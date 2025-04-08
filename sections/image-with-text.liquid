@@ -4,6 +4,7 @@
     padding-bottom: {{ section.settings.padding_bottom | times: 0.75 | round: 0 }}px;
   }
 
+
   @media screen and (min-width: 750px) {
     .section-{{ section.id }}-padding {
       padding-top: {{ section.settings.padding_top }}px;
@@ -12,63 +13,89 @@
   }
 
   .media-section-{{ section.id }} {
-    height: {{ section.settings.height }}px;
+    height: {{ section.settings.height_mobile }}px;
+  }
+
+  @media screen and (min-width: 750px) {
+    .media-section-{{ section.id }} {
+      height: {{ section.settings.height }}px;
+    }
   }
 
   .heading-size-small {
-    font-size: 1.5rem; /* 24px */
-    line-height: 2rem; /* 32px */
+    font-size: 50px;
+    line-height: 4rem;
     font-weight: 700;
   }
-  
-  @media (min-width: 768px) {
+
+  @media (min-width: 750px) {
     .heading-size-small {
-      font-size: 1.875rem; /* 30px */
-      line-height: 2.25rem; /* 36px */
+      font-size: 50px;
+      line-height: 4rem;
     }
   }
-  
+
   .heading-size-medium {
-    font-size: 1.875rem; /* 30px */
-    line-height: 2.25rem; /* 36px */
+    font-size: 60px;
+    line-height: 5rem;
     font-weight: 700;
   }
-  
-  @media (min-width: 768px) {
+
+  @media (min-width: 750px) {
     .heading-size-medium {
-      font-size: 2.25rem; /* 36px */
-      line-height: 2.5rem; /* 40px */
+      font-size: 60px;
+      line-height: 5rem;
     }
   }
-  
+
   .heading-size-large {
-    font-size: 2.25rem; /* 36px */
-    line-height: 2.5rem; /* 40px */
+    font-size: 70px;
+    line-height: 7rem;
     font-weight: 700;
   }
-  
-  @media (min-width: 768px) {
+
+  @media (min-width: 750px) {
     .heading-size-large {
-      font-size: 3rem; /* 48px */
-      line-height: 1;
+      font-size: 70px;
+      line-height: 7rem;
+    }
+  }
+
+  .text-content-wrapper-{{ section.id }} {
+    display: flex;
+    width: 100%;
+    height: 100%;
+    justify-content: {{ section.settings.horizontal_position }};
+    align-items: {{ section.settings.vertical_position }};
+  }
+
+  .text-content-container-{{ section.id }} {
+    width: 100%;
+    max-width: calc({{ section.settings.content_width }}% + 2rem);
+    padding: {{ section.settings.content_padding }}px;
+  }
+
+  @media (max-width: 749px) {
+    .text-content-container-{{ section.id }} {
+      max-width: calc({{ section.settings.content_width_mobile }}% + 1rem);
+      padding: {{ section.settings.content_padding | times: 0.75 | round: 0 }}px;
     }
   }
 {%- endstyle -%}
 
-<div class="media-section-{{ section.id }} relative w-full overflow-hidden" style="padding-top: {{ section.settings.padding_top }}px; padding-bottom: {{ section.settings.padding_bottom }}px;">
-  <!-- Media Container (Background) -->
+<div class="media-section-{{ section.id }} relative w-full overflow-hidden section-{{ section.id }}-padding">
   {% if section.settings.use_video and section.settings.video_url != blank %}
     <div class="absolute inset-0 w-full h-full">
-      {% if section.settings.video_url.type == "youtube" %}
-        <iframe 
+      {% if section.settings.video_url.type == 'youtube' %}
+        <iframe
           class="w-full h-full object-cover"
           src="https://www.youtube.com/embed/{{ section.settings.video_url.id }}?autoplay=1&controls=0&mute=1&loop=1&playlist={{ section.settings.video_url.id }}&playsinline=1&rel=0&enablejsapi=1"
           frameborder="0"
           allow="autoplay; encrypted-media"
           allowfullscreen
         ></iframe>
-      {% elsif section.settings.video_url.type == "vimeo" %}
-        <iframe 
+      {% elsif section.settings.video_url.type == 'vimeo' %}
+        <iframe
           class="w-full h-full object-cover"
           src="https://player.vimeo.com/video/{{ section.settings.video_url.id }}?background=1&autoplay=1&loop=1&byline=0&title=0"
           frameborder="0"
@@ -79,9 +106,20 @@
     </div>
   {% elsif section.settings.image != blank %}
     <div class="absolute inset-0 w-full h-full">
-      {%- assign img_url = section.settings.image | img_url: 'master' -%}
       <img
-        src="{{ img_url }}"
+        srcset="
+          {% if section.settings.image.width >= 375 %}{{ section.settings.image | image_url: width: 375 }} 375w,{% endif %}
+          {% if section.settings.image.width >= 550 %}{{ section.settings.image | image_url: width: 550 }} 550w,{% endif %}
+          {% if section.settings.image.width >= 750 %}{{ section.settings.image | image_url: width: 750 }} 750w,{% endif %}
+          {% if section.settings.image.width >= 1100 %}{{ section.settings.image | image_url: width: 1100 }} 1100w,{% endif %}
+          {% if section.settings.image.width >= 1500 %}{{ section.settings.image | image_url: width: 1500 }} 1500w,{% endif %}
+          {% if section.settings.image.width >= 2200 %}{{ section.settings.image | image_url: width: 2200 }} 2200w,{% endif %}
+          {{ section.settings.image | image_url }} {{ section.settings.image.width }}w
+        "
+        sizes="100vw"
+        height="auto"
+        width="auto"
+        src="{{ section.settings.image | image_url: width: 1500 }}"
         alt="{{ section.settings.image.alt | escape }}"
         class="w-full h-full object-cover"
         loading="lazy"
@@ -92,73 +130,69 @@
       {{ 'image' | placeholder_svg_tag: 'w-1/2 h-auto opacity-30' }}
     </div>
   {% endif %}
-  
+
   <!-- Overlay -->
   {% if section.settings.overlay_opacity > 0 %}
-    <div class="absolute inset-0 bg-black" style="opacity: {{ section.settings.overlay_opacity | divided_by: 100.0 }};"></div>
+    <div
+      class="absolute inset-0 bg-black"
+      style="opacity: {{ section.settings.overlay_opacity | divided_by: 100.0 }};"
+    ></div>
   {% endif %}
 
-  <!-- Content Container -->
-  <div class="absolute inset-0 flex flex-col items-center justify-between p-4 md:p-8 z-10">
-    <div class="text-content text-center max-w-xl mt-8 md:mt-16">
-      {% if section.settings.show_caption and section.settings.caption != blank %}
-        <p class="caption mb-2 {{ section.settings.caption_style }}" style="color: {{ section.settings.text_color }};">
-          {{ section.settings.caption | escape }}
-        </p>
-      {% endif %}
-      
-      {% if section.settings.show_heading and section.settings.heading != blank %}
-        {% assign heading_class = '' %}
-        {% if section.settings.heading_size == 'text-2xl md:text-3xl font-bold' %}
-          {% assign heading_class = 'heading-size-small' %}
-        {% elsif section.settings.heading_size == 'text-3xl md:text-4xl font-bold' %}
-          {% assign heading_class = 'heading-size-medium' %}
-        {% elsif section.settings.heading_size == 'text-4xl md:text-5xl font-bold' %}
-          {% assign heading_class = 'heading-size-large' %}
-        {% endif %}
-        
-        <h2 class="heading mb-4 {{ heading_class }}" style="color: {{ section.settings.text_color }};">
-          {{ section.settings.heading }}
-        </h2>
-      {% endif %}
-      
-      {% if section.settings.show_text and section.settings.text != blank %}
-        <div class="text-content" style="color: {{ section.settings.text_color }};">
-          {{ section.settings.text }}
-        </div>
-      {% endif %}
-    </div>
-    
-    <div class="button-container text-center mb-8 md:mb-16">
-      {% if section.settings.show_button and section.settings.button_label != blank %}
-        <a 
-          href="{{ section.settings.button_link | default: '#' }}"
-          class="button inline-block px-6 py-3 transition-colors duration-300 rounded"
-          style="background-color: {{ section.settings.button_bg_color }}; color: {{ section.settings.button_text_color }};"
-          onmouseover="this.style.backgroundColor='{{ section.settings.button_bg_hover_color }}'"
-          onmouseout="this.style.backgroundColor='{{ section.settings.button_bg_color }}'"
-        >
-          {{ section.settings.button_label | escape }}
-        </a>
-      {% endif %}
+  <div class="absolute inset-0 px-5 text-content-wrapper-{{ section.id }}">
+    <!-- Text and Button Container -->
+    <div class="text-content-container-{{ section.id }} {% if section.settings.text_alignment == 'center' %}text-center{% elsif section.settings.text_alignment == 'right' %}text-right{% else %}text-left{% endif %}">
+      {% for block in section.blocks %}
+        {% case block.type %}
+          {% when 'caption' %}
+            <p class="caption mb-2 {{ block.settings.caption_style }}" style="color: {{ block.settings.text_color }};">
+              {{ block.settings.caption | escape }}
+            </p>
+
+          {% when 'heading' %}
+            {% assign heading_class = '' %}
+            {% if block.settings.heading_size == 'small' %}
+              {% assign heading_class = 'heading-size-small' %}
+            {% elsif block.settings.heading_size == 'medium' %}
+              {% assign heading_class = 'heading-size-medium' %}
+            {% elsif block.settings.heading_size == 'large' %}
+              {% assign heading_class = 'heading-size-large' %}
+            {% endif %}
+
+            <h2 class="heading mb-4 {{ heading_class }}" style="color: {{ block.settings.text_color }};">
+              {{ block.settings.heading }}
+            </h2>
+
+          {% when 'text' %}
+            <div class="text-content mb-6" style="color: {{ block.settings.text_color }};">
+              {{ block.settings.text }}
+            </div>
+
+          {% when 'button' %}
+            <div class="button-container mt-[40px] {% if section.settings.text_alignment == 'center' %}text-center{% elsif section.settings.text_alignment == 'right' %}text-right{% else %}text-left{% endif %}">
+              <a
+                href="#"
+                class="relative inline-block bg-white rounded px-2 font-semibold uppercase tracking-wide overflow-hidden group text-black  transition-colors duration-300 z-1"
+              >
+                <span class="relative z-1 flex items-center transform transition-all duration-500 ease-out group-hover:-translate-x-full">
+                  {{ block.settings.button_label | escape }}
+                  {% if block.settings.show_button_arrow %}
+                    <span class="button-arrow ml-2">→</span>
+                  {% endif %}
+                </span>
+                <span class="absolute inset-0 z-1 flex items-center justify-center rounded border border-white transform translate-x-full group-hover:translate-x-0 transition-all duration-500 ease-out text-white bg-black">
+                  {{ block.settings.button_label | escape }}
+                  {% if block.settings.show_button_arrow %}
+                    <span class="button-arrow ml-2">→</span>
+                  {% endif %}
+                </span>
+              </a>
+            </div>
+        {% endcase %}
+      {% endfor %}
     </div>
   </div>
 </div>
-
-{% javascript %}
-document.addEventListener('DOMContentLoaded', function() {
-  // Ensure the container height matches the settings
-  const container = document.querySelector('.media-section-{{ section.id }}');
-  if (container) {
-    container.style.height = '{{ section.settings.height }}px';
-  }
-  
-  // Lazy load images
-  if (window.lazyLoadInstance) {
-    window.lazyLoadInstance.update();
-  }
-});
-{% endjavascript %}
 
 {% schema %}
 {
@@ -189,128 +223,97 @@ document.addEventListener('DOMContentLoaded', function() {
     },
     {
       "type": "header",
-      "content": "Text Content"
-    },
-    {
-      "type": "color",
-      "id": "text_color",
-      "label": "Text Color",
-      "default": "#FFFFFF"
-    },
-    {
-      "type": "checkbox",
-      "id": "show_caption",
-      "label": "Show caption",
-      "default": true
-    },
-    {
-      "type": "text",
-      "id": "caption",
-      "label": "Caption text",
-      "default": "Caption"
+      "content": "Content Positioning"
     },
     {
       "type": "select",
-      "id": "caption_style",
-      "label": "Caption style",
+      "id": "horizontal_position",
+      "label": "Horizontal position",
       "options": [
         {
-          "value": "uppercase tracking-widest text-sm",
-          "label": "Small with letter spacing"
+          "value": "flex-start",
+          "label": "Left"
         },
         {
-          "value": "italic text-base",
-          "label": "Italic"
+          "value": "center",
+          "label": "Center"
         },
         {
-          "value": "font-bold text-base",
-          "label": "Bold"
+          "value": "flex-end",
+          "label": "Right"
         }
       ],
-      "default": "uppercase tracking-widest text-sm"
-    },
-    {
-      "type": "checkbox",
-      "id": "show_heading",
-      "label": "Show heading",
-      "default": true
-    },
-    {
-      "type": "text",
-      "id": "heading",
-      "label": "Heading",
-      "default": "Section Heading"
+      "default": "center"
     },
     {
       "type": "select",
-      "id": "heading_size",
-      "label": "Heading size",
+      "id": "vertical_position",
+      "label": "Vertical position",
       "options": [
         {
-          "value": "text-2xl md:text-3xl font-bold",
-          "label": "Small"
+          "value": "flex-start",
+          "label": "Top"
         },
         {
-          "value": "text-3xl md:text-4xl font-bold",
-          "label": "Medium"
+          "value": "center",
+          "label": "Center"
         },
         {
-          "value": "text-4xl md:text-5xl font-bold",
-          "label": "Large"
+          "value": "flex-end",
+          "label": "Bottom"
         }
       ],
-      "default": "text-3xl md:text-4xl font-bold"
+      "default": "center"
     },
     {
-      "type": "checkbox",
-      "id": "show_text",
-      "label": "Show text",
-      "default": true
+      "type": "select",
+      "id": "text_alignment",
+      "label": "Text alignment",
+      "options": [
+        {
+          "value": "left",
+          "label": "Left"
+        },
+        {
+          "value": "center",
+          "label": "Center"
+        },
+        {
+          "value": "right",
+          "label": "Right"
+        }
+      ],
+      "default": "center"
     },
     {
-      "type": "richtext",
-      "id": "text",
-      "label": "Text",
-      "default": "<p>Add your description or promotional text here to accompany your featured image or video.</p>"
+      "type": "range",
+      "id": "content_width",
+      "min": 30,
+      "max": 100,
+      "step": 5,
+      "unit": "%",
+      "label": "Content width (desktop)",
+      "default": 60
     },
     {
-      "type": "header",
-      "content": "Button Settings"
+      "type": "range",
+      "id": "content_width_mobile",
+      "min": 50,
+      "max": 100,
+      "step": 5,
+      "unit": "%",
+      "label": "Content width (mobile)",
+      "default": 90
     },
     {
-      "type": "checkbox",
-      "id": "show_button",
-      "label": "Show button",
-      "default": true
-    },
-    {
-      "type": "text",
-      "id": "button_label",
-      "label": "Button label",
-      "default": "Explore Now"
-    },
-    {
-      "type": "url",
-      "id": "button_link",
-      "label": "Button link"
-    },
-    {
-      "type": "color",
-      "id": "button_bg_color",
-      "label": "Button Background Color",
-      "default": "#4F46E5"
-    },
-    {
-      "type": "color",
-      "id": "button_bg_hover_color",
-      "label": "Button Hover Background Color",
-      "default": "#4338CA"
-    },
-    {
-      "type": "color",
-      "id": "button_text_color",
-      "label": "Button Text Color",
-      "default": "#FFFFFF"
+      "type": "range",
+      "id": "content_padding",
+      "min": 0,
+      "max": 60,
+      "step": 5,
+      "unit": "px",
+      "label": "Content padding",
+      "default": 20
     },
     {
       "type": "header",
@@ -323,21 +326,155 @@ document.addEventListener('DOMContentLoaded', function() {
       "max": 800,
       "step": 50,
       "unit": "px",
-      "label": "Section height",
+      "label": "Section height (desktop)",
       "default": 500
+    },
+    {
+      "type": "range",
+      "id": "height_mobile",
+      "min": 200,
+      "max": 600,
+      "step": 50,
+      "unit": "px",
+      "label": "Section height (mobile)",
+      "default": 350
+    }
+  ],
+  "blocks": [
+    {
+      "type": "caption",
+      "name": "Caption",
+      "settings": [
+        {
+          "type": "text",
+          "id": "caption",
+          "label": "Caption text",
+          "default": "Caption"
+        },
+        {
+          "type": "select",
+          "id": "caption_style",
+          "label": "Caption style",
+          "options": [
+            {
+              "value": "uppercase tracking-widest text-sm",
+              "label": "Small with letter spacing"
+            },
+            {
+              "value": "italic text-base",
+              "label": "Italic"
+            },
+            {
+              "value": "font-bold text-base",
+              "label": "Bold"
+            }
+          ],
+          "default": "uppercase tracking-widest text-sm"
+        },
+        {
+          "type": "color",
+          "id": "text_color",
+          "label": "Text Color",
+          "default": "#FFFFFF"
+        }
+      ]
+    },
+    {
+      "type": "heading",
+      "name": "Heading",
+      "settings": [
+        {
+          "type": "text",
+          "id": "heading",
+          "label": "Heading",
+          "default": "HEADING"
+        },
+        {
+          "type": "select",
+          "id": "heading_size",
+          "label": "Heading size",
+          "options": [
+            {
+              "value": "small",
+              "label": "Small"
+            },
+            {
+              "value": "medium",
+              "label": "Medium"
+            },
+            {
+              "value": "large",
+              "label": "Large"
+            }
+          ],
+          "default": "large"
+        },
+        {
+          "type": "color",
+          "id": "text_color",
+          "label": "Text Color",
+          "default": "#FFFFFF"
+        }
+      ]
+    },
+    {
+      "type": "text",
+      "name": "Text",
+      "settings": [
+        {
+          "type": "richtext",
+          "id": "text",
+          "label": "Text",
+          "default": "<p>Add your description or promotional text here to accompany your featured image or video.</p>"
+        },
+        {
+          "type": "color",
+          "id": "text_color",
+          "label": "Text Color",
+          "default": "#FFFFFF"
+        }
+      ]
+    },
+    {
+      "type": "button",
+      "name": "Button",
+      "settings": [
+        {
+          "type": "text",
+          "id": "button_label",
+          "label": "Button label",
+          "default": "EXPLORE NOW"
+        },
+        {
+          "type": "checkbox",
+          "id": "show_button_arrow",
+          "label": "Show arrow in button",
+          "default": true
+        },
+        {
+          "type": "url",
+          "id": "button_link",
+          "label": "Button link"
+        }
+      ]
     }
   ],
   "presets": [
     {
       "name": "Image with Text",
-      "category": "Image",
+      "category": "Media",
+      "blocks": [
+        {
+          "type": "heading"
+        },
+        {
+          "type": "button"
+        }
+      ],
       "settings": {
-        "heading": "Section Heading",
-        "text": "<p>Add your description or promotional text here.</p>",
-        "button_label": "Explore Now",
-        "text_color": "#FFFFFF",
-        "button_bg_color": "#4F46E5",
-        "button_text_color": "#FFFFFF"
+        "horizontal_position": "center",
+        "vertical_position": "center",
+        "text_alignment": "center"
       }
     }
   ]
