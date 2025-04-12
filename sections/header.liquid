@@ -11,6 +11,11 @@
       "type": "link_list",
       "id": "menu",
       "label": "Main Menu"
+    },
+    {
+      "type": "image_picker",
+      "id": "dropdown_icon",
+      "label": "Dropdown Icon"
     }
   ]
 }
@@ -19,7 +24,7 @@
 <header class="w-full bg-white border-b shadow-sm sticky top-0 z-50">
   <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
     <!-- Left: Logo -->
-    <div class="flex items-center space-x-4 ">
+    <div class="flex items-center space-x-4">
       <a href="/">
         {% if section.settings.logo != blank %}
           <img src="{{ section.settings.logo | image_url }}" width="100%" height="auto" alt="Logo" class="h-22 w-auto">
@@ -29,7 +34,7 @@
       </a>
     </div>
 
-    <!-- Middle: Menu (hidden on mobile) -->
+    <!-- Middle: Desktop Menu (hidden on mobile) -->
     <nav class="menu-desktop space-x-6 relative lg:flex">
       <style>
         /* Ensure the desktop menu is only visible on larger screens */
@@ -42,13 +47,28 @@
           }
         }
 
-        /* Explicit CSS for submenu (child) behavior */
+        /* Updated CSS for desktop submenu */
         .sub-menu-drop {
-          display: none; /* hide by default */
+          position: absolute;
+          left: 0;
+          top: 100%; /* Directly below the parent menu item */
+          opacity: 0;
+          visibility: hidden;
+          transform: translateY(10px);
+          transition: opacity 0.3s ease, transform 0.3s ease;
+          background-color: #ffffff;
+          border: 1px solid #e2e8f0;
+          border-radius: 0.25rem;
+          box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+          z-index: 50;
+          min-width: 200px;
         }
-        /* Show submenu when hovering the parent element with .group */
-        .group:hover .sub-menu-drop {
-          display: block;
+        /* Keep submenu visible when hovering either the parent or the submenu itself */
+        .group:hover .sub-menu-drop,
+        .sub-menu-drop:hover {
+          opacity: 1;
+          visibility: visible;
+          transform: translateY(0);
         }
       </style>
 
@@ -60,15 +80,22 @@
             <a href="{{ link.url }}" class="text-gray-700 hover:text-black font-medium inline-flex items-center gap-1">
               {{ link.title }}
               {% if link.links.size > 0 %}
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                    d="M19 9l-7 7-7-7" />
-                </svg>
+                {% if section.settings.dropdown_icon != blank %}
+                  <img
+                    src="{{ section.settings.dropdown_icon | image_url }}"
+                    alt="Dropdown Icon"
+                    class="w-4 h-4 object-contain"
+                  >
+                {% else %}
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                  </svg>
+                {% endif %}
               {% endif %}
             </a>
 
             {% if link.links.size > 0 %}
-              <div class="sub-menu-drop absolute left-0 top-full mt-2 w-full bg-white border rounded shadow-lg z-50">
+              <div class="sub-menu-drop absolute">
                 {% for child in link.links %}
                   <a href="{{ child.url }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
                     {{ child.title }}
@@ -82,7 +109,7 @@
     </nav>
 
     <!-- Right: Actions -->
-    <div class="flex items-center space-x-4 ">
+    <div class="flex items-center space-x-4">
       <!-- Search: input on lg, icon on small -->
       <form action="/search" method="get" class="hidden lg:block">
         <input
@@ -92,26 +119,23 @@
           class="px-3 py-1 border rounded-md focus:outline-none"
         >
       </form>
-      <a href="/search" class="block ">
+      <a href="/search" class="block">
         <svg class="w-6 h-6 text-gray-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-            d="M11 5a7 7 0 100 14 7 7 0 000-14zm0 2a5 5 0 110 10 5 5 0 010-10zM16.293 16.293l4.414-4.414" />
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5a7 7 0 100 14 7 7 0 000-14zm0 2a5 5 0 110 10 5 5 0 010-10zM16.293 16.293l4.414-4.414" />
         </svg>
       </a>
 
       <!-- Login -->
       <a href="/account/login" class="text-gray-700 hover:text-black">
         <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-            d="M5.121 17.804A4 4 0 018 16h8a4 4 0 012.879 1.804M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.121 17.804A4 4 0 018 16h8a4 4 0 012.879 1.804M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
         </svg>
       </a>
 
       <!-- Cart -->
       <a href="/cart" class="relative text-gray-700 hover:text-black">
         <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-            d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-1.293 2.707a1 1 0 00.293 1.414l1.414 1.414A1 1 0 008 18h8a1 1 0 00.707-.293l1.414-1.414a1 1 0 00.293-1.414L17 13" />
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-1.293 2.707a1 1 0 00.293 1.414l1.414 1.414A1 1 0 008 18h8a1 1 0 00.707-.293l1.414-1.414a1 1 0 00.293-1.414L17 13" />
         </svg>
         <span class="absolute -top-2 -right-2 bg-red-600 text-white text-xs w-5 h-5 flex items-center justify-center rounded-full">
           {{ cart.item_count }}
@@ -121,21 +145,48 @@
       <!-- Hamburger Menu (mobile only) -->
       <button id="menu-toggle" class="lg:hidden text-gray-700 focus:outline-none">
         <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-            d="M4 6h16M4 12h16M4 18h16" />
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
         </svg>
       </button>
     </div>
   </div>
 
-  <!-- Mobile menu -->
+  <!-- Mobile Menu -->
   <div id="mobile-menu" class="lg:hidden hidden px-4 pb-4">
     <nav class="flex flex-col space-y-2">
       {% if section.settings.menu != blank and linklists[section.settings.menu] %}
         {% for link in linklists[section.settings.menu].links %}
-          <a href="{{ link.url }}" class="text-gray-700 hover:text-black font-medium">
-            {{ link.title }}
-          </a>
+          <div class="mobile-menu-item border-b border-gray-200 py-2">
+            <div class="flex items-center justify-between">
+              <a href="{{ link.url }}" class="text-gray-700 hover:text-black font-medium">
+                {{ link.title }}
+              </a>
+              {% if link.links.size > 0 %}
+                <button type="button" class="toggle-submenu focus:outline-none">
+                  {% if section.settings.dropdown_icon != blank %}
+                    <img
+                      src="{{ section.settings.dropdown_icon | image_url }}"
+                      alt="Dropdown Icon"
+                      class="w-4 h-4 object-contain"
+                    >
+                  {% else %}
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                    </svg>
+                  {% endif %}
+                </button>
+              {% endif %}
+            </div>
+            {% if link.links.size > 0 %}
+              <div class="mobile-sub-menu hidden flex-col mt-2 ml-4 space-y-1">
+                {% for child in link.links %}
+                  <a href="{{ child.url }}" class="block text-gray-700 hover:text-black">
+                    {{ child.title }}
+                  </a>
+                {% endfor %}
+              </div>
+            {% endif %}
+          </div>
         {% endfor %}
       {% endif %}
     </nav>
@@ -144,10 +195,29 @@
 
 <script>
   document.addEventListener('DOMContentLoaded', function () {
+    // Toggle mobile menu when hamburger icon is clicked
     const toggle = document.getElementById('menu-toggle');
     const mobileMenu = document.getElementById('mobile-menu');
-    toggle.addEventListener('click', function () {
-      mobileMenu.classList.toggle('hidden');
+    if (toggle && mobileMenu) {
+      toggle.addEventListener('click', function () {
+        mobileMenu.classList.toggle('hidden');
+      });
+    }
+
+    // Toggle submenus in the mobile menu
+    const submenuToggles = document.querySelectorAll('.toggle-submenu');
+    submenuToggles.forEach(function (button) {
+      button.addEventListener('click', function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        const mobileMenuItem = button.closest('.mobile-menu-item');
+        if (mobileMenuItem) {
+          const submenu = mobileMenuItem.querySelector('.mobile-sub-menu');
+          if (submenu) {
+            submenu.classList.toggle('hidden');
+          }
+        }
+      });
     });
   });
 </script>
