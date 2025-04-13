@@ -1,16 +1,26 @@
+<style>
+  .announcement-bar {
+    font-family: {{ section.settings.font.family }}, sans-serif;
+    font-weight: {{ section.settings.font.weight }};
+    font-style: {{ section.settings.font.style }};
+  }
+</style>
+
 <div
-  class="bg-[{{ section.settings.background_color }}] text-[{{ section.settings.text_color }}]"
+  class="bg-[{{ section.settings.background_color }}] text-[{{ section.settings.text_color }}] font-tomato-grotesk"
+  style="padding-top: {{ section.settings.padding_vertical }}px; padding-bottom: {{ section.settings.padding_vertical }}px; padding-left: {{ section.settings.padding_horizontal }}px; padding-right: {{ section.settings.padding_horizontal }}px; margin-top: {{ section.settings.margin_top }}px; margin-bottom: {{ section.settings.margin_bottom }}px; margin-left: {{ section.settings.margin_horizontal }}px; margin-right: {{ section.settings.margin_horizontal }}px; font-weight: {{ section.settings.font_weight }};"
 >
-  <div class="flex justify-between items-center px-5 py-2.5 text-md font-medium">
-    <span>
+  <div class="flex justify-between items-center py-2.5 text-md">
+    <span class="break-words hyphens-auto pr-2 max-w-[300px] md:max-w-[800px]">
       {{ section.settings.free_shipping_message }}
     </span>
     <a
       href="{{ section.settings.membership_link }}"
-      class="flex items-center gap-2 border-b-[1px] leading-none font-medium text-[{{ section.settings.link_color }}] group"
-      style="padding-bottom: {{ section.settings.border_spacing }}px"
+      aria-label="{{ section.settings.membership_text }}"
+      class="flex items-center gap-2 pt-1.5 leading-none text-[{{ section.settings.link_color }}] group {% if section.settings.hide_underline_mobile %}sm:border-b-[1px]{% else %}border-b-[1px]{% endif %}"
+      style="padding-bottom: {{ section.settings.border_spacing }}px; font-weight: {{ section.settings.link_font_weight }};"
     >
-      {{ section.settings.membership_text }}
+      <span class="inline max-sm:hidden">{{ section.settings.membership_text }}</span>
       <svg
         class="w-5 h-5 inline-block align-middle transition-transform duration-200 ease-in-out group-hover:translate-x-1"
         width="14"
@@ -28,7 +38,6 @@
 {% schema %}
 {
   "name": "t:sections.announcement-bar.name",
-  "max_blocks": 12,
   "class": "announcement-bar-section",
   "enabled_on": {
     "groups": ["header"]
@@ -53,6 +62,10 @@
       "default": "/account/register"
     },
     {
+      "type": "header",
+      "content": "Color Settings"
+    },
+    {
       "type": "color",
       "id": "background_color",
       "label": "Background Color",
@@ -71,6 +84,116 @@
       "default": "#FFFFFF"
     },
     {
+      "type": "header",
+      "content": "Typography Settings"
+    },
+    {
+      "type": "select",
+      "id": "font_weight",
+      "label": "Message Font Weight",
+      "options": [
+        {
+          "value": "400",
+          "label": "Regular (400)"
+        },
+        {
+          "value": "500",
+          "label": "Medium (500)"
+        },
+        {
+          "value": "600",
+          "label": "Semibold (600)"
+        },
+        {
+          "value": "700",
+          "label": "Bold (700)"
+        }
+      ],
+      "default": "400"
+    },
+    {
+      "type": "select",
+      "id": "link_font_weight",
+      "label": "Link Font Weight",
+      "options": [
+        {
+          "value": "400",
+          "label": "Regular (400)"
+        },
+        {
+          "value": "500",
+          "label": "Medium (500)"
+        },
+        {
+          "value": "600",
+          "label": "Semibold (600)"
+        },
+        {
+          "value": "700",
+          "label": "Bold (700)"
+        }
+      ],
+      "default": "500"
+    },
+    {
+      "type": "header",
+      "content": "Layout Settings"
+    },
+    {
+      "type": "range",
+      "id": "padding_vertical",
+      "min": 0,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "label": "Top/Bottom Padding",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "padding_horizontal",
+      "min": 0,
+      "max": 50,
+      "step": 5,
+      "unit": "px",
+      "label": "Left/Right Padding",
+      "default": 20
+    },
+    {
+      "type": "range",
+      "id": "margin_top",
+      "min": 0,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "label": "Top Margin",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "margin_bottom",
+      "min": 0,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "label": "Bottom Margin",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "margin_horizontal",
+      "min": 0,
+      "max": 50,
+      "step": 5,
+      "unit": "px",
+      "label": "Left/Right Margin",
+      "default": 0
+    },
+    {
+      "type": "header",
+      "content": "Link Settings"
+    },
+    {
       "type": "range",
       "id": "border_spacing",
       "min": 0,
@@ -79,13 +202,17 @@
       "unit": "px",
       "label": "Border Bottom Spacing",
       "default": 0
+    },
+    {
+      "type": "checkbox",
+      "id": "hide_underline_mobile",
+      "label": "Hide Link Underline on Mobile",
+      "default": true
     }
   ],
-  "blocks": [],
   "presets": [
     {
-      "name": "t:sections.announcement-bar.presets.name",
-      "blocks": []
+      "name": "t:sections.announcement-bar.presets.name"
     }
   ]
 }
