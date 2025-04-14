@@ -4,82 +4,55 @@
 <div class="bandit-faq color-{{ section.settings.color_scheme }}">
   <h1 class="faq-title">{{ section.settings.faq-title }}</h1>
 
-  {% if section.blocks.size == 0 %}
-    <div class="faq-item">
-      <div class="faq-row">
-        <h3 class="faq-question" id="faq-question-1" tabindex="0">What is the default question?</h3>
+  {% assign items = section.blocks %}
+  {% if items.size == 0 %}
+    {% assign items = '' | split: '' %}
+    {% assign default = true %}
+    {% assign items[0] = '' %}
+  {% endif %}
 
-        <button 
-          class="faq-toggle" 
-          onclick="toggleFAQ(this)" 
-          aria-expanded="false" 
-          aria-controls="faq-1"
-          aria-label="Toggle answer for 'Enter Question?'"
-        >
-          <svg class="arrow-svg" xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" viewBox="0 0 20 20">
+  {% for block in items %}
+    {% if default %}
+      {% assign question = 'What is the default question?' %}
+      {% assign preview = 'No preview available...' %}
+      {% assign answer = 'This is the default answer. Please update it.' %}
+      {% assign data_answer = 'Enter Answer' %}
+    {% else %}
+      {% assign question = block.settings.question | default: 'What is the default question?' %}
+      {% assign preview = block.settings.preview | default: 'No preview available...' %}
+      {% assign question = block.settings.question | default: 'What is the default question?' %}
+      {% assign preview = block.settings.preview | default: 'No preview available...' %}
+      {% assign answer = block.settings.answer %}
+      {% assign data_answer = answer %}
+    {% endif %}
+
+    <div class="faq-item" aria-expanded="false" aria-controls="faq-{{ forloop.index0 }}" tabindex="0">
+      <div class="faq-row">
+        <h3 class="faq-question">{{ question }}</h3>
+
+        <button class="faq-toggle" onclick="toggleFAQ(this)">
+          <svg class="arrow-svg" xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" viewBox="0 0 20 20" >
             <g transform="rotate(270 12 12)">
               <path d="M12 4c.552 0 1 .448 1 1v10.586l3.293-3.293a1 1 0 1 1 1.414 1.414l-5 5a1 1 0 0 1-1.414 0l-5-5a1 1 0 0 1 1.414-1.414L11 15.586V5c0-.552.448-1 1-1z"/>
             </g>
           </svg>
         </button>
 
-        <div
-          class="faq-preview"
-          onclick="toggleFAQ(this)"
-          data-answer="Enter Answer"
-          id="faq-1"
-          role="region"
-          aria-hidden="true"
-          tabindex="0"
-        >
-          No preview available...
-        </div>
+        {% if answer != blank %}
+          <div class="faq-preview" onclick="toggleFAQ(this)" data-answer="{{ answer }}" id="faq-{{ forloop.index0 }}">
+            {{ preview }}
+          </div>
+        
+          <div class="faq-answer">
+            {{ answer }}
+          </div>
+        {% endif %}
 
-        <div class="faq-answer" tabindex="0">
-          This is the default answer. Please update it.
-        </div>
       </div>
     </div>
-  {% else %}
-    {% for block in section.blocks %}
-      <div class="faq-item">
-        <div class="faq-row">
-          <h3 class="faq-question" id="faq-question-{{ forloop.index }}" tabindex="0">{{ block.settings.question | default: 'What is the default question?' }}</h3>
-
-          <button 
-            class="faq-toggle" 
-            onclick="toggleFAQ(this)" 
-            aria-expanded="false" 
-            aria-controls="faq-{{ forloop.index }}"
-            aria-label="Toggle answer for '{{ block.settings.question | default: 'What is the default question?' }}'"
-          >
-            <svg class="arrow-svg" xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" viewBox="0 0 20 20">
-              <g transform="rotate(270 12 12)">
-                <path d="M12 4c.552 0 1 .448 1 1v10.586l3.293-3.293a1 1 0 1 1 1.414 1.414l-5 5a1 1 0 0 1-1.414 0l-5-5a1 1 0 0 1 1.414-1.414L11 15.586V5c0-.552.448-1 1-1z"/>
-              </g>
-            </svg>
-          </button>
-
-          <div
-            class="faq-preview"
-            onclick="toggleFAQ(this)"
-            data-answer="{{ block.settings.answer | default: 'This is the default answer. Please update it.' }}"
-            id="faq-{{ forloop.index }}"
-            role="region"
-            aria-hidden="true"
-            tabindex="0"
-          >
-            {{ block.settings.preview | default: 'No preview available' }}...
-          </div>
-
-          <div class="faq-answer" tabindex="0">
-            {{ block.settings.answer | default: 'This is the default answer. Please update it.' }}
-          </div>
-        </div>
-      </div>
-    {% endfor %}
-  {% endif %}
+  {% endfor %}
 </div>
+
 
 {% schema %}
 {
