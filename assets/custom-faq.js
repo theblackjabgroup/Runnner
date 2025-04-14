@@ -1,13 +1,17 @@
 document.addEventListener("DOMContentLoaded", () => {
-  document.querySelectorAll(".faq-preview").forEach(preview => {
-    const fullText = preview.dataset.answer;
-    const shortPreview = fullText.split(" ").slice(0, 3).join(" ") + " ...";  
-    preview.innerText = shortPreview;
-    preview.setAttribute("data-original-text", shortPreview);
+  document.querySelectorAll(".bandit-faq").forEach(section => {
+    section.querySelectorAll(".faq-preview").forEach(preview => {
+      const fullText = preview.dataset.answer || "";
+      const shortPreview = fullText.split(" ").slice(0, 3).join(" ") + " ...";
+      preview.innerText = shortPreview;
+      preview.setAttribute("data-original-text", shortPreview);
+    });
   });
 });
+
 function toggleFAQ(element) {
   const faqItem = element.closest('.faq-item');
+  const section = element.closest('.bandit-faq');
   const preview = faqItem.querySelector('.faq-preview');
   const answer = faqItem.querySelector('.faq-answer');
   const arrow = faqItem.querySelector('.faq-toggle svg');
@@ -17,7 +21,7 @@ function toggleFAQ(element) {
 
   const isExpanded = preview.classList.contains('expanded');
 
-  document.querySelectorAll('.faq-preview').forEach(pre => {
+  section.querySelectorAll('.faq-preview').forEach(pre => {
     if (pre.classList.contains('expanded')) {
       pre.innerText = pre.getAttribute('data-original-text');
       pre.classList.remove('expanded');
@@ -25,9 +29,8 @@ function toggleFAQ(element) {
     }
   });
 
-  document.querySelectorAll('.faq-toggle svg').forEach(svg => svg.classList.remove('rotate'));
-
-  document.querySelectorAll('.faq-toggle').forEach(btn => btn.disabled = false); 
+  section.querySelectorAll('.faq-toggle svg').forEach(svg => svg.classList.remove('rotate'));
+  section.querySelectorAll('.faq-toggle').forEach(btn => btn.disabled = false);
 
   if (!isExpanded) {
     preview.style.opacity = '0';
@@ -36,7 +39,7 @@ function toggleFAQ(element) {
       preview.classList.add('expanded');
       arrow.classList.add('rotate');
       preview.style.opacity = '1';
-      element.disabled = true; 
+      element.disabled = true;
     }, 400);
   }
 }
