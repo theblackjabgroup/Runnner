@@ -14,6 +14,7 @@ function toggleFAQ(element, forceClose = false) {
   const preview = faqItem.querySelector('.faq-preview');
   const answer = faqItem.querySelector('.faq-answer');
   const arrow = faqItem.querySelector('.faq-toggle svg');
+  const toggleButton = faqItem.querySelector('.faq-toggle');
 
   const fullAnswer = preview.dataset.answer || preview.getAttribute('data-full-answer');
   const originalText = preview.getAttribute('data-original-text');
@@ -26,16 +27,21 @@ function toggleFAQ(element, forceClose = false) {
       preview.classList.add('expanded');
       arrow.classList.add('rotate');
       preview.style.opacity = '1';
-      faqItem.querySelector('.faq-toggle').disabled = true;
+
+      toggleButton.setAttribute("aria-expanded", "true");
+      toggleButton.disabled = true;
     }, 400);
   } else {
     preview.innerText = originalText;
     preview.classList.remove('expanded');
     preview.style.opacity = '1';
     arrow.classList.remove('rotate');
-    faqItem.querySelector('.faq-toggle').disabled = false;
+
+    toggleButton.setAttribute("aria-expanded", "false");
+    toggleButton.disabled = false;
   }
 }
+
 
 function handleRowClick(event, rowElement) {
   const clickedEl = event.target;
