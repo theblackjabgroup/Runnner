@@ -1,21 +1,43 @@
 {{ 'component-newsletter.css' | asset_url | stylesheet_tag }}
 
 <div class="email-signup-section {% if section.settings.color_scheme != blank %}color-{{ section.settings.color_scheme }}{% endif %}" style="background-color: {{ section.settings.background_color }}; color: {{ section.settings.text_color }};">
-  <form id="email-signup-form" class="email-signup-container">
+  <form id="email-signup-form" class="email-signup-container" novalidate>
+    <!-- Hidden accessibility heading -->
+    <div class="visually-hidden" id="newsletter-heading">Newsletter signup</div>
     <input type="hidden" name="form_type" value="customer" />
     <input type="hidden" name="utf8" value="✓" />
     <input type="hidden" name="contact[tags]" value="newsletter" />
     
-    <div class="message-container" style="display: none;"></div>
+    <div class="message-container" style="display: none;" role="status" aria-live="polite"></div>
     
     <div class="form-fields-container">
       {% for block in section.blocks %}
         {% case block.type %}
           {% when 'email_input' %}
-            <input type="email" name="contact[email]" class="email-input" placeholder="{{ block.settings.email_placeholder }}" required {{ block.shopify_attributes }}>
+            <div class="input-wrapper">
+              <label for="newsletter-email" class="visually-hidden">{{ block.settings.email_placeholder }}</label>
+              <input 
+                type="email" 
+                id="newsletter-email"
+                name="contact[email]" 
+                class="email-input" 
+                placeholder="{{ block.settings.email_placeholder }}" 
+                aria-required="true"
+                aria-describedby="newsletter-error"
+                required 
+                {{ block.shopify_attributes }}
+              >
+              <div id="newsletter-error" class="visually-hidden" aria-live="assertive"></div>
+            </div>
           {% when 'signup_button' %}
-            <button type="submit" class="signup-button" style="background-color: {{ section.settings.button_color }}; color: {{ section.settings.button_text_color }};" {{ block.shopify_attributes }}>
-              <span class="arrow-icon">→</span>
+            <button 
+              type="submit" 
+              class="signup-button" 
+              style="background-color: {{ section.settings.button_color }}; color: {{ section.settings.button_text_color }};" 
+              {{ block.shopify_attributes }}
+              aria-label="{{ block.settings.button_text }}"
+            >
+              <span class="arrow-icon" aria-hidden="true">→</span>
               <span>{{ block.settings.button_text }}</span>
             </button>
         {% endcase %}
@@ -24,6 +46,61 @@
   </form>
 </div>
 
+<style>
+  /* Accessibility styles */
+  .visually-hidden {
+    position: absolute !important;
+    width: 1px !important;
+    height: 1px !important;
+    padding: 0 !important;
+    margin: -1px !important;
+    overflow: hidden !important;
+    clip: rect(0, 0, 0, 0) !important;
+    white-space: nowrap !important;
+    border: 0 !important;
+  }
+  
+  /* Focus styles for keyboard navigation */
+  .email-input:focus,
+  .signup-button:focus {
+    outline: 2px solid #007bff;
+    outline-offset: 2px;
+  }
+  
+  /* Error styling */
+  .email-input.error {
+    border-color: #ff0000;
+    border-width: 2px;
+  }
+  
+  #newsletter-error:not(.visually-hidden) {
+    color: #ff0000;
+    font-size: 0.85em;
+    margin-top: 0.25em;
+  }
+  
+  /* Loading state for button */
+  .signup-button.loading {
+    opacity: 0.7;
+    cursor: wait;
+  }
+  
+  /* Ensure messages are visible */
+  .message-container.error-message {
+    color: #ff0000;
+    border: 1px solid #ff0000;
+    background-color: rgba(255, 0, 0, 0.1);
+    padding: 0.5em;
+  }
+  
+  .message-container.success-message {
+    color: #28a745;
+    border: 1px solid #28a745;
+    background-color: rgba(40, 167, 69, 0.1);
+    padding: 0.5em;
+  }
+</style>
+
 <script>
   document.addEventListener('DOMContentLoaded', function() {
     const emailSignupForm = document.getElementById('email-signup-form');
@@ -31,6 +108,7 @@
     const signupButton = document.querySelector('.signup-button');
     const messageContainer = document.querySelector('.message-container');
     const formFieldsContainer = document.querySelector('.form-fields-container');
+    const newsletterError = document.getElementById('newsletter-error');
     
     function validateEmail(email) {
       const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -42,7 +120,51 @@
       messageContainer.classList.remove('success-message', 'error-message');
       messageContainer.classList.add(isError ? 'error-message' : 'success-message');
       messageContainer.style.display = 'block';
+      
+      // Make sure screen readers announce the message
+      setTimeout(() => {
+        messageContainer.focus();
+      }, 100);
     }
+    
+    function showInputError(message) {
+      emailInput.classList.add('error');
+      newsletterError.textContent = message;
+      newsletterError.classList.remove('visually-hidden');
+    }
+    
+    function clearInputError() {
+      emailInput.classList.remove('error');
+      newsletterError.textContent = '';
+      newsletterError.classList.add('visually-hidden');
+    }
+    
+    // Add keyboard support for input validation
+    emailInput.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') {
+        const email = emailInput.value.trim();
+        
+        if (!email) {
+          e.preventDefault();
+          showInputError('Please enter your email address');
+          return;
+        }
+        
+        if (!validateEmail(email)) {
+          e.preventDefault();
+          showInputError('Please enter a valid email address');
+          return;
+        }
+      }
+    });
+    
+    // Clear error when user starts typing again
+    emailInput.addEventListener('input', function() {
+      clearInputError();
+    });
+    
+    // Focus management for keyboard navigation
+    messageContainer.setAttribute('tabindex', '-1');
     
     emailSignupForm.addEventListener('submit', function(e) {
       e.preventDefault();
@@ -50,18 +172,24 @@
       const email = emailInput.value.trim();
       
       if (!email) {
-        showMessage('Please enter your email address', true);
+        showInputError('Please enter your email address');
+        emailInput.focus(); // Set focus to input for keyboard users
         return;
       }
       
       if (!validateEmail(email)) {
-        showMessage('Please enter a valid email address', true);
+        showInputError('Please enter a valid email address');
+        emailInput.focus(); // Set focus to input for keyboard users
         return;
       }
+      
+      // Clear any previous errors
+      clearInputError();
       
       // Disable button during submission
       signupButton.disabled = true;
       signupButton.classList.add('loading');
+      signupButton.setAttribute('aria-busy', 'true');
       
       const formData = new FormData(emailSignupForm);
       
@@ -86,6 +214,7 @@
           setTimeout(() => {
             formFieldsContainer.style.display = 'flex';
             messageContainer.style.display = 'none';
+            emailInput.focus(); // Return focus to input for keyboard users
           }, {{ section.settings.form_reappear_time | default: 5000 }});
         }
       })
@@ -96,7 +225,29 @@
       .finally(() => {
         signupButton.disabled = false;
         signupButton.classList.remove('loading');
+        signupButton.setAttribute('aria-busy', 'false');
       });
+    });
+    
+    // Add keyboard trap within form when focused for better accessibility
+    document.addEventListener('keydown', function(e) {
+      // If Tab key is pressed and focus is within form
+      if (e.key === 'Tab' && emailSignupForm.contains(document.activeElement)) {
+        const focusableElements = emailSignupForm.querySelectorAll('input:not([type="hidden"]), button');
+        const firstElement = focusableElements[0];
+        const lastElement = focusableElements[focusableElements.length - 1];
+        
+        // If shift + tab on first element, move to last element
+        if (e.shiftKey && document.activeElement === firstElement) {
+          e.preventDefault();
+          lastElement.focus();
+        } 
+        // If tab on last element, move to first element
+        else if (!e.shiftKey && document.activeElement === lastElement) {
+          e.preventDefault();
+          firstElement.focus();
+        }
+      }
     });
   });
 </script>
