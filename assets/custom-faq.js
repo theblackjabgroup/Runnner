@@ -1,63 +1,54 @@
-document.querySelectorAll('.faq-item').forEach(item => {
-    const row = item.querySelector('.faq-row');
-    const answer = item.querySelector('.faq-answer');
-    const arrow = item.querySelector('.arrow-svg');
-    
-    row.addEventListener('click', () => {
-      const isOpen = answer.style.maxHeight && answer.style.maxHeight !== "0px";
-      
-      if (isOpen) return;
-      
-      document.querySelectorAll('.faq-answer').forEach(a => a.style.maxHeight = null);
-      document.querySelectorAll('.arrow-svg').forEach(svg => svg.classList.remove('rotate'));
-      
-      document.querySelectorAll('.faq-preview').forEach(preview => {
-        if (preview.classList.contains('expanded')) {
-          const baseText = preview.getAttribute('data-original-text') || preview.textContent.split('...')[0].trim() + '...';
-          preview.innerHTML = baseText;
-          preview.classList.remove('expanded');
-          preview.style.opacity = '1'; 
-        }
-      });
-      
-      answer.style.maxHeight = answer.scrollHeight + "px"; 
-      arrow.classList.add('rotate');
+document.addEventListener("DOMContentLoaded", () => {
+  document.querySelectorAll(".bandit-faq").forEach(section => {
+    section.querySelectorAll(".faq-preview").forEach(preview => {
+      const fullText = preview.dataset.answer || "";
+      const shortPreview = fullText.split(" ").slice(0, 3).join(" ") + " ...";
+      preview.innerText = shortPreview;
+      preview.setAttribute("data-original-text", shortPreview);
     });
   });
-  
-  function toggleFAQ(element) {
-    const faqItem = element.closest('.faq-item');
-    const preview = faqItem.querySelector('.faq-preview');
-    const answer = faqItem.querySelector('.faq-answer');
-    const arrow = faqItem.querySelector('.faq-toggle svg');
-    
-    if (preview.classList.contains('expanded')) return;
-    
-    document.querySelectorAll('.faq-answer').forEach(a => a.style.maxHeight = null);
-    document.querySelectorAll('.arrow-svg, .faq-toggle svg').forEach(svg => svg.classList.remove('rotate'));
-    
-    document.querySelectorAll('.faq-preview').forEach(preview => {
-      if (preview.classList.contains('expanded')) {
-        const baseText = preview.getAttribute('data-original-text') || preview.textContent.split('...')[0].trim() + '...';
-        preview.innerHTML = baseText;
-        preview.classList.remove('expanded');
-        preview.style.opacity = '1'; 
-      }
-    });
-    
-    const fullAnswer = preview.getAttribute('data-answer');
-    
-    if (!preview.hasAttribute('data-original-text')) {
-      preview.setAttribute('data-original-text', preview.textContent);
-    }
-    
+});
+
+function toggleFAQ(element, forceClose = false) {
+  const faqItem = element.closest('.faq-item');
+  const preview = faqItem.querySelector('.faq-preview');
+  const answer = faqItem.querySelector('.faq-answer');
+  const arrow = faqItem.querySelector('.faq-toggle svg');
+
+  const fullAnswer = preview.dataset.answer || preview.getAttribute('data-full-answer');
+  const originalText = preview.getAttribute('data-original-text');
+  const isExpanded = preview.classList.contains('expanded');
+
+  if (!isExpanded && !forceClose) {
     preview.style.opacity = '0';
     setTimeout(() => {
-      const baseText = preview.textContent.split('...')[0].trim();
-      preview.innerHTML = baseText + " " + fullAnswer;
+      preview.innerText = fullAnswer;
       preview.classList.add('expanded');
       arrow.classList.add('rotate');
       preview.style.opacity = '1';
-      answer.style.maxHeight = answer.scrollHeight + 'px'; 
+      faqItem.querySelector('.faq-toggle').disabled = true;
     }, 400);
+  } else {
+    preview.innerText = originalText;
+    preview.classList.remove('expanded');
+    preview.style.opacity = '1';
+    arrow.classList.remove('rotate');
+    faqItem.querySelector('.faq-toggle').disabled = false;
   }
+}
+
+function handleRowClick(event, rowElement) {
+  const clickedEl = event.target;
+  const isInsideToggle = clickedEl.closest('.faq-toggle');
+  const isInsidePreview = clickedEl.closest('.faq-preview');
+  const isInsideAnswer = clickedEl.closest('.faq-answer');
+  const faqItem = rowElement.closest('.faq-item');
+  const preview = faqItem.querySelector('.faq-preview');
+  const isExpanded = preview.classList.contains('expanded');
+
+  if (isInsideToggle || isInsidePreview || isInsideAnswer) {
+    return;
+  }
+  
+  toggleFAQ(preview, isExpanded); 
+}
