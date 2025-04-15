@@ -9,37 +9,46 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 });
 
-function toggleFAQ(element) {
+function toggleFAQ(element, forceClose = false) {
   const faqItem = element.closest('.faq-item');
-  const section = element.closest('.bandit-faq');
   const preview = faqItem.querySelector('.faq-preview');
   const answer = faqItem.querySelector('.faq-answer');
   const arrow = faqItem.querySelector('.faq-toggle svg');
 
   const fullAnswer = preview.dataset.answer || preview.getAttribute('data-full-answer');
   const originalText = preview.getAttribute('data-original-text');
-
   const isExpanded = preview.classList.contains('expanded');
 
-  section.querySelectorAll('.faq-preview').forEach(pre => {
-    if (pre.classList.contains('expanded')) {
-      pre.innerText = pre.getAttribute('data-original-text');
-      pre.classList.remove('expanded');
-      pre.style.opacity = '1';
-    }
-  });
-
-  section.querySelectorAll('.faq-toggle svg').forEach(svg => svg.classList.remove('rotate'));
-  section.querySelectorAll('.faq-toggle').forEach(btn => btn.disabled = false);
-
-  if (!isExpanded) {
+  if (!isExpanded && !forceClose) {
     preview.style.opacity = '0';
     setTimeout(() => {
       preview.innerText = fullAnswer;
       preview.classList.add('expanded');
       arrow.classList.add('rotate');
       preview.style.opacity = '1';
-      element.disabled = true;
+      faqItem.querySelector('.faq-toggle').disabled = true;
     }, 400);
+  } else {
+    preview.innerText = originalText;
+    preview.classList.remove('expanded');
+    preview.style.opacity = '1';
+    arrow.classList.remove('rotate');
+    faqItem.querySelector('.faq-toggle').disabled = false;
   }
+}
+
+function handleRowClick(event, rowElement) {
+  const clickedEl = event.target;
+  const isInsideToggle = clickedEl.closest('.faq-toggle');
+  const isInsidePreview = clickedEl.closest('.faq-preview');
+  const isInsideAnswer = clickedEl.closest('.faq-answer');
+  const faqItem = rowElement.closest('.faq-item');
+  const preview = faqItem.querySelector('.faq-preview');
+  const isExpanded = preview.classList.contains('expanded');
+
+  if (isInsideToggle || isInsidePreview || isInsideAnswer) {
+    return;
+  }
+  
+  toggleFAQ(preview, isExpanded); 
 }
