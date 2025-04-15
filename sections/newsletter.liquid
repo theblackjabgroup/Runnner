@@ -1,251 +1,154 @@
 {{ 'component-newsletter.css' | asset_url | stylesheet_tag }}
-{{ 'newsletter-section.css' | asset_url | stylesheet_tag }}
 
-{%- style -%}
-  .section-{{ section.id }}-padding {
-    padding-top: {{ section.settings.padding_top | times: 0.75 | round: 0 }}px;
-    padding-bottom: {{ section.settings.padding_bottom | times: 0.75 | round: 0 }}px;
-  }
-
-  @media screen and (min-width: 750px) {
-    .section-{{ section.id }}-padding {
-      padding-top: {{ section.settings.padding_top }}px;
-      padding-bottom: {{ section.settings.padding_bottom }}px;
-    }
-  }
-{%- endstyle -%}
-
-<div class="newsletter center {% if section.settings.full_width == false %}newsletter--narrow page-width{% endif %}">
-  <div class="newsletter__wrapper color-{{ section.settings.color_scheme }} gradient content-container isolate{% if section.settings.full_width %} content-container--full-width{% endif %} section-{{ section.id }}-padding">
-    {%- for block in section.blocks -%}
-      {%- case block.type -%}
-        {%- when '@app' -%}
-          {% render block %}
-        {%- when 'heading' -%}
-          <h2
-            class="inline-richtext {{ block.settings.heading_size }}{% if settings.animations_reveal_on_scroll %} scroll-trigger animate--slide-in{% endif %}"
-            {{ block.shopify_attributes }}
-            {% if settings.animations_reveal_on_scroll %}
-              data-cascade
-              style="--animation-order: {{ forloop.index }};"
-            {% endif %}
-          >
-            {{ block.settings.heading }}
-          </h2>
-        {%- when 'paragraph' -%}
-          <div
-            class="newsletter__subheading rte{% if settings.animations_reveal_on_scroll %} scroll-trigger animate--slide-in{% endif %}"
-            {{ block.shopify_attributes }}
-            {% if settings.animations_reveal_on_scroll %}
-              data-cascade
-              style="--animation-order: {{ forloop.index }};"
-            {% endif %}
-          >
-            {{ block.settings.text }}
-          </div>
-        {%- when 'email_form' -%}
-          <div {{ block.shopify_attributes }}>
-            {% form 'customer', class: 'newsletter-form' %}
-              <input type="hidden" name="contact[tags]" value="newsletter">
-              <div
-                class="newsletter-form__field-wrapper{% if settings.animations_reveal_on_scroll %} scroll-trigger animate--slide-in{% endif %}"
-                {% if settings.animations_reveal_on_scroll %}
-                  data-cascade
-                  style="--animation-order: {{ forloop.index }};"
-                {% endif %}
-              >
-                <div class="field">
-                  <input
-                    id="NewsletterForm--{{ section.id }}"
-                    type="email"
-                    name="contact[email]"
-                    class="field__input"
-                    value="{{ form.email }}"
-                    aria-required="true"
-                    autocorrect="off"
-                    autocapitalize="off"
-                    autocomplete="email"
-                    {% if form.errors %}
-                      autofocus
-                      aria-invalid="true"
-                      aria-describedby="Newsletter-error--{{ section.id }}"
-                    {% elsif form.posted_successfully? %}
-                      aria-describedby="Newsletter-success--{{ section.id }}"
-                    {% endif %}
-                    placeholder="{{ 'newsletter.label' | t }}"
-                    required
-                  >
-                  <label class="field__label" for="NewsletterForm--{{ section.id }}">
-                    {{ 'newsletter.label' | t }}
-                  </label>
-                  <button
-                    type="submit"
-                    class="newsletter-form__button field__button"
-                    name="commit"
-                    id="Subscribe"
-                    aria-label="{{ 'newsletter.button_label' | t }}"
-                  >
-                    <span class="svg-wrapper">
-                      {{- 'icon-arrow.svg' | inline_asset_content -}}
-                    </span>
-                  </button>
-                </div>
-                {%- if form.errors -%}
-                  <small class="newsletter-form__message form__message" id="Newsletter-error--{{ section.id }}">
-                    <span class="svg-wrapper">
-                      {{- 'icon-error.svg' | inline_asset_content -}}
-                    </span>
-                    {{- form.errors.translated_fields.email | capitalize }}
-                    {{ form.errors.messages.email -}}
-                  </small>
-                {%- endif -%}
-              </div>
-              {%- if form.posted_successfully? -%}
-                <h3
-                  class="newsletter-form__message newsletter-form__message--success form__message"
-                  id="Newsletter-success--{{ section.id }}"
-                  tabindex="-1"
-                  autofocus
-                >
-                  <span class="svg-wrapper">
-                    {{- 'icon-success.svg' | inline_asset_content -}}
-                  </span>
-                  {{- 'newsletter.success' | t }}
-                </h3>
-              {%- endif -%}
-            {% endform %}
-          </div>
-      {%- endcase -%}
-    {%- endfor -%}
-  </div>
+<div class="email-signup-section {% if section.settings.color_scheme != blank %}color-{{ section.settings.color_scheme }}{% endif %}" style="background-color: {{ section.settings.background_color }}; color: {{ section.settings.text_color }};">
+  <form id="email-signup-form" class="email-signup-container">
+    <input type="hidden" name="form_type" value="customer" />
+    <input type="hidden" name="utf8" value="✓" />
+    <input type="hidden" name="contact[tags]" value="newsletter" />
+    
+    <div class="message-container" style="display: none;"></div>
+    
+    <div class="form-fields-container">
+      {% for block in section.blocks %}
+        {% case block.type %}
+          {% when 'email_input' %}
+            <input type="email" name="contact[email]" class="email-input" placeholder="{{ block.settings.email_placeholder }}" required {{ block.shopify_attributes }}>
+          {% when 'signup_button' %}
+            <button type="submit" class="signup-button" style="background-color: {{ section.settings.button_color }}; color: {{ section.settings.button_text_color }};" {{ block.shopify_attributes }}>
+              <span class="arrow-icon">→</span>
+              <span>{{ block.settings.button_text }}</span>
+            </button>
+        {% endcase %}
+      {% endfor %}
+    </div>
+  </form>
 </div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const emailSignupForm = document.getElementById('email-signup-form');
+    const emailInput = document.querySelector('.email-input');
+    const signupButton = document.querySelector('.signup-button');
+    const messageContainer = document.querySelector('.message-container');
+    const formFieldsContainer = document.querySelector('.form-fields-container');
+    
+    function validateEmail(email) {
+      const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      return re.test(email);
+    }
+    
+    function showMessage(message, isError = false) {
+      messageContainer.textContent = message;
+      messageContainer.classList.remove('success-message', 'error-message');
+      messageContainer.classList.add(isError ? 'error-message' : 'success-message');
+      messageContainer.style.display = 'block';
+    }
+    
+    emailSignupForm.addEventListener('submit', function(e) {
+      e.preventDefault();
+      
+      const email = emailInput.value.trim();
+      
+      if (!email) {
+        showMessage('Please enter your email address', true);
+        return;
+      }
+      
+      if (!validateEmail(email)) {
+        showMessage('Please enter a valid email address', true);
+        return;
+      }
+      
+      // Disable button during submission
+      signupButton.disabled = true;
+      signupButton.classList.add('loading');
+      
+      const formData = new FormData(emailSignupForm);
+      
+      // Use fetch API to submit the form without page navigation
+      fetch('/contact#contact_form', {
+        method: 'POST',
+        body: formData,
+        headers: {
+          'X-Requested-With': 'XMLHttpRequest'
+        }
+      })
+      .then(response => {
+        // Handle successful submission
+        emailInput.value = '';
+        
+        // Hide the form fields and show success message
+        formFieldsContainer.style.display = 'none';
+        showMessage('{{ section.settings.success_message | default: "Thank you for subscribing!" }}');
+        
+        // Optional: Show form again after some time
+        if ({{ section.settings.show_form_again_after_success | default: true }}) {
+          setTimeout(() => {
+            formFieldsContainer.style.display = 'flex';
+            messageContainer.style.display = 'none';
+          }, {{ section.settings.form_reappear_time | default: 5000 }});
+        }
+      })
+      .catch(error => {
+        console.error('Error:', error);
+        showMessage('There was an error submitting your email. Please try again.', true);
+      })
+      .finally(() => {
+        signupButton.disabled = false;
+        signupButton.classList.remove('loading');
+      });
+    });
+  });
+</script>
 
 {% schema %}
 {
-  "name": "t:sections.newsletter.name",
-  "tag": "section",
-  "class": "section",
-  "disabled_on": {
-    "groups": ["header"]
-  },
+  "name": "Email Signup",
   "settings": [
-    {
-      "type": "paragraph",
-      "content": "t:sections.newsletter.settings.paragraph.content"
-    },
     {
       "type": "color_scheme",
       "id": "color_scheme",
-      "label": "t:sections.all.colors.label",
-      "default": "scheme-1"
-    },
-    {
-      "type": "checkbox",
-      "id": "full_width",
-      "default": true,
-      "label": "t:sections.newsletter.settings.full_width.label"
-    },
-    {
-      "type": "header",
-      "content": "t:sections.all.padding.section_padding_heading"
-    },
-    {
-      "type": "range",
-      "id": "padding_top",
-      "min": 0,
-      "max": 100,
-      "step": 4,
-      "unit": "px",
-      "label": "t:sections.all.padding.padding_top",
-      "default": 40
-    },
-    {
-      "type": "range",
-      "id": "padding_bottom",
-      "min": 0,
-      "max": 100,
-      "step": 4,
-      "unit": "px",
-      "label": "t:sections.all.padding.padding_bottom",
-      "default": 52
+      "default": "scheme-1",
+      "label": "Color Scheme"
     }
   ],
   "blocks": [
     {
-      "type": "heading",
-      "name": "t:sections.newsletter.blocks.heading.name",
+      "name": "Email Input",
+      "type": "email_input",
       "limit": 1,
       "settings": [
         {
-          "type": "inline_richtext",
-          "id": "heading",
-          "default": "t:sections.newsletter.blocks.heading.settings.heading.default",
-          "label": "t:sections.newsletter.blocks.heading.settings.heading.label"
-        },
-        {
-          "type": "select",
-          "id": "heading_size",
-          "options": [
-            {
-              "value": "h2",
-              "label": "t:sections.all.heading_size.options__1.label"
-            },
-            {
-              "value": "h1",
-              "label": "t:sections.all.heading_size.options__2.label"
-            },
-            {
-              "value": "h0",
-              "label": "t:sections.all.heading_size.options__3.label"
-            },
-            {
-              "value": "hxl",
-              "label": "t:sections.all.heading_size.options__4.label"
-            },
-            {
-              "value": "hxxl",
-              "label": "t:sections.all.heading_size.options__5.label"
-            }
-          ],
-          "default": "h1",
-          "label": "t:sections.all.heading_size.label"
+          "type": "text",
+          "id": "email_placeholder",
+          "label": "Email Placeholder",
+          "default": "EMAIL"
         }
       ]
     },
     {
-      "type": "paragraph",
-      "name": "t:sections.newsletter.blocks.paragraph.name",
+      "name": "Signup Button",
+      "type": "signup_button",
       "limit": 1,
       "settings": [
         {
-          "type": "richtext",
-          "id": "text",
-          "default": "t:sections.newsletter.blocks.paragraph.settings.paragraph.default",
-          "label": "t:sections.newsletter.blocks.paragraph.settings.paragraph.label"
+          "type": "text",
+          "id": "button_text",
+          "label": "Button Text",
+          "default": "SIGN ME UP"
         }
       ]
-    },
-    {
-      "type": "email_form",
-      "name": "t:sections.newsletter.blocks.email_form.name",
-      "limit": 1
-    },
-    {
-      "type": "@app"
     }
   ],
   "presets": [
     {
-      "name": "t:sections.newsletter.presets.name",
+      "name": "Email Signup",
       "blocks": [
         {
-          "type": "heading"
+          "type": "email_input"
         },
         {
-          "type": "paragraph"
-        },
-        {
-          "type": "email_form"
+          "type": "signup_button"
         }
       ]
     }
