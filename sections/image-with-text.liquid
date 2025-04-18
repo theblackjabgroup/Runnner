@@ -24,6 +24,7 @@
       }
       .image-with-text-text-content{
     font-size: 20px !important;
+        line-height: 2rem !important;
   }
 
     }
@@ -235,30 +236,45 @@
   role="region"
   aria-label="Image with text section"
 >
-  {% if section.settings.use_video and section.settings.video_url != blank %}
-    <div class="absolute inset-0" style="margin: {{ section.settings.media_margin }}px;">
-      {% if section.settings.video_url.type == 'youtube' %}
-        <iframe
-          class="w-full h-full object-cover"
-          src="https://www.youtube.com/embed/{{ section.settings.video_url.id }}?autoplay=1&controls=0&mute=1&loop=1&playlist={{ section.settings.video_url.id }}&playsinline=1&rel=0&enablejsapi=1"
-          frameborder="0"
-          allow="autoplay; encrypted-media"
-          allowfullscreen
-          title="Background video"
-          aria-label="Background video"
-        ></iframe>
-      {% elsif section.settings.video_url.type == 'vimeo' %}
-        <iframe
-          class="w-full h-full object-cover"
-          src="https://player.vimeo.com/video/{{ section.settings.video_url.id }}?background=1&autoplay=1&loop=1&byline=0&title=0"
-          frameborder="0"
-          allow="autoplay; encrypted-media"
-          allowfullscreen
-          title="Background video"
-          aria-label="Background video"
-        ></iframe>
-      {% endif %}
-    </div>
+  {% if section.settings.use_video %}
+    {% if section.settings.video_source == 'external' and section.settings.video_url != blank %}
+      <div class="absolute inset-0" style="margin: {{ section.settings.media_margin }}px;">
+        {% if section.settings.video_url.type == 'youtube' %}
+          <iframe
+            class="w-full h-full object-cover"
+            src="https://www.youtube.com/embed/{{ section.settings.video_url.id }}?autoplay=1&controls=0&mute=1&loop=1&playlist={{ section.settings.video_url.id }}&playsinline=1&rel=0&enablejsapi=1"
+            frameborder="0"
+            allow="autoplay; encrypted-media"
+            allowfullscreen
+            title="Background video"
+            aria-label="Background video"
+          ></iframe>
+        {% elsif section.settings.video_url.type == 'vimeo' %}
+          <iframe
+            class="w-full h-full object-cover"
+            src="https://player.vimeo.com/video/{{ section.settings.video_url.id }}?background=1&autoplay=1&loop=1&byline=0&title=0"
+            frameborder="0"
+            allow="autoplay; encrypted-media"
+            allowfullscreen
+            title="Background video"
+            aria-label="Background video"
+          ></iframe>
+        {% endif %}
+      </div>
+    {% elsif section.settings.video_source == 'shopify' and section.settings.shopify_video != blank %}
+      <div class="absolute inset-0" style="margin: {{ section.settings.media_margin }}px;">
+        {{
+          section.settings.shopify_video
+          | video_tag:
+            autoplay: true,
+            loop: true,
+            muted: true,
+            playsinline: true,
+            controls: false,
+            class: 'w-full h-full object-cover'
+        }}
+      </div>
+    {% endif %}
   {% elsif section.settings.image != blank %}
     <div
       class="absolute inset-0"
@@ -296,6 +312,7 @@
     </div>
   {% endif %}
 
+  <!-- Content section remains the same -->
   <div class="absolute inset-0 px-12 image-with-text-text-content-wrapper-{{ section.id }}">
     <div
       class="
@@ -388,6 +405,7 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+  // JavaScript remains largely the same
   const styleElement = document.createElement('style');
   styleElement.textContent = `
     @keyframes letterAppear {
@@ -443,13 +461,13 @@ document.addEventListener('DOMContentLoaded', function() {
             const text = element.textContent.trim();
             element.textContent = '';
             element.classList.add('letter-animation-container');
-            element.setAttribute('aria-label', text); // Add aria-label with original text
+            element.setAttribute('aria-label', text);
 
             for (let i = 0; i < text.length; i++) {
               const letterSpan = document.createElement('span');
               letterSpan.classList.add('animated-letter');
               letterSpan.textContent = text[i] === ' ' ? '\u00A0' : text[i]; 
-              letterSpan.setAttribute('aria-hidden', 'true'); // Hide individual letters from screen readers
+              letterSpan.setAttribute('aria-hidden', 'true'); 
 
               letterSpan.style.animation = `letterAppear 1s forwards`; 
               letterSpan.style.animationDelay = `${i * 0.07}s`; 
@@ -542,11 +560,33 @@ document.addEventListener('DOMContentLoaded', function() {
       "default": false
     },
     {
+      "type": "select",
+      "id": "video_source",
+      "label": "Video source",
+      "options": [
+        {
+          "value": "external",
+          "label": "YouTube/Vimeo"
+        },
+        {
+          "value": "shopify",
+          "label": "Shopify video"
+        }
+      ],
+      "default": "external"
+    },
+    {
       "type": "video_url",
       "id": "video_url",
-      "label": "Video URL",
+      "label": "YouTube/Vimeo URL",
       "accept": ["youtube", "vimeo"],
-      "info": "YouTube or Vimeo URL"
+      "info": "YouTube or Vimeo URL",
+    },
+    {
+      "type": "video",
+      "id": "shopify_video",
+      "label": "Shopify video",
+      "info": "Upload video directly to Shopify"
     },
     {
       "type": "range",
