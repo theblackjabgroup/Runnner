@@ -36,7 +36,7 @@
 }
 {% endschema %}
 
-<header class="relative w-full bg-white border-b shadow-sm !sticky top-0 z-50">
+<header class="w-full bg-white border-b shadow-sm !sticky top-0 z-50" style="position: static;">
   <div class="w-full px-4 py-3 flex items-center justify-between">
     <!-- Left: Logo -->
     <div class="flex items-center space-x-4">
@@ -59,7 +59,6 @@
                 <a href="{{ link.url }}" class="cursor-pointer flex items-center py-2 px-4 group">
                   {{ link.title }}
                   <span class="ml-2 transition-transform duration-300 group-hover:rotate-180">▼</span>
-                  <!-- Added transition and rotation effect to the arrow -->
                 </a>
 
                 <!-- Desktop Sub-Menu -->
@@ -138,61 +137,71 @@
   </div>
 
   <!-- Mobile Menu -->
-  <div id="mobile-menu" class="hidden lg:hidden bg-white border-t border-gray-200 shadow-lg w-full">
-    <nav class="flex flex-col space-y-4 p-6 w-full">
-      {% if section.settings.menu.links != blank %}
-        {% for link in section.settings.menu.links %}
-          <div class="mobile-menu-item">
-            <div class="!flex items-center justify-between">
-              <a href="{{ link.url }}" class="block text-xl text-black hover:underline font-medium py-2">
-                {{ link.title }}
-              </a>
+  <div
+    id="mobile-menu"
+    class="hidden lg:hidden bg-white border-t border-gray-200 shadow-lg w-[70vw] h-[100vh] fixed top-0 right-0 z-50"
+  >
+    <nav class="flex flex-col space-y-4 p-6 w-full justify-between">
+      <div class="upper-section">
+        <div class="flex items-center justify-end mb-4 ">
+          <button type="button" class=" bg-black text-white px-2" aria-label="Close Menu">Close</button>
+        </div>
+        {% if section.settings.menu.links != blank %}
+          {% for link in section.settings.menu.links %}
+            <div class="mobile-menu-item">
+              <div class="!flex items-center justify-between">
+                <a href="{{ link.url }}" class="block text-xl text-black hover:underline font-medium py-2">
+                  {{ link.title }}
+                </a>
+                {% if link.links.size > 0 %}
+                  <button type="button" class="toggle-submenu focus:outline-none">
+                    {% if section.settings.dropdown_icon != blank %}
+                      <img
+                        src="{{ section.settings.dropdown_icon | image_url }}"
+                        alt="Dropdown Icon"
+                        width="100%"
+                        height="auto"
+                        class="w-8 h-4 object-contain transition-transform duration-300"
+                      >
+                    {% else %}
+                      <svg
+                        class="w-8 h-4 transition-transform duration-300"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                      </svg>
+                    {% endif %}
+                  </button>
+                {% endif %}
+              </div>
               {% if link.links.size > 0 %}
-                <button type="button" class="toggle-submenu focus:outline-none">
-                  {% if section.settings.dropdown_icon != blank %}
-                    <img
-                      src="{{ section.settings.dropdown_icon | image_url }}"
-                      alt="Dropdown Icon"
-                      width="100%"
-                      height="auto"
-                      class="w-8 h-4 object-contain transition-transform duration-300"
-                    >
-                  {% else %}
-                    <svg
-                      class="w-8 h-4 transition-transform duration-300"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
-                    </svg>
-                  {% endif %}
-                </button>
+                <div class="ml-4 mt-2 hidden space-y-2 submenu">
+                  {% for childlink in link.links %}
+                    <a href="{{ childlink.url }}" class="block text-xl text-gray-700 hover:text-black py-2">
+                      {{ childlink.title }}
+                    </a>
+                    {% if childlink.links.size > 0 %}
+                      <ul class="ml-4 space-y-1">
+                        {% for grandchildlink in childlink.links %}
+                          <li>
+                            <a href="{{ grandchildlink.url }}" class="block text-lg text-gray-600 hover:text-black">
+                              {{ grandchildlink.title }}
+                            </a>
+                          </li>
+                        {% endfor %}
+                      </ul>
+                    {% endif %}
+                  {% endfor %}
+                </div>
               {% endif %}
             </div>
-            {% if link.links.size > 0 %}
-              <div class="ml-4 mt-2 hidden space-y-2 submenu">
-                {% for childlink in link.links %}
-                  <a href="{{ childlink.url }}" class="block text-xl text-gray-700 hover:text-black py-2">
-                    {{ childlink.title }}
-                  </a>
-                  {% if childlink.links.size > 0 %}
-                    <ul class="ml-4 space-y-1">
-                      {% for grandchildlink in childlink.links %}
-                        <li>
-                          <a href="{{ grandchildlink.url }}" class="block text-lg text-gray-600 hover:text-black">
-                            {{ grandchildlink.title }}
-                          </a>
-                        </li>
-                      {% endfor %}
-                    </ul>
-                  {% endif %}
-                {% endfor %}
-              </div>
-            {% endif %}
-          </div>
-        {% endfor %}
-      {% endif %}
+          {% endfor %}
+        {% endif %}
+      </div>
+
+      <div id="social-link-container" class="flex items-center justify-between mt-4"></div>
     </nav>
   </div>
 </header>
@@ -201,27 +210,51 @@
   document.addEventListener('DOMContentLoaded', function () {
     const hamburgerMenu = document.getElementById('hamburger-menu');
     const mobileMenu = document.getElementById('mobile-menu');
-    const submenuToggles = document.querySelectorAll('.toggle-submenu');
+    const closeButton = mobileMenu.querySelector('button[aria-label="Close Menu"]');
+    const overlay = document.createElement('div');
+
+    overlay.className = 'fixed inset-0 bg-black bg-opacity-50 z-40 hidden';
+    overlay.id = 'menu-overlay';
+    document.body.appendChild(overlay);
 
     // Toggle mobile menu visibility
-    if (hamburgerMenu && mobileMenu) {
-      hamburgerMenu.addEventListener('click', () => {
-        mobileMenu.classList.toggle('hidden');
-        mobileMenu.classList.toggle('flex'); // Ensure the menu becomes visible
-        mobileMenu.classList.toggle('flex-col'); // Ensure proper layout for mobile menu
-      });
+    function toggleMobileMenu() {
+      mobileMenu.classList.toggle('hidden');
+      mobileMenu.classList.toggle('flex');
+      overlay.classList.toggle('hidden');
     }
 
-    // Toggle submenus in the mobile menu
+    if (hamburgerMenu && mobileMenu) {
+      hamburgerMenu.addEventListener('click', toggleMobileMenu);
+    }
+
+    if (closeButton) {
+      closeButton.addEventListener('click', toggleMobileMenu);
+    }
+
+    overlay.addEventListener('click', toggleMobileMenu);
+
+    document.addEventListener('click', function (event) {
+      if (
+        !mobileMenu.contains(event.target) &&
+        !hamburgerMenu.contains(event.target) &&
+        !mobileMenu.classList.contains('hidden')
+      ) {
+        toggleMobileMenu();
+      }
+    });
+
+    const submenuToggles = document.querySelectorAll('.toggle-submenu');
+
     submenuToggles.forEach((toggle) => {
       toggle.addEventListener('click', (event) => {
         const submenu = toggle.closest('.mobile-menu-item').querySelector('.submenu');
-        const icon = toggle.querySelector('svg, img'); // Select the dropdown icon
+        const icon = toggle.querySelector('svg, img');
         if (submenu) {
           submenu.classList.toggle('hidden');
-          submenu.classList.toggle('block'); // Ensure submenu becomes visible
+          submenu.classList.toggle('block');
           if (icon) {
-            icon.classList.toggle('rotate-180'); // Add rotation class for dropdown icon
+            icon.classList.toggle('rotate-180');
           }
         }
       });
