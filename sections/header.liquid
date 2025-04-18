@@ -51,8 +51,8 @@
     <!-- Right: Menu & Actions -->
     <div class="flex items-center justify-end lg:justify-between w-full lg:px-6 mx-auto">
       <!-- Desktop Menu -->
-      <nav class="hidden lg:!block w-full">
-        <ul class="flex space-x-4">
+      <nav class="hidden lg:!block w-full ">
+        <ul class="flex space-x-4 ">
           {%- for link in section.settings.menu.links -%}
             <li class="group">
               {% if link.links.size > 0 %}
@@ -63,21 +63,21 @@
 
                 <!-- Desktop Sub-Menu -->
                 <div class="absolute left-0 top-full w-screen z-50 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300">
+                  <!-- Sub-menu spans the full width of the screen -->
                   <div class="mx-auto bg-white shadow-lg px-4 py-6">
                     <ul class="flex justify-start gap-8">
                       {% for childlink in link.links %}
                         <li>
-                          <a href="{{ childlink.url }}" class="block text-gray-800 hover:text-black font-bold text-3xl">
+                          <a href="{{ childlink.url }}" class="block text-gray-800 hover:text-black font-bold text-lg">
                             {{ childlink.title }}
                           </a>
-
                           {% if childlink.links.size > 0 %}
                             <ul class="mt-2 space-y-1">
                               {% for grandchildlink in childlink.links %}
                                 <li>
                                   <a
                                     href="{{ grandchildlink.url }}"
-                                    class="block text-2xl text-gray-600 hover:text-black underline"
+                                    class="block text-sm text-gray-600 hover:text-black"
                                   >
                                     {{ grandchildlink.title }}
                                   </a>
@@ -98,6 +98,9 @@
             </li>
           {%- endfor -%}
         </ul>
+        <div class="relative">
+          <div id="bottom-bar" class="absolute bottom-0 left-0 w-full h-[2px] bg-gray-700">&nbsp;</div>
+        </div>
       </nav>
 
       <!-- Actions -->
@@ -244,6 +247,33 @@
       }
     });
 
+    const nav = document.querySelector('nav');
+    const navItems = document.querySelectorAll('nav ul li a');
+    const bottomBar = document.getElementById('bottom-bar');
+
+    function setBottomBarToFullWidth() {
+      bottomBar.style.width = '100%';
+      bottomBar.style.left = '0';
+      bottomBar.style.transition = 'width 0.3s ease, left 0.3s ease'; // Smooth transition
+    }
+
+    navItems.forEach((item) => {
+      item.addEventListener('mouseenter', (e) => {
+        const rect = e.target.getBoundingClientRect();
+        const navRect = nav.getBoundingClientRect();
+        bottomBar.style.width = `${rect.width}px`;
+        bottomBar.style.left = `${rect.left - navRect.left}px`;
+        bottomBar.style.transition = 'width 0.3s ease, left 0.3s ease'; // Smooth transition
+      });
+    });
+
+    nav.addEventListener('mouseleave', () => {
+      setBottomBarToFullWidth();
+    });
+
+    // Ensure the bottom bar spans the full width on initial load
+    setTimeout(setBottomBarToFullWidth, 0);
+
     const submenuToggles = document.querySelectorAll('.toggle-submenu');
 
     submenuToggles.forEach((toggle) => {
@@ -259,5 +289,13 @@
         }
       });
     });
+
+    const activeItem = document.querySelector('nav ul li a.active');
+    if (activeItem) {
+      const rect = activeItem.getBoundingClientRect();
+      const navRect = activeItem.closest('nav').getBoundingClientRect();
+      bottomBar.style.width = `${rect.width}px`;
+      bottomBar.style.left = `${rect.left - navRect.left}px`;
+    }
   });
 </script>
