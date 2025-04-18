@@ -3,6 +3,12 @@
   "name": "Header",
   "settings": [
     {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "Color scheme",
+      "default": "background-1"
+    },
+    {
       "type": "image_picker",
       "id": "logo",
       "label": "Logo"
@@ -22,22 +28,16 @@
       "id": "marquee_text",
       "label": "Marquee Text",
       "default": "Scrolling Text"
-    },
-    {
-      "type": "range",
-      "id": "marquee_speed",
-      "label": "Marquee Speed (Seconds)",
-      "default": 15,
-      "min": 10,
-      "max": 20,
-      "step": 1
     }
   ]
 }
 {% endschema %}
 
-<header class="w-full bg-white border-b shadow-sm !sticky top-0 z-50" style="position: static;">
-  <div class="w-full px-4 py-3 flex items-center justify-between">
+<header
+  class="w-full bg-white border-b shadow-sm !sticky top-0 z-50 color-{{ section.settings.color_scheme }} color-{{ section.settings.color_scheme }}-text"
+  style="position: static;"
+>
+  <div class="w-full px-4 py-3 flex items-center justify-between bg-[var(--background)]">
     <!-- Left: Logo -->
     <div class="flex items-center space-x-4">
       <a href="/">
@@ -49,21 +49,33 @@
       </a>
     </div>
     <!-- Right: Menu & Actions -->
-    <div class="flex items-center justify-end lg:justify-between w-full lg:px-6 mx-auto">
+    <div class="flex items-center justify-end lg:justify-between w-full lg:px-6 mx-auto bg-[var(--header_background] ">
       <!-- Desktop Menu -->
-      <nav class="hidden lg:!block w-full ">
+      <nav class="hidden lg:!block w-full text-[var(--header_text)]">
         <ul class="flex space-x-4 ">
           {%- for link in section.settings.menu.links -%}
             <li class="group">
               {% if link.links.size > 0 %}
-                <a href="{{ link.url }}" class="cursor-pointer flex items-center py-2 px-4 group">
+                <a
+                  href="{{ link.url }}"
+                  class="cursor-pointer flex items-center py-2 px-4 group "
+                >
                   {{ link.title }}
-                  <span class="ml-2 transition-transform duration-300 group-hover:rotate-180">▼</span>
+                  {% if section.settings.dropdown_icon != blank %}
+                    <img
+                      src="{{ section.settings.dropdown_icon | image_url }}"
+                      alt="Dropdown Icon"
+                      width="100%"
+                      height="auto"
+                      class="w-12 h-6 object-contain transition-transform duration-300 group-hover:rotate-180"
+                    >
+                  {% else %}
+                    <span class="ml-2 transition-transform duration-300 group-hover:rotate-180">▼</span>
+                  {% endif %}
                 </a>
 
                 <!-- Desktop Sub-Menu -->
                 <div class="absolute left-0 top-full w-screen z-50 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300">
-                  <!-- Sub-menu spans the full width of the screen -->
                   <div class="mx-auto bg-white shadow-lg px-4 py-6">
                     <ul class="flex justify-start gap-8">
                       {% for childlink in link.links %}
@@ -145,7 +157,7 @@
   <!-- Mobile Menu -->
   <div
     id="mobile-menu"
-    class="hidden lg:hidden bg-white border-t border-gray-200 shadow-lg w-[70vw] h-[100vh] fixed top-0 right-0 z-50"
+    class="hidden lg:hidden  border-t border-gray-200 shadow-lg w-[70vw] h-[100vh] fixed top-0 right-0 z-50  bg-[var(--background)] text-[var(--header_text)] "
   >
     <nav class="flex flex-col space-y-4 p-6 w-full justify-between">
       <div class="upper-section">
@@ -156,7 +168,7 @@
           {% for link in section.settings.menu.links %}
             <div class="mobile-menu-item">
               <div class="!flex items-center justify-between">
-                <a href="{{ link.url }}" class="block text-xl text-black hover:underline font-medium py-2">
+                <a href="{{ link.url }}" class="block text-2xl text-black hover:underline font-medium py-2">
                   {{ link.title }}
                 </a>
                 {% if link.links.size > 0 %}
@@ -185,14 +197,17 @@
               {% if link.links.size > 0 %}
                 <div class="ml-4 mt-2 hidden space-y-2 submenu">
                   {% for childlink in link.links %}
-                    <a href="{{ childlink.url }}" class="block text-xl text-gray-700 hover:text-black py-2">
+                    <a href="{{ childlink.url }}" class="block text-2xl text-gray-700 hover:text-black py-2">
                       {{ childlink.title }}
                     </a>
                     {% if childlink.links.size > 0 %}
                       <ul class="ml-4 space-y-1">
                         {% for grandchildlink in childlink.links %}
                           <li>
-                            <a href="{{ grandchildlink.url }}" class="block text-lg text-gray-600 hover:text-black">
+                            <a
+                              href="{{ grandchildlink.url }}"
+                              class="block text-xl underline text-gray-600 hover:text-black"
+                            >
                               {{ grandchildlink.title }}
                             </a>
                           </li>
@@ -214,6 +229,46 @@
 
 <script>
   document.addEventListener('DOMContentLoaded', function () {
+    // Mobile Menu Toggle
+    const hamburgerMenu = document.getElementById('hamburger-menu');
+    const mobileMenu = document.getElementById('mobile-menu');
+    const closeButton = mobileMenu.querySelector('button[aria-label="Close Menu"]');
+    const overlay = document.createElement('div');
+
+    overlay.className = 'fixed inset-0 bg-black bg-opacity-50 z-40 hidden';
+    overlay.id = 'menu-overlay';
+    document.body.appendChild(overlay);
+
+    // Toggle mobile menu visibility
+    function toggleMobileMenu() {
+      mobileMenu.classList.toggle('hidden');
+      mobileMenu.classList.toggle('flex');
+      overlay.classList.toggle('hidden');
+    }
+
+    if (hamburgerMenu && mobileMenu) {
+      hamburgerMenu.addEventListener('click', toggleMobileMenu);
+    }
+
+    if (closeButton) {
+      closeButton.addEventListener('click', toggleMobileMenu);
+    }
+
+    overlay.addEventListener('click', toggleMobileMenu);
+
+    // Submenu Toggle for Mobile
+    const submenuToggles = mobileMenu.querySelectorAll('.toggle-submenu');
+    submenuToggles.forEach((toggle) => {
+      toggle.addEventListener('click', function () {
+        const submenu = this.closest('.mobile-menu-item').querySelector('.submenu');
+        if (submenu) {
+          submenu.classList.toggle('hidden');
+          submenu.classList.toggle('block');
+        }
+      });
+    });
+
+    // nav-bottom-bar
     const nav = document.querySelector('nav');
     const navItems = document.querySelectorAll('nav > ul > li');
     const bottomBar = document.getElementById('bottom-bar');
