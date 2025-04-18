@@ -36,7 +36,7 @@
 }
 {% endschema %}
 
-<header class="w-full bg-white border-b shadow-sm !sticky top-0 z-50">
+<header class="relative w-full bg-white border-b shadow-sm !sticky top-0 z-50">
   <div class="w-full px-4 py-3 flex items-center justify-between">
     <!-- Left: Logo -->
     <div class="flex items-center space-x-4">
@@ -51,97 +51,53 @@
     <!-- Right: Menu & Actions -->
     <div class="flex items-center justify-end lg:justify-between w-full lg:px-6 mx-auto">
       <!-- Desktop Menu -->
-      <nav class="menu-desktop hidden lg:!flex space-x-8">
-        {% assign menu = linklists[section.settings.menu] %}
-        {% if menu.links != blank %}
-          {% for link in menu.links %}
-            <div class="group flex items-center ">
-              <a href="{{ link.url }}" class="text-black pl-2 hover:border-b-2 font-medium">
-                {{ link.title }}
-              </a>
+      <nav class="hidden lg:!block w-full">
+        <ul class="flex space-x-4">
+          {%- for link in section.settings.menu.links -%}
+            <li class="group">
               {% if link.links.size > 0 %}
-                {% if section.settings.dropdown_icon != blank %}
-                  <img
-                    src="{{ section.settings.dropdown_icon | image_url }}"
-                    alt="Dropdown Arrow"
-                    width="100%"
-                    height="auto"
-                    class="w-6 h-5 ml-1 transition-transform duration-300 group-hover:rotate-180"
-                  >
-                {% else %}
-                  <svg
-                    class="w-4 h-4 ml-1 transition-transform duration-300 group-hover:rotate-180"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                    aria-hidden="true"
-                  >
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                  </svg>
-                {% endif %}
-                <div
-                  class="submenu absolute left-0 top-20 mt-0 hidden group-hover:!flex flex-col bg-white border border-gray-200 shadow-lg z-50 w-full opacity-0 translate-y-[-10px] transition-all duration-600 group-hover:opacity-100 group-hover:translate-y-0"
-                  onmouseenter="this.classList.add('hovering')"
-                  onmouseleave="this.classList.remove('hovering')"
-                >
-                  <div class="flex items-center justify-between">
-                    <div class="px-2 w-1/4">
-                      {% for child in link.links %}
-                        <a
-                          href="{{ child.url }}"
-                          class="block px-4 py-4 text-2xl text-gray-700 hover:bg-blue-300 hover:text-black font-medium"
-                        >
-                          {{ child.title }}
-                        </a>
-                      {% endfor %}
-                    </div>
-                    <div class="w-3/4 flex items-center justify-end">
-                      <div class="px-4">Optional Link 1</div>
-                      <div class="px-4">Optional Link 2</div>
-                    </div>
-                  </div>
+                <a href="{{ link.url }}" class="cursor-pointer flex items-center py-2 px-4">
+                  {{ link.title }}
+                  <span class="ml-2">▼</span>
+                </a>
 
-                  <!-- Bottom: Scrolling Text -->
-                  <style>
-                    .marquee {
-                      background-color: black;
-                      color: white;
-                      font-weight: 600;
-                      text-align: center;
-                      overflow: hidden;
-                      position: relative;
-                      white-space: nowrap;
-                      width: 100%;
-                      height: 3rem;
-                    }
-                    .marquee-content {
-                      display: inline-block;
-                      animation: marqueeAnimation {{ section.settings.marquee_speed }}s linear infinite;
-                      white-space: nowrap; /* Prevent text wrapping */
-                      position: absolute; /* Ensure content scrolls smoothly */
-                      will-change: transform; /* Optimize animation performance */
-                    }
-                    @keyframes marqueeAnimation {
-                      0% {
-                        transform: translateX(100%);
-                      }
-                      100% {
-                        transform: translateX(-100%);
-                      }
-                    }
-                  </style>
-                  <div class="marquee">
-                    <div
-                      class="marquee-content bg-black text-white text-xl font-semibold text-center py-2"
-                    >
-                      {{ section.settings.marquee_text }}
-                    </div>
+                <!-- Dropdown Container aligned to full header -->
+                <div class="absolute left-0 top-full w-screen z-50 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300">
+                  <div class=" mx-auto bg-white shadow-lg px-4 py-6">
+                    <ul class="grid grid-cols-2 gap-6">
+                      {% for childlink in link.links %}
+                        <li>
+                          <a href="{{ childlink.url }}" class="block text-gray-800 hover:text-black font-medium">
+                            {{ childlink.title }}
+                          </a>
+
+                          {% if childlink.links.size > 0 %}
+                            <ul class="mt-2 ml-2 space-y-1">
+                              {% for grandchildlink in childlink.links %}
+                                <li>
+                                  <a
+                                    href="{{ grandchildlink.url }}"
+                                    class="block text-sm text-gray-600 hover:text-black"
+                                  >
+                                    {{ grandchildlink.title }}
+                                  </a>
+                                </li>
+                              {% endfor %}
+                            </ul>
+                          {% endif %}
+                        </li>
+                      {% endfor %}
+                    </ul>
                   </div>
                 </div>
+              {% else %}
+                <a href="{{ link.url }}" class="py-2 px-4 hover:bg-gray-100 block">
+                  {{ link.title }}
+                </a>
               {% endif %}
-            </div>
-          {% endfor %}
-        {% endif %}
+            </li>
+          {%- endfor -%}
+        </ul>
       </nav>
 
       <!-- Actions -->
