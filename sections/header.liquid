@@ -56,9 +56,10 @@
           {%- for link in section.settings.menu.links -%}
             <li class="group">
               {% if link.links.size > 0 %}
-                <a href="{{ link.url }}" class="cursor-pointer flex items-center py-2 px-4">
+                <a href="{{ link.url }}" class="cursor-pointer flex items-center py-2 px-4 group">
                   {{ link.title }}
-                  <span class="ml-2">▼</span>
+                  <span class="ml-2 transition-transform duration-300 group-hover:rotate-180">▼</span>
+                  <!-- Added transition and rotation effect to the arrow -->
                 </a>
 
                 <!-- Desktop Sub-Menu -->
@@ -77,7 +78,7 @@
                                 <li>
                                   <a
                                     href="{{ grandchildlink.url }}"
-                                    class="block text-xl text-gray-600 hover:text-black"
+                                    class="block text-2xl text-gray-600 hover:text-black underline"
                                   >
                                     {{ grandchildlink.title }}
                                   </a>
@@ -139,8 +140,8 @@
   <!-- Mobile Menu -->
   <div id="mobile-menu" class="hidden lg:hidden bg-white border-t border-gray-200 shadow-lg w-full">
     <nav class="flex flex-col space-y-4 p-6 w-full">
-      {% if menu.links != blank %}
-        {% for link in menu.links %}
+      {% if section.settings.menu.links != blank %}
+        {% for link in section.settings.menu.links %}
           <div class="mobile-menu-item">
             <div class="!flex items-center justify-between">
               <a href="{{ link.url }}" class="block text-xl text-black hover:underline font-medium py-2">
@@ -154,11 +155,11 @@
                       alt="Dropdown Icon"
                       width="100%"
                       height="auto"
-                      class="w-4 h-4 object-contain transition-transform duration-300"
+                      class="w-8 h-4 object-contain transition-transform duration-300"
                     >
                   {% else %}
                     <svg
-                      class="w-4 h-4 transition-transform duration-300"
+                      class="w-8 h-4 transition-transform duration-300"
                       fill="none"
                       stroke="currentColor"
                       viewBox="0 0 24 24"
@@ -170,11 +171,22 @@
               {% endif %}
             </div>
             {% if link.links.size > 0 %}
-              <div class="ml-4 mt-2 hidden space-y-2 submenu ">
-                {% for child in link.links %}
-                  <a href="{{ child.url }}" class="block text-lg text-gray-700 hover:text-black py-2">
-                    {{ child.title }}
+              <div class="ml-4 mt-2 hidden space-y-2 submenu">
+                {% for childlink in link.links %}
+                  <a href="{{ childlink.url }}" class="block text-xl text-gray-700 hover:text-black py-2">
+                    {{ childlink.title }}
                   </a>
+                  {% if childlink.links.size > 0 %}
+                    <ul class="ml-4 space-y-1">
+                      {% for grandchildlink in childlink.links %}
+                        <li>
+                          <a href="{{ grandchildlink.url }}" class="block text-lg text-gray-600 hover:text-black">
+                            {{ grandchildlink.title }}
+                          </a>
+                        </li>
+                      {% endfor %}
+                    </ul>
+                  {% endif %}
                 {% endfor %}
               </div>
             {% endif %}
@@ -196,6 +208,7 @@
       hamburgerMenu.addEventListener('click', () => {
         mobileMenu.classList.toggle('hidden');
         mobileMenu.classList.toggle('flex'); // Ensure the menu becomes visible
+        mobileMenu.classList.toggle('flex-col'); // Ensure proper layout for mobile menu
       });
     }
 
@@ -206,55 +219,11 @@
         const icon = toggle.querySelector('svg, img'); // Select the dropdown icon
         if (submenu) {
           submenu.classList.toggle('hidden');
+          submenu.classList.toggle('block'); // Ensure submenu becomes visible
           if (icon) {
-            icon.classList.toggle('rotate-180'); // Add rotation class
+            icon.classList.toggle('rotate-180'); // Add rotation class for dropdown icon
           }
         }
-      });
-    });
-
-    const menuItems = document.querySelectorAll('.group');
-
-    menuItems.forEach((item) => {
-      const submenu = item.querySelector('.submenu');
-
-      if (submenu) {
-        item.addEventListener('mouseenter', () => {
-          submenu.classList.add('flex');
-          submenu.classList.remove('hidden');
-        });
-
-        item.addEventListener('mouseleave', () => {
-          setTimeout(() => {
-            if (!submenu.classList.contains('hovering')) {
-              submenu.classList.add('hidden');
-              submenu.classList.remove('flex');
-            }
-          }, 200); // Add a slight delay before hiding
-        });
-
-        submenu.addEventListener('mouseenter', () => {
-          submenu.classList.add('hovering');
-        });
-
-        submenu.addEventListener('mouseleave', () => {
-          submenu.classList.remove('hovering');
-        });
-      }
-    });
-
-    // Ensure only one submenu is visible at a time
-    menuItems.forEach((item) => {
-      item.addEventListener('mouseenter', () => {
-        menuItems.forEach((otherItem) => {
-          if (otherItem !== item) {
-            const otherSubmenu = otherItem.querySelector('.submenu');
-            if (otherSubmenu) {
-              otherSubmenu.classList.add('hidden');
-              otherSubmenu.classList.remove('flex');
-            }
-          }
-        });
       });
     });
   });
