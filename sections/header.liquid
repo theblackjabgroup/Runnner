@@ -214,90 +214,83 @@
 
 <script>
   document.addEventListener('DOMContentLoaded', function () {
-    const hamburgerMenu = document.getElementById('hamburger-menu');
-    const mobileMenu = document.getElementById('mobile-menu');
-    const closeButton = mobileMenu.querySelector('button[aria-label="Close Menu"]');
-    const overlay = document.createElement('div');
-
-    overlay.className = 'fixed inset-0 bg-black bg-opacity-50 z-40 hidden';
-    overlay.id = 'menu-overlay';
-    document.body.appendChild(overlay);
-
-    // Toggle mobile menu visibility
-    function toggleMobileMenu() {
-      mobileMenu.classList.toggle('hidden');
-      mobileMenu.classList.toggle('flex');
-      overlay.classList.toggle('hidden');
-    }
-
-    if (hamburgerMenu && mobileMenu) {
-      hamburgerMenu.addEventListener('click', toggleMobileMenu);
-    }
-
-    if (closeButton) {
-      closeButton.addEventListener('click', toggleMobileMenu);
-    }
-
-    overlay.addEventListener('click', toggleMobileMenu);
-
-    document.addEventListener('click', function (event) {
-      if (
-        !mobileMenu.contains(event.target) &&
-        !hamburgerMenu.contains(event.target) &&
-        !mobileMenu.classList.contains('hidden')
-      ) {
-        toggleMobileMenu();
-      }
-    });
-
     const nav = document.querySelector('nav');
-    const navItems = document.querySelectorAll('nav ul li a');
+    const navItems = document.querySelectorAll('nav > ul > li');
     const bottomBar = document.getElementById('bottom-bar');
+    let activeMenuItem = null;
+    let hoverTimeout;
 
-    function setBottomBarToFullWidth() {
-      bottomBar.style.width = '100%';
-      bottomBar.style.left = '0';
-      bottomBar.style.transition = 'width 0.3s ease, left 0.3s ease'; // Smooth transition
-    }
-
-    navItems.forEach((item) => {
-      item.addEventListener('mouseenter', (e) => {
-        const rect = e.target.getBoundingClientRect();
-        const navRect = nav.getBoundingClientRect();
-        bottomBar.style.width = `${rect.width}px`;
-        bottomBar.style.left = `${rect.left - navRect.left}px`;
-        bottomBar.style.transition = 'width 0.3s ease, left 0.3s ease'; // Smooth transition
-      });
-    });
-
-    nav.addEventListener('mouseleave', () => {
-      setBottomBarToFullWidth();
-    });
-
-    setTimeout(setBottomBarToFullWidth, 0);
-
-    const submenuToggles = document.querySelectorAll('.toggle-submenu');
-
-    submenuToggles.forEach((toggle) => {
-      toggle.addEventListener('click', (event) => {
-        const submenu = toggle.closest('.mobile-menu-item').querySelector('.submenu');
-        const icon = toggle.querySelector('svg, img');
-        if (submenu) {
-          submenu.classList.toggle('hidden');
-          submenu.classList.toggle('block');
-          if (icon) {
-            icon.classList.toggle('rotate-180');
-          }
-        }
-      });
-    });
-
-    const activeItem = document.querySelector('nav ul li a.active');
-    if (activeItem) {
-      const rect = activeItem.getBoundingClientRect();
-      const navRect = activeItem.closest('nav').getBoundingClientRect();
+    function updateBottomBar(target) {
+      const rect = target.getBoundingClientRect();
+      const navRect = nav.getBoundingClientRect();
+      bottomBar.style.transition = 'width 0.3s ease, left 0.3s ease';
       bottomBar.style.width = `${rect.width}px`;
       bottomBar.style.left = `${rect.left - navRect.left}px`;
     }
+
+    function resetBottomBar() {
+      if (!activeMenuItem) {
+        bottomBar.style.transition = 'width 0.3s ease, left 0.3s ease';
+        bottomBar.style.width = '100%';
+        bottomBar.style.left = '0';
+      }
+    }
+
+    navItems.forEach((li) => {
+      const link = li.querySelector('a');
+      const dropdown = li.querySelector('.absolute'); // submenu dropdown
+
+      li.addEventListener('mouseenter', () => {
+        clearTimeout(hoverTimeout);
+        updateBottomBar(link);
+      });
+
+      li.addEventListener('mouseleave', () => {
+        hoverTimeout = setTimeout(() => {
+          if (!activeMenuItem || activeMenuItem !== li) {
+            resetBottomBar();
+          }
+        }, 100);
+      });
+
+      link.addEventListener('click', (e) => {
+        const isParentWithDropdown = !!dropdown;
+        const isActive = li.classList.contains('active');
+
+        if (isParentWithDropdown) {
+          e.preventDefault();
+        }
+
+        document.querySelectorAll('nav > ul > li.active').forEach((item) => item.classList.remove('active'));
+
+        if (!isActive) {
+          li.classList.add('active');
+          activeMenuItem = li;
+          updateBottomBar(link);
+        } else {
+          activeMenuItem = null;
+          resetBottomBar();
+        }
+      });
+
+      if (dropdown) {
+        dropdown.addEventListener('mouseenter', () => clearTimeout(hoverTimeout));
+        dropdown.addEventListener('mouseleave', () => {
+          hoverTimeout = setTimeout(() => {
+            if (!activeMenuItem || activeMenuItem !== li) {
+              resetBottomBar();
+            }
+          }, 100);
+        });
+      }
+    });
+
+    nav.addEventListener('mouseleave', () => {
+      if (!activeMenuItem) {
+        resetBottomBar();
+      }
+    });
+
+    setTimeout(resetBottomBar, 0);
   });
 </script>
