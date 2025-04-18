@@ -1,109 +1,220 @@
-<div
-    class="bg-[{{ section.settings.background_color }}] text-[{{ section.settings.text_color }}]"
-  >
-    <div class="flex justify-between items-start px-5 py-2.5 text-md font-medium">
-      <span class="break-words hyphens-auto pr-2 max-w-[300px] md:max-w-[800px]">
-        {{ section.settings.free_shipping_message }}
-      </span>
-      <a
-        href="{{ section.settings.membership_link }}"
-        aria-label="{{ section.settings.membership_text }}"
-        class="flex items-center gap-2 pt-1.5 border-b-[1px] leading-none font-medium text-[{{ section.settings.link_color }}] group"
-        style="padding-bottom: {{ section.settings.border_spacing }}px"
-      >
-        <span class="inline max-sm:hidden">{{ section.settings.membership_text }}</span>
-        <svg
-          class="w-5 h-5 inline-block align-middle transition-transform duration-200 ease-in-out group-hover:translate-x-1"
-          width="14"
-          height="14"
-          viewBox="0 0 14 14"
-          fill="none"
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          <path fill-rule="evenodd" clip-rule="evenodd" d="M7.58586 0.585786C7.96086 0.210786 8.56586 0.210786 8.94086 0.585786L13.9409 5.58579C14.3159 5.96079 14.3159 6.56579 13.9409 6.94079L8.94086 11.9408C8.56586 12.3158 7.96086 12.3158 7.58586 11.9408C7.21086 11.5658 7.21086 10.9608 7.58586 10.5858L11.1709 7.00079H0.500854C-0.0241463 7.00079 -0.449146 6.57579 -0.449146 6.05079C-0.449146 5.52579 -0.0241463 5.10079 0.500854 5.10079H11.1709L7.58586 1.51579C7.21086 1.14079 7.21086 0.535786 7.58586 0.585786Z" fill="currentColor"/>
-        </svg>
-      </a>
-    </div>
-  </div>
-  {% schema %}
-  {
-    "name": "t:sections.announcement-bar.name",
-    "max_blocks": 12,
-    "class": "announcement-bar-section",
-    "enabled_on": {
-      "groups": ["header"]
-    },
-    "settings": [
-      {
-        "type": "text",
-        "id": "free_shipping_message",
-        "label": "Free Shipping Message",
-        "default": "FREE SHIPPING $125+, INTERNATIONAL $200+"
-      },
-      {
-        "type": "text",
-        "id": "membership_text",
-        "label": "Membership Link Text",
-        "default": "JOIN THE MEMBERSHIP"
-      },
-      {
-        "type": "text",
-        "id": "membership_link",
-        "label": "Membership Link URL",
-        "default": "/account/register"
-      },
-      {
-        "type": "color",
-        "id": "background_color",
-        "label": "Background Color",
-        "default": "#000000"
-      },
-      {
-        "type": "color",
-        "id": "text_color",
-        "label": "Text Color",
-        "default": "#FFFFFF"
-      },
-      {
-        "type": "color",
-        "id": "link_color",
-        "label": "Link Color",
-        "default": "#FFFFFF"
-      },
-      {
-        "type": "range",
-        "id": "border_spacing",
-        "min": 0,
-        "max": 10,
-        "step": 1,
-        "unit": "px",
-        "label": "Border Bottom Spacing",
-        "default": 0
-      }
-    ],
-    "blocks": [
-      {
-        "type": "announcement",
-        "name": "Announcement",
-        "settings": [
-          {
-            "type": "text",
-            "id": "text",
-            "label": "Announcement Text",
-            "default": "Announce something here"
-          }
-        ]
-      }
-    ],
-    "presets": [
-      {
-        "name": "t:sections.announcement-bar.presets.name",
-        "blocks": [
-          {
-            "type": "announcement"
-          }
-        ]
-      }
-    ]
+<style>
+  .announcement-bar {
+    font-family: {{ section.settings.font.family }}, sans-serif;
+    font-weight: {{ section.settings.font.weight }};
+    font-style: {{ section.settings.font.style }};
   }
-  {% endschema %}
+</style>
+
+<div
+  class="color-{{ section.settings.color_scheme }} color-{{ section.settings.color_scheme }}-text"
+  style="
+    padding-top: {{ section.settings.padding_vertical }}px;
+    padding-bottom: {{ section.settings.padding_vertical }}px;
+    padding-left: {{ section.settings.padding_horizontal }}px;
+    padding-right: {{ section.settings.padding_horizontal }}px;
+    margin-top: {{ section.settings.margin_top }}px;
+    margin-bottom: {{ section.settings.margin_bottom }}px;
+    margin-left: {{ section.settings.margin_horizontal }}px;
+    margin-right: {{ section.settings.margin_horizontal }}px;
+    font-weight: {{ section.settings.font_weight }};
+  "
+>
+  <div class="flex justify-between items-center py-2.5 text-md">
+    <span
+      class="break-words hyphens-auto pr-2 max-w-[300px] md:max-w-[800px] text-[var(--header_text)]"
+    >
+      {{ section.settings.free_shipping_message }}
+    </span>
+    <a
+      href="{{ section.settings.membership_link }}"
+      aria-label="{{ section.settings.membership_text }}"
+      class="flex items-center gap-2 pt-1.5 leading-none group text-[var(--header_text)] {% if section.settings.hide_underline_mobile %}sm:border-b-[1px]{% else %}border-b-[1px]{% endif %} color-{{ section.settings.color_scheme }}-border"
+      style="padding-bottom: {{ section.settings.border_spacing }}px; font-weight: {{ section.settings.link_font_weight }};"
+    >
+      <span class="inline max-sm:hidden text-[var(--header_text)]">{{ section.settings.membership_text }}</span>
+      <svg
+        class="w-5 h-5 inline-block align-middle transition-transform duration-200 ease-in-out group-hover:translate-x-1 text-[var(--header_text)]"
+        width="14"
+        height="14"
+        viewBox="0 0 14 14"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path
+          fill-rule="evenodd"
+          clip-rule="evenodd"
+          d="M7.58586 0.585786C7.96086 0.210786 8.56586 0.210786 8.94086 0.585786L13.9409 5.58579C14.3159 5.96079 14.3159 6.56579 13.9409 6.94079L8.94086 11.9408C8.56586 12.3158 7.96086 12.3158 7.58586 11.9408C7.21086 11.5658 7.21086 10.9608 7.58586 10.5858L11.1709 7.00079H0.500854C-0.0241463 7.00079 -0.449146 6.57579 -0.449146 6.05079C-0.449146 5.52579 -0.0241463 5.10079 0.500854 5.10079H11.1709L7.58586 1.51579C7.21086 1.14079 7.21086 0.535786 7.58586 0.585786Z"
+          fill="var(--header_text)"
+        />
+      </svg>
+    </a>
+  </div>
+</div>
+
+{% schema %}
+{
+  "name": "t:sections.announcement-bar.name",
+  "class": "announcement-bar-section",
+  "enabled_on": {
+    "groups": ["header"]
+  },
+  "settings": [
+    {
+      "type": "text",
+      "id": "free_shipping_message",
+      "label": "Free Shipping Message",
+      "default": "FREE SHIPPING $125+, INTERNATIONAL $200+"
+    },
+    {
+      "type": "text",
+      "id": "membership_text",
+      "label": "Membership Link Text",
+      "default": "JOIN THE MEMBERSHIP"
+    },
+    {
+      "type": "text",
+      "id": "membership_link",
+      "label": "Membership Link URL",
+      "default": "/account/register"
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "Color scheme",
+      "default": "background-1"
+    },
+    {
+      "type": "header",
+      "content": "Typography Settings"
+    },
+    {
+      "type": "select",
+      "id": "font_weight",
+      "label": "Message Font Weight",
+      "options": [
+        {
+          "value": "400",
+          "label": "Regular (400)"
+        },
+        {
+          "value": "500",
+          "label": "Medium (500)"
+        },
+        {
+          "value": "600",
+          "label": "Semibold (600)"
+        },
+        {
+          "value": "700",
+          "label": "Bold (700)"
+        }
+      ],
+      "default": "400"
+    },
+    {
+      "type": "select",
+      "id": "link_font_weight",
+      "label": "Link Font Weight",
+      "options": [
+        {
+          "value": "400",
+          "label": "Regular (400)"
+        },
+        {
+          "value": "500",
+          "label": "Medium (500)"
+        },
+        {
+          "value": "600",
+          "label": "Semibold (600)"
+        },
+        {
+          "value": "700",
+          "label": "Bold (700)"
+        }
+      ],
+      "default": "500"
+    },
+    {
+      "type": "header",
+      "content": "Layout Settings"
+    },
+    {
+      "type": "range",
+      "id": "padding_vertical",
+      "min": 0,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "label": "Top/Bottom Padding",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "padding_horizontal",
+      "min": 0,
+      "max": 50,
+      "step": 5,
+      "unit": "px",
+      "label": "Left/Right Padding",
+      "default": 20
+    },
+    {
+      "type": "range",
+      "id": "margin_top",
+      "min": 0,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "label": "Top Margin",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "margin_bottom",
+      "min": 0,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "label": "Bottom Margin",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "margin_horizontal",
+      "min": 0,
+      "max": 50,
+      "step": 5,
+      "unit": "px",
+      "label": "Left/Right Margin",
+      "default": 0
+    },
+    {
+      "type": "header",
+      "content": "Link Settings"
+    },
+    {
+      "type": "range",
+      "id": "border_spacing",
+      "min": 0,
+      "max": 10,
+      "step": 1,
+      "unit": "px",
+      "label": "Border Bottom Spacing",
+      "default": 0
+    },
+    {
+      "type": "checkbox",
+      "id": "hide_underline_mobile",
+      "label": "Hide Link Underline on Mobile",
+      "default": true
+    }
+  ],
+  "presets": [
+    {
+      "name": "t:sections.announcement-bar.presets.name"
+    }
+  ]
+}
+{% endschema %}
