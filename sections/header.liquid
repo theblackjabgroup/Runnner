@@ -157,73 +157,107 @@
   <!-- Mobile Menu -->
   <div
     id="mobile-menu"
-    class="hidden lg:hidden  border-t border-gray-200 shadow-lg w-[70vw] h-[100vh] fixed top-0 right-0 z-50  bg-[var(--background)] text-[var(--header_text)] "
+    class=" hidden lg:hidden  border-t border-gray-200 shadow-lg w-[85vw] fixed top-[-1px] right-0 z-50  bg-[var(--background)] text-[var(--header_text)] flex"
   >
-    <nav class="flex flex-col space-y-4 p-6 w-full justify-between">
-      <div class="upper-section">
-        <div class="flex items-center justify-end mb-4 ">
-          <button type="button" class=" bg-black text-white px-2" aria-label="Close Menu">Close</button>
-        </div>
-        {% if section.settings.menu.links != blank %}
-          {% for link in section.settings.menu.links %}
-            <div class="mobile-menu-item">
-              <div class="!flex items-center justify-between">
-                <a href="{{ link.url }}" class="block text-2xl text-black hover:underline font-medium py-2">
-                  {{ link.title }}
-                </a>
+    <div class="h-[100vh] w-10 bg-black text-white flex flex-col gap-4 items-center justify-center">
+      <span class="transform -rotate-90 origin-center text-2xl tracking-widest whitespace-nowrap"> FOLLOW US </span>
+    </div>
+    <div class="flex flex-1 flex-col justify-between">
+      <nav class="flex flex-col space-y-4 p-6 w-full justify-between">
+        <div class="upper-section">
+          <div class="flex items-center justify-end mb-8 ">
+            <button type="button" class=" bg-black text-white px-2" aria-label="Close Menu">Close</button>
+          </div>
+          {% if section.settings.menu.links != blank %}
+            {% for link in section.settings.menu.links %}
+              <div class="mobile-menu-item">
+                <div class="horizontal-line w-full h-1 bg-black my-2">&nbsp;</div>
+                <div class="!flex items-center justify-between">
+                  <a href="{{ link.url }}" class="block text-3xl text-black hover:underline font-medium py-2">
+                    {{ link.title }}
+                  </a>
+                  {% if link.links.size > 0 %}
+                    <button type="button" class="toggle-submenu focus:outline-none">
+                      {% if section.settings.dropdown_icon != blank %}
+                        <img
+                          src="{{ section.settings.dropdown_icon | image_url }}"
+                          alt="Dropdown Icon"
+                          width="100%"
+                          height="auto"
+                          class="w-8 h-4 object-contain transition-transform duration-300"
+                        >
+                      {% else %}
+                        <svg
+                          class="w-8 h-4 transition-transform duration-300"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                        </svg>
+                      {% endif %}
+                    </button>
+                  {% endif %}
+                </div>
                 {% if link.links.size > 0 %}
-                  <button type="button" class="toggle-submenu focus:outline-none">
-                    {% if section.settings.dropdown_icon != blank %}
-                      <img
-                        src="{{ section.settings.dropdown_icon | image_url }}"
-                        alt="Dropdown Icon"
-                        width="100%"
-                        height="auto"
-                        class="w-8 h-4 object-contain transition-transform duration-300"
-                      >
-                    {% else %}
-                      <svg
-                        class="w-8 h-4 transition-transform duration-300"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
-                      </svg>
-                    {% endif %}
-                  </button>
+                  <div class="ml-4 mt-2 hidden space-y-2 submenu">
+                    {% for childlink in link.links %}
+                      <a href="{{ childlink.url }}" class="block text-2xl text-gray-800 hover:text-black">
+                        {{ childlink.title }}
+                      </a>
+                      {% if childlink.links.size > 0 %}
+                        <ul class="ml-4 space-y-1">
+                          {% for grandchildlink in childlink.links %}
+                            <li>
+                              <a
+                                href="{{ grandchildlink.url }}"
+                                class="block text-xl underline text-gray-600 hover:text-black"
+                              >
+                                {{ grandchildlink.title }}
+                              </a>
+                            </li>
+                          {% endfor %}
+                        </ul>
+                      {% endif %}
+                    {% endfor %}
+                  </div>
                 {% endif %}
               </div>
-              {% if link.links.size > 0 %}
-                <div class="ml-4 mt-2 hidden space-y-2 submenu">
-                  {% for childlink in link.links %}
-                    <a href="{{ childlink.url }}" class="block text-2xl text-gray-700 hover:text-black py-2">
-                      {{ childlink.title }}
-                    </a>
-                    {% if childlink.links.size > 0 %}
-                      <ul class="ml-4 space-y-1">
-                        {% for grandchildlink in childlink.links %}
-                          <li>
-                            <a
-                              href="{{ grandchildlink.url }}"
-                              class="block text-xl underline text-gray-600 hover:text-black"
-                            >
-                              {{ grandchildlink.title }}
-                            </a>
-                          </li>
-                        {% endfor %}
-                      </ul>
-                    {% endif %}
-                  {% endfor %}
-                </div>
-              {% endif %}
-            </div>
-          {% endfor %}
-        {% endif %}
-      </div>
+            {% endfor %}
+          {% endif %}
+          <div class="horizontal-line w-full h-1 bg-black my-2">&nbsp;</div>
+        </div>
+      </nav>
 
-      <div id="social-link-container" class="flex items-center justify-between mt-4"></div>
-    </nav>
+      <div class="flex flex-col w-full p-6 ">
+        <div class="horizontal-line w-full h-1 bg-black my-2">&nbsp;</div>
+        <div id="social-link-container" class="flex flex-wrap items-center  gap-4 m-4">
+          {% if settings.social_facebook_link %}
+            <a href="{{ settings.social_facebook_link }}" aria-label="Facebook" target="_blank" rel="noopener">
+              <svg class="w-8 h-8 fill-current text-black hover:text-blue-600" viewBox="0 0 24 24">
+                <path d="M22 12a10 10 0 10-11.5 9.9v-7h-2v-2.9h2v-2.2c0-2 1.2-3.1 3-3.1.9 0 1.8.1 1.8.1v2h-1c-1 0-1.3.6-1.3 1.2v1.9h2.3l-.4 2.9h-1.9v7A10 10 0 0022 12z"/>
+              </svg>
+            </a>
+          {% endif %}
+
+          {% if settings.social_instagram_link %}
+            <a href="{{ settings.social_instagram_link }}" aria-label="Instagram" target="_blank" rel="noopener">
+              <svg class="w-8 h-8 fill-current text-black hover:text-pink-600" viewBox="0 0 24 24">
+                <path d="M7 2C4.8 2 3 3.8 3 6v12c0 2.2 1.8 4 4 4h10c2.2 0 4-1.8 4-4V6c0-2.2-1.8-4-4-4H7zm10 2c1.1 0 2 .9 2 2v2h-2V6h-2V4h2zm-5 3c2.2 0 4 1.8 4 4s-1.8 4-4 4a4 4 0 110-8zm0 1.5a2.5 2.5 0 100 5 2.5 2.5 0 000-5zM5 6h2v2H5V6zm14 2v10c0 1.1-.9 2-2 2H7c-1.1 0-2-.9-2-2V8h2v2h2V8h6v2h2V8h2z"/>
+              </svg>
+            </a>
+          {% endif %}
+
+          {% if settings.social_twitter_link %}
+            <a href="{{ settings.social_twitter_link }}" aria-label="Twitter" target="_blank" rel="noopener">
+              <svg class="w-8 h-8 fill-current text-black hover:text-sky-500" viewBox="0 0 24 24">
+                <path d="M22.46 6c-.77.35-1.6.58-2.47.69a4.23 4.23 0 001.85-2.33 8.44 8.44 0 01-2.7 1.03 4.21 4.21 0 00-7.17 3.84 11.94 11.94 0 01-8.67-4.4 4.2 4.2 0 001.31 5.62 4.17 4.17 0 01-1.91-.53v.05a4.21 4.21 0 003.38 4.13c-.46.12-.95.17-1.45.17-.35 0-.7-.03-1.04-.1a4.22 4.22 0 003.93 2.92 8.47 8.47 0 01-6.24 1.74 11.95 11.95 0 006.46 1.9c7.75 0 11.99-6.42 11.99-11.99 0-.18-.01-.35-.02-.53A8.6 8.6 0 0024 4.56a8.43 8.43 0 01-2.54.7z"/>
+              </svg>
+            </a>
+          {% endif %}
+        </div>
+      </div>
+    </div>
   </div>
 </header>
 
@@ -242,8 +276,9 @@
     // Toggle mobile menu visibility
     function toggleMobileMenu() {
       mobileMenu.classList.toggle('hidden');
-      mobileMenu.classList.toggle('flex');
+      mobileMenu.classList.toggle('!flex');
       overlay.classList.toggle('hidden');
+      document.body.classList.toggle('overflow-hidden');
     }
 
     if (hamburgerMenu && mobileMenu) {
