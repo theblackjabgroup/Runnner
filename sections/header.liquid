@@ -180,7 +180,7 @@
   <!-- Mobile Menu -->
   <div
     id="mobile-menu"
-    class=" hidden lg:hidden  border-t border-gray-200 shadow-lg w-[85vw] fixed top-[-1px] right-0 z-50  bg-[var(--background)] text-[var(--header_text)] flex"
+    class="hidden lg:hidden  border-t border-gray-200 shadow-lg w-[90vw] fixed top-[-1px] right-0 z-50  bg-[var(--background)] text-[var(--header_text)] flex"
   >
     <div class="h-[100vh] w-10 bg-black text-white flex flex-col gap-4 items-center justify-center">
       <span class="transform -rotate-90 origin-center text-2xl tracking-widest whitespace-nowrap"> FOLLOW US </span>
@@ -189,7 +189,7 @@
       <nav class="flex flex-col space-y-4 p-6 w-full justify-between">
         <div class="upper-section">
           <div class="flex items-center justify-end mb-8 ">
-            <button type="button" class=" bg-black text-white px-2" aria-label="Close Menu">Close</button>
+            <button type="button" class=" bg-black text-white px-2 rounded-xl" aria-label="Close Menu">Close</button>
           </div>
           {% if section.settings.menu.links != blank %}
             {% for link in section.settings.menu.links %}
@@ -321,27 +321,44 @@
     // Mobile Menu Toggle
     const hamburgerMenu = document.getElementById('hamburger-menu');
     const mobileMenu = document.getElementById('mobile-menu');
-    const closeButton = mobileMenu.querySelector('button[aria-label="Close Menu"]');
-    const overlay = document.createElement('div');
+    const closeButton = mobileMenu ? mobileMenu.querySelector('button[aria-label="Close Menu"]') : null;
 
-    overlay.className = 'fixed inset-0 bg-black bg-opacity-50 z-40 hidden';
+    // Overlay for the mobile menu
+    const overlay = document.createElement('div');
+    overlay.className = 'block fixed inset-0 w-[10vw] h-[100vh] bg-white opacity-35 z-40 hidden';
     overlay.id = 'menu-overlay';
     document.body.appendChild(overlay);
 
     // Toggle mobile menu visibility
     function toggleMobileMenu() {
+      if (!mobileMenu) {
+        console.warn('Mobile menu not found!');
+        return;
+      }
+
+      if (overlay.style.display === 'none' || !overlay.style.display) {
+        overlay.style.display = 'block';
+      } else {
+        overlay.style.display = 'none';
+      }
       mobileMenu.classList.toggle('hidden');
-      mobileMenu.classList.toggle('!flex');
+      mobileMenu.classList.toggle('flex-visible'); // Use a custom class instead of !flex
       overlay.classList.toggle('hidden');
       document.body.classList.toggle('overflow-hidden');
     }
 
     if (hamburgerMenu && mobileMenu) {
+      console.log('Attaching event listener to hamburger menu');
       hamburgerMenu.addEventListener('click', toggleMobileMenu);
+    } else {
+      console.warn('Hamburger menu or mobile menu not found!');
     }
 
     if (closeButton) {
+      console.log('Attaching event listener to close button');
       closeButton.addEventListener('click', toggleMobileMenu);
+    } else {
+      console.warn('Close button not found!');
     }
 
     overlay.addEventListener('click', toggleMobileMenu);
