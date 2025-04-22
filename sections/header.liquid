@@ -52,6 +52,12 @@
       "id": "scrolling_text",
       "label": "Scrolling Text",
       "default": "BlackBytte - Your One Stop Shop for Everything"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_sticky",
+      "label": "Enable sticky header",
+      "default": true
     }
   ],
   "blocks": [
@@ -104,8 +110,8 @@
 {% endschema %}
 
 <header
-  class="static m-2 lg:mx-0  top-0 z-[100] color-{{ section.settings.color_scheme }} color-{{ section.settings.color_scheme }}-text"
-  style="position: static !important;"
+  class="header-main will-change-transform z-[999] bg-[var(--background)] transform-gpu"
+  data-header-sticky
 >
   <div class=" relative w-full  flex items-center justify-between bg-[var(--background)]">
     <!-- Left: Logo -->
@@ -560,6 +566,8 @@
   </div>
 </header>
 
+<div class="header-offset" data-header-offset></div>
+
 <style>
   @keyframes dropDown {
     0% {
@@ -626,6 +634,35 @@
   .scrolling-text-track:hover {
     animation-play-state: paused;
   }
+
+  .header-main {
+    position: relative;
+    width: 100%;
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    transform: translateY(0);
+  }
+
+  .header-main.is-sticky {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    transform: translateY(0);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  }
+
+  .header-main.is-sticky.is-hidden {
+    transform: translateY(-100%);
+  }
+
+  .header-offset {
+    height: 0;
+    transition: height 0.3s ease;
+  }
+
+  .header-offset.is-active {
+    height: var(--header-height, 0px);
+  }
 </style>
 
 <script>
@@ -672,5 +709,57 @@
         }
       });
     });
+
+    // Sticky Header
+    const header = document.querySelector('[data-header-sticky]');
+    const headerOffset = document.querySelector('[data-header-offset]');
+
+    if (!header || !headerOffset) return;
+
+    let lastScroll = 0;
+    let initialHeaderTop = header.offsetTop;
+    let isFixed = false;
+
+    const setHeaderHeight = () => {
+      const height = header.offsetHeight;
+      document.documentElement.style.setProperty('--header-height', `${height}px`);
+      initialHeaderTop = header.offsetTop;
+    };
+
+    const handleScroll = () => {
+      const currentScroll = window.pageYOffset;
+
+      // If we're above the header's initial position, reset everything
+      if (currentScroll <= initialHeaderTop) {
+        header.classList.remove('is-sticky', 'is-hidden');
+        headerOffset.classList.remove('is-active');
+        isFixed = false;
+        return;
+      }
+
+      // Only handle sticky state changes when crossing the threshold
+      if (!isFixed && currentScroll > initialHeaderTop) {
+        header.classList.add('is-sticky');
+        headerOffset.classList.add('is-active');
+        isFixed = true;
+      }
+
+      // Only handle hide/show when we're in sticky mode
+      if (isFixed) {
+        if (currentScroll > lastScroll + 10) {
+          // Add threshold to prevent tiny movements
+          header.classList.add('is-hidden');
+        } else if (currentScroll < lastScroll - 10) {
+          header.classList.remove('is-hidden');
+        }
+      }
+
+      lastScroll = currentScroll;
+    };
+
+    // Initialize and add event listeners
+    setHeaderHeight();
+    window.addEventListener('resize', setHeaderHeight, { passive: true });
+    window.addEventListener('scroll', () => requestAnimationFrame(handleScroll), { passive: true });
   });
 </script>
