@@ -147,7 +147,9 @@
                   <div
                     class="
                       absolute top-full left-0 w-full z-50
-                      opacity-0 invisible overflow-x-hidden group-hover:opacity-100 group-hover:visible transition-all duration-300
+                      opacity-0 invisible translate-y-[-20px] pointer-events-none
+                      group-hover:opacity-100 group-hover:visible group-hover:translate-y-0 group-hover:pointer-events-auto
+                      transition-transform duration-300 ease-out
                     "
                   >
                     <div class="mx-auto p-6 bg-white flex">
@@ -204,9 +206,10 @@
                                 {% if block.settings.button_text_1 != blank %}
                                   <a
                                     href="{{ block.settings.button_link_1 }}"
-                                    class="block group-hover/card:text-pink-500 group-hover/card:font-bold transition-all duration-300"
+                                    class="block transition-all duration-300 ease-out"
+                                    style="transition-delay: 0ms"
                                   >
-                                    <div class="mt-4 flex items-center justify-between">
+                                    <div class="mt-4 flex items-center justify-between group-hover/card:text-pink-500 group-hover/card:font-bold">
                                       <p class="text-2xl font-medium">{{ block.settings.button_text_1 }}</p>
                                       <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M17 8l4 4m0 0l-4 4m4-4H3"/>
@@ -533,38 +536,72 @@
   </div>
 </header>
 
+<style>
+  @keyframes dropDown {
+    0% {
+      opacity: 0;
+      transform: translateY(-20px);
+      pointer-events: none;
+    }
+    1% {
+      opacity: 0;
+      transform: translateY(-20px);
+    }
+    100% {
+      opacity: 1;
+      transform: translateY(0);
+      pointer-events: auto;
+    }
+  }
+
+  @keyframes dropUp {
+    0% {
+      opacity: 1;
+      transform: translateY(0);
+      pointer-events: auto;
+    }
+    99% {
+      opacity: 0;
+      transform: translateY(-20px);
+    }
+    100% {
+      opacity: 0;
+      transform: translateY(-20px);
+      pointer-events: none;
+    }
+  }
+
+  .group:hover .absolute {
+    animation: dropDown 300ms ease-out forwards;
+  }
+
+  .group:not(:hover) .absolute {
+    animation: dropUp 300ms ease-out forwards;
+  }
+</style>
+
 <script>
   document.addEventListener('DOMContentLoaded', function () {
     // Mobile Menu Toggle
     const hamburgerMenu = document.getElementById('hamburger-menu');
     const mobileMenu = document.getElementById('mobile-menu');
     const closeButton = mobileMenu ? mobileMenu.querySelector('button[aria-label="Close Menu"]') : null;
-
-    // Overlay for the mobile menu
     const overlay = document.createElement('div');
+
+    // Overlay setup
     overlay.className = 'block fixed inset-0 w-[10vw] h-[100vh] bg-white opacity-35 z-40 hidden';
     overlay.id = 'menu-overlay';
     document.body.appendChild(overlay);
 
-    // Toggle mobile menu visibility
     function toggleMobileMenu() {
-      if (!mobileMenu) {
-        console.warn('Mobile menu not found!');
-        return;
-      }
+      if (!mobileMenu) return;
 
-      if (overlay.style.display === 'none' || !overlay.style.display) {
-        overlay.style.display = 'block';
-      } else {
-        overlay.style.display = 'none';
-      }
       mobileMenu.classList.toggle('hidden');
-      mobileMenu.classList.toggle('flex-visible');
       overlay.classList.toggle('hidden');
       document.body.classList.toggle('overflow-hidden');
     }
 
-    if (hamburgerMenu && mobileMenu) {
+    if (hamburgerMenu) {
       hamburgerMenu.addEventListener('click', toggleMobileMenu);
     }
 
@@ -572,7 +609,9 @@
       closeButton.addEventListener('click', toggleMobileMenu);
     }
 
-    overlay.addEventListener('click', toggleMobileMenu);
+    if (overlay) {
+      overlay.addEventListener('click', toggleMobileMenu);
+    }
 
     // Submenu Toggle for Mobile
     const submenuToggles = mobileMenu.querySelectorAll('.toggle-submenu');
