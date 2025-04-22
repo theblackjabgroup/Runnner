@@ -110,7 +110,7 @@
 {% endschema %}
 
 <header
-  class="header-main will-change-transform z-[999] bg-[var(--background)] transform-gpu"
+  class="header-main will-change-transform z-[999] bg-[var(--background)] transform-gpu {% unless section.settings.enable_sticky %}sticky-disabled{% endunless %}"
   data-header-sticky
 >
   <div class=" relative w-full  flex items-center justify-between bg-[var(--background)]">
@@ -663,6 +663,15 @@
   .header-offset.is-active {
     height: var(--header-height, 0px);
   }
+
+  .sticky-disabled {
+    position: relative !important;
+    transform: none !important;
+  }
+
+  .sticky-disabled + .header-offset {
+    display: none !important;
+  }
 </style>
 
 <script>
@@ -714,11 +723,12 @@
     const header = document.querySelector('[data-header-sticky]');
     const headerOffset = document.querySelector('[data-header-offset]');
 
-    if (!header || !headerOffset) return;
+    if (!header || !headerOffset || header.classList.contains('sticky-disabled')) return;
 
     let lastScroll = 0;
     let initialHeaderTop = header.offsetTop;
     let isFixed = false;
+    let stickyEnabled = !header.classList.contains('sticky-disabled');
 
     const setHeaderHeight = () => {
       const height = header.offsetHeight;
@@ -727,9 +737,10 @@
     };
 
     const handleScroll = () => {
+      if (!stickyEnabled) return;
+
       const currentScroll = window.pageYOffset;
 
-      // If we're above the header's initial position, reset everything
       if (currentScroll <= initialHeaderTop) {
         header.classList.remove('is-sticky', 'is-hidden');
         headerOffset.classList.remove('is-active');
@@ -737,17 +748,14 @@
         return;
       }
 
-      // Only handle sticky state changes when crossing the threshold
       if (!isFixed && currentScroll > initialHeaderTop) {
         header.classList.add('is-sticky');
         headerOffset.classList.add('is-active');
         isFixed = true;
       }
 
-      // Only handle hide/show when we're in sticky mode
       if (isFixed) {
         if (currentScroll > lastScroll + 10) {
-          // Add threshold to prevent tiny movements
           header.classList.add('is-hidden');
         } else if (currentScroll < lastScroll - 10) {
           header.classList.remove('is-hidden');
@@ -757,7 +765,6 @@
       lastScroll = currentScroll;
     };
 
-    // Initialize and add event listeners
     setHeaderHeight();
     window.addEventListener('resize', setHeaderHeight, { passive: true });
     window.addEventListener('scroll', () => requestAnimationFrame(handleScroll), { passive: true });
