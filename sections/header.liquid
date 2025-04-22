@@ -47,12 +47,58 @@
       "label": "URL for Link 2",
       "default": "/collections/all"
     }
+  ],
+  "blocks": [
+    {
+      "type": "mega_menu_images",
+      "name": "Mega Menu Images",
+      "settings": [
+        {
+          "type": "text",
+          "id": "menu_item_name",
+          "label": "Menu Item Name",
+          "info": "Enter the exact name of the menu item"
+        },
+        {
+          "type": "image_picker",
+          "id": "image_1",
+          "label": "First Image"
+        },
+        {
+          "type": "url",
+          "id": "button_link_1",
+          "label": "First Button Link"
+        },
+        {
+          "type": "text",
+          "id": "button_text_1",
+          "label": "First Button Text",
+          "default": "Shop Now"
+        },
+        {
+          "type": "image_picker",
+          "id": "image_2",
+          "label": "Second Image"
+        },
+        {
+          "type": "url",
+          "id": "button_link_2",
+          "label": "Second Button Link"
+        },
+        {
+          "type": "text",
+          "id": "button_text_2",
+          "label": "Second Button Text",
+          "default": "Learn More"
+        }
+      ]
+    }
   ]
 }
 {% endschema %}
 
 <header
-  class="static mx-2 lg:mx-0  top-0 z-[100] color-{{ section.settings.color_scheme }} color-{{ section.settings.color_scheme }}-text"
+  class="static m-2 lg:mx-0  top-0 z-[100] color-{{ section.settings.color_scheme }} color-{{ section.settings.color_scheme }}-text"
   style="position: static !important;"
 >
   <div class=" relative w-full  flex items-center justify-between bg-[var(--background)]">
@@ -68,7 +114,7 @@
             class="h-22 max-w-60"
           >
         {% else %}
-          <span class="text-3xl font-semibold">BlackBytte</span>
+          <span class="text-3xl lg:text-5xl font-semibold mx-5">BlackBytte</span>
         {% endif %}
       </a>
     </div>
@@ -104,7 +150,7 @@
                       opacity-0 invisible overflow-x-hidden group-hover:opacity-100 group-hover:visible transition-all duration-300
                     "
                   >
-                    <div class=" mx-auto p-6 bg-pink-200 flex">
+                    <div class="mx-auto p-6 bg-white flex">
                       <ul class="flex justify-start gap-2 w-1/2">
                         {% for childlink in link.links %}
                           <li class="min-w-[100px] relative">
@@ -131,12 +177,62 @@
                           </li>
                         {% endfor %}
                       </ul>
-                      <div class="mega-menu-img flex items-center justify-center w-1/2">
-                        Lorem ipsum dolor sit, amet consectetur adipisicing elit. Repudiandae consequuntur ipsa eum
-                        optio eligendi ipsum? Sed obcaecati molestiae dolor nemo quasi dicta possimus facilis veritatis
-                        sit repellat totam expedita deserunt tenetur sint similique hic, quaerat deleniti ipsum nobis
-                        adipisci nostrum accusantium! Nesciunt, facilis. Molestias ea ut, illum repellendus itaque
-                        alias.
+                      <!-- Mega Menu Images -->
+                      <div class="mega-menu-img flex items-center justify-end w-1/2 gap-4 px-4 bg-green-400">
+                        {% for block in section.blocks %}
+                          {% if block.type == 'mega_menu_images' and block.settings.menu_item_name == link.title %}
+                            <div class="flex flex-col items-center gap-2 bg-pink-400">
+                              {% if block.settings.image_1 != blank %}
+                                <a
+                                  href="{{ block.settings.button_link_1 }}"
+                                  class="img-container flex flex-col items-center gap-6"
+                                >
+                                  <div class="w-[200px] h-[200px] overflow-hidden">
+                                    <img
+                                      src="{{ block.settings.image_1 | image_url: width: 160 }}"
+                                      alt=""
+                                      class="w-full h-full object-cover"
+                                      width="160"
+                                      height="160"
+                                      loading="lazy"
+                                    >
+                                  </div>
+                                  {% if block.settings.button_link_1 != blank %}
+                                    <div
+                                      class="flex items-center justify-between"
+                                    >
+                                      <span class="text-xl">{{ block.settings.button_text_1 }}</span>
+                                      <span>SHOP NOW </span>
+                                    </div>
+                                  {% endif %}
+                                </a>
+                              {% endif %}
+                            </div>
+
+                            <div class="flex flex-col items-center gap-2">
+                              {% if block.settings.image_2 != blank %}
+                                <div class="w-40 h-40 overflow-hidden">
+                                  <img
+                                    src="{{ block.settings.image_2 | image_url: width: 160 }}"
+                                    alt=""
+                                    class="w-full h-full object-cover"
+                                    width="160"
+                                    height="160"
+                                    loading="lazy"
+                                  >
+                                </div>
+                                {% if block.settings.button_link_2 != blank %}
+                                  <a
+                                    href="{{ block.settings.button_link_2 }}"
+                                    class="px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-800"
+                                  >
+                                    {{ block.settings.button_text_2 }}
+                                  </a>
+                                {% endif %}
+                              {% endif %}
+                            </div>
+                          {% endif %}
+                        {% endfor %}
                       </div>
                     </div>
                   </div>
@@ -203,6 +299,7 @@
       </nav>
       <div
         class="
+          hidden lg:!block
           bottom-bar
           w-full h-[2px] bg-blue-700
         "
@@ -210,6 +307,15 @@
         &nbsp
       </div>
     </div>
+  </div>
+  <div
+    class="
+      lg:hidden
+      bottom-bar
+      w-full h-[2px] bg-blue-700
+    "
+  >
+    &nbsp
   </div>
 
   <!-- Mobile Menu -->
