@@ -1,58 +1,51 @@
 document.addEventListener("DOMContentLoaded", () => {
-  document.querySelectorAll(".bandit-faq").forEach(section => {
-    section.querySelectorAll(".faq-preview").forEach(preview => {
-      const fullText = preview.dataset.answer || "";
-      const shortPreview = fullText.split(" ").slice(0, 3).join(" ") + " ...";
-      preview.innerText = shortPreview;
-      preview.setAttribute("data-original-text", shortPreview);
+  document.querySelectorAll(".faq-preview").forEach(preview => {
+    const fullText    = preview.dataset.answer || "";
+    const shortText   = fullText.split(" ").slice(0, 3).join(" ") + " ...";
+    preview.innerText            = shortText;
+    preview.dataset.shortText    = shortText;
+    preview.dataset.fullText     = fullText;
+  });
+
+  document.querySelectorAll(".faq-item").forEach(item => {
+    const row     = item.querySelector(".faq-row");
+    const btn     = item.querySelector(".faq-toggle");
+    const preview = item.querySelector(".faq-preview");
+    const arrow   = item.querySelector(".arrow-svg");
+
+    row.setAttribute("role", "button");
+    row.setAttribute("tabindex", "0");
+    row.setAttribute("aria-expanded", "false");
+    btn.setAttribute("aria-expanded", "false");
+
+    const doToggle = () => {
+      const expanded = btn.getAttribute("aria-expanded") === "true";
+
+      if (!expanded) {
+        preview.innerText = preview.dataset.fullText;
+        arrow.classList.add("rotate-90");
+        btn.setAttribute("aria-expanded", "true");
+        row.setAttribute("aria-expanded", "true");
+      } else {
+        preview.innerText            = preview.dataset.shortText;
+        arrow.classList.remove("rotate-90");
+        btn.setAttribute("aria-expanded", "false");
+        row.setAttribute("aria-expanded", "false");
+      }
+    };
+
+    row.addEventListener("click",  doToggle);
+    row.addEventListener("keydown", e => {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        doToggle();
+      }
+    });
+    btn.addEventListener("keydown", e => {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        doToggle();
+      }
     });
   });
 });
-
-function toggleFAQ(element, forceClose = false) {
-  const faqItem = element.closest('.faq-item');
-  const preview = faqItem.querySelector('.faq-preview');
-  const answer = faqItem.querySelector('.faq-answer');
-  const arrow = faqItem.querySelector('.faq-toggle svg');
-  const toggleButton = faqItem.querySelector('.faq-toggle');
-  const fullAnswer = preview.dataset.answer || preview.getAttribute('data-full-answer');
-  const originalText = preview.getAttribute('data-original-text');
-  const isExpanded = preview.classList.contains('expanded');
-  
-  if (!isExpanded && !forceClose) {
-    preview.style.opacity = '0';
-    setTimeout(() => {
-      preview.innerText = fullAnswer;
-      preview.classList.add('expanded');
-      arrow.classList.add('rotate-90');
-      preview.style.opacity = '1';
-      toggleButton.setAttribute("aria-expanded", "true");
-      toggleButton.disabled = true;
-    }, 400);
-  } else {
-    preview.innerText = originalText;
-    preview.classList.remove('expanded');
-    preview.style.opacity = '1';
-    arrow.classList.remove('rotate-90');
-
-    toggleButton.setAttribute("aria-expanded", "false");
-    toggleButton.disabled = false;
-  }
-}
-
-
-function handleRowClick(event, rowElement) {
-  const clickedEl = event.target;
-  const isInsideToggle = clickedEl.closest('.faq-toggle');
-  const isInsidePreview = clickedEl.closest('.faq-preview');
-  const isInsideAnswer = clickedEl.closest('.faq-answer');
-  const faqItem = rowElement.closest('.faq-item');
-  const preview = faqItem.querySelector('.faq-preview');
-  const isExpanded = preview.classList.contains('expanded');
-
-  if (isInsideToggle || isInsidePreview || isInsideAnswer) {
-    return;
-  }
-  
-  toggleFAQ(preview, isExpanded); 
-}
