@@ -1,9 +1,11 @@
-<link rel="stylesheet" href="{{ 'custom-faq.css' | asset_url }}">
 <script src="{{ 'custom-faq.js' | asset_url }}" defer></script>
-
-<div class="bandit-faq color-{{ section.settings.color_scheme }}">
-  <h1 class="faq-title">{{ section.settings.faq-title }}</h1>
-
+<link rel="stylesheet" href="{{ 'custom-faq.css' | asset_url }}">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<div class="bandit-faq color-{{ section.settings.color_scheme }} px-[10px]">
+  <h1 class="faq-title text-[70px] sm:text-[90px] md:text-[120px] lg:text-[6rem] font-bold uppercase border-b border-[#333] my-[10px] ">{{ section.settings.faq-title }}</h1>
   {% assign items = section.blocks %}
   {% if items.size == 0 %}
     {% assign items = '' | split: '' %}
@@ -25,34 +27,39 @@
 
     {% endif %}
 
-    <div class="faq-item" aria-expanded="false" aria-controls="faq-{{ forloop.index0 }}" tabindex="0">
-      <div class="faq-row" onclick="handleRowClick(event, this)">
-        <h3 class="faq-question">{{ question }}</h3>
-
-        <button class="faq-toggle" aria-expanded="false" aria-controls="faq-{{ forloop.index0 }}" onclick="toggleFAQ(this)">
-
-          <svg class="arrow-svg" xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" viewBox="0 0 20 20" >
-            <g transform="rotate(270 12 12)">
-              <path d="M12 4c.552 0 1 .448 1 1v10.586l3.293-3.293a1 1 0 1 1 1.414 1.414l-5 5a1 1 0 0 1-1.414 0l-5-5a1 1 0 0 1 1.414-1.414L11 15.586V5c0-.552.448-1 1-1z"/>
-            </g>
-          </svg>
-        </button>
-
-        {% if answer != blank %}
-          <div class="faq-preview" onclick="toggleFAQ(this)" data-answer="{{ answer }}" id="faq-{{ forloop.index0 }}">
-            {{ preview }}
+    <div class="faq-item group open bg-background text-foreground border-b border-[#333] px-[17px] py-[15px] w-full relative" aria-expanded="false" aria-controls="faq-{{ forloop.index0 }}" tabindex="0" >
+      <div class="faq-row flex flex-col md:flex-row gap-[0.8rem] justify-between items-start w-full" onclick="handleRowClick(event, this)">
+      <div class="faq-row-question-heading w-full md:w-1/2">
+        <h3 class="faq-question text-[18px] sm:text-[20px] md:text-[22px] lg:text-[25px] uppercase font-normal">{{ question }}</h3>
+      </div>
+        
+      <div class="faq-row-answer w-full md:w-1/2 relative mt-4 md:mt-0 md:pl-0 font-medium">
+        <button class="faq-toggle flex items-start gap-4 border-none outline-none disabled:opacity-100 disabled:fill-current disabled:stroke-current" aria-expanded="false" aria-controls="faq-{{ forloop.index0 }}" onclick="toggleFAQ(this)">
+          <div class="w-[1.8rem] h-[1.8rem] min-w-[1.8rem] min-h-[1.8rem] flex items-center justify-center mt-[0.8rem]">
+            <svg
+              class="arrow-svg transition-transform duration-200 ease-in-out  " xmlns="http://www.w3.org/2000/svg" width="1.8rem" height="1.8rem" fill="currentColor" stroke-width="none" viewBox="0 0 20 20" >
+              <g transform="rotate(270 12 12)">
+                <path d="M12 4c.552 0 1 .448 1 1v10.586l3.293-3.293a1 1 0 1 1 1.414 1.414l-5 5a1 1 0 0 1-1.414 0l-5-5a1 1 0 0 1 1.414-1.414L11 15.586V5c0-.552.448-1 1-1z"/>
+              </g>
+            </svg>
           </div>
-
-          <div class="faq-answer" id="faq-{{ forloop.index0 }}">
+      
+          {% if answer != blank %}
+          <div class="faq-preview whitespace-normal scale-[1.01] text-left opacity-100 transition-opacity duration-400 ease-in-out transition-transform overflow-hidden text-ellipsis text-[19px]"
+            onclick="toggleFAQ(this)" data-answer="{{ answer }}" id="faq-{{ forloop.index0 }}">
+                {{ preview }}
+          </div>
+      
+          <div class="faq-answer group-[.open]:block text-left text-[14px] sm:text-[16px] md:text-[18px] lg:text-[25px] font-medium hidden break-words max-w-full" id="faq-{{ forloop.index0 }}">
             {{ answer }}
           </div>
-
-        {% endif %}
+          {% endif %}
+        </button>
+      </div>
       </div>
     </div>
   {% endfor %}
 </div>
-
 {% schema %}
 {
   "name": "FAQ Section",
@@ -67,7 +74,7 @@
       "type": "text",
       "id": "faq-title",
       "label": "FAQ Title",
-      "default": "Frequently Asked Questions"
+      "default": "FAQ"
     }
   ],
   

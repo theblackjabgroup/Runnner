@@ -15,19 +15,17 @@ function toggleFAQ(element, forceClose = false) {
   const answer = faqItem.querySelector('.faq-answer');
   const arrow = faqItem.querySelector('.faq-toggle svg');
   const toggleButton = faqItem.querySelector('.faq-toggle');
-
   const fullAnswer = preview.dataset.answer || preview.getAttribute('data-full-answer');
   const originalText = preview.getAttribute('data-original-text');
   const isExpanded = preview.classList.contains('expanded');
-
+  
   if (!isExpanded && !forceClose) {
     preview.style.opacity = '0';
     setTimeout(() => {
       preview.innerText = fullAnswer;
       preview.classList.add('expanded');
-      arrow.classList.add('rotate');
+      arrow.classList.add('rotate-90');
       preview.style.opacity = '1';
-
       toggleButton.setAttribute("aria-expanded", "true");
       toggleButton.disabled = true;
     }, 400);
@@ -35,7 +33,7 @@ function toggleFAQ(element, forceClose = false) {
     preview.innerText = originalText;
     preview.classList.remove('expanded');
     preview.style.opacity = '1';
-    arrow.classList.remove('rotate');
+    arrow.classList.remove('rotate-90');
 
     toggleButton.setAttribute("aria-expanded", "false");
     toggleButton.disabled = false;
