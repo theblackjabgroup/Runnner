@@ -870,35 +870,72 @@
       overlay.addEventListener('click', toggleMobileMenu);
     }
 
-    // Enhanced Submenu Toggle for Mobile
+    // Submenu Toggle for Mobile
     const submenuToggles = mobileMenu.querySelectorAll('.toggle-submenu');
+    let activeSubmenu = null;
+    let isAnimating = false;
+
+    const closeSubmenu = (submenu, icon) => {
+      return new Promise((resolve) => {
+        submenu.classList.remove('show');
+        icon.style.transform = 'rotate(0)';
+
+        const handleTransitionEnd = () => {
+          submenu.classList.add('hidden');
+          submenu.removeEventListener('transitionend', handleTransitionEnd);
+          resolve();
+        };
+
+        submenu.addEventListener('transitionend', handleTransitionEnd);
+      });
+    };
+
+    const openSubmenu = (submenu, icon) => {
+      return new Promise((resolve) => {
+        submenu.classList.remove('hidden');
+        submenu.offsetHeight;
+
+        requestAnimationFrame(() => {
+          submenu.classList.add('show');
+          icon.style.transform = 'rotate(180deg)';
+
+          submenu.addEventListener(
+            'transitionend',
+            () => {
+              resolve();
+            },
+            { once: true }
+          );
+        });
+      });
+    };
+
     submenuToggles.forEach((toggle) => {
-      toggle.addEventListener('click', function () {
+      toggle.addEventListener('click', async function () {
+        if (isAnimating) return;
+        isAnimating = true;
+
         const submenu = this.closest('.mobile-menu-item').querySelector('.submenu');
         const icon = this.querySelector('img, svg');
 
-        if (submenu) {
-          if (submenu.classList.contains('hidden')) {
-            // Show menu
-            submenu.classList.remove('hidden');
-            requestAnimationFrame(() => {
-              submenu.classList.add('show');
-              icon.style.transform = 'rotate(180deg)';
-            });
+        try {
+          if (activeSubmenu === submenu) {
+            await closeSubmenu(submenu, icon);
+            activeSubmenu = null;
           } else {
-            // Hide menu
-            submenu.classList.remove('show');
-            icon.style.transform = 'rotate(0)';
-            submenu.addEventListener(
-              'transitionend',
-              () => {
-                if (!submenu.classList.contains('show')) {
-                  submenu.classList.add('hidden');
-                }
-              },
-              { once: true }
-            );
+            const closePromise = activeSubmenu
+              ? closeSubmenu(
+                  activeSubmenu,
+                  activeSubmenu.closest('.mobile-menu-item').querySelector('.toggle-submenu img, .toggle-submenu svg')
+                )
+              : Promise.resolve();
+
+            await closePromise;
+            await openSubmenu(submenu, icon);
+            activeSubmenu = submenu;
           }
+        } finally {
+          isAnimating = false;
         }
       });
     });
