@@ -394,10 +394,20 @@
     &nbsp
   </div>
 </header>
+
+<!-- Mobile Menu Overlay -->
+<div
+  id="menu-overlay"
+  class="fixed inset-0 bg-black opacity-0 pointer-events-none transition-opacity duration-300 z-[101]"
+>
+  &nbsp;
+</div>
+
 <!-- Mobile Menu -->
 <div
   id="mobile-menu"
-  class="hidden lg:hidden w-[90vw] fixed top-0 right-0 z-100  bg-[var(--background)] text-[var(--header_text)] flex "
+  class="hidden lg:hidden w-[90vw] fixed top-0 right-0 z-[102] bg-[var(--background)] text-[var(--header_text)] flex"
+  style="transform: translateX(100%); transition: transform 0.3s ease-in-out;"
 >
   <div class="h-[100vh] w-10 bg-black text-white flex flex-col gap-4 items-center justify-center">
     <span class="transform -rotate-90 origin-center text-2xl tracking-widest whitespace-nowrap"> FOLLOW US </span>
@@ -835,27 +845,64 @@
   .submenu:not(.hidden) {
     display: block;
   }
+
+  /* Add overlay transition */
+  #menu-overlay {
+    transition: opacity 0.3s ease;
+    will-change: opacity;
+  }
+
+  /* Mobile menu transitions */
+  #mobile-menu {
+    will-change: transform;
+    backface-visibility: hidden;
+  }
+
+  #mobile-menu.active {
+    transform: translateX(0) !important;
+  }
 </style>
 
 <script>
   document.addEventListener('DOMContentLoaded', function () {
-    // Mobile Menu Toggle
     const hamburgerMenu = document.getElementById('hamburger-menu');
     const mobileMenu = document.getElementById('mobile-menu');
     const closeButton = mobileMenu ? mobileMenu.querySelector('button[aria-label="Close Menu"]') : null;
-    const overlay = document.createElement('div');
-
-    // Overlay setup
-    overlay.className = 'block fixed inset-0 w-[10vw] h-[100vh] bg-white opacity-35 z-40 hidden';
-    overlay.id = 'menu-overlay';
-    document.body.appendChild(overlay);
+    const overlay = document.getElementById('menu-overlay');
 
     function toggleMobileMenu() {
-      if (!mobileMenu) return;
+      if (!mobileMenu || !overlay) return;
 
-      mobileMenu.classList.toggle('hidden');
-      overlay.classList.toggle('hidden');
-      document.body.classList.toggle('overflow-hidden');
+      const isOpening = mobileMenu.classList.contains('hidden');
+
+      if (isOpening) {
+        mobileMenu.classList.remove('hidden');
+        document.body.classList.add('overflow-hidden');
+
+        // Trigger layout recalc before animations
+        mobileMenu.offsetHeight;
+
+        requestAnimationFrame(() => {
+          overlay.classList.remove('pointer-events-none');
+          overlay.style.opacity = '0.5';
+          mobileMenu.classList.add('active');
+        });
+      } else {
+        overlay.classList.add('pointer-events-none');
+        overlay.style.opacity = '0';
+        mobileMenu.classList.remove('active');
+
+        mobileMenu.addEventListener(
+          'transitionend',
+          () => {
+            if (!mobileMenu.classList.contains('active')) {
+              mobileMenu.classList.add('hidden');
+              document.body.classList.remove('overflow-hidden');
+            }
+          },
+          { once: true }
+        );
+      }
     }
 
     if (hamburgerMenu) {
