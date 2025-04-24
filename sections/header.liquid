@@ -25,188 +25,463 @@
     },
     {
       "type": "text",
-      "id": "marquee_text",
-      "label": "Marquee Text",
-      "default": "Scrolling Text"
+      "id": "optional_url_1_text",
+      "label": "Link 1",
+      "default": "Link 1"
+    },
+    {
+      "type": "url",
+      "id": "optional_url_1",
+      "label": "URL for Link 1",
+      "default": "/collections/all"
+    },
+    {
+      "type": "text",
+      "id": "optional_url_2_text",
+      "label": "Link 2",
+      "default": "Link 2"
+    },
+    {
+      "type": "url",
+      "id": "optional_url_2",
+      "label": "URL for Link 2",
+      "default": "/collections/all"
+    },
+    {
+      "type": "text",
+      "id": "scrolling_text",
+      "label": "Scrolling Text",
+      "default": "BlackBytte - Your One Stop Shop for Everything"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_sticky",
+      "label": "Enable sticky header",
+      "default": true
+    }
+  ],
+  "blocks": [
+    {
+      "type": "mega_menu_images",
+      "name": "Mega Menu Images",
+      "settings": [
+        {
+          "type": "text",
+          "id": "menu_item_name",
+          "label": "Menu Item Name",
+          "info": "Enter the exact name of the menu item"
+        },
+        {
+          "type": "image_picker",
+          "id": "image_1",
+          "label": "First Image"
+        },
+        {
+          "type": "url",
+          "id": "button_link_1",
+          "label": "First Button Link"
+        },
+        {
+          "type": "text",
+          "id": "button_text_1",
+          "label": "First Button Text",
+          "default": "Shop Now"
+        },
+        {
+          "type": "image_picker",
+          "id": "image_2",
+          "label": "Second Image"
+        },
+        {
+          "type": "url",
+          "id": "button_link_2",
+          "label": "Second Button Link"
+        },
+        {
+          "type": "text",
+          "id": "button_text_2",
+          "label": "Second Button Text",
+          "default": "Learn More"
+        }
+      ]
     }
   ]
 }
 {% endschema %}
 
 <header
-  class="w-full bg-white border-b shadow-sm !sticky top-0 z-50 color-{{ section.settings.color_scheme }} color-{{ section.settings.color_scheme }}-text"
-  style="position: static;"
+  class="header-main will-change-transform p-2 lg:px-0 z-99 bg-[var(--background)] transform-gpu {% unless section.settings.enable_sticky %}sticky-disabled{% endunless %}"
+  data-header-sticky
 >
-  <div class="w-full px-4 py-3 flex items-center justify-between bg-[var(--background)]">
+  <div class="relative w-full  flex items-center justify-between bg-[var(--background)]">
     <!-- Left: Logo -->
     <div class="flex items-center space-x-4">
       <a href="/">
         {% if section.settings.logo != blank %}
-          <img src="{{ section.settings.logo | image_url }}" width="100%" height="auto" alt="Logo" class="h-22 w-auto">
+          <img
+            src="{{ section.settings.logo | image_url }}"
+            width="100%"
+            height="auto"
+            alt="Logo"
+            class="h-22 max-w-60"
+          >
         {% else %}
-          <span class="text-3xl font-semibold">BlackBytte</span>
+          <span class="text-3xl lg:text-5xl font-semibold mx-5">BlackBytte</span>
         {% endif %}
       </a>
     </div>
     <!-- Right: Menu & Actions -->
-    <div class="flex items-center justify-end lg:justify-between w-full lg:px-6 mx-auto bg-[var(--header_background] ">
+    <div class=" flex flex-wrap items-center justify-end w-full bg-[var(--background)]">
       <!-- Desktop Menu -->
-      <nav class="hidden lg:!block w-full text-[var(--header_text)]">
-        <ul class="flex space-x-4 ">
-          {%- for link in section.settings.menu.links -%}
-            <li class="group">
-              {% if link.links.size > 0 %}
-                <a
-                  href="{{ link.url }}"
-                  class="cursor-pointer flex items-center py-2 px-4 group "
-                >
-                  {{ link.title }}
-                  {% if section.settings.dropdown_icon != blank %}
-                    <img
-                      src="{{ section.settings.dropdown_icon | image_url }}"
-                      alt="Dropdown Icon"
-                      width="100%"
-                      height="auto"
-                      class="w-12 h-6 object-contain transition-transform duration-300 group-hover:rotate-180"
-                    >
-                  {% else %}
-                    <span class="ml-2 transition-transform duration-300 group-hover:rotate-180">▼</span>
-                  {% endif %}
-                </a>
+      <nav class=" flex justify-end lg:justify-between items-center w-full text-[var(--header_text)]">
+        <!-- Left: Menu Items -->
+        <div class="menu-items hidden lg:!flex gap-2 flex-wrap w-2/3 0">
+          <ul class="flex space-x-1">
+            {%- for link in section.settings.menu.links -%}
+              <li class="group">
+                {% if link.links.size > 0 %}
+                  <a
+                    href="{{ link.url }}"
+                    class="cursor-pointer flex items-center py-2 px-4 group"
+                    aria-expanded="false"
+                    aria-controls="mega-menu-{{ forloop.index }}"
+                    aria-haspopup="true"
+                  >
+                    {{ link.title }}
+                    {% if section.settings.dropdown_icon != blank %}
+                      <img
+                        src="{{ section.settings.dropdown_icon | image_url }}"
+                        alt="Dropdown Icon"
+                        class="w-12 h-6 object-contain transition-transform duration-300 group-hover:rotate-180"
+                        width="100%"
+                        height="auto"
+                        aria-hidden="true"
+                      >
+                    {% else %}
+                      <span class="ml-2 transition-transform duration-300 group-hover:rotate-180">▼</span>
+                    {% endif %}
+                  </a>
 
-                <!-- Desktop Sub-Menu -->
-                <div class="absolute left-0 top-full w-screen z-50 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300">
-                  <div class="mx-auto bg-white shadow-lg px-4 py-6">
-                    <ul class="flex justify-start gap-8">
-                      {% for childlink in link.links %}
-                        <li>
-                          <a
-                            href="{{ childlink.url }}"
-                            class="block text-gray-800 hover:text-black font-bold text-3xl pb-2"
-                          >
-                            {{ childlink.title }}
-                          </a>
-                          {% if childlink.links.size > 0 %}
-                            <ul class="mt-2 space-y-1">
-                              {% for grandchildlink in childlink.links %}
-                                <li>
+                  <!-- sub-menu dropdown -->
+                  <div
+                    id="mega-menu-{{ forloop.index }}"
+                    role="region"
+                    aria-label="{{ link.title }} submenu"
+                    class="
+                      absolute top-[calc(100%-10px)] left-0 right-0 w-full z-50 pt-[10px]
+                      opacity-0 invisible pointer-events-none
+                      group-hover:opacity-100 group-hover:visible group-hover:pointer-events-auto
+                      transition-all duration-300 ease-out
+                    "
+                  >
+                    <div class="mx-auto p-6 bg-white flex">
+                      <ul class="flex justify-start gap-8 m-2 w-1/2">
+                        {% for childlink in link.links %}
+                          <li class="min-w-[100px] relative">
+                            <a
+                              href="{{ childlink.url }}"
+                              class="block text-gray-600 hover:text-black font-bold text-2xl mb-4"
+                            >
+                              {{ childlink.title }}
+                            </a>
+                            {% if childlink.links.size > 0 %}
+                              <ul class="mt-2 space-y-2">
+                                {% for grandchildlink in childlink.links %}
+                                  <li>
+                                    <a
+                                      href="{{ grandchildlink.url }}"
+                                      class="block text-xl hover:text-gray-600 text-black py-1"
+                                    >
+                                      {{ grandchildlink.title }}
+                                    </a>
+                                  </li>
+                                {% endfor %}
+                              </ul>
+                            {% endif %}
+                            <a
+                              href="{{childlink.url}}"
+                              class="block  my-4 text-gray-600 hover:text-black underline font-bold text-2xl "
+                            >
+                              SHOP ALL {{ childlink.title -}}
+                            </a>
+                          </li>
+                        {% endfor %}
+                      </ul>
+                      <!-- Mega Menu Images -->
+                      <div class="mega-menu-img flex items-center justify-end w-1/2 gap-8 px-4">
+                        {% for block in section.blocks %}
+                          {% if block.type == 'mega_menu_images' and block.settings.menu_item_name == link.title %}
+                            <!-- First Image -->
+                            {% if block.settings.image_1 != blank %}
+                              <div class="group/card w-[300px] cursor-pointer">
+                                <a href="{{ block.settings.button_link_1 }}">
+                                  <div class="relative block overflow-hidden">
+                                    <div class="aspect-[4/3] overflow-hidden bg-gray-100">
+                                      <img
+                                        src="{{ block.settings.image_1 | image_url }}"
+                                        alt="Shop now image 1"
+                                        class="w-full h-full object-cover group-hover/card:scale-110 transition-transform duration-700"
+                                        loading="lazy"
+                                        width="100%"
+                                        height="auto"
+                                      >
+                                      <div
+                                        class="absolute inset-0 bg-black/60 flex items-center justify-center translate-y-full group-hover/card:translate-y-0 transition-transform duration-300"
+                                      >
+                                        <span class="text-white text-2xl font-bold tracking-wider">SHOP NOW</span>
+                                      </div>
+                                    </div>
+                                  </div>
+                                </a>
+                                {% if block.settings.button_text_1 != blank %}
                                   <a
-                                    href="{{ grandchildlink.url }}"
-                                    class="block text-xl text-gray-700 underline py-2 hover:text-black"
+                                    href="{{ block.settings.button_link_1 }}"
+                                    class="block transition-all duration-300 ease-out"
+                                    style="transition-delay: 0ms"
                                   >
-                                    {{ grandchildlink.title }}
+                                    <div class="mt-4 flex items-center justify-between group-hover/card:text-pink-500 group-hover/card:font-bold">
+                                      <p class="text-2xl font-medium">{{ block.settings.button_text_1 }}</p>
+                                      <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M17 8l4 4m0 0l-4 4m4-4H3"/>
+                                      </svg>
+                                    </div>
                                   </a>
-                                </li>
-                              {% endfor %}
-                            </ul>
+                                {% endif %}
+                              </div>
+                            {% endif %}
+
+                            <!-- Second Image -->
+                            {% if block.settings.image_2 != blank %}
+                              <div class="group/card w-[300px] cursor-pointer">
+                                <a href="{{ block.settings.button_link_2 }}">
+                                  <div class="relative block overflow-hidden">
+                                    <div class="aspect-[4/3] overflow-hidden bg-gray-100">
+                                      <img
+                                        src="{{ block.settings.image_2 | image_url }}"
+                                        alt="Shop now image 2"
+                                        class="w-full h-full object-cover group-hover/card:scale-110 transition-transform duration-700"
+                                        loading="lazy"
+                                        width="100%"
+                                        height="auto"
+                                      >
+                                      <div
+                                        class="absolute inset-0 bg-black/60 flex items-center justify-center translate-y-full group-hover/card:translate-y-0 transition-transform duration-300"
+                                      >
+                                        <span class="text-white text-2xl font-bold tracking-wider">SHOP NOW</span>
+                                      </div>
+                                    </div>
+                                  </div>
+                                </a>
+                                {% if block.settings.button_text_2 != blank %}
+                                  <a
+                                    href="{{ block.settings.button_link_2 }}"
+                                    class="block group-hover/card:text-pink-500 group-hover/card:font-bold transition-all duration-300"
+                                  >
+                                    <div class="mt-4 flex items-center justify-between">
+                                      <p class="text-2xl font-medium">{{ block.settings.button_text_2 }}</p>
+                                      <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M17 8l4 4m0 0l-4 4m4-4H3"/>
+                                      </svg>
+                                    </div>
+                                  </a>
+                                {% endif %}
+                              </div>
+                            {% endif %}
                           {% endif %}
-                        </li>
-                      {% endfor %}
-                    </ul>
+                        {% endfor %}
+                      </div>
+                    </div>
+                    <!-- Horizontal scrollling text -->
+                    <div class="h-16 w-full border-y-2 bg-white overflow-hidden">
+                      <div class="scrolling-text-container relative flex items-center">
+                        <div class="scrolling-text-track flex whitespace-nowrap animate-loop-scroll">
+                          <div class="flex items-center space-x-4 mt-2">
+                            {%- for i in (1..20) -%}
+                              <span class="inline-block px-2 text-3xl font-bold text-black">
+                                {{- section.settings.scrolling_text -}}
+                              </span>
+                            {%- endfor -%}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
                   </div>
-                </div>
-              {% else %}
-                <a href="{{ link.url }}" class="py-2 px-4 hover:bg-gray-100 block">
-                  {{ link.title }}
-                </a>
-              {% endif %}
-            </li>
-          {%- endfor -%}
-        </ul>
-        <div class="relative">
-          <div id="bottom-bar" class="absolute bottom-0 left-0 w-full h-[2px] bg-gray-700">&nbsp;</div>
+                {% else %}
+                  <a href="{{ link.url }}" class="py-2 px-4 hover:bg-gray-100 block">
+                    {{ link.title }}
+                  </a>
+                {% endif %}
+              </li>
+            {%- endfor -%}
+          </ul>
+        </div>
+
+        <!-- Right: Actions -->
+        <div class="flex lg:!w-1/3  space-x-6 items-center justify-end ">
+          <!-- Top Row: Action Utilities -->
+
+          <!-- Search -->
+          <a href="/search" class="text-black hover:text-gray-700" aria-label="Search">
+            <svg class="size-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
+              <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
+            </svg>
+          </a>
+
+          <!-- Optional URLs -->
+          {% if section.settings.optional_url_1 %}
+            <a href="{{ section.settings.optional_url_1 }}" class="hidden lg:!block text-black hover:text-gray-700">
+              {{ section.settings.optional_url_1_text }}
+            </a>
+          {% endif %}
+          {% if section.settings.optional_url_2 %}
+            <a href="{{ section.settings.optional_url_2 }}" class="hidden lg:!block text-black hover:text-gray-700">
+              {{ section.settings.optional_url_2_text }}
+            </a>
+          {% endif %}
+
+          <!-- Login -->
+          <a
+            href="/account/login"
+            class="hidden lg:!inline-flex items-center gap-2 rounded-xl px-2 text-black hover:text-gray-700 "
+            aria-label="Login"
+          >
+            LOGIN
+          </a>
+
+          <!-- Cart -->
+          <a href="/cart" class="flex text-black hover:text-gray-700" aria-label="Cart">
+            CART
+            <span
+              class="ml-1 mt-1 bg-red-600 text-white text-xl w-8 h-8 flex items-center justify-center rounded-full"
+              aria-label="{{ cart.item_count }} items in cart"
+            >
+              {{ cart.item_count }}
+            </span>
+          </a>
+
+          <!-- Hamburger -->
+          <button
+            id="hamburger-menu"
+            class="lg:hidden text-black hover:text-gray-700"
+            aria-label="Menu"
+            aria-expanded="false"
+            aria-controls="mobile-menu"
+          >
+            <svg class="size-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
+            </svg>
+          </button>
         </div>
       </nav>
+      <div
+        class="
+          hidden lg:!block
+          bottom-bar
+          w-full h-[2px] bg-blue-700
+          mr-2
+        "
+      >
+        &nbsp
+      </div>
+    </div>
+  </div>
+  <div
+    class="
+          mobile-bottom-bar
+      lg:hidden
+      w-full h-[2px] bg-blue-700
+    "
+  >
+    &nbsp
+  </div>
+</header>
 
-      <!-- Actions -->
-      <div class="flex items-center space-x-6 ">
-        <!-- Search -->
-        <a href="/search" class="text-black hover:text-gray-700" aria-label="Search">
-          <svg class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5a7 7 0 100 14 7 7 0 000-14zm0 2a5 5 0 110 10 5 5 0 010-10zM16.293 16.293l4.414-4.414" />
-          </svg>
-        </a>
+<!-- Mobile Menu Overlay -->
+<div
+  id="menu-overlay"
+  class="fixed inset-0 bg-black opacity-0 pointer-events-none transition-opacity duration-300 z-[101]"
+>
+  &nbsp;
+</div>
 
-        <!-- Login -->
-        <a href="/account/login" class="text-black hover:text-gray-700" aria-label="Login">
-          <svg class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.121 17.804A4 4 0 018 16h8a4 4 0 012.879 1.804M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-          </svg>
-        </a>
-
-        <!-- Cart -->
-        <a href="/cart" class="relative text-black hover:text-gray-700" aria-label="Cart">
-          <svg class="w-8 h-8" fill="none" viewBox="0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-1.293 2.707a1 1 0 00.293 1.414l1.414 1.414A1 1 0 008 18h8a1 1 0 00.707-.293l1.414-1.414a1 1 0 00.293-1.414L17 13" />
-          </svg>
-          <span class="absolute -top-2 -right-2 bg-red-600 text-white text-xs w-5 h-5 flex items-center justify-center rounded-full">
-            {{ cart.item_count }}
+<!-- Mobile Menu -->
+<div
+  id="mobile-menu"
+  class="hidden lg:hidden w-[90vw] fixed top-0 right-0 z-[102] bg-[var(--background)] text-[var(--header_text)] flex"
+  style="transform: translateX(100%); transition: transform 0.3s ease-in-out;"
+>
+  <!-- Vertical Scrolling Text -->
+  <div class="h-[100vh] w-12  flex items-center justify-center overflow-hidden relative  border-r-2 border-black">
+    <div class="absolute w-[100vh] origin-center -rotate-90 ">
+      <div class="flex whitespace-nowrap animate-scroll ">
+        {%- for i in (1..15) -%}
+          <span class="inline-block px-4 text-2xl font-bold ">
+            {{- section.settings.scrolling_text -}}
           </span>
-        </a>
-
-        <!-- Hamburger Menu -->
-        <button id="hamburger-menu" class="lg:hidden text-black hover:text-gray-700" aria-label="Menu">
-          <svg class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
-          </svg>
-        </button>
+        {%- endfor -%}
       </div>
     </div>
   </div>
 
-  <!-- Mobile Menu -->
-  <div
-    id="mobile-menu"
-    class=" hidden lg:hidden  border-t border-gray-200 shadow-lg w-[85vw] fixed top-[-1px] right-0 z-50  bg-[var(--background)] text-[var(--header_text)] flex"
-  >
-    <div class="h-[100vh] w-10 bg-black text-white flex flex-col gap-4 items-center justify-center">
-      <span class="transform -rotate-90 origin-center text-2xl tracking-widest whitespace-nowrap"> FOLLOW US </span>
-    </div>
-    <div class="flex flex-1 flex-col justify-between">
-      <nav class="flex flex-col space-y-4 p-6 w-full justify-between">
-        <div class="upper-section">
-          <div class="flex items-center justify-end mb-8 ">
-            <button type="button" class=" bg-black text-white px-2" aria-label="Close Menu">Close</button>
-          </div>
-          {% if section.settings.menu.links != blank %}
-            {% for link in section.settings.menu.links %}
-              <div class="mobile-menu-item">
-                <div class="horizontal-line w-full h-1 bg-black my-2">&nbsp;</div>
-                <div class="!flex items-center justify-between">
-                  <a href="{{ link.url }}" class="block text-3xl text-black hover:underline font-medium py-2">
-                    {{ link.title }}
-                  </a>
-                  {% if link.links.size > 0 %}
-                    <button type="button" class="toggle-submenu focus:outline-none">
-                      {% if section.settings.dropdown_icon != blank %}
-                        <img
-                          src="{{ section.settings.dropdown_icon | image_url }}"
-                          alt="Dropdown Icon"
-                          width="100%"
-                          height="auto"
-                          class="w-8 h-4 object-contain transition-transform duration-300"
-                        >
-                      {% else %}
-                        <svg
-                          class="w-8 h-4 transition-transform duration-300"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
-                        </svg>
-                      {% endif %}
-                    </button>
-                  {% endif %}
-                </div>
+  <div class="flex flex-1 flex-col justify-between">
+    <nav class="flex flex-col space-y-4 p-6 w-full justify-between">
+      <div class="upper-section">
+        <div class="flex items-center justify-end mb-8 ">
+          <button type="button" class=" bg-black text-white px-2 rounded-xl" aria-label="Close Menu">Close</button>
+        </div>
+        {% if section.settings.menu.links != blank %}
+          {% for link in section.settings.menu.links %}
+            <div class="mobile-menu-item">
+              <div class="horizontal-line w-full h-0.5 bg-black my-2">&nbsp;</div>
+              <div class="!flex items-center justify-between">
+                <a href="{{ link.url }}" class="block text-3xl text-black hover:underline font-medium py-2">
+                  {{ link.title }}
+                </a>
                 {% if link.links.size > 0 %}
-                  <div class="ml-4 mt-2 hidden space-y-2 submenu">
+                  <button
+                    type="button"
+                    class="toggle-submenu focus:outline-none"
+                    aria-expanded="false"
+                    aria-controls="mobile-submenu-{{ forloop.index }}"
+                    aria-label="Toggle {{ link.title }} submenu"
+                  >
+                    {% if section.settings.dropdown_icon != blank %}
+                      <img
+                        src="{{ section.settings.dropdown_icon | image_url }}"
+                        alt="Dropdown Icon"
+                        width="100%"
+                        height="auto"
+                        class="w-8 h-8 object-contain transition-transform duration-300"
+                        aria-hidden="true"
+                      >
+                    {% else %}
+                      <svg
+                        class="w-8 h-8 transition-transform duration-300"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                        aria-hidden="true"
+                      >
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                      </svg>
+                    {% endif %}
+                  </button>
+                {% endif %}
+              </div>
+              {% if link.links.size > 0 %}
+                <div
+                  id="mobile-submenu-{{ forloop.index }}"
+                  role="region"
+                  aria-label="{{ link.title }} submenu"
+                  class="ml-4 mt-2 hidden space-y-2 submenu max-h-[0] overflow-y-auto overscroll-contain styled-scrollbar transition-all duration-300"
+                >
+                  <div class="pr-4">
                     {% for childlink in link.links %}
                       <a href="{{ childlink.url }}" class="block text-2xl text-gray-800 hover:text-black">
                         {{ childlink.title }}
                       </a>
                       {% if childlink.links.size > 0 %}
-                        <ul class="ml-4 space-y-1">
+                        <ul class="ml-4 space-y-1 mb-4">
                           {% for grandchildlink in childlink.links %}
                             <li>
                               <a
@@ -220,68 +495,432 @@
                         </ul>
                       {% endif %}
                     {% endfor %}
+
+                    <!-- Mobile Mega Menu Images -->
+                    {% for block in section.blocks %}
+                      {% if block.type == 'mega_menu_images' and block.settings.menu_item_name == link.title %}
+                        <div class="grid grid-cols-1 gap-4 mt-6">
+                          {% if block.settings.image_1 != blank %}
+                            <div class="group/card cursor-pointer">
+                              <a href="{{ block.settings.button_link_1 }}">
+                                <div class="relative block overflow-hidden">
+                                  <div class="aspect-[4/3] overflow-hidden bg-gray-100">
+                                    <img
+                                      src="{{ block.settings.image_1 | image_url }}"
+                                      alt="Shop now image 1"
+                                      class="w-full h-full object-cover group-hover/card:scale-110 transition-transform duration-700"
+                                      loading="lazy"
+                                      width="100%"
+                                      height="auto"
+                                    >
+                                    <div class="absolute inset-0 bg-black/60 flex items-center justify-center translate-y-full group-hover/card:translate-y-0 transition-transform duration-300">
+                                      <span class="text-white text-xl font-bold tracking-wider">SHOP NOW</span>
+                                    </div>
+                                  </div>
+                                </div>
+                              </a>
+                              <a
+                                href="{{ block.settings.button_link_1 }}"
+                                class="block mt-4 transition-all duration-300"
+                              >
+                                <div class="flex items-center justify-between group-hover/card:text-pink-500 group-hover/card:font-bold">
+                                  <p class="text-lg font-medium">{{ block.settings.button_text_1 }}</p>
+                                  <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M17 8l4 4m0 0l-4 4m4-4H3"/>
+                                  </svg>
+                                </div>
+                              </a>
+                            </div>
+                          {% endif %}
+
+                          {% if block.settings.image_2 != blank %}
+                            <div class="group/card cursor-pointer mt-4">
+                              <a href="{{ block.settings.button_link_2 }}">
+                                <div class="relative block overflow-hidden">
+                                  <div class="aspect-[4/3] overflow-hidden bg-gray-100">
+                                    <img
+                                      src="{{ block.settings.image_2 | image_url }}"
+                                      alt="Shop now image 2"
+                                      class="w-full h-full object-cover group-hover/card:scale-110 transition-transform duration-700"
+                                      loading="lazy"
+                                      width="100%"
+                                      height="auto"
+                                    >
+                                    <div class="absolute inset-0 bg-black/60 flex items-center justify-center translate-y-full group-hover/card:translate-y-0 transition-transform duration-300">
+                                      <span class="text-white text-xl font-bold tracking-wider">SHOP NOW</span>
+                                    </div>
+                                  </div>
+                                </div>
+                              </a>
+                              <a
+                                href="{{ block.settings.button_link_2 }}"
+                                class="block mt-4 transition-all duration-300"
+                              >
+                                <div class="flex items-center justify-between group-hover/card:text-pink-500 group-hover/card:font-bold">
+                                  <p class="text-lg font-medium">{{ block.settings.button_text_2 }}</p>
+                                  <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M17 8l4 4m0 0l-4 4m4-4H3"/>
+                                  </svg>
+                                </div>
+                              </a>
+                            </div>
+                          {% endif %}
+                        </div>
+                      {% endif %}
+                    {% endfor %}
                   </div>
-                {% endif %}
-              </div>
-            {% endfor %}
-          {% endif %}
-          <div class="horizontal-line w-full h-1 bg-black my-2">&nbsp;</div>
-        </div>
-      </nav>
+                </div>
+              {% endif %}
+            </div>
+          {% endfor %}
+        {% endif %}
+      </div>
+      <div class="horizontal-line w-full h-0.5 bg-black my-2 -mt-1">&nbsp;</div>
+    </nav>
 
-      <div class="flex flex-col w-full p-6 ">
-        <div class="horizontal-line w-full h-1 bg-black my-2">&nbsp;</div>
-        <div id="social-link-container" class="flex flex-wrap items-center  gap-4 m-4">
-          {% if settings.social_facebook_link %}
-            <a href="{{ settings.social_facebook_link }}" aria-label="Facebook" target="_blank" rel="noopener">
-              <svg class="w-8 h-8 fill-current text-black hover:text-blue-600" viewBox="0 0 24 24">
-                <path d="M22 12a10 10 0 10-11.5 9.9v-7h-2v-2.9h2v-2.2c0-2 1.2-3.1 3-3.1.9 0 1.8.1 1.8.1v2h-1c-1 0-1.3.6-1.3 1.2v1.9h2.3l-.4 2.9h-1.9v7A10 10 0 0022 12z"/>
-              </svg>
-            </a>
-          {% endif %}
+    <div class="flex flex-col w-full p-6 ">
+      <div class="optionalLinks flex flex-col gap-1 mb-4 font-semibold ">
+        {% if section.settings.optional_url_1 != blank %}
+          <a href="{{ section.settings.optional_url_1 }}" class="hover:underline">
+            {{ section.settings.optional_url_1_text }}
+          </a>
+        {% endif %}
 
-          {% if settings.social_instagram_link %}
-            <a href="{{ settings.social_instagram_link }}" aria-label="Instagram" target="_blank" rel="noopener">
-              <svg class="w-8 h-8 fill-current text-black hover:text-pink-600" viewBox="0 0 24 24">
-                <path d="M7 2C4.8 2 3 3.8 3 6v12c0 2.2 1.8 4 4 4h10c2.2 0 4-1.8 4-4V6c0-2.2-1.8-4-4-4H7zm10 2c1.1 0 2 .9 2 2v2h-2V6h-2V4h2zm-5 3c2.2 0 4 1.8 4 4s-1.8 4-4 4a4 4 0 110-8zm0 1.5a2.5 2.5 0 100 5 2.5 2.5 0 000-5zM5 6h2v2H5V6zm14 2v10c0 1.1-.9 2-2 2H7c-1.1 0-2-.9-2-2V8h2v2h2V8h6v2h2V8h2z"/>
-              </svg>
-            </a>
-          {% endif %}
+        {% if section.settings.optional_url_2 != blank %}
+          <a href="{{ section.settings.optional_url_2 }}" class="hover:underline">
+            {{ section.settings.optional_url_2_text }}
+          </a>
+        {% endif %}
 
-          {% if settings.social_twitter_link %}
-            <a href="{{ settings.social_twitter_link }}" aria-label="Twitter" target="_blank" rel="noopener">
-              <svg class="w-8 h-8 fill-current text-black hover:text-sky-500" viewBox="0 0 24 24">
-                <path d="M22.46 6c-.77.35-1.6.58-2.47.69a4.23 4.23 0 001.85-2.33 8.44 8.44 0 01-2.7 1.03 4.21 4.21 0 00-7.17 3.84 11.94 11.94 0 01-8.67-4.4 4.2 4.2 0 001.31 5.62 4.17 4.17 0 01-1.91-.53v.05a4.21 4.21 0 003.38 4.13c-.46.12-.95.17-1.45.17-.35 0-.7-.03-1.04-.1a4.22 4.22 0 003.93 2.92 8.47 8.47 0 01-6.24 1.74 11.95 11.95 0 006.46 1.9c7.75 0 11.99-6.42 11.99-11.99 0-.18-.01-.35-.02-.53A8.6 8.6 0 0024 4.56a8.43 8.43 0 01-2.54.7z"/>
-              </svg>
-            </a>
-          {% endif %}
-        </div>
+        <a
+          href="/account/login"
+          class="inline-flex items-center gap-2 bg-black text-white rounded-xl px-2 w-[30%]"
+          aria-label="Login"
+        >
+          LOGIN
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke-width="3.5"
+            stroke="currentColor"
+            class="size-8 "
+          >
+            <path stroke-linecap="round" stroke-linejoin="round" d="M17.25 8.25 21 12m0 0-3.75 3.75M21 12H3" />
+          </svg>
+        </a>
+      </div>
+      <div class="horizontal-line w-full h-0.5 bg-black">&nbsp;</div>
+      <div id="social-link-container" class="flex flex-wrap items-center justify-between gap-4 m-4">
+        {% if settings.social_facebook_link %}
+          <a href="{{ settings.social_facebook_link }}" aria-label="Facebook" target="_blank" rel="noopener">
+            <svg
+              class="h-10 w-10 hover:fill-current hover:text-sky-500"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2.5"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z" />
+            </svg>
+          </a>
+        {% endif %}
+
+        {% if settings.social_instagram_link %}
+          <a href="{{ settings.social_instagram_link }}" aria-label="Instagram" target="_blank" rel="noopener">
+            <svg
+              class="h-10 w-10 hover:text-pink-500"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2.5"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <rect x="2" y="2" width="20" height="20" rx="5" ry="5" />  <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />  <line x1="17.5" y1="6.5" x2="17.51" y2="6.5" />
+            </svg>
+          </a>
+        {% endif %}
+
+        {% if settings.social_youtube_link %}
+          <a href="{{ settings.social_youtube_link }}" aria-label="YouTube" target="_blank" rel="noopener">
+            <svg
+              class="h-10 w-10 hover:text-red-500"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2.5"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path d="M22.54 6.42a2.78 2.78 0 0 0-1.94-2C18.88 4 12 4 12 4s-6.88 0-8.6.46a2.78 2.78 0 0 0-1.94 2A29 29 0 0 0 1 11.75a29 29 0 0 0 .46 5.33A2.78 2.78 0 0 0 3.4 19c1.72.46 8.6.46 8.6.46s6.88 0 8.6-.46a2.78 2.78 0 0 0 1.94-2 29 29 0 0 0 .46-5.25 29 29 0 0 0-.46-5.33z" />  <polygon points="9.75 15.02 15.5 11.75 9.75 8.48 9.75 15.02" />
+            </svg>
+          </a>
+        {% endif %}
+        {% if settings.social_twitter_link %}
+          <a href="{{ settings.social_twitter_link }}" aria-label="Twitter" target="_blank" rel="noopener">
+            <svg
+              class="h-10 w-10 hover:fill-current hover:text-cyan-500"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2.5"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z" />
+            </svg>
+          </a>
+        {% endif %}
+        {% if settings.social_snapchat_link %}
+          <a href="{{ settings.social_snapchat_link }}" aria-label="Snapchat" target="_blank" rel="noopener">
+            <svg
+              class="h-10 w-10 hover:fill-current hover:text-yellow-500"
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              stroke-width="2.5"
+              stroke="currentColor"
+              fill="none"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path d="M16.882 7.842a4.882 4.882 0 0 0 -9.764 0c0 4.273-.213 6.409-4.118 8.118 2 .882 2 .882 3 3 3 0 4 2 6 2s3-2 6-2c1-2.118 1-2.118 3-3-3.906-1.709-4.118-3.845-4.118-8.118h0zM3 15.961c4-2.118 4-4.118 1-7.118m17 7.118c-4-2.118-4-4.118-1-7.118" />
+            </svg>
+          </a>
+        {% endif %}
       </div>
     </div>
   </div>
-</header>
+</div>
+
+<div class="header-offset" data-header-offset></div>
+
+<style>
+  @keyframes dropDown {
+    0% {
+      opacity: 0;
+      transform: translateY(-20px);
+      pointer-events: none;
+    }
+    1% {
+      opacity: 0;
+      transform: translateY(-20px);
+    }
+    100% {
+      opacity: 1;
+      transform: translateY(0);
+      pointer-events: auto;
+    }
+  }
+
+  @keyframes dropUp {
+    0% {
+      opacity: 1;
+      transform: translateY(0);
+      pointer-events: auto;
+    }
+    99% {
+      opacity: 0;
+      transform: translateY(-20px);
+    }
+    100% {
+      opacity: 0;
+      transform: translateY(-20px);
+      pointer-events: none;
+    }
+  }
+
+  .group:hover .absolute {
+    animation: dropDown 300ms ease-out forwards;
+  }
+
+  .group:not(:hover) .absolute {
+    animation: dropUp 300ms ease-out forwards;
+  }
+
+  @keyframes scroll {
+    0% {
+      transform: translateX(0);
+    }
+    100% {
+      transform: translateX(-50%);
+    }
+  }
+
+  .scrolling-text-container {
+    overflow: hidden;
+    width: 100%;
+  }
+
+  .scrolling-text-track {
+    will-change: transform;
+    animation: scroll 25s linear infinite;
+    width: fit-content;
+  }
+
+  .scrolling-text-track:hover {
+    animation-play-state: paused;
+  }
+
+  .header-main {
+    position: relative;
+    width: 100%;
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    transform: translateY(0);
+  }
+
+  .header-main.is-sticky {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    transform: translateY(0);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  }
+
+  .header-main.is-sticky.is-hidden {
+    transform: translateY(-100%);
+  }
+
+  .header-offset {
+    height: 0;
+    transition: height 0.3s ease;
+  }
+
+  .header-offset.is-active {
+    height: var(--header-height, 0px);
+  }
+
+  .sticky-disabled {
+    position: relative !important;
+    transform: none !important;
+  }
+
+  .sticky-disabled + .header-offset {
+    display: none !important;
+  }
+
+  /* Improve dropdown transitions */
+  .group > .absolute {
+    transition: all 300ms cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .group:hover > .absolute {
+    transition-delay: 50ms;
+  }
+
+  /* Mobile submenu scrollbar styling */
+  .submenu.styled-scrollbar {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(0, 0, 0, 0.3) transparent;
+  }
+
+  .submenu.styled-scrollbar::-webkit-scrollbar {
+    width: 4px;
+  }
+
+  .submenu.styled-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .submenu.styled-scrollbar::-webkit-scrollbar-thumb {
+    background-color: rgba(0, 0, 0, 0.3);
+    border-radius: 20px;
+  }
+
+  /* Mobile submenu animations */
+  .submenu {
+    transition: all 400ms cubic-bezier(0.4, 0, 0.2, 1);
+    will-change: opacity, height;
+    height: auto;
+    max-height: 0;
+  }
+
+  .submenu.show {
+    opacity: 1;
+    max-height: 50vh;
+  }
+
+  .submenu:not(.show) {
+    opacity: 0;
+    max-height: 0;
+  }
+
+  .submenu.hidden {
+    display: none;
+  }
+
+  .submenu:not(.hidden) {
+    display: block;
+  }
+
+  /* Add overlay transition */
+  #menu-overlay {
+    transition: opacity 0.3s ease;
+    will-change: opacity;
+  }
+
+  /* Mobile menu transitions */
+  #mobile-menu {
+    will-change: transform;
+    backface-visibility: hidden;
+  }
+
+  #mobile-menu.active {
+    transform: translateX(0) !important;
+  }
+
+  .animate-scroll {
+    animation: scroll 20s linear infinite;
+  }
+</style>
 
 <script>
   document.addEventListener('DOMContentLoaded', function () {
-    // Mobile Menu Toggle
     const hamburgerMenu = document.getElementById('hamburger-menu');
     const mobileMenu = document.getElementById('mobile-menu');
-    const closeButton = mobileMenu.querySelector('button[aria-label="Close Menu"]');
-    const overlay = document.createElement('div');
+    const closeButton = mobileMenu ? mobileMenu.querySelector('button[aria-label="Close Menu"]') : null;
+    const overlay = document.getElementById('menu-overlay');
 
-    overlay.className = 'fixed inset-0 bg-black bg-opacity-50 z-40 hidden';
-    overlay.id = 'menu-overlay';
-    document.body.appendChild(overlay);
-
-    // Toggle mobile menu visibility
     function toggleMobileMenu() {
-      mobileMenu.classList.toggle('hidden');
-      mobileMenu.classList.toggle('!flex');
-      overlay.classList.toggle('hidden');
-      document.body.classList.toggle('overflow-hidden');
+      if (!mobileMenu || !overlay) return;
+
+      const isOpening = mobileMenu.classList.contains('hidden');
+
+      if (isOpening) {
+        mobileMenu.classList.remove('hidden');
+        document.body.classList.add('overflow-hidden');
+
+        // Trigger layout recalc before animations
+        mobileMenu.offsetHeight;
+
+        requestAnimationFrame(() => {
+          overlay.classList.remove('pointer-events-none');
+          overlay.style.opacity = '0.5';
+          mobileMenu.classList.add('active');
+        });
+      } else {
+        overlay.classList.add('pointer-events-none');
+        overlay.style.opacity = '0';
+        mobileMenu.classList.remove('active');
+
+        mobileMenu.addEventListener(
+          'transitionend',
+          () => {
+            if (!mobileMenu.classList.contains('active')) {
+              mobileMenu.classList.add('hidden');
+              document.body.classList.remove('overflow-hidden');
+            }
+          },
+          { once: true }
+        );
+      }
     }
 
-    if (hamburgerMenu && mobileMenu) {
+    if (hamburgerMenu) {
       hamburgerMenu.addEventListener('click', toggleMobileMenu);
     }
 
@@ -289,98 +928,128 @@
       closeButton.addEventListener('click', toggleMobileMenu);
     }
 
-    overlay.addEventListener('click', toggleMobileMenu);
+    if (overlay) {
+      overlay.addEventListener('click', toggleMobileMenu);
+    }
 
     // Submenu Toggle for Mobile
     const submenuToggles = mobileMenu.querySelectorAll('.toggle-submenu');
-    submenuToggles.forEach((toggle) => {
-      toggle.addEventListener('click', function () {
-        const submenu = this.closest('.mobile-menu-item').querySelector('.submenu');
-        if (submenu) {
-          submenu.classList.toggle('hidden');
-          submenu.classList.toggle('block');
-        }
+    let activeSubmenu = null;
+    let isAnimating = false;
+
+    const closeSubmenu = (submenu, icon) => {
+      return new Promise((resolve) => {
+        submenu.classList.remove('show');
+        icon.style.transform = 'rotate(0)';
+
+        const handleTransitionEnd = () => {
+          submenu.classList.add('hidden');
+          submenu.removeEventListener('transitionend', handleTransitionEnd);
+          resolve();
+        };
+
+        submenu.addEventListener('transitionend', handleTransitionEnd);
       });
-    });
+    };
 
-    // nav-bottom-bar
-    const nav = document.querySelector('nav');
-    const navItems = document.querySelectorAll('nav > ul > li');
-    const bottomBar = document.getElementById('bottom-bar');
-    let activeMenuItem = null;
-    let hoverTimeout;
+    const openSubmenu = (submenu, icon) => {
+      return new Promise((resolve) => {
+        submenu.classList.remove('hidden');
+        submenu.offsetHeight;
 
-    function updateBottomBar(target) {
-      const rect = target.getBoundingClientRect();
-      const navRect = nav.getBoundingClientRect();
-      bottomBar.style.transition = 'width 0.3s ease, left 0.3s ease';
-      bottomBar.style.width = `${rect.width}px`;
-      bottomBar.style.left = `${rect.left - navRect.left}px`;
-    }
+        requestAnimationFrame(() => {
+          submenu.classList.add('show');
+          icon.style.transform = 'rotate(180deg)';
 
-    function resetBottomBar() {
-      if (!activeMenuItem) {
-        bottomBar.style.transition = 'width 0.3s ease, left 0.3s ease';
-        bottomBar.style.width = '100%';
-        bottomBar.style.left = '0';
-      }
-    }
-
-    navItems.forEach((li) => {
-      const link = li.querySelector('a');
-      const dropdown = li.querySelector('.absolute'); // submenu dropdown
-
-      li.addEventListener('mouseenter', () => {
-        clearTimeout(hoverTimeout);
-        updateBottomBar(link);
-      });
-
-      li.addEventListener('mouseleave', () => {
-        hoverTimeout = setTimeout(() => {
-          if (!activeMenuItem || activeMenuItem !== li) {
-            resetBottomBar();
-          }
-        }, 100);
-      });
-
-      link.addEventListener('click', (e) => {
-        const isParentWithDropdown = !!dropdown;
-        const isActive = li.classList.contains('active');
-
-        if (isParentWithDropdown) {
-          e.preventDefault();
-        }
-
-        document.querySelectorAll('nav > ul > li.active').forEach((item) => item.classList.remove('active'));
-
-        if (!isActive) {
-          li.classList.add('active');
-          activeMenuItem = li;
-          updateBottomBar(link);
-        } else {
-          activeMenuItem = null;
-          resetBottomBar();
-        }
-      });
-
-      if (dropdown) {
-        dropdown.addEventListener('mouseenter', () => clearTimeout(hoverTimeout));
-        dropdown.addEventListener('mouseleave', () => {
-          hoverTimeout = setTimeout(() => {
-            if (!activeMenuItem || activeMenuItem !== li) {
-              resetBottomBar();
-            }
-          }, 100);
+          submenu.addEventListener(
+            'transitionend',
+            () => {
+              resolve();
+            },
+            { once: true }
+          );
         });
-      }
+      });
+    };
+
+    submenuToggles.forEach((toggle) => {
+      toggle.addEventListener('click', async function () {
+        if (isAnimating) return;
+        isAnimating = true;
+
+        const submenu = this.closest('.mobile-menu-item').querySelector('.submenu');
+        const icon = this.querySelector('img, svg');
+
+        try {
+          if (activeSubmenu === submenu) {
+            await closeSubmenu(submenu, icon);
+            activeSubmenu = null;
+          } else {
+            const closePromise = activeSubmenu
+              ? closeSubmenu(
+                  activeSubmenu,
+                  activeSubmenu.closest('.mobile-menu-item').querySelector('.toggle-submenu img, .toggle-submenu svg')
+                )
+              : Promise.resolve();
+
+            await closePromise;
+            await openSubmenu(submenu, icon);
+            activeSubmenu = submenu;
+          }
+        } finally {
+          isAnimating = false;
+        }
+      });
     });
 
-    nav.addEventListener('mouseleave', () => {
-      if (!activeMenuItem) {
-        resetBottomBar();
-      }
-    });
+    // Sticky Header
+    const header = document.querySelector('[data-header-sticky]');
+    const headerOffset = document.querySelector('[data-header-offset]');
 
-    setTimeout(resetBottomBar, 0);
+    if (!header || !headerOffset || header.classList.contains('sticky-disabled')) return;
+
+    let lastScroll = 0;
+    let initialHeaderTop = header.offsetTop;
+    let isFixed = false;
+    let stickyEnabled = !header.classList.contains('sticky-disabled');
+
+    const setHeaderHeight = () => {
+      const height = header.offsetHeight;
+      document.documentElement.style.setProperty('--header-height', `${height}px`);
+      initialHeaderTop = header.offsetTop;
+    };
+
+    const handleScroll = () => {
+      if (!stickyEnabled) return;
+
+      const currentScroll = window.pageYOffset;
+
+      if (currentScroll <= initialHeaderTop) {
+        header.classList.remove('is-sticky', 'is-hidden');
+        headerOffset.classList.remove('is-active');
+        isFixed = false;
+        return;
+      }
+
+      if (!isFixed && currentScroll > initialHeaderTop) {
+        header.classList.add('is-sticky');
+        headerOffset.classList.add('is-active');
+        isFixed = true;
+      }
+
+      if (isFixed) {
+        if (currentScroll > lastScroll + 10) {
+          header.classList.add('is-hidden');
+        } else if (currentScroll < lastScroll - 10) {
+          header.classList.remove('is-hidden');
+        }
+      }
+
+      lastScroll = currentScroll;
+    };
+
+    setHeaderHeight();
+    window.addEventListener('resize', setHeaderHeight, { passive: true });
+    window.addEventListener('scroll', () => requestAnimationFrame(handleScroll), { passive: true });
   });
 </script>
