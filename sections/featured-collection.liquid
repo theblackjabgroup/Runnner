@@ -1,32 +1,48 @@
 <div class="featured-collection-page-width py-10">
   {% if section.settings.heading != blank %}
-    <h2 class="!text-9xl font-bold mb-4">{{ section.settings.heading }}</h2>
+    <h2 class="md:!text-9xl text-6xl font-bold mb-4">{{ section.settings.heading }}</h2>
   {% endif %}
 
   <div class="flex justify-end items-center mb-6">
     {% if section.settings.description != blank %}
-      <p class="text-4xl p-2 text-gray-700 mr-auto">{{ section.settings.description }}</p>
+      <p class="text-2xl md:text-4xl p-2 text-gray-700 mr-auto">{{ section.settings.description }}</p>
     {% endif %}
 
     {% if section.settings.collection %}
       <a
         href="{{ section.settings.collection.url }}"
-        class="shop-all-button text-base font-semibold py-2 px-4 border rounded bg-black text-white hover:bg-gray-800"
+        class="image-with-text-custom-button"
       >
-        {{ section.settings.button_text }}
+        <div class="image-with-text-button-text-container">
+          <div class="image-with-text-button-text">
+            {{ section.settings.button_text }}
+            <span class="image-with-text-button-arrow">
+              <svg width="28" height="36" viewBox="0 0 38 36" xmlns="http://www.w3.org/2000/svg" class="w-5 h-5">
+                <path fill="currentColor" d="M26.79,9.21A35.06,35.06,0,0,0,37,16.2v3.66a35.34,35.34,0,0,0-10.21,7A12.84,12.84,0,0,0,23.21,36H17.56q0-6.22,3-10a15.4,15.4,0,0,1,8.06-5.2V20.6H0V15.43H28.63v-.3A15.16,15.16,0,0,1,20.57,10q-3-3.77-3-10h5.65a13,13,0,0,0,.87,5A12.79,12.79,0,0,0,26.79,9.21Z"/>
+              </svg>
+            </span>
+          </div>
+          <div class="image-with-text-button-text-hover">
+            {{ section.settings.button_text }}
+            <span class="image-with-text-button-arrow">
+              <svg width="28" height="36" viewBox="0 0 38 36" xmlns="http://www.w3.org/2000/svg" class="w-5 h-5">
+                <path fill="currentColor" d="M26.79,9.21A35.06,35.06,0,0,0,37,16.2v3.66a35.34,35.34,0,0,0-10.21,7A12.84,12.84,0,0,0,23.21,36H17.56q0-6.22,3-10a15.4,15.4,0,0,1,8.06-5.2V20.6H0V15.43H28.63v-.3A15.16,15.16,0,0,1,20.57,10q-3-3.77-3-10h5.65a13,13,0,0,0,.87,5A12.79,12.79,0,0,0,26.79,9.21Z"/>
+              </svg>
+            </span>
+          </div>
+        </div>
       </a>
     {% endif %}
   </div>
 
   <hr class="border-gray-300 my-6">
 
-  <div class="flex gap-6">
-    <!-- Filters Section (Left Side) -->
-    <div class="filters-container w-1/4">
-      <div class="gender-filters flex flex-col gap-4">
+  <div class="flex flex-col md:flex-row gap-6">
+    <div class="filters-container w-full md:w-1/4 order-1 md:order-none mb-4 md:mb-0">
+      <div class="gender-filters flex flex-row md:flex-col flex-wrap gap-4">
         {% for block in section.blocks %}
           <button
-            class="filter-btn {% if forloop.first %}active{% endif %}"
+            class="filter-btn {% if forloop.first %}active{% endif %} w-auto md:w-full"
             data-filter="{{ block.settings.tag | downcase }}"
             aria-label="Filter by {{ block.settings.label }}"
             aria-pressed="{% if forloop.first %}true{% else %}false{% endif %}"
@@ -40,21 +56,19 @@
       </div>
     </div>
 
-    <!-- Products Section (Right Side) -->
-    <div class="products-container w-3/4">
+    <div class="products-container w-full md:w-3/4 order-2 md:order-none">
       {% if section.settings.collection %}
         <div class="slider-container relative">
           <div
             id="product-slider"
-            class="product-slider flex gap-6 cursor-grab overflow-x-auto custom-scrollbar"
+            class="product-slider flex gap-4 md:gap-6 cursor-grab overflow-x-auto custom-scrollbar"
           >
             {% for product in section.settings.collection.products %}
               <div
-                class="product-card flex-none w-64"
+                class="product-card flex-none w-[220px] md:w-[450px]"
                 data-tag="{% for tag in product.tags %}{{ tag | downcase }} {% endfor %}"
               >
                 <div class="product-image-wrapper relative group">
-                  <!-- SOLD OUT LABEL -->
                   {% unless product.available %}
                     <div class="absolute top-3 right-0 z-10">
                       <span class="inline-block rounded-xl px-4 text-[12px] tracking-wide font-medium bg-zinc-800 text-white">
@@ -72,11 +86,12 @@
                             alt="{{ product.title }}{% if forloop.index > 1 %} image {{ forloop.index }}{% endif %}"
                             class="w-full h-auto rounded product-image {% if forloop.first %}active{% else %}hidden{% endif %}"
                             data-index="{{ forloop.index0 }}"
+                            height="auto"
+                            width="auto"
                             data-product-id="{{ product.id }}"
                           >
                         {% endfor %}
 
-                        <!-- Navigation Arrows (only visible when multiple images) -->
                         <button
                           class="image-nav-arrow image-nav-prev"
                           data-product-id="{{ product.id }}"
@@ -102,12 +117,13 @@
                           src="{{ product.featured_image | img_url: '450x544', crop: 'center' }}"
                           alt="{{ product.title }}"
                           class="w-full h-auto rounded"
+                          height="auto"
+                          width="auto"
                         >
                       {% endif %}
                     </div>
                   </a>
 
-                  <!-- Add to Cart Button & Size Variants -->
                   <div class="product-cart-container absolute bottom-4 left-1/2 transform -translate-x-1/2 w-full px-4">
                     <div class="cart-options-wrapper relative">
                       {% assign has_size_variants = false %}
@@ -119,8 +135,7 @@
                         {% endfor %}
                       {% endunless %}
 
-                      <!-- Size variants container (positioned on top) -->
-                      {% if has_size_variants and product.available %}
+                      {% if has_size_variants %}
                         <div class="size-variants-container bg-white rounded p-2 mb-0 opacity-0 invisible">
                           {% for option in product.options_with_values %}
                             {% if option.name == 'Size' or option.name == 'size' %}
@@ -142,13 +157,18 @@
                                     {% endfor %}
 
                                     <button
-                                      class="size-option-btn p-5 bg-gray-200 text-s rounded size-animate {% if variant_available %}hover:bg-black hover:text-white{% else %}opacity-50 cursor-not-allowed{% endif %}"
+                                      class="size-option-btn p-5 bg-gray-200 text-s rounded size-animate {% unless variant_available %}unavailable-size{% endunless %}"
                                       {% if variant_available %}
                                         data-variant-id="{{ variant_id }}"
                                         data-product-id="{{ product.id }}"
+                                      {% else %}
+                                        data-waitlist="true"
+                                        data-product-id="{{ product.id }}"
+                                        data-product-title="{{ product.title | escape }}"
+                                        data-variant-size="{{ value }}"
                                       {% endif %}
                                       style="--animation-order: {{ forloop.index }}"
-                                      aria-label="Select size {{ value }}"
+                                      aria-label="Size {{ value }}{% unless variant_available %} - Sold Out{% endunless %}"
                                       {% unless variant_available %}
                                         aria-disabled="true"
                                       {% endunless %}
@@ -163,9 +183,7 @@
                         </div>
                       {% endif %}
 
-                      <!-- Button - Different based on availability -->
                       {% if product.available %}
-                        <!-- Regular add to cart button -->
                         <button
                           class="add-to-cart-btn w-90 bg-black text-white py-2 px-4 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-300"
                           data-product-id="{{ product.id }}"
@@ -183,12 +201,11 @@
                           Add to Cart
                         </button>
                       {% else %}
-                        <!-- Notify me button for sold out products -->
                         <button
                           class="notify-me-btn w-90 bg-black text-white py-2 px-4 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-300"
                           data-product-id="{{ product.id }}"
                           data-product-title="{{ product.title | escape }}"
-                          data-has-variants="true"
+                          data-has-variants="{% if has_size_variants %}true{% else %}false{% endif %}"
                           aria-label="Get notified when {{ product.title }} is back in stock"
                           aria-haspopup="dialog"
                         >
@@ -225,15 +242,12 @@
   </div>
 </div>
 
-<!-- Waitlist Modal Overlay -->
 <div
   id="waitlist-modal-overlay"
   class="fixed inset-0 z-50 bg-black/50 hidden items-center justify-center"
 >
-  <!-- Modal Container -->
-  <div class="bg-white !w-[50vw]  rounded p-10 shadow-lg mx-4">
-    <!-- Close Button -->
-    <div class="flex justify-end p-4">
+  <div class="bg-white !w-auto md:!w-[50vw] max-w-[90vw] rounded p-4 md:p-10 shadow-lg mx-4">
+    <div class="flex justify-end p-2 md:p-4">
       <button
         id="close-waitlist-modal"
         class="text-black hover:text-gray-700 font-medium"
@@ -243,17 +257,14 @@
       </button>
     </div>
 
-    <!-- Product Title -->
-    <h2 class="text-2xl font-bold mb-2" id="waitlist-product-title">PRODUCT TITLE</h2>
+    <h2 class="text-xl md:text-2xl font-bold mb-2" id="waitlist-product-title">PRODUCT TITLE</h2>
 
-    <!-- Product Variant -->
     <div class="text-gray-600 mb-4" id="waitlist-product-variant">XS / PORT</div>
 
-    <hr class="border-gray-300 mx-6">
+    <hr class="border-gray-300 mx-2 md:mx-6">
 
-    <!-- Waitlist Form -->
-    <div class="my-6">
-      <p class="font-medium mb-4">
+    <div class="my-4 md:my-6">
+      <p class="font-medium mb-4 text-sm md:text-base">
         Waitlist: Enter your email to get notified when this product becomes available again.
       </p>
 
@@ -262,11 +273,11 @@
           type="email"
           id="waitlist-email"
           placeholder="Your email"
-          class="flex-grow border border-gray-300 p-3 rounded"
+          class="flex-grow border border-gray-300 p-2 md:p-3 rounded text-sm md:text-base"
         >
         <button
           id="get-notified-btn"
-          class="bg-black text-white py-3 px-6 font-medium hover:bg-gray-800 rounded"
+          class="bg-black text-white py-2 md:py-3 px-4 md:px-6 font-medium hover:bg-gray-800 rounded text-sm md:text-base"
           aria-label="Submit waitlist request"
         >
           GET NOTIFIED
@@ -277,336 +288,499 @@
 </div>
 
 <style>
-                .featured-collection-page-width {
-                  margin: 0 10px;
-                  overflow-y: hidden;
-                }
+  .featured-collection-page-width {
+    margin: 0 10px;
+    overflow-y: hidden;
+  }
 
-                .gender-filters .filter-btn {
-                  padding: 0.5rem 1.2rem;
-                  border-bottom: 2px solid black;
-                  text-align: left;
-                  background: #fff;
-                  color: #000;
-                  text-decoration: none;
-                  transition: all 0.3s ease;
-                  cursor: pointer;
-                  display: flex;
-                  align-items: center;
-                  justify-content: space-between;
-                  gap: 8px;
-                  position: relative;
-                }
+  .gender-filters {
+    justify-content: center;
+  }
 
-                .svg-arrow-right {
-                  opacity: 0;
-                  transition: opacity 0.3s ease, transform 0.3s ease;
-                  transform: translateX(-4px);
-                }
-                .filter-btn:hover .svg-arrow-right,
-                .filter-btn.active .svg-arrow-right {
-                  opacity: 1;
-                  transform: translateX(0);
-                }
+  @media (min-width: 768px) {
+    .gender-filters {
+      justify-content: flex-start;
+    }
 
-                .gender-filters .filter-btn:hover,
-                .gender-filters .filter-btn.active {
-                  background: #000;
-                  color: #fff;
-                }
+    .filter-btn {
+      width: 100%;
+      justify-content: space-between;
+    }
+  }
 
-                .product-image-wrapper {
-                  position: relative;
-                  overflow: hidden;
-                }
+  .gender-filters .filter-btn {
+    padding: 0.5rem 1.2rem;
+    border-bottom: 2px solid black;
+    text-align: left;
+    background: #fff;
+    color: #000;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    position: relative;
+  }
 
-                .product-images-container {
-                  position: relative;
-                }
+  .svg-arrow-right {
+    opacity: 0;
+    transition: opacity 0.3s ease, transform 0.3s ease;
+    transform: translateX(-4px);
+  }
+  .filter-btn:hover .svg-arrow-right,
+  .filter-btn.active .svg-arrow-right {
+    opacity: 1;
+    transform: translateX(0);
+  }
 
-                .product-image {
-                  transition: opacity 0.3s ease;
-                }
+  .gender-filters .filter-btn:hover,
+  .gender-filters .filter-btn.active {
+    background: #000;
+    color: #fff;
+  }
 
-                .product-image.hidden {
-                  display: none;
-                }
+  .product-image-wrapper {
+    position: relative;
+    overflow: hidden;
+  }
 
-                .product-image.active {
-                  display: block;
-                }
+  .product-images-container {
+    position: relative;
+  }
 
-                /* Hover functionality to show second image */
-                .product-images-container:hover .product-image[data-index='0'] {
-                  display: none;
-                }
+  .product-image {
+    transition: opacity 0.3s ease;
+  }
 
-                .product-images-container:hover .product-image[data-index='1'] {
-                  display: block;
-                }
+  .product-image.hidden {
+    display: none;
+  }
 
-                /* Image Navigation Arrows */
-                .image-nav-arrow {
-                  position: absolute;
-                  top: 50%;
-                  transform: translateY(-50%);
-                  z-index: 15;
-                  background-color: rgba(255, 255, 255, 0.7);
-                  border-radius: 50%;
-                  width: 32px;
-                  height: 32px;
-                  display: flex;
-                  align-items: center;
-                  justify-content: center;
-                  opacity: 0;
-                  transition: opacity 0.3s ease, background-color 0.3s ease;
-                  cursor: pointer;
-                  border: none;
-                }
+  .product-image.active {
+    display: block;
+  }
 
-                .product-image-wrapper:hover .image-nav-arrow {
-                  opacity: 1;
-                }
+  .product-images-container:hover .product-image[data-index='0'] {
+    display: none;
+  }
 
-                .image-nav-arrow:hover {
-                  background-color: rgba(255, 255, 255, 0.9);
-                }
+  .product-images-container:hover .product-image[data-index='1'] {
+    display: block;
+  }
 
-                .image-nav-prev {
-                  left: 8px;
-                }
+  .image-nav-arrow {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 15;
+    background-color: rgba(255, 255, 255, 0.7);
+    border-radius: 50%;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.3s ease, background-color 0.3s ease;
+    cursor: pointer;
+    border: none;
+  }
 
-                .image-nav-next {
-                  right: 8px;
-                }
+  .product-image-wrapper:hover .image-nav-arrow {
+    opacity: 1;
+  }
 
-                .product-cart-container {
-                  z-index: 10;
-                  width: 90%;
-                }
+  .image-nav-arrow:hover {
+    background-color: rgba(255, 255, 255, 0.9);
+  }
 
-                .cart-options-wrapper {
-                  position: relative;
-                }
+  .image-nav-prev {
+    left: 8px;
+  }
 
-                .add-to-cart-btn,
-                .notify-me-btn {
-                  transition: all 0.3s ease;
-                  width: 100%;
-                  height: 40px;
-                  position: relative;
-                  z-index: 5;
-                }
+  .image-nav-next {
+    right: 8px;
+  }
 
-                .add-to-cart-btn:hover,
-                .notify-me-btn:hover {
-                  background-color: #333;
-                }
+  .product-cart-container {
+    z-index: 10;
+    width: 90%;
+  }
 
-                /* Size variants container - Updated positioning */
-                .size-variants-container {
-                  position: absolute;
-                  bottom: 0;
-                  left: 0;
-                  width: 100%;
-                  height: 100%;
-                  z-index: 10; /* Higher than add to cart button */
-                  transition: all 0.3s ease;
-                  transform: translateY(0);
-                  display: flex;
-                  justify-content: center;
-                  padding: 2px;
-                }
+  .cart-options-wrapper {
+    position: relative;
+  }
 
-                /* Size label styling */
-                .size-label-wrapper {
-                  display: flex;
-                  width: 100%;
-                  align-items: center;
-                }
+  .add-to-cart-btn,
+  .notify-me-btn {
+    transition: all 0.3s ease;
+    width: 100%;
+    height: 40px;
+    position: relative;
+    z-index: 5;
+  }
 
-                .size-label {
-                  margin-right: auto;
-                  font-weight: 600;
-                  color: #000;
-                }
+  .add-to-cart-btn:hover,
+  .notify-me-btn:hover {
+    background-color: #333;
+  }
 
-                /* Only show variants on hover if product has variants */
-                .product-cart-container:hover .size-variants-container,
-                .size-variants-container.active {
-                  opacity: 1 !important;
-                  visibility: visible !important;
-                  transform: translateY(0);
-                }
+  .size-variants-container {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 10;
+    transition: all 0.3s ease;
+    transform: translateY(0);
+    display: flex;
+    justify-content: center;
+    padding: 2px;
+  }
 
-                /* Only hide the add to cart button when size variants are shown */
-                .product-cart-container:hover .add-to-cart-btn[data-has-variants='true'] {
-                  opacity: 0 !important;
-                  visibility: hidden;
-                }
+  .size-label-wrapper {
+    display: flex;
+    width: 100%;
+    align-items: center;
+  }
 
-                /* Keep normal button hover state for products without variants */
-                .product-cart-container:hover .add-to-cart-btn[data-has-variants='false'],
-                .product-cart-container:hover .notify-me-btn {
-                  opacity: 1 !important;
-                  visibility: visible !important;
-                }
+  .size-label {
+    margin-right: auto;
+    font-weight: 600;
+    color: #000;
+  }
 
-                .size-option-btn {
-                  transition: all 0.2s ease;
-                  width:30px;
-                  border: 1px solid #000;
-                  padding: 2px;
-                }
+  .product-cart-container:hover .size-variants-container,
+  .size-variants-container.active {
+    opacity: 1 !important;
+    visibility: visible !important;
+    transform: translateY(0);
+  }
 
-                .size-option-btn:hover {
-                  transform: translateY(-2px);
-                }
+  .product-cart-container:hover .add-to-cart-btn[data-has-variants='true'] {
+    opacity: 0 !important;
+    visibility: hidden;
+  }
 
-                /* Size button animation styles */
-                .size-option-btn.size-animate {
-                  opacity: 0;
-                  transform: translateY(20px);
-                  animation: sizeAppear 0.3s ease forwards;
-                  animation-delay: calc(0.1s * var(--animation-order));
-                }
+  .product-cart-container:hover .add-to-cart-btn[data-has-variants='false'],
+  .product-cart-container:hover .notify-me-btn {
+    opacity: 1 !important;
+    visibility: visible !important;
+  }
 
-                @keyframes sizeAppear {
-                  0% {
-                    opacity: 0;
-                    transform: translateY(20px);
-                  }
-                  100% {
-                    opacity: 1;
-                    transform: translateY(0);
-                  }
-                }
+  .size-option-btn {
+    transition: all 0.2s ease;
+    width: 30px;
+    height: 30px;
+    border: 1px solid #000;
+    padding: 2px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
 
-                /* Reset animation when container is not visible */
-                .size-variants-container:not(.active) .size-option-btn {
-                  animation: none;
-                  opacity: 0;
-                  transform: translateY(20px);
-                }
+  .unavailable-size {
+    opacity: 1;
+    position: relative;
+    cursor: not-allowed;
+    border-color: #ccc;
+    color: #ccc;
+    overflow: hidden;
+  }
 
-                .size-variants-container.active .size-option-btn {
-                  animation: sizeAppear 0.3s ease forwards;
-                  animation-delay: calc(0.1s * var(--animation-order));
-                }
+  .unavailable-size::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: -2px;
+    right: -2px;
+    height: 1px;
+    background-color: #ccc;
+    transform: rotate(-45deg);
+  }
 
-                .shop-all-button {
-                  display: inline-block;
-                  text-align: center;
-                  padding: 2px 5px;
-                  font-weight: bold;
-                  background-color: #000;
-                  color: #fff;
-                  text-decoration: none;
-                  border-radius: 4px;
-                  transition: background-color 0.3s ease;
-                }
+  .size-option-btn:hover {
+    transform: translateY(-2px);
+  }
 
-                .shop-all-button:hover {
-                  background-color: #555;
-                }
+  .size-option-btn.size-animate {
+    opacity: 0;
+    transform: translateY(20px);
+    animation: sizeAppear 0.3s ease forwards;
+    animation-delay: calc(0.1s * var(--animation-order));
+  }
 
-                hr {
-                  border: 0;
-                  height: 1px;
-                  background: #ccc;
-                  margin: 10px 0;
-                }
+  @keyframes sizeAppear {
+    0% {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    100% {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
 
-                .slider-container {
-                  position: relative;
-                  width: 100%;
-                  overflow-x: auto;
-                  overflow-y: hidden;
-                  -webkit-overflow-scrolling: touch;
-                  height: auto;
-                  padding-bottom: 12px; /* Add padding to show scrollbar */
-                }
+  .size-variants-container:not(.active) .size-option-btn {
+    animation: none;
+    opacity: 0;
+    transform: translateY(20px);
+  }
 
-                .product-slider {
-                  display: flex;
-                  gap: 6px;
-                  overflow-y: hidden;
-                }
+  .size-variants-container.active .size-option-btn {
+    animation: sizeAppear 0.3s ease forwards;
+    animation-delay: calc(0.1s * var(--animation-order));
+  }
 
-                .product-card {
-                  flex-shrink: 0;
-                  width: 450px;
-                  height: auto;
-                  display: flex;
-                  flex-direction: column;
-                  justify-content: flex-start;
-                  overflow: hidden;
-                }
+  .shop-all-button {
+    display: inline-block;
+    text-align: center;
+    padding: 2px 5px;
+    font-weight: bold;
+    background-color: #000;
+    color: #fff;
+    text-decoration: none;
+    border-radius: 4px;
+    transition: background-color 0.3s ease;
+  }
 
-                /* Hide only vertical scrollbar */
-                .product-slider::-webkit-scrollbar:vertical {
-                  display: none;
-                }
+  .shop-all-button:hover {
+    background-color: #555;
+  }
 
-                .cursor-grab {
-                  cursor: grab;
-                }
+  hr {
+    border: 0;
+    height: 1px;
+    background: #ccc;
+    margin: 10px 0;
+  }
 
-                .cursor-grabbing {
-                  cursor: grabbing;
-                }
-    /* Main scrollbar styles */
+  .slider-container {
+    position: relative;
+    width: 100%;
+    overflow-x: auto;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+    height: auto;
+    padding-bottom: 12px;
+  }
+
+  .product-slider {
+    display: flex;
+    gap: 6px;
+    overflow-y: hidden;
+  }
+
+  .product-card {
+    flex-shrink: 0;
+    height: auto;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    overflow: hidden;
+  }
+
+  .product-slider::-webkit-scrollbar:vertical {
+    display: none;
+  }
+
+  .cursor-grab {
+    cursor: grab;
+  }
+
+  .cursor-grabbing {
+    cursor: grabbing;
+  }
+
   .custom-scrollbar::-webkit-scrollbar {
-    height: 5px; /* enough space for thumb to float */
+    height: 5px;
     background: transparent;
   }
 
-  /* Track: just a thin black line centered vertically */
   .custom-scrollbar::-webkit-scrollbar-track {
     background: transparent;
     padding-top: 10px;
     border-top: 1px solid black;
-    border-bottom: 1px solid transparent; /* optional, to visually center */
+    border-bottom: 1px solid transparent;
   }
 
-  /* Thumb: white rectangle floating above the black line */
   .custom-scrollbar::-webkit-scrollbar-thumb {
     background-color: black;
     height: 3px;
     border: none;
   }
 
-  /* Hide arrows */
   .custom-scrollbar::-webkit-scrollbar-button:single-button {
     display: none;
     width: 0;
     height: 0;
   }
 
+  #waitlist-modal-overlay {
+    transition: opacity 0.3s ease;
+  }
 
-                /* Waitlist Modal Styles */
-                #waitlist-modal-overlay {
-                  transition: opacity 0.3s ease;
-                }
+  #waitlist-modal-overlay.hidden {
+    opacity: 0;
+    pointer-events: none;
+  }
 
-                #waitlist-modal-overlay.hidden {
-                  opacity: 0;
-                  pointer-events: none;
-                }
+  #waitlist-product-title {
+    text-transform: uppercase;
+    font-weight: bold;
+  }
 
-                #waitlist-product-title {
-                  text-transform: uppercase;
-                  font-weight: bold;
-                }
+  #waitlist-email {
+    border: 1px solid #ccc;
+  }
 
-                #waitlist-email {
-                  border: 1px solid #ccc;
-                }
+  #get-notified-btn {
+    white-space: nowrap;
+    text-transform: uppercase;
+  }
 
-                #get-notified-btn {
-                  white-space: nowrap;
-                  text-transform: uppercase;
-                }
+  .product-cart-container:hover .notify-me-btn[data-has-variants='true'] {
+    opacity: 0 !important;
+    visibility: hidden !important;
+  }
+
+  .product-cart-container:hover .size-variants-container {
+    opacity: 1 !important;
+    visibility: visible !important;
+    transform: translateY(0);
+  }
+
+  .image-with-text-custom-button {
+    position: relative;
+    display: inline-block;
+    padding: 2px 7px;
+    background-color: white;
+    color: black;
+    border-radius: 4px;
+    overflow: hidden;
+    transition: background-color 0s, color 0s;
+  }
+
+  .image-with-text-custom-button:hover {
+    background-color: black;
+    color: white;
+    border: 2px solid white;
+  }
+
+  .image-with-text-button-text-container {
+    position: relative;
+    width: 100%;
+    overflow: hidden;
+  }
+
+  .image-with-text-button-text {
+    display: flex;
+    align-items: center;
+    font-size: 24px;
+    line-height: 1;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    transition: transform 0.7s ease;
+  }
+
+  .image-with-text-custom-button:hover .image-with-text-button-text {
+    transform: translateX(-100%);
+  }
+
+  .image-with-text-button-text-hover {
+    position: absolute;
+    top: 0;
+    left: 0;
+    display: flex;
+    align-items: center;
+    font-size: 24px;
+    line-height: 1;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    transform: translateX(100%);
+    transition: transform 0.7s ease;
+  }
+
+  .image-with-text-custom-button:hover .image-with-text-button-text-hover {
+    transform: translateX(0);
+  }
+
+  .image-with-text-custom-button:not(:hover) .image-with-text-button-text,
+  .image-with-text-custom-button:not(:hover) .image-with-text-button-text-hover {
+    transition: none;
+  }
+
+  .image-with-text-button-arrow {
+    margin-left: 28px;
+  }
+
+  @media (max-width: 768px) {
+    .product-details h3 {
+      font-size: 12px !important;
+      line-height: 1.4;
+    }
+
+    .product-details span {
+      font-size: 12px !important;
+    }
+
+    .filter-btn {
+      padding: 0.5rem 1rem;
+      font-size: 0.9rem;
+    }
+
+    .size-option-btn {
+      width: 28px;
+      height: 28px;
+      font-size: 0.8rem;
+    }
+
+    .size-label {
+      font-size: 0.9rem;
+    }
+
+    .add-to-cart-btn,
+    .notify-me-btn {
+      font-size: 0.9rem;
+      height: 36px;
+    }
+
+    .image-with-text-button-text,
+    .image-with-text-button-text-hover {
+      font-size: 18px;
+    }
+
+    .image-with-text-button-arrow {
+      margin-left: 12px;
+    }
+
+    .product-cart-container,
+    .size-variants-container,
+    .add-to-cart-btn,
+    .notify-me-btn {
+      display: none !important;
+    }
+
+    .product-card {
+      position: relative;
+    }
+
+    .product-card .product-image-link {
+      display: block;
+      width: 100%;
+    }
+
+    .image-nav-arrow {
+      display: none;
+    }
+
+    #waitlist-modal-overlay {
+      display: none !important;
+    }
+  }
 </style>
 
 <script>
@@ -791,6 +965,14 @@
     const addToCartButtons = document.querySelectorAll('.add-to-cart-btn');
     const notifyMeButtons = document.querySelectorAll('.notify-me-btn');
 
+    // Waitlist Modal Functionality
+    const waitlistModal = document.getElementById('waitlist-modal-overlay');
+    const closeModalBtn = document.getElementById('close-waitlist-modal');
+    const waitlistProductTitle = document.getElementById('waitlist-product-title');
+    const waitlistProductVariant = document.getElementById('waitlist-product-variant');
+    const waitlistEmail = document.getElementById('waitlist-email');
+    const getNotifiedBtn = document.getElementById('get-notified-btn');
+
     // Size option button click handler
     sizeOptionButtons.forEach((button) => {
       button.addEventListener('click', (e) => {
@@ -799,33 +981,18 @@
 
         const variantId = button.getAttribute('data-variant-id');
         const productId = button.getAttribute('data-product-id');
+        const isWaitlist = button.getAttribute('data-waitlist');
+
+        if (isWaitlist) {
+          openWaitlistModal(
+            button.getAttribute('data-product-title'),
+            button.getAttribute('data-variant-size'),
+            productId
+          );
+          return;
+        }
 
         if (variantId) {
-          // Add the selected variant to cart
-          addToCart(variantId, 1, productId);
-
-          // Visual feedback for selection
-          const sizeContainer = button.closest('.size-options-wrapper');
-          sizeContainer.querySelectorAll('.size-option-btn').forEach((btn) => {
-            btn.classList.remove('bg-black', 'text-white');
-          });
-          button.classList.add('bg-black', 'text-white');
-        }
-      });
-    });
-
-    // Direct add to cart for products with only default variant
-    addToCartButtons.forEach((button) => {
-      button.addEventListener('click', (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-
-        const productId = button.getAttribute('data-product-id');
-        const variantId = button.getAttribute('data-variant-id');
-        const hasVariants = button.getAttribute('data-has-variants') === 'true';
-
-        // Only add to cart if it has a variant ID (meaning it's a product with no size options)
-        if (variantId && !hasVariants) {
           addToCart(variantId, 1, productId);
         }
       });
@@ -837,164 +1004,130 @@
         e.preventDefault();
         e.stopPropagation();
 
-        const productId = button.getAttribute('data-product-id');
-        // Add this inside your existing DOMContentLoaded event listener
-        // Waitlist Modal Functionality
-        const waitlistModal = document.getElementById('waitlist-modal-overlay');
-        const closeModalBtn = document.getElementById('close-waitlist-modal');
-        const waitlistProductTitle = document.getElementById('waitlist-product-title');
-        const waitlistProductVariant = document.getElementById('waitlist-product-variant');
-        const waitlistEmail = document.getElementById('waitlist-email');
-        const getNotifiedBtn = document.getElementById('get-notified-btn');
-
-        // Open modal when clicking "Notify Me" buttons
-        notifyMeButtons.forEach((button) => {
-          button.addEventListener('click', (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-
-            const productId = button.getAttribute('data-product-id');
-            const productTitle = button.getAttribute('data-product-title');
-
-            // Set the product information in the modal
-            waitlistProductTitle.textContent = productTitle;
-
-            // For products with variants, you might want to show the selected variant
-            // For now, we'll hide this element if there's no variant information
-            waitlistProductVariant.style.display = 'none';
-
-            // Show the modal
-            waitlistModal.classList.remove('hidden');
-            waitlistModal.style.display = 'flex';
-
-            // Store the product ID for submission
-            getNotifiedBtn.setAttribute('data-product-id', productId);
-          });
-        });
-
-        // Close modal when clicking the close button
-        closeModalBtn.addEventListener('click', () => {
-          waitlistModal.classList.add('hidden');
-          setTimeout(() => {
-            waitlistModal.style.display = 'none';
-          }, 300); // Match the transition duration
-        });
-
-        // Close modal when clicking outside the modal content
-        waitlistModal.addEventListener('click', (e) => {
-          if (e.target === waitlistModal) {
-            closeModalBtn.click();
-          }
-        });
-
-        // Handle the form submission
-        getNotifiedBtn.addEventListener('click', () => {
-          const email = waitlistEmail.value.trim();
-          const productId = getNotifiedBtn.getAttribute('data-product-id');
-
-          // Validate email
-          if (!email || !/\S+@\S+\.\S+/.test(email)) {
-            waitlistEmail.style.borderColor = 'red';
-            return;
-          }
-
-          // Reset validation
-          waitlistEmail.style.borderColor = '';
-
-          // Submit the waitlist request
-          submitWaitlistRequest(email, productId);
-        });
-
-        function submitWaitlistRequest(email, productId) {
-          getNotifiedBtn.textContent = 'Submitting...';
-          getNotifiedBtn.disabled = true;
-
-          fetch('/api/waitlist/subscribe', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-              email: email,
-              productId: productId,
-            }),
-          })
-            .then((response) => {
-              waitlistEmail.value = '';
-              getNotifiedBtn.textContent = 'Thank you!';
-
-              setTimeout(() => {
-                closeModalBtn.click();
-
-                setTimeout(() => {
-                  getNotifiedBtn.textContent = 'GET NOTIFIED';
-                  getNotifiedBtn.disabled = false;
-                }, 300);
-              }, 1500);
-            })
-            .catch((error) => {
-              console.error('Error submitting waitlist request:', error);
-              getNotifiedBtn.textContent = 'Error. Try again';
-              getNotifiedBtn.disabled = false;
-            });
-        }
-        setTimeout(() => {
-          button.textContent = 'Notify Me When In Stock';
-        }, 2000);
-
-        console.log('Notify requested for product ID:', productId);
+        openWaitlistModal(button.getAttribute('data-product-title'), null, button.getAttribute('data-product-id'));
       });
+    });
+
+    // Helper function to open waitlist modal
+    function openWaitlistModal(productTitle, variantSize, productId) {
+      waitlistProductTitle.textContent = productTitle;
+
+      if (variantSize) {
+        waitlistProductVariant.textContent = `Size: ${variantSize}`;
+        waitlistProductVariant.style.display = 'block';
+      } else {
+        waitlistProductVariant.style.display = 'none';
+      }
+
+      // Show modal
+      waitlistModal.classList.remove('hidden');
+      waitlistModal.style.display = 'flex';
+
+      // Store data for submission
+      getNotifiedBtn.setAttribute('data-product-id', productId);
+      if (variantSize) {
+        getNotifiedBtn.setAttribute('data-variant-size', variantSize);
+      } else {
+        getNotifiedBtn.removeAttribute('data-variant-size');
+      }
+    }
+
+    // Close modal when clicking the close button
+    closeModalBtn.addEventListener('click', () => {
+      waitlistModal.classList.add('hidden');
+      setTimeout(() => {
+        waitlistModal.style.display = 'none';
+        // Reset form
+        waitlistEmail.value = '';
+        waitlistEmail.style.borderColor = '';
+      }, 300);
+    });
+
+    // Close modal when clicking outside
+    waitlistModal.addEventListener('click', (e) => {
+      if (e.target === waitlistModal) {
+        closeModalBtn.click();
+      }
+    });
+
+    // Handle the waitlist form submission
+    getNotifiedBtn.addEventListener('click', () => {
+      const email = waitlistEmail.value.trim();
+      const productId = getNotifiedBtn.getAttribute('data-product-id');
+      const variantSize = getNotifiedBtn.getAttribute('data-variant-size');
+
+      // Validate email
+      if (!email || !/\S+@\S+\.\S+/.test(email)) {
+        waitlistEmail.style.borderColor = 'red';
+        return;
+      }
+
+      // Reset validation
+      waitlistEmail.style.borderColor = '';
+      getNotifiedBtn.textContent = 'Submitting...';
+      getNotifiedBtn.disabled = true;
+
+      // Submit the waitlist request
+      fetch('/api/waitlist/subscribe', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email: email,
+          productId: productId,
+          variantSize: variantSize,
+        }),
+      })
+        .then((response) => {
+          waitlistEmail.value = '';
+          getNotifiedBtn.textContent = 'Thank you!';
+
+          setTimeout(() => {
+            closeModalBtn.click();
+            setTimeout(() => {
+              getNotifiedBtn.textContent = 'GET NOTIFIED';
+              getNotifiedBtn.disabled = false;
+            }, 300);
+          }, 1500);
+        })
+        .catch((error) => {
+          console.error('Error submitting waitlist request:', error);
+          getNotifiedBtn.textContent = 'Error. Try again';
+          getNotifiedBtn.disabled = false;
+        });
     });
 
     // Function to add product to cart
     function addToCart(variantId, quantity, productId) {
-      // Create the item data
       const formData = {
-        items: [
-          {
-            id: variantId,
-            quantity: quantity,
-          },
-        ],
+        items: [{ id: variantId, quantity: quantity }],
       };
 
-      // Add loading state to relevant buttons
-      const productCard = document
-        .querySelector(`.product-card [data-product-id="${productId}"]`)
-        .closest('.product-card');
-      const addButton = productCard.querySelector('.add-to-cart-btn');
+      // Find the specific add to cart button for this product
+      const addButton = document.querySelector(`.add-to-cart-btn[data-product-id="${productId}"]`);
+      if (!addButton) return;
+
       addButton.textContent = 'Adding...';
       addButton.disabled = true;
 
       // Make the Ajax request to add to cart
       fetch('/cart/add.js', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData),
       })
         .then((response) => response.json())
         .then((data) => {
-          // Update UI to show success
           addButton.textContent = 'Added!';
-
-          // Reset after a delay
           setTimeout(() => {
             addButton.textContent = 'Add to Cart';
             addButton.disabled = false;
           }, 2000);
-
-          // Optional: Update mini cart or show cart drawer
-          // updateMiniCart();
-
-          console.log('Added to cart:', data);
         })
         .catch((error) => {
           console.error('Error adding to cart:', error);
           addButton.textContent = 'Error';
-
-          // Reset after a delay
           setTimeout(() => {
             addButton.textContent = 'Add to Cart';
             addButton.disabled = false;
@@ -1002,10 +1135,28 @@
         });
     }
 
+    // Direct add to cart for products with only default variant
+    addToCartButtons.forEach((button) => {
+      button.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+
+        const productId = button.getAttribute('data-product-id');
+        const variantId = button.getAttribute('data-variant-id');
+        const hasVariants = button.getAttribute('data-has-variants') === 'true';
+
+        // Only proceed if it's a product without size variants
+        if (variantId && !hasVariants) {
+          // Find the closest product card for this button
+          addToCart(variantId, 1, productId);
+        }
+      });
+    });
+
     // Add animation reset when hiding size variants
     function resetSizeButtonAnimations(container) {
       const buttons = container.querySelectorAll('.size-option-btn');
-      buttons.forEach(button => {
+      buttons.forEach((button) => {
         button.style.animation = 'none';
         button.offsetHeight; // Trigger reflow
         button.style.animation = null;
@@ -1013,7 +1164,7 @@
     }
 
     // Update product hover handler
-    document.querySelectorAll('.product-cart-container').forEach(container => {
+    document.querySelectorAll('.product-cart-container').forEach((container) => {
       const sizeContainer = container.querySelector('.size-variants-container');
 
       container.addEventListener('mouseenter', () => {
