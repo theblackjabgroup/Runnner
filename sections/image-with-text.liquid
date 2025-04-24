@@ -191,6 +191,9 @@
       width: 100%;
       max-width: calc({{ section.settings.content_width }}% + 2rem);
       padding: {{ section.settings.content_padding }}px;
+      display: flex;
+      flex-direction: column;
+      height: 100%;
     }
 
     @media (max-width: 749px) {
@@ -227,6 +230,42 @@
       .image-with-text-button-text-hover {
         transition: none !important;
       }
+    }
+
+    /* New styles for dual headings */
+    .dual-heading-container {
+      width: 100%;
+    }
+
+    .dual-heading-top {
+      margin-bottom: 20px;
+    }
+
+    .dual-heading-bottom {
+      margin-top: 20px;
+    }
+
+    .content-wrapper-flex {
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      width: 100%;
+    }
+
+    .content-flex-top {
+      justify-content: flex-start;
+    }
+
+    .content-flex-bottom {
+      justify-content: flex-end;
+    }
+
+    .content-flex-center {
+      justify-content: center;
+    }
+
+    .content-flex-space-between {
+      justify-content: space-between;
     }
 {%- endstyle -%}
 
@@ -319,85 +358,131 @@
         {% if section.settings.text_alignment == 'center' %}text-center{% elsif section.settings.text_alignment == 'right' %}text-right{% else %}text-left{% endif %}
       "
     >
-      {% for block in section.blocks %}
-        {% case block.type %}
-          {% when 'heading' %}
-            {% assign heading_class = '' %}
-            {% if block.settings.heading_size == 'small' %}
-              {% assign heading_class = 'image-with-text-heading-size-small' %}
-            {% elsif block.settings.heading_size == 'medium' %}
-              {% assign heading_class = 'image-with-text-heading-size-medium' %}
-            {% elsif block.settings.heading_size == 'large' %}
-              {% assign heading_class = 'image-with-text-heading-size-large' %}
-            {% endif %}
-
-            <h2
-              id="Heading-{{ section.id }}-{{ forloop.index }}"
-              class="image-with-text-heading mb-4 {{ heading_class }} {% if section.settings.enable_text_animation %}letter-animation{% endif %}"
-              style="color:{{ block.settings.text_color }};"
-            >
-              {{ block.settings.heading }}
-            </h2>
-          {% when 'text' %}
-            <div
-              id="TextContent-{{ section.id }}-{{ forloop.index }}"
-              class="image-with-text-text-content mb-6"
-              style="color: {{ block.settings.text_color }};"
-            >
-              {% if section.settings.enable_text_animation %}
-                {{ block.settings.text | replace: '<p>', '<p class="letter-animation">' }}
-              {% else %}
-                {{ block.settings.text }}
+      <div class="content-wrapper-flex content-flex-{{ section.settings.vertical_content_position }}">
+        {% for block in section.blocks %}
+          {% case block.type %}
+            {% when 'heading' %}
+              {% assign heading_class = '' %}
+              {% if block.settings.heading_size == 'small' %}
+                {% assign heading_class = 'image-with-text-heading-size-small' %}
+              {% elsif block.settings.heading_size == 'medium' %}
+                {% assign heading_class = 'image-with-text-heading-size-medium' %}
+              {% elsif block.settings.heading_size == 'large' %}
+                {% assign heading_class = 'image-with-text-heading-size-large' %}
               {% endif %}
-            </div>
-          {% when 'button' %}
-            <div class="image-with-text-button-container color-{{ section.settings.color_scheme }} {% if section.settings.text_alignment == 'center' %}text-center{% elsif section.settings.text_alignment == 'right' %}text-right{% else %}text-left{% endif %}">
-              <a
-                href="{{ block.settings.button_link }}"
-                class="image-with-text-custom-button"
-                id="Button-{{ section.id }}-{{ forloop.index }}"
-                aria-label="{{ block.settings.button_label | escape }}"
-                role="button"
-                tabindex="0"
+
+              <h2
+                id="Heading-{{ section.id }}-{{ forloop.index }}"
+                class="image-with-text-heading mb-4 {{ heading_class }} {% if section.settings.enable_text_animation %}letter-animation{% endif %}"
+                style="color:{{ block.settings.text_color }};"
               >
-                <div class="image-with-text-button-text-container color-{{ section.settings.color_scheme }}">
-                  <div class="image-with-text-button-text color-{{ section.settings.color_scheme }}">
-                    {{ block.settings.button_label | escape }}
-                    {% if block.settings.show_button_arrow %}
-                      <span class="image-with-text-button-arrow" aria-hidden="true">
-                        <svg
-                          width="28"
-                          height="36"
-                          viewBox="0 0 38 36"
-                          xmlns="http://www.w3.org/2000/svg"
-                          class="w-5 h-5"
-                        >
-                          <path fill="currentColor" d="M26.79,9.21A35.06,35.06,0,0,0,37,16.2v3.66a35.34,35.34,0,0,0-10.21,7A12.84,12.84,0,0,0,23.21,36H17.56q0-6.22,3-10a15.4,15.4,0,0,1,8.06-5.2V20.6H0V15.43H28.63v-.3A15.16,15.16,0,0,1,20.57,10q-3-3.77-3-10h5.65a13,13,0,0,0,.87,5A12.79,12.79,0,0,0,26.79,9.21Z"></path>
-                        </svg>
-                      </span>
-                    {% endif %}
+                {{ block.settings.heading }}
+              </h2>
+            {% when 'text' %}
+              <div
+                id="TextContent-{{ section.id }}-{{ forloop.index }}"
+                class="image-with-text-text-content mb-6"
+                style="color: {{ block.settings.text_color }};"
+              >
+                {% if section.settings.enable_text_animation %}
+                  {{ block.settings.text | replace: '<p>', '<p class="letter-animation">' }}
+                {% else %}
+                  {{ block.settings.text }}
+                {% endif %}
+              </div>
+            {% when 'dual_headings' %}
+              <div class="dual-heading-container">
+                {% if block.settings.top_heading != blank %}
+                  {% assign top_heading_class = '' %}
+                  {% if block.settings.top_heading_size == 'small' %}
+                    {% assign top_heading_class = 'image-with-text-heading-size-small' %}
+                  {% elsif block.settings.top_heading_size == 'medium' %}
+                    {% assign top_heading_class = 'image-with-text-heading-size-medium' %}
+                  {% elsif block.settings.top_heading_size == 'large' %}
+                    {% assign top_heading_class = 'image-with-text-heading-size-large' %}
+                  {% endif %}
+
+                  <div class="dual-heading-top {% if block.settings.top_alignment == 'center' %}text-center{% elsif block.settings.top_alignment == 'right' %}text-right{% else %}text-left{% endif %}">
+                    <h2
+                      id="TopHeading-{{ section.id }}-{{ forloop.index }}"
+                      class="image-with-text-heading {{ top_heading_class }} {% if section.settings.enable_text_animation %}letter-animation{% endif %}"
+                      style="color:{{ block.settings.top_text_color }};"
+                    >
+                      {{ block.settings.top_heading }}
+                    </h2>
                   </div>
-                  <div class="image-with-text-button-text-hover">
-                    {{ block.settings.button_label | escape }}
-                    {% if block.settings.show_button_arrow %}
-                      <span class="image-with-text-button-arrow" aria-hidden="true">
-                        <svg
-                          width="28"
-                          height="36"
-                          viewBox="0 0 38 36"
-                          xmlns="http://www.w3.org/2000/svg"
-                          class="w-5 h-5"
-                        >
-                          <path fill="currentColor" d="M26.79,9.21A35.06,35.06,0,0,0,37,16.2v3.66a35.34,35.34,0,0,0-10.21,7A12.84,12.84,0,0,0,23.21,36H17.56q0-6.22,3-10a15.4,15.4,0,0,1,8.06-5.2V20.6H0V15.43H28.63v-.3A15.16,15.16,0,0,1,20.57,10q-3-3.77-3-10h5.65a13,13,0,0,0,.87,5A12.79,12.79,0,0,0,26.79,9.21Z"></path>
-                        </svg>
-                      </span>
-                    {% endif %}
+                {% endif %}
+
+                {% if block.settings.bottom_heading != blank %}
+                  {% assign bottom_heading_class = '' %}
+                  {% if block.settings.bottom_heading_size == 'small' %}
+                    {% assign bottom_heading_class = 'image-with-text-heading-size-small' %}
+                  {% elsif block.settings.bottom_heading_size == 'medium' %}
+                    {% assign bottom_heading_class = 'image-with-text-heading-size-medium' %}
+                  {% elsif block.settings.bottom_heading_size == 'large' %}
+                    {% assign bottom_heading_class = 'image-with-text-heading-size-large' %}
+                  {% endif %}
+
+                  <div class="dual-heading-bottom {% if block.settings.bottom_alignment == 'center' %}text-center{% elsif block.settings.bottom_alignment == 'right' %}text-right{% else %}text-left{% endif %}">
+                    <h2
+                      id="BottomHeading-{{ section.id }}-{{ forloop.index }}"
+                      class="image-with-text-heading {{ bottom_heading_class }} {% if section.settings.enable_text_animation %}letter-animation{% endif %}"
+                      style="color:{{ block.settings.bottom_text_color }};"
+                    >
+                      {{ block.settings.bottom_heading }}
+                    </h2>
                   </div>
-                </div>
-              </a>
-            </div>
-        {% endcase %}
-      {% endfor %}
+                {% endif %}
+              </div>
+            {% when 'button' %}
+              <div class="image-with-text-button-container color-{{ section.settings.color_scheme }} {% if section.settings.text_alignment == 'center' %}text-center{% elsif section.settings.text_alignment == 'right' %}text-right{% else %}text-left{% endif %}">
+                <a
+                  href="{{ block.settings.button_link }}"
+                  class="image-with-text-custom-button"
+                  id="Button-{{ section.id }}-{{ forloop.index }}"
+                  aria-label="{{ block.settings.button_label | escape }}"
+                  role="button"
+                  tabindex="0"
+                >
+                  <div class="image-with-text-button-text-container color-{{ section.settings.color_scheme }}">
+                    <div class="image-with-text-button-text color-{{ section.settings.color_scheme }}">
+                      {{ block.settings.button_label | escape }}
+                      {% if block.settings.show_button_arrow %}
+                        <span class="image-with-text-button-arrow" aria-hidden="true">
+                          <svg
+                            width="28"
+                            height="36"
+                            viewBox="0 0 38 36"
+                            xmlns="http://www.w3.org/2000/svg"
+                            class="w-5 h-5"
+                          >
+                            <path fill="currentColor" d="M26.79,9.21A35.06,35.06,0,0,0,37,16.2v3.66a35.34,35.34,0,0,0-10.21,7A12.84,12.84,0,0,0,23.21,36H17.56q0-6.22,3-10a15.4,15.4,0,0,1,8.06-5.2V20.6H0V15.43H28.63v-.3A15.16,15.16,0,0,1,20.57,10q-3-3.77-3-10h5.65a13,13,0,0,0,.87,5A12.79,12.79,0,0,0,26.79,9.21Z"></path>
+                          </svg>
+                        </span>
+                      {% endif %}
+                    </div>
+                    <div class="image-with-text-button-text-hover">
+                      {{ block.settings.button_label | escape }}
+                      {% if block.settings.show_button_arrow %}
+                        <span class="image-with-text-button-arrow" aria-hidden="true">
+                          <svg
+                            width="28"
+                            height="36"
+                            viewBox="0 0 38 36"
+                            xmlns="http://www.w3.org/2000/svg"
+                            class="w-5 h-5"
+                          >
+                            <path fill="currentColor" d="M26.79,9.21A35.06,35.06,0,0,0,37,16.2v3.66a35.34,35.34,0,0,0-10.21,7A12.84,12.84,0,0,0,23.21,36H17.56q0-6.22,3-10a15.4,15.4,0,0,1,8.06-5.2V20.6H0V15.43H28.63v-.3A15.16,15.16,0,0,1,20.57,10q-3-3.77-3-10h5.65a13,13,0,0,0,.87,5A12.79,12.79,0,0,0,26.79,9.21Z"></path>
+                          </svg>
+                        </span>
+                      {% endif %}
+                    </div>
+                  </div>
+                </a>
+              </div>
+          {% endcase %}
+        {% endfor %}
+      </div>
     </div>
   </div>
 </section>
@@ -693,6 +778,31 @@ document.addEventListener('DOMContentLoaded', function() {
       "default": "center"
     },
     {
+      "type": "select",
+      "id": "vertical_content_position",
+      "label": "Content vertical layout",
+      "options": [
+        {
+          "value": "top",
+          "label": "Top"
+        },
+        {
+          "value": "center",
+          "label": "Center"
+        },
+        {
+          "value": "bottom",
+          "label": "Bottom"
+        },
+        {
+          "value": "space-between",
+          "label": "Space between"
+        }
+      ],
+      "default": "center",
+      "info": "Controls how the content blocks are vertically arranged"
+    },
+    {
       "type": "range",
       "id": "content_width",
       "min": 30,
@@ -843,6 +953,7 @@ document.addEventListener('DOMContentLoaded', function() {
       "settings": {
         "horizontal_position": "center",
         "vertical_position": "center",
+        "vertical_content_position": "space-between",
         "text_alignment": "center",
         "enable_text_animation": true,
         "enable_button_animation": true,
