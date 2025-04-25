@@ -5,11 +5,10 @@
         id="promo-close"
         class="absolute top-2 right-2 md:top-4 md:right-4 text-4xl font-bold text-gray-700 hover:text-black z-10"
         aria-label="Close popup"
+        onclick="hidePromo()"
       >&times;</button>
-
       <div class="popup-container bg-white rounded-lg overflow-hidden shadow-xl h-full md:h-[500px]">
         <div class="flex flex-col-reverse md:flex-row w-full h-full">
-
           <!-- Text Section -->
           <div class="w-full md:w-1/2 flex items-center justify-center p-4 md:p-6 bg-white">
             <div class="w-full max-w-md text-center">
@@ -32,12 +31,12 @@
               <button
                 id="get-access"
                 class="w-full bg-black text-white py-2 rounded-md hover:bg-black-900 transition duration-200"
+                onclick="hidePromo()"
               >
                 {{ section.settings.btn }}
               </button>
             </div>
           </div>
-
           <!-- Image Section -->
           <div class="w-full md:w-1/2 aspect-[4/3] md:aspect-auto">
             {% if section.settings.image != blank %}
@@ -53,25 +52,80 @@
               </div>
             {% endif %}
           </div>
-
         </div>
       </div>
     </div>
   </div>
 </div>
 <script>
+  // Timer variable to track the reappear timeout
+  let reappearTimer;
+  
+  // Configuration (in milliseconds)
+  const REAPPEAR_DELAY = {{ section.settings.reappear_delay | default: 30 }} * 1000; // Time before popup reappears after being closed
+  const INITIAL_DELAY = {{ section.settings.initial_delay | default: 1 }} * 1000;  // Time before popup first appears
+  
+  // Show the popup
   function showPromo() {
     document.getElementById('promo-overlay').classList.remove('hidden');
+    console.log('Popup shown');
   }
-  document.addEventListener('DOMContentLoaded', () => {
-    const overlay = document.getElementById('promo-overlay');
-    showPromo();
-    document.getElementById('get-access').addEventListener('click', () => {
-      overlay.classList.add('hidden');
-    });
-    document.getElementById('promo-close').addEventListener('click', () => {
-      overlay.classList.add('hidden');
-    });
+  
+  // Hide the popup and set a timer for it to reappear
+  function hidePromo() {
+    document.getElementById('promo-overlay').classList.add('hidden');
+    console.log('Popup hidden');
+    
+    // Clear any existing timer
+    clearTimeout(reappearTimer);
+    
+    // Set a new timer for the popup to reappear
+    reappearTimer = setTimeout(function() {
+      console.log('Reappear timer triggered');
+      showPromo();
+    }, REAPPEAR_DELAY);
+  }
+  
+  // Fix for theme editor - ensures popup remains enabled
+  document.addEventListener('shopify:section:load', function(event) {
+    if (event.detail.sectionId.includes('popup')) {
+      // Clear any existing timer
+      clearTimeout(reappearTimer);
+      
+      // Show the popup after a brief delay (to ensure the section is fully loaded)
+      setTimeout(showPromo, 500);
+      
+      // Re-attach event listeners
+      attachEventListeners();
+    }
+  });
+  
+  // Attach event listeners to buttons
+  function attachEventListeners() {
+    // Handle close button click
+    const closeButton = document.getElementById('promo-close');
+    if (closeButton) {
+      closeButton.addEventListener('click', function() {
+        hidePromo();
+      });
+    }
+    
+    // Handle "Get Access" button click
+    const getAccessButton = document.getElementById('get-access');
+    if (getAccessButton) {
+      getAccessButton.addEventListener('click', function() {
+        hidePromo();
+      });
+    }
+  }
+  
+  // When the DOM is fully loaded
+  document.addEventListener('DOMContentLoaded', function() {
+    // Attach event listeners
+    attachEventListeners();
+    
+    // Show the popup after the initial delay
+    setTimeout(showPromo, INITIAL_DELAY);
   });
 </script>
 {% schema %}
@@ -106,6 +160,24 @@
       "type": "image_picker",
       "id": "image",
       "label": "Image to be displayed"
+    },
+    {
+      "type": "range",
+      "id": "initial_delay",
+      "min": 0,
+      "max": 10,
+      "step": 1,
+      "default": 1,
+      "label": "Initial delay before popup appears (seconds)"
+    },
+    {
+      "type": "range",
+      "id": "reappear_delay",
+      "min": 5,
+      "max": 60,
+      "step": 5,
+      "default": 30,
+      "label": "Time before popup reappears after closing (seconds)"
     }
   ],
   "presets": [
