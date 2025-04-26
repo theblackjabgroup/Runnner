@@ -1,254 +1,226 @@
-{{ 'component-newsletter.css' | asset_url | stylesheet_tag }}
+<div class="bg-black text-white px-8" style="padding: {{ section.settings.padding }}px 0; margin-bottom: {{ section.settings.margin_bottom }}px;">
+  <div class="flex flex-col md:flex-row items-center justify-between gap-6 md:gap-12" id="mainContainer">
+    
+    <!-- Text content with fixed width to prevent affecting layout -->
+<div class="text-center md:text-left text-white ml-8 md:w-1/2 flex-shrink-0">
+  <h2 style="all: unset; font-size: 50px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; color: white; display: block; margin: 0; white-space: normal; word-break: break-word; line-height: 1.1; margin-left: 20px;">
+    {{ section.settings.heading }}
+  </h2>
+  <p style="font-size: 35px; margin-top: 4px; color: white; word-break: break-word; overflow-wrap: break-word; max-width: 100%; margin-left: 20px;">
+    {{ section.settings.subheading }}
+  </p>
+</div>
 
-<div class="email-signup-section {% if section.settings.color_scheme != blank %}color-{{ section.settings.color_scheme }}{% endif %}" style="background-color: {{ section.settings.background_color }}; color: {{ section.settings.text_color }};">
-  <form id="email-signup-form" class="email-signup-container" novalidate>
-    <!-- Hidden accessibility heading -->
-    <div class="visually-hidden" id="newsletter-heading">Newsletter signup</div>
-    <input type="hidden" name="form_type" value="customer" />
-    <input type="hidden" name="utf8" value="✓" />
-    <input type="hidden" name="contact[tags]" value="newsletter" />
+    <!-- Form Container with fixed width -->
+<div id="formContainer" class="w-full md:w-1/2 md:pr-8">
+  <form id="email-signup-form" class="flex flex-col gap-6 w-[95%] mx-auto">
+    <div class="form-fields-container relative">
+      <input
+        type="email"
+        id="email-input"
+        placeholder="EMAIL"
+        class="w-full px-4 text-[50px] text-left text-white bg-black border border-white placeholder-gray-400 focus:outline-none rounded-lg leading-none py-0"
+        style="height: 80px; line-height: 70px; padding-top: 0; padding-bottom: 0;"
+      />
+    </div>
     
-    <div class="message-container" style="display: none;" role="status" aria-live="polite"></div>
-    
-    <div class="form-fields-container">
-      {% for block in section.blocks %}
-        {% case block.type %}
-          {% when 'email_input' %}
-            <div class="input-wrapper">
-              <label for="newsletter-email" class="visually-hidden">{{ block.settings.email_placeholder }}</label>
-              <input 
-                type="email" 
-                id="newsletter-email"
-                name="contact[email]" 
-                class="email-input" 
-                placeholder="{{ block.settings.email_placeholder }}" 
-                aria-required="true"
-                aria-describedby="newsletter-error"
-                required 
-                {{ block.shopify_attributes }}
-              >
-              <div id="newsletter-error" class="visually-hidden" aria-live="assertive"></div>
-            </div>
-          {% when 'signup_button' %}
-            <button 
-              type="submit" 
-              class="signup-button" 
-              style="background-color: {{ section.settings.button_color }}; color: {{ section.settings.button_text_color }};" 
-              {{ block.shopify_attributes }}
-              aria-label="{{ block.settings.button_text }}"
-            >
-              <span class="arrow-icon" aria-hidden="true">→</span>
-              <span>{{ block.settings.button_text }}</span>
-            </button>
-        {% endcase %}
-      {% endfor %}
+    <div class="flex justify-end w-full">
+      <button
+        type="submit"
+        id="submitButton"
+        class="w-full bg-red-600 text-white text-[50px] font-bold px-6 flex items-center justify-between hover:bg-red-700 transition-colors rounded-lg"
+        style="height: 80px; line-height: 70px; padding-top: 0; padding-bottom: 0;"
+      >
+        <span class="text-[50px]">→</span>
+        <span id="buttonText">{{ section.settings.button_text }}</span>
+        <span id="loadingSpinner" class="hidden">
+          <svg class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+          </svg>
+        </span>
+      </button>
     </div>
   </form>
 </div>
+  </div>
+
+</div>
 
 <style>
-  /* Accessibility styles */
-  .visually-hidden {
-    position: absolute !important;
-    width: 1px !important;
-    height: 1px !important;
-    padding: 0 !important;
-    margin: -1px !important;
-    overflow: hidden !important;
-    clip: rect(0, 0, 0, 0) !important;
-    white-space: nowrap !important;
-    border: 0 !important;
+  /* Red border style for empty submission */
+  #email-input.error-state {
+    border-color: #dc2626 !important;
+    border-width: 2px !important;
+  }
+  /* Remove default focus styling */
+  #email-input:focus {
+    outline: none !important;
+    box-shadow: none !important;
   }
   
-  /* Focus styles for keyboard navigation */
-  .email-input:focus,
-  .signup-button:focus {
-    outline: 2px solid #007bff;
-    outline-offset: 2px;
-  }
-  
-  /* Error styling */
-  .email-input.error {
-    border-color: #ff0000;
-    border-width: 2px;
-  }
-  
-  #newsletter-error:not(.visually-hidden) {
-    color: #ff0000;
-    font-size: 0.85em;
-    margin-top: 0.25em;
-  }
-  
-  /* Loading state for button */
-  .signup-button.loading {
-    opacity: 0.7;
-    cursor: wait;
-  }
-  
-  /* Ensure messages are visible */
-  .message-container.error-message {
-    color: #ff0000;
-    border: 1px solid #ff0000;
-    background-color: rgba(255, 0, 0, 0.1);
-    padding: 0.5em;
-  }
-  
-  .message-container.success-message {
-    color: #28a745;
-    border: 1px solid #28a745;
-    background-color: rgba(40, 167, 69, 0.1);
-    padding: 0.5em;
+  /* Make sure text container doesn't grow beyond allocated space */
+  @media (min-width: 768px) {
+    #mainContainer {
+      align-items: flex-start;
+    }
   }
 </style>
 
 <script>
   document.addEventListener('DOMContentLoaded', function() {
     const emailSignupForm = document.getElementById('email-signup-form');
-    const emailInput = document.querySelector('.email-input');
-    const signupButton = document.querySelector('.signup-button');
-    const messageContainer = document.querySelector('.message-container');
-    const formFieldsContainer = document.querySelector('.form-fields-container');
-    const newsletterError = document.getElementById('newsletter-error');
     
-    function validateEmail(email) {
-      const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      return re.test(email);
-    }
-    
-    function showMessage(message, isError = false) {
-      messageContainer.textContent = message;
-      messageContainer.classList.remove('success-message', 'error-message');
-      messageContainer.classList.add(isError ? 'error-message' : 'success-message');
-      messageContainer.style.display = 'block';
+    if (emailSignupForm) {
+      const emailInput = document.getElementById('email-input');
+      const submitButton = document.getElementById('submitButton');
+      const buttonText = document.getElementById('buttonText');
+      const loadingSpinner = document.getElementById('loadingSpinner');
+      const formContainer = document.getElementById('formContainer');
+      const mainContainer = document.getElementById('mainContainer');
       
-      // Make sure screen readers announce the message
-      setTimeout(() => {
-        messageContainer.focus();
-      }, 100);
-    }
-    
-    function showInputError(message) {
-      emailInput.classList.add('error');
-      newsletterError.textContent = message;
-      newsletterError.classList.remove('visually-hidden');
-    }
-    
-    function clearInputError() {
-      emailInput.classList.remove('error');
-      newsletterError.textContent = '';
-      newsletterError.classList.add('visually-hidden');
-    }
-    
-    // Add keyboard support for input validation
-    emailInput.addEventListener('keydown', function(e) {
-      if (e.key === 'Enter') {
+      // Flag to track if submission is in progress
+      let isSubmitting = false;
+      
+      // Check if the input is empty on page load and add the empty class if it is
+      if (!emailInput.value.trim()) {
+        emailInput.classList.add('empty');
+      }
+      
+      // Monitor input changes to add/remove error state class
+      emailInput.addEventListener('input', function() {
+        if (this.value.trim()) {
+          // Remove error state when user starts typing
+          this.classList.remove('error-state');
+          this.classList.remove('empty');
+        }
+      });
+      
+      function validateEmail(email) {
+        const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        return re.test(email);
+      }
+      
+      function showSuccessMessage() {
+        // For success message, create a nice success display
+        // Remove form and create success message
+        if (formContainer) {
+          formContainer.style.display = 'none';
+        }
+        
+        // Create success message container
+        const successMessageElement = document.createElement('div');
+        successMessageElement.className = 'w-full';
+        
+        // Create inner container
+        const innerContainer = document.createElement('div');
+        innerContainer.className = 'rounded-lg p-8 text-center';
+        
+        // Create checkmark icon
+        const svgElement = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+        svgElement.setAttribute('class', 'h-16 w-16 mx-auto text-green-500 mb-4');
+        svgElement.setAttribute('fill', 'none');
+        svgElement.setAttribute('viewBox', '0 0 24 24');
+        svgElement.setAttribute('stroke', 'currentColor');
+        
+        const pathElement = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+        pathElement.setAttribute('stroke-linecap', 'round');
+        pathElement.setAttribute('stroke-linejoin', 'round');
+        pathElement.setAttribute('stroke-width', '2');
+        pathElement.setAttribute('d', 'M5 13l4 4L19 7');
+        
+        svgElement.appendChild(pathElement);
+        
+        // Create thank you heading
+        const heading = document.createElement('h3');
+        heading.className = 'text-4xl font-bold text-white mb-4';
+        heading.textContent = 'Thank You!';
+        
+        // Create success message text
+        const paragraph = document.createElement('p');
+        paragraph.className = 'text-2xl text-gray-300';
+        paragraph.textContent = 'You\'ve been successfully subscribed to our notifications.';
+        
+        // Append all elements
+        innerContainer.appendChild(svgElement);
+        innerContainer.appendChild(heading);
+        innerContainer.appendChild(paragraph);
+        successMessageElement.appendChild(innerContainer);
+        
+        // Add to main container
+        mainContainer.appendChild(successMessageElement);
+      }
+      
+      // Function to simulate API call (replace with actual API call)
+      function submitEmail(email) {
+        return new Promise((resolve) => {
+          // Simulate API delay (2 seconds)
+          setTimeout(() => {
+            resolve({ success: true });
+          }, 2000);
+        });
+      }
+      
+      // Form submission handler
+      emailSignupForm.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        // Prevent multiple submissions
+        if (isSubmitting) return;
+        
         const email = emailInput.value.trim();
         
+        // Show red border if empty and add error-state class
         if (!email) {
-          e.preventDefault();
-          showInputError('Please enter your email address');
+          emailInput.classList.add('empty');
+          emailInput.classList.add('error-state');
+          emailInput.focus();
           return;
         }
         
         if (!validateEmail(email)) {
-          e.preventDefault();
-          showInputError('Please enter a valid email address');
+          emailInput.classList.add('error-state');
+          emailInput.focus();
           return;
         }
-      }
-    });
-    
-    // Clear error when user starts typing again
-    emailInput.addEventListener('input', function() {
-      clearInputError();
-    });
-    
-    // Focus management for keyboard navigation
-    messageContainer.setAttribute('tabindex', '-1');
-    
-    emailSignupForm.addEventListener('submit', function(e) {
-      e.preventDefault();
-      
-      const email = emailInput.value.trim();
-      
-      if (!email) {
-        showInputError('Please enter your email address');
-        emailInput.focus(); // Set focus to input for keyboard users
-        return;
-      }
-      
-      if (!validateEmail(email)) {
-        showInputError('Please enter a valid email address');
-        emailInput.focus(); // Set focus to input for keyboard users
-        return;
-      }
-      
-      // Clear any previous errors
-      clearInputError();
-      
-      // Disable button during submission
-      signupButton.disabled = true;
-      signupButton.classList.add('loading');
-      signupButton.setAttribute('aria-busy', 'true');
-      
-      const formData = new FormData(emailSignupForm);
-      
-      // Use fetch API to submit the form without page navigation
-      fetch('/contact#contact_form', {
-        method: 'POST',
-        body: formData,
-        headers: {
-          'X-Requested-With': 'XMLHttpRequest'
-        }
-      })
-      .then(response => {
-        // Handle successful submission
-        emailInput.value = '';
         
-        // Hide the form fields and show success message
-        formFieldsContainer.style.display = 'none';
-        showMessage('{{ section.settings.success_message | default: "Thank you for subscribing!" }}');
+        // Set submitting state
+        isSubmitting = true;
         
-        // Optional: Show form again after some time
-        if ({{ section.settings.show_form_again_after_success | default: true }}) {
-          setTimeout(() => {
-            formFieldsContainer.style.display = 'flex';
-            messageContainer.style.display = 'none';
-            emailInput.focus(); // Return focus to input for keyboard users
-          }, {{ section.settings.form_reappear_time | default: 5000 }});
+        // Show loading state
+        buttonText.textContent = "SUBMITTING...";
+        loadingSpinner.classList.remove('hidden');
+        submitButton.disabled = true;
+        
+        try {
+          // Process form submission within the current page
+          const result = await submitEmail(email);
+          
+          if (result.success) {
+            // Show success message
+            showSuccessMessage();
+          } else {
+            // Reset submitting state for errors
+            isSubmitting = false;
+            buttonText.textContent = "GET NOTIFIED";
+            loadingSpinner.classList.add('hidden');
+            submitButton.disabled = false;
+            
+            // Add error state
+            emailInput.classList.add('error-state');
+          }
+        } catch (error) {
+          // Reset submitting state
+          isSubmitting = false;
+          buttonText.textContent = "GET NOTIFIED";
+          loadingSpinner.classList.add('hidden');
+          submitButton.disabled = false;
+          
+          // Add error state
+          emailInput.classList.add('error-state');
         }
-      })
-      .catch(error => {
-        console.error('Error:', error);
-        showMessage('There was an error submitting your email. Please try again.', true);
-      })
-      .finally(() => {
-        signupButton.disabled = false;
-        signupButton.classList.remove('loading');
-        signupButton.setAttribute('aria-busy', 'false');
       });
-    });
-    
-    // Add keyboard trap within form when focused for better accessibility
-    document.addEventListener('keydown', function(e) {
-      // If Tab key is pressed and focus is within form
-      if (e.key === 'Tab' && emailSignupForm.contains(document.activeElement)) {
-        const focusableElements = emailSignupForm.querySelectorAll('input:not([type="hidden"]), button');
-        const firstElement = focusableElements[0];
-        const lastElement = focusableElements[focusableElements.length - 1];
-        
-        // If shift + tab on first element, move to last element
-        if (e.shiftKey && document.activeElement === firstElement) {
-          e.preventDefault();
-          lastElement.focus();
-        } 
-        // If tab on last element, move to first element
-        else if (!e.shiftKey && document.activeElement === lastElement) {
-          e.preventDefault();
-          firstElement.focus();
-        }
-      }
-    });
+    }
   });
 </script>
 
@@ -257,51 +229,48 @@
   "name": "Email Signup",
   "settings": [
     {
-      "type": "color_scheme",
-      "id": "color_scheme",
-      "default": "scheme-1",
-      "label": "Color Scheme"
-    }
-  ],
-  "blocks": [
-    {
-      "name": "Email Input",
-      "type": "email_input",
-      "limit": 1,
-      "settings": [
-        {
-          "type": "text",
-          "id": "email_placeholder",
-          "label": "Email Placeholder",
-          "default": "EMAIL"
-        }
-      ]
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Bandit Grand Prix"
     },
     {
-      "name": "Signup Button",
-      "type": "signup_button",
-      "limit": 1,
-      "settings": [
-        {
-          "type": "text",
-          "id": "button_text",
-          "label": "Button Text",
-          "default": "SIGN ME UP"
-        }
-      ]
+      "type": "text",
+      "id": "subheading",
+      "label": "Subheading",
+      "default": "Registration opens on Thursday, 5/8."
+    },
+    {
+      "type": "text",
+      "id": "button_text",
+      "label": "Button Text",
+      "default": "GET NOTIFIED"
+    },
+    {
+      "type": "range",
+      "id": "padding",
+      "label": "top/botom Padding",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "default": 32
+    },
+    {
+      "type": "range",
+      "id": "margin_bottom",
+      "label": "Bottom Margin",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "default": 0
     }
   ],
   "presets": [
     {
       "name": "Email Signup",
-      "blocks": [
-        {
-          "type": "email_input"
-        },
-        {
-          "type": "signup_button"
-        }
-      ]
+      "category": "Promotions"
     }
   ]
 }
