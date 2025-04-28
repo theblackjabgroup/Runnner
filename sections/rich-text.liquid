@@ -1,10 +1,104 @@
 {{ 'section-rich-text.css' | asset_url | stylesheet_tag }}
 
 {%- style -%}
+  .text-center {
+    text-align: center;
+  }
+  
+  .text-right {
+    text-align: right;
+  }
   .section-{{ section.id }}-padding {
     padding-top: {{ section.settings.padding_top | times: 0.75 | round: 0 }}px;
     padding-bottom: {{ section.settings.padding_bottom | times: 0.75 | round: 0 }}px;
   }
+
+  .rich-text__spacing {
+    height: 0;
+    display: block;
+    clear: both;
+  }
+
+  .rich-text__blocks > * {
+    margin: 0 !important;
+  }
+
+  {% for block in section.blocks %}
+    {% case block.type %}
+      {% when 'heading' %}
+        #Heading-{{ block.id }} {
+          font-weight: {% case block.settings.font_weight %}
+            {% when 'light' %}300
+            {% when 'normal' %}400
+            {% when 'medium' %}550
+            {% when 'bold' %}700
+          {% endcase %};
+          font-size: {% case block.settings.heading_size %}
+            {% when 'h3' %}2.5rem
+            {% when 'h2' %}3rem
+            {% when 'h1' %}4rem
+            {% when 'h0' %}5rem
+            {% when 'hxl' %}6rem
+            {% when 'hxxl' %}7rem
+            {% when 'hxxxl' %}8rem
+          {% endcase %};
+          line-height: {% case block.settings.heading_size %}
+            {% when 'h3' %}1.2
+            {% when 'h2' %}1.1
+            {% when 'h1' %}1.1
+            {% when 'h0' %}1
+            {% when 'hxl' %}1
+            {% when 'hxxl' %}0.9
+            {% when 'hxxxl' %}0.9
+          {% endcase %};
+          margin-bottom: {{ block.settings.spacing }}px !important;
+        }
+      {% when 'caption' %}
+        #Caption-{{ block.id }} {
+          font-weight: {% case block.settings.font_weight %}
+            {% when 'light' %}300
+            {% when 'normal' %}400
+            {% when 'medium' %}600
+            {% when 'bold' %}700
+          {% endcase %};
+          margin-bottom: {{ block.settings.spacing }}px !important;
+        }
+      {% when 'text' %}
+        #Text-{{ block.id }} {
+          font-weight: {% case block.settings.font_weight %}
+            {% when 'light' %}300
+            {% when 'normal' %}400
+            {% when 'medium' %}600
+            {% when 'bold' %}700
+          {% endcase %};
+          font-size: {% case block.settings.text_size %}
+            {% when 'small' %}0.875rem
+            {% when 'regular' %}1rem
+            {% when 'medium' %}1.15rem
+            {% when 'large' %}1.5rem
+            {% when 'xlarge' %}2rem
+          {% endcase %};
+          line-height: {% case block.settings.text_size %}
+            {% when 'small' %}1.1
+            {% when 'regular' %}1.1
+            {% when 'medium' %}1.2
+            {% when 'large' %}1.3
+            {% when 'xlarge' %}1.4
+          {% endcase %};
+          margin-bottom: {{ block.settings.spacing }}px !important;
+        }
+      {% when 'buttons' %}
+        #Buttons-{{ block.id }} {
+          margin-bottom: {{ block.settings.spacing }}px !important;
+        }
+    {% endcase %}
+  {% endfor %}
+
+  {% if section.settings.button_toggle == false %}
+    .rich-text__buttons {
+      display: none !important;
+    }
+  {% endif %}
 
   @media screen and (min-width: 750px) {
     .section-{{ section.id }}-padding {
@@ -14,77 +108,29 @@
   }
 {%- endstyle -%}
 
-<div class="isolate{% unless section.settings.full_width %} page-width{% endunless %}">
+<div class="color-{{ section.settings.color_scheme }} gradient">
   <div class="rich-text content-container color-{{ section.settings.color_scheme }} gradient{% if section.settings.full_width %} rich-text--full-width content-container--full-width{% endif %} section-{{ section.id }}-padding">
     <div class="rich-text__wrapper rich-text__wrapper--{{ section.settings.desktop_content_position }}{% if section.settings.full_width %} page-width{% endif %}">
       <div class="rich-text__blocks {{ section.settings.content_alignment }}">
         {%- for block in section.blocks -%}
           {%- case block.type -%}
             {%- when 'heading' -%}
-              <h2
-                class="rich-text__heading rte inline-richtext {{ block.settings.heading_size }}{% if settings.animations_reveal_on_scroll %} scroll-trigger animate--slide-in{% endif %}"
-                {{ block.shopify_attributes }}
-                {% if settings.animations_reveal_on_scroll %}
-                  data-cascade
-                  style="--animation-order: {{ forloop.index }};"
-                {% endif %}
-              >
-                {{ block.settings.heading }}
+              <h2 id="Heading-{{ block.id }}" class="rich-text__heading rte {{ block.settings.heading_size }}{% if block.settings.text_align == 'center' %} text-center{% endif %}{% if block.settings.text_align == 'right' %} text-right{% endif %}" {{ block.shopify_attributes }}>
+                {{ block.settings.heading | replace: 'p>', 'span>' }}
               </h2>
             {%- when 'caption' -%}
-              <p
-                class="rich-text__caption {{ block.settings.text_style }} {{ block.settings.text_style }}--{{ block.settings.text_size }}{% if settings.animations_reveal_on_scroll %} scroll-trigger animate--slide-in{% endif %}"
-                {{ block.shopify_attributes }}
-                {% if settings.animations_reveal_on_scroll %}
-                  data-cascade
-                  style="--animation-order: {{ forloop.index }};"
-                {% endif %}
-              >
+              <p id="Caption-{{ block.id }}" class="rich-text__caption {{ block.settings.text_style }} {{ block.settings.text_style }}--{{ block.settings.text_size }}" {{ block.shopify_attributes }}>
                 {{ block.settings.caption | escape }}
               </p>
             {%- when 'text' -%}
-              <div
-                class="rich-text__text rte{% if settings.animations_reveal_on_scroll %} scroll-trigger animate--slide-in{% endif %}"
-                {{ block.shopify_attributes }}
-                {% if settings.animations_reveal_on_scroll %}
-                  data-cascade
-                  style="--animation-order: {{ forloop.index }};"
-                {% endif %}
-              >
-                {{ block.settings.text }}
-              </div>
-            {%- when 'button' -%}
-              <div
-                class="rich-text__buttons{% if block.settings.button_label != blank and block.settings.button_label_2 != blank %} rich-text__buttons--multiple{% endif %}{% if settings.animations_reveal_on_scroll %} scroll-trigger animate--slide-in{% endif %}"
-                {{ block.shopify_attributes }}
-                {% if settings.animations_reveal_on_scroll %}
-                  data-cascade
-                  style="--animation-order: {{ forloop.index }};"
-                {% endif %}
-              >
-                {%- if block.settings.button_label != blank -%}
-                  <a
-                    {% if block.settings.button_link == blank %}
-                      role="link" aria-disabled="true"
-                    {% else %}
-                      href="{{ block.settings.button_link }}"
-                    {% endif %}
-                    class="button{% if block.settings.button_style_secondary %} button--secondary{% else %} button--primary{% endif %}"
-                  >
-                    {{- block.settings.button_label | escape -}}
-                  </a>
+              <div id="Text-{{ block.id }}" class="rich-text__text rte" {{ block.shopify_attributes }}>{{ block.settings.text }}</div>
+            {%- when 'buttons' -%}
+              <div id="Buttons-{{ block.id }}" class="rich-text__buttons{% if block.settings.button_label_1 != blank and block.settings.button_label_2 != blank %} rich-text__buttons--multiple{% endif %}" {{ block.shopify_attributes }}>
+                {%- if block.settings.button_label_1 != blank -%}
+                  <a{% if block.settings.button_link_1 == blank %} role="link" aria-disabled="true"{% else %} href="{{ block.settings.button_link_1 }}"{% endif %} class="button{% if block.settings.button_style_secondary_1 %} button--secondary{% else %} button--primary{% endif %}">{{ block.settings.button_label_1 | escape }}</a>
                 {%- endif -%}
                 {%- if block.settings.button_label_2 != blank -%}
-                  <a
-                    {% if block.settings.button_link_2 == blank %}
-                      role="link" aria-disabled="true"
-                    {% else %}
-                      href="{{ block.settings.button_link_2 }}"
-                    {% endif %}
-                    class="button{% if block.settings.button_style_secondary_2 %} button--secondary{% else %} button--primary{% endif %}"
-                  >
-                    {{- block.settings.button_label_2 | escape -}}
-                  </a>
+                  <a{% if block.settings.button_link_2 == blank %} role="link" aria-disabled="true"{% else %} href="{{ block.settings.button_link_2 }}"{% endif %} class="button{% if block.settings.button_style_secondary_2 %} button--secondary{% else %} button--primary{% endif %}">{{ block.settings.button_label_2 | escape }}</a>
                 {%- endif -%}
               </div>
           {%- endcase -%}
@@ -96,12 +142,9 @@
 
 {% schema %}
 {
-  "name": "t:sections.rich-text.name",
+  "name": "Rich text",
   "tag": "section",
   "class": "section",
-  "disabled_on": {
-    "groups": ["header", "footer"]
-  },
   "settings": [
     {
       "type": "select",
@@ -109,19 +152,19 @@
       "options": [
         {
           "value": "left",
-          "label": "t:sections.rich-text.settings.desktop_content_position.options__1.label"
+          "label": "Left"
         },
         {
           "value": "center",
-          "label": "t:sections.rich-text.settings.desktop_content_position.options__2.label"
+          "label": "Center"
         },
         {
           "value": "right",
-          "label": "t:sections.rich-text.settings.desktop_content_position.options__3.label"
+          "label": "Right"
         }
       ],
       "default": "center",
-      "label": "t:sections.rich-text.settings.desktop_content_position.label"
+      "label": "Content position"
     },
     {
       "type": "select",
@@ -129,35 +172,37 @@
       "options": [
         {
           "value": "left",
-          "label": "t:sections.rich-text.settings.content_alignment.options__1.label"
+          "label": "Left"
         },
         {
           "value": "center",
-          "label": "t:sections.rich-text.settings.content_alignment.options__2.label"
+          "label": "Center"
         },
         {
           "value": "right",
-          "label": "t:sections.rich-text.settings.content_alignment.options__3.label"
+          "label": "Right"
         }
       ],
       "default": "center",
-      "label": "t:sections.rich-text.settings.content_alignment.label"
-    },
-    {
-      "type": "color_scheme",
-      "id": "color_scheme",
-      "label": "t:sections.all.colors.label",
-      "default": "scheme-1"
+      "label": "Content alignment"
     },
     {
       "type": "checkbox",
       "id": "full_width",
       "default": true,
-      "label": "t:sections.rich-text.settings.full_width.label"
+      "label": "Full width"
     },
     {
-      "type": "header",
-      "content": "t:sections.all.padding.section_padding_heading"
+      "type": "checkbox",
+      "id": "button_toggle",
+      "default": true,
+      "label": "Show buttons"
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "Color scheme",
+      "default": "background-1"
     },
     {
       "type": "range",
@@ -166,8 +211,8 @@
       "max": 100,
       "step": 4,
       "unit": "px",
-      "label": "t:sections.all.padding.padding_top",
-      "default": 40
+      "label": "Top padding",
+      "default": 36
     },
     {
       "type": "range",
@@ -176,62 +221,122 @@
       "max": 100,
       "step": 4,
       "unit": "px",
-      "label": "t:sections.all.padding.padding_bottom",
-      "default": 52
+      "label": "Bottom padding",
+      "default": 36
     }
   ],
   "blocks": [
     {
       "type": "heading",
-      "name": "t:sections.rich-text.blocks.heading.name",
-      "limit": 3,
+      "name": "Heading",
       "settings": [
         {
-          "type": "inline_richtext",
+          "type": "richtext",
           "id": "heading",
-          "default": "t:sections.rich-text.blocks.heading.settings.heading.default",
-          "label": "t:sections.rich-text.blocks.heading.settings.heading.label"
+          "default": "<p>Talk about your brand</p>",
+          "label": "Heading"
         },
         {
           "type": "select",
           "id": "heading_size",
           "options": [
             {
+              "value": "h3",
+              "label": "Extra Small"
+            },
+            {
               "value": "h2",
-              "label": "t:sections.all.heading_size.options__1.label"
+              "label": "Small"
             },
             {
               "value": "h1",
-              "label": "t:sections.all.heading_size.options__2.label"
+              "label": "Medium"
             },
             {
               "value": "h0",
-              "label": "t:sections.all.heading_size.options__3.label"
+              "label": "Large"
             },
             {
               "value": "hxl",
-              "label": "t:sections.all.heading_size.options__4.label"
+              "label": "Extra Large"
             },
             {
               "value": "hxxl",
-              "label": "t:sections.all.heading_size.options__5.label"
+              "label": "Double Extra Large"
+            },
+            {
+              "value": "hxxxl",
+              "label": "Triple Extra Large"
             }
           ],
           "default": "h1",
-          "label": "t:sections.all.heading_size.label"
+          "label": "Heading size"
+        },
+        {
+          "type": "select",
+          "id": "font_weight",
+          "options": [
+            {
+              "value": "light",
+              "label": "Light"
+            },
+            {
+              "value": "normal",
+              "label": "Normal"
+            },
+            {
+              "value": "medium",
+              "label": "Medium"
+            },
+            {
+              "value": "bold",
+              "label": "Bold"
+            }
+          ],
+          "default": "bold",
+          "label": "Font weight"
+        },
+        {
+          "type": "select",
+          "id": "text_align",
+          "options": [
+            {
+              "value": "left",
+              "label": "Left"
+            },
+            {
+              "value": "center",
+              "label": "Center"
+            },
+            {
+              "value": "right",
+              "label": "Right"
+            }
+          ],
+          "default": "left",
+          "label": "Text alignment"
+        },
+        {
+          "type": "range",
+          "id": "spacing",
+          "min": 0,
+          "max": 100,
+          "step": 4,
+          "unit": "px",
+          "label": "Space after element",
+          "default": 20
         }
       ]
     },
     {
       "type": "caption",
-      "name": "t:sections.rich-text.blocks.caption.name",
-      "limit": 3,
+      "name": "Caption",
       "settings": [
         {
           "type": "text",
           "id": "caption",
-          "default": "t:sections.rich-text.blocks.caption.settings.text.default",
-          "label": "t:sections.rich-text.blocks.caption.settings.text.label"
+          "default": "Add a tagline",
+          "label": "Text"
         },
         {
           "type": "select",
@@ -239,15 +344,15 @@
           "options": [
             {
               "value": "subtitle",
-              "label": "t:sections.rich-text.blocks.caption.settings.text_style.options__1.label"
+              "label": "Subtitle"
             },
             {
-              "value": "caption-with-letter-spacing",
-              "label": "t:sections.rich-text.blocks.caption.settings.text_style.options__2.label"
+              "value": "caption",
+              "label": "Uppercase"
             }
           ],
-          "default": "caption-with-letter-spacing",
-          "label": "t:sections.rich-text.blocks.caption.settings.text_style.label"
+          "default": "caption",
+          "label": "Style"
         },
         {
           "type": "select",
@@ -255,89 +360,186 @@
           "options": [
             {
               "value": "small",
-              "label": "t:sections.rich-text.blocks.caption.settings.caption_size.options__1.label"
+              "label": "Small"
             },
             {
               "value": "medium",
-              "label": "t:sections.rich-text.blocks.caption.settings.caption_size.options__2.label"
+              "label": "Medium"
             },
             {
               "value": "large",
-              "label": "t:sections.rich-text.blocks.caption.settings.caption_size.options__3.label"
+              "label": "Large"
             }
           ],
           "default": "medium",
-          "label": "t:sections.rich-text.blocks.caption.settings.caption_size.label"
+          "label": "Size"
+        },
+        {
+          "type": "select",
+          "id": "font_weight",
+          "options": [
+            {
+              "value": "light",
+              "label": "Light"
+            },
+            {
+              "value": "normal",
+              "label": "Normal"
+            },
+            {
+              "value": "medium",
+              "label": "Medium"
+            },
+            {
+              "value": "bold",
+              "label": "Bold"
+            }
+          ],
+          "default": "normal",
+          "label": "Font weight"
+        },
+        {
+          "type": "range",
+          "id": "spacing",
+          "min": 0,
+          "max": 100,
+          "step": 4,
+          "unit": "px",
+          "label": "Space after element",
+          "default": 16
         }
       ]
     },
     {
       "type": "text",
-      "name": "t:sections.rich-text.blocks.text.name",
-      "limit": 3,
+      "name": "Text",
       "settings": [
         {
           "type": "richtext",
           "id": "text",
-          "default": "t:sections.rich-text.blocks.text.settings.text.default",
-          "label": "t:sections.rich-text.blocks.text.settings.text.label"
+          "default": "<p>Share information about your brand with your customers. Describe a product, make announcements, or welcome customers to your store.</p>",
+          "label": "Text"
+        },
+        {
+          "type": "select",
+          "id": "text_size",
+          "options": [
+            {
+              "value": "small",
+              "label": "Small"
+            },
+            {
+              "value": "regular",
+              "label": "Regular"
+            },
+            {
+              "value": "medium",
+              "label": "Medium"
+            },
+            {
+              "value": "large",
+              "label": "Large"
+            },
+            {
+              "value": "xlarge",
+              "label": "Extra Large"
+            }
+          ],
+          "default": "regular",
+          "label": "Text size"
+        },
+        {
+          "type": "select",
+          "id": "font_weight",
+          "options": [
+            {
+              "value": "light",
+              "label": "Light"
+            },
+            {
+              "value": "normal",
+              "label": "Normal"
+            },
+            {
+              "value": "medium",
+              "label": "Medium"
+            },
+            {
+              "value": "bold",
+              "label": "Bold"
+            }
+          ],
+          "default": "normal",
+          "label": "Font weight"
+        },
+        {
+          "type": "range",
+          "id": "spacing",
+          "min": 0,
+          "max": 100,
+          "step": 4,
+          "unit": "px",
+          "label": "Space after element",
+          "default": 24
         }
       ]
     },
     {
-      "type": "button",
-      "name": "t:sections.rich-text.blocks.buttons.name",
-      "limit": 2,
+      "type": "buttons",
+      "name": "Buttons",
       "settings": [
         {
-         "type": "header",
-         "content": "t:sections.rich-text.blocks.buttons.settings.header_button1.content"
-        },        
-        {
           "type": "text",
-          "id": "button_label",
-          "default": "t:sections.rich-text.blocks.buttons.settings.button_label_1.default",
-          "label": "t:sections.rich-text.blocks.buttons.settings.button_label_1.label",
-          "info": "t:sections.rich-text.blocks.buttons.settings.button_label_1.info"
+          "id": "button_label_1",
+          "default": "Button label",
+          "label": "First button label",
+          "info": "Leave blank to hide"
         },
         {
           "type": "url",
-          "id": "button_link",
-          "label": "t:sections.rich-text.blocks.buttons.settings.button_link_1.label"
+          "id": "button_link_1",
+          "label": "First button link"
         },
         {
           "type": "checkbox",
-          "id": "button_style_secondary",
-          "default": false,
-          "label": "t:sections.rich-text.blocks.buttons.settings.button_style_secondary_1.label"
+          "id": "button_style_secondary_1",
+          "default": true,
+          "label": "First button outline style"
         },
-        {
-         "type": "header",
-         "content": "t:sections.rich-text.blocks.buttons.settings.header_button2.content"
-        },          
         {
           "type": "text",
           "id": "button_label_2",
-          "label": "t:sections.rich-text.blocks.buttons.settings.button_label_2.label",
-          "info": "t:sections.rich-text.blocks.buttons.settings.button_label_2.info"
+          "default": "Button label",
+          "label": "Second button label",
+          "info": "Leave blank to hide"
         },
         {
           "type": "url",
           "id": "button_link_2",
-          "label": "t:sections.rich-text.blocks.buttons.settings.button_link_2.label"
+          "label": "Second button link"
         },
         {
           "type": "checkbox",
           "id": "button_style_secondary_2",
-          "default": false,
-          "label": "t:sections.rich-text.blocks.buttons.settings.button_style_secondary_2.label"
+          "default": true,
+          "label": "Second button outline style"
+        },
+        {
+          "type": "range",
+          "id": "spacing",
+          "min": 0,
+          "max": 100,
+          "step": 4,
+          "unit": "px",
+          "label": "Space after element",
+          "default": 0
         }
       ]
     }
   ],
   "presets": [
     {
-      "name": "t:sections.rich-text.presets.name",
+      "name": "Rich text",
       "blocks": [
         {
           "type": "heading"
@@ -346,7 +548,7 @@
           "type": "text"
         },
         {
-          "type": "button"
+          "type": "buttons"
         }
       ]
     }
