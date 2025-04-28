@@ -1,12 +1,12 @@
-<div class="bg-black text-white px-8" style="padding: {{ section.settings.padding }}px 0; margin-bottom: {{ section.settings.margin_bottom }}px;">
+<div class="bg-black text-white px-8" style="padding: {{ section.settings.padding }}px 0; margin-bottom: {{ section.settings.margin_bottom }}px;" id="newsletter-section">
   <div class="flex flex-col md:flex-row items-center justify-between gap-6 md:gap-12" id="mainContainer">
     
     <!-- Text content with fixed width to prevent affecting layout -->
 <div class="text-center md:text-left text-white ml-8 md:w-1/2 flex-shrink-0">
-  <h2 style="all: unset; font-size: 50px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; color: white; display: block; margin: 0; white-space: normal; word-break: break-word; line-height: 1.1; margin-left: 20px;">
+  <h2 class="!text-[20px] md:!text-[50px] font-extrabold uppercase tracking-wider text-white block md:block flex md:inline-block justify-start md:justify-normal m-0 break-words leading-tight -ml-[60px] md:ml-0" >
     {{ section.settings.heading }}
   </h2>
-  <p style="font-size: 35px; margin-top: 4px; color: white; word-break: break-word; overflow-wrap: break-word; max-width: 100%; margin-left: 20px;">
+  <p class="text-[15px] md:text-[35px] mt-1 text-white break-words overflow-wrap-normal max-w-full -ml-[60px] md:ml-0 flex md:block justify-start md:justify-normal whitespace-nowrap md:whitespace-normal">
     {{ section.settings.subheading }}
   </p>
 </div>
@@ -19,8 +19,8 @@
         type="email"
         id="email-input"
         placeholder="EMAIL"
-        class="w-full px-4 text-[50px] text-left text-white bg-black border border-white placeholder-gray-400 focus:outline-none rounded-lg leading-none py-0"
-        style="height: 80px; line-height: 70px; padding-top: 0; padding-bottom: 0;"
+        class="w-full px-4 text-[30px] md:text-[50px] text-left text-white bg-black border border-white placeholder-gray-400 focus:outline-none rounded-lg leading-none py-0"
+        style="height: 50px; line-height: 50px; padding-top: 0; padding-bottom: 0; @media (min-width: 768px) { height: 80px; line-height: 70px; }"
       />
     </div>
     
@@ -28,10 +28,10 @@
       <button
         type="submit"
         id="submitButton"
-        class="w-full bg-red-600 text-white text-[50px] font-bold px-6 flex items-center justify-between hover:bg-red-700 transition-colors rounded-lg"
-        style="height: 80px; line-height: 70px; padding-top: 0; padding-bottom: 0;"
+        class="w-full bg-red-600 text-white text-[30px] md:text-[50px] font-bold px-6 flex items-center justify-between hover:bg-red-700 transition-colors rounded-lg"
+        style="height: 50px; line-height: 50px; padding-top: 0; padding-bottom: 0; @media (min-width: 768px) { height: 80px; line-height: 70px; }"
       >
-        <span class="text-[50px]">→</span>
+        <span class="text-[30px] md:text-[50px]">→</span>
         <span id="buttonText">{{ section.settings.button_text }}</span>
         <span id="loadingSpinner" class="hidden">
           <svg class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
@@ -47,14 +47,71 @@
 
 </div>
 
+<!-- Scroll-triggered popup newsletter -->
+<div id="popup-newsletter" class="fixed bottom-0 left-0 right-0 bg-black text-white border-t border-gray-800 z-50" style="transform: translateY(100%); transition: transform 0.5s ease;">
+  <div class="container mx-auto px-4 py-4">
+    <div class="flex flex-col md:flex-row items-center justify-between gap-4">
+      <!-- Text content -->
+      <div class="text-center md:text-left md:w-1/2">
+        <h2 class="text-2xl md:text-3xl font-extrabold uppercase tracking-wider">
+          {{ section.settings.heading }}
+        </h2>
+        <p class="text-lg md:text-xl mt-1">
+          {{ section.settings.subheading }}
+        </p>
+      </div>
+
+      <!-- Form container -->
+      <div class="w-full md:w-1/2">
+        <form id="popup-email-form" class="flex flex-col sm:flex-row gap-4">
+          <div class="flex-grow">
+            <input
+              type="email"
+              id="popup-email-input"
+              placeholder="EMAIL"
+              class="w-full px-4 py-3 text-white bg-black border border-white placeholder-gray-400 focus:outline-none rounded-lg"
+            />
+          </div>
+          
+          <div>
+            <button
+              type="submit"
+              id="popup-submit-button"
+              class="w-full sm:w-auto bg-red-600 text-white font-bold px-6 py-3 flex items-center justify-between hover:bg-red-700 transition-colors rounded-lg"
+            >
+              <span class="mr-2">→</span>
+              <span id="popup-button-text">{{ section.settings.button_text }}</span>
+              <span id="popup-loading-spinner" class="hidden ml-2">
+                <svg class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                  <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+              </span>
+            </button>
+          </div>
+        </form>
+      </div>
+      
+      <!-- Close button -->
+      <button id="close-popup" class="absolute top-2 right-2 text-white hover:text-gray-300">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+      </button>
+    </div>
+  </div>
+</div>
+
 <style>
   /* Red border style for empty submission */
-  #email-input.error-state {
+  #email-input.error-state,
+  #popup-email-input.error-state {
     border-color: #dc2626 !important;
     border-width: 2px !important;
   }
   /* Remove default focus styling */
-  #email-input:focus {
+  #email-input:focus,
+  #popup-email-input:focus {
     outline: none !important;
     box-shadow: none !important;
   }
@@ -65,152 +122,186 @@
       align-items: flex-start;
     }
   }
+  
+  /* Popup display when active */
+  #popup-newsletter.show-popup {
+    transform: translateY(0) !important;
+  }
+
+
+  @media (max-width: 767px) {
+    #email-input, #submitButton {
+      height: 50px !important;
+      line-height: 50px !important;
+    }
+  }
+  @media (min-width: 768px) {
+    #email-input, #submitButton {
+      height: 80px !important;
+      line-height: 70px !important;
+    }
+  }
 </style>
 
+
 <script>
-  document.addEventListener('DOMContentLoaded', function() {
-    const emailSignupForm = document.getElementById('email-signup-form');
+document.addEventListener('DOMContentLoaded', function() {
+  // Original form functionality
+  const emailSignupForm = document.getElementById('email-signup-form');
+  
+  if (emailSignupForm) {
+    const emailInput = document.getElementById('email-input');
+    const submitButton = document.getElementById('submitButton');
+    const buttonText = document.getElementById('buttonText');
+    const loadingSpinner = document.getElementById('loadingSpinner');
+    const formContainer = document.getElementById('formContainer');
+    const mainContainer = document.getElementById('mainContainer');
     
-    if (emailSignupForm) {
-      const emailInput = document.getElementById('email-input');
-      const submitButton = document.getElementById('submitButton');
-      const buttonText = document.getElementById('buttonText');
-      const loadingSpinner = document.getElementById('loadingSpinner');
-      const formContainer = document.getElementById('formContainer');
-      const mainContainer = document.getElementById('mainContainer');
-      
-      // Flag to track if submission is in progress
-      let isSubmitting = false;
-      
-      // Check if the input is empty on page load and add the empty class if it is
-      if (!emailInput.value.trim()) {
-        emailInput.classList.add('empty');
+    // Flag to track if submission is in progress
+    let isSubmitting = false;
+    
+    // Check if the input is empty on page load and add the empty class if it is
+    if (!emailInput.value.trim()) {
+      emailInput.classList.add('empty');
+    }
+    
+    // Monitor input changes to add/remove error state class
+    emailInput.addEventListener('input', function() {
+      if (this.value.trim()) {
+        // Remove error state when user starts typing
+        this.classList.remove('error-state');
+        this.classList.remove('empty');
+      }
+    });
+    
+    function validateEmail(email) {
+      const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      return re.test(email);
+    }
+    
+    function showSuccessMessage() {
+      // For success message, create a nice success display
+      // Remove form and create success message
+      if (formContainer) {
+        formContainer.style.display = 'none';
       }
       
-      // Monitor input changes to add/remove error state class
-      emailInput.addEventListener('input', function() {
-        if (this.value.trim()) {
-          // Remove error state when user starts typing
-          this.classList.remove('error-state');
-          this.classList.remove('empty');
-        }
+      // Create success message container
+      const successMessageElement = document.createElement('div');
+      successMessageElement.className = 'w-full';
+      
+      // Create inner container
+      const innerContainer = document.createElement('div');
+      innerContainer.className = 'rounded-lg p-8 text-center';
+      
+      // Create checkmark icon
+      const svgElement = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+      svgElement.setAttribute('class', 'h-16 w-16 mx-auto text-green-500 mb-4');
+      svgElement.setAttribute('fill', 'none');
+      svgElement.setAttribute('viewBox', '0 0 24 24');
+      svgElement.setAttribute('stroke', 'currentColor');
+      
+      const pathElement = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+      pathElement.setAttribute('stroke-linecap', 'round');
+      pathElement.setAttribute('stroke-linejoin', 'round');
+      pathElement.setAttribute('stroke-width', '2');
+      pathElement.setAttribute('d', 'M5 13l4 4L19 7');
+      
+      svgElement.appendChild(pathElement);
+      
+      // Create thank you heading
+      const heading = document.createElement('h3');
+      heading.className = 'text-4xl font-bold text-white mb-4';
+      heading.textContent = 'Thank You!';
+      
+      // Create success message text
+      const paragraph = document.createElement('p');
+      paragraph.className = 'text-2xl text-gray-300';
+      paragraph.textContent = 'You\'ve been successfully subscribed to our notifications.';
+      
+      // Append all elements
+      innerContainer.appendChild(svgElement);
+      innerContainer.appendChild(heading);
+      innerContainer.appendChild(paragraph);
+      successMessageElement.appendChild(innerContainer);
+      
+      // Add to main container
+      mainContainer.appendChild(successMessageElement);
+    }
+    
+    // Function to show popup success message
+    function showPopupSuccessMessage(popupContainer) {
+      // Create success message
+      popupContainer.innerHTML = `
+        <div class="container mx-auto px-4 py-6">
+          <div class="flex justify-center items-center">
+            <div class="text-center">
+              <svg class="h-12 w-12 mx-auto text-green-500 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+              </svg>
+              <h3 class="text-2xl font-bold text-white mb-2">Thank You!</h3>
+              <p class="text-lg text-gray-300">You've been successfully subscribed to our notifications.</p>
+            </div>
+          </div>
+        </div>
+      `;
+      
+      // Hide popup after 5 seconds
+      setTimeout(() => {
+        popupContainer.classList.remove('show-popup');
+      }, 5000);
+    }
+    
+    // Function to simulate API call (replace with actual API call)
+    function submitEmail(email) {
+      return new Promise((resolve) => {
+        // Simulate API delay (2 seconds)
+        setTimeout(() => {
+          resolve({ success: true });
+        }, 2000);
       });
+    }
+    
+    // Form submission handler
+    emailSignupForm.addEventListener('submit', async function(e) {
+      e.preventDefault();
       
-      function validateEmail(email) {
-        const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        return re.test(email);
+      // Prevent multiple submissions
+      if (isSubmitting) return;
+      
+      const email = emailInput.value.trim();
+      
+      // Show red border if empty and add error-state class
+      if (!email) {
+        emailInput.classList.add('empty');
+        emailInput.classList.add('error-state');
+        emailInput.focus();
+        return;
       }
       
-      function showSuccessMessage() {
-        // For success message, create a nice success display
-        // Remove form and create success message
-        if (formContainer) {
-          formContainer.style.display = 'none';
-        }
-        
-        // Create success message container
-        const successMessageElement = document.createElement('div');
-        successMessageElement.className = 'w-full';
-        
-        // Create inner container
-        const innerContainer = document.createElement('div');
-        innerContainer.className = 'rounded-lg p-8 text-center';
-        
-        // Create checkmark icon
-        const svgElement = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-        svgElement.setAttribute('class', 'h-16 w-16 mx-auto text-green-500 mb-4');
-        svgElement.setAttribute('fill', 'none');
-        svgElement.setAttribute('viewBox', '0 0 24 24');
-        svgElement.setAttribute('stroke', 'currentColor');
-        
-        const pathElement = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-        pathElement.setAttribute('stroke-linecap', 'round');
-        pathElement.setAttribute('stroke-linejoin', 'round');
-        pathElement.setAttribute('stroke-width', '2');
-        pathElement.setAttribute('d', 'M5 13l4 4L19 7');
-        
-        svgElement.appendChild(pathElement);
-        
-        // Create thank you heading
-        const heading = document.createElement('h3');
-        heading.className = 'text-4xl font-bold text-white mb-4';
-        heading.textContent = 'Thank You!';
-        
-        // Create success message text
-        const paragraph = document.createElement('p');
-        paragraph.className = 'text-2xl text-gray-300';
-        paragraph.textContent = 'You\'ve been successfully subscribed to our notifications.';
-        
-        // Append all elements
-        innerContainer.appendChild(svgElement);
-        innerContainer.appendChild(heading);
-        innerContainer.appendChild(paragraph);
-        successMessageElement.appendChild(innerContainer);
-        
-        // Add to main container
-        mainContainer.appendChild(successMessageElement);
+      if (!validateEmail(email)) {
+        emailInput.classList.add('error-state');
+        emailInput.focus();
+        return;
       }
       
-      // Function to simulate API call (replace with actual API call)
-      function submitEmail(email) {
-        return new Promise((resolve) => {
-          // Simulate API delay (2 seconds)
-          setTimeout(() => {
-            resolve({ success: true });
-          }, 2000);
-        });
-      }
+      // Set submitting state
+      isSubmitting = true;
       
-      // Form submission handler
-      emailSignupForm.addEventListener('submit', async function(e) {
-        e.preventDefault();
+      // Show loading state
+      buttonText.textContent = "SUBMITTING...";
+      loadingSpinner.classList.remove('hidden');
+      submitButton.disabled = true;
+      
+      try {
+        // Process form submission within the current page
+        const result = await submitEmail(email);
         
-        // Prevent multiple submissions
-        if (isSubmitting) return;
-        
-        const email = emailInput.value.trim();
-        
-        // Show red border if empty and add error-state class
-        if (!email) {
-          emailInput.classList.add('empty');
-          emailInput.classList.add('error-state');
-          emailInput.focus();
-          return;
-        }
-        
-        if (!validateEmail(email)) {
-          emailInput.classList.add('error-state');
-          emailInput.focus();
-          return;
-        }
-        
-        // Set submitting state
-        isSubmitting = true;
-        
-        // Show loading state
-        buttonText.textContent = "SUBMITTING...";
-        loadingSpinner.classList.remove('hidden');
-        submitButton.disabled = true;
-        
-        try {
-          // Process form submission within the current page
-          const result = await submitEmail(email);
-          
-          if (result.success) {
-            // Show success message
-            showSuccessMessage();
-          } else {
-            // Reset submitting state for errors
-            isSubmitting = false;
-            buttonText.textContent = "GET NOTIFIED";
-            loadingSpinner.classList.add('hidden');
-            submitButton.disabled = false;
-            
-            // Add error state
-            emailInput.classList.add('error-state');
-          }
-        } catch (error) {
-          // Reset submitting state
+        if (result.success) {
+          // Show success message
+          showSuccessMessage();
+        } else {
+          // Reset submitting state for errors
           isSubmitting = false;
           buttonText.textContent = "GET NOTIFIED";
           loadingSpinner.classList.add('hidden');
@@ -219,9 +310,145 @@
           // Add error state
           emailInput.classList.add('error-state');
         }
-      });
+      } catch (error) {
+        // Reset submitting state
+        isSubmitting = false;
+        buttonText.textContent = "GET NOTIFIED";
+        loadingSpinner.classList.add('hidden');
+        submitButton.disabled = false;
+        
+        // Add error state
+        emailInput.classList.add('error-state');
+      }
+    });
+  }
+  
+  // Popup Newsletter Functionality
+  const popupNewsletter = document.getElementById('popup-newsletter');
+  const newsletterSection = document.getElementById('newsletter-section');
+  const closePopupBtn = document.getElementById('close-popup');
+  const popupEmailForm = document.getElementById('popup-email-form');
+  const popupEmailInput = document.getElementById('popup-email-input');
+  const popupSubmitButton = document.getElementById('popup-submit-button');
+  const popupButtonText = document.getElementById('popup-button-text');
+  const popupLoadingSpinner = document.getElementById('popup-loading-spinner');
+  
+  // Track if user has closed the popup manually in this session
+  let userClosedPopup = false;
+  // Track if form is being submitted
+  let isPopupSubmitting = false;
+  
+  // Handle scroll to show/hide popup based on newsletter position
+  function handleScroll() {
+    if (userClosedPopup) return;
+    
+    // Get current scroll position
+    const scrollPosition = window.scrollY || document.documentElement.scrollTop;
+    
+    // Get newsletter position relative to the document
+    const newsletterRect = newsletterSection.getBoundingClientRect();
+    const newsletterTop = newsletterRect.top + scrollPosition;
+    
+    // Show popup when above newsletter, hide when at or below
+    if (scrollPosition < newsletterTop) {
+      popupNewsletter.classList.add('show-popup');
+    } else {
+      popupNewsletter.classList.remove('show-popup');
+    }
+  }
+  
+  // Close button handler
+  if (closePopupBtn) {
+    closePopupBtn.addEventListener('click', function() {
+      popupNewsletter.classList.remove('show-popup');
+      userClosedPopup = true;
+    });
+  }
+  
+  // Popup form submission handler
+  if (popupEmailForm) {
+    popupEmailForm.addEventListener('submit', async function(e) {
+      e.preventDefault();
+      
+      // Prevent multiple submissions
+      if (isPopupSubmitting) return;
+      
+      const email = popupEmailInput.value.trim();
+      
+      // Show error if empty
+      if (!email) {
+        popupEmailInput.classList.add('error-state');
+        popupEmailInput.focus();
+        return;
+      }
+      
+      // Validate email format
+      if (!validateEmail(email)) {
+        popupEmailInput.classList.add('error-state');
+        popupEmailInput.focus();
+        return;
+      }
+      
+      // Set submitting state
+      isPopupSubmitting = true;
+      
+      // Show loading state
+      popupButtonText.textContent = "SUBMITTING...";
+      popupLoadingSpinner.classList.remove('hidden');
+      popupSubmitButton.disabled = true;
+      
+      try {
+        // Process form submission
+        const result = await submitEmail(email);
+        
+        if (result.success) {
+          // Show success message
+          showPopupSuccessMessage(popupNewsletter);
+          // Consider this a manual close after successful submission
+          userClosedPopup = true;
+        } else {
+          // Reset form on error
+          isPopupSubmitting = false;
+          popupButtonText.textContent = "GET NOTIFIED";
+          popupLoadingSpinner.classList.add('hidden');
+          popupSubmitButton.disabled = false;
+          popupEmailInput.classList.add('error-state');
+        }
+      } catch (error) {
+        // Reset form on error
+        isPopupSubmitting = false;
+        popupButtonText.textContent = "GET NOTIFIED";
+        popupLoadingSpinner.classList.add('hidden');
+        popupSubmitButton.disabled = false;
+        popupEmailInput.classList.add('error-state');
+      }
+    });
+    
+    // Remove error styling on input
+    popupEmailInput.addEventListener('input', function() {
+      if (this.value.trim()) {
+        this.classList.remove('error-state');
+      }
+    });
+  }
+  
+  // Add scroll event listener with throttling for performance
+  let scrollTimeout;
+  window.addEventListener('scroll', function() {
+    if (!scrollTimeout) {
+      scrollTimeout = setTimeout(function() {
+        handleScroll();
+        scrollTimeout = null;
+      }, 100);
     }
   });
+  
+  // Check on window resize
+  window.addEventListener('resize', handleScroll);
+  
+  // Initial check on page load
+  setTimeout(handleScroll, 500);
+});
 </script>
 
 {% schema %}
