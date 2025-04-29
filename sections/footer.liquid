@@ -1,31 +1,46 @@
 {{ 'section-footer.css' | asset_url | stylesheet_tag }}
 {{ 'component-newsletters.css' | asset_url | stylesheet_tag }}
 
-
-
 <style>
   :root {
-  --cr-yellow-2: #d68c00;
-  --cr-yellow-1: #c9c3ad;
-}
- .email-input.error {
+    --cr-yellow-2: #d68c00;
+    --cr-yellow-1: #c9c3ad;
+  }
+  .email-input.error {
     border-color: red !important;
   }
-  
+
   .message-container {
     padding: 10px;
     margin-bottom: 15px;
     text-align: center;
   }
-  
+
   .success-message {
     color: green;
     font-weight: bold;
   }
+
+  /* Added styling for social icons in support section */
+  .support-social-icons {
+    display: flex;
+    margin-top: 70px;
+    gap: 10px;
+  }
+ 
+  .social-icons-hover {
+    fill: #808080 !important;
+    transition: fill 0.3s ease;
+  }
+  
+  .social-icons-hover {
+    transition: fill 0.3s ease;
+  }
+
 </style>
 
-
-<footer class="color-{{ section.settings.color_scheme }} bg-black text-white font-sans p-4"
+<footer
+  class="color-{{ section.settings.color_scheme }} bg-black text-white font-sans p-4 sm:px-6 md:px-8 md:py-8"
   style="
     padding-top: {{ section.settings.padding_top }}px;
     padding-bottom: {{ section.settings.padding_bottom }}px;
@@ -33,252 +48,302 @@
     margin-bottom: {{ section.settings.margin_bottom }}px;
   "
   role="contentinfo"
-  aria-label="Footer">
+  aria-label="Footer"
+>
+  {% for block in section.blocks %}
+    <div class="w-full md:w-auto">
+      {% case block.type %}
+        {% when 'email_signup' %}
+          <div
+            class="email-signup-section {% if section.settings.color_scheme != blank %}color-{{ section.settings.color_scheme }}{% endif %}"
+            {{ block.shopify_attributes }}
+          >
+            <form id="email-signup-form" class="email-signup-container" aria-labelledby="newsletter-heading">
+              <h2 id="newsletter-heading" class="visually-hidden">
+                {{ block.settings.button_text | default: 'Sign up for our newsletter' }}
+              </h2>
+              <input type="hidden" name="form_type" value="customer">
+              <input type="hidden" name="utf8" value="✓">
+              <input type="hidden" name="contact[tags]" value="newsletter">
 
-   {% for block in section.blocks %}
-    {% case block.type %}
-      {% when 'email_signup' %}
-    <div class="email-signup-section {% if section.settings.color_scheme != blank %}color-{{ section.settings.color_scheme }}{% endif %}" {{ block.shopify_attributes }}>
-  <form id="email-signup-form" class="email-signup-container" aria-labelledby="newsletter-heading">
-    <h2 id="newsletter-heading" class="visually-hidden">{{ block.settings.button_text | default: 'Sign up for our newsletter' }}</h2>
-    <input type="hidden" name="form_type" value="customer" />
-    <input type="hidden" name="utf8" value="✓" />
-    <input type="hidden" name="contact[tags]" value="newsletter" />
-    
-    <div id="message-container" class="message-container" style="display: none;" aria-live="polite" role="status"></div>
-    
-    <div id="form-fields-container" class="form-fields-container">
-      <label for="email-input" class="visually-hidden">{{ block.settings.email_placeholder | default: 'EMAIL' }}</label>
-      <input type="email" 
-        id="email-input" 
-        name="contact[email]" 
-        class="email-input" 
-        placeholder="{{ block.settings.email_placeholder | default: 'EMAIL' }}" 
-        required
-        autocomplete="email">
-      <button type="submit" class="signup-button" aria-label="{{ block.settings.button_text | default: 'SIGN ME UP' }}">
-        <span class="arrow-icon" aria-hidden="true">→</span>
-        <span>{{ block.settings.button_text | default: 'SIGN ME UP' }}</span>
-      </button>
+              <div
+                id="message-container"
+                class="message-container"
+                style="display: none;"
+                aria-live="polite"
+                role="status"
+              ></div>
+
+              <div id="form-fields-container" class="form-fields-container">
+                <label for="email-input1" class="visually-hidden">
+                  {{- block.settings.email_placeholder | default: 'EMAIL' -}}
+                </label>
+                <input
+                  type="email"
+                  id="email-input1"
+                  name="contact[email]"
+                  class="email-input1"
+                  placeholder="{{ block.settings.email_placeholder | default: 'EMAIL' }}"
+                  required
+                  autocomplete="email"
+                >
+                <button
+                  type="submit"
+                  class="signup-button"
+                  aria-label="{{ block.settings.button_text | default: 'SIGN ME UP' }}"
+                >
+                  <span class="arrow-icon" aria-hidden="true">→</span>
+                  <span>{{ block.settings.button_text | default: 'SIGN ME UP' }}</span>
+                </button>
+              </div>
+            </form>
+          </div>
+
+          <div class="flex flex-wrap">
+        {% when 'scroll_tracker' %}
+          <div class="w-full md:w-[700px]">
+            <div
+              class="ml-0 md:ml-[50px] bg-[var(--cr-yellow-2)] text-black px-2 md:px-5 py-6 mt-5 rounded-[5px] group hover:bg-transparent border-2 border-transparent hover:border-[var(--cr-yellow-2)] hover:text-[var(--cr-yellow-2)] transition-colors duration-300 w-full md:mt-0 md:w-1/3 max-w-full text-left scroll-tracker md:relative absolute mt-[610px] md:ml-[152px] transform -translate-x-1/2 md:transform-none md:bottom-auto z-50"
+              aria-live="polite"
+              {{ block.shopify_attributes }}
+            >
+              <p class="text-[12px] md:text-[18px] font-semibold -mt-2 md:mt-[-13px] ml-2 md:ml-[6px] group-hover:text-[var(--cr-yellow-2)]">
+                {{ block.settings.scroll_text | default: 'YOU HAVE SCROLLED' }}
+              </p>
+
+              <div class="flex items-baseline bg-[var(--cr-yellow-1)] px-3 md:px-4 py-1 md:py-2 mt-1 rounded-[5px] transition-colors duration-300 border-3 border-transparent group-hover:bg-transparent group-hover:border-[var(--cr-yellow-2)] w-full max-w-[290px] md:max-w-full">
+                <div class="flex w-full justify-between items-baseline">
+                  <span
+                    id="scrollValueFooter"
+                    class="text-[24px] md:text-[36px] font-bold leading-none group-hover:text-[var(--cr-yellow-2)] w-[100px] md:w-[160px]"
+                  >
+                    0.185
+                  </span>
+                  <span class="text-[16px] md:text-[18px] font-semibold group-hover:text-[var(--cr-yellow-2)] w-[40px] md:w-[50px] ml-2 md:ml-[15px]">
+                    KM
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+          </div>
+
+        {% when 'support' %}
+          <div class="w-1/2 md:w-full flex pr-4 md:pr-20 mt-[0px] md:mt-[-8%] justify-end">
+            <div class="mb-6 w-[350px] md:max-w-[50%] px-4 ml:w-[150px]" {{ block.shopify_attributes }}>
+              <p class="uppercase md:normal-case font-bold text-[20px] md:text-[2.85rem] break-words text-left text-white" style="word-wrap: break-word; overflow-wrap: break-word;">
+                {{ block.settings.support_heading }}
+              </p>
+              <p class="uppercase md:normal-case mt-1 text-[13px] md:text-[1.85rem] break-words text-left text-white" style="word-wrap: break-word; overflow-wrap: break-word;">
+                {{ block.settings.support_text }}
+              </p>
+              <a
+                href="mailto:{{ block.settings.email_address }}"
+                class="relative mt-2 inline-block text-white text-[19px] md:text-[2.85rem] uppercase md:normal-case animated-underline break-words group" style="word-wrap: break-word; overflow-wrap: break-word;"
+              >
+                {{ block.settings.email_link_text }}
+                <span class="arrow"></span>
+              </a>
+
+              <!-- Social Icons moved inside support section -->
+         <div class="support-social-icons social-icons-hover" aria-labelledby="social-heading-support">
+                <h4 id="social-heading-support" class="sr-only">Follow Us</h4>
+                {%- if settings.social_facebook_link != blank -%}
+                  <a
+                    href="{{ settings.social_facebook_link }}"
+                    class="social-icon"
+                    style="color: {{ section.settings.menu_item_color }};"
+                    aria-label="Facebook"
+                  >
+                    {{
+                      'icon-facebook.svg'
+                      | inline_asset_content
+                      | replace: '<svg', '<svg role="img" aria-hidden="true" style="height: 30px; fill: '
+                      | append: settings.social_icon_color
+                      | remove: '_'
+                    }}
+                  </a>
+                {%- endif -%}
+                {%- if settings.social_instagram_link != blank -%}
+                  <a
+                    href="{{ settings.social_instagram_link }}"
+                    class="social-icon"
+                    aria-label="Instagram"
+                    style="color: {{ section.settings.menu_item_color }};"
+                  >
+                    {{
+                      'icon-instagram.svg'
+                      | inline_asset_content
+                      | replace: '<svg', '<svg role="img" aria-hidden="true" style="height: 30px; fill: '
+                      | append: settings.social_icon_color
+                      | remove: '_'
+                    }}
+                  </a>
+                {%- endif -%}
+                {%- if settings.social_youtube_link != blank -%}
+                  <a
+                    href="{{ settings.social_youtube_link }}"
+                    class="social-icon"
+                    aria-label="YouTube"
+                    style="color: {{ section.settings.menu_item_color }};"
+                  >
+                    {{
+                      'icon-youtube.svg'
+                      | inline_asset_content
+                      | replace: '<svg', '<svg role="img" aria-hidden="true" style="height: 25px; fill: '
+                      | append: settings.social_icon_color
+                      | remove: '_'
+                    }}
+                  </a>
+                {%- endif -%}
+                {%- if settings.social_tiktok_link != blank -%}
+                  <a
+                    href="{{ settings.social_tiktok_link }}"
+                    class="social-icon"
+                    aria-label="TikTok"
+                    style="color: {{ section.settings.menu_item_color }};"
+                  >
+                    {{
+                      'icon-tiktok.svg'
+                      | inline_asset_content
+                      | replace: '<svg', '<svg role="img" aria-hidden="true" style="height: 25px; fill: '
+                      | append: settings.social_icon_color
+                      | remove: "'"
+                    }}
+                  </a>
+                {%- endif -%}
+                {%- if settings.social_twitter_link != blank -%}
+                  <a
+                    href="{{ settings.social_twitter_link }}"
+                    class="social-icon"
+                    aria-label="Twitter"
+                    style="color: {{ section.settings.menu_item_color }};"
+                  >
+                    {{
+                      'icon-twitter.svg'
+                      | inline_asset_content
+                      | replace: '<svg', '<svg role="img" aria-hidden="true" style="height: 25px; fill: '
+                      | append: settings.social_icon_color
+                      | remove: "'"
+                    }}
+                  </a>
+                {%- endif -%}
+                {%- if settings.social_pinterest_link != blank -%}
+                  <a
+                    href="{{ settings.social_pinterest_link }}"
+                    class="social-icon"
+                    aria-label="Pinterest"
+                    style="color: {{ section.settings.menu_item_color }};"
+                  >
+                    {{
+                      'icon-pinterest.svg'
+                      | inline_asset_content
+                      | replace: '<svg', '<svg role="img" aria-hidden="true" style="height: 25px; fill: '
+                      | append: settings.social_icon_color
+                      | remove: "'"
+                    }}
+                  </a>
+                {%- endif -%}
+                {%- if settings.social_snapchat_link != blank -%}
+                  <a
+                    href="{{ settings.social_snapchat_link }}"
+                    class="social-icon"
+                    aria-label="Snapchat"
+                    style="color: {{ section.settings.menu_item_color }};"
+                  >
+                    {{
+                      'icon-snapchat.svg'
+                      | inline_asset_content
+                      | replace: '<svg', '<svg role="img" aria-hidden="true" style="height: 25px; fill: '
+                      | append: settings.social_icon_color
+                      | remove: "'"
+                    }}
+                  </a>
+                {%- endif -%}
+                {%- if settings.social_tumblr_link != blank -%}
+                  <a
+                    href="{{ settings.social_tumblr_link }}"
+                    class="social-icon"
+                    aria-label="Tumblr"
+                    style="color: {{ section.settings.menu_item_color }};"
+                  >
+                    {{
+                      'icon-tumblr.svg'
+                      | inline_asset_content
+                      | replace: '<svg', '<svg role="img" aria-hidden="true" style="height: 25px; fill: '
+                      | append: settings.social_icon_color
+                      | remove: "'"
+                    }}
+                  </a>
+                {%- endif -%}
+                {%- if settings.social_vimeo_link != blank -%}
+                  <a
+                    href="{{ settings.social_vimeo_link }}"
+                    class="social-icon"
+                    aria-label="Vimeo"
+                    style="color: {{ section.settings.menu_item_color }};"
+                  >
+                    {{
+                      'icon-vimeo.svg'
+                      | inline_asset_content
+                      | replace: '<svg', '<svg role="img" aria-hidden="true" style="height: 25px; fill: '
+                      | append: settings.social_icon_color
+                      | remove: "'"
+                    }}
+                  </a>
+                {%- endif -%}
+              </div>
+            </div>
+          </div>
+
+        {% when 'social_icons' %}
+          
+          <div class="hidden" {{ block.shopify_attributes }}></div>
+
+          <div class="flex flex-col md:flex-row justify-between items-start w-full">
+            <!-- Menu Section - Top on mobile, right side on desktop -->
+        <div class="menu-section w-full md:w-2/5 order-1 md:order-2 ml-[3px] md:ml-0">
+  <div class="flex flex-wrap justify-start md:justify-end">
+    <div class="flex flex-row flex-wrap justify-start md:justify-end gap-8 w-full ml-[15px] md:ml-0">
+      {% for block in section.blocks %}
+        {% case block.type %}
+          {% when 'menu' %}
+            <div class="menu-block" {{ block.shopify_attributes }}>
+              <div class="flex flex-col w-auto">
+                <div class="flex flex-col space-y-2">
+                  {% for link in linklists[block.settings.menu_links].links %}
+                    <a
+                      href="{{ link.url }}"
+                      class="text-[1.85rem]"
+                      style="color: {{ section.settings.menu_item_color }};"
+                    >
+                      {{- link.title -}}
+                    </a>
+                  {% endfor %}
+                </div>
+              </div>
+            </div>
+        {% endcase %}
+      {% endfor %}
     </div>
-  </form>
+  </div>
 </div>
 
 
-  
-      
-
-{% when 'scroll_tracker' %}
-<div
-  style="margin-left:50px"
-  class="bg-[var(--cr-yellow-2)] text-black px-10 py-6 mt-5 rounded-[5px] group hover:bg-transparent border-2 border-transparent hover:border-[var(--cr-yellow-2)] hover:text-[var(--cr-yellow-2)] transition-colors duration-300 w-[320px]"
-  aria-live="polite"
-  {{ block.shopify_attributes }}>
-
-    <p class="text-[20px] font-semibold mt-[-13px] group-hover:text-[var(--cr-yellow-2)]" style="margin-left:6px">{{ block.settings.scroll_text | default: 'YOU HAVE SCROLLED' }}</p>
-    
-    <div class="flex items-baseline bg-[var(--cr-yellow-1)] px-6 py-0 mt-4 rounded-[5px] transition-colors duration-300 border-3 border-transparent group-hover:bg-transparent group-hover:border-[var(--cr-yellow-2)] w-[283px]" style="margin:10px 10px 0px -7px">
-      <div class="flex w-full justify-between items-baseline">
-        <span id="scrollValueFooter" class="text-[64px] font-bold leading-none group-hover:text-[var(--cr-yellow-2)] w-[160px]">0.185</span>
-        <span class="text-[24px] font-semibold group-hover:text-[var(--cr-yellow-2)] w-[50px] ml-15">KM</span>
-      </div>
+            <!-- Logo Section - Bottom on mobile, left side on desktop -->
+       <div class="logo-container w-full md:w-3/5 mt-8 md:mt-16 md:ml-25 order-2 md:order-1 ml-[20px] md:ml-[60px]">
+  {% if section.settings.logo != blank %}
+    <img src="{{ section.settings.logo | img_url: 'master' }}" alt="{{ shop.name }}" class="w-full max-w-[300px] md:max-w-[450px] h-[75px] md:h-[100px] object-contain transform scale-118 md:scale-125" loading="lazy">
+  {% else %}
+    <div class="text-white text-4xl md:text-5xl font-bold transform scale-118 md:scale-125">
+      {{ shop.name }}
     </div>
-  </div>
+  {% endif %}
+</div>
 
-  
-{% when 'support' %}
-  <div class="w-full flex justify-end pr-9" style="margin-top: -11%"> 
-    <div class="mb-6 max-w-1/5 w-max" {{ block.shopify_attributes }}>
-      <p class="uppercase font-bold text-[2.85rem] break-words text-left text-white">{{ block.settings.support_heading }}</p> 
-      <p class="mt-1 text-[1.85rem] break-words text-left text-white">{{ block.settings.support_text }}</p> 
-      <a href="mailto:{{ block.settings.email_address }}"
-         class="relative mt-2 inline-block text-white text-[2.85rem] animated-underline break-words group"> 
-        {{ block.settings.email_link_text }}
-        <span class="arrow"></span> 
-      </a>
-    </div>
-  </div>
-
-
-      
-{% when 'menu' %}
-  <div class="flex w-full justify-end mt-6 text-gray-300 pr-[12%] space-x-12" {{ block.shopify_attributes }}>
-    <div class="inline-block">
-      <h4 class="text-[1.85rem] font-semibold mb-2" style="color: {{ section.settings.menu_item_color }};">
-        {{ block.settings.menu_title }}
-      </h4>
-      <div class="flex flex-col space-y-2">
-        {% for link in linklists[block.settings.menu_links].links %}
-          <a 
-            href="{{ link.url }}"  
-            class="text-[1.85rem]" 
-            style="color: {{ section.settings.menu_item_color }};"
-          >
-            {{- link.title -}}
-          </a>
-        {% endfor %}
-      </div>
-    </div>
-  </div>
-
-
-
-
-
-  
-        {% when 'social_icons' %}
-        <div class="footer-column" {{ block.shopify_attributes }}>
-          <div class="social-icons" aria-labelledby="social-heading">
-            {% if block.settings.social_title != blank %}
-              <h4 id="social-heading">{{ block.settings.social_title }}</h4>
-            {% endif %}
-            {%- if settings.social_facebook_link != blank -%}
-              <a
-                href="{{ settings.social_facebook_link }}"
-                class="social-icon"
-                style="color: {{ section.settings.menu_item_color }};"
-                aria-label="Facebook"
-              >
-                {{
-                  'icon-facebook.svg'
-                  | inline_asset_content
-                  | replace: '<svg', '<svg role="img" aria-hidden="true" style="height: 30px; fill: '
-                  | append: settings.social_icon_color
-                  | remove: '_'
-                }}
-              </a>
-            {%- endif -%}
-            {%- if settings.social_instagram_link != blank -%}
-              <a
-                href="{{ settings.social_instagram_link }}"
-                class="social-icon"
-                aria-label="Instagram"
-                style="color: {{ section.settings.menu_item_color }};"
-              >
-                {{
-                  'icon-instagram.svg'
-                  | inline_asset_content
-                  | replace: '<svg', '<svg role="img" aria-hidden="true" style="height: 30px; fill: '
-                  | append: settings.social_icon_color
-                  | remove: '_'
-                }}
-              </a>
-            {%- endif -%}
-            {%- if settings.social_youtube_link != blank -%}
-              <a
-                href="{{ settings.social_youtube_link }}"
-                class="social-icon"
-                aria-label="YouTube"
-                style="color: {{ section.settings.menu_item_color }};"
-              >
-                {{
-                  'icon-youtube.svg'
-                  | inline_asset_content
-                  | replace: '<svg', '<svg role="img" aria-hidden="true" style="height: 25px; fill: '
-                  | append: settings.social_icon_color
-                  | remove: '_'
-                }}
-              </a>
-            {%- endif -%}
-            {%- if settings.social_tiktok_link != blank -%}
-              <a
-                href="{{ settings.social_tiktok_link }}"
-                class="social-icon"
-                aria-label="TikTok"
-                style="color: {{ section.settings.menu_item_color }};"
-              >
-                {{
-                  'icon-tiktok.svg'
-                  | inline_asset_content
-                  | replace: '<svg', '<svg role="img" aria-hidden="true" style="height: 25px; fill: '
-                  | append: settings.social_icon_color
-                  | remove: "'"
-                }}
-              </a>
-            {%- endif -%}
-            {%- if settings.social_twitter_link != blank -%}
-              <a
-                href="{{ settings.social_twitter_link }}"
-                class="social-icon"
-                aria-label="Twitter"
-                style="color: {{ section.settings.menu_item_color }};"
-              >
-                {{
-                  'icon-twitter.svg'
-                  | inline_asset_content
-                  | replace: '<svg', '<svg role="img" aria-hidden="true" style="height: 25px; fill: '
-                  | append: settings.social_icon_color
-                  | remove: "'"
-                }}
-              </a>
-            {%- endif -%}
-            {%- if settings.social_pinterest_link != blank -%}
-              <a
-                href="{{ settings.social_pinterest_link }}"
-                class="social-icon"
-                aria-label="Pinterest"
-                style="color: {{ section.settings.menu_item_color }};"
-              >
-                {{
-                  'icon-pinterest.svg'
-                  | inline_asset_content
-                  | replace: '<svg', '<svg role="img" aria-hidden="true" style="height: 25px; fill: '
-                  | append: settings.social_icon_color
-                  | remove: "'"
-                }}
-              </a>
-            {%- endif -%}
-            {%- if settings.social_snapchat_link != blank -%}
-              <a
-                href="{{ settings.social_snapchat_link }}"
-                class="social-icon"
-                aria-label="Snapchat"
-                style="color: {{ section.settings.menu_item_color }};"
-              >
-                {{
-                  'icon-snapchat.svg'
-                  | inline_asset_content
-                  | replace: '<svg', '<svg role="img" aria-hidden="true" style="height: 25px; fill: '
-                  | append: settings.social_icon_color
-                  | remove: "'"
-                }}
-              </a>
-            {%- endif -%}
-            {%- if settings.social_tumblr_link != blank -%}
-              <a
-                href="{{ settings.social_tumblr_link }}"
-                class="social-icon"
-                aria-label="Tumblr"
-                style="color: {{ section.settings.menu_item_color }};"
-              >
-                {{
-                  'icon-tumblr.svg'
-                  | inline_asset_content
-                  | replace: '<svg', '<svg role="img" aria-hidden="true" style="height: 25px; fill: '
-                  | append: settings.social_icon_color
-                  | remove: "'"
-                }}
-              </a>
-            {%- endif -%}
-            {%- if settings.social_vimeo_link != blank -%}
-              <a
-                href="{{ settings.social_vimeo_link }}"
-                class="social-icon"
-                aria-label="Vimeo"
-                style="color: {{ section.settings.menu_item_color }};"
-              >
-                {{
-                  'icon-vimeo.svg'
-                  | inline_asset_content
-                  | replace: '<svg', '<svg role="img" aria-hidden="true" style="height: 25px; fill: '
-                  | append: settings.social_icon_color
-                  | remove: "'"
-                }}
-              </a>
-            {%- endif -%}
           </div>
-        </div>
-    {% endcase %}
+      {% endcase %}
+    </div>
   {% endfor %}
 </footer>
 
@@ -290,7 +355,7 @@
   .background-{{ section.settings.color_scheme }} {
     background-color: {{ settings.colors[section.settings.color_scheme].background }};
   }
-  
+
   /* Accessibility styles */
   .sr-only {
     position: absolute;
@@ -302,7 +367,7 @@
     clip: rect(0, 0, 0, 0);
     border: 0;
   }
-  
+
   /* Focus styles for keyboard navigation */
   a:focus,
   button:focus,
@@ -314,74 +379,75 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-  
-  const footerDistance = document.getElementById('scrollValueFooter');
-
-  if (!footerDistance) {
-    console.error('Could not find element with ID "scrollValueFooter"');
-    return;
-  }
-  footerDistance.textContent = (0.000).toFixed(3);
-  let lastScrollPosition = window.scrollY || document.documentElement.scrollTop;
-  let totalScrollDistance = 0;
-  let lastScrollTime = 0;
-  const distanceDivisor = 100000;
-  window.addEventListener('scroll', function() {
-    const now = Date.now();
-    if (now - lastScrollTime < 100) {
-      return;
-    }
-    lastScrollTime = now;
-    const currentScrollPosition = window.scrollY || document.documentElement.scrollTop;
-    const scrollDifference = Math.abs(currentScrollPosition - lastScrollPosition);
-    totalScrollDistance += scrollDifference;
-    const distanceInKM = (totalScrollDistance / distanceDivisor).toFixed(3);
-    footerDistance.textContent = distanceInKM;
-    lastScrollPosition = currentScrollPosition;
-  });
-});
-
-document.addEventListener('DOMContentLoaded', function() {
   const form = document.getElementById('email-signup-form');
-  const emailInput = document.getElementById('email-input');
+  const messageContainer = document.getElementById('message-container');
   const formFieldsContainer = document.getElementById('form-fields-container');
   
-  // Use onclick on the submit button instead
-  const submitButton = form.querySelector('button[type="submit"]');
-  submitButton.onclick = function(e) {
-    e.preventDefault();
-    
-    // Check if email is empty
-    if (emailInput.value.trim() === '') {
-      emailInput.classList.add('error');
-      return false;
-    }
-    
-    emailInput.classList.remove('error');
-    
-    // Replace the form fields with success message immediately
-    formFieldsContainer.innerHTML = '<div class="success-message">Thank you for signing up!</div>';
-    
-    // Optional: still send the data to the server in the background
-    const formData = new FormData(form);
-    fetch('/contact', {
-      method: 'POST',
-      body: formData,
-      headers: {
-        'Accept': 'application/json'
-      }
-    }).catch(error => {
-      console.error('Error:', error);
-    });
-    
-    return false;
-  };
+  // Stop the form from submitting normally - attach event listener directly to the button
+  const signupButton = document.querySelector('.signup-button');
   
-  emailInput.addEventListener('input', function() {
-    if (emailInput.value.trim() !== '') {
-      emailInput.classList.remove('error');
+  if (signupButton) {
+    // Prevent the default click action on the button
+    signupButton.addEventListener('click', function(event) {
+      event.preventDefault();
+      event.stopPropagation();
+      
+      const emailInput = document.getElementById('email-input1');
+      const email = emailInput.value;
+      
+      // Basic email validation
+      if (!email || !isValidEmail(email)) {
+        showMessage('Please enter a valid email address.', 'error');
+        return false;
+      }
+      
+      // Hide the form fields
+      formFieldsContainer.style.display = 'none';
+      
+      // Show the success message
+      showMessage('Thanks for signing up!', 'success');
+      
+      // Return false to prevent form submission
+      return false;
+    });
+  }
+  
+  // Also handle the form submit event as a backup
+  if (form) {
+    form.addEventListener('submit', function(event) {
+      // This will prevent the form from submitting and refreshing the page
+      event.preventDefault();
+      event.stopPropagation();
+      return false;
+    });
+  }
+  
+  function isValidEmail(email) {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  }
+  
+  function showMessage(message, type) {
+    messageContainer.innerHTML = `<p class="message ${type}">${message}</p>`;
+    messageContainer.style.display = 'block';
+    
+    // Add some basic styling to the message
+    const messageElement = messageContainer.querySelector('.message');
+    if (messageElement) {
+      messageElement.style.padding = '15px';
+      messageElement.style.margin = '10px 0';
+      messageElement.style.borderRadius = '4px';
+      
+      // Use inherit for background color to maintain parent's background
+      messageElement.style.backgroundColor = 'inherit';
+      
+      if (type === 'success') {
+        messageElement.style.color = '#FFFFFF';
+      } else if (type === 'error') {
+        messageElement.style.color = '#FFFFFF';
+      }
     }
-  });
+  }
 });
 </script>
 
@@ -389,6 +455,11 @@ document.addEventListener('DOMContentLoaded', function() {
 {
   "name": "Footer",
   "settings": [
+    {
+      "type": "image_picker",
+      "id": "logo",
+      "label": "Logo Image"
+    },
     {
       "type": "color_scheme",
       "id": "color_scheme",
@@ -550,7 +621,7 @@ document.addEventListener('DOMContentLoaded', function() {
   ],
   "presets": [
     {
-      "name": " Footer",
+      "name": "Footer",
       "category": "Footer",
       "blocks": [
         {
@@ -572,4 +643,4 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   ]
 }
-{% endschema %} 
+{% endschema %}
