@@ -6,6 +6,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const answer = item.querySelector(".faq-answer");
 
     const fullText = preview.dataset.answer || "";
+    preview.classList.add("break-words");
 
     const styleClass = 'font-bold underline break-all';
 
@@ -53,13 +54,20 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     };
 
-    row.addEventListener("click", doToggle);
+    row.addEventListener("click", (e) => {
+      const selection = window.getSelection();
+      if (!selection || selection.toString().trim() === "") {
+        doToggle();
+      }
+    });
+
     row.addEventListener("keydown", e => {
       if (e.key === "Enter" || e.key === " ") {
         e.preventDefault();
         doToggle();
       }
     });
+
     btn.addEventListener("keydown", e => {
       if (e.key === "Enter" || e.key === " ") {
         e.preventDefault();
