@@ -1,4 +1,4 @@
-<div class="featured-collection-page-width py-10">
+<div class="featured-collection-page-width overflow-hidden py-10">
   {% if section.settings.heading != blank %}
     <h2 class="md:!text-9xl text-6xl font-bold mb-4">{{ section.settings.heading }}</h2>
   {% endif %}
@@ -8,7 +8,7 @@
       <p class="text-2xl md:text-4xl p-2 text-gray-700 mr-auto">{{ section.settings.description }}</p>
     {% endif %}
 
-    {% if section.settings.collection %}
+    {% if section.settings.show_shop_all and section.settings.collection %}
       <a
         href="{{ section.settings.collection.url }}"
         class="image-with-text-custom-button"
@@ -37,12 +37,12 @@
 
   <hr class="border-gray-300 my-6">
 
-  <div class="flex flex-col md:flex-row gap-6">
-    <div class="filters-container w-full md:w-1/4 order-1 md:order-none mb-4 md:mb-0">
-      <div class="gender-filters flex flex-row md:flex-col flex-wrap gap-1">
+  <div class="featured_collection_filters flex flex-col md:flex-row mt-10 gap-[40px]">
+    <div class="filters-container w-full md:w-[400px] min-w-[350px] order-1 md:order-none mb-4 md:mb-0">
+      <div class="gender-filters flex flex-row md:flex-col flex-wrap">
         {% for block in section.blocks %}
           <button
-            class="filter-btn {% if forloop.first %}active{% endif %} w-auto md:w-full"
+            class="filter-btn {% if forloop.first %}active{% endif %} w-auto md:w-full h-[59px] flex items-center justify-between"
             data-filter="{{ block.settings.tag | downcase }}"
             aria-label="Filter by {{ block.settings.label }}"
             aria-pressed="{% if forloop.first %}true{% else %}false{% endif %}"
@@ -56,7 +56,7 @@
       </div>
     </div>
 
-    <div class="products-container w-full md:w-3/4 order-2 md:order-none">
+    <div class="products-container w-full md:flex-1 order-2 md:order-none">
       {% if section.settings.collection %}
         <div class="slider-container relative">
           <div
@@ -70,7 +70,7 @@
               >
                 <div class="product-image-wrapper relative group">
                   {% unless product.available %}
-                    <div class="absolute top-3 right-10 z-10">
+                    <div class="absolute top-3 right-4 z-10">
                       <span class="inline-block rounded-xl px-4 text-[12px] tracking-wide font-medium bg-zinc-800 text-white">
                         SOLD OUT
                       </span>
@@ -189,7 +189,7 @@
 
                       {% if product.available %}
                         <button
-                          class="add-to-cart-btn w-90 bg-black text-white py-2 px-4 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                          class="add-to-cart-btn w-90 bg-white text-black py-2 px-4 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-300"
                           data-product-id="{{ product.id }}"
                           {% if product.has_only_default_variant %}
                             data-variant-id="{{ product.variants.first.id }}"
@@ -206,7 +206,7 @@
                         </button>
                       {% else %}
                         <button
-                          class="notify-me-btn w-90 bg-black text-white py-2 px-4 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                          class="notify-me-btn w-90 bg-white text-black py-2 px-4 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-300"
                           data-product-id="{{ product.id }}"
                           data-product-title="{{ product.title | escape }}"
                           data-has-variants="{% if has_size_variants %}true{% else %}false{% endif %}"
@@ -302,13 +302,23 @@
   }
 
   @media (min-width: 768px) {
-    .gender-filters {
-      justify-content: flex-start;
+    .filters-container {
+      width: 400px !important;
+      min-width: 400px;
+      max-width: 400px;
     }
 
-    .filter-btn {
-      width: 100%;
-      justify-content: space-between;
+    .products-container {
+      width: calc(100% - 400px - 1.5rem) !important; 
+      overflow: hidden;
+    }
+
+    .slider-container {
+      margin-right: -1.5rem; 
+    }
+
+    .product-slider {
+      padding-right: 1.5rem; 
     }
   }
 
@@ -379,7 +389,6 @@
     top: 50%;
     transform: translateY(-50%);
     z-index: 15;
-    background-color: rgba(255, 255, 255, 0.7);
     border-radius: 50%;
     width: 32px;
     height: 32px;
@@ -424,11 +433,13 @@
     height: 40px;
     position: relative;
     z-index: 5;
+    cursor: pointer;
   }
 
   .add-to-cart-btn:hover,
   .notify-me-btn:hover {
-    background-color: #333;
+    background-color: black;
+    color: white;
   }
 
   .size-variants-container {
@@ -484,6 +495,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
+    cursor: pointer;
   }
 
   .unavailable-size {
@@ -722,68 +734,35 @@
   }
 
   @media (max-width: 768px) {
-    .product-details h3 {
-      font-size: 12px !important;
-      line-height: 1.4;
-    }
-
-    .product-details span {
-      font-size: 12px !important;
+    .gender-filters {
+      gap: 5px;
+      justify-content: left;
     }
 
     .filter-btn {
-      padding: 0.5rem 1rem;
-      font-size: 0.9rem;
+      padding: 0 6px !important;
+      border: none !important;
+      border-radius: 4px !important;
+      background: #f4f4f4 !important;
+      font-size: 14px !important;
+      min-width: fit-content !important;
+      height: 24px !important;
     }
 
-    .size-option-btn {
-      width: 28px;
-      height: 28px;
-      font-size: 0.8rem;
+    .filter-btn.active {
+      background: #000 !important;
+      color: #fff !important;
     }
 
-    .size-label {
-      font-size: 0.9rem;
+    .filter-btn .svg-arrow-right {
+      display: none !important;
     }
-
-    .add-to-cart-btn,
-    .notify-me-btn {
-      font-size: 0.9rem;
-      height: 36px;
-    }
-
-    .image-with-text-button-text,
-    .image-with-text-button-text-hover {
-      font-size: 18px;
-    }
-
-    .image-with-text-button-arrow {
-      margin-left: 12px;
-    }
-
+     .size-variants-container,
     .product-cart-container,
-    .size-variants-container,
-    .add-to-cart-btn,
-    .notify-me-btn {
+    .cart-options-wrapper {
       display: none !important;
-    }
-
-    .product-card {
-      position: relative;
-    }
-
-    .product-card .product-image-link {
-      display: block;
-      width: 100%;
-    }
-
-    .image-nav-arrow {
-      display: none;
-    }
-
-    #waitlist-modal-overlay {
-      display: none !important;
-    }
+      opacity: 0 !important;
+      visibility: hidden !important;
   }
 </style>
 
@@ -1207,6 +1186,13 @@
       "id": "description",
       "label": "Description",
       "default": "Discover the best products in our featured collection."
+    },
+    {
+      "type": "checkbox",
+      "id": "show_shop_all",
+      "label": "Show Shop All button",
+      "default": true,
+      "info": "Enable or disable the Shop All button"
     },
     {
       "type": "text",
