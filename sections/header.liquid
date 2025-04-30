@@ -312,8 +312,56 @@
             </svg>
           </a>
 
-          <!-- Optional URLs -->
-          <div class="countrySelector hidden lg:!block">Country</div>
+          <!-- Country Selector -->
+
+          <div class="group relative hidden lg:!inline-block ">
+            <!-- Trigger: Current country -->
+            <div class="inline-flex items-center cursor-pointer px-3 gap-2 hover:bg-gray-100">
+              {% assign current_country = localization.country %}
+              <span class="mr-2">
+                {{ current_country.name }}
+              </span>
+              {% if current_country.iso_code %}
+                <img
+                  src="https://flagcdn.com/24x18/{{ current_country.iso_code | downcase }}.png"
+                  alt="{{ current_country.name }} flag"
+                  width="24"
+                  height="18"
+                  class="inline-block "
+                >
+              {% endif %}
+              <svg class="ml-2 w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+              </svg>
+            </div>
+
+            <!-- Dropdown -->
+            <div class="absolute right-0 mt-2 w-80 bg-white border border-gray-200 rounded-md shadow-lg opacity-0 group-hover:opacity-100 invisible group-hover:visible transition-all duration-300">
+              <ul class="max-h-100 overflow-y-auto divide-y divide-gray-100 text-xl">
+                {% for country in localization.available_countries %}
+                  <li>
+                    <a
+                      href="{{ country.url }}"
+                      class="flex items-center px-4 py-2 hover:bg-gray-100"
+                    >
+                      <img
+                        src="https://flagcdn.com/24x18/{{ country.iso_code | downcase }}.png"
+                        alt="{{ country.name }} flag"
+                        class="w-5 h-4 mr-3 border rounded-sm"
+                        width="24"
+                        height="18"
+                      >
+                      <span class="flex-1">{{ country.name }}</span>
+                      <span class="text-gray-500 ml-auto">
+                        {{ country.currency.symbol }}
+                        {{ country.currency.iso_code }}
+                      </span>
+                    </a>
+                  </li>
+                {% endfor %}
+              </ul>
+            </div>
+          </div>
 
           <!-- Login -->
           <a
@@ -558,8 +606,64 @@
     </nav>
 
     <div class="flex flex-col w-full p-6 ">
-      <div class="optionalLinks flex flex-col gap-1 mb-4 font-semibold ">
-        <div class="countrySelectorMOBILE">Country</div>
+      <div class="flex flex-col gap-1 mb-4 font-semibold ">
+        <div class="country-selector relative inline-block">
+          <!-- Trigger: Current country -->
+          <button
+            type="button"
+            class="country-selector-button inline-flex items-center cursor-pointer px-3 gap-2 hover:bg-gray-100"
+            aria-expanded="false"
+          >
+            {% assign current_country = localization.country %}
+            <span class="">
+              {{ current_country.name }}
+            </span>
+            {% if current_country.iso_code %}
+              <img
+                src="https://flagcdn.com/24x18/{{ current_country.iso_code | downcase }}.png"
+                alt="{{ current_country.name }} flag"
+                width="24"
+                height="18"
+                class="inline-block"
+              >
+            {% endif %}
+            <svg
+              class="ml-2 w-4 h-4 text-gray-600 transition-transform duration-300"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+            </svg>
+          </button>
+
+          <!-- Dropdown -->
+          <div class="country-selector-dropdown absolute bottom-16 w-80 bg-white border border-gray-200 rounded-md shadow-lg opacity-0 invisible transition-all duration-300 z-[9999]">
+            <ul class="max-h-100 overflow-y-auto divide-y divide-gray-100 text-xl">
+              {% for country in localization.available_countries %}
+                <li>
+                  <a
+                    href="{{ country.url }}"
+                    class="flex items-center px-4 py-2 hover:bg-gray-100"
+                  >
+                    <img
+                      src="https://flagcdn.com/24x18/{{ country.iso_code | downcase }}.png"
+                      alt="{{ country.name }} flag"
+                      class="w-5 h-4 mr-3 border rounded-sm"
+                      width="24"
+                      height="18"
+                    >
+                    <span class="flex-1">{{ country.name }}</span>
+                    <span class="text-gray-500 ml-auto">
+                      {{ country.currency.symbol }}
+                      {{ country.currency.iso_code }}
+                    </span>
+                  </a>
+                </li>
+              {% endfor %}
+            </ul>
+          </div>
+        </div>
 
         <a
           href="/account/login"
@@ -1103,5 +1207,31 @@
     setHeaderHeight();
     window.addEventListener('resize', setHeaderHeight, { passive: true });
     window.addEventListener('scroll', () => requestAnimationFrame(handleScroll), { passive: true });
+
+    // Country Selector for Mobile
+    const countrySelector = document.querySelector('.country-selector');
+    const countrySelectorBtn = document.querySelector('.country-selector-button');
+    const countrySelectorDropdown = document.querySelector('.country-selector-dropdown');
+
+    if (countrySelector && countrySelectorBtn && countrySelectorDropdown) {
+      countrySelectorBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const isExpanded = countrySelectorBtn.getAttribute('aria-expanded') === 'true';
+
+        countrySelectorBtn.setAttribute('aria-expanded', !isExpanded);
+        countrySelectorBtn.querySelector('svg').style.transform = isExpanded ? 'rotate(0)' : 'rotate(180deg)';
+        countrySelectorDropdown.classList.toggle('opacity-0');
+        countrySelectorDropdown.classList.toggle('invisible');
+      });
+
+      // Close dropdown when clicking outside
+      document.addEventListener('click', (e) => {
+        if (!countrySelector.contains(e.target)) {
+          countrySelectorBtn.setAttribute('aria-expanded', 'false');
+          countrySelectorBtn.querySelector('svg').style.transform = 'rotate(0)';
+          countrySelectorDropdown.classList.add('opacity-0', 'invisible');
+        }
+      });
+    }
   });
 </script>
