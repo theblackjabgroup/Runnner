@@ -1,4 +1,5 @@
-<section class="product-section">
+<!-- Desktop view -->
+<section class="product-section hidden lg:!flex lg:flex-row gap-4 lg:gap-8 px-4 py-8">
   {%- comment -%} Left: Image Gallery {%- endcomment -%}
   <div class="product-gallery w-1/2">
     <div class="gallery-wrapper sticky top-0 h-screen">
@@ -178,6 +179,193 @@
   </div>
 </section>
 
+<!-- Mobile view -->
+<section class="lg:hidden flex flex-col gap-6 px-4 py-4 mobile-sticky-container">
+  <!-- Mobile Image Gallery -->
+  <div class="mobile-gallery">
+    <!-- Main Image Stack -->
+    <div class="main-images relative h-[70vh] overflow-hidden">
+      {%- if product.media.size > 0 -%}
+        {%- for media in product.media -%}
+          <div
+            class="mobile-gallery-item w-full h-full {% unless forloop.first %}absolute top-0 left-0{% endunless %} {% if forloop.first %}relative{% endif %}"
+            data-mobile-index="{{ forloop.index0 }}"
+            style="opacity: {% if forloop.first %}1{% else %}0{% endif %}; transition: opacity 0.3s ease;"
+          >
+            <img
+              src="{{ media | image_url: width: 1200 }}"
+              alt="{{ media.alt | escape }}"
+              class="w-full h-full object-cover"
+              loading="{% if forloop.first %}eager{% else %}lazy{% endif %}"
+              width="full"
+              height="full"
+            >
+          </div>
+        {%- endfor -%}
+      {%- endif -%}
+    </div>
+
+    <!-- Mobile Thumbnail Strip -->
+    <div class="thumbnail-strip mt-8 pb-2 overflow-x-auto mx-auto w-fit">
+      <div class="flex gap-2 snap-x  p-4">
+        {%- for media in product.media -%}
+          <button
+            class="thumbnail-item flex-shrink-0 w-20 h-20 p-2 "
+            data-thumb-index="{{ forloop.index0 }}"
+          >
+            <img
+              src="{{ media | image_url: width: 150 }}"
+              alt="{{ media.alt | escape }}"
+              class="w-full h-full object-cover rounded"
+              loading="lazy"
+              width="full"
+              height="full"
+            >
+          </button>
+        {%- endfor -%}
+      </div>
+    </div>
+  </div>
+
+  <!-- Mobile Product Details -->
+  <div class="mobile-details mt-6">
+    <div class="details-inner flex flex-col">
+      {%- comment -%} Header {%- endcomment -%}
+      <div class="product-header space-y-8">
+        <div class="header-top flex flex-col gap-4">
+          <div class="product-status flex items-center gap-4">
+            {% if product.available != true %}
+              <span class="inline-flex items-center px-3 py-1 text-2xl tracking-wider bg-black text-white uppercase rounded"
+                >Sold Out</span
+              >
+            {% endif %}
+          </div>
+          <h1 class="text-4xl font-bold">{{ product.title }}</h1>
+          <div class="product-variants my-8">
+            <div class="flex items-center gap-2">
+              <span class="inline-block text-2xl font-medium">SELECT COLOR:</span>
+              {%- assign first_color = product.options_with_values | where: 'name', 'Color' | first -%}
+              <span class="active-color text-2xl" data-active-color>
+                {{- first_color.values | first -}}
+              </span>
+            </div>
+            <div class="color-options flex gap-3 p-2">
+              {%- for option in product.options_with_values -%}
+                {%- if option.name == 'Color' -%}
+                  {%- for value in option.values -%}
+                    <button
+                      type="button"
+                      class="color-swatch w-8 h-8 rounded-full hover:scale-110 transition-transform {% if forloop.first %}ring-2 ring-offset-2 ring-black{% endif %}"
+                      style="background-color: {{ value | handleize }};"
+                      data-option-value="{{ value | escape }}"
+                    >
+                      <span class="sr-only">{{ value }}</span>
+                    </button>
+                  {%- endfor -%}
+                {%- endif -%}
+              {%- endfor -%}
+            </div>
+          </div>
+        </div>
+      </div>
+      {%- comment -%} Tabs {%- endcomment -%}
+      <div class="product-tabs flex-1">
+        <div class="tabs-nav flex border-t border-gray-200">
+          <button
+            class="tab-btn text-black border-black flex-1 p-4 border-t-2 hover:text-black hover:border-black transition-colors duration-300"
+            data-tab="description"
+          >
+            Description
+          </button>
+          <button
+            class="tab-btn flex-1 p-4 text-gray-500 border-t-2 border-transparent hover:text-black hover:border-black transition-colors duration-300"
+            data-tab="details"
+          >
+            Details
+          </button>
+          <button
+            class="tab-btn flex-1 p-4 text-gray-500 border-t-2 border-transparent hover:text-black hover:border-black transition-colors duration-300"
+          >
+            Sizing
+          </button>
+        </div>
+        <div class="tab-content p-8">
+          <div class="tab-pane active" data-content="description">{{ product.description }}</div>
+          <div class="tab-pane hidden" data-content="details">Product details here...</div>
+          <div class="tab-pane hidden" data-content="sizing">Size guide here...</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Mobile Sticky Size & Price Selector -->
+  <div
+    class="mobile-sticky-selector   w-full shadow-lg transition-all duration-300 sticky-div"
+    data-sticky-selector
+  >
+    <div class="size-price-selector  flex flex-col gap-4   max-h-[80vh] w-[100%] ">
+      <div class="size-selector border-t border-gray-400 py-4 flex justify-between ">
+        <div class="flex items-center mb-4">
+          <span class="text-xl font-medium">SELECT SIZE:</span>
+        </div>
+        <div class="size-buttons flex-1 justify-end flex gap-4">
+          {%- assign size_options = product.options_with_values | where: 'name', 'Size' | first -%}
+          {%- for value in size_options.values -%}
+            {%- assign size_variant = product.variants | where: 'option2', value | first -%}
+            <button
+              type="button"
+              class="size-btn relative w-10 h-10 flex items-center justify-center {% if forloop.first %}bg-black text-white{% endif %} {% unless size_variant.available %}opacity-50 cursor-not-allowed{% endunless %} transition-all duration-300"
+              data-value="{{ value | escape }}"
+              {% unless size_variant.available %}
+                disabled
+                aria-disabled="true"
+              {% endunless %}
+              aria-label="Size {{ value }}{% unless size_variant.available %} - Sold out{% endunless %}"
+            >
+              <span class="relative z-10 text-xl font-bold ">{{ value }}</span>
+              {% unless size_variant.available %}
+                <span class="absolute inset-0 flex items-center justify-center">
+                  <span class="block w-full h-[2px] bg-neutral-900 rotate-135 origin-center"></span>
+                </span>
+              {% endunless %}
+            </button>
+          {%- endfor -%}
+        </div>
+      </div>
+
+      <div class="price-selector flex flex-col gap-2 border-t border-gray-400 py-4">
+        <div class="flex flex-col items-center justify-between">
+          <div class="flex items-center gap-2">
+            <span class="text-2xl font-bold">${{ product.price | money_without_currency }}</span>
+            {% if product.compare_at_price > product.price %}
+              <span class="text-2xl text-gray-500">|</span>
+              <span class="text-2xl line-through text-gray-500">
+                ${{ product.compare_at_price | money_without_currency -}}
+              </span>
+              <div class="text-xl text-red-600">
+                Save {{ product.compare_at_price | minus: product.price | money_without_currency }}$ (
+                {{-
+                  product.compare_at_price
+                  | minus: product.price
+                  | times: 100
+                  | divided_by: product.compare_at_price
+                -}}
+                %)
+              </div>
+            {% endif %}
+          </div>
+          <button class=" flex justify-between  bg-black text-white mx-6 px-8 py-3 text-4xl font-medium  w-full hover:bg-gray-900 transition-colors">
+            <span>-></span>
+            <span>
+              {%- if product.available %}Add to Cart{% else %}Sold Out{% endif -%}
+            </span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
 <style>
   .product-section {
     display: flex;
@@ -281,6 +469,43 @@
     opacity: 0.8;
     cursor: not-allowed;
   }
+
+  /* Mobile-specific styles */
+  @media (max-width: 1024px) {
+    .mobile-gallery-item {
+      will-change: opacity, transform;
+      transition: opacity 0.3s ease;
+      position: absolute;
+      inset: 0;
+    }
+
+    .mobile-gallery-item.active {
+      opacity: 1;
+      z-index: 2;
+      position: relative;
+    }
+
+    .thumbnail-item {
+      transition: all 0.3s ease;
+      opacity: 0.6;
+      border: 2px solid transparent;
+    }
+
+    .thumbnail-item.active {
+      opacity: 1;
+      border-color: black;
+      transform: scale(1.05);
+    }
+
+    .product-tabs {
+      height: auto;
+      min-height: 200px;
+    }
+
+    .tab-content {
+      height: auto;
+    }
+  }
 </style>
 
 <script>
@@ -326,7 +551,7 @@
 
     const firstSwatch = document.querySelector('.color-swatch');
     if (firstSwatch) {
-      firstSwatch.classList.add('ring-2', 'ring-offset-2', 'ring-black');
+      firstSwatch.classList.add('ring-1', 'ring-offset-2', 'ring-black');
       const initialColor = firstSwatch.getAttribute('data-option-value');
       document.querySelector('[data-active-color]').textContent = initialColor;
     }
@@ -355,21 +580,35 @@
       });
     });
     const colorSwatches = document.querySelectorAll('.color-swatch');
-    const activeColorDisplay = document.querySelector('[data-active-color]');
+    const activeColorDisplays = document.querySelectorAll('[data-active-color]');
 
     colorSwatches.forEach((swatch) => {
       swatch.addEventListener('click', () => {
         const selectedColor = swatch.getAttribute('data-option-value');
-        activeColorDisplay.textContent = selectedColor;
 
+        // Update all color displays
+        activeColorDisplays.forEach((display) => {
+          display.textContent = selectedColor;
+        });
+
+        // Update swatch states
         colorSwatches.forEach((s) => {
-          s.className = s.className.replace(/ring-\w+\s*/g, '');
-          if (s === swatch) {
+          s.classList.remove('ring-2', 'ring-offset-2', 'ring-black');
+          if (s.getAttribute('data-option-value') === selectedColor) {
             s.classList.add('ring-2', 'ring-offset-2', 'ring-black');
           }
         });
       });
     });
+
+    // Initialize first color
+    if (colorSwatches.length > 0) {
+      const initialColor = colorSwatches[0].getAttribute('data-option-value');
+      activeColorDisplays.forEach((display) => {
+        display.textContent = initialColor;
+      });
+      colorSwatches[0].classList.add('ring-2', 'ring-offset-2', 'ring-black');
+    }
 
     // Size button handling
     const sizeButtons = document.querySelectorAll('.size-btn');
@@ -402,6 +641,49 @@
         });
       });
     });
+
+    // Mobile Gallery Handling
+    if (window.innerWidth < 1024) {
+      const mobileImages = document.querySelectorAll('.mobile-gallery-item');
+      const thumbnails = document.querySelectorAll('.thumbnail-item');
+      let currentIndex = 0;
+
+      function showImage(index) {
+        mobileImages.forEach((img, i) => {
+          if (i === index) {
+            img.classList.add('active');
+            img.style.opacity = '1';
+            img.style.zIndex = '2';
+          } else {
+            img.classList.remove('active');
+            img.style.opacity = '0';
+            img.style.zIndex = '1';
+          }
+        });
+
+        thumbnails.forEach((thumb, i) => {
+          if (i === index) {
+            thumb.classList.add('active');
+            thumb.style.opacity = '1';
+          } else {
+            thumb.classList.remove('active');
+            thumb.style.opacity = '0.6';
+          }
+        });
+
+        currentIndex = index;
+      }
+
+      // Add click handlers to thumbnails
+      thumbnails.forEach((thumb, index) => {
+        thumb.addEventListener('click', () => {
+          showImage(index);
+        });
+      });
+
+      // Initialize with first image
+      showImage(0);
+    }
   });
 </script>
 
