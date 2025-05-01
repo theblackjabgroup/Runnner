@@ -389,6 +389,35 @@
 {% endstyle %}
 
 <script>
+
+  document.addEventListener('DOMContentLoaded', function() {
+  
+  const footerDistance = document.getElementById('scrollValueFooter');
+
+  if (!footerDistance) {
+    console.error('Could not find element with ID "scrollValueFooter"');
+    return;
+  }
+  footerDistance.textContent = (0.000).toFixed(3);
+  let lastScrollPosition = window.scrollY || document.documentElement.scrollTop;
+  let totalScrollDistance = 0;
+  let lastScrollTime = 0;
+  const distanceDivisor = 100000;
+  window.addEventListener('scroll', function() {
+    const now = Date.now();
+    if (now - lastScrollTime < 100) {
+      return;
+    }
+    lastScrollTime = now;
+    const currentScrollPosition = window.scrollY || document.documentElement.scrollTop;
+    const scrollDifference = Math.abs(currentScrollPosition - lastScrollPosition);
+    totalScrollDistance += scrollDifference;
+    const distanceInKM = (totalScrollDistance / distanceDivisor).toFixed(3);
+    footerDistance.textContent = distanceInKM;
+    lastScrollPosition = currentScrollPosition;
+  });
+});
+
 document.addEventListener('DOMContentLoaded', function() {
   const form = document.getElementById('email-signup-form');
   const messageContainer = document.getElementById('message-container');
