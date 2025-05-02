@@ -1369,16 +1369,19 @@
 
     // Bottom bar
     const bottomBarIndicator = document.getElementById('bottom-bar-indicator');
-    const menuItems = document.querySelectorAll('.menu-items ul > li > a');
 
     if (bottomBarIndicator) {
       bottomBarIndicator.style.width = '100%';
       bottomBarIndicator.style.transform = 'translateX(0)';
     }
 
+    const menuItems = document.querySelectorAll('.menu-items ul > li.dropdown-group');
+
     menuItems.forEach((item) => {
-      item.addEventListener('mouseenter', (e) => {
-        const rect = item.getBoundingClientRect();
+      const link = item.querySelector('a');
+
+      item.addEventListener('mouseenter', () => {
+        const rect = link.getBoundingClientRect();
         const containerRect = item.closest('.menu-items').getBoundingClientRect();
         const left = rect.left - containerRect.left;
         const width = rect.width;
@@ -1388,6 +1391,7 @@
       });
 
       item.addEventListener('mouseleave', () => {
+        // Reset only when leaving the whole dropdown group
         bottomBarIndicator.style.width = `100%`;
         bottomBarIndicator.style.transform = `translateX(0)`;
       });
