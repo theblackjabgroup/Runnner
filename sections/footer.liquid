@@ -37,6 +37,12 @@
     transition: fill 0.3s ease;
   }
 
+  @media screen and (max-width: 767px) {
+  .support-social-icons {
+    margin-top: 20px;
+  }
+}
+
 </style>
 
 <footer
@@ -128,7 +134,7 @@
 
 
         {% when 'support' %}
-          <div class="w-1/2 md:w-full flex pr-4 md:pr-8 mt-[0px] md:mt-[-10%] justify-end">
+          <div class="w-1/2 md:w-full flex pr-4 md:pr-8 mt-[0px] md:mt-[-9%] justify-end">
             <div class="mb-6 w-[350px]  ml-[-10px] md:max-w-[50%] px-4 ml:w-[150px]" {{ block.shopify_attributes }}>
               <p class="uppercase md:normal-case font-bold text-[20px] md:text-[24px] break-words text-left text-white" style="word-wrap: break-word; overflow-wrap: break-word;">
                 {{ block.settings.support_heading }}
@@ -330,17 +336,17 @@
 
 
             <!-- Logo Section - Bottom on mobile, left side on desktop -->
-     <div class="logo-container w-full md:w-3/5 mt-8 md:mt-16 md:ml-25 order-2 md:order-1 ml-[20px] md:ml-[65px]">
+    <div class="logo-container w-full md:w-3/5 mt-13 md:mt-16 pl-[30px] md:ml-[65px] order-2 md:order-1">
   {% if section.settings.logo != blank %}
     <img 
       src="{{ section.settings.logo | img_url: 'master' }}" 
       alt="{{ shop.name }}" 
       width="450" 
       height="100"
-      class="w-full max-w-[250px] md:max-w-[400px] h-[75px] md:h-[100px] object-contain transform scale-118 md:scale-125" 
+      class="w-full max-w-[220px] md:max-w-[400px] h-[75px] md:h-[100px] object-contain transform scale-125 md:scale-125" 
       loading="lazy">
   {% else %}
-    <div class="text-white text-4xl md:text-5xl font-bold transform scale-118 md:scale-125">
+    <div class="text-white text-4xl md:text-5xl font-bold transform scale-125 md:scale-125">
       {{ shop.name }}
     </div>
   {% endif %}
@@ -383,6 +389,35 @@
 {% endstyle %}
 
 <script>
+
+  document.addEventListener('DOMContentLoaded', function() {
+  
+  const footerDistance = document.getElementById('scrollValueFooter');
+
+  if (!footerDistance) {
+    console.error('Could not find element with ID "scrollValueFooter"');
+    return;
+  }
+  footerDistance.textContent = (0.000).toFixed(3);
+  let lastScrollPosition = window.scrollY || document.documentElement.scrollTop;
+  let totalScrollDistance = 0;
+  let lastScrollTime = 0;
+  const distanceDivisor = 100000;
+  window.addEventListener('scroll', function() {
+    const now = Date.now();
+    if (now - lastScrollTime < 100) {
+      return;
+    }
+    lastScrollTime = now;
+    const currentScrollPosition = window.scrollY || document.documentElement.scrollTop;
+    const scrollDifference = Math.abs(currentScrollPosition - lastScrollPosition);
+    totalScrollDistance += scrollDifference;
+    const distanceInKM = (totalScrollDistance / distanceDivisor).toFixed(3);
+    footerDistance.textContent = distanceInKM;
+    lastScrollPosition = currentScrollPosition;
+  });
+});
+
 document.addEventListener('DOMContentLoaded', function() {
   const form = document.getElementById('email-signup-form');
   const messageContainer = document.getElementById('message-container');
@@ -528,18 +563,18 @@ document.addEventListener('DOMContentLoaded', function() {
       "name": "Email Signup",
       "limit": 1,
       "settings": [
-     {
-      "type": "text",
-      "id": "email_placeholder",
-      "label": "Email Placeholder",
-      "default": "EMAIL"
-    },
-    {
-      "type": "text",
-      "id": "button_text",
-      "label": "Button Text",
-      "default": "SIGN ME UP"
-    },
+        {
+          "type": "text",
+          "id": "email_placeholder",
+          "label": "Email Placeholder",
+          "default": "EMAIL"
+        },
+        {
+          "type": "text",
+          "id": "button_text",
+          "label": "Button Text",
+          "default": "SIGN ME UP"
+        },
         {
           "type": "text",
           "id": "success_message",
