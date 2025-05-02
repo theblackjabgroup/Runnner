@@ -97,7 +97,7 @@
 >
   <div class="relative w-full my-2 flex items-center lg:items-end justify-between bg-[var(--background)]">
     <!-- Left: Logo -->
-    <div class="flex items-center mx-4">
+    <div class="flex items-center justify-center mx-4 ">
       <a href="/">
         {% if section.settings.logo != blank %}
           <img
@@ -108,14 +108,14 @@
             class="h-22 max-w-60"
           >
         {% else %}
-          <span class="block text-2xl lg:text-4xl font-semibold  ">{{ shop.name }}</span>
+          <span class="block text-2xl lg:text-4xl font-semibold text-center ">{{ shop.name }}</span>
         {% endif %}
       </a>
     </div>
     <!-- Right: Menu & Actions -->
     <div class=" flex flex-wrap items-center justify-end w-full bg-[var(--background)] tracking-tight">
       <!-- Desktop Menu -->
-      <nav class=" flex justify-end lg:justify-between items-center w-full text-[var(--header_text)]">
+      <nav class="relative flex justify-end lg:justify-between items-center w-full text-[var(--header_text)]">
         <!-- Left: Menu Items -->
         <div class="menu-items hidden lg:!flex gap-2 flex-wrap w-2/3 0">
           <ul class="flex space-x-1">
@@ -157,13 +157,13 @@
                     role="region"
                     aria-label="{{ link.title }} submenu"
                     class="
-                      absolute top-[calc(100%-10px)] left-0 right-0 w-full z-50 pt-[10px]
+                      fixed top-[calc(100%-10px)] left-0 right-0 w-full z-50 pt-[10px]
                       opacity-0 invisible pointer-events-none
                       group-hover:opacity-100 group-hover:visible group-hover:pointer-events-auto
-                      transition-all duration-300 ease-out
+                      transition-all duration-300 ease-out bg-white
                     "
                   >
-                    <div class="mx-auto p-6 bg-white flex">
+                    <div class="mx-auto p-6  flex">
                       <ul class="flex justify-start gap-8 m-2 w-1/2">
                         {% for childlink in link.links %}
                           <li class="min-w-[100px] relative">
@@ -281,7 +281,7 @@
                       </div>
                     </div>
                     <!-- Horizontal scrollling text -->
-                    <div class="h-16 w-full border-t-1 bg-white ">
+                    <div class=" absolute -bottom-14 h-16 w-full border-t-1  bg-white ">
                       <div class="horizontal-text-container">
                         <div class="horizontal-text">
                           {{ section.settings.scrolling_text }}
@@ -413,8 +413,9 @@
         class="
           hidden lg:!block
           bottom-bar
-          w-full h-[2px] bg-blue-700
+          w-full h-[2px]
           mx-1
+          bg-black
         "
       >
         &nbsp
@@ -425,7 +426,7 @@
     class="
           mobile-bottom-bar
       lg:hidden
-      w-full h-[2px] bg-blue-700
+      w-full h-[2px] bg-black
     "
   >
     &nbsp
@@ -1225,5 +1226,27 @@
         }
       });
     }
+
+    // baar
+    const hoverBar = document.getElementById('hover-bar');
+
+    function moveHoverBar(element) {
+      const rect = element.getBoundingClientRect();
+      const navRect = element.closest('nav').getBoundingClientRect();
+
+      hoverBar.style.width = `${rect.width}px`;
+      hoverBar.style.left = `${rect.left - navRect.left}px`;
+    }
+
+    function resetHoverBar() {
+      hoverBar.style.width = '0';
+      hoverBar.style.left = '0';
+    }
+
+    const menuItems = document.querySelectorAll('nav ul li a');
+    menuItems.forEach((item) => {
+      item.addEventListener('mouseover', () => moveHoverBar(item));
+      item.addEventListener('mouseout', resetHoverBar);
+    });
   });
 </script>
