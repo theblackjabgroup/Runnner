@@ -313,11 +313,102 @@
           <!-- Top Row: Action Utilities -->
 
           <!-- Search -->
-          <a href="/search" class="text-black hover:text-gray-700" aria-label="Search">
-            <svg class="size-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
-              <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
-            </svg>
-          </a>
+          <div class="relative">
+            <button
+              id="search-toggle"
+              class="text-black hover:text-gray-700 transition-colors duration-200"
+              aria-label="Toggle search"
+              aria-expanded="false"
+            >
+              <svg class="size-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
+              </svg>
+            </button>
+
+            <!-- Search Overlay -->
+            <div
+              id="search-overlay"
+              class="fixed left-0 right-0 bottom-0 bg-black/50 z-[100] hidden transition-opacity duration-300"
+              style="top: var(--header-height, 0px);"
+            >
+              &nbsp;
+            </div>
+
+            <!-- Search Container -->
+            <div
+              id="search-container"
+              class="fixed left-0 right-0 z-[1000] hidden transform -translate-y-full transition-transform duration-300 ease-in-out shadow-lg py-8 bg-white"
+              style="top: var(--header-height, 0px);"
+              aria-hidden="true"
+            >
+              <div class="searchbox-container mx-auto w-full px-4 py-4">
+                <form
+                  action="/search"
+                  method="get"
+                  class="flex items-center gap-4 w-full mx-2 "
+                  role="search"
+                >
+                  <div class="relative flex-1">
+                    <input
+                      type="search"
+                      name="q"
+                      placeholder="Search"
+                      class="w-full px-2 py-3 text-2xl lg:text-4xl focus:outline-none bg-transparent placeholder-black"
+                    >
+                  </div>
+                  <button
+                    type="submit"
+                    class="text-white bg-black text-2xl lg:text-4xl px-2 py-1 hover:text-black hover:bg-white hover:border-1 rounded-md transition-colors duration-200"
+                  >
+                    SEARCH
+                  </button>
+                  <button
+                    id="close-search"
+                    class="text-black hover:text-gray-700 transition-colors duration-200"
+                    aria-label="Close search"
+                  >
+                    <svg class="size-10" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                </form>
+
+                <div
+                  class="
+                    block
+                    search-bottom-bar
+                    w-full h-[2px]
+                    mx-1
+                    bg-black
+                  "
+                >
+                  &nbsp
+                </div>
+
+                <!-- Quick Links -->
+                <div class=" flex flex-col lg:flex-row items-center mt-8  mx-auto">
+                  <span class="inline-block lg:!block text-2xl lg:text-4xl text-black uppercase m-4">Top Searches</span>
+                  <div class="flex flex-wrap gap-4">
+                    <a
+                      href="/search?q=new"
+                      class="px-1 bg-gray-400 hover:bg-gray-200 transition-colors duration-200 rounded-md text-xl lg:text-3xl font-medium"
+                      >New Arrivals</a
+                    >
+                    <a
+                      href="/search?q=sale"
+                      class="px-1 bg-gray-400 hover:bg-gray-200 transition-colors duration-200 rounded-md text-xl lg:text-3xl font-medium"
+                      >Sale</a
+                    >
+                    <a
+                      href="/search?q=bestsellers"
+                      class="px-1 bg-gray-400 hover:bg-gray-200 transition-colors duration-200 rounded-md text-xl lg:text-3xl font-medium"
+                      >Bestsellers</a
+                    >
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
 
           <!-- Country Selector -->
 
@@ -343,7 +434,7 @@
             </div>
 
             <!-- Dropdown -->
-            <div class="absolute right-0 mt-2 w-100 bg-white border border-gray-200 rounded-md shadow-lg opacity-100 group-hover:opacity-100 visible group-hover:visible transition-all duration-300">
+            <div class="absolute right-0 mt-2 w-100 bg-white border border-gray-200 rounded-md shadow-lg opacity-0 group-hover:opacity-100 invisible group-hover:visible transition-all duration-300">
               <ul class="max-h-100 overflow-y-auto divide-y divide-gray-100">
                 {% for country in localization.available_countries %}
                   <li>
@@ -1231,5 +1322,53 @@
         }
       });
     }
+
+    // Search bar
+    const searchToggle = document.getElementById('search-toggle');
+    const searchContainer = document.getElementById('search-container');
+    const searchOverlay = document.getElementById('search-overlay');
+    const closeSearch = document.getElementById('close-search');
+    const searchInput = searchContainer.querySelector('input[type="search"]');
+
+    function toggleSearch(show) {
+      searchToggle.setAttribute('aria-expanded', show);
+      searchOverlay.classList.toggle('hidden', !show);
+      document.body.classList.toggle('overflow-hidden', show);
+
+      if (show) {
+        const headerHeight = document.querySelector('[data-header-sticky]').offsetHeight;
+        document.documentElement.style.setProperty('--header-height', `${headerHeight}px`);
+
+        searchContainer.classList.remove('hidden');
+        searchContainer.offsetHeight;
+        requestAnimationFrame(() => {
+          searchOverlay.classList.remove('opacity-0');
+          searchContainer.classList.add('translate-y-0');
+          setTimeout(() => searchInput.focus(), 300);
+        });
+      } else {
+        searchOverlay.classList.add('opacity-0');
+        searchContainer.classList.remove('translate-y-0');
+        // Hide the container after the animation
+        searchContainer.addEventListener(
+          'transitionend',
+          () => {
+            searchContainer.classList.add('hidden');
+          },
+          { once: true }
+        );
+      }
+    }
+
+    searchToggle.addEventListener('click', () => toggleSearch(true));
+    closeSearch.addEventListener('click', () => toggleSearch(false));
+    searchOverlay.addEventListener('click', () => toggleSearch(false));
+
+    // Close search on escape key
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && searchToggle.getAttribute('aria-expanded') === 'true') {
+        toggleSearch(false);
+      }
+    });
   });
 </script>
