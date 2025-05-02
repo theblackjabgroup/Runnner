@@ -313,14 +313,14 @@
           <!-- Top Row: Action Utilities -->
 
           <!-- Search -->
-          <div class="relative">
+          <div class="relative ">
             <button
               id="search-toggle"
               class="text-black hover:text-gray-700 transition-colors duration-200"
               aria-label="Toggle search"
               aria-expanded="false"
             >
-              <svg class="size-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
+              <svg class="size-8 mt-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
                 <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
               </svg>
             </button>
@@ -505,16 +505,12 @@
           </button>
         </div>
       </nav>
-      <div
-        class="
-          hidden lg:!block
-          bottom-bar
-          w-full h-[2px]
-          mx-1
-          bg-black
-        "
-      >
-        &nbsp
+      <div class="hidden lg:!block bottom-bar w-full h-[2px] mx-1 bg-transparent relative overflow-hidden">
+        <span
+          id="bottom-bar-indicator"
+          class="absolute bottom-0 left-0 h-full bg-black transition-all duration-300 ease-out"
+          style="width: 0"
+        ></span>
       </div>
     </div>
   </div>
@@ -1369,6 +1365,32 @@
       if (e.key === 'Escape' && searchToggle.getAttribute('aria-expanded') === 'true') {
         toggleSearch(false);
       }
+    });
+
+    // Bottom bar
+    const bottomBarIndicator = document.getElementById('bottom-bar-indicator');
+    const menuItems = document.querySelectorAll('.menu-items ul > li > a');
+
+    if (bottomBarIndicator) {
+      bottomBarIndicator.style.width = '100%';
+      bottomBarIndicator.style.transform = 'translateX(0)';
+    }
+
+    menuItems.forEach((item) => {
+      item.addEventListener('mouseenter', (e) => {
+        const rect = item.getBoundingClientRect();
+        const containerRect = item.closest('.menu-items').getBoundingClientRect();
+        const left = rect.left - containerRect.left;
+        const width = rect.width;
+
+        bottomBarIndicator.style.transform = `translateX(${left}px)`;
+        bottomBarIndicator.style.width = `${width}px`;
+      });
+
+      item.addEventListener('mouseleave', () => {
+        bottomBarIndicator.style.width = `100%`;
+        bottomBarIndicator.style.transform = `translateX(0)`;
+      });
     });
   });
 </script>
