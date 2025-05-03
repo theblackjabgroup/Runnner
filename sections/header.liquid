@@ -24,34 +24,16 @@
       "label": "Dropdown Icon"
     },
     {
-      "type": "text",
-      "id": "optional_url_1_text",
-      "label": "Link 1",
-      "default": "Link 1"
-    },
-    {
-      "type": "url",
-      "id": "optional_url_1",
-      "label": "URL for Link 1",
-      "default": "/collections/all"
-    },
-    {
-      "type": "text",
-      "id": "optional_url_2_text",
-      "label": "Link 2",
-      "default": "Link 2"
-    },
-    {
-      "type": "url",
-      "id": "optional_url_2",
-      "label": "URL for Link 2",
-      "default": "/collections/all"
+      "type": "color",
+      "id": "subMenuItem_color",
+      "label": "Sub-menu Item Color",
+      "default": "#000000"
     },
     {
       "type": "text",
       "id": "scrolling_text",
       "label": "Scrolling Text",
-      "default": "BlackBytte - Your One Stop Shop for Everything"
+      "default": "STAY TRUE → KEEP GOING → FIND THE BALANCE → STAY TRUE → KEEP GOING → FIND THE BALANCE → STAY TRUE → KEEP GOING → FIND THE BALANCE → STAY TRUE → KEEP GOING → FIND THE BALANCE →"
     },
     {
       "type": "checkbox",
@@ -110,12 +92,12 @@
 {% endschema %}
 
 <header
-  class="header-main will-change-transform z-[999] bg-[var(--background)] transform-gpu {% unless section.settings.enable_sticky %}sticky-disabled{% endunless %}"
+  class="header-main will-change-transform p-2 lg:px-0 z-99 bg-[var(--background)] transform-gpu {% unless section.settings.enable_sticky %}sticky-disabled{% endunless %}"
   data-header-sticky
 >
-  <div class=" relative w-full  flex items-center justify-between bg-[var(--background)]">
+  <div class="relative w-full my-2 flex items-center lg:items-end justify-between bg-[var(--background)]">
     <!-- Left: Logo -->
-    <div class="flex items-center space-x-4">
+    <div class="flex items-center justify-center mx-4 ">
       <a href="/">
         {% if section.settings.logo != blank %}
           <img
@@ -126,21 +108,27 @@
             class="h-22 max-w-60"
           >
         {% else %}
-          <span class="text-3xl lg:text-5xl font-semibold mx-5">BlackBytte</span>
+          <span class="block text-2xl lg:text-4xl font-semibold text-center ">{{ shop.name }}</span>
         {% endif %}
       </a>
     </div>
     <!-- Right: Menu & Actions -->
-    <div class=" flex flex-wrap items-center justify-end w-full bg-[var(--background)]">
+    <div class=" flex flex-wrap items-center justify-end w-full bg-[var(--background)] tracking-tight">
       <!-- Desktop Menu -->
-      <nav class=" flex justify-end lg:justify-between items-center w-full text-[var(--header_text)]">
+      <nav class="relative flex justify-end lg:justify-between items-center w-full text-[var(--header_text)]">
         <!-- Left: Menu Items -->
         <div class="menu-items hidden lg:!flex gap-2 flex-wrap w-2/3 0">
           <ul class="flex space-x-1">
             {%- for link in section.settings.menu.links -%}
-              <li class="group ">
+              <li class="group dropdown-group">
                 {% if link.links.size > 0 %}
-                  <a href="{{ link.url }}" class="cursor-pointer flex items-center py-2 px-2 group">
+                  <a
+                    href="{{ link.url }}"
+                    class="cursor-pointer text-[16px] flex items-center py-2  group"
+                    aria-expanded="false"
+                    aria-controls="mega-menu-{{ forloop.index }}"
+                    aria-haspopup="true"
+                  >
                     {{ link.title }}
                     {% if section.settings.dropdown_icon != blank %}
                       <img
@@ -149,38 +137,49 @@
                         class="w-12 h-6 object-contain transition-transform duration-300 group-hover:rotate-180"
                         width="100%"
                         height="auto"
+                        aria-hidden="true"
                       >
                     {% else %}
-                      <span class="ml-2 transition-transform duration-300 group-hover:rotate-180">▼</span>
+                      <img
+                        src="{{ "arrow-down.png" |  asset_url }}"
+                        alt="Dropdown Icon"
+                        class="w-12 h-6 object-contain transition-transform duration-300 group-hover:-rotate-90"
+                        width="100%"
+                        height="auto"
+                        aria-hidden="true"
+                      >
                     {% endif %}
                   </a>
 
                   <!-- sub-menu dropdown -->
                   <div
+                    id="mega-menu-{{ forloop.index }}"
+                    role="region"
+                    aria-label="{{ link.title }} submenu"
                     class="
-                      absolute top-full left-0 w-full z-50
-                      opacity-0 invisible translate-y-[-20px] pointer-events-none
-                      group-hover:opacity-100 group-hover:visible group-hover:translate-y-0 group-hover:pointer-events-auto
-                      transition-transform duration-300 ease-out
+                      fixed top-[calc(100%-10px)] left-0 right-0 w-full z-50 pt-[10px]
+                      opacity-0 invisible pointer-events-none
+                      group-hover:opacity-100 group-hover:visible group-hover:pointer-events-auto
+                      transition-all duration-300 ease-out bg-white
                     "
                   >
-                    <div class="mx-auto p-6 bg-white flex">
-                      <ul class="flex justify-start gap-2 w-1/2">
+                    <div class="mx-auto p-6  flex">
+                      <ul class="flex justify-start gap-8 m-2 w-1/2">
                         {% for childlink in link.links %}
                           <li class="min-w-[100px] relative">
                             <a
                               href="{{ childlink.url }}"
-                              class="block text-gray-600 hover:text-black font-bold text-2xl "
+                              class="block text-[{{ section.settings.subMenuItem_color }}] hover:text-[var(--hover)] font-medium text-[14px] mb-2"
                             >
                               {{ childlink.title }}
                             </a>
                             {% if childlink.links.size > 0 %}
-                              <ul class="mt-2 space-y-2">
+                              <ul class=" space-y-0">
                                 {% for grandchildlink in childlink.links %}
                                   <li>
                                     <a
                                       href="{{ grandchildlink.url }}"
-                                      class="block text-xl hover:text-gray-600 text-black underline py-1"
+                                      class="block text-[16px] hover:text-[var(--hover)] font-normal text-black"
                                     >
                                       {{ grandchildlink.title }}
                                     </a>
@@ -188,6 +187,12 @@
                                 {% endfor %}
                               </ul>
                             {% endif %}
+                            <a
+                              href="{{childlink.url}}"
+                              class="block  my-2 text-[{{ section.settings.subMenuItem_color }}] hover:text-[var(--hover)] underline font-medium text-2xl "
+                            >
+                              SHOP ALL {{ childlink.title -}}
+                            </a>
                           </li>
                         {% endfor %}
                       </ul>
@@ -223,7 +228,7 @@
                                     class="block transition-all duration-300 ease-out"
                                     style="transition-delay: 0ms"
                                   >
-                                    <div class="mt-4 flex items-center justify-between group-hover/card:text-pink-500 group-hover/card:font-bold">
+                                    <div class="mt-4 flex items-center justify-between group-hover/card:hover:text-[var(--hover)] group-hover/card:font-bold">
                                       <p class="text-2xl font-medium">{{ block.settings.button_text_1 }}</p>
                                       <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M17 8l4 4m0 0l-4 4m4-4H3"/>
@@ -259,7 +264,7 @@
                                 {% if block.settings.button_text_2 != blank %}
                                   <a
                                     href="{{ block.settings.button_link_2 }}"
-                                    class="block group-hover/card:text-pink-500 group-hover/card:font-bold transition-all duration-300"
+                                    class="block group-hover/card:hover:text-[var(--hover)] group-hover/card:font-bold transition-all duration-300"
                                   >
                                     <div class="mt-4 flex items-center justify-between">
                                       <p class="text-2xl font-medium">{{ block.settings.button_text_2 }}</p>
@@ -275,16 +280,20 @@
                         {% endfor %}
                       </div>
                     </div>
-                    <div class="h-12 w-full border-y-2 bg-white overflow-hidden">
-                      <div class="scrolling-text-container relative flex items-center">
-                        <div class="scrolling-text-track flex whitespace-nowrap animate-loop-scroll">
-                          <div class="flex items-center space-x-4 mt-2">
-                            {%- for i in (1..20) -%}
-                              <span class="inline-block px-2 text-2xl font-bold text-black">
-                                {{- section.settings.scrolling_text -}}
-                              </span>
-                            {%- endfor -%}
-                          </div>
+                    <!-- Horizontal scrollling text -->
+                    <div class=" absolute -bottom-14 h-16 w-full border-t-1  bg-white ">
+                      <div class="horizontal-text-container">
+                        <div class="horizontal-text">
+                          {{ section.settings.scrolling_text }}
+                        </div>
+                        <div class="horizontal-text">
+                          {{ section.settings.scrolling_text }}
+                        </div>
+                        <div class="horizontal-text">
+                          {{ section.settings.scrolling_text }}
+                        </div>
+                        <div class="horizontal-text">
+                          {{ section.settings.scrolling_text }}
                         </div>
                       </div>
                     </div>
@@ -300,65 +309,208 @@
         </div>
 
         <!-- Right: Actions -->
-        <div class="flex lg:!w-1/3  space-x-4 items-center justify-end ">
+        <div class="flex lg:!w-1/3  space-x-6 items-center justify-end ">
           <!-- Top Row: Action Utilities -->
 
           <!-- Search -->
-          <a href="/search" class="text-black hover:text-gray-700" aria-label="Search">
-            <svg class="size-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
-              <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
-            </svg>
-          </a>
+          <div class="relative ">
+            <button
+              id="search-toggle"
+              class="text-black hover:text-gray-700 transition-colors duration-200"
+              aria-label="Toggle search"
+              aria-expanded="false"
+            >
+              <svg class="size-8 mt-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
+              </svg>
+            </button>
 
-          <!-- Optional URLs -->
-          {% if section.settings.optional_url_1 %}
-            <a href="{{ section.settings.optional_url_1 }}" class="hidden lg:!block text-black hover:text-gray-700">
-              {{ section.settings.optional_url_1_text }}
-            </a>
-          {% endif %}
-          {% if section.settings.optional_url_2 %}
-            <a href="{{ section.settings.optional_url_2 }}" class="hidden lg:!block text-black hover:text-gray-700">
-              {{ section.settings.optional_url_2_text }}
-            </a>
-          {% endif %}
+            <!-- Search Overlay -->
+            <div
+              id="search-overlay"
+              class="fixed left-0 right-0 bottom-0 bg-black/50 z-[100] hidden transition-opacity duration-300"
+              style="top: var(--header-height, 0px);"
+            >
+              &nbsp;
+            </div>
+
+            <!-- Search Container -->
+            <div
+              id="search-container"
+              class="fixed left-0 right-0 z-[1000] hidden transform -translate-y-full transition-transform duration-300 ease-in-out shadow-lg py-8 bg-white"
+              style="top: var(--header-height, 0px);"
+              aria-hidden="true"
+            >
+              <div class="searchbox-container mx-auto w-full px-4 py-4">
+                <form
+                  action="/search"
+                  method="get"
+                  class="flex items-center gap-4 w-full mx-2 "
+                  role="search"
+                >
+                  <div class="relative flex-1">
+                    <input
+                      type="search"
+                      name="q"
+                      placeholder="Search"
+                      class="w-full px-2 py-3 text-2xl lg:text-4xl focus:outline-none bg-transparent placeholder-black"
+                    >
+                  </div>
+                  <button
+                    type="submit"
+                    class="text-white bg-black text-2xl lg:text-4xl px-2 py-1 hover:text-black hover:bg-white hover:border-1 rounded-md transition-colors duration-200"
+                  >
+                    SEARCH
+                  </button>
+                  <button
+                    id="close-search"
+                    class="text-black hover:text-gray-700 transition-colors duration-200"
+                    aria-label="Close search"
+                  >
+                    <svg class="size-10" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                </form>
+
+                <div
+                  class="
+                    block
+                    search-bottom-bar
+                    w-full h-[2px]
+                    mx-1
+                    bg-black
+                  "
+                >
+                  &nbsp
+                </div>
+
+                <!-- Quick Links -->
+                <div class=" flex flex-col lg:flex-row items-center mt-8  mx-auto">
+                  <span class="inline-block lg:!block text-2xl lg:text-4xl text-black uppercase m-4">Top Searches</span>
+                  <div class="flex flex-wrap gap-4">
+                    <a
+                      href="/search?q=new"
+                      class="px-1 bg-gray-400 hover:bg-gray-200 transition-colors duration-200 rounded-md text-xl lg:text-3xl font-medium"
+                      >New Arrivals</a
+                    >
+                    <a
+                      href="/search?q=sale"
+                      class="px-1 bg-gray-400 hover:bg-gray-200 transition-colors duration-200 rounded-md text-xl lg:text-3xl font-medium"
+                      >Sale</a
+                    >
+                    <a
+                      href="/search?q=bestsellers"
+                      class="px-1 bg-gray-400 hover:bg-gray-200 transition-colors duration-200 rounded-md text-xl lg:text-3xl font-medium"
+                      >Bestsellers</a
+                    >
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Country Selector -->
+
+          <div class="group relative hidden lg:!inline-block ">
+            <!-- Trigger: Current country -->
+            <div class="inline-flex items-center cursor-pointer px-3 gap-2 hover:bg-gray-100">
+              {% assign current_country = localization.country %}
+              <span class="mr-2">
+                {{ current_country.name }}
+              </span>
+              {% if current_country.iso_code %}
+                <img
+                  src="https://flagcdn.com/24x18/{{ current_country.iso_code | downcase }}.png"
+                  alt="{{ current_country.name }} flag"
+                  width="24"
+                  height="18"
+                  class="inline-block"
+                >
+              {% endif %}
+              <svg class="ml-2 w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+              </svg>
+            </div>
+
+            <!-- Dropdown -->
+            <div class="absolute right-0 mt-2 w-100 bg-white border border-gray-200 rounded-md shadow-lg opacity-0 group-hover:opacity-100 invisible group-hover:visible transition-all duration-300">
+              <ul class="max-h-100 overflow-y-auto divide-y divide-gray-100">
+                {% for country in localization.available_countries %}
+                  <li>
+                    <a
+                      href="{{ country.url }}"
+                      class="flex items-center px-4 py-2 text-3xl text-black hover:bg-gray-100"
+                    >
+                      <img
+                        src="https://flagcdn.com/24x18/{{ country.iso_code | downcase }}.png"
+                        alt="{{ country.name }} flag"
+                        class="w-8 h-6 mr-3 border-transparent rounded-sm"
+                        width="24"
+                        height="18"
+                      >
+                      <span class="flex-1 ">{{ country.name }}</span>
+                      <div class="flex flex-col text-right text-xl ml-auto">
+                        <span class="text-gray-700 font-medium">
+                          {{ country.currency.symbol }}
+                          {{ country.currency.iso_code }}
+                        </span>
+                        <span class="text-gray-500">
+                          {{ localization.language.endonym_name }}
+                        </span>
+                      </div>
+                    </a>
+                  </li>
+                {% endfor %}
+              </ul>
+            </div>
+          </div>
 
           <!-- Login -->
           <a
             href="/account/login"
-            class="hidden lg:!inline-flex items-center gap-2 bg-black text-white rounded-xl px-2 "
+            class="hidden lg:!inline-flex items-center gap-2 rounded-xl px-2 text-black hover:text-gray-700 "
             aria-label="Login"
           >
             LOGIN
-            <svg class="size-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="3.5">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M17.25 8.25 21 12m0 0-3.75 3.75M21 12H3" />
-            </svg>
           </a>
 
           <!-- Cart -->
-          <a href="/cart" class="flex text-black hover:text-gray-700" aria-label="Cart">
-            CART
-            <span class="ml-1 mt-1 bg-red-600 text-white text-xl w-8 h-8 flex items-center justify-center rounded-full">
+          <a
+            href="{{ routes.cart_url }}"
+            class="header_icon header_icon--cart link focus-inset !flex items-center justify-center "
+            id="cart-icon-bubble"
+            aria-label="Cart"
+          >
+            <span class="flex text-black hover:text-gray-700">CART</span>
+            <span
+              class="ml-1 mt-1 bg-red-600 text-white text-xl w-8 h-8 flex items-center justify-center rounded-full"
+              aria-label="{{ cart.item_count }} items in cart"
+            >
               {{ cart.item_count }}
             </span>
           </a>
 
           <!-- Hamburger -->
-          <button id="hamburger-menu" class="lg:hidden text-black hover:text-gray-700" aria-label="Menu">
+          <button
+            id="hamburger-menu"
+            class="lg:hidden text-black hover:text-gray-700"
+            aria-label="Menu"
+            aria-expanded="false"
+            aria-controls="mobile-menu"
+          >
             <svg class="size-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
               <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
             </svg>
           </button>
         </div>
       </nav>
-      <div
-        class="
-          hidden lg:!block
-          bottom-bar
-          w-full h-[2px] bg-blue-700
-          mr-2
-        "
-      >
-        &nbsp
+      <div class="hidden lg:!block bottom-bar w-full h-[2px] mx-1 bg-transparent relative overflow-hidden">
+        <span
+          id="bottom-bar-indicator"
+          class="absolute bottom-0 left-0 h-full bg-black transition-all duration-300 ease-out"
+          style="width: 0"
+        ></span>
       </div>
     </div>
   </div>
@@ -366,65 +518,97 @@
     class="
           mobile-bottom-bar
       lg:hidden
-      w-full h-[2px] bg-blue-700
+      w-full h-[2px] bg-black
     "
   >
     &nbsp
   </div>
+</header>
 
-  <!-- Mobile Menu -->
-  <div
-    id="mobile-menu"
-    class="hidden lg:hidden  border-t border-gray-200 shadow-lg w-[90vw] fixed top-[-1px] right-0 z-50  bg-[var(--background)] text-[var(--header_text)] flex"
-  >
-    <div class="h-[100vh] w-10 bg-black text-white flex flex-col gap-4 items-center justify-center">
-      <span class="transform -rotate-90 origin-center text-2xl tracking-widest whitespace-nowrap"> FOLLOW US </span>
+<!-- Mobile Menu Overlay -->
+<div
+  id="menu-overlay"
+  class="fixed inset-0 bg-black opacity-0 pointer-events-none transition-opacity duration-300 z-[101]"
+>
+  &nbsp;
+</div>
+
+<!-- Mobile Menu -->
+<div
+  id="mobile-menu"
+  class="hidden lg:hidden w-[90vw] fixed top-0 right-0 z-[102] bg-[var(--background)] text-black flex"
+  style="transform: translateX(100%); transition: transform 0.3s ease-in-out;"
+>
+  <!-- Vertical Scrolling Text -->
+  <div class="h-[100vh] w-12  flex items-center justify-center overflow-hidden relative border-r-2 ">
+    <div class="vertical-text-container">
+      <div class="vertical-text">
+        {{ section.settings.scrolling_text }}
+      </div>
+      <div class="vertical-text">
+        {{ section.settings.scrolling_text }}
+      </div>
     </div>
-    <div class="flex flex-1 flex-col justify-between">
-      <nav class="flex flex-col space-y-4 p-6 w-full justify-between">
-        <div class="upper-section">
-          <div class="flex items-center justify-end mb-8 ">
-            <button type="button" class=" bg-black text-white px-2 rounded-xl" aria-label="Close Menu">Close</button>
-          </div>
-          {% if section.settings.menu.links != blank %}
-            {% for link in section.settings.menu.links %}
-              <div class="mobile-menu-item">
-                <div class="horizontal-line w-full h-0.5 bg-black my-2">&nbsp;</div>
-                <div class="!flex items-center justify-between">
-                  <a href="{{ link.url }}" class="block text-3xl text-black hover:underline font-medium py-2">
-                    {{ link.title }}
-                  </a>
-                  {% if link.links.size > 0 %}
-                    <button type="button" class="toggle-submenu focus:outline-none">
-                      {% if section.settings.dropdown_icon != blank %}
-                        <img
-                          src="{{ section.settings.dropdown_icon | image_url }}"
-                          alt="Dropdown Icon"
-                          width="100%"
-                          height="auto"
-                          class="w-8 h-4 object-contain transition-transform duration-300"
-                        >
-                      {% else %}
-                        <svg
-                          class="w-8 h-4 transition-transform duration-300"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
-                        </svg>
-                      {% endif %}
-                    </button>
-                  {% endif %}
-                </div>
+  </div>
+
+  <div class="flex flex-1 flex-col justify-between">
+    <nav class="flex flex-col space-y-4 p-6 w-full justify-between">
+      <div class="upper-section">
+        <div class="flex items-center justify-end mb-8 ">
+          <button type="button" class="px-2" aria-label="Close Menu">Close</button>
+        </div>
+        {% if section.settings.menu.links != blank %}
+          {% for link in section.settings.menu.links %}
+            <div class="mobile-menu-item">
+              <div class="horizontal-line w-full h-0.5 bg-black my-2">&nbsp;</div>
+              <div class="!flex items-center justify-between">
+                <a href="{{ link.url }}" class="block text-3xl text-black hover:underline font-medium py-2">
+                  {{ link.title }}
+                </a>
                 {% if link.links.size > 0 %}
-                  <div class="ml-4 mt-2 hidden space-y-2 submenu">
+                  <button
+                    type="button"
+                    class="toggle-submenu focus:outline-none"
+                    aria-expanded="false"
+                    aria-controls="mobile-submenu-{{ forloop.index }}"
+                    aria-label="Toggle {{ link.title }} submenu"
+                  >
+                    {% if section.settings.dropdown_icon != blank %}
+                      <img
+                        src="{{ section.settings.dropdown_icon | image_url }}"
+                        alt="Dropdown Icon"
+                        width="100%"
+                        height="auto"
+                        class="w-8 h-8 object-contain transition-transform duration-300"
+                        aria-hidden="true"
+                      >
+                    {% else %}
+                      <img
+                        src="{{ 'arrow-down.png' | asset_url }}"
+                        alt="Dropdown Icon"
+                        width="100%"
+                        height="auto"
+                        class="w-8 h-8 object-contain "
+                        aria-hidden="true"
+                      >
+                    {% endif %}
+                  </button>
+                {% endif %}
+              </div>
+              {% if link.links.size > 0 %}
+                <div
+                  id="mobile-submenu-{{ forloop.index }}"
+                  role="region"
+                  aria-label="{{ link.title }} submenu"
+                  class="ml-4 mt-2 hidden space-y-2 submenu max-h-[0] overflow-y-auto overscroll-contain styled-scrollbar transition-all duration-300"
+                >
+                  <div class="pr-4">
                     {% for childlink in link.links %}
                       <a href="{{ childlink.url }}" class="block text-2xl text-gray-800 hover:text-black">
                         {{ childlink.title }}
                       </a>
                       {% if childlink.links.size > 0 %}
-                        <ul class="ml-4 space-y-1">
+                        <ul class="ml-4 space-y-1 mb-4">
                           {% for grandchildlink in childlink.links %}
                             <li>
                               <a
@@ -438,133 +622,252 @@
                         </ul>
                       {% endif %}
                     {% endfor %}
+
+                    <!-- Mobile Mega Menu Images -->
+                    {% for block in section.blocks %}
+                      {% if block.type == 'mega_menu_images' and block.settings.menu_item_name == link.title %}
+                        <div class="grid grid-cols-1 gap-4 mt-6">
+                          {% if block.settings.image_1 != blank %}
+                            <div class="group/card cursor-pointer">
+                              <a href="{{ block.settings.button_link_1 }}">
+                                <div class="relative block overflow-hidden">
+                                  <div class="aspect-[4/3] overflow-hidden bg-gray-100">
+                                    <img
+                                      src="{{ block.settings.image_1 | image_url }}"
+                                      alt="Shop now image 1"
+                                      class="w-full h-full object-cover group-hover/card:scale-110 transition-transform duration-700"
+                                      loading="lazy"
+                                      width="100%"
+                                      height="auto"
+                                    >
+                                    <div class="absolute inset-0 bg-black/60 flex items-center justify-center translate-y-full group-hover/card:translate-y-0 transition-transform duration-300">
+                                      <span class="text-white text-xl font-bold tracking-wider">SHOP NOW</span>
+                                    </div>
+                                  </div>
+                                </div>
+                              </a>
+                              <a
+                                href="{{ block.settings.button_link_1 }}"
+                                class="block mt-4 transition-all duration-300"
+                              >
+                                <div class="flex items-center justify-between group-hover/card:text-pink-500 group-hover/card:font-bold">
+                                  <p class="text-lg font-medium">{{ block.settings.button_text_1 }}</p>
+                                  <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M17 8l4 4m0 0l-4 4m4-4H3"/>
+                                  </svg>
+                                </div>
+                              </a>
+                            </div>
+                          {% endif %}
+
+                          {% if block.settings.image_2 != blank %}
+                            <div class="group/card cursor-pointer mt-4">
+                              <a href="{{ block.settings.button_link_2 }}">
+                                <div class="relative block overflow-hidden">
+                                  <div class="aspect-[4/3] overflow-hidden bg-gray-100">
+                                    <img
+                                      src="{{ block.settings.image_2 | image_url }}"
+                                      alt="Shop now image 2"
+                                      class="w-full h-full object-cover group-hover/card:scale-110 transition-transform duration-700"
+                                      loading="lazy"
+                                      width="100%"
+                                      height="auto"
+                                    >
+                                    <div class="absolute inset-0 bg-black/60 flex items-center justify-center translate-y-full group-hover/card:translate-y-0 transition-transform duration-300">
+                                      <span class="text-white text-xl font-bold tracking-wider">SHOP NOW</span>
+                                    </div>
+                                  </div>
+                                </div>
+                              </a>
+                              <a
+                                href="{{ block.settings.button_link_2 }}"
+                                class="block mt-4 transition-all duration-300"
+                              >
+                                <div class="flex items-center justify-between group-hover/card:text-pink-500 group-hover/card:font-bold">
+                                  <p class="text-lg font-medium">{{ block.settings.button_text_2 }}</p>
+                                  <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M17 8l4 4m0 0l-4 4m4-4H3"/>
+                                  </svg>
+                                </div>
+                              </a>
+                            </div>
+                          {% endif %}
+                        </div>
+                      {% endif %}
+                    {% endfor %}
                   </div>
-                {% endif %}
-              </div>
-            {% endfor %}
-          {% endif %}
-        </div>
-        <div class="horizontal-line w-full h-0.5 bg-black my-2 -mt-1">&nbsp;</div>
-      </nav>
+                </div>
+              {% endif %}
+            </div>
+          {% endfor %}
+        {% endif %}
+      </div>
+      <div class="horizontal-line w-full h-0.5 bg-black my-2 -mt-1">&nbsp;</div>
+    </nav>
 
-      <div class="flex flex-col w-full p-6 ">
-        <div class="optionalLinks flex flex-col gap-1 mb-4 font-semibold ">
-          {% if section.settings.optional_url_1 != blank %}
-            <a href="{{ section.settings.optional_url_1 }}" class="hover:underline">
-              {{ section.settings.optional_url_1_text }}
-            </a>
-          {% endif %}
-
-          {% if section.settings.optional_url_2 != blank %}
-            <a href="{{ section.settings.optional_url_2 }}" class="hover:underline">
-              {{ section.settings.optional_url_2_text }}
-            </a>
-          {% endif %}
-
-          <a
-            href="/account/login"
-            class="inline-flex items-center gap-2 bg-black text-white rounded-xl px-2 w-[30%]"
-            aria-label="Login"
+    <div class="flex flex-col w-full p-6 ">
+      <div class="flex flex-col gap-1 mb-4 font-semibold ">
+        <div class="country-selector relative inline-block">
+          <!-- Trigger: Current country -->
+          <button
+            type="button"
+            class="country-selector-button inline-flex items-center cursor-pointer px-3 gap-2 hover:bg-gray-100"
+            aria-expanded="false"
           >
-            LOGIN
+            {% assign current_country = localization.country %}
+            <span class="">
+              {{ current_country.name }}
+            </span>
+            {% if current_country.iso_code %}
+              <img
+                src="https://flagcdn.com/24x18/{{ current_country.iso_code | downcase }}.png"
+                alt="{{ current_country.name }} flag"
+                width="24"
+                height="18"
+                class="inline-block"
+              >
+            {% endif %}
             <svg
-              xmlns="http://www.w3.org/2000/svg"
+              class="ml-2 w-4 h-4 text-gray-600 transition-transform duration-300"
               fill="none"
-              viewBox="0 0 24 24"
-              stroke-width="3.5"
               stroke="currentColor"
-              class="size-8 "
+              viewBox="0 0 24 24"
             >
-              <path stroke-linecap="round" stroke-linejoin="round" d="M17.25 8.25 21 12m0 0-3.75 3.75M21 12H3" />
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+            </svg>
+          </button>
+
+          <!-- Dropdown -->
+          <div class="country-selector-dropdown absolute bottom-16 w-80 bg-white border border-gray-200 rounded-md shadow-lg opacity-0 invisible transition-all duration-300 z-[9999]">
+            <ul class="max-h-100 overflow-y-auto divide-y divide-gray-100 text-xl">
+              {% for country in localization.available_countries %}
+                <li>
+                  <a
+                    href="{{ country.url }}"
+                    class="flex items-center px-4 py-2 hover:bg-gray-100"
+                  >
+                    <img
+                      src="https://flagcdn.com/24x18/{{ country.iso_code | downcase }}.png"
+                      alt="{{ country.name }} flag"
+                      class="w-5 h-4 mr-3 border rounded-sm"
+                      width="24"
+                      height="18"
+                    >
+                    <span class="flex-1">{{ country.name }}</span>
+                    <span class="text-gray-500 ml-auto">
+                      {{ country.currency.symbol }}
+                      {{ country.currency.iso_code }}
+                    </span>
+                  </a>
+                </li>
+              {% endfor %}
+            </ul>
+          </div>
+        </div>
+
+        <a
+          href="/account/login"
+          class="inline-flex items-center gap-2 bg-black text-white rounded-xl px-2 w-[30%]"
+          aria-label="Login"
+        >
+          LOGIN
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke-width="3.5"
+            stroke="currentColor"
+            class="size-8 "
+          >
+            <path stroke-linecap="round" stroke-linejoin="round" d="M17.25 8.25 21 12m0 0-3.75 3.75M21 12H3" />
+          </svg>
+        </a>
+      </div>
+      <div class="horizontal-line w-full h-0.5 bg-black">&nbsp;</div>
+      <div id="social-link-container" class="flex flex-wrap items-center justify-between gap-4 m-4">
+        {% if settings.social_facebook_link %}
+          <a href="{{ settings.social_facebook_link }}" aria-label="Facebook" target="_blank" rel="noopener">
+            <svg
+              class="h-10 w-10 hover:fill-current hover:text-sky-500"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2.5"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z" />
             </svg>
           </a>
-        </div>
-        <div class="horizontal-line w-full h-0.5 bg-black">&nbsp;</div>
-        <div id="social-link-container" class="flex flex-wrap items-center justify-between gap-4 m-4">
-          {% if settings.social_facebook_link %}
-            <a href="{{ settings.social_facebook_link }}" aria-label="Facebook" target="_blank" rel="noopener">
-              <svg
-                class="h-10 w-10 hover:fill-current hover:text-sky-500"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2.5"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-              >
-                <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z" />
-              </svg>
-            </a>
-          {% endif %}
+        {% endif %}
 
-          {% if settings.social_instagram_link %}
-            <a href="{{ settings.social_instagram_link }}" aria-label="Instagram" target="_blank" rel="noopener">
-              <svg
-                class="h-10 w-10 hover:text-pink-500"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2.5"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-              >
-                <rect x="2" y="2" width="20" height="20" rx="5" ry="5" />  <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />  <line x1="17.5" y1="6.5" x2="17.51" y2="6.5" />
-              </svg>
-            </a>
-          {% endif %}
+        {% if settings.social_instagram_link %}
+          <a href="{{ settings.social_instagram_link }}" aria-label="Instagram" target="_blank" rel="noopener">
+            <svg
+              class="h-10 w-10 hover:text-pink-500"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2.5"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <rect x="2" y="2" width="20" height="20" rx="5" ry="5" />  <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />  <line x1="17.5" y1="6.5" x2="17.51" y2="6.5" />
+            </svg>
+          </a>
+        {% endif %}
 
-          {% if settings.social_youtube_link %}
-            <a href="{{ settings.social_youtube_link }}" aria-label="YouTube" target="_blank" rel="noopener">
-              <svg
-                class="h-10 w-10 hover:text-red-500"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2.5"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-              >
-                <path d="M22.54 6.42a2.78 2.78 0 0 0-1.94-2C18.88 4 12 4 12 4s-6.88 0-8.6.46a2.78 2.78 0 0 0-1.94 2A29 29 0 0 0 1 11.75a29 29 0 0 0 .46 5.33A2.78 2.78 0 0 0 3.4 19c1.72.46 8.6.46 8.6.46s6.88 0 8.6-.46a2.78 2.78 0 0 0 1.94-2 29 29 0 0 0 .46-5.25 29 29 0 0 0-.46-5.33z" />  <polygon points="9.75 15.02 15.5 11.75 9.75 8.48 9.75 15.02" />
-              </svg>
-            </a>
-          {% endif %}
-          {% if settings.social_twitter_link %}
-            <a href="{{ settings.social_twitter_link }}" aria-label="Twitter" target="_blank" rel="noopener">
-              <svg
-                class="h-10 w-10 hover:fill-current hover:text-cyan-500"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2.5"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-              >
-                <path d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z" />
-              </svg>
-            </a>
-          {% endif %}
-          {% if settings.social_snapchat_link %}
-            <a href="{{ settings.social_snapchat_link }}" aria-label="Snapchat" target="_blank" rel="noopener">
-              <svg
-                class="h-10 w-10 hover:fill-current hover:text-yellow-500"
-                width="24"
-                height="24"
-                viewBox="0 0 24 24"
-                stroke-width="2.5"
-                stroke="currentColor"
-                fill="none"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-              >
-                <path d="M16.882 7.842a4.882 4.882 0 0 0 -9.764 0c0 4.273-.213 6.409-4.118 8.118 2 .882 2 .882 3 3 3 0 4 2 6 2s3-2 6-2c1-2.118 1-2.118 3-3-3.906-1.709-4.118-3.845-4.118-8.118h0zM3 15.961c4-2.118 4-4.118 1-7.118m17 7.118c-4-2.118-4-4.118-1-7.118" />
-              </svg>
-            </a>
-          {% endif %}
-        </div>
+        {% if settings.social_youtube_link %}
+          <a href="{{ settings.social_youtube_link }}" aria-label="YouTube" target="_blank" rel="noopener">
+            <svg
+              class="h-10 w-10 hover:text-red-500"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2.5"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path d="M22.54 6.42a2.78 2.78 0 0 0-1.94-2C18.88 4 12 4 12 4s-6.88 0-8.6.46a2.78 2.78 0 0 0-1.94 2A29 29 0 0 0 1 11.75a29 29 0 0 0 .46 5.33A2.78 2.78 0 0 0 3.4 19c1.72.46 8.6.46 8.6.46s6.88 0 8.6-.46a2.78 2.78 0 0 0 1.94-2 29 29 0 0 0 .46-5.25 29 29 0 0 0-.46-5.33z" />  <polygon points="9.75 15.02 15.5 11.75 9.75 8.48 9.75 15.02" />
+            </svg>
+          </a>
+        {% endif %}
+        {% if settings.social_twitter_link %}
+          <a href="{{ settings.social_twitter_link }}" aria-label="Twitter" target="_blank" rel="noopener">
+            <svg
+              class="h-10 w-10 hover:fill-current hover:text-cyan-500"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2.5"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z" />
+            </svg>
+          </a>
+        {% endif %}
+        {% if settings.social_snapchat_link %}
+          <a href="{{ settings.social_snapchat_link }}" aria-label="Snapchat" target="_blank" rel="noopener">
+            <svg
+              class="h-10 w-10 hover:fill-current hover:text-yellow-500"
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              stroke-width="2.5"
+              stroke="currentColor"
+              fill="none"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path d="M16.882 7.842a4.882 4.882 0 0 0 -9.764 0c0 4.273-.213 6.409-4.118 8.118 2 .882 2 .882 3 3 3 0 4 2 6 2s3-2 6-2c1-2.118 1-2.118 3-3-3.906-1.709-4.118-3.845-4.118-8.118h0zM3 15.961c4-2.118 4-4.118 1-7.118m17 7.118c-4-2.118-4-4.118-1-7.118" />
+            </svg>
+          </a>
+        {% endif %}
       </div>
     </div>
   </div>
-</header>
+</div>
 
 <div class="header-offset" data-header-offset></div>
 
@@ -603,11 +906,11 @@
     }
   }
 
-  .group:hover .absolute {
+  .dropdown-group:hover .absolute {
     animation: dropDown 300ms ease-out forwards;
   }
 
-  .group:not(:hover) .absolute {
+  .dropdown-group:not(:hover) .absolute {
     animation: dropUp 300ms ease-out forwards;
   }
 
@@ -618,21 +921,6 @@
     100% {
       transform: translateX(-50%);
     }
-  }
-
-  .scrolling-text-container {
-    overflow: hidden;
-    width: 100%;
-  }
-
-  .scrolling-text-track {
-    will-change: transform;
-    animation: scroll 25s linear infinite;
-    width: fit-content;
-  }
-
-  .scrolling-text-track:hover {
-    animation-play-state: paused;
   }
 
   .header-main {
@@ -672,27 +960,205 @@
   .sticky-disabled + .header-offset {
     display: none !important;
   }
+
+  /* Improve dropdown transitions */
+  .dropdown-group > .absolute {
+    transition: all 300ms cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .dropdown-group:hover > .absolute {
+    transition-delay: 50ms;
+  }
+
+  /* Mobile submenu scrollbar styling */
+  .submenu.styled-scrollbar {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(0, 0, 0, 0.3) transparent;
+  }
+
+  .submenu.styled-scrollbar::-webkit-scrollbar {
+    width: 4px;
+  }
+
+  .submenu.styled-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .submenu.styled-scrollbar::-webkit-scrollbar-thumb {
+    background-color: rgba(0, 0, 0, 0.3);
+    border-radius: 20px;
+  }
+
+  /* Mobile submenu animations */
+  .submenu {
+    transition: all 400ms cubic-bezier(0.4, 0, 0.2, 1);
+    will-change: opacity, height;
+    height: auto;
+    max-height: 0;
+  }
+
+  .submenu.show {
+    opacity: 1;
+    max-height: 50vh;
+  }
+
+  .submenu:not(.show) {
+    opacity: 0;
+    max-height: 0;
+  }
+
+  .submenu.hidden {
+    display: none;
+  }
+
+  .submenu:not(.hidden) {
+    display: block;
+  }
+
+  /* Add overlay transition */
+  #menu-overlay {
+    transition: opacity 0.3s ease;
+    will-change: opacity;
+  }
+
+  /* Mobile menu transitions */
+  #mobile-menu {
+    will-change: transform;
+    backface-visibility: hidden;
+  }
+
+  #mobile-menu.active {
+    transform: translateX(0) !important;
+  }
+
+  .vertical-text-container {
+    position: fixed;
+    left: 0px;
+    top: 0;
+    bottom: 0;
+    width: 40px;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+  }
+
+  .vertical-text {
+    position: absolute;
+    writing-mode: vertical-rl;
+    text-orientation: mixed;
+    transform: rotate(180deg);
+    animation: scrollText 50s linear infinite;
+    color: #000;
+    font-size: 22px;
+    white-space: nowrap;
+    padding: 5px 0;
+  }
+
+  .vertical-text:nth-child(2) {
+    animation: scrollText2 50s linear infinite;
+  }
+
+  @keyframes scrollText {
+    0% {
+      transform: translateY(0) rotate(180deg);
+    }
+    100% {
+      transform: translateY(-100%) rotate(180deg);
+    }
+  }
+
+  @keyframes scrollText2 {
+    0% {
+      transform: translateY(100%) rotate(180deg);
+    }
+    100% {
+      transform: translateY(0) rotate(180deg);
+    }
+  }
+
+  .horizontal-text-container {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 40px;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    border-top: 1px solid black;
+    z-index: 999;
+  }
+
+  .horizontal-text {
+    white-space: nowrap;
+    font-size: 22px;
+    display: inline-block;
+    animation: scrollRight 50s linear infinite;
+  }
+
+  .horizontal-text:nth-child(n) {
+    animation: scrollRight2 50s linear infinite;
+  }
+
+  @keyframes scrollRight {
+    0% {
+      transform: translateX(-100%);
+    }
+    100% {
+      transform: translateX(100%);
+    }
+  }
+
+  @keyframes scrollRight2 {
+    0% {
+      transform: translateX(-100%);
+    }
+    100% {
+      transform: translateX(100%);
+    }
+  }
 </style>
 
 <script>
   document.addEventListener('DOMContentLoaded', function () {
-    // Mobile Menu Toggle
     const hamburgerMenu = document.getElementById('hamburger-menu');
     const mobileMenu = document.getElementById('mobile-menu');
     const closeButton = mobileMenu ? mobileMenu.querySelector('button[aria-label="Close Menu"]') : null;
-    const overlay = document.createElement('div');
-
-    // Overlay setup
-    overlay.className = 'block fixed inset-0 w-[10vw] h-[100vh] bg-white opacity-35 z-40 hidden';
-    overlay.id = 'menu-overlay';
-    document.body.appendChild(overlay);
+    const overlay = document.getElementById('menu-overlay');
 
     function toggleMobileMenu() {
-      if (!mobileMenu) return;
+      if (!mobileMenu || !overlay) return;
 
-      mobileMenu.classList.toggle('hidden');
-      overlay.classList.toggle('hidden');
-      document.body.classList.toggle('overflow-hidden');
+      const isOpening = mobileMenu.classList.contains('hidden');
+
+      if (isOpening) {
+        mobileMenu.classList.remove('hidden');
+        document.body.classList.add('overflow-hidden');
+
+        // Trigger layout recalc before animations
+        mobileMenu.offsetHeight;
+
+        requestAnimationFrame(() => {
+          overlay.classList.remove('pointer-events-none');
+          overlay.style.opacity = '0.5';
+          mobileMenu.classList.add('active');
+        });
+      } else {
+        overlay.classList.add('pointer-events-none');
+        overlay.style.opacity = '0';
+        mobileMenu.classList.remove('active');
+
+        mobileMenu.addEventListener(
+          'transitionend',
+          () => {
+            if (!mobileMenu.classList.contains('active')) {
+              mobileMenu.classList.add('hidden');
+              document.body.classList.remove('overflow-hidden');
+            }
+          },
+          { once: true }
+        );
+      }
     }
 
     if (hamburgerMenu) {
@@ -709,12 +1175,70 @@
 
     // Submenu Toggle for Mobile
     const submenuToggles = mobileMenu.querySelectorAll('.toggle-submenu');
+    let activeSubmenu = null;
+    let isAnimating = false;
+
+    const closeSubmenu = (submenu, icon) => {
+      return new Promise((resolve) => {
+        submenu.classList.remove('show');
+        icon.style.transform = 'rotate(0)';
+
+        const handleTransitionEnd = () => {
+          submenu.classList.add('hidden');
+          submenu.removeEventListener('transitionend', handleTransitionEnd);
+          resolve();
+        };
+
+        submenu.addEventListener('transitionend', handleTransitionEnd);
+      });
+    };
+
+    const openSubmenu = (submenu, icon) => {
+      return new Promise((resolve) => {
+        submenu.classList.remove('hidden');
+        submenu.offsetHeight;
+
+        requestAnimationFrame(() => {
+          submenu.classList.add('show');
+          icon.style.transform = 'rotate(-90deg)';
+
+          submenu.addEventListener(
+            'transitionend',
+            () => {
+              resolve();
+            },
+            { once: true }
+          );
+        });
+      });
+    };
+
     submenuToggles.forEach((toggle) => {
-      toggle.addEventListener('click', function () {
+      toggle.addEventListener('click', async function () {
+        if (isAnimating) return;
+        isAnimating = true;
+
         const submenu = this.closest('.mobile-menu-item').querySelector('.submenu');
-        if (submenu) {
-          submenu.classList.toggle('hidden');
-          submenu.classList.toggle('block');
+        const icon = this.querySelector('img, svg');
+
+        try {
+          if (activeSubmenu === submenu) {
+            await closeSubmenu(submenu, icon);
+            activeSubmenu = null;
+          } else {
+            const closePromise = activeSubmenu
+              ? closeSubmenu(
+                  activeSubmenu,
+                  activeSubmenu.closest('.mobile-menu-item').querySelector('.toggle-submenu img, .toggle-submenu svg')
+                )
+              : Promise.resolve();
+
+            await closePromise;
+            await openSubmenu(submenu, icon);
+            activeSubmenu = submenu;
+          }
+        } finally {
+          isAnimating = false;
         }
       });
     });
@@ -768,5 +1292,109 @@
     setHeaderHeight();
     window.addEventListener('resize', setHeaderHeight, { passive: true });
     window.addEventListener('scroll', () => requestAnimationFrame(handleScroll), { passive: true });
+
+    // Country Selector for Mobile
+    const countrySelector = document.querySelector('.country-selector');
+    const countrySelectorBtn = document.querySelector('.country-selector-button');
+    const countrySelectorDropdown = document.querySelector('.country-selector-dropdown');
+
+    if (countrySelector && countrySelectorBtn && countrySelectorDropdown) {
+      countrySelectorBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const isExpanded = countrySelectorBtn.getAttribute('aria-expanded') === 'true';
+
+        countrySelectorBtn.setAttribute('aria-expanded', !isExpanded);
+        countrySelectorBtn.querySelector('svg').style.transform = isExpanded ? 'rotate(0)' : 'rotate(180deg)';
+        countrySelectorDropdown.classList.toggle('opacity-0');
+        countrySelectorDropdown.classList.toggle('invisible');
+      });
+
+      // Close dropdown when clicking outside
+      document.addEventListener('click', (e) => {
+        if (!countrySelector.contains(e.target)) {
+          countrySelectorBtn.setAttribute('aria-expanded', 'false');
+          countrySelectorBtn.querySelector('svg').style.transform = 'rotate(0)';
+          countrySelectorDropdown.classList.add('opacity-0', 'invisible');
+        }
+      });
+    }
+
+    // Search bar
+    const searchToggle = document.getElementById('search-toggle');
+    const searchContainer = document.getElementById('search-container');
+    const searchOverlay = document.getElementById('search-overlay');
+    const closeSearch = document.getElementById('close-search');
+    const searchInput = searchContainer.querySelector('input[type="search"]');
+
+    function toggleSearch(show) {
+      searchToggle.setAttribute('aria-expanded', show);
+      searchOverlay.classList.toggle('hidden', !show);
+      document.body.classList.toggle('overflow-hidden', show);
+
+      if (show) {
+        const headerHeight = document.querySelector('[data-header-sticky]').offsetHeight;
+        document.documentElement.style.setProperty('--header-height', `${headerHeight}px`);
+
+        searchContainer.classList.remove('hidden');
+        searchContainer.offsetHeight;
+        requestAnimationFrame(() => {
+          searchOverlay.classList.remove('opacity-0');
+          searchContainer.classList.add('translate-y-0');
+          setTimeout(() => searchInput.focus(), 300);
+        });
+      } else {
+        searchOverlay.classList.add('opacity-0');
+        searchContainer.classList.remove('translate-y-0');
+        // Hide the container after the animation
+        searchContainer.addEventListener(
+          'transitionend',
+          () => {
+            searchContainer.classList.add('hidden');
+          },
+          { once: true }
+        );
+      }
+    }
+
+    searchToggle.addEventListener('click', () => toggleSearch(true));
+    closeSearch.addEventListener('click', () => toggleSearch(false));
+    searchOverlay.addEventListener('click', () => toggleSearch(false));
+
+    // Close search on escape key
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && searchToggle.getAttribute('aria-expanded') === 'true') {
+        toggleSearch(false);
+      }
+    });
+
+    // Bottom bar
+    const bottomBarIndicator = document.getElementById('bottom-bar-indicator');
+
+    if (bottomBarIndicator) {
+      bottomBarIndicator.style.width = '100%';
+      bottomBarIndicator.style.transform = 'translateX(0)';
+    }
+
+    const menuItems = document.querySelectorAll('.menu-items ul > li.dropdown-group');
+
+    menuItems.forEach((item) => {
+      const link = item.querySelector('a');
+
+      item.addEventListener('mouseenter', () => {
+        const rect = link.getBoundingClientRect();
+        const containerRect = item.closest('.menu-items').getBoundingClientRect();
+        const left = rect.left - containerRect.left;
+        const width = rect.width;
+
+        bottomBarIndicator.style.transform = `translateX(${left}px)`;
+        bottomBarIndicator.style.width = `${width}px`;
+      });
+
+      item.addEventListener('mouseleave', () => {
+        // Reset only when leaving the whole dropdown group
+        bottomBarIndicator.style.width = `100%`;
+        bottomBarIndicator.style.transform = `translateX(0)`;
+      });
+    });
   });
 </script>

@@ -1,23 +1,226 @@
-<style type="text/css">
-  .template-404 .title + * {
-    margin-top: 1rem;
-  }
-
-  @media screen and (min-width: 750px) {
-    .template-404 .title + * {
-      margin-top: 2rem;
+{% schema %}
+{
+  "name": "404 Page",
+  "settings": [
+    {
+      "type": "text",
+      "id": "first_text",
+      "label": "t:sections.404.first_text.label",
+      "default": "Did you take"
+    },
+    {
+      "type": "text",
+      "id": "second_text",
+      "label": "t:sections.404.second_text.label",
+      "default": "a wrong turn?"
+    },
+    {
+      "type": "text",
+      "id": "third_text",
+      "label": "t:sections.404.third_text.label",
+      "default": "Page not found"
+    },
+    {
+      "type": "text",
+      "id": "button_text",
+      "label": "t:sections.404.button_text.label",
+      "default": "Home"
+    },
+    {
+      "type": "header",
+      "content": "t:sections.404.animation_header.label"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_animation",
+      "label": "t:sections.404.enable_animation.label",
+      "default": true
+    },
+    {
+      "type": "range",
+      "id": "animation_speed",
+      "min": 0.5,
+      "max": 3,
+      "step": 0.1,
+      "unit": "s",
+      "label": "t:sections.404.animation_speed.label",
+      "default": 1.5
+    },
+    {
+      "type": "header",
+      "content": "t:sections.404.background_image_header.label"
+    },
+    {
+      "type": "image_picker",
+      "id": "background_image",
+      "label": "t:sections.404.background_image.label"
+    },
+    {
+      "type": "select",
+      "id": "background_size",
+      "label": "t:sections.404.background_size.label",
+      "options": [
+        {
+          "value": "cover",
+          "label": "t:sections.404.background_size.options.cover.label"
+        },
+        {
+          "value": "contain",
+          "label": "t:sections.404.background_size.options.contain.label"
+        }
+      ],
+      "default": "cover"
     }
-  }
-</style>
+  ]
+}
+{% endschema %}
 
-<div class="template-404 page-width page-margin center">
-  <p>
-    {{ 'templates.404.subtext' | t }}
-  </p>
-  <h1 class="title">
-    {{ 'templates.404.title' | t }}
-  </h1>
-  <a href="{{ routes.all_products_collection_url }}" class="button">
-    {{ 'general.continue_shopping' | t }}
+<div class="bandit-404-section color-{{ section.settings.color_scheme }}" style="{% if section.settings.background_image %}background-image: url({{ section.settings.background_image | image_url }}); background-size: {{ section.settings.background_size }};{% endif %}">
+  {% if section.settings.enable_animation %}
+    <svg class="svg-text-flow text-flow-10 is-animating" xmlns="http://www.w3.org/2000/svg" viewBox="-100 -100 1400 600" data-text-path-animate="text-flow-10">
+      <path id="text-flow-10" fill="none" d="M1200,287.5H80.5a80,80,0,0,1-80-80V80.5a80,80,0,0,1,80-80h1000"></path>
+      <text y="40" style="text-transform: uppercase;" font-size="60" fill="var(--color-foreground)">
+        <textPath href="#text-flow-10" startOffset="-551">
+          {{ section.settings.first_text }}
+          <animate attributeName="startOffset" from="0" to="1511.36279296875" dur="{{ section.settings.animation_speed }}s" begin="0.3s" fill="freeze"></animate>
+        </textPath>
+      </text>
+    </svg>
+
+    <svg class="svg-text-flow text-flow-11 is-animating" xmlns="http://www.w3.org/2000/svg" viewBox="-100 -100 1400 600" data-text-path-animate="text-flow-11">
+      <path id="text-flow-11" fill="none" d="M100.5,-30.5V80.5a80,80,0,0,0,80,80h800"></path>
+      <text y="40" style="text-transform: uppercase;" font-size="60" fill="var(--color-foreground)">
+        <textPath href="#text-flow-11" startOffset="-551">
+          {{ section.settings.second_text }}
+          <animate attributeName="startOffset" from="0" to="300" dur="{{ section.settings.animation_speed }}s" begin="0.3s" fill="freeze"></animate>
+        </textPath>
+      </text>
+    </svg>
+
+    <svg class="svg-text-flow text-flow-12 is-animating" xmlns="http://www.w3.org/2000/svg" viewBox="-100 -100 1400 600" data-text-path-animate="text-flow-12">
+      <path id="text-flow-12" fill="none" d="M100.5,387.5V80.5a80,80,0,0,1,80,-80h800"></path>
+      <text y="40" style="text-transform: uppercase;" font-size="60" fill="var(--color-foreground)">
+        <textPath href="#text-flow-12" startOffset="-551">
+          {{ section.settings.third_text }}
+          <animate attributeName="startOffset" from="0" to="502" dur="{{ section.settings.animation_speed | times: 1.5 }}s" begin="{{ section.settings.animation_speed | plus: 0.3 }}s" fill="freeze"></animate>
+        </textPath>
+      </text>
+    </svg>
+  {% else %}
+    <svg class="svg-text-flow text-flow-10" xmlns="http://www.w3.org/2000/svg" viewBox="-100 -100 1400 600">
+      <path id="text-flow-10-static" fill="none" d="M1200,287.5H80.5a80,80,0,0,1-80-80V80.5a80,80,0,0,1,80-80h1000"></path>
+      <text y="40" style="text-transform: uppercase;" font-size="60" fill="var(--color-foreground)">
+        <textPath href="#text-flow-10-static" startOffset="1511.36279296875">
+          {{ section.settings.first_text }}
+        </textPath>
+      </text>
+    </svg>
+
+    <svg class="svg-text-flow text-flow-11" xmlns="http://www.w3.org/2000/svg" viewBox="-100 -100 1400 600">
+      <path id="text-flow-11-static" fill="none" d="M100.5,-30.5V80.5a80,80,0,0,0,80,80h800"></path>
+      <text y="40" style="text-transform: uppercase;" font-size="60" fill="var(--color-foreground)">
+        <textPath href="#text-flow-11-static" startOffset="300">
+          {{ section.settings.second_text }}
+        </textPath>
+      </text>
+    </svg>
+
+    <svg class="svg-text-flow text-flow-12" xmlns="http://www.w3.org/2000/svg" viewBox="-100 -100 1400 600">
+      <path id="text-flow-12-static" fill="none" d="M100.5,387.5V80.5a80,80,0,0,1,80,-80h800"></path>
+      <text y="40" style="text-transform: uppercase;" font-size="60" fill="var(--color-foreground)">
+        <textPath href="#text-flow-12-static" startOffset="502">
+          {{ section.settings.third_text }}
+        </textPath>
+      </text>
+    </svg>
+  {% endif %}
+  
+  <a href="/" class="bandit-404-button" style="background-color: var(--text); color: var(--button_label);">
+    {{ section.settings.button_text }}
   </a>
 </div>
+
+<style>
+.bandit-404-section {
+  min-height: 60vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  position: relative;
+  text-align: center;
+  padding: 8vh 0 15vh;
+  overflow: visible;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+.svg-text-flow {
+  color: #000000;
+  position: absolute;
+  left: 55%;
+  transform: translateX(-50%) scale(0.6);
+  width: 100%;
+  max-width: 1000px;
+  overflow: visible;
+}
+
+.text-flow-10 {
+  top: -4vh;
+}
+
+.text-flow-11 {
+  top: -10vh;
+}
+
+.text-flow-12 {
+  top: 15vh;
+}
+
+.bandit-404-button {
+  position: relative;
+  top: 20vh;
+  padding: 8px 30px;
+  text-decoration: none;
+  font-size: 16px;
+  font-weight: 500;
+  border-radius: 4px;
+  transition: all 0.3s ease;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.bandit-404-button:hover {
+  transform: translateY(-2px);
+  opacity: 0.9;
+}
+
+@media screen and (max-width: 768px) {
+  .bandit-404-section {
+    min-height: 50vh;
+    padding: 8vh 0 10vh;
+  }
+
+  .text-flow-10 {
+    top: 6vh;
+  }
+
+  .text-flow-11 {
+    top: 4vh;
+  }
+
+  .text-flow-12 {
+    top: 20vh;
+  }
+
+  text {
+    font-size: 40px !important;
+  }
+  
+  .bandit-404-button {
+    top: 10vh;
+    padding: 5px 20px;
+    font-size: 10px;
+  }
+}
+</style>
