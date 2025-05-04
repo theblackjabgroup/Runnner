@@ -17,7 +17,11 @@ document.addEventListener("DOMContentLoaded", () => {
     };
 
     const fullWithLinks = convertLinks(fullText);
+<<<<<<< HEAD
     const shortRaw = fullText.split(" ").slice(0, 5).join(" ") + "...";
+=======
+    const shortRaw = fullText.split(" ").slice(0, 3).join(" ") + " ...";
+>>>>>>> 806fad7575faa02d898e41f9e72a250b3616e649
     const shortWithLinks = convertLinks(shortRaw);
 
     preview.innerHTML = shortWithLinks;
