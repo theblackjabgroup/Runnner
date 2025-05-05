@@ -1,5 +1,5 @@
 <!-- Desktop view -->
-<section class="product-section hidden lg:!flex lg:flex-row gap-4 lg:gap-8 px-4 py-8">
+<section class="product-section section-{{ section.id }}-padding hidden lg:!flex lg:flex-row gap-4 lg:gap-8 px-4 py-8">
   {%- comment -%} Left: Image Gallery {%- endcomment -%}
   <div class="product-gallery w-1/2">
     <div class="gallery-wrapper sticky top-0 h-screen">
@@ -111,7 +111,16 @@
         </div>
         <div class="tab-content p-8 overflow-y-auto">
           <div class="tab-pane active" data-content="description">{{ product.description }}</div>
-          <div class="tab-pane hidden" data-content="details">Product details here...</div>
+
+          <div class="tab-pane hidden" data-content="details">
+            {%- if section.settings.metafield_namespace_key != blank -%}
+              <div class="prose prose-lg max-w-none">
+                {{ section.settings.metafield_namespace_key }}
+              </div>
+            {%- else -%}
+              <p class="text-gray-500">No details available for this product.</p>
+            {%- endif -%}
+          </div>
           <div class="tab-pane hidden" data-content="sizing">Size guide here...</div>
         </div>
       </div>
@@ -291,7 +300,15 @@
         </div>
         <div class="tab-content p-8">
           <div class="tab-pane active" data-content="description">{{ product.description }}</div>
-          <div class="tab-pane hidden" data-content="details">Product details here...</div>
+          <div class="tab-pane hidden" data-content="details">
+            {%- if section.settings.metafield_namespace_key != blank -%}
+              <div class="prose prose-lg max-w-none">
+                {{ section.settings.metafield_namespace_key }}
+              </div>
+            {%- else -%}
+              <p class="text-gray-500">No details available for this product.</p>
+            {%- endif -%}
+          </div>
           <div class="tab-pane hidden" data-content="sizing">Size guide here...</div>
         </div>
       </div>
@@ -367,6 +384,18 @@
 </section>
 
 <style>
+  .section-{{ section.id }}-padding {
+    padding-top: {{ section.settings.padding_top | times: 0.75 | round: 0 }}px;
+    padding-bottom: {{ section.settings.padding_bottom | times: 0.75 | round: 0 }}px;
+  }
+
+  @media screen and (min-width: 750px) {
+    .section-{{ section.id }}-padding {
+      padding-top: {{ section.settings.padding_top }}px;
+      padding-bottom: {{ section.settings.padding_bottom }}px;
+    }
+  }
+
   .product-section {
     display: flex;
     height: calc(100vh * {{product.media.size}});
@@ -853,7 +882,34 @@ function updateVariant() {
   "name": "Product Details",
   "tag": "section",
   "class": "section",
-  "settings": [],
+  "settings": [
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "t:sections.all.padding.padding_top",
+      "default": 36
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "t:sections.all.padding.padding_bottom",
+      "default": 36
+    },
+    {
+      "type": "text",
+      "id": "metafield_namespace_key",
+      "label": "Metafield ",
+      "default": "custom.short_description"
+    }
+  ],
   "presets": [
     {
       "name": "Product Details"
