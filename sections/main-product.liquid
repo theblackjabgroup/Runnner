@@ -127,7 +127,13 @@
 
       {%- comment -%} Size & Price {%- endcomment -%}
       {%- assign option_names = product.options_with_values | map: 'name' -%}
-      {%- assign size_index = option_names | index_of: 'Size' | plus: 1 -%}
+      {%- assign size_index = 0 -%}
+      {%- for name in option_names -%}
+        {%- if name == 'Size' -%}
+          {%- assign size_index = forloop.index -%}
+        {%- endif -%}
+      {%- endfor -%}
+      {%- comment -%} size_index is 1-based, matching Shopify's variant option numbering {%- endcomment -%}
 
       <div class="size-price-selector px-4 flex flex-col gap-4">
         <div class="size-selector border-t border-gray-400 py-4 flex justify-between ">
@@ -755,7 +761,7 @@
     // variant logic
     const productOptions = {{ product.options | json }};
     const productVariants = {{ product.variants | json }};
-    
+
     const colorIndex = productOptions.findIndex(opt => opt.toLowerCase() === 'color');
     const sizeIndex = productOptions.findIndex(opt => opt.toLowerCase() === 'size');
 
@@ -871,7 +877,7 @@
 function updateVariant() {
   const variant = findMatchingVariant();
   updateUI(variant);
-  updateSizeAvailability(); 
+  updateSizeAvailability();
 }
 
   });
