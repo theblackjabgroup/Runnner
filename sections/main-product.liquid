@@ -1,5 +1,5 @@
 <!-- Desktop view -->
-<section class="product-section hidden lg:!flex lg:flex-row gap-4 lg:gap-8 px-4 py-8">
+<section class="product-section section-{{ section.id }}-padding hidden lg:!flex lg:flex-row gap-4 lg:gap-8 px-4 py-8">
   {%- comment -%} Left: Image Gallery {%- endcomment -%}
   <div class="product-gallery w-1/2">
     <div class="gallery-wrapper sticky top-0 h-screen">
@@ -111,12 +111,30 @@
         </div>
         <div class="tab-content p-8 overflow-y-auto">
           <div class="tab-pane active" data-content="description">{{ product.description }}</div>
-          <div class="tab-pane hidden" data-content="details">Product details here...</div>
+
+          <div class="tab-pane hidden" data-content="details">
+            {%- if section.settings.metafield_namespace_key != blank -%}
+              <div class="prose prose-lg max-w-none">
+                {{ section.settings.metafield_namespace_key }}
+              </div>
+            {%- else -%}
+              <p class="text-gray-500">No details available for this product.</p>
+            {%- endif -%}
+          </div>
           <div class="tab-pane hidden" data-content="sizing">Size guide here...</div>
         </div>
       </div>
 
       {%- comment -%} Size & Price {%- endcomment -%}
+      {%- assign option_names = product.options_with_values | map: 'name' -%}
+      {%- assign size_index = 0 -%}
+      {%- for name in option_names -%}
+        {%- if name == 'Size' -%}
+          {%- assign size_index = forloop.index -%}
+        {%- endif -%}
+      {%- endfor -%}
+      {%- comment -%} size_index is 1-based, matching Shopify's variant option numbering {%- endcomment -%}
+
       <div class="size-price-selector px-4 flex flex-col gap-4">
         <div class="size-selector border-t border-gray-400 py-4 flex justify-between ">
           <div class="flex items-center mb-4">
@@ -125,23 +143,20 @@
           <div class="size-buttons flex-1 justify-end flex gap-4">
             {%- assign size_options = product.options_with_values | where: 'name', 'Size' | first -%}
             {%- for value in size_options.values -%}
-              {%- assign size_variant = product.variants | where: 'option2', value | first -%}
+              {% assign size_variant = product.variants
+                | where: 'option'
+                | append: size_index
+                | append: '', value
+                | first
+              %}
+
               <button
                 type="button"
-                class="size-btn relative w-12 h-12 flex items-center justify-center {% if forloop.first %}bg-black text-white{% endif %} {% unless size_variant.available %}opacity-50 cursor-not-allowed{% endunless %} transition-all duration-300"
+                class="size-btn relative w-12 h-12 flex items-center justify-center transition-all duration-300"
                 data-value="{{ value | escape }}"
-                {% unless size_variant.available %}
-                  disabled
-                  aria-disabled="true"
-                {% endunless %}
-                aria-label="Size {{ value }}{% unless size_variant.available %} - Sold out{% endunless %}"
+                aria-label="Size {{ value }}"
               >
                 <span class="relative z-10 text-3xl font-bold ">{{ value }}</span>
-                {% unless size_variant.available %}
-                  <span class="absolute inset-0 flex items-center justify-center">
-                    <span class="block w-full h-[2px] bg-neutral-900 rotate-135 origin-center"></span>
-                  </span>
-                {% endunless %}
               </button>
             {%- endfor -%}
           </div>
@@ -184,7 +199,7 @@
   <!-- Mobile Image Gallery -->
   <div class="mobile-gallery">
     <!-- Main Image Stack -->
-    <div class="main-images relative h-[70vh] overflow-hidden">
+    <div class="main-images relative h-[60vh] overflow-hidden">
       {%- if product.media.size > 0 -%}
         {%- for media in product.media -%}
           <div
@@ -291,7 +306,15 @@
         </div>
         <div class="tab-content p-8">
           <div class="tab-pane active" data-content="description">{{ product.description }}</div>
-          <div class="tab-pane hidden" data-content="details">Product details here...</div>
+          <div class="tab-pane hidden" data-content="details">
+            {%- if section.settings.metafield_namespace_key != blank -%}
+              <div class="prose prose-lg max-w-none">
+                {{ section.settings.metafield_namespace_key }}
+              </div>
+            {%- else -%}
+              <p class="text-gray-500">No details available for this product.</p>
+            {%- endif -%}
+          </div>
           <div class="tab-pane hidden" data-content="sizing">Size guide here...</div>
         </div>
       </div>
@@ -367,6 +390,18 @@
 </section>
 
 <style>
+  .section-{{ section.id }}-padding {
+    padding-top: {{ section.settings.padding_top | times: 0.75 | round: 0 }}px;
+    padding-bottom: {{ section.settings.padding_bottom | times: 0.75 | round: 0 }}px;
+  }
+
+  @media screen and (min-width: 750px) {
+    .section-{{ section.id }}-padding {
+      padding-top: {{ section.settings.padding_top }}px;
+      padding-bottom: {{ section.settings.padding_bottom }}px;
+    }
+  }
+
   .product-section {
     display: flex;
     height: calc(100vh * {{product.media.size}});
@@ -504,6 +539,22 @@
 
     .tab-content {
       height: auto;
+    }
+    .mobile-sticky-selector {
+      position: static;
+      transform: translateY(100%);
+      transition: transform 0.3s ease;
+      will-change: transform;
+      z-index: 999;
+    }
+
+    .mobile-sticky-selector.stuck {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      transform: translateY(0);
+      background-color: white;
     }
   }
 </style>
@@ -684,6 +735,151 @@
       // Initialize with first image
       showImage(0);
     }
+
+    const stickySelector = document.querySelector('.mobile-sticky-selector');
+    const stickyContainer = document.querySelector('.mobile-sticky-container');
+
+    if (stickySelector && stickyContainer) {
+      const observer = new IntersectionObserver(
+        ([entry]) => {
+          if (entry.isIntersecting) {
+            stickySelector.classList.add('stuck');
+          } else {
+            stickySelector.classList.remove('stuck');
+          }
+        },
+        {
+          root: null,
+          threshold: 0,
+          rootMargin: `0px 0px -100% 0px`, // triggers when container bottom reaches viewport bottom
+        }
+      );
+
+      observer.observe(stickyContainer);
+    }
+
+    // variant logic
+    const productOptions = {{ product.options | json }};
+    const productVariants = {{ product.variants | json }};
+
+    const colorIndex = productOptions.findIndex(opt => opt.toLowerCase() === 'color');
+    const sizeIndex = productOptions.findIndex(opt => opt.toLowerCase() === 'size');
+
+    let selectedColor = null;
+    let selectedSize = null;
+
+    const priceElement = document.querySelector('.price-selector span.text-5xl');
+    const addToCartButton = document.querySelector('.price-selector button');
+
+    function findMatchingVariant() {
+      return productVariants.find(variant => {
+        const colorMatch = colorIndex >= 0 ? variant[`option${colorIndex + 1}`] === selectedColor : true;
+        const sizeMatch = sizeIndex >= 0 ? variant[`option${sizeIndex + 1}`] === selectedSize : true;
+        return colorMatch && sizeMatch;
+      });
+    }
+
+    function updateUI(variant) {
+      if (!variant) {
+        addToCartButton.disabled = true;
+        addToCartButton.textContent = 'Unavailable';
+        priceElement.textContent = 'N/A';
+        return;
+      }
+
+      addToCartButton.disabled = !variant.available;
+      addToCartButton.textContent = variant.available ? 'Add to Cart' : 'Sold Out';
+      priceElement.textContent = `$${(variant.price / 100).toFixed(2)}`;
+    }
+
+    function updateVariant() {
+      const variant = findMatchingVariant();
+      updateUI(variant);
+    }
+
+    // Color button clicks
+    document.querySelectorAll('.color-swatch').forEach(btn => {
+      btn.addEventListener('click', () => {
+        selectedColor = btn.getAttribute('data-option-value');
+
+        // highlight selected color
+        document.querySelectorAll('.color-swatch').forEach(b => {
+          b.classList.remove('ring-2', 'ring-offset-2', 'ring-black');
+        });
+        btn.classList.add('ring-2', 'ring-offset-2', 'ring-black');
+
+        updateVariant();
+      });
+    });
+
+    // Size button clicks
+    document.querySelectorAll('.size-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        selectedSize = btn.getAttribute('data-value');
+
+        // highlight selected size
+        document.querySelectorAll('.size-btn').forEach(b => {
+          b.classList.remove('bg-black', 'text-white');
+        });
+        btn.classList.add('bg-black', 'text-white');
+
+        updateVariant();
+      });
+    });
+
+    // Initial pre-select (optional)
+    const defaultColorBtn = document.querySelector('.color-swatch');
+    if (defaultColorBtn) {
+      selectedColor = defaultColorBtn.getAttribute('data-option-value');
+      defaultColorBtn.classList.add('ring-2', 'ring-offset-2', 'ring-black');
+    }
+
+    const defaultSizeBtn = document.querySelector('.size-btn');
+    if (defaultSizeBtn) {
+      selectedSize = defaultSizeBtn.getAttribute('data-value');
+      defaultSizeBtn.classList.add('bg-black', 'text-white');
+    }
+
+    function updateSizeAvailability() {
+  const color = selectedColor;
+  const sizeBtns = document.querySelectorAll('.size-btn');
+
+  sizeBtns.forEach(btn => {
+    const size = btn.getAttribute('data-value');
+
+    // Find if there's any variant with this color + size
+    const matchingVariant = productVariants.find(variant => {
+      const colorMatch = colorIndex >= 0 ? variant[`option${colorIndex + 1}`] === color : true;
+      const sizeMatch = sizeIndex >= 0 ? variant[`option${sizeIndex + 1}`] === size : true;
+      return colorMatch && sizeMatch;
+    });
+
+    if (!matchingVariant || !matchingVariant.available) {
+      btn.classList.add('opacity-50', 'cursor-not-allowed');
+      btn.disabled = true;
+      btn.setAttribute('aria-disabled', 'true');
+      btn.querySelector('span').insertAdjacentHTML('afterend', `
+        <span class="absolute inset-0 flex items-center justify-center">
+          <span class="block w-full h-[2px] bg-neutral-900 rotate-135 origin-center"></span>
+        </span>
+      `);
+    } else {
+      btn.classList.remove('opacity-50', 'cursor-not-allowed');
+      btn.disabled = false;
+      btn.removeAttribute('aria-disabled');
+      const slash = btn.querySelector('.absolute');
+      if (slash) slash.remove();
+    }
+  });
+}
+
+
+function updateVariant() {
+  const variant = findMatchingVariant();
+  updateUI(variant);
+  updateSizeAvailability();
+}
+
   });
 </script>
 
@@ -692,7 +888,34 @@
   "name": "Product Details",
   "tag": "section",
   "class": "section",
-  "settings": [],
+  "settings": [
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "t:sections.all.padding.padding_top",
+      "default": 36
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "t:sections.all.padding.padding_bottom",
+      "default": 36
+    },
+    {
+      "type": "text",
+      "id": "metafield_namespace_key",
+      "label": "Metafield ",
+      "default": "custom.short_description"
+    }
+  ],
   "presets": [
     {
       "name": "Product Details"
