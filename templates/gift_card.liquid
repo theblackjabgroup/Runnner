@@ -254,17 +254,6 @@
         justify-content: center;
       }
 
-      .gift-card__copy-success {
-        display: none;
-        color: rgb(var(--color-foreground));
-        font-size: 14px;
-        margin-top: 24px;
-      }
-
-      .gift-card__copy-success.visible {
-        display: block;
-      }
-
        @media screen and (max-width: 768px) {
          .container {
            margin-left: 20px;
@@ -277,6 +266,25 @@
            font-size: 10px;
          }
        }
+
+      @media print {
+        body * {
+          visibility: hidden !important;
+        }
+        #printable-gift-card, #printable-gift-card * {
+          visibility: visible !important;
+        }
+        #printable-gift-card {
+          position: fixed !important;
+          left: 50% !important;
+          top: 50% !important;
+          transform: translate(-50%, -50%) !important;
+          width: 40% !important;
+          margin: 0 !important;
+          box-shadow: none !important;
+          z-index: 9999 !important;
+        }
+      }
     {% endstyle %}
 
     {%- unless settings.type_body_font.system? -%}
@@ -295,7 +303,7 @@
     <div class="container">
       <div class="store-name">{{ shop.name }}</div>
       <div class="your-gift-card">{{ 'gift_cards.issued.title' | t: value: formatted_balance, shop: shop.name }}</div>
-      <div class="gift-card-box">
+      <div id="printable-gift-card" class="gift-card-box">
         <div class="store-name-inside">{{ shop.name }}</div>
         <div class="gift-text">{{ 'gift_cards.issued.gift' | t }}</div>
         <div class="gift-card-code">{{ gift_card.code | format_code }}</div>
@@ -308,8 +316,9 @@
         </div>
       </div>
       <div class="gift-card-instructions">{{ 'gift_cards.issued.how_to_use_gift_card' | t }}</div>
+      
       <button class="button-main" onclick="window.open('{{ shop.url }}', '_blank')">{{ 'gift_cards.issued.shop_link' | t }}</button><br>
-      <button class="button-outline" onclick="window.print()">{{ 'gift_cards.issued.print_gift_card' | t }}</button>
+      <button class="button-outline" onclick="printGiftCard()">{{ 'gift_cards.issued.print_gift_card' | t }}</button>
       <div class="divider">
         <div class="divider-line"></div>
         <div class="divider-text">{{ 'gift_cards.issued.or' | t }}</div>
@@ -318,7 +327,6 @@
       <div class="qr-section">
         <div class="gift-card__qr-code" data-identifier="{{ gift_card.qr_identifier }}"></div>
       </div>
-      <div class="gift-card__copy-success" role="status"></div>
     </div>
 
     <script>
@@ -330,22 +338,11 @@
           height: 120,
           imageAltText: string.qrImageAlt
         });
-
-        // Copy code functionality
-        const copyButton = document.querySelector('.button-outline');
-        const copySuccess = document.querySelector('.gift-card__copy-success');
-        const giftCardCode = document.querySelector('.gift-card-code');
-
-        copyButton.addEventListener('click', function() {
-          navigator.clipboard.writeText(giftCardCode.textContent).then(function() {
-            copySuccess.textContent = {{ 'gift_cards.issued.copy_code_success' | t | json }};
-            copySuccess.classList.add('visible');
-            setTimeout(function() {
-              copySuccess.classList.remove('visible');
-            }, 2000);
-          });
-        });
       });
+
+      function printGiftCard() {
+        window.print();
+      }
     </script>
   </body>
 </html>
