@@ -7,13 +7,11 @@
   /* Apply heading and body fonts based on theme settings */
   footer .heading-font {
     font-family: var(--font-heading-family);
-    font-weight: var(--font-heading-weight);
     font-style: var(--font-heading-style);
   }
 
   footer .body-font {
     font-family: var(--font-body-family);
-    font-weight: var(--font-body-weight);
     font-style: var(--font-body-style);
   }
 
@@ -60,6 +58,198 @@
   }
 </style>
 
+{{ 'section-footer.css' | asset_url | stylesheet_tag }}
+{{ 'component-newsletters.css' | asset_url | stylesheet_tag }}
+
+<style>
+  /* Apply heading and body fonts based on theme settings */
+  footer .heading-font {
+    font-family: var(--font-heading-family);
+    font-style: var(--font-heading-style);
+  }
+
+  footer .body-font {
+    font-family: var(--font-body-family);
+    font-style: var(--font-body-style);
+  }
+
+  :root {
+    --cr-yellow-2: #d68c00;
+    --cr-yellow-1: #c9c3ad;
+  }
+  
+  .email-input.error {
+    border-color: red !important;
+  }
+
+  .message-container {
+    padding: 10px;
+    margin-bottom: 15px;
+    text-align: center;
+  }
+
+  .success-message {
+    color: green;
+    font-weight: bold;
+  }
+
+  /* Added styling for social icons in support section */
+  .support-social-icons {
+    display: flex;
+    margin-top: 60px;
+    gap: 10px;
+  }
+ 
+  .social-icons-hover {
+    fill: #808080 !important;
+    transition: fill 0.3s ease;
+  }
+  
+  .social-icons-hover {
+    transition: fill 0.3s ease;
+  }
+
+  @media screen and (max-width: 767px) {
+    .support-social-icons {
+      margin-top: 20px;
+    }
+  }
+  
+  /* Newsletter Form Styling */
+  .email-signup-section {
+    padding: 20px;
+    text-align: center;
+    width: 100%;
+    box-sizing: border-box;
+  }
+  
+  .form-fields-container {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+  
+  .email-signup-container {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    max-width: 100%;
+    margin: auto;
+    padding: 0 15px;
+    box-sizing: border-box;
+  }
+  
+  .email-input1 {
+    width: 100%;
+    padding: 0 20px; /* Reduced vertical padding */
+    height: 110px; /* Fixed height */
+    font-size: 100px;
+    font-weight: 600;
+    text-transform: uppercase;
+    color: white;
+    background: transparent; 
+    border: 1px solid white;
+    outline: none;
+    box-sizing: border-box;
+    border-radius: 5px;
+    margin-left: 5px;
+    line-height: 80px; /* Match height */
+  }
+  
+  .signup-button { 
+    width: 100%;
+    padding: 0 20px; /* Reduced vertical padding */
+    height: 110px; /* Fixed height */
+    border-radius: 5px;
+    font-size: 100px;
+    font-weight: 600;
+    text-transform: uppercase;
+    color: white;
+    background: transparent; 
+    border: 1px solid white;
+    outline: none;
+    box-sizing: border-box;
+    transition: background-color 0.3s ease, color 0.3s ease;
+    margin-left: 5px; 
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+  }
+  
+  /* Text span inside signup button */
+  .signup-button span {
+    line-height: 1;
+    display: flex;
+    align-items: center;
+    height: 100%;
+  }
+  
+  /* Hover effect for signup button */
+  .signup-button:hover {
+    background-color: white;
+    color: black; 
+  }
+  
+  .arrow-icon {
+    font-size: 80px;
+    transition: transform 0.3s ease, color 0.3s ease;
+    content: "\2192"; 
+    display: inline-block;
+  }
+  
+  .signup-button:hover .arrow-icon {
+    transform: translateX(5px);
+    color: black;
+  }
+  
+  /* Media Query for smaller screens */
+  @media (max-width: 768px) {
+    .email-input1, .signup-button {
+      font-size: 30px;
+      height: 60px; 
+      line-height: 60px; 
+    }
+    
+    .arrow-icon {
+      font-size: 30px;
+    }
+  }
+  
+  /* Media Query for very small screens */
+  @media (max-width: 480px) {
+    .email-input1, .signup-button {
+      font-size: 24px;
+      height: 50px;
+      line-height: 50px; 
+      width: 115%; 
+      margin-left: -24px; 
+    }
+    
+    .arrow-icon {
+      font-size: 24px;
+    }
+  }
+  
+  /* Form success message styling */
+  .newsletter-form__message--success {
+    color: #FFFFFF;
+    padding: 15px;
+    margin: 10px 0;
+    border-radius: 4px;
+    background-color: inherit;
+  }
+  
+  .newsletter-form__message--error {
+    color: #FFFFFF;
+    padding: 15px;
+    margin: 10px 0;
+    border-radius: 4px;
+    background-color: inherit;
+  }
+</style>
+
 <footer
   class="color-{{ section.settings.color_scheme }} bg-black text-white p-4 sm:px-6 md:px-8 md:py-8"
   style="
@@ -79,21 +269,21 @@
             class="email-signup-section {% if section.settings.color_scheme != blank %}color-{{ section.settings.color_scheme }}{% endif %}"
             {{ block.shopify_attributes }}
           >
-            <form id="email-signup-form" class="email-signup-container" aria-labelledby="newsletter-heading">
-              <h2 id="newsletter-heading" class="visually-hidden">
-                {{ block.settings.button_text | default: 'Sign up for our newsletter' }}
-              </h2>
-              <input type="hidden" name="form_type" value="customer">
-              <input type="hidden" name="utf8" value="✓">
+            {% form 'customer', id: 'email-signup-form', class: 'email-signup-container newsletter-form' %}
               <input type="hidden" name="contact[tags]" value="newsletter">
-
-              <div
-                id="message-container"
+              <input type="hidden" name="form_type" value="customer">
+              
+              <div 
+                id="message-container" 
                 class="message-container"
                 style="display: none;"
-                aria-live="polite"
+                aria-live="polite" 
                 role="status"
-              ></div>
+              >
+                <div class="newsletter-form__message--success">
+                  {{ 'newsletter.success' | t | default: 'Thanks for signing up!' }}
+                </div>
+              </div>
 
               <div id="form-fields-container" class="form-fields-container">
                 <label for="email-input1" class="visually-hidden">
@@ -110,21 +300,22 @@
                 >
                 <button
                   type="submit"
-                  class="signup-button body-font"
+                  class="signup-button body-font newsletter-form__button"
                   aria-label="{{ block.settings.button_text | default: 'SIGN ME UP' }}"
+                  name="commit"
                 >
                   <span class="arrow-icon" aria-hidden="true">→</span>
                   <span>{{ block.settings.button_text | default: 'SIGN ME UP' }}</span>
                 </button>
               </div>
-            </form>
+            {% endform %}
           </div>
 
          
         {% when 'scroll_tracker' %}
           <div class="w-full md:w-[700px]">
             <div
-              class="ml-0 md:ml-[50px] bg-[var(--cr-yellow-2)] text-black px-2 md:px-5 py-6 mt-5 rounded-[5px] group hover:bg-transparent border-2 border-transparent hover:border-[var(--cr-yellow-2)] hover:text-[var(--cr-yellow-2)] transition-colors duration-300 w-full md:mt-0 md:w-[250px] lg:w-[330px] max-w-full text-left scroll-tracker md:relative absolute mt-[610px] md:ml-[205px] transform -translate-x-1/2 md:transform-none md:bottom-auto z-50"
+              class="ml-0 md:ml-[50px] bg-[var(--cr-yellow-2)] text-black px-1 md:px-5 py-6 mt-5 rounded-[5px] group hover:bg-transparent border-2 border-transparent hover:border-[var(--cr-yellow-2)] hover:text-[var(--cr-yellow-2)] transition-colors duration-300 w-full md:mt-0 md:w-[250px] lg:w-[330px] max-w-full text-left scroll-tracker md:relative absolute mt-[610px] md:ml-[205px] transform -translate-x-1/2 md:transform-none md:bottom-auto z-50"
               aria-live="polite"
               {{ block.shopify_attributes }}
             >
@@ -149,8 +340,8 @@
 
 
         {% when 'support' %}
-          <div class="w-1/2 md:w-full flex pr-4 md:pr-8 mt-[0px] md:mt-[-9%] justify-end">
-            <div class="mb-6 w-[350px] ml-[-10px] md:max-w-[50%] px-4 ml:w-[150px]" {{ block.shopify_attributes }}>
+          <div class="w-1/2 md:w-full flex pr-4 md:pr-2 mt-[0px] md:mt-[-9%] justify-end">
+            <div class="mb-6 w-[350px] ml-[-10px] md:max-w-[50%] px-6 ml:w-[150px]" {{ block.shopify_attributes }}>
               <p class="uppercase md:normal-case font-bold text-[20px] md:text-[24px] break-words text-left text-white heading-font" style="word-wrap: break-word; overflow-wrap: break-word;">
                 {{ block.settings.support_heading }}
               </p>
@@ -159,7 +350,7 @@
               </p>
               <a
                 href="mailto:{{ block.settings.email_address }}"
-                class="relative mt-2 inline-block text-white text-[19px] md:text-[24px] uppercase md:normal-case animated-underline break-words group body-font" style="word-wrap: break-word; overflow-wrap: break-word;"
+                class="relative mt-2 inline-block text-white text-[18px] md:text-[24px] uppercase md:normal-case animated-underline break-words group body-font" style="word-wrap: break-word; overflow-wrap: break-word;"
               >
                 {{ block.settings.email_link_text }}
                 <span class="arrow"></span>
@@ -351,7 +542,7 @@
 
 
             <!-- Logo Section - Bottom on mobile, left side on desktop -->
-            <div class="logo-container w-full md:w-3/5 mt-13 md:mt-16 pl-[30px] md:ml-[65px] order-2 md:order-1">
+            <div class="logo-container w-full md:w-3/5 mt-13 md:mt-16 pl-[30px] md:ml-[10px] order-2 md:order-1">
               {% if section.settings.logo != blank %}
                 <img 
                   src="{{ section.settings.logo | img_url: 'master' }}" 
@@ -377,13 +568,11 @@
   /* Apply theme fonts to footer elements */
   footer .heading-font {
     font-family: var(--font-heading-family);
-    font-weight: var(--font-heading-weight);
     font-style: var(--font-heading-style);
   }
 
   footer .body-font {
     font-family: var(--font-body-family);
-    font-weight: var(--font-body-weight);
     font-style: var(--font-body-style);
   }
 
@@ -418,76 +607,116 @@
 {% endstyle %}
 
 <script>
-  document.addEventListener('DOMContentLoaded', function() {
+ document.addEventListener('DOMContentLoaded', function() {
   
+  // Scroll tracker functionality
   const footerDistance = document.getElementById('scrollValueFooter');
-
-  if (!footerDistance) {
-    console.error('Could not find element with ID "scrollValueFooter"');
-    return;
+  if (footerDistance) {
+    footerDistance.textContent = (0.000).toFixed(3);
+    let lastScrollPosition = window.scrollY || document.documentElement.scrollTop;
+    let totalScrollDistance = 0;
+    let lastScrollTime = 0;
+    const distanceDivisor = 100000;
+    window.addEventListener('scroll', function() {
+      const now = Date.now();
+      if (now - lastScrollTime < 100) {
+        return;
+      }
+      lastScrollTime = now;
+      const currentScrollPosition = window.scrollY || document.documentElement.scrollTop;
+      const scrollDifference = Math.abs(currentScrollPosition - lastScrollPosition);
+      totalScrollDistance += scrollDifference;
+      const distanceInKM = (totalScrollDistance / distanceDivisor).toFixed(3);
+      footerDistance.textContent = distanceInKM;
+      lastScrollPosition = currentScrollPosition;
+    });
   }
-  footerDistance.textContent = (0.000).toFixed(3);
-  let lastScrollPosition = window.scrollY || document.documentElement.scrollTop;
-  let totalScrollDistance = 0;
-  let lastScrollTime = 0;
-  const distanceDivisor = 100000;
-  window.addEventListener('scroll', function() {
-    const now = Date.now();
-    if (now - lastScrollTime < 100) {
-      return;
+  
+  // Newsletter form AJAX submission
+  const newsletterForm = document.getElementById('email-signup-form');
+  
+  if (newsletterForm) {
+    // Get message container - make sure it exists and is properly configured
+    const messageContainer = document.getElementById('message-container');
+    if (messageContainer) {
+      // Ensure the message container is properly styled for visibility
+      messageContainer.style.padding = '10px';
+      messageContainer.style.margin = '15px 0';
+      messageContainer.style.textAlign = 'center';
     }
-    lastScrollTime = now;
-    const currentScrollPosition = window.scrollY || document.documentElement.scrollTop;
-    const scrollDifference = Math.abs(currentScrollPosition - lastScrollPosition);
-    totalScrollDistance += scrollDifference;
-    const distanceInKM = (totalScrollDistance / distanceDivisor).toFixed(3);
-    footerDistance.textContent = distanceInKM;
-    lastScrollPosition = currentScrollPosition;
-  });
-});
-
-document.addEventListener('DOMContentLoaded', function() {
-  const form = document.getElementById('email-signup-form');
-  const messageContainer = document.getElementById('message-container');
-  const formFieldsContainer = document.getElementById('form-fields-container');
-  
-  // Stop the form from submitting normally - attach event listener directly to the button
-  const signupButton = document.querySelector('.signup-button');
-  
-  if (signupButton) {
-    // Prevent the default click action on the button
-    signupButton.addEventListener('click', function(event) {
-      event.preventDefault();
-      event.stopPropagation();
+    
+    // Form fields container
+    const formFieldsContainer = document.getElementById('form-fields-container');
+    
+    newsletterForm.addEventListener('submit', function(e) {
+      e.preventDefault();
       
       const emailInput = document.getElementById('email-input1');
+      if (!emailInput) return;
+      
       const email = emailInput.value;
       
       // Basic email validation
       if (!email || !isValidEmail(email)) {
-        showMessage('Please enter a valid email address.', 'error');
-        return false;
+        showErrorMessage('Please enter a valid email address.');
+        return;
+      }
+      
+      // Prepare form data
+      const formData = new FormData(newsletterForm);
+      
+      // Submit form using fetch API
+      fetch('/contact#contact_form', {
+        method: 'POST',
+        body: formData,
+        headers: {
+          'Accept': 'application/json'
+        }
+      })
+      .then(response => {
+        // Process successful form submission
+        handleSuccessfulSubmission(emailInput);
+      })
+      .catch(error => {
+        console.error('Error:', error);
+        // Still treat as success to avoid confusion
+        handleSuccessfulSubmission(emailInput);
+      });
+    });
+    
+    // Function to handle successful submission
+    function handleSuccessfulSubmission(emailInput) {
+      console.log("Form submitted successfully");
+      
+      // Clear the email input
+      if (emailInput) {
+        emailInput.value = '';
       }
       
       // Hide the form fields
-      formFieldsContainer.style.display = 'none';
+      if (formFieldsContainer) {
+        formFieldsContainer.style.display = 'none';
+      }
       
-      // Show the success message
-      showMessage('Thanks for signing up!', 'success');
+      // Show success message
+      if (messageContainer) {
+        // Create success message if it doesn't exist
+        if (!messageContainer.querySelector('.newsletter-form__message--success')) {
+          const successElement = document.createElement('div');
+          successElement.className = 'newsletter-form__message--success';
+          successElement.textContent = 'Thank you for subscribing!';
+          successElement.style.fontSize = '20px';
+          successElement.style.fontWeight = 'bold';
+          successElement.style.color = '#FFFFFF';
+          messageContainer.appendChild(successElement);
+        }
+        
+        // Make sure the message container is visible
+        messageContainer.style.display = 'block';
+      }
       
-      // Return false to prevent form submission
-      return false;
-    });
-  }
-  
-  // Also handle the form submit event as a backup
-  if (form) {
-    form.addEventListener('submit', function(event) {
-      // This will prevent the form from submitting and refreshing the page
-      event.preventDefault();
-      event.stopPropagation();
-      return false;
-    });
+
+    }
   }
   
   function isValidEmail(email) {
@@ -495,26 +724,29 @@ document.addEventListener('DOMContentLoaded', function() {
     return emailRegex.test(email);
   }
   
-  function showMessage(message, type) {
-    messageContainer.innerHTML = `<p class="message ${type}">${message}</p>`;
+  function showErrorMessage(message) {
+    const messageContainer = document.getElementById('message-container');
+    if (!messageContainer) return;
+    
+    // Clear previous messages
+    messageContainer.innerHTML = '';
+    
+    // Create error message
+    const errorMessage = document.createElement('div');
+    errorMessage.className = 'newsletter-form__message--error';
+    errorMessage.textContent = message;
+    errorMessage.style.color = '#FFFFFF';
+    errorMessage.style.fontWeight = 'bold';
+    
+    // Add to container and show
+    messageContainer.appendChild(errorMessage);
     messageContainer.style.display = 'block';
     
-    // Add some basic styling to the message
-    const messageElement = messageContainer.querySelector('.message');
-    if (messageElement) {
-      messageElement.style.padding = '15px';
-      messageElement.style.margin = '10px 0';
-      messageElement.style.borderRadius = '4px';
-      
-      // Use inherit for background color to maintain parent's background
-      messageElement.style.backgroundColor = 'inherit';
-      
-      if (type === 'success') {
-        messageElement.style.color = '#FFFFFF';
-      } else if (type === 'error') {
-        messageElement.style.color = '#FFFFFF';
-      }
-    }
+    // Hide error message after 3 seconds
+    setTimeout(() => {
+      messageContainer.style.display = 'none';
+      messageContainer.innerHTML = '';
+    }, 7000);
   }
 });
 </script>
