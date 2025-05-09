@@ -97,7 +97,7 @@
 >
   <div class="relative w-full my-2 flex items-center lg:items-end justify-between bg-[var(--background)]">
     <!-- Left: Logo -->
-    <div class="flex items-center space-x-4 mx-4 lg:mx-12">
+    <div class="flex items-center justify-center mx-4 ">
       <a href="/">
         {% if section.settings.logo != blank %}
           <img
@@ -108,14 +108,16 @@
             class="h-22 max-w-60"
           >
         {% else %}
-          <span class="text-3xl lg:text-5xl font-semibold mx-5">BlackBytte</span>
+          <span class="block text-3xl lg:text-4xl font-semibold text-center pl-2 pr-20 lg:pb-4">
+            {{- shop.name -}}
+          </span>
         {% endif %}
       </a>
     </div>
     <!-- Right: Menu & Actions -->
     <div class=" flex flex-wrap items-center justify-end w-full bg-[var(--background)] tracking-tight">
       <!-- Desktop Menu -->
-      <nav class=" flex justify-end lg:justify-between items-center w-full text-[var(--header_text)]">
+      <nav class="relative flex justify-end lg:justify-between items-center w-full text-[var(--header_text)]">
         <!-- Left: Menu Items -->
         <div class="menu-items hidden lg:!flex gap-2 flex-wrap w-2/3 0">
           <ul class="flex space-x-1">
@@ -140,7 +142,14 @@
                         aria-hidden="true"
                       >
                     {% else %}
-                      <span class="ml-2 transition-transform duration-300 group-hover:rotate-180">▼</span>
+                      <img
+                        src="{{ "arrow-down.png" |  asset_url }}"
+                        alt="Dropdown Icon"
+                        class="w-12 h-6 object-contain transition-transform duration-300 group-hover:-rotate-90"
+                        width="100%"
+                        height="auto"
+                        aria-hidden="true"
+                      >
                     {% endif %}
                   </a>
 
@@ -150,13 +159,13 @@
                     role="region"
                     aria-label="{{ link.title }} submenu"
                     class="
-                      absolute top-[calc(100%-10px)] left-0 right-0 w-full z-50 pt-[10px]
+                      fixed top-[calc(100%-10px)] left-0 right-0 w-full z-50 pt-[10px]
                       opacity-0 invisible pointer-events-none
                       group-hover:opacity-100 group-hover:visible group-hover:pointer-events-auto
-                      transition-all duration-300 ease-out
+                      transition-all duration-300 ease-out bg-white
                     "
                   >
-                    <div class="mx-auto p-6 bg-white flex">
+                    <div class="mx-auto p-6  flex">
                       <ul class="flex justify-start gap-8 m-2 w-1/2">
                         {% for childlink in link.links %}
                           <li class="min-w-[100px] relative">
@@ -274,7 +283,7 @@
                       </div>
                     </div>
                     <!-- Horizontal scrollling text -->
-                    <div class="h-16 w-full border-t-1 bg-white ">
+                    <div class=" absolute -bottom-14 h-16 w-full border-t-1  bg-white ">
                       <div class="horizontal-text-container">
                         <div class="horizontal-text">
                           {{ section.settings.scrolling_text }}
@@ -306,11 +315,102 @@
           <!-- Top Row: Action Utilities -->
 
           <!-- Search -->
-          <a href="/search" class="text-black hover:text-gray-700" aria-label="Search">
-            <svg class="size-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
-              <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
-            </svg>
-          </a>
+          <div class="relative ">
+            <button
+              id="search-toggle"
+              class="text-black hover:text-gray-700 transition-all duration-300 transform hover:-translate-y-1"
+              aria-label="Toggle search"
+              aria-expanded="false"
+            >
+              <svg class="size-8 mt-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
+              </svg>
+            </button>
+
+            <!-- Search Overlay -->
+            <div
+              id="search-overlay"
+              class="fixed left-0 right-0 bottom-0 bg-black/50 z-[100] hidden transition-opacity duration-300"
+              style="top: var(--header-height, 0px);"
+            >
+              &nbsp;
+            </div>
+
+            <!-- Search Container -->
+            <div
+              id="search-container"
+              class="fixed left-0 right-0 z-[1000] hidden transform -translate-y-full transition-transform duration-300 ease-in-out shadow-lg py-8 bg-white"
+              style="top: var(--header-height, 0px);"
+              aria-hidden="true"
+            >
+              <div class="searchbox-container mx-auto w-full px-4 py-4">
+                <form
+                  action="/search"
+                  method="get"
+                  class="flex items-center gap-4 w-full mx-2 "
+                  role="search"
+                >
+                  <div class="relative flex-1">
+                    <input
+                      type="search"
+                      name="q"
+                      placeholder="Search"
+                      class="w-full px-2 py-3 text-2xl lg:text-4xl focus:outline-none bg-transparent placeholder-black"
+                    >
+                  </div>
+                  <button
+                    type="submit"
+                    class="text-white bg-black text-2xl lg:text-4xl px-2 py-1 hover:text-black hover:bg-white hover:border-1 rounded-md transition-colors duration-200"
+                  >
+                    SEARCH
+                  </button>
+                  <button
+                    id="close-search"
+                    class="text-black hover:text-gray-700 transition-colors duration-200"
+                    aria-label="Close search"
+                  >
+                    <svg class="size-10" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                </form>
+
+                <div
+                  class="
+                    block
+                    search-bottom-bar
+                    w-full h-[2px]
+                    mx-1
+                    bg-black
+                  "
+                >
+                  &nbsp
+                </div>
+
+                <!-- Quick Links -->
+                <div class=" flex flex-col lg:flex-row items-center mt-8  mx-auto">
+                  <span class="inline-block lg:!block text-2xl lg:text-4xl text-black uppercase m-4">Top Searches</span>
+                  <div class="flex flex-wrap gap-4">
+                    <a
+                      href="/search?q=new"
+                      class="px-1 bg-gray-400 hover:bg-gray-200 transition-colors duration-200 rounded-md text-xl lg:text-3xl font-medium"
+                      >New Arrivals</a
+                    >
+                    <a
+                      href="/search?q=sale"
+                      class="px-1 bg-gray-400 hover:bg-gray-200 transition-colors duration-200 rounded-md text-xl lg:text-3xl font-medium"
+                      >Sale</a
+                    >
+                    <a
+                      href="/search?q=bestsellers"
+                      class="px-1 bg-gray-400 hover:bg-gray-200 transition-colors duration-200 rounded-md text-xl lg:text-3xl font-medium"
+                      >Bestsellers</a
+                    >
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
 
           <!-- Country Selector -->
 
@@ -327,7 +427,7 @@
                   alt="{{ current_country.name }} flag"
                   width="24"
                   height="18"
-                  class="inline-block "
+                  class="inline-block"
                 >
               {% endif %}
               <svg class="ml-2 w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -336,26 +436,31 @@
             </div>
 
             <!-- Dropdown -->
-            <div class="absolute right-0 mt-2 w-80 bg-white border border-gray-200 rounded-md shadow-lg opacity-0 group-hover:opacity-100 invisible group-hover:visible transition-all duration-300">
-              <ul class="max-h-100 overflow-y-auto divide-y divide-gray-100 text-xl">
+            <div class="absolute right-0 mt-2 w-100 bg-white border border-gray-200 rounded-md shadow-lg opacity-0 group-hover:opacity-100 invisible group-hover:visible transition-all duration-300">
+              <ul class="max-h-100 overflow-y-auto divide-y divide-gray-100">
                 {% for country in localization.available_countries %}
                   <li>
                     <a
                       href="{{ country.url }}"
-                      class="flex items-center px-4 py-2 hover:bg-gray-100"
+                      class="flex items-center px-4 py-2 text-3xl text-black hover:bg-gray-100"
                     >
                       <img
                         src="https://flagcdn.com/24x18/{{ country.iso_code | downcase }}.png"
                         alt="{{ country.name }} flag"
-                        class="w-5 h-4 mr-3 border rounded-sm"
+                        class="w-8 h-6 mr-3 border-transparent rounded-sm"
                         width="24"
                         height="18"
                       >
-                      <span class="flex-1">{{ country.name }}</span>
-                      <span class="text-gray-500 ml-auto">
-                        {{ country.currency.symbol }}
-                        {{ country.currency.iso_code }}
-                      </span>
+                      <span class="flex-1 ">{{ country.name }}</span>
+                      <div class="flex flex-col text-right text-xl ml-auto">
+                        <span class="text-gray-700 font-medium">
+                          {{ country.currency.symbol }}
+                          {{ country.currency.iso_code }}
+                        </span>
+                        <span class="text-gray-500">
+                          {{ localization.language.endonym_name }}
+                        </span>
+                      </div>
                     </a>
                   </li>
                 {% endfor %}
@@ -366,7 +471,7 @@
           <!-- Login -->
           <a
             href="/account/login"
-            class="hidden lg:!inline-flex items-center gap-2 rounded-xl px-2 text-black hover:text-gray-700 "
+            class="hidden lg:!inline-flex items-center gap-2 rounded-xl px-2  text-[16px] text-black hover:text-gray-700 "
             aria-label="Login"
           >
             LOGIN
@@ -379,9 +484,9 @@
             id="cart-icon-bubble"
             aria-label="Cart"
           >
-            <span class="flex text-black hover:text-gray-700">CART</span>
+            <span class="flex text-black text-[16px] hover:text-gray-700">CART</span>
             <span
-              class="ml-1 mt-1 bg-red-600 text-white text-xl w-8 h-8 flex items-center justify-center rounded-full"
+              class="m-2 p-1 bg-transparent text-black text-md w-7 h-7 flex items-center justify-center ring-1 rounded-full"
               aria-label="{{ cart.item_count }} items in cart"
             >
               {{ cart.item_count }}
@@ -402,15 +507,12 @@
           </button>
         </div>
       </nav>
-      <div
-        class="
-          hidden lg:!block
-          bottom-bar
-          w-full h-[2px] bg-blue-700
-          mx-1
-        "
-      >
-        &nbsp
+      <div class="hidden lg:!block bottom-bar w-full h-[2px] mx-1 bg-transparent relative overflow-hidden">
+        <span
+          id="bottom-bar-indicator"
+          class="absolute bottom-0 left-0 h-full bg-black transition-all duration-300 ease-out"
+          style="width: 0"
+        ></span>
       </div>
     </div>
   </div>
@@ -418,7 +520,7 @@
     class="
           mobile-bottom-bar
       lg:hidden
-      w-full h-[2px] bg-blue-700
+      w-full h-[2px] bg-black
     "
   >
     &nbsp
@@ -440,7 +542,7 @@
   style="transform: translateX(100%); transition: transform 0.3s ease-in-out;"
 >
   <!-- Vertical Scrolling Text -->
-  <div class="h-[100vh] w-12  flex items-center justify-center overflow-hidden relative border-r-2 ">
+  <div class="h-[100vh] w-10  flex items-center justify-center overflow-hidden relative border-r-1 ">
     <div class="vertical-text-container">
       <div class="vertical-text">
         {{ section.settings.scrolling_text }}
@@ -455,7 +557,7 @@
     <nav class="flex flex-col space-y-4 p-6 w-full justify-between">
       <div class="upper-section">
         <div class="flex items-center justify-end mb-8 ">
-          <button type="button" class=" bg-black text-white px-2 rounded-xl" aria-label="Close Menu">Close</button>
+          <button type="button" class="px-2" aria-label="Close Menu">Close</button>
         </div>
         {% if section.settings.menu.links != blank %}
           {% for link in section.settings.menu.links %}
@@ -488,7 +590,7 @@
                         alt="Dropdown Icon"
                         width="100%"
                         height="auto"
-                        class="w-8 h-8 object-contain transition-transform duration-300 group-hover:-rotate-90 mx-2"
+                        class="w-8 h-8 object-contain "
                         aria-hidden="true"
                       >
                     {% endif %}
@@ -823,21 +925,6 @@
     }
   }
 
-  .scrolling-text-container {
-    overflow: hidden;
-    width: 100%;
-  }
-
-  .scrolling-text-track {
-    will-change: transform;
-    animation: scroll 25s linear infinite;
-    width: fit-content;
-  }
-
-  .scrolling-text-track:hover {
-    animation-play-state: paused;
-  }
-
   .header-main {
     position: relative;
     width: 100%;
@@ -951,7 +1038,7 @@
     left: 0px;
     top: 0;
     bottom: 0;
-    width: 40px;
+    width: 30px;
     overflow: hidden;
     display: flex;
     align-items: center;
@@ -962,15 +1049,15 @@
     writing-mode: vertical-rl;
     text-orientation: mixed;
     transform: rotate(180deg);
-    animation: scrollText 20s linear infinite;
+    animation: scrollText 50s linear infinite;
     color: #000;
-    font-size: 22px;
+    font-size: 16px;
     white-space: nowrap;
     padding: 5px 0;
   }
 
   .vertical-text:nth-child(2) {
-    animation: scrollText2 20s linear infinite;
+    animation: scrollText2 50s linear infinite;
   }
 
   @keyframes scrollText {
@@ -1008,11 +1095,11 @@
     white-space: nowrap;
     font-size: 22px;
     display: inline-block;
-    animation: scrollRight 20s linear infinite;
+    animation: scrollRight 50s linear infinite;
   }
 
   .horizontal-text:nth-child(n) {
-    animation: scrollRight2 20s linear infinite;
+    animation: scrollRight2 50s linear infinite;
   }
 
   @keyframes scrollRight {
@@ -1115,7 +1202,7 @@
 
         requestAnimationFrame(() => {
           submenu.classList.add('show');
-          icon.style.transform = 'rotate(180deg)';
+          icon.style.transform = 'rotate(-90deg)';
 
           submenu.addEventListener(
             'transitionend',
@@ -1233,5 +1320,83 @@
         }
       });
     }
+
+    // Search bar
+    const searchToggle = document.getElementById('search-toggle');
+    const searchContainer = document.getElementById('search-container');
+    const searchOverlay = document.getElementById('search-overlay');
+    const closeSearch = document.getElementById('close-search');
+    const searchInput = searchContainer.querySelector('input[type="search"]');
+
+    function toggleSearch(show) {
+      searchToggle.setAttribute('aria-expanded', show);
+      searchOverlay.classList.toggle('hidden', !show);
+      document.body.classList.toggle('overflow-hidden', show);
+
+      if (show) {
+        const headerHeight = document.querySelector('[data-header-sticky]').offsetHeight;
+        document.documentElement.style.setProperty('--header-height', `${headerHeight}px`);
+
+        searchContainer.classList.remove('hidden');
+        searchContainer.offsetHeight;
+        requestAnimationFrame(() => {
+          searchOverlay.classList.remove('opacity-0');
+          searchContainer.classList.add('translate-y-0');
+          setTimeout(() => searchInput.focus(), 300);
+        });
+      } else {
+        searchOverlay.classList.add('opacity-0');
+        searchContainer.classList.remove('translate-y-0');
+        // Hide the container after the animation
+        searchContainer.addEventListener(
+          'transitionend',
+          () => {
+            searchContainer.classList.add('hidden');
+          },
+          { once: true }
+        );
+      }
+    }
+
+    searchToggle.addEventListener('click', () => toggleSearch(true));
+    closeSearch.addEventListener('click', () => toggleSearch(false));
+    searchOverlay.addEventListener('click', () => toggleSearch(false));
+
+    // Close search on escape key
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && searchToggle.getAttribute('aria-expanded') === 'true') {
+        toggleSearch(false);
+      }
+    });
+
+    // Bottom bar
+    const bottomBarIndicator = document.getElementById('bottom-bar-indicator');
+
+    if (bottomBarIndicator) {
+      bottomBarIndicator.style.width = '100%';
+      bottomBarIndicator.style.transform = 'translateX(0)';
+    }
+
+    const menuItems = document.querySelectorAll('.menu-items ul > li.dropdown-group');
+
+    menuItems.forEach((item) => {
+      const link = item.querySelector('a');
+
+      item.addEventListener('mouseenter', () => {
+        const rect = link.getBoundingClientRect();
+        const containerRect = item.closest('.menu-items').getBoundingClientRect();
+        const left = rect.left - containerRect.left;
+        const width = rect.width;
+
+        bottomBarIndicator.style.transform = `translateX(${left}px)`;
+        bottomBarIndicator.style.width = `${width}px`;
+      });
+
+      item.addEventListener('mouseleave', () => {
+        // Reset only when leaving the whole dropdown group
+        bottomBarIndicator.style.width = `100%`;
+        bottomBarIndicator.style.transform = `translateX(0)`;
+      });
+    });
   });
 </script>

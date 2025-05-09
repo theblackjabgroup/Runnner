@@ -1,0 +1,419 @@
+<div class="bg-white text-black px-2 flex items-center justify-between h-screen" style="padding: {{ section.settings.padding }}px 0; height: 100vh; margin-bottom: {{ section.settings.margin_bottom }}px;" id="password-section">
+  <div class="flex flex-col md:flex-row items-center justify-between gap-6 md:gap-20 max-w-[1400px] w-full mx-auto" id="mainContainer-password">
+    
+    <!-- Text content with fixed width to prevent affecting layout -->
+    <div class="md:text-black md:w-[42%] lg:ml-0 flex-shrink-0 space-y-0 text-left pr-4 pl-4 md:pl-20">
+      <p class="text-[15px] md:text-[25px] 2xl:text-[80px] 3xl:text-[100px] mt-1 font-bold break-words justify-center w-full flex md:block md:justify-start whitespace-nowrap">
+        {{ section.settings.heading_1 }}
+      </p>
+      <p class="text-[15px] md:text-[25px] 2xl:text-[80px] 3xl:text-[100px] mt-1 font-bold break-words w-full flex justify-center md:block md:justify-start whitespace-nowrap">
+        {{ section.settings.heading_2 }}
+      </p>
+      <p class="!text-[50px] md:!text-[80px] 2xl:!text-[100px] font-light uppercase tracking-tight text-black block justify-center md:block flex md:inline-block md:justify-start m-0 break-words leading-tight" style="font-size: 50px !important; @media (min-width: 768px) { font-size: 80px !important; } @media (min-width: 1536px) { font-size: 100px !important; }">
+        {{ section.settings.subheading }}
+      </p>
+    </div>
+
+    <!-- Form Container with fixed width -->
+    <div id="formContainer-password" class="w-full md:w-[80%] flex flex-col items-end lg:mr-0 pr-4 pl-4 md:pr-20">
+      <form method="post" action="/contact#contact_form" id="email-signup-form-password" class="flex flex-col gap-6 w-full max-w-4xl">
+        <input type="hidden" name="form_type" value="customer">
+        <input type="hidden" name="utf8" value="✓">
+        <div class="form-fields-container relative w-full">
+          <input
+            type="email"
+            id="email-input-password"
+            placeholder="EMAIL"
+            name="contact[email]"
+            class="w-full px-4 py-4 text-[30px] md:text-[50px] text-left text-black bg-white border border-black placeholder-gray-700 focus:outline-none rounded-lg leading-none py-0"
+            style="height: 60px; line-height: 50px; padding-top: 0; padding-bottom: 0; @media (min-width: 768px) { height: 90px; line-height: 70px; }"
+          />
+        </div>
+        <div class="flex justify-end w-full">
+          <button
+            type="submit"
+            id="submitButton-password"
+            class="w-full px-4 py-4 bg-black text-white text-[30px] md:text-[50px] font-bold px-6 flex items-center justify-between hover:bg-black-700 transition-colors rounded-lg"
+            style="height: 60px; line-height: 50px; padding-top: 0; padding-bottom: 0; @media (min-width: 768px) { height: 90px; line-height: 70px; }"
+          >
+            <span class="text-[30px] md:text-[50px]">→</span>
+            <span id="buttonText-password">{{ section.settings.button_text }}</span>
+            <span id="loadingSpinner-password" class="hidden">
+              <svg class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+            </span>
+          </button>
+        </div>
+      </form>
+      <div class="flex justify-end items-center w-[95%] mx-auto mt-4">
+        <span class="text-black-600 text-xl mr-4 cursor-pointer">{{ section.settings.password_text_1 }}</span>
+        <button type="button" onclick="loadPasswordSection()" class="inline-flex items-center bg-black text-white text-xl px-8 py-3 rounded-md hover:bg-gray-900 transition-colors" id="enterPasswordBtn">
+          <svg class="w-8 h-8 mr-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+          </svg>
+          {{ section.settings.password_text_2 }}
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div id="successMessage-password" class="hidden text-green-600 text-xl mt-4 text-center">
+    Thanks for subscribing!
+  </div>
+</div>
+
+<!-- Password Modal -->
+<modal-dialog id="passwordModal" class="fixed inset-0 bg-white hidden z-50">
+  <div class="password-page space-y-1">
+    <button id="closeModalBtn" class="absolute top-4 right-4 text-black text-6xl font-bold hover:text-gray-700">&times;</button>
+    <div class="password-header flex flex-col">
+      <h1 class="password-title">{{ section.settings.modal_title }}</h1>
+      <p class="password-subtitle">{{ section.settings.modal_subtitle }}</p>
+    </div>
+
+    {% form 'storefront_password' %}
+      <div class="password-form">
+        {% if form.errors %}
+          <div class="password-error">
+            {{ form.errors | default_errors }}
+          </div>
+        {% endif %}
+
+        <input
+          type="password"
+          name="password"
+          class="password-input"
+          placeholder="{{ section.settings.modal_placeholder }}"
+          required
+          {% if form.password %}value="{{ form.password }}"{% endif %}
+        >
+
+        <button type="submit" class="password-submit text-white bg-black">
+          {{ section.settings.modal_button }}
+        </button>
+      </div>
+    {% endform %}
+  </div>
+</modal-dialog>
+
+<style>
+  /* Remove default focus styling */
+  #email-input-password:focus {
+    outline: none !important;
+    box-shadow: none !important;
+  }
+
+  #successMessage-password {
+    color: var(--text);
+    font-weight: bold;
+    text-align: center;
+    margin-top: 1.5rem;
+    font-size: 2rem;
+  }
+
+  /* Make sure text container doesn't grow beyond allocated space */
+  @media (min-width: 768px) {
+    #mainContainer-password {
+      align-items: flex-start;
+    }
+  }
+
+  /* @media (max-width: 767px) {
+    #email-input-password, #submitButton-password {
+      height: 50px !important;
+      line-height: 50px !important;
+    }
+  }
+  @media (min-width: 768px) {
+    #email-input-password, #submitButton-password {
+      height: 80px !important;
+      line-height: 70px !important;
+    }
+  } */
+
+  .password-page {
+  font-family: {{ section.settings.custom_font.family }}, {{ section.settings.custom_font.fallback_families }};
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh; 
+  margin-top: {{ section.settings.page_margin_top }}px;
+  margin-bottom: {{ section.settings.page_margin_bottom }}px;
+}
+
+.password-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  /* margin-bottom: 2rem; */
+}
+
+.password-title {
+  font-size: 4.5rem;
+  font-weight: 500;
+  /* margin-bottom: 0.5rem; */
+  /* color: #000; */
+}
+
+.password-subtitle {
+  font-size: 1.5rem;
+  font-weight: 400;
+  margin: 0;
+  margin-top: -1.5rem;
+}
+
+.password-form {
+  width: 60rem;
+  margin-top: 1rem;
+  display: flex;
+  flex-direction: column;
+}
+
+.password-input {
+  width: 100%;
+  padding: 1rem;
+  margin-bottom: rem;
+  border: 1px solid black;
+  border-radius: 6px;
+  font-size: 1.5rem;
+  letter-spacing: 0.5px;
+  box-sizing: border-box;
+}
+
+.password-submit {
+  width: 30%;
+  padding: 1rem;
+  margin-top: 2rem;
+  border: none;
+  border-radius: 6px;
+  font-size: 1.5rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  align-self: center;
+}
+
+  @media (max-width: 768px) {
+  .password-page {
+    width: 95vw;
+    max-width: 400px;
+    min-width: unset;
+    margin: 40px auto;
+    padding-left: 2rem;
+    border-radius: 12px;
+  }
+  /* .password-header {
+    margin-bottom: 1.2rem;
+  } */
+  .password-title {
+    font-size: 2.5rem;
+    font-weight: 600;
+    /* margin-bottom: 0.7rem; */
+  }
+  .password-subtitle {
+    font-size: 0.95rem;
+    margin-top: 1rem;
+    margin-bottom: 0.5rem;
+  }
+  .password-form {
+    width: 100%;
+    min-width: unset;
+    max-width: 100%;
+    margin-top: 0.5rem;
+    gap: 0.75rem;
+  }
+  .password-input {
+    font-size: 1rem;
+    padding: 0.7rem 1rem;
+    border-radius: 6px;
+  }
+  .password-submit {
+    font-size: 1rem;
+    padding: 0.7rem 0;
+    width: 100%;
+    margin-top: 1rem;
+    border-radius: 6px;
+  }
+  #closeModalBtn {
+    font-size: 2.5rem;
+    top: 10px;
+    right: 10px;
+  }
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const form = document.getElementById('email-signup-form-password');
+  const emailInput = document.getElementById('email-input-password');
+  const submitButton = document.getElementById('submitButton-password');
+  const buttonText = document.getElementById('buttonText-password');
+  const loadingSpinner = document.getElementById('loadingSpinner-password');
+  const successMessage = document.getElementById('successMessage-password');
+  const passwordModal = document.getElementById('passwordModal');
+  const enterPasswordBtn = document.getElementById('enterPasswordBtn');
+  const mainContainer = document.getElementById('mainContainer-password');
+  const closeModalBtn = document.getElementById('closeModalBtn');
+
+  if (!form) return;
+
+  let isSubmitting = false;
+
+  // Password modal functionality
+  enterPasswordBtn.onclick = function() {
+    passwordModal.classList.remove('hidden');
+    mainContainer.style.display = 'none';
+  };
+
+  closeModalBtn.onclick = function () {
+    passwordModal.classList.add('hidden');
+    mainContainer.style.display = 'flex';
+  };
+
+  // Original form functionality
+  emailInput.addEventListener('input', () => {
+    emailInput.classList.remove('error-state', 'empty');
+  });
+
+  form.addEventListener('submit', async (e) => {
+    if (isSubmitting) return;
+
+    const email = emailInput.value.trim();
+
+    if (!email) {
+      emailInput.classList.add('empty', 'error-state');
+      emailInput.focus();
+      return;
+    }
+
+    isSubmitting = true;
+    buttonText.textContent = "SUBMITTING...";
+    loadingSpinner.classList.remove('hidden');
+    submitButton.disabled = true;
+
+    try {
+      // Simulate submission delay (e.g., API call)
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      successMessage.classList.remove('hidden');
+      buttonText.textContent = "SUBSCRIBED";
+      loadingSpinner.classList.add('hidden');
+      emailInput.disabled = true;
+      submitButton.disabled = true;
+    } catch (error) {
+      buttonText.textContent = "GET NOTIFIED";
+      loadingSpinner.classList.add('hidden');
+      emailInput.classList.add('error-state');
+      submitButton.disabled = false;
+    } finally {
+      isSubmitting = false;
+    }
+  });
+});
+
+</script>
+
+
+{% schema %}
+{
+  "name": "t:sections.password_page.name",
+  "settings": [
+    {
+      "type": "text",
+      "id": "heading_1",
+      "label": "t:sections.password_page.settings.heading_1",
+      "default": "GOOD THINGS"
+    },
+    {
+      "type": "text",
+      "id": "heading_2",
+      "label": "t:sections.password_page.settings.heading_2",
+      "default": "TAKE TIME"
+    },
+    {
+      "type": "text",
+      "id": "subheading",
+      "label": "t:sections.password_page.settings.subheading",
+      "default": "Opening soon"
+    },
+    {
+      "type": "text",
+      "id": "button_text",
+      "label": "t:sections.password_page.settings.button_text",
+      "default": "SUBSCRIBE"
+    },
+    {
+      "type": "text",
+      "id": "password_text_1",
+      "label": "t:sections.password_page.settings.password_text_1",
+      "default": "Got a password?"
+    },
+    {
+      "type": "text",
+      "id": "password_text_2",
+      "label": "t:sections.password_page.settings.password_text_2",
+      "default": "ENTER PASSWORD"
+    },
+    {
+      "type": "text",
+      "id": "modal_title",
+      "label": "t:sections.password_page.settings.modal_title",
+      "default": "ENTER YOUR PASSWORD"
+    },
+    {
+      "type": "text",
+      "id": "modal_subtitle",
+      "label": "t:sections.password_page.settings.modal_subtitle",
+      "default": "THIS STORE REQUIRES A PASSWORD TO ENTER."
+    },
+    {
+      "type": "text",
+      "id": "modal_placeholder",
+      "label": "t:sections.password_page.settings.modal_placeholder",
+      "default": "PASSWORD"
+    },
+    {
+      "type": "text",
+      "id": "modal_button",
+      "label": "t:sections.password_page.settings.modal_button",
+      "default": "Submit"
+    },
+    {
+      "type": "range",
+      "id": "padding",
+      "label": "t:sections.password_page.settings.padding",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "default": 32
+    },
+    {
+      "type": "range",
+      "id": "margin_bottom",
+      "label": "t:sections.password_page.settings.margin_bottom",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "default": 0
+    }
+  ],
+  "blocks": [
+    {
+      "type": "email_form",
+      "name": "Email Form"
+    }
+  ],
+  "presets": [
+    {
+      "name": "t:sections.password_page.name",
+      "category": "t:sections.password_page.category"
+    }
+  ]
+}
+{% endschema %}
