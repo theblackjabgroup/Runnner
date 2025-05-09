@@ -1,126 +1,305 @@
-<script src="{{ 'blog-edit.js' | asset_url }}" defer></script>
-<style>
- :root {
-    --font-heading-family: {{ settings.type_heading_font.family }}, sans-serif;
-    --font-body-family: {{ settings.type_body_font.family }}, sans-serif;
-  }
-  .hero-image {
-    object-fit: cover;
-  }
-  .overlay-content {
-    color: {{ section.settings.color_card_excerpt | default: '#ffffff' }};
-  }
-  #animated-heading {
-    font-family: var(--font-heading-family);
-  }
-  .letter {
-    display: inline-block;
-    opacity: 0;
-    transform: translateX(100vw);
-    animation: slideInLetter 0.8s forwards;
-  }
-  @keyframes slideInLetter {
-    0% {
-      opacity: 0;
-      transform: translateX(100vw);
-    }
-    100% {
-      opacity: 1;
-      transform: translateX(0);
-    }
-  }
-
-  .date-tag, .card-excerpt {
-    font-family: var(--font-body-family);
-    opacity: 0;
-    animation: fadeIn 1s ease-in-out forwards;
-  }
-  @keyframes fadeIn {
-    0% {
-      opacity: 0;
-      transform: translateY(10px);
-    }
-    100% {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
-</style>
-
-<section class="bg-black text-white overflow-hidden flex">
-  <img
-    class="hero-image absolute md:h-[480px] w-full z-1"
-    src="{% if section.settings.image != blank %}{{ section.settings.image | image_url: width: 2000 }}{% else %}//banditrunning.com/cdn/shop/articles/250311BANDIT_1995copy_2000x.png?v=1743544968{% endif %}"
-    alt="Hero Background"
-    height="100%"
-    width="100%"
-  />
-  <div class=" w-full max-w-7xl flex flex-col text-left">
-    <div class="overlay-content max-w-7xlrelative z-2 flex flex-col">
-    <div class=" top-18 left-20 text-xl sm:text-2xl md:text-3xl date-tag">
-      {{ section.settings.date_text }}
-    </div>
-
-    <div class="flex flex-row">
-      <svg class="w-9 h-8 md:mt-[20px] mt-[10px] sm:w-16 sm:h-18 md:w-20 md:h-44 lg:w-44 lg:h-28" style="fill: {{ section.settings.color_card_excerpt | default: '#ffffff' }}" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 37 36">
-        <path d="M26.79,9.21A35.06,35.06,0,0,0,37,16.2v3.66a35.34,35.34,0,0,0-10.21,7A12.84,12.84,0,0,0,23.21,36H17.56q0-6.22,3-10a15.4,15.4,0,0,1,8.06-5.2V20.6H0V15.43H28.63v-.3A15.16,15.16,0,0,1,20.57,10q-3-3.77-3-10h5.65a13,13,0,0,0,.87,5A12.79,12.79,0,0,0,26.79,9.21Z" />
-      </svg>
-    <div class=" top-11 left-3 md:left-25 z-10 p-2 flex flex-col items-start text-left">
-      <div class="text-4xl sm:text-6xl md:text-[10.5rem] font-medium uppercase leading-tight sm:leading-none break-words lg:w-[60vw] md:w-[40vw] sm:w-[100px] w-[50vw]"
-           id="animated-heading"
-           style="color: {{ section.settings.color_card_excerpt | default: '#ffffff' }}">
-        {{ section.settings.full_text }}
+<div id="promo-overlay" class="fixed inset-0 bg-black/50 hidden z-[1000] overflow-y-auto">
+  <div class="absolute inset-0 flex items-center justify-center p-4">
+    <div class="relative w-full max-w-[90vw] md:max-w-[60vw] max-h-[90vh] md:max-h-[500px]">
+      <button
+        id="promo-close"
+        class="absolute top-2 right-2 md:top-4 md:right-4 text-4xl font-bold text-gray-700 hover:text-black z-10 cursor-pointer"
+        aria-label="Close popup"
+      >&times;</button>
+      <div id="popup-content" class="popup-container color-{{ section.settings.color_scheme }} rounded-lg overflow-hidden shadow-xl h-full md:h-[500px]">
+        <div id="popup-inner" class="flex flex-col-reverse md:flex-row w-full h-full">
+          <!-- Text Section -->
+          <div class="w-full md:w-1/2 flex items-center justify-center p-4 md:p-6 color-{{ section.settings.color_scheme }}">
+            <div class="w-full max-w-md text-center">
+              <h2 class="popup-header !font-[400] mb-2 !tracking-tighter uppercase">
+                {{ section.settings.header }}
+              </h2>
+              <p class="popup-sub-header text-black-600 mb-2 text-base md:text-2xl !font-[500] tracking-tighter ">
+                {{ section.settings.sub_header }}
+              </p>
+              <p class="popup-bracket-header text-sm md:text-xl text-black-200 mb-4 md:mb-6 font-[400] tracking-tighter py-2">
+                {% if section.settings.bracket_header != blank %}
+                    ({{ section.settings.bracket_header }})
+                {% endif %}
+              </p>
+              <div class="email-holder">
+                <input
+                  type="email"
+                  placeholder="Email address"
+                  class="w-full px-4 py-2 my-2 border-[2.5px] border-black rounded-md focus:outline-none focus:ring-2 focus:ring-black"
+                  style="font-family: var(--font-primary);"
+                />
+              </div>
+              <button
+                id="get-access"
+                class="w-full bg-black text-white py-4 hover:bg-black-900 transition duration-200 cursor-pointer !font-[500] md:hover-orange-500"
+                style="font-family: var(--font-primary);">
+                {{ section.settings.btn }}
+              </button>
+            </div>
+          </div>
+          <!-- Image Section -->
+          <div class="w-full md:w-1/2 aspect-[4/3] md:aspect-auto">
+            {% if section.settings.image != blank %}
+              <div class="h-full w-full">
+                {{ section.settings.image | image_url: width: 1200 | image_tag:
+                  class: 'w-full h-full object-cover',
+                  alt: 'Offer Promo',
+                  loading: 'lazy' }}
+              </div>
+            {% else %}
+              <div class="w-full h-full bg-black-200 flex items-center justify-center">
+                <p class="text-black-500">Please select an image in theme settings</p>
+              </div>
+            {% endif %}
+          </div>
+        </div>
       </div>
     </div>
-        </div>
-    <p class=" md:bottom-2 md:right-100 text-xl sm:text-2xl md:text-3xl uppercase top-60 ml-[30px] md:ml-[125px] card-excerpt md:top-180">
-      {{ section.settings.excerpt_text }}
-    </p>
   </div>
+</div>
+
+<script>
+  function showPromo() {
+    document.getElementById('promo-overlay').classList.remove('hidden');
+    console.log('Popup shown');
+  }
+
+  function hidePromo() {
+    document.getElementById('promo-overlay').classList.add('hidden');
+    console.log('Popup hidden');
+  }
+
+  function attachEventListeners() {
+    const closeButton = document.getElementById('promo-close');
+    const getAccessButton = document.getElementById('get-access');
+    const emailInput = document.querySelector('.email-holder input[type="email"]');
+
+    if (closeButton) {
+      closeButton.addEventListener('click', hidePromo);
+    }
+
+    if (getAccessButton) {
+      getAccessButton.addEventListener('click', function (event) {
+        event.preventDefault();
+        validateAndSubmitEmail();
+      });
+    }
+
+    if (emailInput) {
+      emailInput.addEventListener('keyup', function (event) {
+        if (event.key === 'Enter') {
+          event.preventDefault();
+          validateAndSubmitEmail();
+        }
+      });
+    }
+  }
+
+  function validateAndSubmitEmail() {
+    const emailInput = document.querySelector('.email-holder input[type="email"]');
+    const email = emailInput.value.trim();
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    if (!email) {
+      alert('Please enter your email address.');
+      return;
+    }
+
+    if (!emailRegex.test(email)) {
+      alert('Please enter a valid email address.');
+      return;
+    }
+
+    emailInput.value = '';
+
+    updatePopupToThankYou();
+    console.log('Email submitted:', email);
+  }
+
+ function updatePopupToThankYou() {
+  const textSection = document.querySelector('#popup-inner .w-full.md\\:w-1\\/2');
+
+  if (textSection) {
+    textSection.innerHTML = `
+      <div class="w-full max-w-md text-center px-0">
+        <h3 class="popup-header !font-[600] mb-4 !tracking-tighter uppercase text-base md:text-lg">
+          {{ section.settings.popupheader }}
+        </h3>
+        <p class="popup-bracket-header text-sm md:text-xl text-black-200 mb-6 md:mb-8 font-[400] tracking-tighter py-2">
+          ({{ section.settings.bracket }})
+        </p>
+
+        <div class="email-holder my-6">
+          <input
+            type="tel"
+            placeholder="Contact number"
+            class="w-full px-4 py-2 border-[2.5px] border-black rounded-md focus:outline-none focus:ring-2 focus:ring-black"
+            style="font-family: var(--font-primary);"
+          />
         </div>
-</section>
+
+        <button
+          id="submit-contact"
+          class="w-full bg-black text-white py-4 hover:bg-black-900 transition duration-200 cursor-pointer !font-[500]"
+          style="font-family: var(--font-primary);">
+          {{ section.settings.secondbtn }}
+        </button>
+
+        <div id="accept-offer" class="mt-6 text-xl text-black-700 underline cursor-pointer hover:text-black font-sans hover:text-orange-500 mb-6 font-medium">
+          {{ section.settings.offertext }}
+        </div>
+
+        <div class="text-sm md:text-lg mt-4 font-sans text-black-500 break-words">
+          {{ section.settings.declaration }}
+        </div>
+      </div>
+    `;
+
+    attachContactSubmitListener();
+    attachAcceptOfferListener();
+  }
+}
+
+
+  function attachContactSubmitListener() {
+    const submitContactButton = document.getElementById('submit-contact');
+    const contactInput = document.querySelector('.email-holder input[type="tel"]');
+
+    if (submitContactButton && contactInput) {
+      function submitContact() {
+        const contactNumber = contactInput.value.trim();
+        if (!contactNumber) {
+          alert('Please enter your contact number.');
+          return;
+        }
+        if (!/^[0-9]{10,15}$/.test(contactNumber)) {
+          alert('Please enter a valid contact number.');
+          return;
+        }
+        contactInput.value = '';
+        hidePromo();
+      }
+
+      submitContactButton.addEventListener('click', function (event) {
+        event.preventDefault();
+        submitContact();
+      });
+
+      contactInput.addEventListener('keyup', function (event) {
+        if (event.key === 'Enter') {
+          event.preventDefault();
+          submitContact();
+        }
+      });
+    }
+  }
+
+  function attachAcceptOfferListener() {
+    const acceptOffer = document.getElementById('accept-offer');
+
+    if (acceptOffer) {
+      acceptOffer.addEventListener('click', function () {
+        hidePromo(); 
+      });
+    }
+  }
+
+  document.addEventListener('DOMContentLoaded', function () {
+    attachEventListeners();
+    setTimeout(showPromo, {{ section.settings.initial_delay | default: 1 }} * 1000);
+  });
+
+  document.addEventListener('shopify:section:load', function(event) {
+    if (event.detail.sectionId.includes('popup')) {
+      setTimeout(showPromo, 500);
+      attachEventListeners();
+    }
+  });
+</script>
 
 
 {% schema %}
 {
-  "name": "Blog",
-  "tag": "section",
+  "name": "Popup",
   "settings": [
-    {
+     {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "default": "scheme-1",
+      "label": "Color Scheme"
+    },
+    { 
+      "type": "text", 
+      "id": "header", 
+      "default": "ENJOY 10% OFF YOUR FIRST ORDER + FREE SHIPPING", 
+      "label": "Heading for first line" 
+    },
+    { 
+      "type": "text", 
+      "id": "sub_header", 
+      "default": "And stay updated on new releases, events, stories and more.",
+      "label": "Heading for second line" 
+    },
+    { 
       "type": "text",
-      "id": "full_text",
-      "label": "Full Heading Text",
-      "default": "The Bandit x ASICS Novablast 5 Campaign"
+      "id": "bracket_header",
+      "default": "Your code will be emailed",
+      "label": "Heading for mail line"
     },
     {
       "type": "text",
-      "id": "date_text",
-      "label": "Date",
-      "default": "04.01.25"
+      "id": "btn",
+      "default": "GET ACCESS",
+      "label": "Text for access button" 
     },
     {
       "type": "image_picker",
       "id": "image",
-      "label": "Main Image"
+      "label": "Image to be displayed"
+    },
+    {
+      "type": "range",
+      "id": "initial_delay",
+      "min": 0,
+      "max": 10,
+      "step": 1,
+      "default": 1,
+      "label": "Initial delay before popup appears (seconds)"
     },
     {
       "type": "text",
-      "id": "excerpt_text",
-      "label": "Excerpt Text",
-      "default": "Our first-ever footwear collaboration."
+      "id": "popupheader",
+      "default": "Thank you for Subscribing!",
+      "label": "Thank you popup heading"
     },
     {
-      "type": "color",
-      "id": "color_card_excerpt",
-      "label": "Card Excerpt Color",
-      "default": "#ffffff"
+      "type": "text",
+      "id": "bracket",
+      "default": "Your code has been sent to your email",
+      "label": "Bracket heading in Thank You popup"
+    },
+    {
+      "type": "text",
+      "id": "secondbtn",
+      "default": "Submit Contact",
+      "label": "Text for submit contact button"
+    },
+    {
+      "type": "text",
+      "id": "offertext",
+      "default": "I am good with 10% offer",
+      "label": "Offer accept text"
+    },
+    {
+      "type": "text",
+      "id": "declaration",
+      "default": "By clicking submit, you agree to our terms and conditions.",
+      "label": "Declaration text below offer accept"
     }
   ],
   "presets": [
-    {
-      "name": "Blog",
-      "category": "Custom"
-    }
+    { "name": "Pop Up", "category": "Promotions" }
   ]
 }
 {% endschema %}
