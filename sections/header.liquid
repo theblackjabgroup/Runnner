@@ -1,96 +1,3 @@
-{% schema %}
-{
-  "name": "Header",
-  "settings": [
-    {
-      "type": "color_scheme",
-      "id": "color_scheme",
-      "label": "Color scheme",
-      "default": "background-1"
-    },
-    {
-      "type": "image_picker",
-      "id": "logo",
-      "label": "Logo"
-    },
-    {
-      "type": "link_list",
-      "id": "menu",
-      "label": "Main Menu"
-    },
-    {
-      "type": "image_picker",
-      "id": "dropdown_icon",
-      "label": "Dropdown Icon"
-    },
-    {
-      "type": "color",
-      "id": "subMenuItem_color",
-      "label": "Sub-menu Item Color",
-      "default": "#000000"
-    },
-    {
-      "type": "text",
-      "id": "scrolling_text",
-      "label": "Scrolling Text",
-      "default": "STAY TRUE → KEEP GOING → FIND THE BALANCE → STAY TRUE → KEEP GOING → FIND THE BALANCE → STAY TRUE → KEEP GOING → FIND THE BALANCE → STAY TRUE → KEEP GOING → FIND THE BALANCE →"
-    },
-    {
-      "type": "checkbox",
-      "id": "enable_sticky",
-      "label": "Enable sticky header",
-      "default": true
-    }
-  ],
-  "blocks": [
-    {
-      "type": "mega_menu_images",
-      "name": "Mega Menu Images",
-      "settings": [
-        {
-          "type": "text",
-          "id": "menu_item_name",
-          "label": "Menu Item Name",
-          "info": "Enter the exact name of the menu item"
-        },
-        {
-          "type": "image_picker",
-          "id": "image_1",
-          "label": "First Image"
-        },
-        {
-          "type": "url",
-          "id": "button_link_1",
-          "label": "First Button Link"
-        },
-        {
-          "type": "text",
-          "id": "button_text_1",
-          "label": "First Button Text",
-          "default": "Shop Now"
-        },
-        {
-          "type": "image_picker",
-          "id": "image_2",
-          "label": "Second Image"
-        },
-        {
-          "type": "url",
-          "id": "button_link_2",
-          "label": "Second Button Link"
-        },
-        {
-          "type": "text",
-          "id": "button_text_2",
-          "label": "Second Button Text",
-          "default": "Learn More"
-        }
-      ]
-    }
-  ]
-}
-{% endschema %}
-
 <header
   class="header-main will-change-transform p-2 lg:px-0 z-99 bg-[var(--header_background)] transform-gpu {% unless section.settings.enable_sticky %}sticky-disabled{% endunless %}"
   data-header-sticky
@@ -322,11 +229,9 @@
           <div class="relative ">
             <button
               id="search-toggle"
-              class="text-[var(--header_text)] hover:text-[var(--hover)] transition-all duration-300 transform hover:-translate-y-1"
-              aria-label="Toggle search"
-              aria-expanded="false"
+              class="flex items-center justify-center text-[var(--header_text)] hover:text-[var(--hover)]"
             >
-              <svg class="size-8 mt-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
+              <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
                 <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
               </svg>
             </button>
@@ -343,8 +248,8 @@
             <!-- Search Container -->
             <div
               id="search-container"
-              class="fixed left-0 right-0 z-[1000] hidden transform -translate-y-full transition-transform duration-300 ease-in-out shadow-lg py-8 "
-              style="top: var(--header-height, 0px); background: var(--header_background);"
+              class="fixed left-0 right-0 z-[1000] hidden opacity-0 transition-opacity duration-300 ease-in-out shadow-lg py-8"
+              style="background: var(--header_background); top: var(--header-height, 0px);"
               aria-hidden="true"
             >
               <div class="searchbox-container mx-auto w-full px-4 py-4">
@@ -514,7 +419,7 @@
           </button>
         </div>
       </nav>
-      <div class="hidden lg:!block bottom-bar w-full h-[2px] mx-1 bg-transparent relative overflow-hidden">
+      <div class="hidden lg:!block bottom-bar w-full mx-1 bg-transparent relative overflow-hidden" style="height: 1px;">
         <span
           id="bottom-bar-indicator"
           class="absolute bottom-0 left-0 h-full bg-black transition-all duration-300 ease-out"
@@ -1338,31 +1243,25 @@
 
     function toggleSearch(show) {
       searchToggle.setAttribute('aria-expanded', show);
-      searchOverlay.classList.toggle('hidden', !show);
-      document.body.classList.toggle('overflow-hidden', show);
+
+      // Always recalculate header height and set it as top
+      const header = document.querySelector('[data-header-sticky]');
+      if (header) {
+        const headerHeight = header.offsetHeight;
+        searchContainer.style.top = `${headerHeight}px`;
+      }
 
       if (show) {
-        const headerHeight = document.querySelector('[data-header-sticky]').offsetHeight;
-        document.documentElement.style.setProperty('--header-height', `${headerHeight}px`);
-
         searchContainer.classList.remove('hidden');
-        searchContainer.offsetHeight;
         requestAnimationFrame(() => {
-          searchOverlay.classList.remove('opacity-0');
-          searchContainer.classList.add('translate-y-0');
+          searchContainer.classList.remove('opacity-0');
           setTimeout(() => searchInput.focus(), 300);
         });
       } else {
-        searchOverlay.classList.add('opacity-0');
-        searchContainer.classList.remove('translate-y-0');
-        // Hide the container after the animation
-        searchContainer.addEventListener(
-          'transitionend',
-          () => {
-            searchContainer.classList.add('hidden');
-          },
-          { once: true }
-        );
+        searchContainer.classList.add('opacity-0');
+        searchContainer.addEventListener('transitionend', () => searchContainer.classList.add('hidden'), {
+          once: true,
+        });
       }
     }
 
@@ -1408,3 +1307,96 @@
     });
   });
 </script>
+
+{% schema %}
+{
+  "name": "Header",
+  "settings": [
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "Color scheme",
+      "default": "background-1"
+    },
+    {
+      "type": "image_picker",
+      "id": "logo",
+      "label": "Logo"
+    },
+    {
+      "type": "link_list",
+      "id": "menu",
+      "label": "Main Menu"
+    },
+    {
+      "type": "image_picker",
+      "id": "dropdown_icon",
+      "label": "Dropdown Icon"
+    },
+    {
+      "type": "color",
+      "id": "subMenuItem_color",
+      "label": "Sub-menu Item Color",
+      "default": "#000000"
+    },
+    {
+      "type": "text",
+      "id": "scrolling_text",
+      "label": "Scrolling Text",
+      "default": "STAY TRUE → KEEP GOING → FIND THE BALANCE → STAY TRUE → KEEP GOING → FIND THE BALANCE → STAY TRUE → KEEP GOING → FIND THE BALANCE → STAY TRUE → KEEP GOING → FIND THE BALANCE →"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_sticky",
+      "label": "Enable sticky header",
+      "default": true
+    }
+  ],
+  "blocks": [
+    {
+      "type": "mega_menu_images",
+      "name": "Mega Menu Images",
+      "settings": [
+        {
+          "type": "text",
+          "id": "menu_item_name",
+          "label": "Menu Item Name",
+          "info": "Enter the exact name of the menu item"
+        },
+        {
+          "type": "image_picker",
+          "id": "image_1",
+          "label": "First Image"
+        },
+        {
+          "type": "url",
+          "id": "button_link_1",
+          "label": "First Button Link"
+        },
+        {
+          "type": "text",
+          "id": "button_text_1",
+          "label": "First Button Text",
+          "default": "Shop Now"
+        },
+        {
+          "type": "image_picker",
+          "id": "image_2",
+          "label": "Second Image"
+        },
+        {
+          "type": "url",
+          "id": "button_link_2",
+          "label": "Second Button Link"
+        },
+        {
+          "type": "text",
+          "id": "button_text_2",
+          "label": "Second Button Text",
+          "default": "Learn More"
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}
