@@ -2,7 +2,7 @@
   class="header-main will-change-transform p-2 lg:px-0 z-99 bg-[var(--header_background)] transform-gpu {% unless section.settings.enable_sticky %}sticky-disabled{% endunless %}"
   data-header-sticky
 >
-  <div class="relative w-full lg:my-2 flex items-center justify-between ">
+  <div class="relative w-full flex items-center justify-between ">
     <!-- Left: Logo -->
     <div class="flex items-center justify-center mx-4  ">
       <a href="/">
@@ -15,7 +15,7 @@
             class=" !max-w-full !max-h-16  mx-auto"
           >
         {% else %}
-          <span class="block font-semibold text-center pl-2 pr-24 " style="font-size: 44px;">
+          <span class="block font-semibold text-center pl-2 pr-24 " style="font-size: 44px; line-height: 1;">
             {{- shop.name -}}
           </span>
         {% endif %}
@@ -66,12 +66,12 @@
                     role="region"
                     aria-label="{{ link.title }} submenu"
                     class="
-                      fixed top-[calc(100%-10px)] left-0 right-0 w-full z-50 pt-[10px]
+                      fixed top-[calc(100%-12px)] left-0 right-0 w-full z-50 mt-3
                       opacity-0 invisible pointer-events-none
                       group-hover:opacity-100 group-hover:visible group-hover:pointer-events-auto
                       transition-all duration-300 ease-out bg-[var(--header_background)]
                     "
-                    style="background: var(--header_background);"
+                    style="background:grey;"
                   >
                     <div class="mx-auto p-6  flex">
                       <ul class="flex justify-start gap-8 m-2 w-1/2">
@@ -832,12 +832,19 @@
     }
   }
 
-  .dropdown-group:hover .absolute {
-    animation: dropDown 300ms ease-out forwards;
+  .dropdown-group .absolute {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transform: translateY(-10px);
+    transition: opacity 300ms ease, transform 300ms ease;
   }
 
-  .dropdown-group:not(:hover) .absolute {
-    animation: dropUp 300ms ease-out forwards;
+  .dropdown-group.active-submenu .absolute {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+    transform: translateY(0);
   }
 
   @keyframes scroll {
@@ -1315,6 +1322,22 @@
         // Reset only when leaving the whole dropdown group
         bottomBarIndicator.style.width = `100%`;
         bottomBarIndicator.style.transform = `translateX(0)`;
+      });
+    });
+
+    const dropdownGroups = document.querySelectorAll('.dropdown-group');
+    dropdownGroups.forEach((dropdown) => {
+      let hideTimeout;
+
+      dropdown.addEventListener('mouseenter', function () {
+        clearTimeout(hideTimeout);
+        this.classList.add('active-submenu');
+      });
+
+      dropdown.addEventListener('mouseleave', function () {
+        hideTimeout = setTimeout(() => {
+          this.classList.remove('active-submenu');
+        }, 300); // 300ms delay on mouse leave
       });
     });
   });
