@@ -13,25 +13,40 @@
 
     <!-- Form Container with fixed width -->
     <div id="formContainer" class="w-full md:w-1/2 md:pr-8">
-      <form id="email-signup-form" class="flex flex-col gap-6 w-[95%] mx-auto">
+      <div id="successMessageContainer" class="hidden w-[95%] mx-auto">
+        <div class="rounded-lg p-8 text-center">
+          <svg class="h-16 w-16 mx-auto text-green-500 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+          </svg>
+          <h3 class="text-4xl font-bold text-white mb-4">Thank You!</h3>
+          <p class="text-2xl text-gray-300">You've been successfully subscribed to our notifications.</p>
+        </div>
+      </div>
+
+      {%- form 'customer', id: 'custom-email-signup-form', class: 'flex flex-col gap-6 w-[95%] mx-auto' -%}
+        <input type="hidden" name="contact[tags]" value="{{ section.settings.customer_tag }}" />
+        
         <div class="form-fields-container relative">
           <input
             type="email"
-            id="email-input"
+            id="custom-email-input"
+            name="contact[email]"
             placeholder="EMAIL"
             class="w-full px-4 text-[30px] md:text-[50px] text-left text-white bg-black border border-white placeholder-gray-400 focus:outline-none rounded-lg leading-none py-0"
+            {% if form.errors contains 'email' %} class="error-state"{% endif %}
+            value="{{ form.email }}"
           />
         </div>
         
         <div class="flex justify-end w-full">
           <button
             type="submit"
-            id="submitButton"
+            id="custom-submitButton"
             class="w-full bg-red-600 text-white text-[30px] md:text-[50px] font-bold px-6 flex items-center justify-between hover:bg-red-700 transition-colors rounded-lg"
           >
             <span class="text-[30px] md:text-[50px]">→</span>
-            <span id="buttonText">{{ section.settings.button_text }}</span>
-            <span id="loadingSpinner" class="hidden">
+            <span id="custom-buttonText">{{ section.settings.button_text }}</span>
+            <span id="custom-loadingSpinner" class="hidden">
               <svg class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                 <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                 <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
@@ -39,50 +54,80 @@
             </span>
           </button>
         </div>
-      </form>
+        
+        {% if form.posted_successfully? %}
+          <script>
+            document.getElementById('custom-email-signup-form').style.display = 'none';
+            document.getElementById('successMessageContainer').classList.remove('hidden');
+          </script>
+        {% endif %}
+        
+        {% if form.errors %}
+          <script>
+            document.getElementById('custom-email-input').classList.add('error-state');
+          </script>
+        {% endif %}
+      {%- endform -%}
     </div>
   </div>
 </div>
 
 <!-- Scroll-triggered popup newsletter -->
 <div id="popup-newsletter" class="fixed bottom-0 left-0 right-0 bg-black text-white border-t border-gray-800 z-50" style="transform: translateY(100%); transition: transform 0.5s ease;">
-  <div class="container w-full max-w-[1400px] mx-auto px-4 py-4">
+  <div class="container mx-auto px-4 py-4">
     <div class="flex flex-col md:flex-row items-center justify-between gap-4">
       <!-- Text content -->
-      <div class="md:text-left md:w-1/2 md:-ml-[42%]">
+      <div class="text-center md:text-left md:w-1/2 md:-ml-[40%]">
         <h2 class="text-2xl md:text-3xl font-extrabold uppercase tracking-wider">{{ section.settings.heading_text }}</h2>
         <p class="text-lg md:text-xl mt-1">{{ section.settings.subheading_text }}</p>
       </div>
       
       <!-- Form container -->
-      <div class="w-full md:w-1/2">
-        <form id="popup-email-form" class="flex flex-col sm:flex-row gap-4 justify-end md:ml-[850px]">
-          <div>
+      <div class="w-full md:w-2/3 ml-auto">
+        {%- form 'customer', id: 'popup-email-form', class: 'flex flex-col sm:flex-row gap-4 justify-end md:ml-[800px]' -%}
+          <input type="hidden" name="contact[tags]" value="{{ section.settings.customer_tag }}" />
+          
+          <div class="flex-grow">
             <input
               type="email"
               id="popup-email-input"
+              name="contact[email]"
               placeholder="EMAIL"
-              class="w-full md:w-[400px] px-4 py-3 text-white bg-black border border-white placeholder-gray-400 focus:outline-none rounded-lg text-left"
+              class="w-full md:w-[350px] px-4 py-3 text-white bg-black border border-white placeholder-gray-400 focus:outline-none rounded-lg text-left"
+              {% if form.errors contains 'email' %} class="error-state"{% endif %}
+              value="{{ form.email }}"
             />
           </div>
           
           <div class="md:w-[200px]">
-           <button
-  type="submit"
-  id="popup-submit-button"
-  class="w-full md:w-auto bg-red-600 text-white font-bold px-6 py-3 flex items-center justify-center hover:bg-red-700 transition-colors rounded-lg">
-  <span class="mr-2">→</span>
-  <span id="popup-button-text">{{ section.settings.button_text }}</span>
-  <span id="popup-loading-spinner" class="hidden ml-2">
-    <svg class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-      <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-      <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-    </svg>
-  </span>
-</button>
-
+            <button
+              type="submit"
+              id="popup-submit-button"
+              class="w-full md:w-[200px] sm:w-auto bg-red-600 text-white font-bold px-6 py-3 flex items-center justify-between hover:bg-red-700 transition-colors rounded-lg"
+            >
+              <span class="mr-2">→</span>
+              <span id="popup-button-text">{{ section.settings.button_text }}</span>
+              <span id="popup-loading-spinner" class="hidden ml-2">
+                <svg class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                  <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+              </span>
+            </button>
           </div>
-        </form>
+          
+          {% if form.posted_successfully? %}
+            <script>
+              // Show success message in popup
+              document.addEventListener('DOMContentLoaded', function() {
+                const popupContainer = document.getElementById('popup-newsletter');
+                if (popupContainer) {
+                  showPopupSuccessMessage(popupContainer);
+                }
+              });
+            </script>
+          {% endif %}
+        {%- endform -%}
         
         <!-- Close button -->
         <button id="close-popup" class="absolute top-2 right-2 text-white hover:text-gray-300">
@@ -97,14 +142,14 @@
 
 <style>
   /* Red border style for empty submission */
-  #email-input.error-state,
+  #custom-email-input.error-state,
   #popup-email-input.error-state {
     border-color: #dc2626 !important;
     border-width: 2px !important;
   }
   
   /* Remove default focus styling */
-  #email-input:focus,
+  #custom-email-input:focus,
   #popup-email-input:focus {
     outline: none !important;
     box-shadow: none !important;
@@ -123,14 +168,14 @@
   }
 
   /* Input and button height responsiveness */
-  #email-input, #submitButton {
+  #custom-email-input, #custom-submitButton {
     height: 50px;
     line-height: 50px;
   }
   
   @media (min-width: 768px) {
-    #email-input, #submitButton {
-      height: 80px;
+    #custom-email-input, #custom-submitButton {
+      height: 70px;
       line-height: 70px;
     }
   }
@@ -138,181 +183,71 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-  // Original form functionality
-  const emailSignupForm = document.getElementById('email-signup-form');
+  // Original form functionality - Using unique IDs to avoid conflicts
+  const customEmailSignupForm = document.getElementById('custom-email-signup-form');
   
-  if (emailSignupForm) {
-    const emailInput = document.getElementById('email-input');
-    const submitButton = document.getElementById('submitButton');
-    const buttonText = document.getElementById('buttonText');
-    const loadingSpinner = document.getElementById('loadingSpinner');
-    const formContainer = document.getElementById('formContainer');
-    const mainContainer = document.getElementById('mainContainer');
+  if (customEmailSignupForm) {
+    const customEmailInput = document.getElementById('custom-email-input');
+    const customSubmitButton = document.getElementById('custom-submitButton');
+    const customButtonText = document.getElementById('custom-buttonText');
+    const customLoadingSpinner = document.getElementById('custom-loadingSpinner');
     
     // Flag to track if submission is in progress
     let isSubmitting = false;
     
     // Check if the input is empty on page load and add the empty class if it is
-    if (!emailInput.value.trim()) {
-      emailInput.classList.add('empty');
+    if (customEmailInput && !customEmailInput.value.trim()) {
+      customEmailInput.classList.add('empty');
     }
     
     // Monitor input changes to add/remove error state class
-    emailInput.addEventListener('input', function() {
-      if (this.value.trim()) {
-        // Remove error state when user starts typing
-        this.classList.remove('error-state');
-        this.classList.remove('empty');
-      }
-    });
-    
-    function validateEmail(email) {
-      const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      return re.test(email);
-    }
-    
-    function showSuccessMessage() {
-      // For success message, create a nice success display
-      // Remove form and create success message
-      if (formContainer) {
-        formContainer.style.display = 'none';
-      }
-      
-      // Create success message container
-      const successMessageElement = document.createElement('div');
-      successMessageElement.className = 'w-full';
-      
-      // Create inner container
-      const innerContainer = document.createElement('div');
-      innerContainer.className = 'rounded-lg p-8 text-center';
-      
-      // Create checkmark icon
-      const svgElement = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-      svgElement.setAttribute('class', 'h-16 w-16 mx-auto text-green-500 mb-4');
-      svgElement.setAttribute('fill', 'none');
-      svgElement.setAttribute('viewBox', '0 0 24 24');
-      svgElement.setAttribute('stroke', 'currentColor');
-      
-      const pathElement = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-      pathElement.setAttribute('stroke-linecap', 'round');
-      pathElement.setAttribute('stroke-linejoin', 'round');
-      pathElement.setAttribute('stroke-width', '2');
-      pathElement.setAttribute('d', 'M5 13l4 4L19 7');
-      
-      svgElement.appendChild(pathElement);
-      
-      // Create thank you heading
-      const heading = document.createElement('h3');
-      heading.className = 'text-4xl font-bold text-white mb-4';
-      heading.textContent = 'Thank You!';
-      
-      // Create success message text
-      const paragraph = document.createElement('p');
-      paragraph.className = 'text-2xl text-gray-300';
-      paragraph.textContent = 'You\'ve been successfully subscribed to our notifications.';
-      
-      // Append all elements
-      innerContainer.appendChild(svgElement);
-      innerContainer.appendChild(heading);
-      innerContainer.appendChild(paragraph);
-      successMessageElement.appendChild(innerContainer);
-      
-      // Add to main container
-      mainContainer.appendChild(successMessageElement);
-    }
-    
-    // Function to show popup success message
-    function showPopupSuccessMessage(popupContainer) {
-      // Create success message
-      popupContainer.innerHTML = `
-        <div class="container mx-auto px-4 py-6">
-          <div class="flex justify-center items-center">
-            <div class="text-center">
-              <svg class="h-12 w-12 mx-auto text-green-500 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-              </svg>
-              <h3 class="text-2xl font-bold text-white mb-2">Thank You!</h3>
-              <p class="text-lg text-gray-300">You've been successfully subscribed to our notifications.</p>
-            </div>
-          </div>
-        </div>
-      `;
-      
-      // Hide popup after 5 seconds
-      setTimeout(() => {
-        popupContainer.classList.remove('show-popup');
-      }, 5000);
-    }
-    
-    // Function to simulate API call (replace with actual API call)
-    function submitEmail(email) {
-      return new Promise((resolve) => {
-        // Simulate API delay (2 seconds)
-        setTimeout(() => {
-          resolve({ success: true });
-        }, 2000);
+    if (customEmailInput) {
+      customEmailInput.addEventListener('input', function() {
+        if (this.value.trim()) {
+          // Remove error state when user starts typing
+          this.classList.remove('error-state');
+          this.classList.remove('empty');
+        }
       });
     }
     
-    // Form submission handler
-    emailSignupForm.addEventListener('submit', async function(e) {
-      e.preventDefault();
-      
-      // Prevent multiple submissions
-      if (isSubmitting) return;
-      
-      const email = emailInput.value.trim();
-      
-      // Show red border if empty and add error-state class
-      if (!email) {
-        emailInput.classList.add('empty');
-        emailInput.classList.add('error-state');
-        emailInput.focus();
-        return;
-      }
-      
-      if (!validateEmail(email)) {
-        emailInput.classList.add('error-state');
-        emailInput.focus();
-        return;
-      }
-      
-      // Set submitting state
-      isSubmitting = true;
-      
-      // Show loading state
-      buttonText.textContent = "SUBMITTING...";
-      loadingSpinner.classList.remove('hidden');
-      submitButton.disabled = true;
-      
-      try {
-        // Process form submission within the current page
-        const result = await submitEmail(email);
-        
-        if (result.success) {
-          // Show success message
-          showSuccessMessage();
-        } else {
-          // Reset submitting state for errors
-          isSubmitting = false;
-          buttonText.textContent = "GET NOTIFIED";
-          loadingSpinner.classList.add('hidden');
-          submitButton.disabled = false;
-          
-          // Add error state
-          emailInput.classList.add('error-state');
+    // Show loading state when form is submitted
+    if (customEmailSignupForm) {
+      customEmailSignupForm.addEventListener('submit', function(e) {
+        // Prevent multiple submissions
+        if (isSubmitting) {
+          e.preventDefault();
+          return;
         }
-      } catch (error) {
-        // Reset submitting state
-        isSubmitting = false;
-        buttonText.textContent = "GET NOTIFIED";
-        loadingSpinner.classList.add('hidden');
-        submitButton.disabled = false;
         
-        // Add error state
-        emailInput.classList.add('error-state');
-      }
-    });
+        const email = customEmailInput.value.trim();
+        
+        // Show red border if empty and add error-state class
+        if (!email) {
+          e.preventDefault();
+          customEmailInput.classList.add('empty');
+          customEmailInput.classList.add('error-state');
+          customEmailInput.focus();
+          return;
+        }
+        
+        // Validate email (simple client-side validation)
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+          e.preventDefault();
+          customEmailInput.classList.add('error-state');
+          customEmailInput.focus();
+          return;
+        }
+        
+        // Set submitting state
+        isSubmitting = true;
+        
+        // Show loading state
+        customButtonText.textContent = "SUBMITTING...";
+        customLoadingSpinner.classList.remove('hidden');
+        customSubmitButton.disabled = true;
+      });
+    }
   }
   
   // Popup Newsletter Functionality
@@ -332,7 +267,7 @@ document.addEventListener('DOMContentLoaded', function() {
   
   // Handle scroll to show/hide popup based on newsletter position
   function handleScroll() {
-    if (userClosedPopup) return;
+    if (userClosedPopup || !popupNewsletter || !newsletterSection) return;
     
     // Get current scroll position
     const scrollPosition = window.scrollY || document.documentElement.scrollTop;
@@ -352,30 +287,67 @@ document.addEventListener('DOMContentLoaded', function() {
   // Close button handler
   if (closePopupBtn) {
     closePopupBtn.addEventListener('click', function() {
-      popupNewsletter.classList.remove('show-popup');
-      userClosedPopup = true;
+      if (popupNewsletter) {
+        popupNewsletter.classList.remove('show-popup');
+        userClosedPopup = true;
+      }
     });
   }
   
+  // Function to show popup success message
+  window.showPopupSuccessMessage = function(popupContainer) {
+    // Create success message
+    popupContainer.innerHTML = `
+      <div class="container mx-auto px-4 py-6">
+        <div class="flex justify-center items-center">
+          <div class="text-center">
+            <svg class="h-12 w-12 mx-auto text-green-500 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+            </svg>
+            <h3 class="text-2xl font-bold text-white mb-2">Thank You!</h3>
+            <p class="text-lg text-gray-300">You've been successfully subscribed to our notifications.</p>
+          </div>
+        </div>
+      </div>
+    `;
+    
+    // Make sure popup is visible
+    popupContainer.classList.add('show-popup');
+    
+    // Hide popup after 5 seconds
+    setTimeout(() => {
+      popupContainer.classList.remove('show-popup');
+    }, 5000);
+  };
+  
   // Popup form submission handler
-  if (popupEmailForm) {
-    popupEmailForm.addEventListener('submit', async function(e) {
-      e.preventDefault();
-      
+  if (popupEmailForm && popupEmailInput) {
+    popupEmailInput.addEventListener('input', function() {
+      if (this.value.trim()) {
+        this.classList.remove('error-state');
+      }
+    });
+    
+    popupEmailForm.addEventListener('submit', function(e) {
       // Prevent multiple submissions
-      if (isPopupSubmitting) return;
+      if (isPopupSubmitting) {
+        e.preventDefault();
+        return;
+      }
       
       const email = popupEmailInput.value.trim();
       
       // Show error if empty
       if (!email) {
+        e.preventDefault();
         popupEmailInput.classList.add('error-state');
         popupEmailInput.focus();
         return;
       }
       
       // Validate email format
-      if (!validateEmail(email)) {
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        e.preventDefault();
         popupEmailInput.classList.add('error-state');
         popupEmailInput.focus();
         return;
@@ -388,39 +360,6 @@ document.addEventListener('DOMContentLoaded', function() {
       popupButtonText.textContent = "SUBMITTING...";
       popupLoadingSpinner.classList.remove('hidden');
       popupSubmitButton.disabled = true;
-      
-      try {
-        // Process form submission
-        const result = await submitEmail(email);
-        
-        if (result.success) {
-          // Show success message
-          showPopupSuccessMessage(popupNewsletter);
-          // Consider this a manual close after successful submission
-          userClosedPopup = true;
-        } else {
-          // Reset form on error
-          isPopupSubmitting = false;
-          popupButtonText.textContent = "GET NOTIFIED";
-          popupLoadingSpinner.classList.add('hidden');
-          popupSubmitButton.disabled = false;
-          popupEmailInput.classList.add('error-state');
-        }
-      } catch (error) {
-        // Reset form on error
-        isPopupSubmitting = false;
-        popupButtonText.textContent = "GET NOTIFIED";
-        popupLoadingSpinner.classList.add('hidden');
-        popupSubmitButton.disabled = false;
-        popupEmailInput.classList.add('error-state');
-      }
-    });
-    
-    // Remove error styling on input
-    popupEmailInput.addEventListener('input', function() {
-      if (this.value.trim()) {
-        this.classList.remove('error-state');
-      }
     });
   }
   
@@ -453,7 +392,7 @@ document.addEventListener('DOMContentLoaded', function() {
       "label": "Heading",
       "default": "Bandit Grand Prix"
     },
-     {
+    {
       "type": "color_scheme",
       "id": "color_scheme",
       "default": "scheme-1",
@@ -470,6 +409,13 @@ document.addEventListener('DOMContentLoaded', function() {
       "id": "button_text",
       "label": "Button Text",
       "default": "GET NOTIFIED"
+    },
+    {
+      "type": "text",
+      "id": "customer_tag",
+      "label": "Customer Tag",
+      "default": "newsletter,grand-prix",
+      "info": "Tags to add to customer (comma separated)"
     },
     {
       "type": "range",
