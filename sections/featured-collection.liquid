@@ -2,14 +2,14 @@
   {% if section.settings.heading != blank %}
     <h2
       style="font-weight:500;"
-      class="featured-collection-main-heading"
+      class="featured-collection-main-heading mb-[-10px]"
     >
       {{ section.settings.heading | upcase }}
     </h2>
   {% endif %}
 
-  <div class="flex justify-between items-center w-full">
-    <div class="flex-grow md:text-5xl text-2xl">
+  <div class="flex justify-between items-center w-full featured-collection-subheading">
+    <div class="flex-grow md:text-[24px] text-2xl md:mt-[-20px]">
       {% if section.settings.description != blank %}
         {{ section.settings.description | upcase }}
       {% endif %}
@@ -60,9 +60,19 @@
             aria-pressed="{% if forloop.first %}true{% else %}false{% endif %}"
           >
             <span class="label-text">{{ block.settings.label }}</span>
-            <svg class="svg-arrow-right" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 37 36" width="18" height="18">
-              <path fill="currentColor" d="M26.79,9.21A35.06,35.06,0,0,0,37,16.2v3.66a35.34,35.34,0,0,0-10.21,7A12.84,12.84,0,0,0,23.21,36H17.56q0-6.22,3-10a15.4,15.4,0,0,1,8.06-5.2V20.6H0V15.43H28.63v-.3A15.16,15.16,0,0,1,20.57,10q-3-3.77-3-10h5.65a13,13,0,0,0,.87,5A12.79,12.79,0,0,0,26.79,9.21Z"/>
-            </svg>
+            {% comment %}
+              <svg class="svg-arrow-right" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 37 36" width="18" height="18">
+                <path fill="currentColor" d="M26.79,9.21A35.06,35.06,0,0,0,37,16.2v3.66a35.34,35.34,0,0,0-10.21,7A12.84,12.84,0,0,0,23.21,36H17.56q0-6.22,3-10a15.4,15.4,0,0,1,8.06-5.2V20.6H0V15.43H28.63v-.3A15.16,15.16,0,0,1,20.57,10q-3-3.77-3-10h5.65a13,13,0,0,0,.87,5A12.79,12.79,0,0,0,26.79,9.21Z"/>
+              </svg>
+            {% endcomment %}
+            <img
+              src="{{ "arrow-down.png" | asset_url }}"
+              alt="Dropdown Icon"
+              class="w-12 h-6 object-contain transition-transform duration-300 group-hover:-rotate-90 collection-arrow-img"
+              width="100%"
+              height="auto"
+              aria-hidden="true"
+            >
           </button>
         {% endfor %}
       </div>
@@ -307,6 +317,10 @@
   .featured-collection-page-width {
     margin: 0 10px;
     overflow-y: hidden;
+  }
+
+  .featured-collection-subheading {
+    margin-top: -30px;
   }
 
   h2.featured-collection-main-heading {
@@ -613,7 +627,7 @@
 
   hr {
     border: 0;
-    height: 1.5px;
+    /* height: 1.5px; */
     background: #000;
     margin: 5px 0;
   }
@@ -656,7 +670,7 @@
   }
 
   .custom-scrollbar::-webkit-scrollbar {
-    height: 5px;
+    height: 8px;
     background: transparent;
   }
 
@@ -795,6 +809,10 @@
       height: 24px !important;
     }
 
+    .featured-collection-subheading {
+      margin-top: -20px;
+    }
+
     .collection-btn.active {
       background: #000 !important;
       color: #fff !important;
@@ -818,6 +836,12 @@
 
   .product-image-wrapper:hover .product-image[data-index='1'] {
     display: block;
+  }
+
+  @media (max-width: 425px) {
+    .featured-collection-subheading {
+      margin-top: -10px;
+    }
   }
 </style>
 
@@ -1222,15 +1246,28 @@
     const collectionContainers = document.querySelectorAll('.collection-products-container');
 
     collectionButtons.forEach((button) => {
+      // Handle click
       button.addEventListener('click', () => {
         const collectionId = button.getAttribute('data-collection');
 
         collectionButtons.forEach((btn) => {
           btn.classList.remove('active');
           btn.setAttribute('aria-pressed', 'false');
+          // Remove invert from all arrows
+          const img = btn.querySelector('.collection-arrow-img');
+          if (img) img.style.filter = '';
         });
         button.classList.add('active');
         button.setAttribute('aria-pressed', 'true');
+
+        // Invert arrow color for the active button
+        const activeImg = button.querySelector('.collection-arrow-img');
+        if (activeImg) {
+          // Use setTimeout to ensure the class is applied before the filter
+          setTimeout(() => {
+            activeImg.style.filter = 'invert(1)';
+          }, 0);
+        }
 
         collectionContainers.forEach((container) => {
           if (container.getAttribute('data-collection-id') === collectionId) {
@@ -1242,7 +1279,27 @@
           }
         });
       });
+
+      // Handle hover
+      button.addEventListener('mouseenter', () => {
+        const img = button.querySelector('.collection-arrow-img');
+        if (img) img.style.filter = 'invert(1)';
+      });
+      button.addEventListener('mouseleave', () => {
+        // Only remove invert if not active
+        if (!button.classList.contains('active')) {
+          const img = button.querySelector('.collection-arrow-img');
+          if (img) img.style.filter = '';
+        }
+      });
     });
+
+    // Set initial invert for the first active button
+    const firstActiveBtn = document.querySelector('.collection-btn.active');
+    if (firstActiveBtn) {
+      const img = firstActiveBtn.querySelector('.collection-arrow-img');
+      if (img) img.style.filter = 'invert(1)';
+    }
 
     // Update cart count on page load to ensure synchronization
     updateCartCount();
