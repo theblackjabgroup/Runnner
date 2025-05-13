@@ -24,16 +24,19 @@
     <!-- Right: Menu & Actions -->
     <div class=" flex flex-wrap items-center justify-end w-full tracking-tight">
       <!-- Desktop Menu -->
-      <nav class="relative flex justify-end lg:justify-between items-center w-full text-[var(--header_text)]">
+      <nav
+        class="relative flex justify-end lg:justify-between items-center w-full text-[var(--header_text)]"
+        style="height: 25px;"
+      >
         <!-- Left: Menu Items -->
         <div class="menu-items hidden lg:!flex gap-2 flex-wrap w-2/3 0">
           <ul class="flex space-x-1">
             {%- for link in section.settings.menu.links -%}
-              <li class="group dropdown-group">
+              <li class="group dropdown-group flex items-center justify-center ">
                 {% if link.links.size > 0 %}
                   <a
                     href="{{ link.url }}"
-                    class="cursor-pointer text-[16px] flex items-center py-2  group"
+                    class="cursor-pointer text-[16px] flex items-center group"
                     aria-expanded="false"
                     aria-controls="mega-menu-{{ forloop.index }}"
                     aria-haspopup="true"
@@ -66,12 +69,12 @@
                     role="region"
                     aria-label="{{ link.title }} submenu"
                     class="
-                      fixed top-[calc(100%-12px)] left-0 right-0 w-full z-50 mt-3
+                      fixed top-[85%] left-0 right-0 w-full z-50 mt-3
                       opacity-0 invisible pointer-events-none
                       group-hover:opacity-100 group-hover:visible group-hover:pointer-events-auto
                       transition-all duration-300 ease-out bg-[var(--header_background)]
                     "
-                    style="background:grey;"
+                    style="background:grey; top:70%"
                   >
                     <div class="mx-auto p-6  flex">
                       <ul class="flex justify-start gap-8 m-2 w-1/2">
@@ -336,54 +339,40 @@
 
           <div class="group relative hidden lg:!inline-block " style="background: var(--header_background);">
             <!-- Trigger: Current country -->
-            <div class="inline-flex items-center cursor-pointer px-3 gap-2 ">
+            <div class="inline-flex items-center cursor-pointer ">
               {% assign current_country = localization.country %}
-              <span class="mr-2">
+              <span>
                 {{ current_country.name }}
               </span>
-              {% if current_country.iso_code %}
-                <img
-                  src="https://flagcdn.com/24x18/{{ current_country.iso_code | downcase }}.png"
-                  alt="{{ current_country.name }} flag"
-                  width="24"
-                  height="18"
-                  class="inline-block"
-                >
-              {% endif %}
-              <svg class="ml-2 w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-              </svg>
+
+              <img
+                src="{{ "arrow-down.png" |  asset_url }}"
+                alt="Dropdown Icon"
+                class="w-12 h-6 object-contain transition-transform duration-300 group-hover:-rotate-90"
+                width="100%"
+                height="auto"
+                aria-hidden="true"
+              >
             </div>
 
             <!-- Dropdown -->
             <div
-              class="absolute right-0 mt-5 w-100 bg-[var(--header_background)] border border-gray-200 rounded-md shadow-lg opacity-0 group-hover:opacity-100 invisible group-hover:visible transition-all duration-300"
-              style="background: var(--header_background);"
+              class="absolute w-100 bg-[var(--header_background)] border border-gray-200 rounded-md shadow-lg opacity-0 group-hover:opacity-100 invisible group-hover:visible transition-all duration-300"
+              style="background: var(--header_background); right: -100%;"
             >
-              <ul class="max-h-100 overflow-y-auto divide-y divide-gray-100">
+              <ul class=" overflow-y-auto divide-y divide-gray-100" style="max-height: 500px; max-width: 400px;">
+                {% assign current_country = localization.country %}
                 {% for country in localization.available_countries %}
                   <li>
                     <a
                       href="{{ country.url }}"
-                      class="flex items-center px-4 py-2 text-3xl text-black hover:bg-gray-100"
+                      class="w-full flex items-center justify-between px-4 py-2 text-3xl text-black hover:bg-gray-100"
                     >
-                      <img
-                        src="https://flagcdn.com/24x18/{{ country.iso_code | downcase }}.png"
-                        alt="{{ country.name }} flag"
-                        class="w-8 h-6 mr-3 border-transparent rounded-sm"
-                        width="24"
-                        height="18"
-                      >
-                      <span class="flex-1 ">{{ country.name }}</span>
-                      <div class="flex flex-col text-right text-xl ml-auto">
-                        <span class="text-gray-700 font-medium">
-                          {{ country.currency.symbol }}
-                          {{ country.currency.iso_code }}
-                        </span>
-                        <span class="text-gray-500">
-                          {{ localization.language.endonym_name }}
-                        </span>
-                      </div>
+                      <span class="mx-2">{{ country.name }}</span>
+                      <span class="text-gray-700 font-medium">
+                        {{ country.currency.iso_code }}
+                        {{ country.currency.symbol }}
+                      </span>
                     </a>
                   </li>
                 {% endfor %}
@@ -430,7 +419,7 @@
           </button>
         </div>
       </nav>
-      <div class="hidden lg:!block bottom-bar w-full mx-1 bg-transparent relative overflow-hidden" style="height: 1px;">
+      <div class="hidden lg:!block bottom-bar w-full  bg-transparent relative overflow-hidden" style="height: 1px;">
         <span
           id="bottom-bar-indicator"
           class="absolute bottom-0 left-0 h-full bg-black transition-all duration-300 ease-out"
@@ -644,45 +633,29 @@
             <span class="">
               {{ current_country.name }}
             </span>
-            {% if current_country.iso_code %}
-              <img
-                src="https://flagcdn.com/24x18/{{ current_country.iso_code | downcase }}.png"
-                alt="{{ current_country.name }} flag"
-                width="24"
-                height="18"
-                class="inline-block"
-              >
-            {% endif %}
-            <svg
-              class="ml-2 w-4 h-4 text-gray-600 transition-transform duration-300"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
+            <img
+              src="{{ "arrow-down.png" |  asset_url }}"
+              alt="Dropdown Icon"
+              class="w-12 h-6 object-contain transition-transform duration-300 group-hover:-rotate-90"
+              width="100%"
+              height="auto"
+              aria-hidden="true"
             >
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-            </svg>
           </button>
 
           <!-- Dropdown -->
-          <div class="country-selector-dropdown absolute bottom-16 w-80 bg-[var(--header_background)] border border-gray-200 rounded-md shadow-lg opacity-0 invisible transition-all duration-300 z-[9999]">
+          <div class="country-selector-dropdown absolute bottom-16 w-100 bg-[var(--header_background)] border border-gray-200 rounded-md shadow-lg opacity-0 invisible transition-all duration-300 z-[9999]">
             <ul class="max-h-100 overflow-y-auto divide-y divide-gray-100 text-xl">
               {% for country in localization.available_countries %}
                 <li>
                   <a
                     href="{{ country.url }}"
-                    class="flex items-center px-4 py-2 hover:bg-gray-100"
+                    class="w-full flex items-center justify-between px-4 py-2 text-2xl text-black hover:bg-gray-100"
                   >
-                    <img
-                      src="https://flagcdn.com/24x18/{{ country.iso_code | downcase }}.png"
-                      alt="{{ country.name }} flag"
-                      class="w-5 h-4 mr-3 border rounded-sm"
-                      width="24"
-                      height="18"
-                    >
-                    <span class="flex-1">{{ country.name }}</span>
-                    <span class="text-gray-500 ml-auto">
-                      {{ country.currency.symbol }}
+                    <span class="mx-2">{{ country.name }}</span>
+                    <span class="text-gray-700 font-medium">
                       {{ country.currency.iso_code }}
+                      {{ country.currency.symbol }}
                     </span>
                   </a>
                 </li>
@@ -1238,7 +1211,7 @@
         const isExpanded = countrySelectorBtn.getAttribute('aria-expanded') === 'true';
 
         countrySelectorBtn.setAttribute('aria-expanded', !isExpanded);
-        countrySelectorBtn.querySelector('svg').style.transform = isExpanded ? 'rotate(0)' : 'rotate(180deg)';
+        countrySelectorBtn.querySelector('img').style.transform = isExpanded ? 'rotate(0)' : 'rotate(-90deg)';
         countrySelectorDropdown.classList.toggle('opacity-0');
         countrySelectorDropdown.classList.toggle('invisible');
       });
