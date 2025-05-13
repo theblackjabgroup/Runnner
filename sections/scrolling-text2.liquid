@@ -1,0 +1,263 @@
+{% schema %}
+{
+  "name": "Scrolling text",
+  "class": "scrolling-text-section",
+  "tag": "section",
+  "settings": [
+    {
+      "type": "text",
+      "id": "top_strip_text",
+      "label": "Top Strip Text",
+      "default": "BANDIT GRAND PRIX → BANDIT GRAND PRIX → BANDIT GRAND PRIX → BANDIT GRAND PRIX → BANDIT GRAND PRIX →"
+    },
+    {
+      "type": "text",
+      "id": "middle_strip_large_text",
+      "label": "Middle Strip Large Text",
+      "default": "JULY 5TH"
+    },
+    {
+      "type": "text",
+      "id": "middle_strip_small_text",
+      "label": "Middle Strip Small Text",
+      "default": "BROOKLYN STOREHOUSE"
+    },
+    {
+      "type": "text",
+      "id": "bottom_strip_text",
+      "label": "Bottom Strip Text",
+      "default": "OPEN HEATS → 3K SUPER FINALS → AFTERPARTY → OPEN HEATS → 3K SUPER FINALS → AFTERPARTY →"
+    },
+    {
+      "type": "range",
+      "id": "banner_height",
+      "min": 40,
+      "max": 120,
+      "step": 5,
+      "unit": "px",
+      "label": "Banner Height",
+      "default": 80
+    },
+    {
+      "type": "range",
+      "id": "scroll_speed",
+      "min": 5,
+      "max": 50,
+      "step": 1,
+      "unit": "s",
+      "label": "Scroll Speed (seconds)",
+      "default": 30
+    }
+  ],
+  "presets": [
+    {
+      "name": "Scrolling Text Banners",
+      "category": "Custom Content"
+    }
+  ]
+}
+{% endschema %}
+<style>
+  * {
+    box-sizing: border-box;
+  }
+
+.scrolling-text-section {
+  overflow: hidden;
+  padding-top: 2rem;
+  padding-bottom: 2rem;
+  background-color: #000; /* or whatever background you want */
+}
+
+
+
+  .scrolling-banner {
+    white-space: nowrap;
+    overflow: hidden;
+    height: 50px;
+    display: flex;
+    align-items: center;
+    position: relative;
+    padding-top: 10px;
+    padding-bottom: 10px;
+  }
+
+  .scrolling-text-wrapper,
+  .scrolling-text-top-wrapper,
+  .scrolling-text-slow-wrapper {
+    position: absolute;
+    display: flex;
+    height: 100%;
+    width: fit-content;
+  }
+
+  .scrolling-text-wrapper {
+    animation: scrollInfinite {{ section.settings.scroll_speed | times: 4 }}s linear infinite;
+  }
+
+  .scrolling-text-top-wrapper {
+    animation: scrollInfinite {{ section.settings.scroll_speed | times: 4 }}s linear infinite;
+  }
+
+  .scrolling-text-slow-wrapper {
+    animation: scrollInfinite {{ section.settings.scroll_speed | times: 1.5 }}s linear infinite;
+  }
+
+  .text-item {
+    font-weight: 500;
+    letter-spacing: 0.05em;
+    line-height: 1.2;
+    font-size: 70px;
+    display: inline-flex;
+    align-items: center;
+  }
+
+  .middle-strip-item {
+    display: inline-flex;
+    align-items: center;
+    margin-right: 30px;
+  }
+
+  .large-text {
+    font-weight: 500;
+    letter-spacing: 0.05em;
+    line-height: 1.2;
+    font-size: 70px;
+    display: inline-block;
+    margin-right: 15px;
+  }
+
+  .small-text {
+    font-weight: 500;
+    letter-spacing: 0.05em;
+    line-height: 1.2;
+    font-size: 20px;
+    display: inline-block;
+    text-align: left;
+    white-space: normal;
+    width: max-content;
+  }
+
+  @keyframes scrollInfinite {
+    0% {
+      transform: translateX(-50%);
+    }
+    100% {
+      transform: translateX(0);
+    }
+  }
+
+  .banner-strip {
+    transform: rotate(-1deg);
+    padding: 1rem 0;
+    overflow: visible;
+  }
+
+  .top-strip {
+    background-color: #dc2626;
+  }
+
+  .middle-strip {
+    background-color: #ffffff;
+  }
+
+  .bottom-strip {
+    background-color: #000000;
+  }
+
+  @media (max-width: 480px) {
+    .scrolling-banner {
+      height:25px;
+    }
+    .large-text{
+      font-size:30px;
+    }
+    .text-item{
+      font-size:30px;
+    }
+  }
+</style>
+
+<div class="scrolling-text-section bg-black text-white">
+  <!-- Top Rotated Strip (Slowest) -->
+  <div class="banner-strip top-strip">
+    <div class="scrolling-banner">
+      <div class="scrolling-text-top-wrapper">
+        <div class="text-item">{{ section.settings.top_strip_text }}</div>
+        <div class="text-item">{{ section.settings.top_strip_text }}</div>
+        <div class="text-item">{{ section.settings.top_strip_text }}</div>
+        <div class="text-item">{{ section.settings.top_strip_text }}</div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Middle Rotated Strip (Medium Speed) -->
+  <div class="banner-strip middle-strip">
+    <div class="scrolling-banner">
+      <div class="scrolling-text-wrapper">
+        {% for i in (1..8) %}
+          <div class="middle-strip-item">
+            <span class="large-text text-red-600">{{ section.settings.middle_strip_large_text }}</span>
+            <span class="small-text text-red-600">{{ section.settings.middle_strip_small_text }}</span>
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+  
+  <!-- Bottom Rotated Strip -->
+  <div class="banner-strip bottom-strip">
+    <div class="scrolling-banner">
+      <div class="scrolling-text-slow-wrapper">
+        <div class="text-item text-red-600">{{ section.settings.bottom_strip_text }}</div>
+        <div class="text-item text-red-600">{{ section.settings.bottom_strip_text }}</div>
+        <div class="text-item text-red-600">{{ section.settings.bottom_strip_text }}</div>
+        <div class="text-item text-red-600">{{ section.settings.bottom_strip_text }}</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // This script ensures we have enough copies of text to create a seamless scrolling effect
+    const wrappers = document.querySelectorAll('.scrolling-text-wrapper, .scrolling-text-top-wrapper, .scrolling-text-slow-wrapper');
+    
+    wrappers.forEach(wrapper => {
+      const firstItem = wrapper.querySelector('.text-item, .middle-strip-item');
+      if (!firstItem) return;
+      
+      const itemWidth = firstItem.offsetWidth;
+      const containerWidth = window.innerWidth;
+      
+      // Calculate how many copies we need based on container width
+      const requiredCopies = Math.ceil((containerWidth * 3) / itemWidth);
+      let currentCopies;
+      
+      if (wrapper.querySelector('.middle-strip-item')) {
+        currentCopies = wrapper.querySelectorAll('.middle-strip-item').length;
+        
+        // Add more copies if needed for middle strip
+        if (requiredCopies > currentCopies) {
+          const textContent = firstItem.outerHTML;
+          for (let i = currentCopies; i < requiredCopies; i++) {
+            wrapper.insertAdjacentHTML('beforeend', textContent);
+          }
+        }
+      } else {
+        currentCopies = wrapper.querySelectorAll('.text-item').length;
+        
+        // Add more copies if needed for top and bottom strips
+        if (requiredCopies > currentCopies) {
+          const textContent = firstItem.innerHTML;
+          for (let i = currentCopies; i < requiredCopies; i++) {
+            const newItem = document.createElement('div');
+            newItem.className = firstItem.className;
+            newItem.innerHTML = textContent;
+            wrapper.appendChild(newItem);
+          }
+        }
+      }
+    });
+  });
+</script>
