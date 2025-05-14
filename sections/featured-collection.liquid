@@ -2,7 +2,7 @@
   {% if section.settings.heading != blank %}
     <h2
       style="font-weight:500;"
-      class="featured-collection-main-heading mb-[-10px]"
+      class="featured-collection-main-heading mb-[-10px] letter-animation"
     >
       {{ section.settings.heading | upcase }}
     </h2>
@@ -843,6 +843,30 @@
       margin-top: -10px;
     }
   }
+
+  /* Letter-by-letter animation styles (copied from image-with-text) */
+  @keyframes letterAppear {
+    0% {
+      transform: translateX(10000%);
+      opacity: 0;
+    }
+    100% {
+      transform: translateX(0);
+      opacity: 1;
+    }
+  }
+  .letter-animation-container {
+    display: inline-block;
+    width: 100%;
+    overflow: visible;
+    position: relative;
+  }
+  .animated-letter {
+    display: inline-block;
+    opacity: 0;
+    transform: translateX(500%);
+    position: relative;
+  }
 </style>
 
 <script>
@@ -1309,6 +1333,50 @@
     if (initialContainer) {
       initializeCollection(initialContainer);
     }
+
+    // Letter-by-letter heading animation for featured collection
+    (function () {
+      const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      const heading = document.querySelector('.featured-collection-main-heading.letter-animation');
+      if (!heading) return;
+
+      function animateHeading() {
+        const text = heading.textContent.trim();
+        heading.textContent = '';
+        heading.classList.add('letter-animation-container');
+        heading.setAttribute('aria-label', text);
+
+        // Animate from left to right (starting from first letter)
+        for (let i = 0; i < text.length; i++) {
+          const letterSpan = document.createElement('span');
+          letterSpan.classList.add('animated-letter');
+          letterSpan.textContent = text[i] === ' ' ? '\u00A0' : text[i];
+          letterSpan.setAttribute('aria-hidden', 'true');
+          // Delay so that leftmost letter appears first
+          letterSpan.style.animation = `letterAppear 1s forwards`;
+          letterSpan.style.animationDelay = `${i * 0.07}s`;
+          heading.appendChild(letterSpan);
+        }
+      }
+
+      if (prefersReducedMotion) {
+        heading.style.opacity = '1';
+      } else {
+        // Animate when heading enters viewport
+        const observer = new IntersectionObserver(
+          (entries, observer) => {
+            entries.forEach((entry) => {
+              if (entry.isIntersecting) {
+                animateHeading();
+                observer.unobserve(entry.target);
+              }
+            });
+          },
+          { threshold: 0.1 }
+        );
+        observer.observe(heading);
+      }
+    })();
   });
 </script>
 

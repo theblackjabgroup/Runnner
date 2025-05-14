@@ -61,7 +61,7 @@
       transform: translateX(500%);
       position: relative;
     }
-  .image-with-text-custom-button {
+  .image-with-text-custom-button-css {
     position: relative;
     display: inline-block;
     padding: 2px 7px;
@@ -73,8 +73,8 @@
     transition: background-color 0s, color 0s;
   }
 
-  .image-with-text-custom-button:hover,
-  .image-with-text-custom-button:focus {
+  .image-with-text-custom-button-css:hover,
+  .image-with-text-custom-button-css:focus {
     background-color: var(--hovered_secondary_button_label);
     color: var(--hovered_secondary_button_text_color);
     border: 1px solid var(--hovered_secondary_button_text_color);
@@ -98,8 +98,8 @@
     transition: transform 0.7s ease;
   }
 
-  .image-with-text-custom-button:hover .image-with-text-button-text,
-  .image-with-text-custom-button:focus .image-with-text-button-text {
+  .image-with-text-custom-button-css:hover .image-with-text-button-text,
+  .image-with-text-custom-button-css:focus .image-with-text-button-text {
     transform: translateX(-100%);
   }
 
@@ -117,13 +117,13 @@
     transition: transform 0.7s ease;
   }
 
-  .image-with-text-custom-button:hover .image-with-text-button-text-hover,
-  .image-with-text-custom-button:focus .image-with-text-button-text-hover {
+  .image-with-text-custom-button-css:hover .image-with-text-button-text-hover,
+  .image-with-text-custom-button-css:focus .image-with-text-button-text-hover {
     transform: translateX(0);
   }
 
-  .image-with-text-custom-button:not(:hover):not(:focus) .image-with-text-button-text,
-  .image-with-text-custom-button:not(:hover):not(:focus) .image-with-text-button-text-hover {
+  .image-with-text-custom-button-css:not(:hover):not(:focus) .image-with-text-button-text,
+  .image-with-text-custom-button-css:not(:hover):not(:focus) .image-with-text-button-text-hover {
     transition: none;
   }
 
@@ -254,7 +254,7 @@
     }
 
     .content-flex-bottom {
-      justify-content: flex-end;
+      justify-content: center;
     }
 
     .content-flex-center {
@@ -435,7 +435,7 @@
               <div class="image-with-text-button-container color-{{ section.settings.color_scheme }} {% if section.settings.text_alignment == 'center' %}text-center{% elsif section.settings.text_alignment == 'right' %}text-right{% else %}text-left{% endif %}">
                 <a
                   href="{{ block.settings.button_link }}"
-                  class="image-with-text-custom-button"
+                  class="image-with-text-custom-button-css"
                   id="Button-{{ section.id }}-{{ forloop.index }}"
                   aria-label="{{ block.settings.button_label | escape }}"
                   role="button"
@@ -491,133 +491,133 @@ const buttonAnimationDelay = {{ section.settings.button_animation_delay }};
 
 const styleElement = document.createElement('style');
 styleElement.textContent = `
-  @keyframes letterAppear {
-    0% {
-      transform: translateX(10000%);
-      opacity: 0;
-    }
-    100% {
-      transform: translateX(0);
-      opacity: 1;
-    }
+@keyframes letterAppear {
+  0% {
+    transform: translateX(10000%);
+    opacity: 0;
   }
-  
-  @keyframes buttonAppear {
-    0% {
-      transform: translateY(100px);
-      opacity: 0;
-    }
-    100% {
-      transform: translateY(0);
-      opacity: 1;
-    }
+  100% {
+    transform: translateX(0);
+    opacity: 1;
   }
-  
-  .button-animation {
-    opacity: 0; 
+}
+
+@keyframes buttonAppear {
+  0% {
+    transform: translateY(100px);
+    opacity: 0;
   }
-  
-  .button-animation.animated {
-    animation: buttonAppear 0.8s forwards;
-    animation-delay: ${buttonAnimationDelay}s; 
+  100% {
+    transform: translateY(0);
+    opacity: 1;
   }
+}
+
+.button-animation {
+  opacity: 0; 
+}
+
+.button-animation.animated {
+  animation: buttonAppear 0.8s forwards;
+  animation-delay: ${buttonAnimationDelay}s; 
+}
 `;
 document.head.appendChild(styleElement);
 
 const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 if (prefersReducedMotion) {
-  document.querySelectorAll('.letter-animation').forEach(element => {
-    element.style.opacity = '1';
-  });
-  document.querySelectorAll('.button-animation').forEach(button => {
-    button.style.opacity = '1';
-  });
+document.querySelectorAll('.letter-animation').forEach(element => {
+  element.style.opacity = '1';
+});
+document.querySelectorAll('.button-animation').forEach(button => {
+  button.style.opacity = '1';
+});
 } else {
-  const observer = new IntersectionObserver((entries, observer) => {
-    entries.forEach(entry => {
-      if (entry.isIntersecting) {
-        {% if section.settings.enable_text_animation %}
-        const headingElements = entry.target.querySelectorAll('.letter-animation');
-        
-        headingElements.forEach(element => {
-          const text = element.textContent.trim();
-          element.textContent = '';
-          element.classList.add('letter-animation-container');
-          element.setAttribute('aria-label', text);
+const observer = new IntersectionObserver((entries, observer) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      {% if section.settings.enable_text_animation %}
+      const headingElements = entry.target.querySelectorAll('.letter-animation');
+      
+      headingElements.forEach(element => {
+        const text = element.textContent.trim();
+        element.textContent = '';
+        element.classList.add('letter-animation-container');
+        element.setAttribute('aria-label', text);
 
-          for (let i = 0; i < text.length; i++) {
-            const letterSpan = document.createElement('span');
-            letterSpan.classList.add('animated-letter');
-            letterSpan.textContent = text[i] === ' ' ? '\u00A0' : text[i]; 
-            letterSpan.setAttribute('aria-hidden', 'true'); 
+        for (let i = 0; i < text.length; i++) {
+          const letterSpan = document.createElement('span');
+          letterSpan.classList.add('animated-letter');
+          letterSpan.textContent = text[i] === ' ' ? '\u00A0' : text[i]; 
+          letterSpan.setAttribute('aria-hidden', 'true'); 
 
-            letterSpan.style.animation = `letterAppear 1s forwards`; 
-            letterSpan.style.animationDelay = `${i * 0.07}s`; 
-            
-            element.appendChild(letterSpan);
-          }
-        });
+          letterSpan.style.animation = `letterAppear 1s forwards`; 
+          letterSpan.style.animationDelay = `${i * 0.07}s`; 
+          
+          element.appendChild(letterSpan);
+        }
+      });
 
-        const textContentElements = entry.target.querySelectorAll('.image-with-text-text-content p.letter-animation');
-        
-        textContentElements.forEach(element => {
-          const text = element.textContent.trim();
-          element.textContent = '';
-          element.classList.add('letter-animation-container');
-          element.setAttribute('aria-label', text);
+      const textContentElements = entry.target.querySelectorAll('.image-with-text-text-content p.letter-animation');
+      
+      textContentElements.forEach(element => {
+        const text = element.textContent.trim();
+        element.textContent = '';
+        element.classList.add('letter-animation-container');
+        element.setAttribute('aria-label', text);
 
-          for (let i = 0; i < text.length; i++) {
-            const letterSpan = document.createElement('span');
-            letterSpan.classList.add('animated-letter');
-            letterSpan.textContent = text[i] === ' ' ? '\u00A0' : text[i]; 
-            letterSpan.setAttribute('aria-hidden', 'true'); 
+        for (let i = 0; i < text.length; i++) {
+          const letterSpan = document.createElement('span');
+          letterSpan.classList.add('animated-letter');
+          letterSpan.textContent = text[i] === ' ' ? '\u00A0' : text[i]; 
+          letterSpan.setAttribute('aria-hidden', 'true'); 
 
-            letterSpan.style.animation = `letterAppear 1s forwards`; 
-            letterSpan.style.animationDelay = `${i * 0.07}s`; 
-            
-            element.appendChild(letterSpan);
-          }
-        });
-        {% endif %}
+          letterSpan.style.animation = `letterAppear 1s forwards`; 
+          letterSpan.style.animationDelay = `${i * 0.07}s`; 
+          
+          element.appendChild(letterSpan);
+        }
+      });
+      {% endif %}
 
-        {% if section.settings.enable_button_animation %}
-        const buttons = entry.target.querySelectorAll('.image-with-text-button-container');
-        buttons.forEach(button => {
-          button.classList.add('button-animation');
-          setTimeout(() => {
-            button.classList.add('animated');
-          }, 100);
-        });
-        {% else %}
-        const buttons = entry.target.querySelectorAll('.image-with-text-button-container');
-        buttons.forEach(button => {
-          button.style.opacity = '1';
-        });
-        {% endif %}
+      {% if section.settings.enable_button_animation %}
+      const buttons = entry.target.querySelectorAll('.image-with-text-button-container');
+      buttons.forEach(button => {
+        button.classList.add('button-animation');
+        setTimeout(() => {
+          button.classList.add('animated');
+        }, 100);
+      });
+      {% else %}
+      const buttons = entry.target.querySelectorAll('.image-with-text-button-container');
+      buttons.forEach(button => {
+        button.style.opacity = '1';
+      });
+      {% endif %}
 
-        observer.unobserve(entry.target);
-      }
-    });
-  }, {
-    root: null, 
-    rootMargin: '0px', 
-    threshold: 0.1 
-  });
-
-  document.querySelectorAll('.image-with-text-media-section-{{ section.id }}').forEach(section => {
-    observer.observe(section);
-  });
-}
-
-const buttons = document.querySelectorAll('.image-with-text-custom-button');
-buttons.forEach(button => {
-  button.addEventListener('keydown', function(event) {
-    if (event.key === 'Enter' || event.key === ' ') {
-      event.preventDefault();
-      this.click();
+      observer.unobserve(entry.target);
     }
   });
+}, {
+  root: null, 
+  rootMargin: '0px', 
+  threshold: 0.1 
+});
+
+document.querySelectorAll('.image-with-text-media-section-{{ section.id }}').forEach(section => {
+  observer.observe(section);
+});
+}
+
+const buttons = document.querySelectorAll('.image-with-text-custom-button-css');
+buttons.forEach(button => {
+button.addEventListener('keydown', function(event) {
+  if (event.key === 'Enter' || event.key === ' ') {
+    event.preventDefault();
+    this.click();
+  }
+});
 });
 });
 </script>
@@ -872,10 +872,6 @@ buttons.forEach(button => {
           "label": "Font weight",
           "options": [
             {
-              "value": "300",
-              "label": "Light (300)"
-            },
-            {
               "value": "400",
               "label": "Regular (400)"
             },
@@ -884,23 +880,11 @@ buttons.forEach(button => {
               "label": "Medium (500)"
             },
             {
-              "value": "600",
-              "label": "Semibold (600)"
-            },
-            {
-              "value": "700",
-              "label": "Bold (700)"
-            },
-            {
-              "value": "800",
-              "label": "Extra Bold (800)"
-            },
-            {
               "value": "900",
               "label": "Black (900)"
             }
           ],
-          "default": "700"
+          "default": "500"
         },
         {
           "type": "color",
@@ -926,10 +910,6 @@ buttons.forEach(button => {
           "label": "Font weight",
           "options": [
             {
-              "value": "300",
-              "label": "Light (300)"
-            },
-            {
               "value": "400",
               "label": "Regular (400)"
             },
@@ -938,23 +918,11 @@ buttons.forEach(button => {
               "label": "Medium (500)"
             },
             {
-              "value": "600",
-              "label": "Semibold (600)"
-            },
-            {
-              "value": "700",
-              "label": "Bold (700)"
-            },
-            {
-              "value": "800",
-              "label": "Extra Bold (800)"
-            },
-            {
               "value": "900",
               "label": "Black (900)"
             }
           ],
-          "default": "400"
+          "default": "500"
         },
         {
           "type": "color",
@@ -999,15 +967,11 @@ buttons.forEach(button => {
               "label": "Medium (500)"
             },
             {
-              "value": "600",
-              "label": "Semibold (600)"
-            },
-            {
-              "value": "700",
+              "value": "900",
               "label": "Bold (700)"
             }
           ],
-          "default": "600"
+          "default": "500"
         }
       ]
     },
@@ -1047,10 +1011,6 @@ buttons.forEach(button => {
           "label": "Top heading font weight",
           "options": [
             {
-              "value": "300",
-              "label": "Light (300)"
-            },
-            {
               "value": "400",
               "label": "Regular (400)"
             },
@@ -1059,23 +1019,11 @@ buttons.forEach(button => {
               "label": "Medium (500)"
             },
             {
-              "value": "600",
-              "label": "Semibold (600)"
-            },
-            {
-              "value": "700",
-              "label": "Bold (700)"
-            },
-            {
-              "value": "800",
-              "label": "Extra Bold (800)"
-            },
-            {
               "value": "900",
               "label": "Black (900)"
             }
           ],
-          "default": "700"
+          "default": "500"
         },
         {
           "type": "select",
@@ -1135,10 +1083,6 @@ buttons.forEach(button => {
           "label": "Bottom heading font weight",
           "options": [
             {
-              "value": "300",
-              "label": "Light (300)"
-            },
-            {
               "value": "400",
               "label": "Regular (400)"
             },
@@ -1147,23 +1091,11 @@ buttons.forEach(button => {
               "label": "Medium (500)"
             },
             {
-              "value": "600",
-              "label": "Semibold (600)"
-            },
-            {
-              "value": "700",
-              "label": "Bold (700)"
-            },
-            {
-              "value": "800",
-              "label": "Extra Bold (800)"
-            },
-            {
               "value": "900",
               "label": "Black (900)"
             }
           ],
-          "default": "700"
+          "default": "500"
         },
         {
           "type": "select",
