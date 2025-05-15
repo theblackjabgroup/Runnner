@@ -26,7 +26,7 @@
       <!-- Desktop Menu -->
       <nav
         class="relative flex justify-end lg:justify-between items-center w-full text-[var(--header_text)]"
-        style="height: 25px;"
+        {% comment %} style="height: 25px;" {% endcomment %}
       >
         <!-- Left: Menu Items -->
         <div class="menu-items hidden lg:!flex gap-2 flex-wrap w-2/3 0">
@@ -69,12 +69,19 @@
                     role="region"
                     aria-label="{{ link.title }} submenu"
                     class="
-                      fixed top-[85%] left-0 right-0 w-full z-50 mt-3
-                      opacity-0 invisible pointer-events-none
-                      group-hover:opacity-100 group-hover:visible group-hover:pointer-events-auto
-                      transition-all duration-300 ease-out bg-[var(--header_background)]
+                      fixed left-0 right-0 w-full
+                      opacity-0 pointer-events-none
                     "
-                    style="background:grey; top:70%"
+                    style="
+                      background: var(--header_background);
+                      top: 85%;
+                      will-change: transform, opacity;
+                      transform: translateY(-30px);
+                      transition-property: opacity, transform;
+                      transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+                      transition-duration: 500ms;
+                      z-index: 990;
+                    "
                   >
                     <div class="mx-auto p-6  flex">
                       <ul class="flex justify-start gap-8 m-2 w-1/2">
@@ -195,7 +202,7 @@
                     </div>
                     <!-- Horizontal scrollling text -->
                     <div
-                      class=" absolute -bottom-14 h-16 w-full border-t-1"
+                      class=" absolute -bottom-14 h-16 w-full"
                       style="background: var(--header_background);"
                     >
                       <div class="horizontal-text-container">
@@ -250,20 +257,11 @@
               </svg>
             </button>
 
-            <!-- Search Overlay -->
-            <div
-              id="search-overlay"
-              class="fixed left-0 right-0 bottom-0 bg-black/50 z-[100] hidden transition-opacity duration-300"
-              style="top: var(--header-height, 0px);"
-            >
-              &nbsp;
-            </div>
-
             <!-- Search Container -->
             <div
               id="search-container"
-              class="fixed left-0 right-0 z-[1000] hidden opacity-0 transition-opacity duration-300 ease-in-out shadow-lg py-8"
-              style="background: var(--header_background); top: var(--header-height, 0px);"
+              class="fixed left-0 right-0 z-[1000] hidden opacity-0  shadow-lg py-8"
+              style="background: var(--header_background); top: var(--header-height);"
               aria-hidden="true"
             >
               <div class="searchbox-container mx-auto w-full px-4 py-4">
@@ -332,6 +330,15 @@
                   </div>
                 </div>
               </div>
+            </div>
+
+            <!-- Search Overlay -->
+            <div
+              id="search-overlay"
+              class="fixed left-0 right-0 w-full z-[990] bg-black opacity-0 pointer-events-none"
+              style="height: 100vh; transition: opacity 0.2s ease-in-out; top: 100%"
+            >
+              &nbsp;
             </div>
           </div>
 
@@ -419,11 +426,13 @@
           </button>
         </div>
       </nav>
-      <div class="hidden lg:!block bottom-bar w-full  bg-transparent relative overflow-hidden" style="height: 1px;">
+      <div
+        class="hidden lg:!block bottom-bar bg-transparent w-full relative overflow-visible"
+      >
         <span
           id="bottom-bar-indicator"
-          class="absolute bottom-0 left-0 h-full bg-black transition-all duration-300 ease-out"
-          style="width: 0"
+          class=" absolute bottom-0 left-0 bg-black transition-all duration-300 ease-out"
+          style="width: 0; height: 1px;"
         ></span>
       </div>
     </div>
@@ -439,6 +448,15 @@
     &nbsp
   </div>
 </header>
+
+<!-- Sub Menu Overlay -->
+<div
+  id="mega-menu-overlay"
+  class="fixed top-1/5 w-full z-[999] bg-black opacity-0 pointer-events-none"
+  style="height: 100vh; transition: opacity 0.2s ease-in-out;"
+>
+  &nbsp;
+</div>
 
 <!-- Mobile Menu Overlay -->
 <div
@@ -771,259 +789,215 @@
 <div class="header-offset" data-header-offset></div>
 
 <style>
-  @keyframes dropDown {
-    0% {
-      opacity: 0;
-      transform: translateY(-20px);
-      pointer-events: none;
-    }
-    1% {
-      opacity: 0;
-      transform: translateY(-20px);
-    }
-    100% {
-      opacity: 1;
-      transform: translateY(0);
-      pointer-events: auto;
-    }
-  }
+     .dropdown-group .absolute {
+       opacity: 100;
+       pointer-events: none;
+       transform: translateY(-10px);
+       transition: opacity 300ms ease, transform 300ms ease;
+     }
 
-  @keyframes dropUp {
-    0% {
-      opacity: 1;
-      transform: translateY(0);
-      pointer-events: auto;
-    }
-    99% {
-      opacity: 0;
-      transform: translateY(-20px);
-    }
-    100% {
-      opacity: 0;
-      transform: translateY(-20px);
-      pointer-events: none;
-    }
-  }
 
-  .dropdown-group .absolute {
-    opacity: 0;
-    visibility: hidden;
-    pointer-events: none;
-    transform: translateY(-10px);
-    transition: opacity 300ms ease, transform 300ms ease;
-  }
+     .header-main {
+       position: relative;
+       width: 100%;
+       transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+       transform: translateY(0);
+       background: var(--header_background);
+     }
 
-  .dropdown-group.active-submenu .absolute {
-    opacity: 1;
-    visibility: visible;
-    pointer-events: auto;
-    transform: translateY(0);
-  }
+     .header-main.is-sticky {
+       position: fixed;
+       top: 0;
+       left: 0;
+       right: 0;
+       transform: translateY(0);
+       box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+     }
 
-  @keyframes scroll {
-    0% {
-      transform: translateX(0);
-    }
-    100% {
-      transform: translateX(-50%);
-    }
-  }
+     .header-main.is-sticky.is-hidden {
+       transform: translateY(-100%);
+     }
 
-  .header-main {
-    position: relative;
-    width: 100%;
-    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    transform: translateY(0);
-    background: var(--header_background);
-  }
+     .header-offset {
+       height: 0;
+       transition: height 0.3s ease;
+     }
 
-  .header-main.is-sticky {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    transform: translateY(0);
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-  }
+     .header-offset.is-active {
+       height: var(--header-height, 0px);
+     }
 
-  .header-main.is-sticky.is-hidden {
-    transform: translateY(-100%);
-  }
+     .sticky-disabled {
+       position: relative !important;
+       transform: none !important;
+     }
 
-  .header-offset {
-    height: 0;
-    transition: height 0.3s ease;
-  }
+     .sticky-disabled + .header-offset {
+       display: none !important;
+     }
 
-  .header-offset.is-active {
-    height: var(--header-height, 0px);
-  }
+     /* Improve dropdown transitions */
+     .dropdown-group > .absolute {
+       transition: all 300ms cubic-bezier(0.4, 0, 0.2, 1);
+     }
+     .dropdown-group:hover > .absolute {
+       transition-delay: 50ms;
+     }
+     .dropdown-group:hover #mega-menu-{{ forloop.index }} {
+     opacity: 1;
+     transform: translateY(0);
+     pointer-events: auto;
+   }
 
-  .sticky-disabled {
-    position: relative !important;
-    transform: none !important;
-  }
 
-  .sticky-disabled + .header-offset {
-    display: none !important;
-  }
+     /* Mobile submenu scrollbar styling */
+     .submenu.styled-scrollbar {
+       scrollbar-width: thin;
+       scrollbar-color: rgba(0, 0, 0, 0.3) transparent;
+     }
 
-  /* Improve dropdown transitions */
-  .dropdown-group > .absolute {
-    transition: all 300ms cubic-bezier(0.4, 0, 0.2, 1);
-  }
+     .submenu.styled-scrollbar::-webkit-scrollbar {
+       width: 4px;
+     }
 
-  .dropdown-group:hover > .absolute {
-    transition-delay: 50ms;
-  }
+     .submenu.styled-scrollbar::-webkit-scrollbar-track {
+       background: transparent;
+     }
 
-  /* Mobile submenu scrollbar styling */
-  .submenu.styled-scrollbar {
-    scrollbar-width: thin;
-    scrollbar-color: rgba(0, 0, 0, 0.3) transparent;
-  }
+     .submenu.styled-scrollbar::-webkit-scrollbar-thumb {
+       background-color: rgba(0, 0, 0, 0.3);
+       border-radius: 20px;
+     }
 
-  .submenu.styled-scrollbar::-webkit-scrollbar {
-    width: 4px;
-  }
+     /* Mobile submenu animations */
+     .submenu {
+       transition: all 400ms cubic-bezier(0.4, 0, 0.2, 1);
+       will-change: opacity, height;
+       height: auto;
+       max-height: 0;
+     }
 
-  .submenu.styled-scrollbar::-webkit-scrollbar-track {
-    background: transparent;
-  }
+     .submenu.show {
+       opacity: 1;
+       max-height: 50vh;
+     }
 
-  .submenu.styled-scrollbar::-webkit-scrollbar-thumb {
-    background-color: rgba(0, 0, 0, 0.3);
-    border-radius: 20px;
-  }
+     .submenu:not(.show) {
+       opacity: 0;
+       max-height: 0;
+     }
 
-  /* Mobile submenu animations */
-  .submenu {
-    transition: all 400ms cubic-bezier(0.4, 0, 0.2, 1);
-    will-change: opacity, height;
-    height: auto;
-    max-height: 0;
-  }
+     .submenu.hidden {
+       display: none;
+     }
 
-  .submenu.show {
-    opacity: 1;
-    max-height: 50vh;
-  }
+     .submenu:not(.hidden) {
+       display: block;
+     }
 
-  .submenu:not(.show) {
-    opacity: 0;
-    max-height: 0;
-  }
+     /* Add overlay transition */
+     #menu-overlay {
+       transition: opacity 0.3s ease;
+       will-change: opacity;
+     }
 
-  .submenu.hidden {
-    display: none;
-  }
+     /* Mobile menu transitions */
+     #mobile-menu {
+       will-change: transform;
+       backface-visibility: hidden;
+     }
 
-  .submenu:not(.hidden) {
-    display: block;
-  }
+     #mobile-menu.active {
+       transform: translateX(0) !important;
+     }
 
-  /* Add overlay transition */
-  #menu-overlay {
-    transition: opacity 0.3s ease;
-    will-change: opacity;
-  }
+     .vertical-text-container {
+       position: fixed;
+       left: 0px;
+       top: 0;
+       bottom: 0;
+       width: 30px;
+       overflow: hidden;
+       display: flex;
+       align-items: center;
+     }
 
-  /* Mobile menu transitions */
-  #mobile-menu {
-    will-change: transform;
-    backface-visibility: hidden;
-  }
+     .vertical-text {
+       position: absolute;
+       writing-mode: vertical-rl;
+       text-orientation: mixed;
+       transform: rotate(180deg);
+       animation: scrollText 50s linear infinite;
+       color: #000;
+       font-size: 16px;
+       white-space: nowrap;
+       padding: 5px 0;
+     }
 
-  #mobile-menu.active {
-    transform: translateX(0) !important;
-  }
+     .vertical-text:nth-child(2) {
+       animation: scrollText2 50s linear infinite;
+     }
 
-  .vertical-text-container {
-    position: fixed;
-    left: 0px;
-    top: 0;
-    bottom: 0;
-    width: 30px;
-    overflow: hidden;
-    display: flex;
-    align-items: center;
-  }
+     @keyframes scrollText {
+       0% {
+         transform: translateY(0) rotate(180deg);
+       }
+       100% {
+         transform: translateY(-100%) rotate(180deg);
+       }
+     }
 
-  .vertical-text {
-    position: absolute;
-    writing-mode: vertical-rl;
-    text-orientation: mixed;
-    transform: rotate(180deg);
-    animation: scrollText 50s linear infinite;
-    color: #000;
-    font-size: 16px;
-    white-space: nowrap;
-    padding: 5px 0;
-  }
+     @keyframes scrollText2 {
+       0% {
+         transform: translateY(100%) rotate(180deg);
+       }
+       100% {
+         transform: translateY(0) rotate(180deg);
+       }
+     }
 
-  .vertical-text:nth-child(2) {
-    animation: scrollText2 50s linear infinite;
-  }
+     .horizontal-text-container {
+       position: fixed;
+       bottom: 0;
+       left: 0;
+       width: 100%;
+       height: 40px;
+       overflow: hidden;
+       display: flex;
+       align-items: center;
+  border-top: 1px solid black;
+       border-bottom: 1px solid black;
+       z-index: 999;
+     }
 
-  @keyframes scrollText {
-    0% {
-      transform: translateY(0) rotate(180deg);
-    }
-    100% {
-      transform: translateY(-100%) rotate(180deg);
-    }
-  }
+     .horizontal-text {
+       white-space: nowrap;
+       font-size: 22px;
+       display: inline-block;
+       animation: scrollRight 50s linear infinite;
+     }
 
-  @keyframes scrollText2 {
-    0% {
-      transform: translateY(100%) rotate(180deg);
-    }
-    100% {
-      transform: translateY(0) rotate(180deg);
-    }
-  }
+     .horizontal-text:nth-child(n) {
+       animation: scrollRight2 50s linear infinite;
+     }
 
-  .horizontal-text-container {
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    width: 100%;
-    height: 40px;
-    overflow: hidden;
-    display: flex;
-    align-items: center;
-    border-top: 1px solid black;
-    z-index: 999;
-  }
+     @keyframes scrollRight {
+       0% {
+         transform: translateX(-100%);
+       }
+       100% {
+         transform: translateX(100%);
+       }
+     }
 
-  .horizontal-text {
-    white-space: nowrap;
-    font-size: 22px;
-    display: inline-block;
-    animation: scrollRight 50s linear infinite;
-  }
-
-  .horizontal-text:nth-child(n) {
-    animation: scrollRight2 50s linear infinite;
-  }
-
-  @keyframes scrollRight {
-    0% {
-      transform: translateX(-100%);
-    }
-    100% {
-      transform: translateX(100%);
-    }
-  }
-
-  @keyframes scrollRight2 {
-    0% {
-      transform: translateX(-100%);
-    }
-    100% {
-      transform: translateX(100%);
-    }
-  }
+     @keyframes scrollRight2 {
+       0% {
+         transform: translateX(-100%);
+       }
+       100% {
+         transform: translateX(100%);
+       }
+     }
 </style>
 
 <script>
@@ -1216,7 +1190,6 @@
         countrySelectorDropdown.classList.toggle('invisible');
       });
 
-      // Close dropdown when clicking outside
       document.addEventListener('click', (e) => {
         if (!countrySelector.contains(e.target)) {
           countrySelectorBtn.setAttribute('aria-expanded', 'false');
@@ -1227,16 +1200,29 @@
     }
 
     // Search bar
+
     const searchToggle = document.getElementById('search-toggle');
     const searchContainer = document.getElementById('search-container');
     const searchOverlay = document.getElementById('search-overlay');
     const closeSearch = document.getElementById('close-search');
     const searchInput = searchContainer.querySelector('input[type="search"]');
 
+    let isSearchOpen = false;
+
+    searchContainer.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+    searchOverlay.style.transition = 'opacity 0.3s ease';
+
+    searchContainer.style.transform = 'translateY(0px)';
+
+    searchOverlay.classList.add('pointer-events-none');
+
     function toggleSearch(show) {
+      if (show === isSearchOpen) return;
+
+      isSearchOpen = show;
+
       searchToggle.setAttribute('aria-expanded', show);
 
-      // Always recalculate header height and set it as top
       const header = document.querySelector('[data-header-sticky]');
       if (header) {
         const headerHeight = header.offsetHeight;
@@ -1245,25 +1231,38 @@
 
       if (show) {
         searchContainer.classList.remove('hidden');
+        searchOverlay.style.opacity = '0.5';
+        searchOverlay.classList.remove('pointer-events-none');
+
         requestAnimationFrame(() => {
-          searchContainer.classList.remove('opacity-0');
-          setTimeout(() => searchInput.focus(), 300);
+          searchContainer.style.opacity = '1';
+          searchContainer.style.transform = 'translateY(0)';
+
+          setTimeout(() => searchInput.focus(), 400);
         });
       } else {
-        searchContainer.classList.add('opacity-0');
-        searchContainer.addEventListener('transitionend', () => searchContainer.classList.add('hidden'), {
-          once: true,
+        searchContainer.style.opacity = '0';
+        searchContainer.style.transform = 'translateY(-20px)';
+
+        searchOverlay.style.opacity = '0';
+        searchOverlay.classList.add('pointer-events-none');
+
+        searchContainer.addEventListener('transitionend', function handler(e) {
+          if (e.propertyName === 'opacity' && !isSearchOpen) {
+            searchContainer.classList.add('hidden');
+            searchContainer.removeEventListener('transitionend', handler);
+          }
         });
       }
     }
 
-    searchToggle.addEventListener('click', () => toggleSearch(true));
+    searchToggle.addEventListener('click', () => toggleSearch(!isSearchOpen));
+
     closeSearch.addEventListener('click', () => toggleSearch(false));
     searchOverlay.addEventListener('click', () => toggleSearch(false));
 
-    // Close search on escape key
     document.addEventListener('keydown', function (e) {
-      if (e.key === 'Escape' && searchToggle.getAttribute('aria-expanded') === 'true') {
+      if (e.key === 'Escape' && isSearchOpen) {
         toggleSearch(false);
       }
     });
@@ -1287,31 +1286,55 @@
         const left = rect.left - containerRect.left;
         const width = rect.width;
 
-        bottomBarIndicator.style.transform = `translateX(${left}px)`;
+        bottomBarIndicator.style.transform = `translateX(${left}px) translateY(-6px)`;
         bottomBarIndicator.style.width = `${width}px`;
       });
 
       item.addEventListener('mouseleave', () => {
         // Reset only when leaving the whole dropdown group
         bottomBarIndicator.style.width = `100%`;
-        bottomBarIndicator.style.transform = `translateX(0)`;
+        bottomBarIndicator.style.transform = `translateX(0) translateY(0px)`;
       });
     });
 
     const dropdownGroups = document.querySelectorAll('.dropdown-group');
-    dropdownGroups.forEach((dropdown) => {
-      let hideTimeout;
+    const megaMenuOverlay = document.getElementById('mega-menu-overlay');
 
-      dropdown.addEventListener('mouseenter', function () {
-        clearTimeout(hideTimeout);
-        this.classList.add('active-submenu');
-      });
+    let hoverCount = 0;
 
-      dropdown.addEventListener('mouseleave', function () {
-        hideTimeout = setTimeout(() => {
-          this.classList.remove('active-submenu');
-        }, 300); // 300ms delay on mouse leave
-      });
+    dropdownGroups.forEach((group) => {
+      const megaMenu = group.querySelector('[id^="mega-menu-"]');
+
+      if (megaMenu) {
+        group.addEventListener('mouseenter', () => {
+          hoverCount++;
+
+          group.classList.add('active-submenu');
+
+          megaMenuOverlay.classList.remove('opacity-0', 'pointer-events-none');
+          megaMenuOverlay.classList.add('opacity-50');
+
+          requestAnimationFrame(() => {
+            megaMenu.style.opacity = '1';
+            megaMenu.style.transform = 'translateY(0)';
+            megaMenu.style.pointerEvents = 'auto';
+          });
+        });
+
+        group.addEventListener('mouseleave', () => {
+          group.classList.remove('active-submenu');
+          hoverCount--;
+
+          megaMenu.style.opacity = '0';
+          megaMenu.style.transform = 'translateY(-20px)';
+          megaMenu.style.pointerEvents = 'none';
+
+          if (hoverCount <= 0) {
+            megaMenuOverlay.classList.add('opacity-0', 'pointer-events-none');
+            megaMenuOverlay.classList.remove('opacity-50');
+          }
+        });
+      }
     });
   });
 </script>
