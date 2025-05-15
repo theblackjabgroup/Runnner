@@ -65,7 +65,7 @@
     position: relative;
     display: inline-block;
     padding: 2px 7px;
-     border: 1px solid transparent;
+    border: 1px solid transparent;
     background-color:var(--secondary_button_label);
     color: var(--secondary_button_text_color);
     border-radius: 4px;
@@ -143,7 +143,6 @@
     .image-with-text-heading-size-small {
       font-size: 50px;
       line-height: 4rem;
-      font-weight: 700;
     }
 
     @media (min-width: 750px) {
@@ -156,7 +155,6 @@
     .image-with-text-heading-size-medium {
       font-size: 60px;
       line-height: 5rem;
-      font-weight: 700;
     }
 
     @media (min-width: 750px) {
@@ -169,7 +167,6 @@
     .image-with-text-heading-size-large {
       font-size: 70px;
       line-height: 7rem;
-      font-weight: 700;
     }
 
     @media (min-width: 750px) {
@@ -374,7 +371,7 @@
               <h2
                 id="Heading-{{ section.id }}-{{ forloop.index }}"
                 class="image-with-text-heading mb-4 {{ heading_class }} {% if section.settings.enable_text_animation %}letter-animation{% endif %}"
-                style="color:{{ block.settings.text_color }};"
+                style="color:{{ block.settings.text_color }}; font-weight: {{ block.settings.font_weight }};"
               >
                 {{ block.settings.heading }}
               </h2>
@@ -382,7 +379,7 @@
               <div
                 id="TextContent-{{ section.id }}-{{ forloop.index }}"
                 class="image-with-text-text-content mb-6"
-                style="color: {{ block.settings.text_color }};"
+                style="color: {{ block.settings.text_color }}; font-weight: {{ block.settings.font_weight }};"
               >
                 {% if section.settings.enable_text_animation %}
                   {{ block.settings.text | replace: '<p>', '<p class="letter-animation">' }}
@@ -406,7 +403,7 @@
                     <h2
                       id="TopHeading-{{ section.id }}-{{ forloop.index }}"
                       class="image-with-text-heading {{ top_heading_class }} {% if section.settings.enable_text_animation %}letter-animation{% endif %}"
-                      style="color:{{ block.settings.top_text_color }};"
+                      style="color:{{ block.settings.top_text_color }}; font-weight: {{ block.settings.top_font_weight }};"
                     >
                       {{ block.settings.top_heading }}
                     </h2>
@@ -427,7 +424,7 @@
                     <h2
                       id="BottomHeading-{{ section.id }}-{{ forloop.index }}"
                       class="image-with-text-heading {{ bottom_heading_class }} {% if section.settings.enable_text_animation %}letter-animation{% endif %}"
-                      style="color:{{ block.settings.bottom_text_color }};"
+                      style="color:{{ block.settings.bottom_text_color }}; font-weight: {{ block.settings.bottom_font_weight }};"
                     >
                       {{ block.settings.bottom_heading }}
                     </h2>
@@ -443,6 +440,7 @@
                   aria-label="{{ block.settings.button_label | escape }}"
                   role="button"
                   tabindex="0"
+                  style="font-weight: {{ block.settings.font_weight }};"
                 >
                   <div class="image-with-text-button-text-container color-{{ section.settings.color_scheme }}">
                     <div class="image-with-text-button-text color-{{ section.settings.color_scheme }}">
@@ -489,138 +487,138 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-  const buttonAnimationDelay = {{ section.settings.button_animation_delay }};
-  
-  const styleElement = document.createElement('style');
-  styleElement.textContent = `
-    @keyframes letterAppear {
-      0% {
-        transform: translateX(10000%);
-        opacity: 0;
-      }
-      100% {
-        transform: translateX(0);
-        opacity: 1;
-      }
+const buttonAnimationDelay = {{ section.settings.button_animation_delay }};
+
+const styleElement = document.createElement('style');
+styleElement.textContent = `
+  @keyframes letterAppear {
+    0% {
+      transform: translateX(10000%);
+      opacity: 0;
     }
-    
-    @keyframes buttonAppear {
-      0% {
-        transform: translateY(100px);
-        opacity: 0;
-      }
-      100% {
-        transform: translateY(0);
-        opacity: 1;
-      }
+    100% {
+      transform: translateX(0);
+      opacity: 1;
     }
-    
-    .button-animation {
-      opacity: 0; 
-    }
-    
-    .button-animation.animated {
-      animation: buttonAppear 0.8s forwards;
-      animation-delay: ${buttonAnimationDelay}s; 
-    }
-  `;
-  document.head.appendChild(styleElement);
-
-  const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  
-  if (prefersReducedMotion) {
-    document.querySelectorAll('.letter-animation').forEach(element => {
-      element.style.opacity = '1';
-    });
-    document.querySelectorAll('.button-animation').forEach(button => {
-      button.style.opacity = '1';
-    });
-  } else {
-    const observer = new IntersectionObserver((entries, observer) => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          {% if section.settings.enable_text_animation %}
-          const headingElements = entry.target.querySelectorAll('.letter-animation');
-          
-          headingElements.forEach(element => {
-            const text = element.textContent.trim();
-            element.textContent = '';
-            element.classList.add('letter-animation-container');
-            element.setAttribute('aria-label', text);
-
-            for (let i = 0; i < text.length; i++) {
-              const letterSpan = document.createElement('span');
-              letterSpan.classList.add('animated-letter');
-              letterSpan.textContent = text[i] === ' ' ? '\u00A0' : text[i]; 
-              letterSpan.setAttribute('aria-hidden', 'true'); 
-
-              letterSpan.style.animation = `letterAppear 1s forwards`; 
-              letterSpan.style.animationDelay = `${i * 0.07}s`; 
-              
-              element.appendChild(letterSpan);
-            }
-          });
-
-          const textContentElements = entry.target.querySelectorAll('.image-with-text-text-content p.letter-animation');
-          
-          textContentElements.forEach(element => {
-            const text = element.textContent.trim();
-            element.textContent = '';
-            element.classList.add('letter-animation-container');
-            element.setAttribute('aria-label', text);
-
-            for (let i = 0; i < text.length; i++) {
-              const letterSpan = document.createElement('span');
-              letterSpan.classList.add('animated-letter');
-              letterSpan.textContent = text[i] === ' ' ? '\u00A0' : text[i]; 
-              letterSpan.setAttribute('aria-hidden', 'true'); 
-
-              letterSpan.style.animation = `letterAppear 1s forwards`; 
-              letterSpan.style.animationDelay = `${i * 0.07}s`; 
-              
-              element.appendChild(letterSpan);
-            }
-          });
-          {% endif %}
-
-          {% if section.settings.enable_button_animation %}
-          const buttons = entry.target.querySelectorAll('.image-with-text-button-container');
-          buttons.forEach(button => {
-            button.classList.add('button-animation');
-            setTimeout(() => {
-              button.classList.add('animated');
-            }, 100);
-          });
-          {% else %}
-          const buttons = entry.target.querySelectorAll('.image-with-text-button-container');
-          buttons.forEach(button => {
-            button.style.opacity = '1';
-          });
-          {% endif %}
-
-          observer.unobserve(entry.target);
-        }
-      });
-    }, {
-      root: null, 
-      rootMargin: '0px', 
-      threshold: 0.1 
-    });
-
-    document.querySelectorAll('.image-with-text-media-section-{{ section.id }}').forEach(section => {
-      observer.observe(section);
-    });
   }
+  
+  @keyframes buttonAppear {
+    0% {
+      transform: translateY(100px);
+      opacity: 0;
+    }
+    100% {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  }
+  
+  .button-animation {
+    opacity: 0; 
+  }
+  
+  .button-animation.animated {
+    animation: buttonAppear 0.8s forwards;
+    animation-delay: ${buttonAnimationDelay}s; 
+  }
+`;
+document.head.appendChild(styleElement);
 
-  const buttons = document.querySelectorAll('.image-with-text-custom-button');
-  buttons.forEach(button => {
-    button.addEventListener('keydown', function(event) {
-      if (event.key === 'Enter' || event.key === ' ') {
-        event.preventDefault();
-        this.click();
+const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+if (prefersReducedMotion) {
+  document.querySelectorAll('.letter-animation').forEach(element => {
+    element.style.opacity = '1';
+  });
+  document.querySelectorAll('.button-animation').forEach(button => {
+    button.style.opacity = '1';
+  });
+} else {
+  const observer = new IntersectionObserver((entries, observer) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        {% if section.settings.enable_text_animation %}
+        const headingElements = entry.target.querySelectorAll('.letter-animation');
+        
+        headingElements.forEach(element => {
+          const text = element.textContent.trim();
+          element.textContent = '';
+          element.classList.add('letter-animation-container');
+          element.setAttribute('aria-label', text);
+
+          for (let i = 0; i < text.length; i++) {
+            const letterSpan = document.createElement('span');
+            letterSpan.classList.add('animated-letter');
+            letterSpan.textContent = text[i] === ' ' ? '\u00A0' : text[i]; 
+            letterSpan.setAttribute('aria-hidden', 'true'); 
+
+            letterSpan.style.animation = `letterAppear 1s forwards`; 
+            letterSpan.style.animationDelay = `${i * 0.07}s`; 
+            
+            element.appendChild(letterSpan);
+          }
+        });
+
+        const textContentElements = entry.target.querySelectorAll('.image-with-text-text-content p.letter-animation');
+        
+        textContentElements.forEach(element => {
+          const text = element.textContent.trim();
+          element.textContent = '';
+          element.classList.add('letter-animation-container');
+          element.setAttribute('aria-label', text);
+
+          for (let i = 0; i < text.length; i++) {
+            const letterSpan = document.createElement('span');
+            letterSpan.classList.add('animated-letter');
+            letterSpan.textContent = text[i] === ' ' ? '\u00A0' : text[i]; 
+            letterSpan.setAttribute('aria-hidden', 'true'); 
+
+            letterSpan.style.animation = `letterAppear 1s forwards`; 
+            letterSpan.style.animationDelay = `${i * 0.07}s`; 
+            
+            element.appendChild(letterSpan);
+          }
+        });
+        {% endif %}
+
+        {% if section.settings.enable_button_animation %}
+        const buttons = entry.target.querySelectorAll('.image-with-text-button-container');
+        buttons.forEach(button => {
+          button.classList.add('button-animation');
+          setTimeout(() => {
+            button.classList.add('animated');
+          }, 100);
+        });
+        {% else %}
+        const buttons = entry.target.querySelectorAll('.image-with-text-button-container');
+        buttons.forEach(button => {
+          button.style.opacity = '1';
+        });
+        {% endif %}
+
+        observer.unobserve(entry.target);
       }
     });
+  }, {
+    root: null, 
+    rootMargin: '0px', 
+    threshold: 0.1 
   });
+
+  document.querySelectorAll('.image-with-text-media-section-{{ section.id }}').forEach(section => {
+    observer.observe(section);
+  });
+}
+
+const buttons = document.querySelectorAll('.image-with-text-custom-button');
+buttons.forEach(button => {
+  button.addEventListener('keydown', function(event) {
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      this.click();
+    }
+  });
+});
 });
 </script>
 
@@ -869,6 +867,42 @@ document.addEventListener('DOMContentLoaded', function() {
           "default": "large"
         },
         {
+          "type": "select",
+          "id": "font_weight",
+          "label": "Font weight",
+          "options": [
+            {
+              "value": "300",
+              "label": "Light (300)"
+            },
+            {
+              "value": "400",
+              "label": "Regular (400)"
+            },
+            {
+              "value": "500",
+              "label": "Medium (500)"
+            },
+            {
+              "value": "600",
+              "label": "Semibold (600)"
+            },
+            {
+              "value": "700",
+              "label": "Bold (700)"
+            },
+            {
+              "value": "800",
+              "label": "Extra Bold (800)"
+            },
+            {
+              "value": "900",
+              "label": "Black (900)"
+            }
+          ],
+          "default": "700"
+        },
+        {
           "type": "color",
           "id": "text_color",
           "label": "Text Color",
@@ -885,6 +919,42 @@ document.addEventListener('DOMContentLoaded', function() {
           "id": "text",
           "label": "Text",
           "default": "<p>Add your description or promotional text here to accompany your featured image or video.</p>"
+        },
+        {
+          "type": "select",
+          "id": "font_weight",
+          "label": "Font weight",
+          "options": [
+            {
+              "value": "300",
+              "label": "Light (300)"
+            },
+            {
+              "value": "400",
+              "label": "Regular (400)"
+            },
+            {
+              "value": "500",
+              "label": "Medium (500)"
+            },
+            {
+              "value": "600",
+              "label": "Semibold (600)"
+            },
+            {
+              "value": "700",
+              "label": "Bold (700)"
+            },
+            {
+              "value": "800",
+              "label": "Extra Bold (800)"
+            },
+            {
+              "value": "900",
+              "label": "Black (900)"
+            }
+          ],
+          "default": "400"
         },
         {
           "type": "color",
@@ -914,6 +984,212 @@ document.addEventListener('DOMContentLoaded', function() {
           "type": "url",
           "id": "button_link",
           "label": "Button link"
+        },
+        {
+          "type": "select",
+          "id": "font_weight",
+          "label": "Font weight",
+          "options": [
+            {
+              "value": "400",
+              "label": "Regular (400)"
+            },
+            {
+              "value": "500",
+              "label": "Medium (500)"
+            },
+            {
+              "value": "600",
+              "label": "Semibold (600)"
+            },
+            {
+              "value": "700",
+              "label": "Bold (700)"
+            }
+          ],
+          "default": "600"
+        }
+      ]
+    },
+    {
+      "type": "dual_headings",
+      "name": "Dual Headings",
+      "settings": [
+        {
+          "type": "text",
+          "id": "top_heading",
+          "label": "Top heading",
+          "default": "TOP HEADING"
+        },
+        {
+          "type": "select",
+          "id": "top_heading_size",
+          "label": "Top heading size",
+          "options": [
+            {
+              "value": "small",
+              "label": "Small"
+            },
+            {
+              "value": "medium",
+              "label": "Medium"
+            },
+            {
+              "value": "large",
+              "label": "Large"
+            }
+          ],
+          "default": "medium"
+        },
+        {
+          "type": "select",
+          "id": "top_font_weight",
+          "label": "Top heading font weight",
+          "options": [
+            {
+              "value": "300",
+              "label": "Light (300)"
+            },
+            {
+              "value": "400",
+              "label": "Regular (400)"
+            },
+            {
+              "value": "500",
+              "label": "Medium (500)"
+            },
+            {
+              "value": "600",
+              "label": "Semibold (600)"
+            },
+            {
+              "value": "700",
+              "label": "Bold (700)"
+            },
+            {
+              "value": "800",
+              "label": "Extra Bold (800)"
+            },
+            {
+              "value": "900",
+              "label": "Black (900)"
+            }
+          ],
+          "default": "700"
+        },
+        {
+          "type": "select",
+          "id": "top_alignment",
+          "label": "Top heading alignment",
+          "options": [
+            {
+              "value": "left",
+              "label": "Left"
+            },
+            {
+              "value": "center",
+              "label": "Center"
+            },
+            {
+              "value": "right",
+              "label": "Right"
+            }
+          ],
+          "default": "center"
+        },
+        {
+          "type": "color",
+          "id": "top_text_color",
+          "label": "Top heading color",
+          "default": "#FFFFFF"
+        },
+        {
+          "type": "text",
+          "id": "bottom_heading",
+          "label": "Bottom heading",
+          "default": "BOTTOM HEADING"
+        },
+        {
+          "type": "select",
+          "id": "bottom_heading_size",
+          "label": "Bottom heading size",
+          "options": [
+            {
+              "value": "small",
+              "label": "Small"
+            },
+            {
+              "value": "medium",
+              "label": "Medium"
+            },
+            {
+              "value": "large",
+              "label": "Large"
+            }
+          ],
+          "default": "medium"
+        },
+        {
+          "type": "select",
+          "id": "bottom_font_weight",
+          "label": "Bottom heading font weight",
+          "options": [
+            {
+              "value": "300",
+              "label": "Light (300)"
+            },
+            {
+              "value": "400",
+              "label": "Regular (400)"
+            },
+            {
+              "value": "500",
+              "label": "Medium (500)"
+            },
+            {
+              "value": "600",
+              "label": "Semibold (600)"
+            },
+            {
+              "value": "700",
+              "label": "Bold (700)"
+            },
+            {
+              "value": "800",
+              "label": "Extra Bold (800)"
+            },
+            {
+              "value": "900",
+              "label": "Black (900)"
+            }
+          ],
+          "default": "700"
+        },
+        {
+          "type": "select",
+          "id": "bottom_alignment",
+          "label": "Bottom heading alignment",
+          "options": [
+            {
+              "value": "left",
+              "label": "Left"
+            },
+            {
+              "value": "center",
+              "label": "Center"
+            },
+            {
+              "value": "right",
+              "label": "Right"
+            }
+          ],
+          "default": "center"
+        },
+        {
+          "type": "color",
+          "id": "bottom_text_color",
+          "label": "Bottom heading color",
+          "default": "#FFFFFF"
         }
       ]
     }
@@ -924,7 +1200,10 @@ document.addEventListener('DOMContentLoaded', function() {
       "category": "Media",
       "blocks": [
         {
-          "type": "heading"
+          "type": "heading",
+          "settings": {
+            "font_weight": "500"
+          }
         },
         {
           "type": "button"
