@@ -1,10 +1,59 @@
+
 {{ 'section-footer.css' | asset_url | stylesheet_tag }}
 {{ 'component-newsletters.css' | asset_url | stylesheet_tag }}
 
 <style>
+ 
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    padding: 0;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    border: 0;
+  }
 
+  /* Focus styles for keyboard navigation */
+  a:focus,
+  button:focus,
+  input:focus {
+    outline: 2px solid #4d90fe;
+    outline-offset: 2px;
+  }
+  /* Mobile-only margin-left */
+.mobile-ml-10 {
+  margin-left: 10px;
+}
 
-  /* Apply heading and body fonts based on theme settings */
+@media (min-width: 480px) {
+  .mobile-ml-10 {
+    margin-left: 0px; /* Override on md and up */
+  }
+}
+
+  .mobile-ml-150 {
+  margin-left: 10px;
+}
+
+@media (min-width: 480px) {
+  .mobile-ml-10 {
+    margin-left: -10px; /* match md and larger value */
+  }
+}
+
+  .arrow-svg {
+  width: 80px;
+  height: 80px;
+  fill: var(--icon-default, #ffffff);
+  transition: fill 0.3s ease;
+}
+
+.hover-icon-button:hover .arrow-svg {
+  fill: #000000; /* Change to black on hover */
+}
+  
   footer .heading-font {
     font-family: var(--font-heading-family);
     font-style: var(--font-heading-style);
@@ -42,76 +91,6 @@
     gap: 10px;
   }
  
-  .social-icons-hover {
-    fill: #808080 !important;
-    transition: fill 0.3s ease;
-  }
-  
-  .social-icons-hover {
-    transition: fill 0.3s ease;
-  }
-
-  @media screen and (max-width: 767px) {
-    .support-social-icons {
-      margin-top: 20px;
-    }
-    .heading-font{
-      margin-left: 0px;
-      font-size:18px;
-    }
-  }
-</style>
-
-{{ 'section-footer.css' | asset_url | stylesheet_tag }}
-{{ 'component-newsletters.css' | asset_url | stylesheet_tag }}
-
-<style>
-  /* Apply heading and body fonts based on theme settings */
-  footer .heading-font {
-    font-family: var(--font-heading-family);
-    font-style: var(--font-heading-style);
-  }
-
-  footer .body-font {
-    font-family: var(--font-body-family);
-    font-style: var(--font-body-style);
-  }
-
-  :root {
-    --cr-yellow-2: #d68c00;
-    --cr-yellow-1: #c9c3ad;
-  }
-  
-  .email-input.error {
-    border-color: red !important;
-  }
-
-  .message-container {
-    padding: 10px;
-    margin-bottom: 15px;
-    text-align: center;
-  }
-
-  .success-message {
-    color: green;
-    font-weight: bold;
-  }
-
-  /* Added styling for social icons in support section */
-  .support-social-icons {
-    display: flex;
-    margin-top: 60px;
-    gap: 10px;
-  }
- 
-  .social-icons-hover {
-    fill: #808080 !important;
-    transition: fill 0.3s ease;
-  }
-  
-  .social-icons-hover {
-    transition: fill 0.3s ease;
-  }
 
   @media screen and (max-width: 767px) {
     .support-social-icons {
@@ -230,7 +209,6 @@
     margin-bottom: {{ section.settings.margin_bottom }}px;
   "
   role="contentinfo"
-  aria-label="Footer"
 >
   {% for block in section.blocks %}
     <div class="w-full">
@@ -257,7 +235,7 @@
               </div>
 
               <div id="form-fields-container" class="form-fields-container">
-                <label for="email-input1" class="visually-hidden">
+                <label for="email-input1" class="sr-only">
                   {{- block.settings.email_placeholder | default: 'EMAIL' -}}
                 </label>
                 <input
@@ -268,22 +246,24 @@
                   placeholder="{{ block.settings.email_placeholder | default: 'EMAIL' }}"
                   required
                   autocomplete="email"
+                  aria-required="true"
                 >
-                <button
-                  type="submit"
-                  class="signup-button body-font newsletter-form__button"
-                  aria-label="{{ block.settings.button_text | default: 'SIGN ME UP' }}"
-                  name="commit"
-                >
-                  <span class="arrow-icon" aria-hidden="true">       
-              <svg class="w-15 h-15 sm:w-16 sm:h-18 md:w-20 md:h-44 lg:w-44 lg:h-28" style="fill: {{ section.settings.color_card_excerpt | default: '#ffffff' }}"
-          xmlns="http://www.w3.org/2000/svg"
-          viewBox="0 0 37 36"
-        >
-          <path d="M26.79,9.21A35.06,35.06,0,0,0,37,16.2v3.66a35.34,35.34,0,0,0-10.21,7A12.84,12.84,0,0,0,23.21,36H17.56q0-6.22,3-10a15.4,15.4,0,0,1,8.06-5.2V20.6H0V15.43H28.63v-.3A15.16,15.16,0,0,1,20.57,10q-3-3.77-3-10h5.65a13,13,0,0,0,.87,5A12.79,12.79,0,0,0,26.79,9.21Z" />
-        </svg></span>
-                  <span>{{ block.settings.button_text | default: 'SIGN ME UP' }}</span>
-                </button>
+              <button
+  type="submit"
+  class="signup-button body-font newsletter-form__button hover-icon-button"
+  aria-label="{{ block.settings.button_text | default: 'SIGN ME UP' }}"
+  name="commit"
+>
+  <span class="arrow-icon" aria-hidden="true">
+    <svg class="arrow-svg"
+         xmlns="http://www.w3.org/2000/svg"
+         viewBox="0 0 37 36">
+      <path d="M26.79,9.21A35.06,35.06,0,0,0,37,16.2v3.66a35.34,35.34,0,0,0-10.21,7A12.84,12.84,0,0,0,23.21,36H17.56q0-6.22,3-10a15.4,15.4,0,0,1,8.06-5.2V20.6H0V15.43H28.63v-.3A15.16,15.16,0,0,1,20.57,10q-3-3.77-3-10h5.65a13,13,0,0,0,.87,5A12.79,12.79,0,0,0,26.79,9.21Z" />
+    </svg>
+  </span>
+  <span>{{ block.settings.button_text | default: 'SIGN ME UP' }}</span>
+</button>
+
               </div>
             {% endform %}
           </div>
@@ -291,37 +271,40 @@
          
         {% when 'scroll_tracker' %}
          <div class="w-full md:w-[700px]">
-  <div
-    class="ml-0 bg-[var(--cr-yellow-2)] text-black px-1 md:px-5 py-6 mt-5 rounded-[5px] group hover:bg-transparent border-2 border-transparent hover:border-[var(--cr-yellow-2)] hover:text-[var(--cr-yellow-2)] transition-colors duration-300 w-full md:mt-0 md:w-[250px] lg:w-[330px] max-w-full text-left scroll-tracker md:relative absolute mt-[610px] md:ml-[192px] md:transform-none md:bottom-auto z-50"
-    aria-live="polite"
-    {{ block.shopify_attributes }}
-  >
-    <p class="text-[12px] md:text-[20px] font-medium -mt-2 md:mt-[-13px] ml-2 md:ml-[6px] group-hover:text-[var(--cr-yellow-2)] heading-font">
-      {{ block.settings.scroll_text | default: 'YOU HAVE SCROLLED' }}
-    </p>
-    <div class="flex items-baseline bg-[var(--cr-yellow-1)] px-3 md:px-4 py-1 md:py-2 mt-1 rounded-[5px] transition-colors duration-300 border-3 border-transparent group-hover:bg-transparent group-hover:border-[var(--cr-yellow-2)] w-full max-w-[290px] md:max-w-full h-auto lg:h-[70px]">
-      <div class="flex w-full justify-between items-baseline lg:-mt-3">
-        <span
-          id="scrollValueFooter"
-          class="text-[24px] md:text-[70px] font-medium leading-none group-hover:text-[var(--cr-yellow-2)] w-[100px] md:w-[160px] heading-font"
-        >
-          0.185
-        </span>
-        <span class="text-[16px] md:text-[30px] font-medium group-hover:text-[var(--cr-yellow-2)] w-[40px] md:w-[50px] ml-2 md:ml-[15px] heading-font">
-          KM
-        </span>
-      </div>
-    </div>
-  </div>
-</div>
+          <div
+            class="ml-0 bg-[var(--cr-yellow-2)] text-black px-1 md:px-5 py-6 mt-5 rounded-[5px] group hover:bg-transparent border-2 border-transparent hover:border-[var(--cr-yellow-2)] hover:text-[var(--cr-yellow-2)] transition-colors duration-300 w-full md:mt-0 md:w-[250px] lg:w-[330px] max-w-full text-left scroll-tracker md:relative absolute mt-[610px] md:ml-[192px] md:transform-none md:bottom-auto z-50"
+            aria-live="polite"
+            {{ block.shopify_attributes }}
+          >
+            <p class="text-[12px] md:text-[20px] font-medium -mt-2 md:mt-[-13px] ml-2 md:ml-[6px] group-hover:text-[var(--cr-yellow-2)] heading-font">
+              {{ block.settings.scroll_text | default: 'YOU HAVE SCROLLED' }}
+            </p>
+            <div class="flex items-baseline bg-[var(--cr-yellow-1)] px-3 md:px-4 py-1 md:py-2 mt-1 rounded-[5px] transition-colors duration-300 border-3 border-transparent group-hover:bg-transparent group-hover:border-[var(--cr-yellow-2)] w-full max-w-[290px] md:max-w-full h-auto lg:h-[70px]">
+              <div class="flex w-full justify-between items-baseline lg:-mt-3">
+                <span
+                  id="scrollValueFooter"
+                  class="text-[24px] md:text-[70px] font-medium leading-none group-hover:text-[var(--cr-yellow-2)] w-[100px] md:w-[160px] heading-font"
+                  aria-live="polite"
+                >
+                  0.000
+                </span>
+                <span class="text-[16px] md:text-[30px] font-medium group-hover:text-[var(--cr-yellow-2)] w-[40px] md:w-[50px] ml-2 md:ml-[15px] heading-font">
+                  KM
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
 
 
         {% when 'support' %}
           <div class="w-1/2 md:w-full flex pr-1 md:pr-2 mt-[0px] md:mt-[-9%] justify-end">
             <div class="mb-6 w-[350px] md:max-w-[50%] mobile-ml-150" {{ block.shopify_attributes }}>
-              <p class="uppercase md:normal-case font-bold text-[20px] md:text-[24px] break-words text-left text-white heading-font" style="word-wrap: break-word; overflow-wrap: break-word;">
-                {{ block.settings.support_heading }}
-              </p>
+              <p class="uppercase md:normal-case font-medium text-[18px] md:text-[24px] break-words text-left text-white heading-font"
+   style="word-wrap: break-word; overflow-wrap: break-word;">
+  {{ block.settings.support_heading }}
+</p>
+
               <p class="md:normal-case mt-1 text-[13px] md:text-[20px] break-words text-left text-white leading-tight body-font" style="word-wrap: break-word; overflow-wrap: break-word; line-height: 1.3;">
                 {{ block.settings.support_text }}
               </p>
@@ -349,7 +332,8 @@
 </a>
 
 
-              <!-- Social Icons moved inside support section -->
+
+                 <!-- Social Icons moved inside support section -->
               <div class="support-social-icons social-icons-hover" aria-labelledby="social-heading-support">
                 <h4 id="social-heading-support" class="sr-only">Follow Us</h4>
                 {%- if settings.social_facebook_link != blank -%}
@@ -517,13 +501,14 @@
             </div>
           </div>
 
+
         {% when 'social_icons' %}
           
           <div class="hidden" {{ block.shopify_attributes }}></div>
 
           <div class="flex flex-col md:flex-row justify-between items-start w-full" style="margin-left:10px">
             <!-- Menu Section - Top on mobile, right side on desktop -->
-            <div class="menu-section w-full md:w-2/5 order-1 md:order-2 ml-[3px] md:ml-0">
+            <nav class="menu-section w-full md:w-2/5 order-1 md:order-2 ml-[3px] md:ml-0" aria-label="Footer Navigation">
               <div class="flex flex-wrap justify-start md:justify-end" style="margin-left:-10px;">
                 <div class="flex flex-row flex-wrap justify-start md:justify-end gap-7 w-full mr-[20px] md:ml-0 mobile-ml-10">
                   {% for block in section.blocks %}
@@ -548,93 +533,31 @@
                   {% endfor %}
                 </div>
               </div>
-            </div>
+            </nav>
 
 
             <!-- Logo Section - Bottom on mobile, left side on desktop -->
-           <div class="logo-container w-full md:w-3/5 mt-13 md:mt-16 pl-[30px] md:ml-[10px] order-2 md:order-1">
-  {% if section.settings.logo != blank %}
-    <img 
-      src="{{ section.settings.logo | img_url: 'master' }}" 
-      alt="{{ shop.name }}" 
-      width="450" 
-      height="150"
-      class="w-full max-w-[220px] md:max-w-[400px] h-[75px] md:h-[130px] lg:h-[150px] object-contain transform scale-125 md:scale-125" 
-      loading="lazy">
-  {% else %}
-    <div class="text-white font-bold transform scale-150 md:scale-150 heading-font" style="margin-left:-30px; font-size: 50px;">
-      {{ shop.name }}
-    </div>
-  {% endif %}
-</div>
-
+           <div class="logo-container w-full md:w-3/5 mt-4 md:mt-16 pl-[30px] md:ml-[10px] order-2 md:order-1">
+              {% if section.settings.logo != blank %}
+                <img 
+                  src="{{ section.settings.logo | img_url: 'master' }}" 
+                  alt="{{ shop.name }}" 
+                  width="450" 
+                  height="150"
+                  class="w-full max-w-[220px] md:max-w-[400px] h-[75px] md:h-[130px] lg:h-[150px] object-contain transform scale-125 md:scale-125" 
+                  loading="lazy">
+              {% else %}
+                <div class="text-white font-bold transform scale-150 md:scale-150 heading-font" style="margin-left:-30px; font-size: 50px;">
+                  {{ shop.name }}
+                </div>
+              {% endif %}
+            </div>
           </div>
       {% endcase %}
     </div>
   {% endfor %}
 </footer>
 
-{% style %}
-  /* Apply theme fonts to footer elements */
-  footer .heading-font {
-    font-family: var(--font-heading-family);
-    font-style: var(--font-heading-style);
-  }
-
-  footer .body-font {
-    font-family: var(--font-body-family);
-    font-style: var(--font-body-style);
-  }
-
-  /* Apply colors from theme settings */
-  .color-{{ section.settings.color_scheme }} {
-    color: {{ settings.colors[section.settings.color_scheme].text }};
-  }
-
-  .background-{{ section.settings.color_scheme }} {
-    background-color: {{ settings.colors[section.settings.color_scheme].background }};
-  }
-
-  /* Accessibility styles */
-  .sr-only {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    margin: -1px;
-    padding: 0;
-    overflow: hidden;
-    clip: rect(0, 0, 0, 0);
-    border: 0;
-  }
-
-  /* Focus styles for keyboard navigation */
-  a:focus,
-  button:focus,
-  input:focus {
-    outline: 2px solid #4d90fe;
-    outline-offset: 2px;
-  }
-  /* Mobile-only margin-left */
-.mobile-ml-10 {
-  margin-left: 10px;
-}
-
-@media (min-width: 480px) {
-  .mobile-ml-10 {
-    margin-left: 0px; /* Override on md and up */
-  }
-}
-
-  .mobile-ml-150 {
-  margin-left: 10px;
-}
-
-@media (min-width: 480px) {
-  .mobile-ml-10 {
-    margin-left: -10px; /* match md and larger value */
-  }
-}s
-{% endstyle %}
 
 <script>
  document.addEventListener('DOMContentLoaded', function() {
