@@ -11,7 +11,6 @@
   </p>
 </div>
 
-
     <!-- Form Container with fixed width -->
     <div id="formContainer" class="w-full md:w-1/2 md:pr-8">
       <div id="successMessageContainer" class="hidden w-[95%] mx-auto">
@@ -26,6 +25,7 @@
 
       {%- form 'customer', id: 'custom-email-signup-form', class: 'flex flex-col gap-6 w-[95%] mx-auto' -%}
         <input type="hidden" name="contact[tags]" value="{{ section.settings.customer_tag }}" />
+        <input type="hidden" name="contact[accepts_marketing]" value="true" />
         
         <div class="form-fields-container relative">
           <input
@@ -82,6 +82,7 @@
       <div class="w-full md:w-2/3 ml-auto">
         {%- form 'customer', id: 'popup-email-form', class: 'flex flex-col sm:flex-row gap-4 justify-end md:ml-[850px]' -%}
           <input type="hidden" name="contact[tags]" value="{{ section.settings.customer_tag }}" />
+          <input type="hidden" name="contact[accepts_marketing]" value="true" />
           
           <div class="flex-grow">
             <input
@@ -176,6 +177,8 @@
 document.addEventListener('DOMContentLoaded', function() {
   // Original form functionality - Using unique IDs to avoid conflicts
   const customEmailSignupForm = document.getElementById('custom-email-signup-form');
+  const formContainer = document.getElementById('formContainer');
+  const successMessageContainer = document.getElementById('successMessageContainer');
   
   if (customEmailSignupForm) {
     const customEmailInput = document.getElementById('custom-email-input');
@@ -185,6 +188,25 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Flag to track if submission is in progress
     let isSubmitting = false;
+    
+    // Error message element creation function
+    const createErrorMessage = (message) => {
+      // Remove any existing error messages first
+      const existingError = customEmailInput.parentNode.querySelector('.error-message');
+      if (existingError) existingError.remove();
+      
+      const errorElement = document.createElement('div');
+      errorElement.className = 'error-message text-red-500 text-lg font-bold mt-2 absolute -bottom-8 left-0';
+      errorElement.textContent = message;
+      customEmailInput.parentNode.appendChild(errorElement);
+      
+      // Auto remove after 5 seconds
+      setTimeout(() => {
+        if (errorElement.parentNode) {
+          errorElement.remove();
+        }
+      }, 5000);
+    };
     
     // Check if the input is empty on page load and add the empty class if it is
     if (customEmailInput && !customEmailInput.value.trim()) {
@@ -198,16 +220,22 @@ document.addEventListener('DOMContentLoaded', function() {
           // Remove error state when user starts typing
           this.classList.remove('error-state');
           this.classList.remove('empty');
+          
+          // Remove any error messages
+          const existingError = this.parentNode.querySelector('.error-message');
+          if (existingError) existingError.remove();
         }
       });
     }
     
-    // Show loading state when form is submitted
+    // Handle form submission
     if (customEmailSignupForm) {
-      customEmailSignupForm.addEventListener('submit', function(e) {
+      // Override the form submit button click
+      customSubmitButton.addEventListener('click', function(e) {
+        e.preventDefault(); // Prevent button default action
+        
         // Prevent multiple submissions
         if (isSubmitting) {
-          e.preventDefault();
           return;
         }
         
@@ -215,29 +243,63 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Show red border if empty and add error-state class
         if (!email) {
-          e.preventDefault();
           customEmailInput.classList.add('empty');
           customEmailInput.classList.add('error-state');
           customEmailInput.focus();
           return;
         }
         
-        // Validate email (simple client-side validation)
-        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-          e.preventDefault();
-          customEmailInput.classList.add('error-state');
-          customEmailInput.focus();
-          return;
-        }
-        
-        // Set submitting state
+        // If validation passes, we can continue with form submission
         isSubmitting = true;
         
         // Show loading state
         customButtonText.textContent = "SUBMITTING...";
         customLoadingSpinner.classList.remove('hidden');
         customSubmitButton.disabled = true;
+        
+        // Show success message immediately
+        customEmailSignupForm.classList.add('hidden');
+        if (successMessageContainer) {
+          successMessageContainer.classList.remove('hidden');
+        }
+        
+        // Submit the form via AJAX to prevent page refresh
+        fetch(customEmailSignupForm.action, {
+          method: 'POST',
+          body: new FormData(customEmailSignupForm),
+          headers: {
+            'Accept': 'application/json'
+          }
+        }).then(response => {
+          // Form submitted successfully
+          console.log('Form submitted successfully');
+        }).catch(error => {
+          console.error('Error submitting form:', error);
+        });
+        
+        // Reset form state after a delay (but keep success message visible)
+        setTimeout(() => {
+          isSubmitting = false;
+          customButtonText.textContent = customSubmitButton.getAttribute('data-original-text') || "GET NOTIFIED";
+          customLoadingSpinner.classList.add('hidden');
+          customSubmitButton.disabled = false;
+        }, 1000);
       });
+      
+      // Also handle the native form submission as a fallback
+      customEmailSignupForm.addEventListener('submit', function(e) {
+        e.preventDefault(); // Always prevent traditional form submission
+        
+        // Trigger the button click handler if not already submitting
+        if (!isSubmitting) {
+          customSubmitButton.click();
+        }
+      });
+    }
+    
+    // Store original button text for later reset
+    if (customButtonText) {
+      customSubmitButton.setAttribute('data-original-text', customButtonText.textContent);
     }
   }
   
@@ -255,6 +317,25 @@ document.addEventListener('DOMContentLoaded', function() {
   let userClosedPopup = false;
   // Track if form is being submitted
   let isPopupSubmitting = false;
+  
+  // Create popup error message function
+  const createPopupErrorMessage = (message) => {
+    // Remove any existing error messages first
+    const existingError = popupEmailInput.parentNode.querySelector('.popup-error-message');
+    if (existingError) existingError.remove();
+    
+    const errorElement = document.createElement('div');
+    errorElement.className = 'popup-error-message text-red-500 text-lg font-bold mt-2';
+    errorElement.textContent = message;
+    popupEmailInput.parentNode.appendChild(errorElement);
+    
+    // Auto remove after 5 seconds
+    setTimeout(() => {
+      if (errorElement.parentNode) {
+        errorElement.remove();
+      }
+    }, 5000);
+  };
   
   // Handle scroll to show/hide popup based on newsletter position
   function handleScroll() {
@@ -287,6 +368,11 @@ document.addEventListener('DOMContentLoaded', function() {
   
   // Function to show popup success message
   window.showPopupSuccessMessage = function(popupContainer) {
+    // Store original content to restore later if needed
+    if (!popupContainer.hasAttribute('data-original-content')) {
+      popupContainer.setAttribute('data-original-content', popupContainer.innerHTML);
+    }
+    
     // Create success message
     popupContainer.innerHTML = `
       <div class="container mx-auto px-4 py-6">
@@ -302,13 +388,25 @@ document.addEventListener('DOMContentLoaded', function() {
       </div>
     `;
     
+    // Add close button to success message
+    const closeBtn = document.createElement('button');
+    closeBtn.innerHTML = `
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+      </svg>
+    `;
+    closeBtn.className = 'absolute top-2 right-2 text-white hover:text-gray-300';
+    closeBtn.addEventListener('click', function() {
+      popupContainer.classList.remove('show-popup');
+      userClosedPopup = true;
+    });
+    
+    popupContainer.querySelector('.container').appendChild(closeBtn);
+    
     // Make sure popup is visible
     popupContainer.classList.add('show-popup');
     
-    // Hide popup after 5 seconds
-    setTimeout(() => {
-      popupContainer.classList.remove('show-popup');
-    }, 5000);
+    // DO NOT hide popup automatically - let it stay visible until manual refresh
   };
   
   // Popup form submission handler
@@ -316,13 +414,19 @@ document.addEventListener('DOMContentLoaded', function() {
     popupEmailInput.addEventListener('input', function() {
       if (this.value.trim()) {
         this.classList.remove('error-state');
+        
+        // Remove any error messages
+        const existingError = this.parentNode.querySelector('.popup-error-message');
+        if (existingError) existingError.remove();
       }
     });
     
-    popupEmailForm.addEventListener('submit', function(e) {
+    // Handle popup submit button click
+    popupSubmitButton.addEventListener('click', function(e) {
+      e.preventDefault(); // Prevent button default action
+      
       // Prevent multiple submissions
       if (isPopupSubmitting) {
-        e.preventDefault();
         return;
       }
       
@@ -330,17 +434,17 @@ document.addEventListener('DOMContentLoaded', function() {
       
       // Show error if empty
       if (!email) {
-        e.preventDefault();
         popupEmailInput.classList.add('error-state');
         popupEmailInput.focus();
+        createPopupErrorMessage("Please enter your email address");
         return;
       }
       
       // Validate email format
       if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-        e.preventDefault();
         popupEmailInput.classList.add('error-state');
         popupEmailInput.focus();
+        createPopupErrorMessage("Please enter a valid email address");
         return;
       }
       
@@ -351,7 +455,47 @@ document.addEventListener('DOMContentLoaded', function() {
       popupButtonText.textContent = "SUBMITTING...";
       popupLoadingSpinner.classList.remove('hidden');
       popupSubmitButton.disabled = true;
+      
+      // Show success message immediately
+      window.showPopupSuccessMessage(popupNewsletter);
+      
+      // Submit the form via AJAX to prevent page refresh
+      fetch(popupEmailForm.action, {
+        method: 'POST',
+        body: new FormData(popupEmailForm),
+        headers: {
+          'Accept': 'application/json'
+        }
+      }).then(response => {
+        // Form submitted successfully
+        console.log('Popup form submitted successfully');
+      }).catch(error => {
+        console.error('Error submitting popup form:', error);
+      });
+      
+      // Reset form state after a delay (but keep success message visible)
+      setTimeout(() => {
+        isPopupSubmitting = false;
+        popupButtonText.textContent = popupSubmitButton.getAttribute('data-original-text') || "GET NOTIFIED";
+        popupLoadingSpinner.classList.add('hidden');
+        popupSubmitButton.disabled = false;
+      }, 1000);
     });
+    
+    // Also handle the native form submission as a fallback
+    popupEmailForm.addEventListener('submit', function(e) {
+      e.preventDefault(); // Always prevent traditional form submission
+      
+      // Trigger the button click handler if not already submitting
+      if (!isPopupSubmitting) {
+        popupSubmitButton.click();
+      }
+    });
+    
+    // Store original button text for later reset
+    if (popupButtonText) {
+      popupSubmitButton.setAttribute('data-original-text', popupButtonText.textContent);
+    }
   }
   
   // Add scroll event listener with throttling for performance
@@ -372,7 +516,6 @@ document.addEventListener('DOMContentLoaded', function() {
   setTimeout(handleScroll, 500);
 });
 </script>
-
 
 {% schema %}
 {
