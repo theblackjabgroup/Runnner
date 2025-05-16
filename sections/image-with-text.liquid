@@ -193,6 +193,38 @@
       height: 100%;
     }
 
+    /* .image-with-text-iframe{
+      position: relative;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+    }
+
+    .image-with-text-iframe iframe {
+      display: block;
+      width: 100%;
+      height: 100%;
+    }
+
+    .image-with-text-iframe .image-with-text-iframe-overlay {
+      position: absolute;
+      inset: 0;
+      background: black;
+      opacity: 1;
+      z-index: 999;
+      pointer-events: none;
+      animation-name: fadeOverlay;
+      animation-duration: 1s;
+      animation-delay: 1s;
+      animation-timing-function: ease-out;
+      animation-fill-mode: forwards;
+    }
+
+    @keyframes fade-overlay {
+      from { opacity: 1; }
+      to   { opacity: 0; }
+    } */
+
     @media (max-width: 749px) {
       .image-with-text-text-content-container-{{ section.id }} {
         max-width: calc({{ section.settings.content_width_mobile }}% + 1rem);
@@ -266,226 +298,250 @@
     }
 {%- endstyle -%}
 
-<section
-  id="ImageWithText-{{ section.id }}"
-  class="image-with-text-media-section-{{ section.id }} relative w-full overflow-hidden image-with-text-section-{{ section.id }}-padding"
-  role="region"
-  aria-label="Image with text section"
->
-  {% if section.settings.use_video %}
-    {% if section.settings.video_source == 'external' and section.settings.video_url != blank %}
-      <div class="absolute inset-0" style="margin: {{ section.settings.media_margin }}px;">
-        {% if section.settings.video_url.type == 'youtube' %}
-          <iframe
-            class="w-full h-full object-cover"
-            src="https://www.youtube.com/embed/{{ section.settings.video_url.id }}?autoplay=1&controls=0&mute=1&loop=1&playlist={{ section.settings.video_url.id }}&playsinline=1&rel=0&enablejsapi=1"
-            frameborder="0"
-            allow="autoplay; encrypted-media"
-            allowfullscreen
-            title="Background video"
-            aria-label="Background video"
-          ></iframe>
-        {% elsif section.settings.video_url.type == 'vimeo' %}
-          <iframe
-            class="w-full h-full object-cover"
-            src="https://player.vimeo.com/video/{{ section.settings.video_url.id }}?background=1&autoplay=1&loop=1&byline=0&title=0"
-            frameborder="0"
-            allow="autoplay; encrypted-media"
-            allowfullscreen
-            title="Background video"
-            aria-label="Background video"
-          ></iframe>
-        {% endif %}
+{% if section.settings.enabled %}
+  <section
+    id="ImageWithText-{{ section.id }}"
+    class="image-with-text-media-section-{{ section.id }} relative w-full overflow-hidden image-with-text-section-{{ section.id }}-padding"
+    role="region"
+    aria-label="Image with text section"
+  >
+    {% if section.settings.use_video %}
+      {% if section.settings.video_source == 'external' and section.settings.video_url != blank %}
+        <div
+          class="absolute inset-0 image-with-text-iframe"
+          style="margin: {{ section.settings.media_margin }}px; --aspect-ratio: 1.78; width: 100%; height: 100%;"
+        >
+          {% if section.settings.video_url.type == 'youtube' %}
+            <iframe
+              class="w-full h-full object-cover"
+              src="https://www.youtube.com/embed/{{ section.settings.video_url.id }}?autoplay=1&controls=0&mute=1&loop=1&playlist={{ section.settings.video_url.id }}&playsinline=1&rel=0&enablejsapi=1"
+              frameborder="0"
+              allow="autoplay; encrypted-media"
+              allowfullscreen
+              title="Background video"
+              aria-label="Background video"
+            ></iframe>
+            <div class="image-with-text-iframe-overlay"></div>
+          {% elsif section.settings.video_url.type == 'vimeo' %}
+            <iframe
+              class="w-full h-full object-cover"
+              src="https://player.vimeo.com/video/{{ section.settings.video_url.id }}?background=1&autoplay=1&loop=1&byline=0&title=0"
+              frameborder="0"
+              allow="picture-in-picture; fullscreen; autoplay; encrypted-media"
+              allowfullscreen
+              title="Background video"
+              aria-label="Background video"
+              loading="lazy"
+              data-ready="true"
+              data-gtm-yt-inspected-9="true"
+            ></iframe>
+            <div class="image-with-text-iframe-overlay"></div>
+          {% endif %}
+        </div>
+      {% elsif section.settings.video_source == 'shopify' and section.settings.shopify_video != blank %}
+        <div class="absolute inset-0 image-with-text-iframe" style="margin: {{ section.settings.media_margin }}px;">
+          {{
+            section.settings.shopify_video
+            | video_tag:
+              autoplay: true,
+              loop: true,
+              muted: true,
+              playsinline: true,
+              controls: false,
+              class: 'w-full h-full object-cover'
+          }}
+          <div class="image-with-text-iframe-overlay"></div>
+        </div>
+      {% endif %}
+    {% elsif section.settings.image != blank %}
+      <div
+        class="absolute inset-0 image-with-text-iframe"
+        style="margin: {{ section.settings.media_margin }}px;"
+        role="img"
+        aria-label="{{ section.settings.image.alt | escape | default: 'Background image' }}"
+      >
+        <img
+          srcset="
+            {% if section.settings.image.width >= 375 %}{{ section.settings.image | image_url: width: 375 }} 375w,{% endif %}
+            {% if section.settings.image.width >= 550 %}{{ section.settings.image | image_url: width: 550 }} 550w,{% endif %}
+            {% if section.settings.image.width >= 750 %}{{ section.settings.image | image_url: width: 750 }} 750w,{% endif %}
+            {% if section.settings.image.width >= 1100 %}{{ section.settings.image | image_url: width: 1100 }} 1100w,{% endif %}
+            {% if section.settings.image.width >= 1500 %}{{ section.settings.image | image_url: width: 1500 }} 1500w,{% endif %}
+            {% if section.settings.image.width >= 2200 %}{{ section.settings.image | image_url: width: 2200 }} 2200w,{% endif %}
+            {{ section.settings.image | image_url }} {{ section.settings.image.width }}w
+          "
+          sizes="100vw"
+          height="auto"
+          width="auto"
+          src="{{ section.settings.image | image_url: width: 1500 }}"
+          alt="{{ section.settings.image.alt | escape | default: 'Background image' }}"
+          class="w-full h-full object-cover"
+          loading="lazy"
+        >
+        <div class="image-with-text-iframe-overlay"></div>
       </div>
-    {% elsif section.settings.video_source == 'shopify' and section.settings.shopify_video != blank %}
-      <div class="absolute inset-0" style="margin: {{ section.settings.media_margin }}px;">
-        {{
-          section.settings.shopify_video
-          | video_tag:
-            autoplay: true,
-            loop: true,
-            muted: true,
-            playsinline: true,
-            controls: false,
-            class: 'w-full h-full object-cover'
-        }}
+    {% else %}
+      <div
+        class="absolute inset-0 flex bg-gray-400 items-center justify-center"
+        style="margin: {{ section.settings.media_margin }}px;"
+        role="img"
+        aria-label="Placeholder image"
+      >
+        {{ 'lifestyle-2' | placeholder_svg_tag: 'w-auto h-auto opacity-30' }}
       </div>
     {% endif %}
-  {% elsif section.settings.image != blank %}
-    <div
-      class="absolute inset-0"
-      style="margin: {{ section.settings.media_margin }}px;"
-      role="img"
-      aria-label="{{ section.settings.image.alt | escape | default: 'Background image' }}"
-    >
-      <img
-        srcset="
-          {% if section.settings.image.width >= 375 %}{{ section.settings.image | image_url: width: 375 }} 375w,{% endif %}
-          {% if section.settings.image.width >= 550 %}{{ section.settings.image | image_url: width: 550 }} 550w,{% endif %}
-          {% if section.settings.image.width >= 750 %}{{ section.settings.image | image_url: width: 750 }} 750w,{% endif %}
-          {% if section.settings.image.width >= 1100 %}{{ section.settings.image | image_url: width: 1100 }} 1100w,{% endif %}
-          {% if section.settings.image.width >= 1500 %}{{ section.settings.image | image_url: width: 1500 }} 1500w,{% endif %}
-          {% if section.settings.image.width >= 2200 %}{{ section.settings.image | image_url: width: 2200 }} 2200w,{% endif %}
-          {{ section.settings.image | image_url }} {{ section.settings.image.width }}w
+
+    <div class="absolute inset-0 px-12 image-with-text-text-content-wrapper-{{ section.id }}">
+      <div
+        class="
+          image-with-text-text-content-container-{{ section.id }}
+          {% if section.settings.text_alignment == 'center' %}text-center{% elsif section.settings.text_alignment == 'right' %}text-right{% else %}text-left{% endif %}
         "
-        sizes="100vw"
-        height="auto"
-        width="auto"
-        src="{{ section.settings.image | image_url: width: 1500 }}"
-        alt="{{ section.settings.image.alt | escape | default: 'Background image' }}"
-        class="w-full h-full object-cover"
-        loading="lazy"
       >
-    </div>
-  {% else %}
-    <div
-      class="absolute inset-0 flex bg-gray-400 items-center justify-center"
-      style="margin: {{ section.settings.media_margin }}px;"
-      role="img"
-      aria-label="Placeholder image"
-    >
-      {{ 'lifestyle-2' | placeholder_svg_tag: 'w-auto h-auto opacity-30' }}
-    </div>
-  {% endif %}
-
-  <div class="absolute inset-0 px-12 image-with-text-text-content-wrapper-{{ section.id }}">
-    <div
-      class="
-        image-with-text-text-content-container-{{ section.id }}
-        {% if section.settings.text_alignment == 'center' %}text-center{% elsif section.settings.text_alignment == 'right' %}text-right{% else %}text-left{% endif %}
-      "
-    >
-      <div class="content-wrapper-flex content-flex-{{ section.settings.vertical_content_position }}">
-        {% for block in section.blocks %}
-          {% case block.type %}
-            {% when 'heading' %}
-              {% assign heading_class = '' %}
-              {% if block.settings.heading_size == 'small' %}
-                {% assign heading_class = 'image-with-text-heading-size-small' %}
-              {% elsif block.settings.heading_size == 'medium' %}
-                {% assign heading_class = 'image-with-text-heading-size-medium' %}
-              {% elsif block.settings.heading_size == 'large' %}
-                {% assign heading_class = 'image-with-text-heading-size-large' %}
-              {% endif %}
-
-              <h2
-                id="Heading-{{ section.id }}-{{ forloop.index }}"
-                class="image-with-text-heading mb-4 {{ heading_class }} {% if section.settings.enable_text_animation %}letter-animation{% endif %}"
-                style="color:{{ block.settings.text_color }}; font-weight: {{ block.settings.font_weight }};"
-              >
-                {{ block.settings.heading }}
-              </h2>
-            {% when 'text' %}
-              <div
-                id="TextContent-{{ section.id }}-{{ forloop.index }}"
-                class="image-with-text-text-content mb-6"
-                style="color: {{ block.settings.text_color }}; font-weight: {{ block.settings.font_weight }};"
-              >
-                {% if section.settings.enable_text_animation %}
-                  {{ block.settings.text | replace: '<p>', '<p class="letter-animation">' }}
-                {% else %}
-                  {{ block.settings.text }}
-                {% endif %}
-              </div>
-            {% when 'dual_headings' %}
-              <div class="dual-heading-container">
-                {% if block.settings.top_heading != blank %}
-                  {% assign top_heading_class = '' %}
-                  {% if block.settings.top_heading_size == 'small' %}
-                    {% assign top_heading_class = 'image-with-text-heading-size-small' %}
-                  {% elsif block.settings.top_heading_size == 'medium' %}
-                    {% assign top_heading_class = 'image-with-text-heading-size-medium' %}
-                  {% elsif block.settings.top_heading_size == 'large' %}
-                    {% assign top_heading_class = 'image-with-text-heading-size-large' %}
-                  {% endif %}
-
-                  <div class="dual-heading-top {% if block.settings.top_alignment == 'center' %}text-center{% elsif block.settings.top_alignment == 'right' %}text-right{% else %}text-left{% endif %}">
-                    <h2
-                      id="TopHeading-{{ section.id }}-{{ forloop.index }}"
-                      class="image-with-text-heading {{ top_heading_class }} {% if section.settings.enable_text_animation %}letter-animation{% endif %}"
-                      style="color:{{ block.settings.top_text_color }}; font-weight: {{ block.settings.top_font_weight }};"
-                    >
-                      {{ block.settings.top_heading }}
-                    </h2>
-                  </div>
+        <div class="content-wrapper-flex content-flex-{{ section.settings.vertical_content_position }}">
+          {% for block in section.blocks %}
+            {% case block.type %}
+              {% when 'heading' %}
+                {% assign heading_class = '' %}
+                {% if block.settings.heading_size == 'small' %}
+                  {% assign heading_class = 'image-with-text-heading-size-small' %}
+                {% elsif block.settings.heading_size == 'medium' %}
+                  {% assign heading_class = 'image-with-text-heading-size-medium' %}
+                {% elsif block.settings.heading_size == 'large' %}
+                  {% assign heading_class = 'image-with-text-heading-size-large' %}
                 {% endif %}
 
-                {% if block.settings.bottom_heading != blank %}
-                  {% assign bottom_heading_class = '' %}
-                  {% if block.settings.bottom_heading_size == 'small' %}
-                    {% assign bottom_heading_class = 'image-with-text-heading-size-small' %}
-                  {% elsif block.settings.bottom_heading_size == 'medium' %}
-                    {% assign bottom_heading_class = 'image-with-text-heading-size-medium' %}
-                  {% elsif block.settings.bottom_heading_size == 'large' %}
-                    {% assign bottom_heading_class = 'image-with-text-heading-size-large' %}
-                  {% endif %}
-
-                  <div class="dual-heading-bottom {% if block.settings.bottom_alignment == 'center' %}text-center{% elsif block.settings.bottom_alignment == 'right' %}text-right{% else %}text-left{% endif %}">
-                    <h2
-                      id="BottomHeading-{{ section.id }}-{{ forloop.index }}"
-                      class="image-with-text-heading {{ bottom_heading_class }} {% if section.settings.enable_text_animation %}letter-animation{% endif %}"
-                      style="color:{{ block.settings.bottom_text_color }}; font-weight: {{ block.settings.bottom_font_weight }};"
-                    >
-                      {{ block.settings.bottom_heading }}
-                    </h2>
-                  </div>
-                {% endif %}
-              </div>
-            {% when 'button' %}
-              <div class="image-with-text-button-container color-{{ section.settings.color_scheme }} {% if section.settings.text_alignment == 'center' %}text-center{% elsif section.settings.text_alignment == 'right' %}text-right{% else %}text-left{% endif %}">
-                <a
-                  href="{{ block.settings.button_link }}"
-                  class="image-with-text-custom-button-css"
-                  id="Button-{{ section.id }}-{{ forloop.index }}"
-                  aria-label="{{ block.settings.button_label | escape }}"
-                  role="button"
-                  tabindex="0"
-                  style="font-weight: {{ block.settings.font_weight }};"
+                <h2
+                  id="Heading-{{ section.id }}-{{ forloop.index }}"
+                  class="image-with-text-heading mb-4 {{ heading_class }} {% if section.settings.enable_text_animation %}letter-animation{% endif %}"
+                  style="color:{{ block.settings.text_color }}; font-weight: {{ block.settings.font_weight }};"
                 >
-                  <div class="image-with-text-button-text-container color-{{ section.settings.color_scheme }}">
-                    <div class="image-with-text-button-text color-{{ section.settings.color_scheme }}">
-                      {{ block.settings.button_label | escape }}
-                      {% if block.settings.show_button_arrow %}
-                        <span class="image-with-text-button-arrow" aria-hidden="true">
-                          <svg
-                            width="28"
-                            height="36"
-                            viewBox="0 0 38 36"
-                            xmlns="http://www.w3.org/2000/svg"
-                            class="w-5 h-5"
-                          >
-                            <path fill="currentColor" d="M26.79,9.21A35.06,35.06,0,0,0,37,16.2v3.66a35.34,35.34,0,0,0-10.21,7A12.84,12.84,0,0,0,23.21,36H17.56q0-6.22,3-10a15.4,15.4,0,0,1,8.06-5.2V20.6H0V15.43H28.63v-.3A15.16,15.16,0,0,1,20.57,10q-3-3.77-3-10h5.65a13,13,0,0,0,.87,5A12.79,12.79,0,0,0,26.79,9.21Z"></path>
-                          </svg>
-                        </span>
-                      {% endif %}
+                  {{ block.settings.heading }}
+                </h2>
+              {% when 'text' %}
+                <div
+                  id="TextContent-{{ section.id }}-{{ forloop.index }}"
+                  class="image-with-text-text-content mb-6"
+                  style="color: {{ block.settings.text_color }}; font-weight: {{ block.settings.font_weight }};"
+                >
+                  {% if section.settings.enable_text_animation %}
+                    {{ block.settings.text | replace: '<p>', '<p class="letter-animation">' }}
+                  {% else %}
+                    {{ block.settings.text }}
+                  {% endif %}
+                </div>
+              {% when 'dual_headings' %}
+                <div class="dual-heading-container">
+                  {% if block.settings.top_heading != blank %}
+                    {% assign top_heading_class = '' %}
+                    {% if block.settings.top_heading_size == 'small' %}
+                      {% assign top_heading_class = 'image-with-text-heading-size-small' %}
+                    {% elsif block.settings.top_heading_size == 'medium' %}
+                      {% assign top_heading_class = 'image-with-text-heading-size-medium' %}
+                    {% elsif block.settings.top_heading_size == 'large' %}
+                      {% assign top_heading_class = 'image-with-text-heading-size-large' %}
+                    {% endif %}
+
+                    <div class="dual-heading-top {% if block.settings.top_alignment == 'center' %}text-center{% elsif block.settings.top_alignment == 'right' %}text-right{% else %}text-left{% endif %}">
+                      <h2
+                        id="TopHeading-{{ section.id }}-{{ forloop.index }}"
+                        class="image-with-text-heading {{ top_heading_class }} {% if section.settings.enable_text_animation %}letter-animation{% endif %}"
+                        style="color:{{ block.settings.top_text_color }}; font-weight: {{ block.settings.top_font_weight }};"
+                      >
+                        {{ block.settings.top_heading }}
+                      </h2>
                     </div>
-                    <div class="image-with-text-button-text-hover">
-                      {{ block.settings.button_label | escape }}
-                      {% if block.settings.show_button_arrow %}
-                        <span class="image-with-text-button-arrow" aria-hidden="true">
-                          <svg
-                            width="28"
-                            height="36"
-                            viewBox="0 0 38 36"
-                            xmlns="http://www.w3.org/2000/svg"
-                            class="w-5 h-5"
-                          >
-                            <path fill="currentColor" d="M26.79,9.21A35.06,35.06,0,0,0,37,16.2v3.66a35.34,35.34,0,0,0-10.21,7A12.84,12.84,0,0,0,23.21,36H17.56q0-6.22,3-10a15.4,15.4,0,0,1,8.06-5.2V20.6H0V15.43H28.63v-.3A15.16,15.16,0,0,1,20.57,10q-3-3.77-3-10h5.65a13,13,0,0,0,.87,5A12.79,12.79,0,0,0,26.79,9.21Z"></path>
-                          </svg>
-                        </span>
-                      {% endif %}
+                  {% endif %}
+
+                  {% if block.settings.bottom_heading != blank %}
+                    {% assign bottom_heading_class = '' %}
+                    {% if block.settings.bottom_heading_size == 'small' %}
+                      {% assign bottom_heading_class = 'image-with-text-heading-size-small' %}
+                    {% elsif block.settings.bottom_heading_size == 'medium' %}
+                      {% assign bottom_heading_class = 'image-with-text-heading-size-medium' %}
+                    {% elsif block.settings.bottom_heading_size == 'large' %}
+                      {% assign bottom_heading_class = 'image-with-text-heading-size-large' %}
+                    {% endif %}
+
+                    <div class="dual-heading-bottom {% if block.settings.bottom_alignment == 'center' %}text-center{% elsif block.settings.bottom_alignment == 'right' %}text-right{% else %}text-left{% endif %}">
+                      <h2
+                        id="BottomHeading-{{ section.id }}-{{ forloop.index }}"
+                        class="image-with-text-heading {{ bottom_heading_class }} {% if section.settings.enable_text_animation %}letter-animation{% endif %}"
+                        style="color:{{ block.settings.bottom_text_color }}; font-weight: {{ block.settings.bottom_font_weight }};"
+                      >
+                        {{ block.settings.bottom_heading }}
+                      </h2>
                     </div>
-                  </div>
-                </a>
-              </div>
-          {% endcase %}
-        {% endfor %}
+                  {% endif %}
+                </div>
+              {% when 'button' %}
+                <div class="image-with-text-button-container color-{{ section.settings.color_scheme }} {% if section.settings.text_alignment == 'center' %}text-center{% elsif section.settings.text_alignment == 'right' %}text-right{% else %}text-left{% endif %}">
+                  <a
+                    href="{{ block.settings.button_link }}"
+                    class="image-with-text-custom-button-css"
+                    id="Button-{{ section.id }}-{{ forloop.index }}"
+                    aria-label="{{ block.settings.button_label | escape }}"
+                    role="button"
+                    tabindex="0"
+                    style="font-weight: {{ block.settings.font_weight }};"
+                  >
+                    <div class="image-with-text-button-text-container color-{{ section.settings.color_scheme }}">
+                      <div class="image-with-text-button-text color-{{ section.settings.color_scheme }}">
+                        {{ block.settings.button_label | escape }}
+                        {% if block.settings.show_button_arrow %}
+                          <span class="image-with-text-button-arrow" aria-hidden="true">
+                            <svg
+                              width="28"
+                              height="36"
+                              viewBox="0 0 38 36"
+                              xmlns="http://www.w3.org/2000/svg"
+                              class="w-5 h-5"
+                            >
+                              <path fill="currentColor" d="M26.79,9.21A35.06,35.06,0,0,0,37,16.2v3.66a35.34,35.34,0,0,0-10.21,7A12.84,12.84,0,0,0,23.21,36H17.56q0-6.22,3-10a15.4,15.4,0,0,1,8.06-5.2V20.6H0V15.43H28.63v-.3A15.16,15.16,0,0,1,20.57,10q-3-3.77-3-10h5.65a13,13,0,0,0,.87,5A12.79,12.79,0,0,0,26.79,9.21Z"></path>
+                            </svg>
+                          </span>
+                        {% endif %}
+                      </div>
+                      <div class="image-with-text-button-text-hover">
+                        {{ block.settings.button_label | escape }}
+                        {% if block.settings.show_button_arrow %}
+                          <span class="image-with-text-button-arrow" aria-hidden="true">
+                            <svg
+                              width="28"
+                              height="36"
+                              viewBox="0 0 38 36"
+                              xmlns="http://www.w3.org/2000/svg"
+                              class="w-5 h-5"
+                            >
+                              <path fill="currentColor" d="M26.79,9.21A35.06,35.06,0,0,0,37,16.2v3.66a35.34,35.34,0,0,0-10.21,7A12.84,12.84,0,0,0,23.21,36H17.56q0-6.22,3-10a15.4,15.4,0,0,1,8.06-5.2V20.6H0V15.43H28.63v-.3A15.16,15.16,0,0,1,20.57,10q-3-3.77-3-10h5.65a13,13,0,0,0,.87,5A12.79,12.79,0,0,0,26.79,9.21Z"></path>
+                            </svg>
+                          </span>
+                        {% endif %}
+                      </div>
+                    </div>
+                  </a>
+                </div>
+            {% endcase %}
+          {% endfor %}
+        </div>
       </div>
     </div>
-  </div>
-</section>
+  </section>
+{% endif %}
 
 <script>
+
+window.addEventListener('load', function() {
+    const overlay = document.querySelector('.image-with-text-iframe-overlay');
+    if (!overlay) return;
+    // wait 1s, then trigger CSS transition if animation didn't run
+    setTimeout(() => {
+      overlay.style.transition = 'opacity 1s ease-out';
+      overlay.style.opacity = '0';
+      overlay.addEventListener('transitionend', () => overlay.remove());
+    }, 1000);
+  });
+
 document.addEventListener('DOMContentLoaded', function() {
 const buttonAnimationDelay = {{ section.settings.button_animation_delay }};
 
@@ -627,6 +683,12 @@ button.addEventListener('keydown', function(event) {
   "name": "Image with Text",
   "class": "section",
   "settings": [
+    {
+      "type": "checkbox",
+      "id": "enabled",
+      "label": "Enable section",
+      "default": true
+    },
     {
       "type": "header",
       "content": "Media Settings"
