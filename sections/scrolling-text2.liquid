@@ -10,6 +10,12 @@
       "label": "Top Strip Text",
       "default": "BANDIT GRAND PRIX → BANDIT GRAND PRIX → BANDIT GRAND PRIX → BANDIT GRAND PRIX → BANDIT GRAND PRIX →"
     },
+     {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "default": "scheme-1",
+      "label": "Color Scheme"
+    },
     {
       "type": "text",
       "id": "middle_strip_large_text",
@@ -36,7 +42,7 @@
       "step": 5,
       "unit": "px",
       "label": "Banner Height",
-      "default": 80
+      "default": 50
     },
     {
       "type": "range",
@@ -47,6 +53,42 @@
       "unit": "s",
       "label": "Scroll Speed (seconds)",
       "default": 30
+    },
+    {
+      "type": "color",
+      "id": "top_strip_bg_color",
+      "label": "Top Strip Background Color",
+      "default": "#dc2626"
+    },
+    {
+      "type": "color",
+      "id": "top_strip_text_color",
+      "label": "Top Strip Text Color",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "middle_strip_bg_color",
+      "label": "Middle Strip Background Color",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "middle_strip_text_color",
+      "label": "Middle Strip Text Color",
+      "default": "#dc2626"
+    },
+    {
+      "type": "color",
+      "id": "bottom_strip_bg_color",
+      "label": "Bottom Strip Background Color",
+      "default": "#000000"
+    },
+    {
+      "type": "color",
+      "id": "bottom_strip_text_color",
+      "label": "Bottom Strip Text Color",
+      "default": "#dc2626"
     }
   ],
   "presets": [
@@ -62,19 +104,17 @@
     box-sizing: border-box;
   }
 
-.scrolling-text-section {
-  overflow: hidden;
-  padding-top: 2rem;
-  padding-bottom: 2rem;
-  background-color: #000; /* or whatever background you want */
-}
-
-
+  .scrolling-text-section {
+    overflow: hidden;
+    padding-top: 2rem;
+    padding-bottom: 2rem;
+    background-color: #000; /* or whatever background you want */
+  }
 
   .scrolling-banner {
     white-space: nowrap;
     overflow: hidden;
-    height: 50px;
+    height: {{ section.settings.banner_height }}px;
     display: flex;
     align-items: center;
     position: relative;
@@ -131,7 +171,7 @@
     font-weight: 500;
     letter-spacing: 0.05em;
     line-height: 1.2;
-    font-size: 20px;
+    font-size: 17px;
     display: inline-block;
     text-align: left;
     white-space: normal;
@@ -154,31 +194,44 @@
   }
 
   .top-strip {
-    background-color: #dc2626;
+    background-color: {{ section.settings.top_strip_bg_color }};
   }
 
   .middle-strip {
-    background-color: #ffffff;
+    background-color: {{ section.settings.middle_strip_bg_color }};
   }
 
   .bottom-strip {
-    background-color: #000000;
+    background-color: {{ section.settings.bottom_strip_bg_color }};
+  }
+
+  .top-strip .text-item {
+    color: {{ section.settings.top_strip_text_color }};
+  }
+
+  .middle-strip .large-text,
+  .middle-strip .small-text {
+    color: {{ section.settings.middle_strip_text_color }};
+  }
+
+  .bottom-strip .text-item {
+    color: {{ section.settings.bottom_strip_text_color }};
   }
 
   @media (max-width: 480px) {
     .scrolling-banner {
-      height:25px;
+      height: calc({{ section.settings.banner_height }}px / 2);
     }
     .large-text{
-      font-size:30px;
+      font-size: 30px;
     }
     .text-item{
-      font-size:30px;
+      font-size: 30px;
     }
   }
 </style>
 
-<div class="scrolling-text-section bg-black text-white">
+<div class="scrolling-text-section color-{{ section.settings.color_scheme }} ">
   <!-- Top Rotated Strip (Slowest) -->
   <div class="banner-strip top-strip">
     <div class="scrolling-banner">
@@ -197,8 +250,13 @@
       <div class="scrolling-text-wrapper">
         {% for i in (1..8) %}
           <div class="middle-strip-item">
-            <span class="large-text text-red-600">{{ section.settings.middle_strip_large_text }}</span>
-            <span class="small-text text-red-600">{{ section.settings.middle_strip_small_text }}</span>
+            <span class="large-text">{{ section.settings.middle_strip_large_text }}</span>
+            <span class="small-text">
+            {% assign words = section.settings.middle_strip_small_text | split: ' ' %}
+            {% for word in words %}
+              <span>{{ word }}</span><br>
+            {% endfor %}
+            </span>
           </div>
         {% endfor %}
       </div>
@@ -209,10 +267,10 @@
   <div class="banner-strip bottom-strip">
     <div class="scrolling-banner">
       <div class="scrolling-text-slow-wrapper">
-        <div class="text-item text-red-600">{{ section.settings.bottom_strip_text }}</div>
-        <div class="text-item text-red-600">{{ section.settings.bottom_strip_text }}</div>
-        <div class="text-item text-red-600">{{ section.settings.bottom_strip_text }}</div>
-        <div class="text-item text-red-600">{{ section.settings.bottom_strip_text }}</div>
+        <div class="text-item">{{ section.settings.bottom_strip_text }}</div>
+        <div class="text-item">{{ section.settings.bottom_strip_text }}</div>
+        <div class="text-item">{{ section.settings.bottom_strip_text }}</div>
+        <div class="text-item">{{ section.settings.bottom_strip_text }}</div>
       </div>
     </div>
   </div>
