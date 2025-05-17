@@ -296,6 +296,27 @@
     .content-flex-space-between {
       justify-content: space-between;
     }
+
+    .image-with-text-media-overlay-{{ section.id }} {
+      position: absolute;
+      top: 0;
+      left: 0;
+      inset: 0;
+      background-color: black;
+      height: 100%;
+      width: 100%;
+      opacity: 1;
+      z-index: 2;
+      pointer-events: none;
+      transition: opacity 2s ease-out;
+      display: block !important;
+    }
+
+    .image-with-text-media-container-{{ section.id }} {
+      position: relative;
+      width: 100%;
+      height: 100%;
+    }
 {%- endstyle -%}
 
 {% if section.settings.enabled %}
@@ -305,93 +326,97 @@
     role="region"
     aria-label="Image with text section"
   >
-    {% if section.settings.use_video %}
-      {% if section.settings.video_source == 'external' and section.settings.video_url != blank %}
+    <div class="image-with-text-media-container-{{ section.id }}">
+      {% if section.settings.use_video %}
+        {% if section.settings.video_source == 'external' and section.settings.video_url != blank %}
+          <div
+            class="image-with-text-iframe"
+            style="margin: {{ section.settings.media_margin }}px; --aspect-ratio: 1.78; width: 100%; height: 100%; position: relative; z-index: 1;"
+          >
+            {% if section.settings.video_url.type == 'youtube' %}
+              <iframe
+                class="w-full h-full object-cover"
+                src="https://www.youtube.com/embed/{{ section.settings.video_url.id }}?autoplay=1&controls=0&mute=1&loop=1&playlist={{ section.settings.video_url.id }}&playsinline=1&rel=0&enablejsapi=1"
+                frameborder="0"
+                allow="autoplay; encrypted-media"
+                allowfullscreen
+                title="Background video"
+                aria-label="Background video"
+                style="position: relative; z-index: 1;"
+              ></iframe>
+            {% elsif section.settings.video_url.type == 'vimeo' %}
+              <iframe
+                class="w-full h-full object-cover"
+                src="https://player.vimeo.com/video/{{ section.settings.video_url.id }}?background=1&autoplay=1&loop=1&byline=0&title=0"
+                frameborder="0"
+                allow="picture-in-picture; fullscreen; autoplay; encrypted-media"
+                allowfullscreen
+                title="Background video"
+                aria-label="Background video"
+                loading="lazy"
+                data-ready="true"
+                data-gtm-yt-inspected-9="true"
+                style="position: relative; z-index: 1;"
+              ></iframe>
+            {% endif %}
+          </div>
+        {% elsif section.settings.video_source == 'shopify' and section.settings.shopify_video != blank %}
+          <div
+            class="image-with-text-iframe"
+            style="margin: {{ section.settings.media_margin }}px; position: relative; z-index: 1;"
+          >
+            {{
+              section.settings.shopify_video
+              | video_tag:
+                autoplay: true,
+                loop: true,
+                muted: true,
+                playsinline: true,
+                controls: false,
+                class: 'w-full h-full object-cover'
+            }}
+          </div>
+        {% endif %}
+      {% elsif section.settings.image != blank %}
         <div
-          class="absolute inset-0 image-with-text-iframe"
-          style="margin: {{ section.settings.media_margin }}px; --aspect-ratio: 1.78; width: 100%; height: 100%;"
+          class="image-with-text-iframe"
+          style="margin: {{ section.settings.media_margin }}px; position: relative; z-index: 1;"
+          role="img"
+          aria-label="{{ section.settings.image.alt | escape | default: 'Background image' }}"
         >
-          {% if section.settings.video_url.type == 'youtube' %}
-            <iframe
-              class="w-full h-full object-cover"
-              src="https://www.youtube.com/embed/{{ section.settings.video_url.id }}?autoplay=1&controls=0&mute=1&loop=1&playlist={{ section.settings.video_url.id }}&playsinline=1&rel=0&enablejsapi=1"
-              frameborder="0"
-              allow="autoplay; encrypted-media"
-              allowfullscreen
-              title="Background video"
-              aria-label="Background video"
-            ></iframe>
-            <div class="image-with-text-iframe-overlay"></div>
-          {% elsif section.settings.video_url.type == 'vimeo' %}
-            <iframe
-              class="w-full h-full object-cover"
-              src="https://player.vimeo.com/video/{{ section.settings.video_url.id }}?background=1&autoplay=1&loop=1&byline=0&title=0"
-              frameborder="0"
-              allow="picture-in-picture; fullscreen; autoplay; encrypted-media"
-              allowfullscreen
-              title="Background video"
-              aria-label="Background video"
-              loading="lazy"
-              data-ready="true"
-              data-gtm-yt-inspected-9="true"
-            ></iframe>
-            <div class="image-with-text-iframe-overlay"></div>
-          {% endif %}
+          <img
+            srcset="
+              {% if section.settings.image.width >= 375 %}{{ section.settings.image | image_url: width: 375 }} 375w,{% endif %}
+              {% if section.settings.image.width >= 550 %}{{ section.settings.image | image_url: width: 550 }} 550w,{% endif %}
+              {% if section.settings.image.width >= 750 %}{{ section.settings.image | image_url: width: 750 }} 750w,{% endif %}
+              {% if section.settings.image.width >= 1100 %}{{ section.settings.image | image_url: width: 1100 }} 1100w,{% endif %}
+              {% if section.settings.image.width >= 1500 %}{{ section.settings.image | image_url: width: 1500 }} 1500w,{% endif %}
+              {% if section.settings.image.width >= 2200 %}{{ section.settings.image | image_url: width: 2200 }} 2200w,{% endif %}
+              {{ section.settings.image | image_url }} {{ section.settings.image.width }}w
+            "
+            sizes="100vw"
+            height="auto"
+            width="auto"
+            src="{{ section.settings.image | image_url: width: 1500 }}"
+            alt="{{ section.settings.image.alt | escape | default: 'Background image' }}"
+            class="w-full h-full object-cover"
+            loading="lazy"
+            style="position: relative; z-index: 1;"
+          >
         </div>
-      {% elsif section.settings.video_source == 'shopify' and section.settings.shopify_video != blank %}
-        <div class="absolute inset-0 image-with-text-iframe" style="margin: {{ section.settings.media_margin }}px;">
-          {{
-            section.settings.shopify_video
-            | video_tag:
-              autoplay: true,
-              loop: true,
-              muted: true,
-              playsinline: true,
-              controls: false,
-              class: 'w-full h-full object-cover'
-          }}
-          <div class="image-with-text-iframe-overlay"></div>
+      {% else %}
+        <div
+          class="flex bg-gray-400 items-center justify-center w-full h-full"
+          style="margin: {{ section.settings.media_margin }}px; position: relative; z-index: 1;"
+          role="img"
+          aria-label="Placeholder image"
+        >
+          {{ 'lifestyle-2' | placeholder_svg_tag: 'w-auto h-auto opacity-30' }}
         </div>
       {% endif %}
-    {% elsif section.settings.image != blank %}
-      <div
-        class="absolute inset-0 image-with-text-iframe"
-        style="margin: {{ section.settings.media_margin }}px;"
-        role="img"
-        aria-label="{{ section.settings.image.alt | escape | default: 'Background image' }}"
-      >
-        <img
-          srcset="
-            {% if section.settings.image.width >= 375 %}{{ section.settings.image | image_url: width: 375 }} 375w,{% endif %}
-            {% if section.settings.image.width >= 550 %}{{ section.settings.image | image_url: width: 550 }} 550w,{% endif %}
-            {% if section.settings.image.width >= 750 %}{{ section.settings.image | image_url: width: 750 }} 750w,{% endif %}
-            {% if section.settings.image.width >= 1100 %}{{ section.settings.image | image_url: width: 1100 }} 1100w,{% endif %}
-            {% if section.settings.image.width >= 1500 %}{{ section.settings.image | image_url: width: 1500 }} 1500w,{% endif %}
-            {% if section.settings.image.width >= 2200 %}{{ section.settings.image | image_url: width: 2200 }} 2200w,{% endif %}
-            {{ section.settings.image | image_url }} {{ section.settings.image.width }}w
-          "
-          sizes="100vw"
-          height="auto"
-          width="auto"
-          src="{{ section.settings.image | image_url: width: 1500 }}"
-          alt="{{ section.settings.image.alt | escape | default: 'Background image' }}"
-          class="w-full h-full object-cover"
-          loading="lazy"
-        >
-        <div class="image-with-text-iframe-overlay"></div>
-      </div>
-    {% else %}
-      <div
-        class="absolute inset-0 flex bg-gray-400 items-center justify-center"
-        style="margin: {{ section.settings.media_margin }}px;"
-        role="img"
-        aria-label="Placeholder image"
-      >
-        {{ 'lifestyle-2' | placeholder_svg_tag: 'w-auto h-auto opacity-30' }}
-      </div>
-    {% endif %}
-
-    <div class="absolute inset-0 px-12 image-with-text-text-content-wrapper-{{ section.id }}">
+      <div class="image-with-text-media-overlay-{{ section.id }}"></div>
+    </div>
+    <div class="absolute inset-0 px-12 image-with-text-text-content-wrapper-{{ section.id }}" style="z-index:3;">
       <div
         class="
           image-with-text-text-content-container-{{ section.id }}
@@ -532,11 +557,9 @@
 <script>
 
 window.addEventListener('load', function() {
-    const overlay = document.querySelector('.image-with-text-iframe-overlay');
+    const overlay = document.querySelector('.image-with-text-media-overlay-{{ section.id }}');
     if (!overlay) return;
-    // wait 1s, then trigger CSS transition if animation didn't run
     setTimeout(() => {
-      overlay.style.transition = 'opacity 1s ease-out';
       overlay.style.opacity = '0';
       overlay.addEventListener('transitionend', () => overlay.remove());
     }, 1000);
