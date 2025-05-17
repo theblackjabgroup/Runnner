@@ -1,0 +1,249 @@
+<script src="{{ 'blog-edit.js' | asset_url }}" defer></script>
+<style>
+ :root {
+    --font-heading-family: {{ settings.type_heading_font.family }}, sans-serif;
+    --font-body-family: {{ settings.type_body_font.family }}, sans-serif;
+  }
+  #animated-heading {
+    font-family: var(--font-heading-family);
+  }
+  .letter {
+    display: inline-block;
+    opacity: 0;
+    transform: translateX(100vw);
+    animation: slideInLetter 0.8s forwards;
+  }
+  @keyframes slideInLetter {
+    0% {
+      opacity: 0;
+      transform: translateX(100vw);
+    }
+    100% {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+
+  .date-tag, .card-excerpt {
+    font-family: var(--font-body-family);
+    opacity: 0;
+    animation: fadeIn 1s ease-in-out forwards;
+  }
+  @keyframes fadeIn {
+    0% {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    100% {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  @keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.fade-up {
+  animation: fadeUp 2.0s ease-out forwards;
+}
+  #parallax-image {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 10;
+    transition: transform 0.1s ease-out;
+    will-change: transform;
+}
+@media (max-width: 768px) {
+  #parallax-image {
+    width: 100% !important;       
+    margin-left: 7% !important;    
+    margin-top: 0px !important;   
+    height: 300px !important; 
+  }
+  #arrow-svg{
+    margin-top:0px !important;
+  }
+  #section-1{
+     height:50vh !important;
+    min-height: 100px !important;
+  }
+  #section-2-header{
+    font-size:20px;
+  }
+  #section-2-article{
+    width:300px;
+  }
+}
+</style>
+
+<section class="relative w-full overflow-hidden" style="min-height: 800px; height: 90vh;" id="section-1">
+
+   <div class="w-full max-w-14xl flex flex-col text-left" style='margin-left:13px;'>
+    <div class="overlay-content max-w-7xlz-2 flex flex-col" style="margin-top:35px;">
+       {% if section.settings.article_images != blank %}
+   <img
+  id="parallax-image"
+  src="{{ section.settings.article_images | img_url: 'master' }}"
+  class="absolute top-0 left-0 w-1/2 object-cover z-0"
+  style="margin-left:900px; padding-right:37px; height:600px; margin-top:100px;"
+/>
+
+  {% else %}
+    {{ 'image' | placeholder_svg_tag: 'absolute md:h-[500px] w-full' }}
+  {% endif %}
+      <div class="top-18 left-20 text-xl sm:text-2xl md:text-3xl date-tag">
+        {{ section.settings.date_text }}
+      </div>
+
+      <div class="flex flex-row"">
+          <svg
+          xmlns="http://www.w3.org/2000/svg"
+          class="arrow-svg w-9 h-8 md:mt-[20px] mt-[10px] sm:w-16 sm:h-18 md:w-20 md:h-44 lg:w-44 lg:h-28"
+          id="arrow-svg"
+          viewBox="0 0 24 24"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          style="fill:none;"
+        >
+          <line x1="5" y1="12" x2="19" y2="12" />
+          <polyline points="12 5 19 12 12 19" />
+        </svg>
+  <line x1="5" y1="12" x2="19" y2="12" />
+  <polyline points="12 5 19 12 12 19" />
+</svg>
+        <div class="top-11 left-3 md:left-25 z-10 flex flex-col items-start text-left">
+          <div
+            class="text-black text-4xl sm:text-6xl md:text-[10.5rem] font-medium uppercase leading-tight sm:leading-none break-words md:w-[40vw] sm:w-[100px] w-[50vw]" style="width:895px;"
+            id="animated-heading"
+          >
+            {{ section.settings.full_text }}
+          </div>
+        </div>
+      </div>
+      <p class="md:bottom-2 md:right-100 text-xl sm:text-2xl md:text-3xl uppercase top-60 card-excerpt md:top-180">
+        {{ section.settings.excerpt_text }}
+      </p>
+    </div>
+  </div>
+</section>
+<section>
+  <hr class="w-screen max-w-none mx-auto border-black"
+     style="border-top-width: 0px; border-style: solid; margin-bottom:14px; margin-left:13px;" />
+
+  <div class="uppercase text-5xl font-medium tracking-tight" style="margin-left:13px;" id="section-2-header">{{ section.settings.header }}</div>
+  <hr class="w-screen max-w-none mx-auto border-black"
+     style="border-top-width: 0px; border-style: solid; margin-top:14px;margin-left:13px;" />
+
+   <div class="flex flex-row">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          class="arrow-svg w-9 h-8 md:mt-[20px] mt-[10px] sm:w-16 sm:h-18 md:w-20 md:h-44 lg:w-44 lg:h-28"
+          id="arrow-svg"
+          viewBox="0 0 24 24"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          style="fill:none; margin-top:-29px;"
+        >
+          <line x1="5" y1="12" x2="19" y2="12" />
+          <polyline points="12 5 19 12 12 19" />
+        </svg>
+         <div class="w-1/2 mx-auto text-center text-left" id="section-2-article">{{ section.settings.article }}</div>
+          </div>
+</section>
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const image = document.getElementById('parallax-image');
+    const section = image.closest('section');
+
+    // Function to get maxTranslate based on screen size
+    function getMaxTranslate() {
+      if(window.innerWidth <= 768) {
+        return 150;  // smaller shift on mobile
+      } else {
+        return 300;  // desktop shift
+      }
+    }
+
+    // Initialize image position at bottom
+    let maxTranslate = getMaxTranslate();
+    image.style.transform = `translateY(${maxTranslate}px)`;
+
+    window.addEventListener('resize', () => {
+      maxTranslate = getMaxTranslate();
+      // Keep image at bottom on resize (optional)
+      image.style.transform = `translateY(${maxTranslate}px)`;
+    });
+
+    window.addEventListener('scroll', () => {
+      const scrollTop = window.scrollY || window.pageYOffset;
+      const sectionTop = section.offsetTop;
+
+      if (scrollTop > sectionTop) {
+        // Scroll down - image slides up
+        image.style.transform = `translateY(0)`;
+      } else {
+        // Scroll up - image slides down
+        image.style.transform = `translateY(${maxTranslate}px)`;
+      }
+    });
+  });
+</script>
+{% schema %}
+{
+  "name": "Blog-Article",
+  "tag": "section",
+  "settings": [
+    {
+      "type": "text",
+      "id": "full_text",
+      "label": "Full Heading Text",
+      "default": "The Bandit x ASICS Novablast 5 Campaign"
+    },
+    {
+      "type": "text",
+      "id": "date_text",
+      "label": "Date",
+      "default": "04.01.25"
+    },
+    {
+      "type": "color",
+      "id": "color_card_excerpt",
+      "label": "Card Excerpt Color",
+      "default": "#000000"
+    },
+    {
+      "type": "image_picker",
+      "id": "article_images",
+      "label": "Article Images",
+      "info": "Upload an image for each article."
+    },
+    {
+      "type": "text",
+      "id":"header",
+      "label": "Header of Blog Article",
+      "default":"Inspired by the work of Japanese American artist, Isamu Noguchi."
+    },
+    {
+      "type":"text",
+      "id":"article",
+      "label":"Article text",
+      "default":"Drawing from Japanese American artist Isamu Noguchi’s innovative and distinct use of light, translucency, and sculptural forms, the footwear design works to seamlessly blend art, culture, and performance.The shoe’s knitted upper features a dynamic play of sheer and opaque textures, accentuated with translucent, no-sew appliqué using the abstract shape of the Current. A transparent infographic tag at the laces and sculptural interpretations of eyelet shapes, laces, and the no-sew heel detail all pay homage to Noguchi’s bold yet soft design language, which is characterized by subtle curves and organic forms."
+    }
+  ],
+  "presets": [
+    {
+      "name": "Blog Article",
+      "category": "Custom"
+    }
+  ]
+}
+{% endschema %}
