@@ -22,506 +22,518 @@
 {% endcomment %}
 
 <style>
-    [x-cloak] {
-      display: none !important;
-    }
-  </style>
+  [x-cloak] {
+    display: none !important;
+  }
+</style>
 
-  {%- unless skip_styles -%}
-    {{ 'component-rating.css' | asset_url | stylesheet_tag }}
-    {{ 'component-volume-pricing.css' | asset_url | stylesheet_tag }}
+{%- unless skip_styles -%}
+  {{ 'component-rating.css' | asset_url | stylesheet_tag }}
+  {{ 'component-volume-pricing.css' | asset_url | stylesheet_tag }}
 
-    {{ 'component-price.css' | asset_url | stylesheet_tag }}
-    {{ 'quick-order-list.css' | asset_url | stylesheet_tag }}
-    {{ 'quantity-popover.css' | asset_url | stylesheet_tag }}
-  {%- endunless -%}
-  {%- if card_product and card_product != empty -%}
-    {%- liquid
+  {{ 'component-price.css' | asset_url | stylesheet_tag }}
+  {{ 'quick-order-list.css' | asset_url | stylesheet_tag }}
+  {{ 'quantity-popover.css' | asset_url | stylesheet_tag }}
+{%- endunless -%}
+{%- if card_product and card_product != empty -%}
+  {%- liquid
+    assign ratio = 1
+    if card_product.featured_media and media_aspect_ratio == 'portrait'
+      assign ratio = 0.8
+    elsif card_product.featured_media and media_aspect_ratio == 'adapt'
+      assign ratio = card_product.featured_media.aspect_ratio
+    endif
+    if ratio == 0 or ratio == null
       assign ratio = 1
-      if card_product.featured_media and media_aspect_ratio == 'portrait'
-        assign ratio = 0.8
-      elsif card_product.featured_media and media_aspect_ratio == 'adapt'
-        assign ratio = card_product.featured_media.aspect_ratio
-      endif
-      if ratio == 0 or ratio == null
-        assign ratio = 1
-      endif
-    -%}
-    <div class="card-wrapper product-card-wrapper group">
-      <div class="block w-full">
-        <div class="relative bg-[#F8F8F8] w-full h-[420px] group-hover:h-[380px] transition-all duration-300 overflow-hidden">
-          {%- if card_product.featured_media -%}
-            <div class="absolute inset-0 w-full h-full overflow-hidden product-images-slider ">
-              {% for media in card_product.media %}
-                <img
-                  srcset="
-                    {%- if media.width >= 165 -%}{{ media | image_url: width: 165 }} 165w,{%- endif -%}
-                    {%- if media.width >= 360 -%}{{ media | image_url: width: 360 }} 360w,{%- endif -%}
-                    {%- if media.width >= 533 -%}{{ media | image_url: width: 533 }} 533w,{%- endif -%}
-                    {%- if media.width >= 720 -%}{{ media | image_url: width: 720 }} 720w,{%- endif -%}
-                    {%- if media.width >= 940 -%}{{ media | image_url: width: 940 }} 940w,{%- endif -%}
-                    {%- if media.width >= 1066 -%}{{ media | image_url: width: 1066 }} 1066w,{%- endif -%}
-                    {{ media | image_url }} {{ media.width }}w
-                  "
-                  class="w-full h-full object-contain p-5 transition-all duration-300 group-hover:scale-[90%] group-hover:-translate-y-10 absolute inset-0 opacity-0"
-                  loading="lazy"
-                  width="{{ media.width }}"
-                  height="{{ media.height }}"
-                  {% if forloop.first %}
-                    style="opacity: 1;"
-                  {% endif %}
+    endif
+  -%}
+  <div class="card-wrapper product-card-wrapper group">
+    <div class="block w-full">
+      <div class="relative bg-[#F8F8F8] w-full h-[420px] group-hover:h-[380px] transition-all duration-300 overflow-hidden">
+        {%- if card_product.featured_media -%}
+          <div class="absolute inset-0 w-full h-full overflow-hidden product-images-slider ">
+            {% for media in card_product.media %}
+              <img
+                srcset="
+                  {%- if media.width >= 165 -%}{{ media | image_url: width: 165 }} 165w,{%- endif -%}
+                  {%- if media.width >= 360 -%}{{ media | image_url: width: 360 }} 360w,{%- endif -%}
+                  {%- if media.width >= 533 -%}{{ media | image_url: width: 533 }} 533w,{%- endif -%}
+                  {%- if media.width >= 720 -%}{{ media | image_url: width: 720 }} 720w,{%- endif -%}
+                  {%- if media.width >= 940 -%}{{ media | image_url: width: 940 }} 940w,{%- endif -%}
+                  {%- if media.width >= 1066 -%}{{ media | image_url: width: 1066 }} 1066w,{%- endif -%}
+                  {{ media | image_url }} {{ media.width }}w
+                "
+                class="w-full h-full object-contain p-5 transition-all duration-300 group-hover:scale-[90%] group-hover:-translate-y-10 absolute inset-0 opacity-0"
+                loading="lazy"
+                width="{{ media.width }}"
+                height="{{ media.height }}"
+                {% if forloop.first %}
+                  style="opacity: 1;"
+                {% endif %}
+              >
+            {% endfor %}
+
+            {% if card_product.media.size > 1 %}
+              <button class="slider-arrow prev absolute left-2 top-1/2  -translate-y-1/2  cursor-pointer  opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                <svg
+                  width="40"
+                  height="40"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="#ccc"
                 >
-              {% endfor %}
-
-              {% if card_product.media.size > 1 %}
-                <button class="slider-arrow prev absolute left-2 top-1/2 -translate-y-1/2 w-8 h-8 bg-white rounded-full shadow-lg opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                    <path d="M15 18l-6-6 6-6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                  </svg>
-                </button>
-                <button class="slider-arrow next absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 bg-white rounded-full shadow-lg opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                    <path d="M9 18l6-6-6-6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                  </svg>
-                </button>
-              {% endif %}
-            </div>
-          {%- endif -%}
-
-          {% if card_product.available == false %}
-            <div class="absolute top-3 right-0 z-10">
-              <span class="inline-block px-4 py-1 text-[12px] tracking-wide font-medium bg-zinc-800 text-white">
-                SOLD OUT
-              </span>
-            </div>
-          {% else %}
-            <div class="absolute inset-x-0 bottom-0 p-4 opacity-0 translate-y-10 transition-all duration-300 group-hover:opacity-100 group-hover:-translate-y-0">
-              <div class="bg-white w-[93%] mx-auto text-center product-sizes-container">
-                {%- liquid
-                  assign has_size_variant = false
-                  for option in card_product.options_with_values
-                    if option.name contains 'Size' or option.name contains 'size'
-                      assign has_size_variant = true
-                      break
-                    endif
-                  endfor
-                -%}
-
-                <button
-                  type="button"
-                  class="add-to-cart-btn w-full py-4 !rounded-xl !text-[1.6rem] shadow-xl rounded-lg font-medium text-black hover:bg-black hover:text-white transition-colors duration-200 uppercase tracking-wider quick-add-button"
-                  {% if has_size_variant %}
-                    data-has-sizes="true"
-                  {% else %}
-                    data-single-variant="{{ card_product.first_available_variant.id }}"
-                  {% endif %}
+                  <path d="M15 18l-6-6 6-6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </button>
+              <button class="slider-arrow next absolute right-2 top-1/2  -translate-y-1/2  cursor-pointer  opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                <svg
+                  width="40"
+                  height="40"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="#ccc"
                 >
-                  <span class="add-to-cart-text">{{ 'products.product.add_to_cart' | t }}</span>
-                  <span class="adding-to-cart-text hidden">Adding...</span>
-                  <span class="added-to-cart-text hidden">Added!</span>
-                </button>
+                  <path d="M9 18l6-6-6-6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </button>
+            {% endif %}
+          </div>
+        {%- endif -%}
 
+        {% if card_product.available == false %}
+          <div class="absolute top-3 right-0 z-10">
+            <span class="inline-block px-4 py-1 text-[12px] tracking-wide font-medium bg-zinc-800 text-white">
+              SOLD OUT
+            </span>
+          </div>
+        {% else %}
+          <div class="absolute inset-x-0 bottom-0 p-4 opacity-0 translate-y-10 transition-all duration-300 group-hover:opacity-100 group-hover:-translate-y-0">
+            <div class="bg-white w-[93%] mx-auto text-center product-sizes-container">
+              {%- liquid
+                assign has_size_variant = false
+                for option in card_product.options_with_values
+                  if option.name contains 'Size' or option.name contains 'size'
+                    assign has_size_variant = true
+                    break
+                  endif
+                endfor
+              -%}
+
+              <button
+                type="button"
+                class="add-to-cart-btn w-full py-4 !rounded-xl !text-[1.6rem] shadow-xl rounded-lg font-medium text-black hover:bg-black hover:text-white transition-colors duration-200 uppercase tracking-wider quick-add-button"
                 {% if has_size_variant %}
-                  <div class="quick-add-modal hidden">
-                    <div class="quick-add-modal__content">
-                      <div class="quick-add-modal__header">
-                        <h3 class="!text-[1.4rem] !font-medium !uppercase">Select Size</h3>
-                        <div class="quick-add-modal__options">
-                          {% for option in card_product.options_with_values %}
-                            {% if option.name contains 'Size' or option.name contains 'size' %}
-                              {% for value in option.values %}
-                                {% assign variant_exists = false %}
-                                {% assign variant_id = null %}
-                                {% for variant in card_product.variants %}
-                                  {% comment %} Changed to check only if variant option contains the size value {% endcomment %}
-                                  {% if variant.available and variant.title contains value %}
-                                    {% assign variant_exists = true %}
-                                    {% assign variant_id = variant.id %}
-                                    {% break %}
-                                  {% endif %}
-                                {% endfor %}
+                  data-has-sizes="true"
+                {% else %}
+                  data-single-variant="{{ card_product.first_available_variant.id }}"
+                {% endif %}
+              >
+                <span class="add-to-cart-text">{{ 'products.product.add_to_cart' | t }}</span>
+                <span class="adding-to-cart-text hidden">Adding...</span>
+                <span class="added-to-cart-text hidden">Added!</span>
+              </button>
 
-                                <span
-                                  class="quick-add__submit  text-black{% unless variant_exists %} opacity-50{% endunless %}"
-                                  {% if variant_exists %}
-                                    data-variant-id="{{ variant_id }}"
-                                    form="quick-add-{{ card_product.id }}"
-                                  {% else %}
-                                    disabled
-                                  {% endif %}
-                                >
-                                  {{ value }}
-                                </span>
+              {% if has_size_variant %}
+                <div class="quick-add-modal hidden">
+                  <div class="quick-add-modal__content">
+                    <div class="quick-add-modal__header">
+                      <h3 class="!text-[1.4rem] !font-medium !uppercase">Select Size</h3>
+                      <div class="quick-add-modal__options">
+                        {% for option in card_product.options_with_values %}
+                          {% if option.name contains 'Size' or option.name contains 'size' %}
+                            {% for value in option.values %}
+                              {% assign variant_exists = false %}
+                              {% assign variant_id = null %}
+                              {% for variant in card_product.variants %}
+                                {% comment %} Changed to check only if variant option contains the size value {% endcomment %}
+                                {% if variant.available and variant.title contains value %}
+                                  {% assign variant_exists = true %}
+                                  {% assign variant_id = variant.id %}
+                                  {% break %}
+                                {% endif %}
                               {% endfor %}
-                            {% endif %}
-                          {% endfor %}
-                        </div>
+
+                              <span
+                                class="quick-add__submit !rounded-lg !text-[1.5rem]  text-black{% unless variant_exists %} opacity-50{% endunless %}"
+                                {% if variant_exists %}
+                                  data-variant-id="{{ variant_id }}"
+                                  form="quick-add-{{ card_product.id }}"
+                                {% else %}
+                                  disabled
+                                {% endif %}
+                              >
+                                {{ value }}
+                              </span>
+                            {% endfor %}
+                          {% endif %}
+                        {% endfor %}
                       </div>
                     </div>
                   </div>
-                {% endif %}
+                </div>
+              {% endif %}
 
-                <form
-                  method="post"
-                  action="{{ routes.cart_add_url }}"
-                  id="quick-add-{{ card_product.id }}"
-                  accept-charset="UTF-8"
-                  class="form quick-add__form"
+              <form
+                method="post"
+                action="{{ routes.cart_add_url }}"
+                id="quick-add-{{ card_product.id }}"
+                accept-charset="UTF-8"
+                class="form quick-add__form"
+              >
+                <input
+                  type="hidden"
+                  name="id"
+                  value="{{ card_product.selected_or_first_available_variant.id }}"
+                  class="!text-black"
                 >
-                  <input
-                    type="hidden"
-                    name="id"
-                    value="{{ card_product.selected_or_first_available_variant.id }}"
-                    class="!text-black"
-                  >
-                  <input type="hidden" name="quantity" value="1">
-                </form>
-              </div>
+                <input type="hidden" name="quantity" value="1">
+              </form>
             </div>
-          {% endif %}
-        </div>
+          </div>
+        {% endif %}
+      </div>
 
-        <div class="mt-3 space-y-1">
-          <a href="{{ card_product.url }}" class="block hover:opacity-75 transition-opacity duration-200">
-            <h3 class="!text-[1.6rem] uppercase font-medium leading-tight">{{ card_product.title | escape }}</h3>
-            <div class="flex gap-2 items-baseline">
-              <span class="!text-[1.6rem] uppercase font-medium"> {{ card_product.price | money }} </span>
-              {%- if card_product.compare_at_price > card_product.price -%}
-                |<span class="!text-[1.6rem] uppercase text-red-600">
-                  {{- card_product.compare_at_price | money }} FOR MEMBERS</span
-                >
-              {%- endif -%}
-            </div>
-          </a>
-        </div>
+      <div class="mt-3 space-y-1">
+        <a href="{{ card_product.url }}" class="block hover:opacity-75 transition-opacity duration-200">
+          <h3 class="!text-[1.6rem] uppercase font-medium leading-tight">{{ card_product.title | escape }}</h3>
+          <div class="flex gap-2 items-baseline">
+            <span class="!text-[1.6rem] uppercase font-medium"> {{ card_product.price | money }} </span>
+            {%- if card_product.compare_at_price > card_product.price -%}
+              |<span class="!text-[1.6rem] uppercase text-red-600">
+                {{- card_product.compare_at_price | money }} FOR MEMBERS</span
+              >
+            {%- endif -%}
+          </div>
+        </a>
       </div>
     </div>
-  {%- else -%}
-    {%- liquid
-      assign ratio = 1
-      assign placeholder = true
-      if media_aspect_ratio == 'portrait'
-        assign ratio = 0.8
-      endif
-    -%}
-    <div class="card-wrapper product-card-wrapper underline-links-hover">
+  </div>
+{%- else -%}
+  {%- liquid
+    assign ratio = 1
+    assign placeholder = true
+    if media_aspect_ratio == 'portrait'
+      assign ratio = 0.8
+    endif
+  -%}
+  <div class="card-wrapper product-card-wrapper underline-links-hover">
+    <div
+      class="
+        card card--{{ settings.card_style }}
+        {% if extend_height %} card--extend-height{% endif %}
+        {% if image_shape and image_shape != 'default' %} card--shape{% endif %}
+        {% if settings.card_style == 'card' %} color-{{ settings.card_color_scheme }} gradient{% endif %}
+      "
+      style="--ratio-percent: {{ 1 | divided_by: ratio | times: 100 }}%;"
+    >
       <div
-        class="
-          card card--{{ settings.card_style }}
-          {% if extend_height %} card--extend-height{% endif %}
-          {% if image_shape and image_shape != 'default' %} card--shape{% endif %}
-          {% if settings.card_style == 'card' %} color-{{ settings.card_color_scheme }} gradient{% endif %}
-        "
-        style="--ratio-percent: {{ 1 | divided_by: ratio | times: 100 }}%;"
+        class="card__inner{% if settings.card_style == 'standard' %} color-{{ settings.card_color_scheme }} gradient{% endif %} ratio"
       >
         <div
-          class="card__inner{% if settings.card_style == 'standard' %} color-{{ settings.card_color_scheme }} gradient{% endif %} ratio"
+          class="card__media {% if image_shape and image_shape != 'default' %} shape--{{ image_shape }} color-{{ settings.card_color_scheme }} gradient{% endif %}"
         >
           <div
-            class="card__media {% if image_shape and image_shape != 'default' %} shape--{{ image_shape }} color-{{ settings.card_color_scheme }} gradient{% endif %}"
+            class="media media--transparent"
           >
-            <div
-              class="media media--transparent"
-            >
-              {%- if placeholder_image -%}
-                {{ placeholder_image | placeholder_svg_tag: 'placeholder-svg' }}
-              {%- else -%}
-                {{ 'product-apparel-2' | placeholder_svg_tag: 'placeholder-svg' }}
-              {% endif %}
-            </div>
+            {%- if placeholder_image -%}
+              {{ placeholder_image | placeholder_svg_tag: 'placeholder-svg' }}
+            {%- else -%}
+              {{ 'product-apparel-2' | placeholder_svg_tag: 'placeholder-svg' }}
+            {% endif %}
           </div>
         </div>
-        <div class="card__content">
-          <div class="card__information">
-            <h3 class="card__heading card__heading--placeholder{% if settings.card_style == 'standard' %} h5{% endif %}">
-              <a role="link" aria-disabled="true" class="full-unstyled-link">
-                {{ 'onboarding.product_title' | t }}
-              </a>
-            </h3>
-            <div class="card-information">
-              {%- if show_vendor -%}
-                <span class="visually-hidden">{{ 'accessibility.vendor' | t }}</span>
-                <div class="caption-with-letter-spacing light">{{ 'products.product.vendor' | t }}</div>
-              {%- endif -%}
-              {% render 'price', placeholder: placeholder, show_compare_at_price: true %}
-            </div>
+      </div>
+      <div class="card__content">
+        <div class="card__information">
+          <h3 class="card__heading card__heading--placeholder{% if settings.card_style == 'standard' %} h5{% endif %}">
+            <a role="link" aria-disabled="true" class="full-unstyled-link">
+              {{ 'onboarding.product_title' | t }}
+            </a>
+          </h3>
+          <div class="card-information">
+            {%- if show_vendor -%}
+              <span class="visually-hidden">{{ 'accessibility.vendor' | t }}</span>
+              <div class="caption-with-letter-spacing light">{{ 'products.product.vendor' | t }}</div>
+            {%- endif -%}
+            {% render 'price', placeholder: placeholder, show_compare_at_price: true %}
           </div>
         </div>
       </div>
     </div>
-  {%- endif -%}
+  </div>
+{%- endif -%}
 
-  <style>
-    .quick-add-modal {
-      position: absolute;
-      bottom: 10px;
-      right: 21px;
-      left: 21px;
-      background: white;
-      padding: 0 10px;
-      z-index: 20;
-      opacity: 1;
-      height: 50px !important;
-      visibility: visible;
-      border-radius: 10px;
-      overflow: hidden; /* Add this */
-      clip-path: inset(0); /* Add this */
-    }
+<style>
+  .quick-add-modal {
+    position: absolute;
+    bottom: 10px;
+    right: 21px;
+    left: 21px;
+    background: white;
+    padding: 0 10px;
+    z-index: 20;
+    opacity: 1;
+    height: 50px !important;
+    visibility: visible;
+    border-radius: 10px;
+    overflow: hidden; /* Add this */
+    clip-path: inset(0); /* Add this */
+  }
 
-    .quick-add-modal__header {
-      display: flex;
-      justify-content: space-between;
-      height: 50px;
-      align-items: center;
-    }
+  .quick-add-modal__header {
+    display: flex;
+    justify-content: space-between;
+    height: 50px;
+    align-items: center;
+  }
 
-    .quick-add-modal__options {
-      margin-left: auto;
-      display: flex;
-      flex-wrap: wrap;
-      gap: 5px;
-      justify-content: center;
-    }
+  .quick-add-modal__options {
+    margin-left: auto;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    justify-content: center;
+  }
 
-    @keyframes sizeOptionFade {
-      from {
-        opacity: 0;
-        transform: translateY(10px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
-
-    .quick-add__submit {
+  @keyframes sizeOptionFade {
+    from {
       opacity: 0;
-      transform: translateY(100px);
-
-      animation: sizeOptionFade 0.3s ease forwards;
-      min-width: 35px;
-      padding: 0px !important;
-      border: 1px solid #ddd;
-      background: white;
-      color: black;
-      cursor: pointer;
-      transition: all 0.2s;
-      font-size: 14px;
-      font-weight: 800;
+      transform: translateY(10px);
     }
-
-    .quick-add-modal.visible .quick-add__submit:nth-child(1) {
-      animation-delay: 0s;
+    to {
+      opacity: 1;
+      transform: translateY(0);
     }
-    .quick-add-modal.visible .quick-add__submit:nth-child(2) {
-      animation-delay: 0.1s;
-    }
-    .quick-add-modal.visible .quick-add__submit:nth-child(3) {
-      animation-delay: 0.2s;
-    }
-    .quick-add-modal.visible .quick-add__submit:nth-child(4) {
-      animation-delay: 0.3s;
-    }
-    .quick-add-modal.visible .quick-add__submit:nth-child(5) {
-      animation-delay: 0.4s;
-    }
+  }
 
-    .quick-add__submit:hover:not([disabled]) {
-      background: black;
-      color: white;
-      border-color: black;
-    }
+  .quick-add__submit {
+    opacity: 0;
+    transform: translateY(100px);
 
-    .quick-add__submit[disabled] {
-      opacity: 0.5;
-      cursor: not-allowed;
-      background: #eee;
-      position: relative;
-      text-decoration: none; /* Remove default line-through */
-    }
+    animation: sizeOptionFade 0.3s ease forwards;
+    min-width: 35px;
+    padding: 0px !important;
+    border: 1px solid #ddd;
+    background: white;
+    color: black;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-size: 14px;
+    font-weight: 800;
+  }
 
-    .quick-add__submit[disabled]::after {
-      content: '';
-      position: absolute;
-      left: 0;
-      right: 0;
-      top: 50%;
-      border-top: 1px solid #999;
-      transform: rotate(-45deg);
-    }
+  .quick-add-modal.visible .quick-add__submit:nth-child(1) {
+    animation-delay: 0s;
+  }
+  .quick-add-modal.visible .quick-add__submit:nth-child(2) {
+    animation-delay: 0.1s;
+  }
+  .quick-add-modal.visible .quick-add__submit:nth-child(3) {
+    animation-delay: 0.2s;
+  }
+  .quick-add-modal.visible .quick-add__submit:nth-child(4) {
+    animation-delay: 0.3s;
+  }
+  .quick-add-modal.visible .quick-add__submit:nth-child(5) {
+    animation-delay: 0.4s;
+  }
 
-    .quick-add-modal__close {
-      padding: 5px;
-      cursor: pointer;
-      font-size: 20px;
-      line-height: 1;
-    }
-  </style>
+  .quick-add__submit:hover:not([disabled]) {
+    background: black;
+    color: white;
+    border-color: black;
+  }
 
-  <script>
-    document.addEventListener('DOMContentLoaded', function () {
-      const containers = document.querySelectorAll('.product-sizes-container');
+  .quick-add__submit[disabled] {
+    opacity: 0.5;
+    cursor: not-allowed;
+    background: #eee;
+    position: relative;
+    text-decoration: none; /* Remove default line-through */
+  }
 
-      function updateButtonState(button, state) {
-        const addText = button.querySelector('.add-to-cart-text');
-        const addingText = button.querySelector('.adding-to-cart-text');
-        const addedText = button.querySelector('.added-to-cart-text');
+  .quick-add__submit[disabled]::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 50%;
+    border-top: 1px solid #999;
+    transform: rotate(-45deg);
+  }
 
-        [addText, addingText, addedText].forEach((el) => el.classList.add('hidden'));
+  .quick-add-modal__close {
+    padding: 5px;
+    cursor: pointer;
+    font-size: 20px;
+    line-height: 1;
+  }
+</style>
 
-        switch (state) {
-          case 'adding':
-            addingText.classList.remove('hidden');
-            button.disabled = true;
-            break;
-          case 'added':
-            addedText.classList.remove('hidden');
-            button.disabled = true;
-            setTimeout(() => {
-              addText.classList.remove('hidden');
-              addedText.classList.add('hidden');
-              button.disabled = false;
-            }, 2000);
-            break;
-          default:
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const containers = document.querySelectorAll('.product-sizes-container');
+
+    function updateButtonState(button, state) {
+      const addText = button.querySelector('.add-to-cart-text');
+      const addingText = button.querySelector('.adding-to-cart-text');
+      const addedText = button.querySelector('.added-to-cart-text');
+
+      [addText, addingText, addedText].forEach((el) => el.classList.add('hidden'));
+
+      switch (state) {
+        case 'adding':
+          addingText.classList.remove('hidden');
+          button.disabled = true;
+          break;
+        case 'added':
+          addedText.classList.remove('hidden');
+          button.disabled = true;
+          setTimeout(() => {
             addText.classList.remove('hidden');
+            addedText.classList.add('hidden');
             button.disabled = false;
-        }
+          }, 2000);
+          break;
+        default:
+          addText.classList.remove('hidden');
+          button.disabled = false;
       }
+    }
 
-      async function addToCart(formData) {
-        try {
-          const response = await fetch(window.routes.cart_add_url, {
-            method: 'POST',
-            body: formData,
-          });
-          if (!response.ok) throw new Error('Network response was not ok');
-          return await response.json();
-        } catch (error) {
-          console.error('Error:', error);
-          throw error;
-        }
+    async function addToCart(formData) {
+      try {
+        const response = await fetch(window.routes.cart_add_url, {
+          method: 'POST',
+          body: formData,
+        });
+        if (!response.ok) throw new Error('Network response was not ok');
+        return await response.json();
+      } catch (error) {
+        console.error('Error:', error);
+        throw error;
       }
+    }
 
-      containers.forEach((container) => {
-        const addToCartBtn = container.querySelector('.add-to-cart-btn');
-        const modal = container.querySelector('.quick-add-modal');
-        const form = container.querySelector('.quick-add__form');
-        const singleVariantId = addToCartBtn?.dataset.singleVariant;
-        const hasSizes = addToCartBtn?.dataset.hasSizes === 'true';
+    containers.forEach((container) => {
+      const addToCartBtn = container.querySelector('.add-to-cart-btn');
+      const modal = container.querySelector('.quick-add-modal');
+      const form = container.querySelector('.quick-add__form');
+      const singleVariantId = addToCartBtn?.dataset.singleVariant;
+      const hasSizes = addToCartBtn?.dataset.hasSizes === 'true';
 
-        if (hasSizes && modal && form) {
-          // For products with size variants
-          addToCartBtn.addEventListener('mouseenter', () => {
-            modal.style.display = 'block';
-            requestAnimationFrame(() => {
-              modal.classList.add('visible');
-              modal.classList.remove('hidden');
-            });
+      if (hasSizes && modal && form) {
+        // For products with size variants
+        addToCartBtn.addEventListener('mouseenter', () => {
+          modal.style.display = 'block';
+          requestAnimationFrame(() => {
+            modal.classList.add('visible');
+            modal.classList.remove('hidden');
           });
+        });
 
-          container.addEventListener('mouseleave', () => {
-            modal.classList.remove('visible');
-            setTimeout(() => {
-              modal.classList.add('hidden');
-              modal.style.display = '';
-            }, 300);
-          });
+        container.addEventListener('mouseleave', () => {
+          modal.classList.remove('visible');
+          setTimeout(() => {
+            modal.classList.add('hidden');
+            modal.style.display = '';
+          }, 300);
+        });
 
-          modal.querySelector('.quick-add-modal__close')?.addEventListener('click', (e) => {
-            e.preventDefault();
-            modal.classList.remove('visible');
-            setTimeout(() => {
-              modal.classList.add('hidden');
-              modal.style.display = '';
-            }, 300);
-          });
+        modal.querySelector('.quick-add-modal__close')?.addEventListener('click', (e) => {
+          e.preventDefault();
+          modal.classList.remove('visible');
+          setTimeout(() => {
+            modal.classList.add('hidden');
+            modal.style.display = '';
+          }, 300);
+        });
 
-          modal.querySelectorAll('.quick-add__submit').forEach((submitBtn) => {
-            submitBtn.addEventListener('click', async () => {
-              updateButtonState(addToCartBtn, 'adding');
-              const variantId = submitBtn.dataset.variantId;
-              const formData = new FormData(form);
-              formData.set('id', variantId);
-
-              try {
-                await addToCart(formData);
-                updateButtonState(addToCartBtn, 'added');
-                modal.classList.add('hidden');
-              } catch (error) {
-                updateButtonState(addToCartBtn, 'default');
-              }
-            });
-          });
-        } else if (singleVariantId) {
-          // For products without size variants
-          addToCartBtn.addEventListener('click', async () => {
+        modal.querySelectorAll('.quick-add__submit').forEach((submitBtn) => {
+          submitBtn.addEventListener('click', async () => {
             updateButtonState(addToCartBtn, 'adding');
-            const formData = new FormData();
-            formData.append('id', singleVariantId);
-            formData.append('quantity', '1');
+            const variantId = submitBtn.dataset.variantId;
+            const formData = new FormData(form);
+            formData.set('id', variantId);
 
             try {
               await addToCart(formData);
               updateButtonState(addToCartBtn, 'added');
+              modal.classList.add('hidden');
             } catch (error) {
               updateButtonState(addToCartBtn, 'default');
             }
           });
-        }
+        });
+      } else if (singleVariantId) {
+        // For products without size variants
+        addToCartBtn.addEventListener('click', async () => {
+          updateButtonState(addToCartBtn, 'adding');
+          const formData = new FormData();
+          formData.append('id', singleVariantId);
+          formData.append('quantity', '1');
+
+          try {
+            await addToCart(formData);
+            updateButtonState(addToCartBtn, 'added');
+          } catch (error) {
+            updateButtonState(addToCartBtn, 'default');
+          }
+        });
+      }
+    });
+
+    const sliders = document.querySelectorAll('.product-images-slider');
+
+    sliders.forEach((slider) => {
+      const images = slider.querySelectorAll('img');
+      const prevBtn = slider.querySelector('.prev');
+      const nextBtn = slider.querySelector('.next');
+      let currentIndex = 0;
+
+      if (!prevBtn || !nextBtn) return;
+
+      function showImage(index) {
+        images.forEach((img) => (img.style.opacity = '0'));
+        images[index].style.opacity = '1';
+      }
+
+      prevBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        currentIndex = (currentIndex - 1 + images.length) % images.length;
+        showImage(currentIndex);
       });
 
-      const sliders = document.querySelectorAll('.product-images-slider');
+      nextBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        currentIndex = (currentIndex + 1) % images.length;
+        showImage(currentIndex);
+      });
+    });
 
-      sliders.forEach((slider) => {
-        const images = slider.querySelectorAll('img');
-        const prevBtn = slider.querySelector('.prev');
-        const nextBtn = slider.querySelector('.next');
-        let currentIndex = 0;
+    // Add quick add functionality
+    document.querySelectorAll('.quick-add-button').forEach((button) => {
+      const container = button.closest('.product-sizes-container');
+      const modal = container?.querySelector('.quick-add-modal');
+      const form = container?.querySelector('.quick-add__form');
 
-        if (!prevBtn || !nextBtn) return;
+      if (!container || !modal || !form) return;
 
-        function showImage(index) {
-          images.forEach((img) => (img.style.opacity = '0'));
-          images[index].style.opacity = '1';
-        }
-
-        prevBtn.addEventListener('click', (e) => {
-          e.preventDefault();
-          currentIndex = (currentIndex - 1 + images.length) % images.length;
-          showImage(currentIndex);
-        });
-
-        nextBtn.addEventListener('click', (e) => {
-          e.preventDefault();
-          currentIndex = (currentIndex + 1) % images.length;
-          showImage(currentIndex);
-        });
+      button.addEventListener('click', () => {
+        modal.classList.remove('hidden');
       });
 
-      // Add quick add functionality
-      document.querySelectorAll('.quick-add-button').forEach((button) => {
-        const container = button.closest('.product-sizes-container');
-        const modal = container?.querySelector('.quick-add-modal');
-        const form = container?.querySelector('.quick-add__form');
+      modal.querySelector('.quick-add-modal__close')?.addEventListener('click', () => {
+        modal.classList.add('hidden');
+      });
 
-        if (!container || !modal || !form) return;
-
-        button.addEventListener('click', () => {
-          modal.classList.remove('hidden');
-        });
-
-        modal.querySelector('.quick-add-modal__close')?.addEventListener('click', () => {
-          modal.classList.add('hidden');
-        });
-
-        modal.querySelectorAll('.quick-add__submit').forEach((submitBtn) => {
-          submitBtn.addEventListener('click', () => {
-            const variantId = submitBtn.dataset.variantId;
-            form.querySelector('input[name="id"]').value = variantId;
-            form.submit();
-          });
+      modal.querySelectorAll('.quick-add__submit').forEach((submitBtn) => {
+        submitBtn.addEventListener('click', () => {
+          const variantId = submitBtn.dataset.variantId;
+          form.querySelector('input[name="id"]').value = variantId;
+          form.submit();
         });
       });
     });
-  </script>
+  });
+</script>
