@@ -15,14 +15,13 @@
         {% endif %}
         {{ block.shopify_attributes }}
       >
-        {% if block.settings.video_url != blank %}
-          {% assign video_url = block.settings.video_url %}
-          {% if video_url contains 'youtube.com' or video_url contains 'youtu.be' %}
+        {% if block.settings.video_url != blank or block.settings.video != blank %}
+          {% if block.settings.video_url contains 'youtube.com' or block.settings.video_url contains 'youtu.be' %}
             {% # Convert youtube URL to embed URL %}
-            {% if video_url contains 'watch?v=' %}
-              {% assign video_id = video_url | split: 'watch?v=' | last | split: '&' | first %}
-            {% elsif video_url contains 'youtu.be/' %}
-              {% assign video_id = video_url | split: 'youtu.be/' | last %}
+            {% if block.settings.video_url contains 'watch?v=' %}
+              {% assign video_id = block.settings.video_url | split: 'watch?v=' | last | split: '&' | first %}
+            {% elsif block.settings.video_url contains 'youtu.be/' %}
+              {% assign video_id = block.settings.video_url | split: 'youtu.be/' | last %}
             {% endif %}
             <div class="video-container relative w-full h-full">
               <iframe
@@ -33,16 +32,17 @@
                 allowfullscreen
               ></iframe>
             </div>
-          {% else %}
+          {% elsif block.settings.video != blank %}
             <div class="video-container relative aspect-video w-full">
-              <video
-                src="{{ video_url }}"
-                class="w-full h-full object-cover"
-                autoplay
-                loop
-                muted
-                playsinline
-              ></video>
+              {{
+                block.settings.video
+                | video_tag:
+                  autoplay: true,
+                  loop: true,
+                  muted: true,
+                  controls: true,
+                  class: 'w-full h-full object-cover'
+              }}
             </div>
           {% endif %}
         {% elsif block.settings.image != blank %}
@@ -84,7 +84,7 @@
 <style>
   .collection-list {
     width: 100%;
-    max-width: 1200px;
+
     margin: 0 auto;
     display: grid;
     grid-template-columns: repeat({{ section.settings.columns_desktop }}, 1fr);
@@ -94,7 +94,7 @@
   }
 
   .collection-list__item {
-    height: 350px;
+    height: 400px;
     max-width: 100%;
     overflow: hidden;
   }
@@ -207,9 +207,18 @@
           "info": "Make this card span across two columns"
         },
         {
+          "type": "header",
+          "content": "Media"
+        },
+        {
           "type": "url",
           "id": "video_url",
-          "label": "Video URL"
+          "label": "YouTube Video URL"
+        },
+        {
+          "type": "video",
+          "id": "video",
+          "label": "Shopify Video"
         },
         {
           "type": "image_picker",
