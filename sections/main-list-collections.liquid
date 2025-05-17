@@ -1,52 +1,137 @@
 {{ 'component-card.css' | asset_url | stylesheet_tag }}
 {{ 'section-collection-list.css' | asset_url | stylesheet_tag }}
 
-<div class="page-width">
-  <h1 class="title title--primary inline-richtext{% if settings.animations_reveal_on_scroll %} scroll-trigger animate--fade-in{% endif %}">
+<div class="!p-0 py-16">
+  <h1 class="title title--primary inline-richtext mb-12 {% if settings.animations_reveal_on_scroll %} scroll-trigger animate--fade-in{% endif %}">
     {{ section.settings.title }}
   </h1>
-  {%- liquid
-    case section.settings.sort
-      when 'products_high', 'products_low'
-        assign collections = collections | sort: 'all_products_count'
-      when 'date', 'date_reversed'
-        assign collections = collections | sort: 'published_at'
-    endcase
 
-    if section.settings.sort == 'products_high' or section.settings.sort == 'date_reversed' or section.settings.sort == 'alphabetical_reversed'
-      assign collections = collections | reverse
-    endif
-
-    assign moduloResult = 28 | modulo: section.settings.columns_desktop
-    assign paginate_by = 30
-    if moduloResult == 0
-      assign paginate_by = 28
-    endif
-  -%}
-  {%- paginate collections by paginate_by -%}
-    <ul
-      class="collection-list grid grid--{{ section.settings.columns_desktop }}-col-desktop grid--{{ section.settings.columns_mobile }}-col-tablet-down"
-      role="list"
-    >
-      {%- for collection in collections -%}
-        <li
-          class="collection-list__item grid__item{% if settings.animations_reveal_on_scroll %} scroll-trigger animate--slide-in{% endif %}"
-          {% if settings.animations_reveal_on_scroll %}
-            data-cascade
-            style="--animation-order: {{ forloop.index }};"
+  <ul class="collection-list flex flex-wrap gap-6" role="list">
+    {%- for block in section.blocks -%}
+      <li
+        class="collection-list__item {% if block.settings.span_two_columns %}md:col-span-2{% endif %} {% if settings.animations_reveal_on_scroll %} scroll-trigger animate--slide-in{% endif %}"
+        {% if block.settings.span_two_columns %}
+          data-span-two="true"
+        {% endif %}
+        {{ block.shopify_attributes }}
+      >
+        {% if block.settings.video_url != blank %}
+          {% assign video_url = block.settings.video_url %}
+          {% if video_url contains 'youtube.com' or video_url contains 'youtu.be' %}
+            {% # Convert youtube URL to embed URL %}
+            {% if video_url contains 'watch?v=' %}
+              {% assign video_id = video_url | split: 'watch?v=' | last | split: '&' | first %}
+            {% elsif video_url contains 'youtu.be/' %}
+              {% assign video_id = video_url | split: 'youtu.be/' | last %}
+            {% endif %}
+            <div class="video-container relative w-full h-full">
+              <iframe
+                src="https://www.youtube.com/embed/{{ video_id }}?autoplay=1&mute=1&loop=1&playlist={{ video_id }}&controls=0"
+                class="absolute inset-0 w-full h-full"
+                frameborder="0"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowfullscreen
+              ></iframe>
+            </div>
+          {% else %}
+            <div class="video-container relative aspect-video w-full">
+              <video
+                src="{{ video_url }}"
+                class="w-full h-full object-cover"
+                autoplay
+                loop
+                muted
+                playsinline
+              ></video>
+            </div>
           {% endif %}
-        >
-          {% render 'card-collection',
-            card_collection: collection,
-            media_aspect_ratio: section.settings.image_ratio,
-            columns: 3
-          %}
-        </li>
-      {%- endfor -%}
-    </ul>
-    {% render 'pagination', paginate: paginate %}
-  {%- endpaginate -%}
+        {% elsif block.settings.image != blank %}
+          <div class="image-container relative aspect-video w-full">
+            <img
+              srcset="
+                {%- if block.settings.image.width >= 165 -%}{{ block.settings.image | image_url: width: 165 }} 165w,{%- endif -%}
+                {%- if block.settings.image.width >= 360 -%}{{ block.settings.image | image_url: width: 360 }} 360w,{%- endif -%}
+                {%- if block.settings.image.width >= 535 -%}{{ block.settings.image | image_url: width: 535 }} 535w,{%- endif -%}
+                {%- if block.settings.image.width >= 750 -%}{{ block.settings.image | image_url: width: 750 }} 750w,{%- endif -%}
+              "
+              src="{{ block.settings.image | image_url: width: 750 }}"
+              class="w-full h-full object-cover"
+              loading="lazy"
+              width="100"
+              height="100"
+              sizes="
+                (min-width: 990px) {% if block.settings.span_two_columns %}66vw{% else %}33vw{% endif %},
+                (min-width: 750px) {% if block.settings.span_two_columns %}50vw{% else %}33vw{% endif %},
+                100vw
+              "
+              alt="{{ block.settings.image.alt | escape }}"
+            >
+          </div>
+        {% else %}
+          {% if block.settings.collection != blank %}
+            {% render 'card-collection',
+              card_collection: block.settings.collection,
+              media_aspect_ratio: section.settings.image_ratio,
+              columns: section.settings.columns_desktop
+            %}
+          {% endif %}
+        {% endif %}
+      </li>
+    {%- endfor -%}
+  </ul>
 </div>
+
+<style>
+  .collection-list {
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: repeat({{ section.settings.columns_desktop }}, 1fr);
+    gap: 20px;
+    padding: 0 1rem;
+    margin-bottom: 2rem;
+  }
+
+  .collection-list__item {
+    height: 350px;
+    max-width: 100%;
+    overflow: hidden;
+  }
+
+  .collection-list__item[data-span-two="true"] {
+    grid-column: span 2;
+  }
+
+  @media screen and (max-width: 749px) {
+    .collection-list {
+      grid-template-columns: repeat({{ section.settings.columns_mobile }}, 1fr);
+      gap: 10px;
+    }
+    .collection-list__item {
+      height: 250px;
+    }
+    .collection-list__item[data-span-two="true"] {
+      grid-column: span {{ section.settings.columns_mobile }};
+    }
+  }
+
+  .video-container {
+    position: relative;
+    height: 100%;
+    background: #000;
+  }
+
+  .video-container iframe {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+</style>
+
 {% schema %}
 {
   "name": "t:sections.main-list-collections.name",
@@ -56,39 +141,7 @@
       "type": "inline_richtext",
       "id": "title",
       "label": "t:sections.main-list-collections.settings.title.label",
-      "default": "t:sections.main-list-collections.settings.title.default"
-    },
-    {
-      "type": "select",
-      "id": "sort",
-      "options": [
-        {
-          "value": "alphabetical",
-          "label": "t:sections.main-list-collections.settings.sort.options__1.label"
-        },
-        {
-          "value": "alphabetical_reversed",
-          "label": "t:sections.main-list-collections.settings.sort.options__2.label"
-        },
-        {
-          "value": "date_reversed",
-          "label": "t:sections.main-list-collections.settings.sort.options__3.label"
-        },
-        {
-          "value": "date",
-          "label": "t:sections.main-list-collections.settings.sort.options__4.label"
-        },
-        {
-          "value": "products_high",
-          "label": "t:sections.main-list-collections.settings.sort.options__5.label"
-        },
-        {
-          "value": "products_low",
-          "label": "t:sections.main-list-collections.settings.sort.options__6.label"
-        }
-      ],
-      "default": "alphabetical",
-      "label": "t:sections.main-list-collections.settings.sort.label"
+      "default": "Collections"
     },
     {
       "type": "select",
@@ -96,19 +149,19 @@
       "options": [
         {
           "value": "adapt",
-          "label": "t:sections.main-list-collections.settings.image_ratio.options__1.label"
+          "label": "Adapt to image"
         },
         {
           "value": "portrait",
-          "label": "t:sections.main-list-collections.settings.image_ratio.options__2.label"
+          "label": "Portrait"
         },
         {
           "value": "square",
-          "label": "t:sections.main-list-collections.settings.image_ratio.options__3.label"
+          "label": "Square"
         }
       ],
       "default": "adapt",
-      "label": "t:sections.main-list-collections.settings.image_ratio.label"
+      "label": "Image ratio"
     },
     {
       "type": "range",
@@ -117,7 +170,7 @@
       "max": 6,
       "step": 1,
       "default": 3,
-      "label": "t:sections.main-list-collections.settings.columns_desktop.label"
+      "label": "Number of columns"
     },
     {
       "type": "select",
@@ -125,15 +178,55 @@
       "options": [
         {
           "value": "1",
-          "label": "t:sections.main-list-collections.settings.columns_mobile.options__1.label"
+          "label": "1 column"
         },
         {
           "value": "2",
-          "label": "t:sections.main-list-collections.settings.columns_mobile.options__2.label"
+          "label": "2 columns"
         }
       ],
       "default": "2",
-      "label": "t:sections.main-list-collections.settings.columns_mobile.label"
+      "label": "Columns on mobile"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "card",
+      "name": "Collection Card",
+      "settings": [
+        {
+          "type": "collection",
+          "id": "collection",
+          "label": "Collection"
+        },
+        {
+          "type": "checkbox",
+          "id": "span_two_columns",
+          "label": "Span Two Columns",
+          "default": false,
+          "info": "Make this card span across two columns"
+        },
+        {
+          "type": "url",
+          "id": "video_url",
+          "label": "Video URL"
+        },
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Image"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Collections List",
+      "blocks": [
+        {
+          "type": "card"
+        }
+      ]
     }
   ]
 }
