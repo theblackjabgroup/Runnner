@@ -109,7 +109,7 @@
                             {% endif %}
                             <a
                               href="{{childlink.url}}"
-                              class="block  my-2 text-[{{ section.settings.subMenuItem_color }}] hover:text-[var(--hover)] underline font-medium text-2xl "
+                              class="relative flex items-center gap-2 !tracking-normal  leading-none group text-[var(--header_text)] before:absolute before:bottom-0 before:left-0 before:w-full before:h-[0.15rem] before:bg-[var(--header_text)] before:origin-left before:transition-transform before:duration-1000 before:ease-in-out hover:before:origin-right hover:before:scale-x-0 hover:text-[var(--hover)]"
                             >
                               SHOP ALL {{ childlink.title -}}
                             </a>
@@ -149,7 +149,7 @@
                                     style="transition-delay: 0ms"
                                   >
                                     <div class="mt-4 flex items-center justify-between group-hover/card:hover:text-[var(--hover)] group-hover/card:font-bold">
-                                      <p class="text-2xl font-medium">{{ block.settings.button_text_1 }}</p>
+                                      <p class="text-2xl font-medium uppercase">{{ block.settings.button_text_1 }}</p>
                                       <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M17 8l4 4m0 0l-4 4m4-4H3"/>
                                       </svg>
@@ -184,10 +184,10 @@
                                 {% if block.settings.button_text_2 != blank %}
                                   <a
                                     href="{{ block.settings.button_link_2 }}"
-                                    class="block group-hover/card:hover:text-[var(--hover)] group-hover/card:font-bold transition-all duration-300"
+                                    class="block group-hover/card:hover:text-[var(--hover)] group-hover/card:font-bold group-hover/card:translate-1 transition-all duration-300"
                                   >
                                     <div class="mt-4 flex items-center justify-between">
-                                      <p class="text-2xl font-medium">{{ block.settings.button_text_2 }}</p>
+                                      <p class="text-2xl font-medium uppercase">{{ block.settings.button_text_2 }}</p>
                                       <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M17 8l4 4m0 0l-4 4m4-4H3"/>
                                       </svg>
@@ -202,8 +202,8 @@
                     </div>
                     <!-- Horizontal scrollling text -->
                     <div
-                      class=" absolute -bottom-14 h-16 w-full"
-                      style="background: var(--header_background);"
+                      class=" fixed inset-0 h-16 w-full"
+                      style="background: var(--header_background); top:100%"
                     >
                       <div class="horizontal-text-container">
                         <div class="horizontal-text">
@@ -789,215 +789,193 @@
 <div class="header-offset" data-header-offset></div>
 
 <style>
-     .dropdown-group .absolute {
-       opacity: 100;
-       pointer-events: none;
-       transform: translateY(-10px);
-       transition: opacity 300ms ease, transform 300ms ease;
-     }
+  .header-main {
+    position: relative;
+    width: 100%;
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    transform: translateY(0);
+    background: var(--header_background);
+  }
 
+  .header-main.is-sticky {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    transform: translateY(0);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  }
 
-     .header-main {
-       position: relative;
-       width: 100%;
-       transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-       transform: translateY(0);
-       background: var(--header_background);
-     }
+  .header-main.is-sticky.is-hidden {
+    transform: translateY(-100%);
+  }
 
-     .header-main.is-sticky {
-       position: fixed;
-       top: 0;
-       left: 0;
-       right: 0;
-       transform: translateY(0);
-       box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-     }
+  .header-offset {
+    height: 0;
+    transition: height 0.3s ease;
+  }
 
-     .header-main.is-sticky.is-hidden {
-       transform: translateY(-100%);
-     }
+  .header-offset.is-active {
+    height: var(--header-height, 0px);
+  }
 
-     .header-offset {
-       height: 0;
-       transition: height 0.3s ease;
-     }
+  .sticky-disabled {
+    position: relative !important;
+    transform: none !important;
+  }
 
-     .header-offset.is-active {
-       height: var(--header-height, 0px);
-     }
+  .sticky-disabled + .header-offset {
+    display: none !important;
+  }
 
-     .sticky-disabled {
-       position: relative !important;
-       transform: none !important;
-     }
+  /* Mobile submenu scrollbar styling */
+  .submenu.styled-scrollbar {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(0, 0, 0, 0.3) transparent;
+  }
 
-     .sticky-disabled + .header-offset {
-       display: none !important;
-     }
+  .submenu.styled-scrollbar::-webkit-scrollbar {
+    width: 4px;
+  }
 
-     /* Improve dropdown transitions */
-     .dropdown-group > .absolute {
-       transition: all 300ms cubic-bezier(0.4, 0, 0.2, 1);
-     }
-     .dropdown-group:hover > .absolute {
-       transition-delay: 50ms;
-     }
-     .dropdown-group:hover #mega-menu-{{ forloop.index }} {
-     opacity: 1;
-     transform: translateY(0);
-     pointer-events: auto;
-   }
+  .submenu.styled-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+  }
 
+  .submenu.styled-scrollbar::-webkit-scrollbar-thumb {
+    background-color: rgba(0, 0, 0, 0.3);
+    border-radius: 20px;
+  }
 
-     /* Mobile submenu scrollbar styling */
-     .submenu.styled-scrollbar {
-       scrollbar-width: thin;
-       scrollbar-color: rgba(0, 0, 0, 0.3) transparent;
-     }
+  /* Mobile submenu animations */
+  .submenu {
+    transition: all 400ms cubic-bezier(0.4, 0, 0.2, 1);
+    will-change: opacity, height;
+    height: auto;
+    max-height: 0;
+  }
 
-     .submenu.styled-scrollbar::-webkit-scrollbar {
-       width: 4px;
-     }
+  .submenu.show {
+    opacity: 1;
+    max-height: 50vh;
+  }
 
-     .submenu.styled-scrollbar::-webkit-scrollbar-track {
-       background: transparent;
-     }
+  .submenu:not(.show) {
+    opacity: 0;
+    max-height: 0;
+  }
 
-     .submenu.styled-scrollbar::-webkit-scrollbar-thumb {
-       background-color: rgba(0, 0, 0, 0.3);
-       border-radius: 20px;
-     }
+  .submenu.hidden {
+    display: none;
+  }
 
-     /* Mobile submenu animations */
-     .submenu {
-       transition: all 400ms cubic-bezier(0.4, 0, 0.2, 1);
-       will-change: opacity, height;
-       height: auto;
-       max-height: 0;
-     }
+  .submenu:not(.hidden) {
+    display: block;
+  }
 
-     .submenu.show {
-       opacity: 1;
-       max-height: 50vh;
-     }
+  /* Add overlay transition */
+  #menu-overlay {
+    transition: opacity 0.3s ease;
+    will-change: opacity;
+  }
 
-     .submenu:not(.show) {
-       opacity: 0;
-       max-height: 0;
-     }
+  /* Mobile menu transitions */
+  #mobile-menu {
+    will-change: transform;
+    backface-visibility: hidden;
+  }
 
-     .submenu.hidden {
-       display: none;
-     }
+  #mobile-menu.active {
+    transform: translateX(0) !important;
+  }
 
-     .submenu:not(.hidden) {
-       display: block;
-     }
+  .vertical-text-container {
+    position: fixed;
+    left: 0px;
+    top: 0;
+    bottom: 0;
+    width: 30px;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+  }
 
-     /* Add overlay transition */
-     #menu-overlay {
-       transition: opacity 0.3s ease;
-       will-change: opacity;
-     }
+  .vertical-text {
+    position: absolute;
+    writing-mode: vertical-rl;
+    text-orientation: mixed;
+    transform: rotate(180deg);
+    animation: scrollText 50s linear infinite;
+    color: #000;
+    font-size: 16px;
+    white-space: nowrap;
+    padding: 5px 0;
+  }
 
-     /* Mobile menu transitions */
-     #mobile-menu {
-       will-change: transform;
-       backface-visibility: hidden;
-     }
+  .vertical-text:nth-child(2) {
+    animation: scrollText2 50s linear infinite;
+  }
 
-     #mobile-menu.active {
-       transform: translateX(0) !important;
-     }
+  @keyframes scrollText {
+    0% {
+      transform: translateY(0) rotate(180deg);
+    }
+    100% {
+      transform: translateY(-100%) rotate(180deg);
+    }
+  }
 
-     .vertical-text-container {
-       position: fixed;
-       left: 0px;
-       top: 0;
-       bottom: 0;
-       width: 30px;
-       overflow: hidden;
-       display: flex;
-       align-items: center;
-     }
+  @keyframes scrollText2 {
+    0% {
+      transform: translateY(100%) rotate(180deg);
+    }
+    100% {
+      transform: translateY(0) rotate(180deg);
+    }
+  }
 
-     .vertical-text {
-       position: absolute;
-       writing-mode: vertical-rl;
-       text-orientation: mixed;
-       transform: rotate(180deg);
-       animation: scrollText 50s linear infinite;
-       color: #000;
-       font-size: 16px;
-       white-space: nowrap;
-       padding: 5px 0;
-     }
+  .horizontal-text-container {
+    position: fixed;
+    top: 100%;
+    left: 0;
+    width: 100%;
+    height: 40px;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    border-top: 1px solid black;
+    border-bottom: 1px solid black;
+    z-index: 999;
+  }
 
-     .vertical-text:nth-child(2) {
-       animation: scrollText2 50s linear infinite;
-     }
+  .horizontal-text {
+    white-space: nowrap;
+    font-size: 22px;
+    display: inline-block;
+    animation: scrollRight 50s linear infinite;
+  }
 
-     @keyframes scrollText {
-       0% {
-         transform: translateY(0) rotate(180deg);
-       }
-       100% {
-         transform: translateY(-100%) rotate(180deg);
-       }
-     }
+  .horizontal-text:nth-child(n) {
+    animation: scrollRight2 50s linear infinite;
+  }
 
-     @keyframes scrollText2 {
-       0% {
-         transform: translateY(100%) rotate(180deg);
-       }
-       100% {
-         transform: translateY(0) rotate(180deg);
-       }
-     }
+  @keyframes scrollRight {
+    0% {
+      transform: translateX(-100%);
+    }
+    100% {
+      transform: translateX(100%);
+    }
+  }
 
-     .horizontal-text-container {
-       position: fixed;
-       bottom: 0;
-       left: 0;
-       width: 100%;
-       height: 40px;
-       overflow: hidden;
-       display: flex;
-       align-items: center;
-  border-top: 1px solid black;
-       border-bottom: 1px solid black;
-       z-index: 999;
-     }
-
-     .horizontal-text {
-       white-space: nowrap;
-       font-size: 22px;
-       display: inline-block;
-       animation: scrollRight 50s linear infinite;
-     }
-
-     .horizontal-text:nth-child(n) {
-       animation: scrollRight2 50s linear infinite;
-     }
-
-     @keyframes scrollRight {
-       0% {
-         transform: translateX(-100%);
-       }
-       100% {
-         transform: translateX(100%);
-       }
-     }
-
-     @keyframes scrollRight2 {
-       0% {
-         transform: translateX(-100%);
-       }
-       100% {
-         transform: translateX(100%);
-       }
-     }
+  @keyframes scrollRight2 {
+    0% {
+      transform: translateX(-100%);
+    }
+    100% {
+      transform: translateX(100%);
+    }
+  }
 </style>
 
 <script>
