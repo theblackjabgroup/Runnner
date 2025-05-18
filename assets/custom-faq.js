@@ -31,24 +31,51 @@ document.addEventListener("DOMContentLoaded", () => {
     const row = item.querySelector(".faq-row");
     const btn = item.querySelector(".faq-toggle");
     const preview = item.querySelector(".faq-preview");
-    const arrow = item.querySelector(".arrow-svg");
+    const arrowContainer = item.querySelector(".arrow-container");
 
     row.setAttribute("role", "button");
     row.setAttribute("tabindex", "0");
     row.setAttribute("aria-expanded", "false");
     btn.setAttribute("aria-expanded", "false");
 
+    const defaultArrow = `
+      <svg xmlns="http://www.w3.org/2000/svg" class="arrow-svg inline-block"
+    fill="none"
+    viewBox="0 0 44 44"
+    stroke-width="1.5"
+    stroke="currentColor"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+    style="margin-top:53px;">
+      <path d="M7.47241 7.47241L7.47241 1.00001M7.47241 1.00001L1.00001 1.00001M7.47241 1.00001L1.00001 7.47241" stroke="black" stroke-linejoin="round"/>
+      </svg>
+    `;
+
+    const expandedArrow = `
+      <svg xmlns="http://www.w3.org/2000/svg"  
+      class="arrow-svg inline-block"
+    fill="none"
+    viewBox="0 0 44 44"
+    stroke-width="1.5"
+    stroke="currentColor"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+    style="margin-top:48px;">
+        <path d="M1.1875 7.7334H7.6599M7.6599 7.7334V1.261M7.6599 7.7334L1.1875 1.261">
+      </svg>
+    `;
+
     const doToggle = () => {
       const expanded = btn.getAttribute("aria-expanded") === "true";
 
       if (!expanded) {
         preview.innerHTML = preview.dataset.fullText;
-        arrow.classList.add("rotate-90");
+        arrowContainer.innerHTML = expandedArrow;
         btn.setAttribute("aria-expanded", "true");
         row.setAttribute("aria-expanded", "true");
       } else {
         preview.innerHTML = preview.dataset.shortText;
-        arrow.classList.remove("rotate-90");
+        arrowContainer.innerHTML = defaultArrow;
         btn.setAttribute("aria-expanded", "false");
         row.setAttribute("aria-expanded", "false");
       }
