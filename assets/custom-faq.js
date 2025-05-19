@@ -38,47 +38,44 @@ document.addEventListener("DOMContentLoaded", () => {
     row.setAttribute("aria-expanded", "false");
     btn.setAttribute("aria-expanded", "false");
 
-    const defaultArrow = `
+    // Insert single SVG with default arrow path
+    arrowContainer.innerHTML = `
       <svg xmlns="http://www.w3.org/2000/svg" class="arrow-svg inline-block"
-    fill="none"
-    viewBox="0 0 44 44"
-    stroke-width="1.5"
-    stroke="currentColor"
-    stroke-linecap="round"
-    stroke-linejoin="round"
-    style="margin-top:53px;">
-      <path d="M7.47241 7.47241L7.47241 1.00001M7.47241 1.00001L1.00001 1.00001M7.47241 1.00001L1.00001 7.47241" stroke="black" stroke-linejoin="round"/>
+      fill="none" viewBox="0 0 14 14" stroke-width="1.5" stroke="currentColor"
+      stroke-linecap="round" stroke-linejoin="round" style="width:24px; height:24px; margin-right:35px;">
+        <path id="arrow-path" d="M7.47241 7.47241L7.47241 1.00001M7.47241 1.00001L1.00001 1.00001M7.47241 1.00001L1.00001 7.47241" stroke="black"/>
       </svg>
     `;
 
-    const expandedArrow = `
-      <svg xmlns="http://www.w3.org/2000/svg"  
-      class="arrow-svg inline-block"
-    fill="none"
-    viewBox="0 0 44 44"
-    stroke-width="1.5"
-    stroke="currentColor"
-    stroke-linecap="round"
-    stroke-linejoin="round"
-    style="margin-top:48px;">
-        <path d="M1.1875 7.7334H7.6599M7.6599 7.7334V1.261M7.6599 7.7334L1.1875 1.261">
-      </svg>
-    `;
+    const arrowSvg = arrowContainer.querySelector(".arrow-svg");
+    const arrowPath = arrowSvg.querySelector("#arrow-path");
+
+    const defaultPath = "M7.47241 7.47241L7.47241 1.00001M7.47241 1.00001L1.00001 1.00001M7.47241 1.00001L1.00001 7.47241";
+    const expandedPath = "M1.1875 7.7334H7.6599M7.6599 7.7334V1.261M7.6599 7.7334L1.1875 1.261";
+
+    const flipDuration = 500;
 
     const doToggle = () => {
       const expanded = btn.getAttribute("aria-expanded") === "true";
+      arrowSvg.style.transition = `transform ${flipDuration / 2}ms ease-in`;
+      arrowSvg.style.transformOrigin = "center center";
+      arrowSvg.style.transform = "rotateX(90deg)";
 
-      if (!expanded) {
-        preview.innerHTML = preview.dataset.fullText;
-        arrowContainer.innerHTML = expandedArrow;
-        btn.setAttribute("aria-expanded", "true");
-        row.setAttribute("aria-expanded", "true");
-      } else {
-        preview.innerHTML = preview.dataset.shortText;
-        arrowContainer.innerHTML = defaultArrow;
-        btn.setAttribute("aria-expanded", "false");
-        row.setAttribute("aria-expanded", "false");
-      }
+      setTimeout(() => {
+        if (!expanded) {
+          preview.innerHTML = preview.dataset.fullText;
+          arrowPath.setAttribute("d", expandedPath);
+          btn.setAttribute("aria-expanded", "true");
+          row.setAttribute("aria-expanded", "true");
+        } else {
+          preview.innerHTML = preview.dataset.shortText;
+          arrowPath.setAttribute("d", defaultPath);
+          btn.setAttribute("aria-expanded", "false");
+          row.setAttribute("aria-expanded", "false");
+        }
+        arrowSvg.style.transition = `transform ${flipDuration / 2}ms ease-out`;
+        arrowSvg.style.transform = "rotateX(0deg)";
+      }, flipDuration / 2);
     };
 
     row.addEventListener("click", (e) => {
