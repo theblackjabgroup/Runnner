@@ -43,7 +43,7 @@ document.addEventListener("DOMContentLoaded", () => {
       <svg xmlns="http://www.w3.org/2000/svg" class="arrow-svg inline-block"
       fill="none" viewBox="0 0 14 14" stroke-width="1.5" stroke="currentColor"
       stroke-linecap="round" stroke-linejoin="round" style="width:24px; height:24px; margin-right:35px;">
-        <path id="arrow-path" d="M7.47241 7.47241L7.47241 1.00001M7.47241 1.00001L1.00001 1.00001M7.47241 1.00001L1.00001 7.47241" stroke="black"/>
+        <path id="arrow-path" d="M7.47241 7.47241L7.47241 1.00001M7.47241 1.00001L1.00001 1.00001M7.47241 1.00001L1.00001 7.47241"/>
       </svg>
     `;
 
