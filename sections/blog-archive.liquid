@@ -204,54 +204,56 @@
   }
 </style>
 
-<div class="blog-archive-section">
-  <div class="blog-archive-section-header">
-    <h2 class="blog-archive-section-title">THE ARCHIVE</h2>
-    <div class="view-toggle">
-      <div class="toggle-slider"></div>
-      <button id="gridViewBtn" class="active">Grid</button>
-      <button id="listViewBtn">List</button>
+{% if section.settings.enabled %}
+  <section class="blog-archive-section">
+    <div class="blog-archive-section-header">
+      <h2 class="blog-archive-section-title">THE ARCHIVE</h2>
+      <div class="view-toggle">
+        <div class="toggle-slider"></div>
+        <button id="gridViewBtn" class="active">Grid</button>
+        <button id="listViewBtn">List</button>
+      </div>
     </div>
-  </div>
 
-  <div class="blog-archive-grid grid-view" id="archiveContainer">
-    {% for block in section.blocks %}
-      <a href="{{ block.settings.link }}" class="blog-archive-card" {{ block.shopify_attributes }}>
-        <div class="blog-archive-card-image-wrapper">
-          {% if block.settings.image != blank %}
-            <img
-              class="blog-archive-card-image"
-              src="{{ block.settings.image | image_url }}"
-              alt="{{ block.settings.title }}"
-              width="auto"
-              height="auto"
-            >
-          {% else %}
-            <div style="width:100%; background:#f3f3f3; display:flex; align-items:center; justify-content:center; padding:4rem 0;">
-              <span style="color:#bbb;">No image</span>
-            </div>
-          {% endif %}
-        </div>
-        <div class="blog-archive-card-content">
-          <p class="blog-archive-card-date">{{ block.settings.date }}</p>
-          <h3 class="blog-archive-card-title">
-            <img
-              src="{{ "arrow-down.png" | asset_url }}"
-              alt="Dropdown Icon"
-              class="w-12 h-6 object-contain transition-transform duration-300 group-hover:-rotate-90 collection-arrow-img blog-archive-card-title-arrow"
-              width="15px"
-              height="auto"
-              aria-hidden="true"
-              style="padding-bottom:5px; margin-right:5px;"
-            >
-            {{ block.settings.title }}
-          </h3>
-          <p class="blog-archive-card-desc">{{ block.settings.desc }}</p>
-        </div>
-      </a>
-    {% endfor %}
-  </div>
-</div>
+    <div class="blog-archive-grid grid-view" id="archiveContainer">
+      {% for block in section.blocks %}
+        <a href="{{ block.settings.link }}" class="blog-archive-card" {{ block.shopify_attributes }}>
+          <div class="blog-archive-card-image-wrapper">
+            {% if block.settings.image != blank %}
+              <img
+                class="blog-archive-card-image"
+                src="{{ block.settings.image | image_url }}"
+                alt="{{ block.settings.title }}"
+                width="auto"
+                height="auto"
+              >
+            {% else %}
+              <div style="width:100%; background:#f3f3f3; display:flex; align-items:center; justify-content:center; padding:4rem 0;">
+                <span style="color:#bbb;">No image</span>
+              </div>
+            {% endif %}
+          </div>
+          <div class="blog-archive-card-content">
+            <p class="blog-archive-card-date">{{ block.settings.date }}</p>
+            <h3 class="blog-archive-card-title">
+              <img
+                src="{{ "arrow-down.png" | asset_url }}"
+                alt="Dropdown Icon"
+                class="w-12 h-6 object-contain transition-transform duration-300 group-hover:-rotate-90 collection-arrow-img blog-archive-card-title-arrow"
+                width="15px"
+                height="auto"
+                aria-hidden="true"
+                style="padding-bottom:5px; margin-right:5px;"
+              >
+              {{ block.settings.title }}
+            </h3>
+            <p class="blog-archive-card-desc">{{ block.settings.desc }}</p>
+          </div>
+        </a>
+      {% endfor %}
+    </div>
+  </section>
+{% endif %}
 
 <script>
   document.addEventListener('DOMContentLoaded', () => {
@@ -295,7 +297,14 @@
   "name": "Blog Archive",
   "tag": "section",
   "class": "my-custom-section",
-  "settings": [],
+  "settings": [
+    {
+      "type": "checkbox",
+      "id": "enabled",
+      "label": "Enable section",
+      "default": true
+    }
+  ],
   "blocks": [
     {
       "type": "blog_card",
