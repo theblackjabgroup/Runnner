@@ -74,7 +74,7 @@
                   {%- for value in option.values -%}
                     <button
                       type="button"
-                      class="color-swatch w-8 h-8 rounded-full hover:scale-110 transition-transform {% if forloop.first %}ring-2 ring-offset-2 ring-black{% endif %}"
+                      class="color-swatch w-8 h-8 rounded-full hover:scale-110 transition-transform focus:outline-none"
                       style="background-color: {{ value | handleize }};"
                       data-option-value="{{ value | escape }}"
                     >
@@ -91,28 +91,28 @@
       <div class="product-tabs w-[80%]   flex-1 overflow-hidden">
         <div class="tabs-nav flex border-t border-gray-200">
           <button
-            class="tab-btn text-[16px] text-left text-black border-black flex-1 p-4 border-t-2 hover:text-black hover:border-black transition-colors duration-300"
+            class="tab-btn text-[16px] text-left text-black border-black flex-1  border-t-2 hover:text-black hover:border-black transition-colors duration-300"
             data-tab="description"
           >
             DESCRIPTION
           </button>
           <button
-            class="tab-btn flex-1 p-4 text-[16px] text-left text-gray-500 border-t-2 border-transparent hover:text-black hover:border-black transition-colors duration-300"
+            class="tab-btn flex-1 text-[16px] text-left text-gray-500 border-t-2 border-transparent hover:text-black hover:border-black transition-colors duration-300"
             data-tab="details"
           >
             DETAILS
           </button>
           <button
-            class="tab-btn flex-1 p-4 text-[16px] text-left text-gray-500 border-t-2 border-transparent hover:text-black hover:border-black transition-colors duration-300"
+            class="tab-btn flex-1 text-[16px] text-left text-gray-500 border-t-2 border-transparent hover:text-black hover:border-black transition-colors duration-300"
             data-tab="sizing"
           >
             SIZING
           </button>
         </div>
-        <div class="tab-content p-8 overflow-y-auto">
-          <div class="tab-pane active" data-content="description">{{ product.description }}</div>
+        <div class="tab-content mt-6 overflow-y-auto ">
+          <div class="tab-pane active " data-content="description">{{ product.description }}</div>
 
-          <div class="tab-pane hidden" data-content="details">
+          <div class="tab-pane hidden " data-content="details">
             {%- if section.settings.metafield_namespace_key != blank -%}
               <div class="prose prose-lg max-w-none">
                 {{ section.settings.metafield_namespace_key }}
@@ -121,7 +121,7 @@
               <p class="text-gray-500">No details available for this product.</p>
             {%- endif -%}
           </div>
-          <div class="tab-pane hidden" data-content="sizing">
+          <div class="tab-pane hidden " data-content="sizing">
             <button
               id="open-size-chart"
               class="bg-black text-white px-4 py-2 rounded hover:bg-gray-900 transition-colors"
@@ -158,10 +158,9 @@
               </div>
             </div>
 
-            <!-- Optional Backdrop -->
             <div
               id="size-chart-backdrop"
-              class="fixed inset-0 bg-black bg-opacity-30 hidden z-[999]"
+              class="fixed inset-0 bg-black/60 hidden z-[999]"
             >
               &nbsp;
             </div>
@@ -196,11 +195,12 @@
 
               <button
                 type="button"
-                class="size-btn relative w-12 h-12 flex items-center justify-center transition-all duration-300"
+                class="size-btn relative w-auto h-12 overflow-hidden flex items-center justify-center transition-all duration-300"
+
                 data-value="{{ value | escape }}"
                 aria-label="Size {{ value }}"
               >
-                <span class="relative z-10 text-3xl font-bold ">{{ value }}</span>
+                <span class="relative z-10 text-3xl px-2 font-bold ">{{ value }}</span>
               </button>
             {%- endfor -%}
           </div>
@@ -314,7 +314,7 @@
                   {%- for value in option.values -%}
                     <button
                       type="button"
-                      class="color-swatch w-8 h-8 rounded-full hover:scale-110 transition-transform {% if forloop.first %}ring-2 ring-offset-2 ring-black{% endif %}"
+                      class="color-swatch w-8 h-8 rounded-full hover:scale-110 transition-transform"
                       style="background-color: {{ value | handleize }};"
                       data-option-value="{{ value | escape }}"
                     >
@@ -680,12 +680,6 @@
 
     updateActiveImage();
 
-    const firstSwatch = document.querySelector('.color-swatch');
-    if (firstSwatch) {
-      firstSwatch.classList.add('ring-1', 'ring-offset-2', 'ring-black');
-      const initialColor = firstSwatch.getAttribute('data-option-value');
-      document.querySelector('[data-active-color]').textContent = initialColor;
-    }
     const tabBtns = document.querySelectorAll('.tab-btn');
     const tabPanes = document.querySelectorAll('.tab-pane');
 
@@ -710,38 +704,63 @@
         });
       });
     });
-    const colorSwatches = document.querySelectorAll('.color-swatch');
-    const activeColorDisplays = document.querySelectorAll('[data-active-color]');
 
-    colorSwatches.forEach((swatch) => {
-      swatch.addEventListener('click', () => {
-        const selectedColor = swatch.getAttribute('data-option-value');
 
-        // Update all color displays
-        activeColorDisplays.forEach((display) => {
-          display.textContent = selectedColor;
-        });
 
-        // Update swatch states
-        colorSwatches.forEach((s) => {
-          s.classList.remove('ring-2', 'ring-offset-2', 'ring-black');
-          if (s.getAttribute('data-option-value') === selectedColor) {
-            s.classList.add('ring-2', 'ring-offset-2', 'ring-black');
-          }
-        });
-      });
+  const colorSwatches = document.querySelectorAll('.color-swatch');
+  const activeColorDisplays = document.querySelectorAll('[data-active-color]');
+  let lastSelectedColor = '';
+
+  function updateDisplays(color) {
+    activeColorDisplays.forEach(display => {
+      display.textContent = color;
+    });
+  }
+
+ function setActiveSwatch(swatch) {
+    const selectedColor = swatch.getAttribute('data-option-value');
+
+    // Remove ring from all
+    colorSwatches.forEach((el) => {
+      el.classList.remove('ring-1', 'ring-offset-1', 'ring-black');
     });
 
-    // Initialize first color
-    if (colorSwatches.length > 0) {
-      const initialColor = colorSwatches[0].getAttribute('data-option-value');
-      activeColorDisplays.forEach((display) => {
-        display.textContent = initialColor;
-      });
-      colorSwatches[0].classList.add('ring-2', 'ring-offset-2', 'ring-black');
-    }
+    // Force reflow then add ring (fixes rendering issue)
+    swatch.offsetWidth; // triggers reflow
+    swatch.classList.add('ring-1', 'ring-offset-2', 'ring-black');
 
-    // Size button handling
+    // Update display
+    activeColorDisplays.forEach((el) => {
+      el.textContent = selectedColor;
+    });
+
+    // Remove focus ring delay
+    swatch.blur();
+   updateVariant();
+
+
+  }
+
+
+  colorSwatches.forEach(swatch => {
+    const swatchColor = swatch.getAttribute('data-option-value');
+
+    swatch.addEventListener('click', () => setActiveSwatch(swatch));
+
+    swatch.addEventListener('mouseenter', () => {
+      if (swatchColor) updateDisplays(swatchColor);
+    });
+
+    swatch.addEventListener('mouseleave', () => {
+      if (lastSelectedColor) updateDisplays(lastSelectedColor);
+    });
+  });
+
+  // Initialize first swatch as selected
+  if (colorSwatches.length > 0) {
+    setActiveSwatch(colorSwatches[0]);
+  }
+      // Size button handling
     const sizeButtons = document.querySelectorAll('.size-btn');
 
     // Set initial active state
@@ -872,25 +891,8 @@
       priceElement.textContent = `$${(variant.price / 100).toFixed(2)}`;
     }
 
-    function updateVariant() {
-      const variant = findMatchingVariant();
-      updateUI(variant);
-    }
 
-    // Color button clicks
-    document.querySelectorAll('.color-swatch').forEach(btn => {
-      btn.addEventListener('click', () => {
-        selectedColor = btn.getAttribute('data-option-value');
-
-        // highlight selected color
-        document.querySelectorAll('.color-swatch').forEach(b => {
-          b.classList.remove('ring-2', 'ring-offset-2', 'ring-black');
-        });
-        btn.classList.add('ring-2', 'ring-offset-2', 'ring-black');
-
-        updateVariant();
-      });
-    });
+  
 
     // Size button clicks
     document.querySelectorAll('.size-btn').forEach(btn => {
@@ -907,12 +909,7 @@
       });
     });
 
-    // Initial pre-select (optional)
-    const defaultColorBtn = document.querySelector('.color-swatch');
-    if (defaultColorBtn) {
-      selectedColor = defaultColorBtn.getAttribute('data-option-value');
-      defaultColorBtn.classList.add('ring-2', 'ring-offset-2', 'ring-black');
-    }
+ 
 
     const defaultSizeBtn = document.querySelector('.size-btn');
     if (defaultSizeBtn) {
@@ -970,7 +967,7 @@ const openBtn = document.getElementById('open-size-chart');
       openBtn.addEventListener('click', () => {
   drawer.classList.remove('translate-x-full', 'hidden');
   backdrop.classList.remove('hidden');
-  document.body.classList.add('overflow-hidden');  // ✅ Freeze scroll
+  document.body.classList.add('overflow-hidden'); 
 });
 
 function closeDrawer() {
@@ -979,17 +976,12 @@ function closeDrawer() {
     drawer.classList.add('hidden');
 
   backdrop.classList.add('hidden');
-  document.body.classList.remove('overflow-hidden');  // ✅ Unfreeze scroll
+  document.body.classList.remove('overflow-hidden');  
 }
 
 closeBtn.addEventListener('click', closeDrawer);
 backdrop.addEventListener('click', closeDrawer);
 
-document.addEventListener('keydown', (e) => {
-  if (e.key === 'Escape') {
-    closeDrawer();
-  }
-});
 
 
       backdrop.addEventListener('click', () => {
@@ -997,7 +989,6 @@ document.addEventListener('keydown', (e) => {
         backdrop.classList.add('hidden');
       });
 
-      // Optional: ESC key to close
       document.addEventListener('keydown', (e) => {
         if (e.key === 'Escape') {
           drawer.classList.add('translate-x-full');
@@ -1031,6 +1022,7 @@ document.addEventListener('keydown', (e) => {
         }
       });
     }
+
   });
 </script>
 
