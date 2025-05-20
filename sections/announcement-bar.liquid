@@ -1,5 +1,5 @@
 <div
-  class="color-{{ section.settings.color_scheme }} color-{{ section.settings.color_scheme }}-text announcement-bar"
+  class="color-{{ section.settings.color_scheme }} color-{{ section.settings.color_scheme }}-text announcement-bar animate-slideDown"
   style="
     padding-top: {{ section.settings.padding_vertical }}px;
     padding-bottom: {{ section.settings.padding_vertical }}px;
@@ -10,9 +10,26 @@
     margin-left: {{ section.settings.margin_horizontal }}px;
     margin-right: {{ section.settings.margin_horizontal }}px;
     font-weight: {{ section.settings.font_weight }};
+    {% if section.settings.show_border %}
+      border-bottom: {{ section.settings.border_thickness }}px {{ section.settings.border_style }} {{ section.settings.border_color }};
+    {% endif %}
   "
 >
   <style>
+    .announcement-bar {
+      transform: translateY(-100%);
+      animation: slideDown 0.5s ease forwards;
+    }
+
+    @keyframes slideDown {
+      from {
+        transform: translateY(-100%);
+      }
+      to {
+        transform: translateY(0);
+      }
+    }
+
     .announcement-bar a::before {
       transition-duration: var(--animation-duration);
     }
@@ -34,7 +51,7 @@
         {{ section.settings.membership_link_text | default: 'Join The Membership' | escape }}
       </span>
 
-      <svg height="11.2px" viewBox="0 0 9 9" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <svg width="9" height="9" viewBox="0 0 9 9" fill="none" xmlns="http://www.w3.org/2000/svg">
         <path d="M1.1875 7.7334H7.6599M7.6599 7.7334V1.261M7.6599 7.7334L1.1875 1.261" stroke="white" stroke-linejoin="round"/>
       </svg>
     </a>
@@ -245,6 +262,52 @@
       "label": "Animation Speed",
       "default": 300,
       "info": "Controls the speed of both the underline and arrow animations (0 = instant, 1500 = very slow)"
+    },
+    {
+      "type": "header",
+      "content": "Border Settings"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_border",
+      "label": "Show Bottom Border",
+      "default": false
+    },
+    {
+      "type": "color",
+      "id": "border_color",
+      "label": "Border Color",
+      "default": "#000000"
+    },
+    {
+      "type": "select",
+      "id": "border_style",
+      "label": "Border Style",
+      "options": [
+        {
+          "value": "solid",
+          "label": "Solid"
+        },
+        {
+          "value": "dashed",
+          "label": "Dashed"
+        },
+        {
+          "value": "dotted",
+          "label": "Dotted"
+        }
+      ],
+      "default": "solid"
+    },
+    {
+      "type": "range",
+      "id": "border_thickness",
+      "min": 1,
+      "max": 5,
+      "step": 1,
+      "unit": "px",
+      "label": "Border Thickness",
+      "default": 1
     }
   ],
   "presets": [
