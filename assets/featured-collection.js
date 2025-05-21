@@ -127,47 +127,35 @@ document.addEventListener('DOMContentLoaded', function () {
       }
     });
 
-    // Image hover functionality - improved to work with navigation arrows
-    const imageContainers = container.querySelectorAll('.product-image-wrapper'); // Updated selector
+    const imageContainers = document.querySelectorAll('.product-image-wrapper');
+
     imageContainers.forEach((wrapper) => {
       const images = Array.from(wrapper.querySelectorAll('.product-image'));
       const productId = images[0]?.getAttribute('data-product-id');
-
       if (!productId || images.length <= 1) return;
 
-      // Track if mouse is over the container
-      let isHovering = false;
+      // Initialize index and show first image
+      if (typeof productCurrentIndex[productId] === 'undefined') {
+        productCurrentIndex[productId] = 0;
+        images[0].classList.add('active');
+      }
 
-      wrapper.addEventListener('mouseenter', (e) => {
-        // if (e.target.closest('.add-to-cart-btn, .notify-me-btn')) // Prevent hover effect on buttons
-        isHovering = true;
-        if (images.length >= 2 && productCurrentIndex[productId] === 0) {
-          updateProductImage(productId, 1, images);
-        }
+      wrapper.addEventListener('mouseenter', () => {
+        swapImage(1);
       });
 
       wrapper.addEventListener('mouseleave', () => {
-        if (isHovering && productCurrentIndex[productId] === 1) {
-          updateProductImage(productId, 0, images);
-        }
-        isHovering = false;
+        swapImage(0);
       });
 
-      // Helper function to update product image
-      function updateProductImage(productId, newIndex, imageElements) {
-        // Save the new index
-        productCurrentIndex[productId] = newIndex;
+      function swapImage(targetIndex) {
+        const currentIndex = productCurrentIndex[productId];
+        if (currentIndex === targetIndex) return;
 
-        // Update the display
-        imageElements.forEach((img, i) => {
-          if (i === newIndex) {
-            img.classList.remove('hidden');
-            img.classList.add('active');
-          } else {
-            img.classList.add('hidden');
-            img.classList.remove('active');
-          }
-        });
+        // Crossfade: remove active from current and add to target simultaneously
+        images[currentIndex].classList.remove('active');
+        images[targetIndex].classList.add('active');
+        productCurrentIndex[productId] = targetIndex;
       }
     });
 
