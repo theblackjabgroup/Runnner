@@ -395,68 +395,19 @@
   >
     <details class="mobile-facets__disclosure disclosure-has-popup">
       <summary class="mobile-facets__open-wrapper focus-offset">
-        <span class="mobile-facets__open{% if filter_type == 'drawer' and enable_filtering == false %} medium-hide large-up-hide{% endif %}">
-          <span class="svg-wrapper !text-black">
-            {{- 'icon-filter.svg' | inline_asset_content -}}
-          </span>
-          <span class=" mobile-facets__open-label !text-black button-label !w-[100px] medium-hide large-up-hide">
-            {%- if enable_filtering and enable_sorting -%}
-              {{ 'products.facets.filter_and_sort' | t }}
-            {%- elsif enable_filtering -%}
-              {{ 'products.facets.filter_button' | t }}
-            {%- elsif enable_sorting -%}
-              {{ 'products.facets.sort_button' | t }}
-            {%- endif -%}
-          </span>
-          <span class="mobile-facets__open-label button-label small-hide">
-            {%- if enable_filtering -%}
-              {{ 'products.facets.filter_button' | t }}
-            {%- endif -%}
-          </span>
-        </span>
-        <span tabindex="0" class="mobile-facets__close">
-          <span class="svg-wrapper">
-            {{- 'icon-close.svg' | inline_asset_content -}}
-          </span>
+        <span tabindex="0" class="mobile-facets__close absolute top-4 right-4">
+          <span class="svg-wrapper"> Close </span>
         </span>
       </summary>
       <facet-filters-form>
         <form id="FacetFiltersFormMobile" class="mobile-facets">
-          <div class="mobile-facets__inner gradient">
-            <div class="mobile-facets__header">
+          <div class="mobile-facets__inner">
+            <div class="mobile-facets__header border-b py-4 px-4">
               <div class="mobile-facets__header-inner">
-                <h2 class="mobile-facets__heading medium-hide large-up-hide">
-                  {%- if enable_filtering and enable_sorting -%}
-                    {{ 'products.facets.filter_and_sort' | t }}
-                  {%- elsif enable_filtering -%}
-                    {{ 'products.facets.filter_button' | t }}
-                  {%- elsif enable_sorting -%}
-                    {{ 'products.facets.sort_button' | t }}
-                  {%- endif -%}
-                </h2>
-                <h2 class="mobile-facets__heading small-hide">
-                  {%- if enable_filtering -%}
-                    {{ 'products.facets.filter_button' | t }}
-                  {%- endif -%}
-                </h2>
-                <p class="mobile-facets__count">
-                  {%- if results.results_count -%}
-                    {{ 'templates.search.results_with_count' | t: terms: results.terms, count: results.results_count }}
-                  {%- elsif results.products_count == results.all_products_count -%}
-                    {{ 'products.facets.product_count_simple' | t: count: results.products_count }}
-                  {%- else -%}
-                    {{
-                      'products.facets.product_count'
-                      | t: product_count: results.products_count, count: results.all_products_count
-                    }}
-                  {%- endif -%}
-                </p>
+                <h2 class="!text-2xl uppercase text-left">Filters</h2>
               </div>
             </div>
-            <div
-              id="FacetsWrapperMobile"
-              class="mobile-facets__main has-submenu gradient"
-            >
+            <div id="FacetsWrapperMobile" class="mobile-facets__main">
               {%- if enable_filtering -%}
                 {%- for filter in results.filters -%}
                   {% liquid
@@ -472,16 +423,13 @@
                     {% when 'boolean', 'list' %}
                       <details
                         id="Details-Mobile-{{ filter.param_name | escape }}-{{ section.id }}"
-                        class="mobile-facets__details js-filter"
+                        class="mobile-facets__details js-filter border-b"
                         data-index="mobile-{{ forloop.index }}"
                       >
-                        <summary
-                          class="mobile-facets__summary focus-inset"
-                          onclick="this.closest('details').querySelector('.mobile-facets__arrow').classList.toggle('rotated')"
-                        >
-                          <div>
-                            <span>{{ filter.label | escape }}</span>
-                            <span class="mobile-facets__arrow">
+                        <summary class="mobile-facets__summary focus-inset p-4">
+                          <div class="flex justify-between items-center !border-t">
+                            <span class="uppercase text-[16px]">{{ filter.label | escape }}</span>
+                            <span class="mobile-facets__arrow ">
                               {{- 'icon-arrow.svg' | inline_asset_content -}}
                             </span>
                           </div>
@@ -523,17 +471,17 @@
                               %}
 
                               {%- capture label_class -%}
-                              facets__label mobile-facets__label{% if is_disabled %} disabled{% endif %}{% if value.active %} active{% endif %}
-                              {%- endcapture -%}
+                            facets__label mobile-facets__label{% if is_disabled %} disabled{% endif %}{% if value.active %} active{% endif %}
+                            {%- endcapture -%}
 
                               {%- capture text_value -%}
-                                <span class="facet-checkbox__text" aria-hidden="true">
-                                  <span class="facet-checkbox__text-label">{{- value.label | escape }}</span>
-                                </span>
-                                <span class="visually-hidden">
-                                  {{- value.label | escape }}
-                                </span>
-                              {%- endcapture -%}
+                              <span class="facet-checkbox__text" aria-hidden="true">
+                                <span class="facet-checkbox__text-label">{{- value.label | escape }}</span>
+                              </span>
+                              <span class="visually-hidden">
+                                {{- value.label | escape }}
+                              </span>
+                            {%- endcapture -%}
 
                               <li class="mobile-facets__item list-menu__item">
                                 {% if presentation == 'swatch' %}
@@ -660,63 +608,22 @@
                   {% endcase %}
                 {%- endfor -%}
               {%- endif -%}
-
-              {%- if enable_sorting -%}
-                <div
-                  id="Details-Mobile-SortBy-{{ section.id }}"
-                  class="mobile-facets__details js-filter{% if filter_type == 'drawer' %} medium-hide large-up-hide{% endif %}"
-                  data-index="mobile-{{ forloop.index }}"
-                >
-                  <div class="mobile-facets__summary">
-                    <div class="mobile-facets__sort">
-                      <label for="SortBy-mobile">{{ 'products.facets.sort_by_label' | t }}</label>
-                      <div class="select">
-                        <select
-                          name="sort_by"
-                          class="select__select"
-                          id="SortBy-mobile"
-                          aria-describedby="a11y-refresh-page-message"
-                        >
-                          <option selected disabled>Sort By</option>
-                          {%- for option in results.sort_options -%}
-                            <option value="{{ option.value | escape }}">
-                              {{ option.name | escape }}
-                            </option>
-                          {%- endfor -%}
-                        </select>
-                        <span class="svg-wrapper">
-                          {{- 'icon-caret.svg' | inline_asset_content -}}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              {%- endif -%}
-
-              <div class="mobile-facets__footer">
-                <facet-remove class="mobile-facets__clear-wrapper">
-                  <a href="{{ results_url }}" class="mobile-facets__clear underlined-link">
-                    {{- 'products.facets.clear_all' | t }}
-                  </a>
-                </facet-remove>
-                <button
-                  type="button"
-                  class="button button--primary"
-                  onclick="this.closest('.mobile-facets__wrapper').querySelector('summary').click()"
-                >
-                  {{ 'products.facets.apply' | t }}
-                </button>
-              </div>
             </div>
 
-            {% if results.current_vendor or results.current_type %}
-              <input type="hidden" name="q" value="{{ results.current_vendor }}{{ results.current_type }}">
-            {% endif %}
-
-            {%- if results.terms -%}
-              <input type="hidden" name="q" value="{{ results.terms | escape }}">
-              <input name="options[prefix]" type="hidden" value="last">
-            {%- endif -%}
+            <div class="mobile-facets__footer border-t p-4">
+              <facet-remove class="mobile-facets__clear-wrapper">
+                <a href="{{ results_url }}" class="mobile-facets__clear underlined-link">
+                  {{- 'products.facets.clear_all' | t }}
+                </a>
+              </facet-remove>
+              <button
+                type="button"
+                class="button w-full bg-black text-white py-3 uppercase"
+                onclick="this.closest('.mobile-facets__wrapper').querySelector('summary').click()"
+              >
+                {{ 'products.facets.apply' | t }}
+              </button>
+            </div>
           </div>
         </form>
       </facet-filters-form>
@@ -758,6 +665,68 @@
     {%- endfor -%}
   </div>
 </div>
+
+<div class="filters-translate medium-hide large-up-hide flex border-y  divide-x-4">
+  <button
+    class="mobile-facets-trigger flex items-center gap-2 px-4 py-2 !border-r  w-1/2 justify-center"
+    onclick="document.querySelector('.mobile-facets__disclosure summary').click()"
+  >
+    <span class="uppercase">Filters</span>
+  </button>
+
+  <div class="mobile-sort-dropdown relative w-1/2  ">
+    <button
+      class="mobile-sort-trigger flex items-center gap-2 px-4 py-2  w-full justify-center"
+      onclick="this.nextElementSibling.classList.toggle('hidden')"
+    >
+      <span class="uppercase">Sort</span>
+    </button>
+    <div class="mobile-sort-options hidden absolute top-full left-0 right-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-50">
+      {%- for option in results.sort_options -%}
+        <button
+          class="w-full text-left px-4 py-2 hover:bg-gray-100 {% if option.value == sort_by %}font-bold{% endif %}"
+          data-value="{{ option.value | escape }}"
+          onclick="updateMobileSort(this)"
+        >
+          {{ option.name | escape }}
+        </button>
+      {%- endfor -%}
+    </div>
+  </div>
+</div>
+
+<script>
+  document.querySelectorAll('.mobile-facets__summary').forEach((summary) => {
+    summary.addEventListener('click', () => {
+      const arrow = summary.closest('details')?.querySelector('.mobile-facets__arrow');
+      arrow?.classList.toggle('rotated');
+    });
+  });
+
+  document.querySelectorAll('.button--primary.apply-button').forEach((button) => {
+    button.addEventListener('click', () => {
+      const summary = button.closest('.mobile-facets__wrapper')?.querySelector('summary');
+      summary?.click();
+    });
+  });
+
+  function updateMobileSort(button) {
+    const value = button.dataset.value;
+    const form = document.getElementById('FacetFiltersFormMobile');
+    const input = form.querySelector('select[name="sort_by"]');
+    input.value = value;
+    form.submit();
+  }
+
+  // Close sort dropdown when clicking outside
+  document.addEventListener('click', function (event) {
+    if (!event.target.closest('.mobile-sort-dropdown')) {
+      document.querySelectorAll('.mobile-sort-options').forEach((dropdown) => {
+        dropdown.classList.add('hidden');
+      });
+    }
+  });
+</script>
 
 <style>
   .rotate-icon {
@@ -813,20 +782,62 @@
     width: fit-content;
     min-width: max-content;
   }
+
+  .mobile-sort-trigger .svg-wrapper {
+    width: 12px;
+    height: 12px;
+    transform: rotate(90deg);
+  }
+
+  .mobile-sort-options {
+    max-height: 60vh;
+    overflow-y: auto;
+  }
+
+  .mobile-facets__inner {
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    background: white;
+  }
+
+  .mobile-facets__main {
+    flex-grow: 1;
+    overflow-y: auto;
+  }
+
+  .mobile-facets__arrow {
+    transform: rotate(90deg);
+    width: 12px;
+    height: 12px;
+    transition: transform 0.3s ease;
+  }
+
+  .mobile-facets__arrow.rotated {
+    transform: rotate(90deg);
+  }
+
+  .mobile-facets__details[open] .mobile-facets__arrow {
+    transform: rotate(90deg);
+  }
+
+  .mobile-facets__checkbox {
+    width: 16px;
+    height: 16px;
+  }
+
+  .mobile-facets__submenu {
+    padding: 1rem;
+    background: #f5f5f5;
+  }
+
+  .mobile-facets__label {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.5rem;
+  }
+  .filters-translate {
+    transform: translateY(-65px) !important;
+  }
 </style>
-
-<script>
-  document.querySelectorAll('.mobile-facets__summary').forEach((summary) => {
-    summary.addEventListener('click', () => {
-      const arrow = summary.closest('details')?.querySelector('.mobile-facets__arrow');
-      arrow?.classList.toggle('rotated');
-    });
-  });
-
-  document.querySelectorAll('.button--primary.apply-button').forEach((button) => {
-    button.addEventListener('click', () => {
-      const summary = button.closest('.mobile-facets__wrapper')?.querySelector('summary');
-      summary?.click();
-    });
-  });
-</script>
