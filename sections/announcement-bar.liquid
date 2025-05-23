@@ -1,5 +1,5 @@
 <div
-  class="color-{{ section.settings.color_scheme }} color-{{ section.settings.color_scheme }}-text"
+  class="color-{{ section.settings.color_scheme }} color-{{ section.settings.color_scheme }}-text announcement-bar animate-slideDown"
   style="
     padding-top: {{ section.settings.padding_vertical }}px;
     padding-bottom: {{ section.settings.padding_vertical }}px;
@@ -10,9 +10,31 @@
     margin-left: {{ section.settings.margin_horizontal }}px;
     margin-right: {{ section.settings.margin_horizontal }}px;
     font-weight: {{ section.settings.font_weight }};
+    {% if section.settings.show_border %}
+      border-bottom: {{ section.settings.border_thickness }}px {{ section.settings.border_style }} {{ section.settings.border_color }};
+    {% endif %}
   "
 >
-  <div class="flex justify-between items-center px-[20px] text-md">
+  <style>
+    .announcement-bar {
+      transform: translateY(-100%);
+      animation: slideDown 0.5s ease forwards;
+    }
+
+    @keyframes slideDown {
+      from {
+        transform: translateY(-100%);
+      }
+      to {
+        transform: translateY(0);
+      }
+    }
+
+    .announcement-bar a::before {
+      transition-duration: var(--animation-duration);
+    }
+  </style>
+  <div class="flex justify-between items-center px-[20px] text-md w-[100vw]">
     <span
       class="break-words hyphens-auto pr-2 !tracking-normal max-w-[300px] md:max-w-[800px] text-[var(--header_text)]"
       style="font-size: {{ section.settings.message_font_size }}px;"
@@ -22,19 +44,15 @@
     <a
       href="{{ section.settings.membership_link }}"
       aria-label="{{ 'sections.announcement-bar.settings.membership_text.label' | t }}"
-      class="relative flex items-center gap-2 !tracking-normal  leading-none group text-[var(--header_text)] before:absolute before:bottom-0 before:left-0 before:w-full before:h-[0.15rem] before:bg-[var(--header_text)] {% if section.settings.underline_direction == 'left-to-right' %}before:origin-left{% else %}before:origin-right{% endif %} before:transition-transform before:duration-{{ section.settings.animation_speed }} before:ease-in-out {% if section.settings.underline_direction == 'left-to-right' %}hover:before:origin-right{% else %}hover:before:origin-left{% endif %} hover:before:scale-x-0 {% if section.settings.hide_underline_mobile %}before:hidden sm:before:block{% endif %}"
-      style="padding-bottom: {{ section.settings.border_spacing }}px; font-weight: {{ section.settings.link_font_weight }}; font-size: {{ section.settings.link_font_size }}px;"
+      class="relative flex items-center gap-2 !tracking-normal leading-none group text-[var(--header_text)] before:absolute before:bottom-0 before:left-0 before:w-full before:h-[0.15rem] before:bg-[var(--header_text)] {% if section.settings.underline_direction == 'left-to-right' %}before:origin-left{% else %}before:origin-right{% endif %} before:transition-transform before:ease-in-out {% if section.settings.underline_direction == 'left-to-right' %}hover:before:origin-right{% else %}hover:before:origin-left{% endif %} hover:before:scale-x-0 {% if section.settings.hide_underline_mobile %}before:hidden sm:before:block{% endif %}"
+      style="padding-bottom: {{ section.settings.border_spacing }}px; font-weight: {{ section.settings.link_font_weight }}; font-size: {{ section.settings.link_font_size }}px; --animation-duration: {{ section.settings.animation_speed }}ms;"
     >
       <span class="inline max-sm:hidden text-[var(--header_text)]">
         {{ section.settings.membership_link_text | default: 'Join The Membership' | escape }}
       </span>
-      <svg
-        class="svg-arrow-down rotate-icon !h-[11.2px] -rotate-[90deg]"
-        viewBox="0 0 18 18"
-        fill="none"
-        xmlns="http://www.w3.org/2000/svg"
-      >
-        <path d="M13.3964 13.0312C12.1408 14.1889 10.9749 15.8451 9.89865 18L8.07175 18C6.99552 15.8504 5.8296 14.1941 4.57399 13.0312C3.96693 12.4629 3.25037 12.0168 2.46544 11.7183C1.68051 11.4199 0.842667 11.2751 1.90735e-06 11.2922V8.54366C2.07534 8.54366 3.73901 9.03094 4.99103 10.0055C6.26318 11.0123 7.17333 12.386 7.59013 13.9282L7.70045 13.9282L7.70045 -2.57632e-09L10.2834 -1.93022e-09L10.2834 13.9282L10.4368 13.9282C10.8363 12.3852 11.7386 11.0091 13.009 10.0055C14.2646 9.02919 15.9283 8.54192 18 8.54366V11.2922C17.1526 11.2725 16.3095 11.4161 15.5194 11.7146C14.7293 12.013 14.0078 12.4605 13.3964 13.0312Z" fill="currentColor"></path>
+
+      <svg width="9" height="9" viewBox="0 0 9 9" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M1.1875 7.7334H7.6599M7.6599 7.7334V1.261M7.6599 7.7334L1.1875 1.261" stroke="white" stroke-linejoin="round"/>
       </svg>
     </a>
   </div>
@@ -235,33 +253,61 @@
       "default": "right-to-left"
     },
     {
-      "type": "select",
+      "type": "range",
       "id": "animation_speed",
+      "min": 0,
+      "max": 1500,
+      "step": 50,
+      "unit": "ms",
       "label": "Animation Speed",
+      "default": 300,
+      "info": "Controls the speed of both the underline and arrow animations (0 = instant, 1500 = very slow)"
+    },
+    {
+      "type": "header",
+      "content": "Border Settings"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_border",
+      "label": "Show Bottom Border",
+      "default": false
+    },
+    {
+      "type": "color",
+      "id": "border_color",
+      "label": "Border Color",
+      "default": "#000000"
+    },
+    {
+      "type": "select",
+      "id": "border_style",
+      "label": "Border Style",
       "options": [
         {
-          "value": "100",
-          "label": "Very Fast (100ms)"
+          "value": "solid",
+          "label": "Solid"
         },
         {
-          "value": "200",
-          "label": "Fast (200ms)"
+          "value": "dashed",
+          "label": "Dashed"
         },
         {
-          "value": "300",
-          "label": "Medium (300ms)"
-        },
-        {
-          "value": "500",
-          "label": "Slow (500ms)"
-        },
-        {
-          "value": "700",
-          "label": "Very Slow (700ms)"
+          "value": "dotted",
+          "label": "Dotted"
         }
       ],
-      "default": "700",
-      "info": "Controls the speed of both the underline and arrow animations"
+      "default": "solid"
+    },
+    {
+      "type": "range",
+      "id": "border_thickness",
+      "min": 1,
+      "max": 5,
+      "step": 1,
+      "unit": "px",
+      "label": "Border Thickness",
+      "default": 1
     }
   ],
   "presets": [

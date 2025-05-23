@@ -26,7 +26,7 @@
       <!-- Desktop Menu -->
       <nav
         class="relative flex justify-end lg:justify-between items-center w-full text-[var(--header_text)]"
-        style="height: 25px;"
+        {% comment %} style="height: 25px;" {% endcomment %}
       >
         <!-- Left: Menu Items -->
         <div class="menu-items hidden lg:!flex gap-2 flex-wrap w-2/3 0">
@@ -69,12 +69,19 @@
                     role="region"
                     aria-label="{{ link.title }} submenu"
                     class="
-                      fixed top-[85%] left-0 right-0 w-full z-50 mt-3
-                      opacity-0 invisible pointer-events-none
-                      group-hover:opacity-100 group-hover:visible group-hover:pointer-events-auto
-                      transition-all duration-300 ease-out bg-[var(--header_background)]
+                      fixed left-0 right-0 w-full
+                      opacity-0 pointer-events-none
                     "
-                    style="background:grey; top:70%"
+                    style="
+                      background: var(--header_background);
+                      top: 85%;
+                      will-change: transform, opacity;
+                      transform: translateY(-30px);
+                      transition-property: opacity, transform;
+                      transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+                      transition-duration: 500ms;
+                      z-index: 990;
+                    "
                   >
                     <div class="mx-auto p-6  flex">
                       <ul class="flex justify-start gap-8 m-2 w-1/2">
@@ -82,7 +89,7 @@
                           <li class="min-w-[100px] relative">
                             <a
                               href="{{ childlink.url }}"
-                              class="block text-[{{ section.settings.subMenuItem_color }}] hover:text-[var(--hover)] font-medium text-[14px] mb-2"
+                              class="block text-[{{ section.settings.subMenuItem_color }}] hover:text-[var(--hover)] font-medium text-[14px] mb-6"
                             >
                               {{ childlink.title }}
                             </a>
@@ -102,7 +109,7 @@
                             {% endif %}
                             <a
                               href="{{childlink.url}}"
-                              class="block  my-2 text-[{{ section.settings.subMenuItem_color }}] hover:text-[var(--hover)] underline font-medium text-2xl "
+                              class="relative flex items-center gap-2 !tracking-normal  leading-none group text-[var(--header_text)] mt-4 before:absolute before:bottom-0 before:left-0 before:w-full before:h-[0.15rem] before:bg-[var(--header_text)] before:origin-left before:transition-transform before:duration-1000 before:ease-in-out hover:before:origin-right hover:before:scale-x-0 hover:text-[var(--hover)]"
                             >
                               SHOP ALL {{ childlink.title -}}
                             </a>
@@ -142,7 +149,7 @@
                                     style="transition-delay: 0ms"
                                   >
                                     <div class="mt-4 flex items-center justify-between group-hover/card:hover:text-[var(--hover)] group-hover/card:font-bold">
-                                      <p class="text-2xl font-medium">{{ block.settings.button_text_1 }}</p>
+                                      <p class="text-2xl font-medium uppercase">{{ block.settings.button_text_1 }}</p>
                                       <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M17 8l4 4m0 0l-4 4m4-4H3"/>
                                       </svg>
@@ -177,10 +184,10 @@
                                 {% if block.settings.button_text_2 != blank %}
                                   <a
                                     href="{{ block.settings.button_link_2 }}"
-                                    class="block group-hover/card:hover:text-[var(--hover)] group-hover/card:font-bold transition-all duration-300"
+                                    class="block group-hover/card:hover:text-[var(--hover)] group-hover/card:font-bold group-hover/card:translate-1 transition-all duration-300"
                                   >
                                     <div class="mt-4 flex items-center justify-between">
-                                      <p class="text-2xl font-medium">{{ block.settings.button_text_2 }}</p>
+                                      <p class="text-2xl font-medium uppercase">{{ block.settings.button_text_2 }}</p>
                                       <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M17 8l4 4m0 0l-4 4m4-4H3"/>
                                       </svg>
@@ -194,26 +201,28 @@
                       </div>
                     </div>
                     <!-- Horizontal scrollling text -->
-                    <div
-                      class=" absolute -bottom-14 h-16 w-full border-t-1"
-                      style="background: var(--header_background);"
-                    >
-                      <div class="horizontal-text-container">
-                        <div class="horizontal-text">
-                          {{ section.settings.scrolling_text }}
-                        </div>
-                        <div class="horizontal-text">
-                          {{ section.settings.scrolling_text }}
-                        </div>
-                        <div class="horizontal-text">
-                          {{ section.settings.scrolling_text }}
-                        </div>
-                        <div class="horizontal-text">
-                          {{ section.settings.scrolling_text }}
-                        </div>
+                    {% comment %}
+                      <div
+                        class=" fixed inset-0 h-16 w-full"
+                        style="background: red; top:100%"
+                      >
+                    {% endcomment %}
+                    <div class="horizontal-text-container">
+                      <div class="horizontal-text">
+                        {{ section.settings.scrolling_text }}
+                      </div>
+                      <div class="horizontal-text">
+                        {{ section.settings.scrolling_text }}
+                      </div>
+                      <div class="horizontal-text">
+                        {{ section.settings.scrolling_text }}
+                      </div>
+                      <div class="horizontal-text">
+                        {{ section.settings.scrolling_text }}
                       </div>
                     </div>
                   </div>
+                  {% comment %} </div> {% endcomment %}
                 {% else %}
                   <a href="{{ link.url }}" class="py-2 px-2 block">
                     {{ link.title }}
@@ -250,20 +259,11 @@
               </svg>
             </button>
 
-            <!-- Search Overlay -->
-            <div
-              id="search-overlay"
-              class="fixed left-0 right-0 bottom-0 bg-black/50 z-[100] hidden transition-opacity duration-300"
-              style="top: var(--header-height, 0px);"
-            >
-              &nbsp;
-            </div>
-
             <!-- Search Container -->
             <div
               id="search-container"
-              class="fixed left-0 right-0 z-[1000] hidden opacity-0 transition-opacity duration-300 ease-in-out shadow-lg py-8"
-              style="background: var(--header_background); top: var(--header-height, 0px);"
+              class="fixed left-0 right-0 z-[1000] hidden opacity-0  shadow-lg py-8"
+              style="background: var(--header_background); top: var(--header-height);"
               aria-hidden="true"
             >
               <div class="searchbox-container mx-auto w-full px-4 py-4">
@@ -333,6 +333,15 @@
                 </div>
               </div>
             </div>
+
+            <!-- Search Overlay -->
+            <div
+              id="search-overlay"
+              class="fixed left-0 right-0 w-full z-[990] bg-black opacity-0 pointer-events-none"
+              style="height: 100vh; transition: opacity 0.2s ease-in-out; top: 100%"
+            >
+              &nbsp;
+            </div>
           </div>
 
           <!-- Country Selector -->
@@ -345,14 +354,25 @@
                 {{ current_country.name }}
               </span>
 
-              <img
-                src="{{ "arrow-down.png" |  asset_url }}"
-                alt="Dropdown Icon"
-                class="w-12 h-6 object-contain transition-transform duration-300 group-hover:-rotate-90"
-                width="100%"
-                height="auto"
-                aria-hidden="true"
-              >
+              {% if section.settings.dropdown_icon != blank %}
+                <img
+                  src="{{ section.settings.dropdown_icon | image_url }}"
+                  alt="Dropdown Icon"
+                  class="w-12 h-6 object-contain transition-transform duration-300 group-hover:rotate-180"
+                  width="100%"
+                  height="auto"
+                  aria-hidden="true"
+                >
+              {% else %}
+                <img
+                  src="{{ "arrow-down.png" |  asset_url }}"
+                  alt="Dropdown Icon"
+                  class="w-12 h-6 object-contain transition-transform duration-300 group-hover:-rotate-90"
+                  width="100%"
+                  height="auto"
+                  aria-hidden="true"
+                >
+              {% endif %}
             </div>
 
             <!-- Dropdown -->
@@ -419,11 +439,13 @@
           </button>
         </div>
       </nav>
-      <div class="hidden lg:!block bottom-bar w-full  bg-transparent relative overflow-hidden" style="height: 1px;">
+      <div
+        class="hidden lg:!block bottom-bar bg-transparent w-full relative overflow-visible"
+      >
         <span
           id="bottom-bar-indicator"
-          class="absolute bottom-0 left-0 h-full bg-black transition-all duration-300 ease-out"
-          style="width: 0"
+          class=" absolute bottom-0 left-0 bg-black transition-all duration-300 ease-out"
+          style="width: 0; height: 1px;"
         ></span>
       </div>
     </div>
@@ -440,6 +462,15 @@
   </div>
 </header>
 
+<!-- Sub Menu Overlay -->
+<div
+  id="mega-menu-overlay"
+  class="fixed top-1/5 w-full z-[999] bg-black opacity-0 pointer-events-none"
+  style="height: 100vh; transition: opacity 0.2s ease-in-out;"
+>
+  &nbsp;
+</div>
+
 <!-- Mobile Menu Overlay -->
 <div
   id="menu-overlay"
@@ -451,12 +482,12 @@
 <!-- Mobile Menu -->
 <div
   id="mobile-menu"
-  class="hidden lg:hidden w-[90vw] fixed top-0 right-0 z-[102] bg-[var(--header_background)] text-black flex"
+  class="hidden lg:hidden w-[90vw] h-[100vh] fixed top-0 right-0 z-[102] bg-[var(--header_background)] text-black flex"
   style="transform: translateX(100%); transition: transform 0.3s ease-in-out; background: var(--header_background);"
 >
   <!-- Vertical Scrolling Text -->
-  <div class="h-[100vh] w-10  flex items-center justify-center overflow-hidden relative ">
-    <div class="vertical-text-container !border-r-1 " style="border-right: 1px solid var(--header_text);">
+  <div class="h-[100vh] w-8 flex items-center justify-center overflow-hidden relative ">
+    <div class="vertical-text-container" style="border-right: 1px solid var(--header_text);">
       <div class="vertical-text">
         {{ section.settings.scrolling_text }}
       </div>
@@ -467,10 +498,10 @@
   </div>
 
   <div class="flex flex-1 flex-col justify-between">
-    <nav class="flex flex-col space-y-4 p-6 w-full justify-between">
+    <nav class="flex flex-col space-y-4 px-4 w-full justify-between">
       <div class="upper-section">
-        <div class="flex items-center justify-end mb-8 ">
-          <button type="button" class="px-2" aria-label="Close Menu">Close</button>
+        <div class="flex items-center justify-end mb-2 ">
+          <button type="button" class="px-2 uppercase" aria-label="Close Menu">Close</button>
         </div>
         {% if section.settings.menu.links != blank %}
           {% for link in section.settings.menu.links %}
@@ -620,7 +651,7 @@
       <div class="horizontal-line w-full h-0.5 bg-black my-2 -mt-1">&nbsp;</div>
     </nav>
 
-    <div class="flex flex-col w-full p-6 ">
+    <div class="flex flex-col w-full px-4 ">
       <div class="flex flex-col gap-1 mb-4 font-semibold ">
         <div class="country-selector relative inline-block">
           <!-- Trigger: Current country -->
@@ -771,64 +802,6 @@
 <div class="header-offset" data-header-offset></div>
 
 <style>
-  @keyframes dropDown {
-    0% {
-      opacity: 0;
-      transform: translateY(-20px);
-      pointer-events: none;
-    }
-    1% {
-      opacity: 0;
-      transform: translateY(-20px);
-    }
-    100% {
-      opacity: 1;
-      transform: translateY(0);
-      pointer-events: auto;
-    }
-  }
-
-  @keyframes dropUp {
-    0% {
-      opacity: 1;
-      transform: translateY(0);
-      pointer-events: auto;
-    }
-    99% {
-      opacity: 0;
-      transform: translateY(-20px);
-    }
-    100% {
-      opacity: 0;
-      transform: translateY(-20px);
-      pointer-events: none;
-    }
-  }
-
-  .dropdown-group .absolute {
-    opacity: 0;
-    visibility: hidden;
-    pointer-events: none;
-    transform: translateY(-10px);
-    transition: opacity 300ms ease, transform 300ms ease;
-  }
-
-  .dropdown-group.active-submenu .absolute {
-    opacity: 1;
-    visibility: visible;
-    pointer-events: auto;
-    transform: translateY(0);
-  }
-
-  @keyframes scroll {
-    0% {
-      transform: translateX(0);
-    }
-    100% {
-      transform: translateX(-50%);
-    }
-  }
-
   .header-main {
     position: relative;
     width: 100%;
@@ -866,15 +839,6 @@
 
   .sticky-disabled + .header-offset {
     display: none !important;
-  }
-
-  /* Improve dropdown transitions */
-  .dropdown-group > .absolute {
-    transition: all 300ms cubic-bezier(0.4, 0, 0.2, 1);
-  }
-
-  .dropdown-group:hover > .absolute {
-    transition-delay: 50ms;
   }
 
   /* Mobile submenu scrollbar styling */
@@ -943,10 +907,11 @@
     left: 0px;
     top: 0;
     bottom: 0;
-    width: 30px;
+    width: 20px;
     overflow: hidden;
     display: flex;
     align-items: center;
+    justify-content: center;
   }
 
   .vertical-text {
@@ -958,7 +923,7 @@
     color: #000;
     font-size: 16px;
     white-space: nowrap;
-    padding: 5px 0;
+    padding: 0;
   }
 
   .vertical-text:nth-child(2) {
@@ -985,26 +950,31 @@
 
   .horizontal-text-container {
     position: fixed;
-    bottom: 0;
+    top: 100%;
     left: 0;
     width: 100%;
-    height: 40px;
+    height: 26px;
     overflow: hidden;
     display: flex;
     align-items: center;
+    justify-content: center;
     border-top: 1px solid black;
+    border-bottom: 1px solid black;
+    background: var(--header_background);
     z-index: 999;
   }
 
   .horizontal-text {
     white-space: nowrap;
-    font-size: 22px;
+    font-size: 20px;
     display: inline-block;
-    animation: scrollRight 50s linear infinite;
+    animation: scrollRight 80s linear infinite;
+    height: 100%;
+    line-height: 26px;
   }
 
   .horizontal-text:nth-child(n) {
-    animation: scrollRight2 50s linear infinite;
+    animation: scrollRight2 80s linear infinite;
   }
 
   @keyframes scrollRight {
@@ -1216,7 +1186,6 @@
         countrySelectorDropdown.classList.toggle('invisible');
       });
 
-      // Close dropdown when clicking outside
       document.addEventListener('click', (e) => {
         if (!countrySelector.contains(e.target)) {
           countrySelectorBtn.setAttribute('aria-expanded', 'false');
@@ -1227,16 +1196,29 @@
     }
 
     // Search bar
+
     const searchToggle = document.getElementById('search-toggle');
     const searchContainer = document.getElementById('search-container');
     const searchOverlay = document.getElementById('search-overlay');
     const closeSearch = document.getElementById('close-search');
     const searchInput = searchContainer.querySelector('input[type="search"]');
 
+    let isSearchOpen = false;
+
+    searchContainer.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+    searchOverlay.style.transition = 'opacity 0.3s ease';
+
+    searchContainer.style.transform = 'translateY(0px)';
+
+    searchOverlay.classList.add('pointer-events-none');
+
     function toggleSearch(show) {
+      if (show === isSearchOpen) return;
+
+      isSearchOpen = show;
+
       searchToggle.setAttribute('aria-expanded', show);
 
-      // Always recalculate header height and set it as top
       const header = document.querySelector('[data-header-sticky]');
       if (header) {
         const headerHeight = header.offsetHeight;
@@ -1245,25 +1227,38 @@
 
       if (show) {
         searchContainer.classList.remove('hidden');
+        searchOverlay.style.opacity = '0.5';
+        searchOverlay.classList.remove('pointer-events-none');
+
         requestAnimationFrame(() => {
-          searchContainer.classList.remove('opacity-0');
-          setTimeout(() => searchInput.focus(), 300);
+          searchContainer.style.opacity = '1';
+          searchContainer.style.transform = 'translateY(0)';
+
+          setTimeout(() => searchInput.focus(), 400);
         });
       } else {
-        searchContainer.classList.add('opacity-0');
-        searchContainer.addEventListener('transitionend', () => searchContainer.classList.add('hidden'), {
-          once: true,
+        searchContainer.style.opacity = '0';
+        searchContainer.style.transform = 'translateY(-20px)';
+
+        searchOverlay.style.opacity = '0';
+        searchOverlay.classList.add('pointer-events-none');
+
+        searchContainer.addEventListener('transitionend', function handler(e) {
+          if (e.propertyName === 'opacity' && !isSearchOpen) {
+            searchContainer.classList.add('hidden');
+            searchContainer.removeEventListener('transitionend', handler);
+          }
         });
       }
     }
 
-    searchToggle.addEventListener('click', () => toggleSearch(true));
+    searchToggle.addEventListener('click', () => toggleSearch(!isSearchOpen));
+
     closeSearch.addEventListener('click', () => toggleSearch(false));
     searchOverlay.addEventListener('click', () => toggleSearch(false));
 
-    // Close search on escape key
     document.addEventListener('keydown', function (e) {
-      if (e.key === 'Escape' && searchToggle.getAttribute('aria-expanded') === 'true') {
+      if (e.key === 'Escape' && isSearchOpen) {
         toggleSearch(false);
       }
     });
@@ -1287,31 +1282,55 @@
         const left = rect.left - containerRect.left;
         const width = rect.width;
 
-        bottomBarIndicator.style.transform = `translateX(${left}px)`;
+        bottomBarIndicator.style.transform = `translateX(${left}px) translateY(-6px)`;
         bottomBarIndicator.style.width = `${width}px`;
       });
 
       item.addEventListener('mouseleave', () => {
         // Reset only when leaving the whole dropdown group
         bottomBarIndicator.style.width = `100%`;
-        bottomBarIndicator.style.transform = `translateX(0)`;
+        bottomBarIndicator.style.transform = `translateX(0) translateY(0px)`;
       });
     });
 
     const dropdownGroups = document.querySelectorAll('.dropdown-group');
-    dropdownGroups.forEach((dropdown) => {
-      let hideTimeout;
+    const megaMenuOverlay = document.getElementById('mega-menu-overlay');
 
-      dropdown.addEventListener('mouseenter', function () {
-        clearTimeout(hideTimeout);
-        this.classList.add('active-submenu');
-      });
+    let hoverCount = 0;
 
-      dropdown.addEventListener('mouseleave', function () {
-        hideTimeout = setTimeout(() => {
-          this.classList.remove('active-submenu');
-        }, 300); // 300ms delay on mouse leave
-      });
+    dropdownGroups.forEach((group) => {
+      const megaMenu = group.querySelector('[id^="mega-menu-"]');
+
+      if (megaMenu) {
+        group.addEventListener('mouseenter', () => {
+          hoverCount++;
+
+          group.classList.add('active-submenu');
+
+          megaMenuOverlay.classList.remove('opacity-0', 'pointer-events-none');
+          megaMenuOverlay.classList.add('opacity-50');
+
+          requestAnimationFrame(() => {
+            megaMenu.style.opacity = '1';
+            megaMenu.style.transform = 'translateY(0)';
+            megaMenu.style.pointerEvents = 'auto';
+          });
+        });
+
+        group.addEventListener('mouseleave', () => {
+          group.classList.remove('active-submenu');
+          hoverCount--;
+
+          megaMenu.style.opacity = '0';
+          megaMenu.style.transform = 'translateY(-20px)';
+          megaMenu.style.pointerEvents = 'none';
+
+          if (hoverCount <= 0) {
+            megaMenuOverlay.classList.add('opacity-0', 'pointer-events-none');
+            megaMenuOverlay.classList.remove('opacity-50');
+          }
+        });
+      }
     });
   });
 </script>
