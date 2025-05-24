@@ -1,39 +1,319 @@
-{
-    "name": "t:sections.header.name",
-    "type": "header",
-    "sections": {
-      "announcement-bar": {
-        "type": "announcement-bar",
-        "settings": {
-          "free_shipping_message": "FREE SHIPPING $125+, INTERNATIONAL $200+",
-          "membership_text": "JOIN THE MEMBERSHIP",
-          "membership_link": "",
-          "color_scheme": "scheme-4",
-          "font_weight": "400",
-          "link_font_weight": "500",
-          "padding_vertical": 8,
-          "padding_horizontal": 25,
-          "margin_top": 0,
-          "margin_bottom": 0,
-          "margin_horizontal": 0,
-          "border_spacing": 0,
-          "hide_underline_mobile": true,
-          "underline_direction": "left-to-right"
-        }
-      },
-      "header": {
-        "type": "header",
-        "settings": {
-          "logo": "",
-          "menu": "header-menu",
-          "dropdown_icon": "shopify://shop_images/sample-normal-wax.png",
-          "marquee_text": "Scrolling Text",
-          "marquee_speed": 15
-        }
+<div
+  class="color-{{ section.settings.color_scheme }} color-{{ section.settings.color_scheme }}-text announcement-bar animate-slideDown"
+  style="
+    padding-top: {{ section.settings.padding_vertical }}px;
+    padding-bottom: {{ section.settings.padding_vertical }}px;
+    padding-left: {{ section.settings.padding_horizontal }}px;
+    padding-right: {{ section.settings.padding_horizontal }}px;
+    margin-top: {{ section.settings.margin_top }}px;
+    margin-bottom: {{ section.settings.margin_bottom }}px;
+    margin-left: {{ section.settings.margin_horizontal }}px;
+    margin-right: {{ section.settings.margin_horizontal }}px;
+    font-weight: {{ section.settings.font_weight }};
+    {% if section.settings.show_border %}
+      border-bottom: {{ section.settings.border_thickness }}px {{ section.settings.border_style }} {{ section.settings.border_color }};
+    {% endif %}
+  "
+>
+  <style>
+    .announcement-bar {
+      transform: translateY(-100%);
+      animation: slideDown 0.5s ease forwards;
+    }
+
+    @keyframes slideDown {
+      from {
+        transform: translateY(-100%);
       }
+      to {
+        transform: translateY(0);
+      }
+    }
+
+    .announcement-bar a::before {
+      transition-duration: var(--animation-duration);
+    }
+  </style>
+  <div class="flex justify-between items-center  text-md w-[100vw]">
+    <span
+      class="break-words hyphens-auto pr-2 !tracking-normal max-w-[300px] md:max-w-[800px] text-[var(--header_text)]"
+      style="font-size: {{ section.settings.message_font_size }}px;"
+    >
+      {{ section.settings.announcement_text | default: 'FREE SHIPPING $125+, INTERNATIONAL $200+' | escape }}
+    </span>
+    <a
+      href="{{ section.settings.membership_link }}"
+      aria-label="{{ 'sections.announcement-bar.settings.membership_text.label' | t }}"
+      class="relative flex items-center gap-2 !tracking-normal leading-none group text-[var(--header_text)] before:absolute before:bottom-0 before:left-0 before:w-full before:h-[0.15rem] before:bg-[var(--header_text)] {% if section.settings.underline_direction == 'left-to-right' %}before:origin-left{% else %}before:origin-right{% endif %} before:transition-transform before:ease-in-out {% if section.settings.underline_direction == 'left-to-right' %}hover:before:origin-right{% else %}hover:before:origin-left{% endif %} hover:before:scale-x-0 {% if section.settings.hide_underline_mobile %}before:hidden sm:before:block{% endif %}"
+      style="padding-bottom: {{ section.settings.border_spacing }}px; font-weight: {{ section.settings.link_font_weight }}; font-size: {{ section.settings.link_font_size }}px; --animation-duration: {{ section.settings.animation_speed }}ms;"
+    >
+      <span class="inline max-sm:hidden text-[var(--header_text)]">
+        {{ section.settings.membership_link_text | default: 'Join The Membership' | escape }}
+      </span>
+
+      <svg width="9" height="9" viewBox="0 0 9 9" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M1.1875 7.7334H7.6599M7.6599 7.7334V1.261M7.6599 7.7334L1.1875 1.261" stroke="white" stroke-linejoin="round"/>
+      </svg>
+    </a>
+  </div>
+</div>
+
+{% schema %}
+{
+  "name": "t:sections.announcement-bar.name",
+  "class": "announcement-bar-section",
+  "enabled_on": {
+    "groups": ["header"]
+  },
+  "settings": [
+    {
+      "type": "text",
+      "id": "announcement_text",
+      "label": "t:sections.announcement-bar.settings.announcement_text.label",
+      "default": "t:sections.announcement-bar.settings.announcement_text.default"
     },
-    "order": [
-      "announcement-bar",
-      "header"
-    ]
-  }
+    {
+      "type": "text",
+      "id": "membership_link_text",
+      "label": "t:sections.announcement-bar.settings.membership_link_text.label",
+      "default": "t:sections.announcement-bar.settings.membership_link_text.default"
+    },
+    {
+      "type": "text",
+      "id": "membership_link",
+      "label": "Membership Link URL",
+      "default": "/account/register"
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "Color scheme",
+      "default": "background-1"
+    },
+    {
+      "type": "header",
+      "content": "Typography Settings"
+    },
+    {
+      "type": "range",
+      "id": "message_font_size",
+      "min": 12,
+      "max": 24,
+      "step": 1,
+      "unit": "px",
+      "label": "Message Font Size",
+      "default": 16
+    },
+    {
+      "type": "range",
+      "id": "link_font_size",
+      "min": 12,
+      "max": 24,
+      "step": 1,
+      "unit": "px",
+      "label": "Link Font Size",
+      "default": 16
+    },
+    {
+      "type": "select",
+      "id": "font_weight",
+      "label": "Message Font Weight",
+      "options": [
+        {
+          "value": "400",
+          "label": "Regular (400)"
+        },
+        {
+          "value": "500",
+          "label": "Medium (500)"
+        },
+        {
+          "value": "600",
+          "label": "Semibold (600)"
+        },
+        {
+          "value": "700",
+          "label": "Bold (700)"
+        }
+      ],
+      "default": "400"
+    },
+    {
+      "type": "select",
+      "id": "link_font_weight",
+      "label": "Link Font Weight",
+      "options": [
+        {
+          "value": "400",
+          "label": "Regular (400)"
+        },
+        {
+          "value": "500",
+          "label": "Medium (500)"
+        },
+        {
+          "value": "600",
+          "label": "Semibold (600)"
+        },
+        {
+          "value": "700",
+          "label": "Bold (700)"
+        }
+      ],
+      "default": "500"
+    },
+    {
+      "type": "header",
+      "content": "Layout Settings"
+    },
+    {
+      "type": "range",
+      "id": "padding_vertical",
+      "min": 0,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "label": "Top/Bottom Padding",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "padding_horizontal",
+      "min": 0,
+      "max": 50,
+      "step": 5,
+      "unit": "px",
+      "label": "Left/Right Padding",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "margin_top",
+      "min": 0,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "label": "Top Margin",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "margin_bottom",
+      "min": 0,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "label": "Bottom Margin",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "margin_horizontal",
+      "min": 0,
+      "max": 50,
+      "step": 5,
+      "unit": "px",
+      "label": "Left/Right Margin",
+      "default": 0
+    },
+    {
+      "type": "header",
+      "content": "Link Settings"
+    },
+    {
+      "type": "range",
+      "id": "border_spacing",
+      "min": 0,
+      "max": 10,
+      "step": 1,
+      "unit": "px",
+      "label": "Border Bottom Spacing",
+      "default": 3
+    },
+    {
+      "type": "checkbox",
+      "id": "hide_underline_mobile",
+      "label": "Hide Link Underline on Mobile",
+      "default": true
+    },
+    {
+      "type": "select",
+      "id": "underline_direction",
+      "label": "Underline Animation Direction",
+      "options": [
+        {
+          "value": "left-to-right",
+          "label": "Left to Right"
+        },
+        {
+          "value": "right-to-left",
+          "label": "Right to Left"
+        }
+      ],
+      "default": "right-to-left"
+    },
+    {
+      "type": "range",
+      "id": "animation_speed",
+      "min": 0,
+      "max": 1500,
+      "step": 50,
+      "unit": "ms",
+      "label": "Animation Speed",
+      "default": 300,
+      "info": "Controls the speed of both the underline and arrow animations (0 = instant, 1500 = very slow)"
+    },
+    {
+      "type": "header",
+      "content": "Border Settings"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_border",
+      "label": "Show Bottom Border",
+      "default": false
+    },
+    {
+      "type": "color",
+      "id": "border_color",
+      "label": "Border Color",
+      "default": "#000000"
+    },
+    {
+      "type": "select",
+      "id": "border_style",
+      "label": "Border Style",
+      "options": [
+        {
+          "value": "solid",
+          "label": "Solid"
+        },
+        {
+          "value": "dashed",
+          "label": "Dashed"
+        },
+        {
+          "value": "dotted",
+          "label": "Dotted"
+        }
+      ],
+      "default": "solid"
+    },
+    {
+      "type": "range",
+      "id": "border_thickness",
+      "min": 1,
+      "max": 5,
+      "step": 1,
+      "unit": "px",
+      "label": "Border Thickness",
+      "default": 1
+    }
+  ],
+  "presets": [
+    {
+      "name": "t:sections.announcement-bar.presets.name"
+    }
+  ]
+}
+{% endschema %}
