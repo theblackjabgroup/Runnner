@@ -1,18 +1,23 @@
 {% if section.settings.enabled %}
-  <div class="featured-collection-page-width overflow-hidden ">
+  <section
+    class="featured-collection-page-width overflow-hidden"
+    role="region"
+    aria-labelledby="featured-collection-heading"
+  >
     {% if section.settings.heading != blank %}
-      <div
+      <h2
+        id="featured-collection-heading"
         style="font-weight:500;"
         class="featured-collection-main-heading mb-[-10px] letter-animation"
       >
         {{ section.settings.heading }}
-      </div>
+      </h2>
     {% endif %}
 
     <div class="flex justify-between items-center w-full featured-collection-subheading">
       <div class="flex-grow md:text-[24px] text-2xl md:mt-[-20px]">
         {% if section.settings.description != blank %}
-          {{ section.settings.description }}
+          <div id="featured-collection-description">{{ section.settings.description }}</div>
         {% endif %}
       </div>
       <div class="flex-shrink-0">
@@ -20,6 +25,9 @@
           <a
             href="{{ section.settings.main_collection.url }}"
             class="image-with-text-custom-button"
+            role="button"
+            aria-label="{{ section.settings.button_text }} for {{ section.settings.main_collection.title }}"
+            tabindex="0"
           >
             <div class="image-with-text-button-text-container">
               <div class="image-with-text-button-text">
@@ -48,17 +56,25 @@
       </div>
     </div>
 
-    <hr class="border-black-300 my-6">
+    <hr class="border-black-300 my-6" aria-hidden="true">
 
     <div class="featured_collection_filters flex flex-col md:flex-row mt-10" style="gap:18px; margin-top:18px;">
-      <div class="collections-container text-[24px] w-full md:w-[400px] min-w-[350px] order-1 md:order-none mb-4 md:mb-0">
-        <div class="collection-filters flex flex-row md:flex-col flex-wrap">
+      <nav
+        class="collections-container text-[24px] w-full md:w-[400px] min-w-[350px] order-1 md:order-none mb-4 md:mb-0"
+        aria-label="Collection filters"
+      >
+        <div class="collection-filters flex flex-row md:flex-col flex-wrap" role="tablist" aria-label="Collections">
           {% for block in section.blocks %}
             <button
               class="collection-btn {% if forloop.first %}active{% endif %} w-auto md:w-full h-[59px] flex items-center justify-between"
               data-collection="{{ block.settings.collection.id }}"
               aria-label="View {{ block.settings.label }} collection"
               aria-pressed="{% if forloop.first %}true{% else %}false{% endif %}"
+              role="tab"
+              id="tab-{{ block.settings.collection.id }}"
+              aria-selected="{% if forloop.first %}true{% else %}false{% endif %}"
+              aria-controls="tabpanel-{{ block.settings.collection.id }}"
+              tabindex="{% if forloop.first %}0{% else %}-1{% endif %}"
             >
               <span class="label-text">{{ block.settings.label }}</span>
               {% comment %}
@@ -68,7 +84,7 @@
               {% endcomment %}
               <img
                 src="{{ "arrow-down.png" | asset_url }}"
-                alt="Dropdown Icon"
+                alt=""
                 class="w-12 h-6 object-contain transition-transform duration-300 group-hover:-rotate-90 collection-arrow-img"
                 width="100%"
                 height="auto"
@@ -77,22 +93,28 @@
             </button>
           {% endfor %}
         </div>
-      </div>
+      </nav>
 
       <div class="products-container w-full md:flex-1 order-2 md:order-none">
         {% for block in section.blocks %}
-          <div
+          <section
             class="collection-products-container {% unless forloop.first %}hidden{% endunless %}"
             data-collection-id="{{ block.settings.collection.id }}"
+            id="tabpanel-{{ block.settings.collection.id }}"
+            role="tabpanel"
+            aria-labelledby="tab-{{ block.settings.collection.id }}"
+            tabindex="0"
           >
             <div class="slider-container relative">
               <div
                 id="product-slider-{{ block.settings.collection.id }}"
                 class="product-slider flex gap-2 md:gap-4 cursor-grab overflow-x-auto custom-scrollbar"
+                role="list"
+                aria-label="Products in {{ block.settings.label }}"
               >
                 {% if block.settings.collection == blank or block.settings.collection.products.size == 0 %}
-                  <div class="product-card flex-none w-[220px] md:w-[450px]">
-                    <div class="product-image-wrapper relative group">
+                  <div class="product-card flex-none w-[220px] md:w-[450px]" role="listitem">
+                    <div class="product-image-wrapper relative group" aria-hidden="true">
                       {{ 'product-apparel-1' | placeholder_svg_tag: 'placeholder-svg' }}
                     </div>
                     <div class="product-details mt-3" style="margin-bottom:8px;">
@@ -104,7 +126,7 @@
                   </div>
                 {% else %}
                   {% for product in block.settings.collection.products %}
-                    <div class="product-card flex-none w-[220px] md:w-[450px]">
+                    <div class="product-card flex-none w-[220px] md:w-[450px]" role="listitem">
                       <div class="product-image-wrapper relative group">
                         {% unless product.available %}
                           <div class="absolute top-3 right-4 z-10">
@@ -114,7 +136,12 @@
                           </div>
                         {% endunless %}
 
-                        <a href="{{ product.url }}" class="product-image-link block relative">
+                        <a
+                          href="{{ product.url }}"
+                          class="product-image-link block relative"
+                          tabindex="0"
+                          aria-label="{{ product.title }}"
+                        >
                           <div class="product-images-container relative">
                             {% if product.images.size > 1 %}
                               {% for image in product.images %}
@@ -137,6 +164,7 @@
                                 data-product-id="{{ product.id }}"
                                 aria-label="Previous image"
                                 aria-controls="product-images-{{ product.id }}"
+                                tabindex="0"
                               >
                                 <svg
                                   xmlns="http://www.w3.org/2000/svg"
@@ -153,6 +181,7 @@
                                 data-product-id="{{ product.id }}"
                                 aria-label="Next image"
                                 aria-controls="product-images-{{ product.id }}"
+                                tabindex="0"
                               >
                                 <svg
                                   xmlns="http://www.w3.org/2000/svg"
@@ -227,6 +256,7 @@
                                             {% unless variant_available %}
                                               aria-disabled="true"
                                             {% endunless %}
+                                            tabindex="0"
                                           >
                                             {{ value }}
                                           </button>
@@ -252,6 +282,7 @@
                                   data-has-variants="false"
                                 {% endif %}
                                 aria-label="Add {{ product.title }} to cart"
+                                tabindex="0"
                               >
                                 Add to Cart
                               </button>
@@ -263,6 +294,7 @@
                                 data-has-variants="{% if has_size_variants %}true{% else %}false{% endif %}"
                                 aria-label="Get notified when {{ product.title }} is back in stock"
                                 aria-haspopup="dialog"
+                                tabindex="0"
                               >
                                 Notify Me When In Stock
                               </button>
@@ -272,7 +304,7 @@
                       </div>
 
                       <div class="product-details mt-3" style="margin-bottom:8px;">
-                        <a href="{{ product.url }}">
+                        <a href="{{ product.url }}" tabindex="0" aria-label="{{ product.title }}">
                           <h3 class="!text-[1.6rem] uppercase font-medium leading-tight">
                             {{ product.title | escape }}
                           </h3>
@@ -291,15 +323,19 @@
                 {% endif %}
               </div>
             </div>
-          </div>
+          </section>
         {% endfor %}
       </div>
     </div>
-  </div>
+  </section>
 
   <div
     id="waitlist-modal-overlay"
     class="fixed inset-0 z-50 bg-black/50 hidden items-center justify-center"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="waitlist-product-title"
+    aria-describedby="waitlist-product-variant"
   >
     <div class="bg-white !w-auto md:!w-[50vw] max-w-[90vw] rounded p-4 md:p-10 shadow-lg mx-4">
       <div class="flex justify-end p-2 md:p-4">
@@ -307,6 +343,7 @@
           id="close-waitlist-modal"
           class="text-black hover:text-gray-700 font-medium"
           aria-label="Close waitlist form"
+          tabindex="0"
         >
           CLOSE
         </button>
@@ -316,28 +353,32 @@
 
       <div class="text-gray-600 mb-4" id="waitlist-product-variant">XS / PORT</div>
 
-      <hr class="border-gray-300 mx-2 md:mx-6">
+      <hr class="border-gray-300 mx-2 md:mx-6" aria-hidden="true">
 
       <div class="my-4 md:my-6">
         <p class="font-medium mb-4 text-sm md:text-base">
           Waitlist: Enter your email to get notified when this product becomes available again.
         </p>
 
-        <div class="flex flex-col sm:flex-row gap-3 mb-4">
+        <form class="flex flex-col sm:flex-row gap-3 mb-4" role="form" aria-label="Waitlist notification form">
           <input
             type="email"
             id="waitlist-email"
             placeholder="Your email"
             class="flex-grow border border-gray-300 p-2 md:p-3 rounded text-sm md:text-base"
+            aria-label="Your email"
+            required
           >
           <button
             id="get-notified-btn"
             class="bg-black text-white py-2 md:py-3 px-4 md:px-6 font-medium hover:bg-gray-800 rounded text-sm md:text-base"
             aria-label="Submit waitlist request"
+            type="submit"
+            tabindex="0"
           >
             GET NOTIFIED
           </button>
-        </div>
+        </form>
       </div>
     </div>
   </div>

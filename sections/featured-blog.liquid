@@ -54,12 +54,6 @@
     color: rgb(var(--color-background));
     background-color: var(--text);
   }
-  .view-toggle button:focus {
-    outline: 2px solid var(--text);
-    outline-offset: 2px;
-    z-index: 2;
-    background: rgb(var(--color-background));
-  }
 
   .blog-archive-grid {
     margin: 0 2rem 2rem auto;
@@ -69,6 +63,8 @@
   }
 
   .blog-archive-grid.list-view {
+    border-top: 1px solid var(--text);
+    border-bottom: 1px solid var(--text);
     width: 80%;
     display: block;
   }
@@ -248,13 +244,6 @@
       max-width: calc(100vw - 4rem); /* account for any padding/margins */
     }
   }
-
-  .blog-archive-card:focus,
-  .blog-archive-card:focus-visible {
-    outline: 2px solid #000;
-    outline-offset: 2px;
-    background: #f5f5f5;
-  }
 </style>
 
 {% if section.settings.enabled %}
@@ -272,7 +261,13 @@
       </div>
     </div>
 
-    <div class="blog-archive-grid grid-view" id="archiveContainer" role="list" aria-live="polite">
+    <div
+      class="blog-archive-grid grid-view"
+      id="archiveContainer"
+      role="list"
+      aria-live="polite"
+      aria-label="Blog articles list"
+    >
       {% assign blog_handle = section.settings.blog %}
       {% assign post_limit = section.settings.post_limit %}
       {% if blog_handle != blank and blogs[blog_handle].articles.size > 0 %}
@@ -287,26 +282,15 @@
               href="{{ article.url }}"
               class="blog-archive-card"
               role="listitem"
-              tabindex="0"
               aria-label="{{ article.title }}"
+              tabindex="0"
             >
               <div class="blog-archive-card-image-wrapper">
-                {% comment %} {% if block.settings.image != blank %} {% endcomment %}
-                {% comment %}
-                  <img
-                    class="blog-archive-card-image"
-                    src="{{ block.settings.image | image_url }}"
-                    alt="{{ block.settings.title }}"
-                    width="auto"
-                    height="auto"
-                  >
-                {% endcomment %}
                 {% if article.image %}
-                  {% comment %} {% endif %} {% endcomment %}
                   <img
                     class="blog-archive-card-image"
                     src="{{ article.image | image_url }}"
-                    alt="{{ article.title | escape }}"
+                    alt="{{ article.title }}"
                     width="auto"
                     height="auto"
                   >
@@ -323,7 +307,7 @@
                 <h3 class="blog-archive-card-title" id="article-title-{{ forloop.index0 }}">
                   <img
                     src="{{ "arrow-down.png" | asset_url }}"
-                    alt="toggle-button"
+                    alt="Dropdown Icon"
                     class="w-12 h-6 object-contain transition-transform duration-300 group-hover:-rotate-90 collection-arrow-img blog-archive-card-title-arrow inline-block align-baseline"
                     width="15px"
                     height="auto"
@@ -362,16 +346,7 @@
     }
 
     function switchView(toList) {
-      buttons.forEach((btn, idx) => {
-        const isActive = btn === (toList ? listBtn : gridBtn);
-        btn.classList.toggle('active', isActive);
-        btn.setAttribute('aria-pressed', isActive ? 'true' : 'false');
-        if (isActive) {
-          btn.setAttribute('aria-current', 'true');
-        } else {
-          btn.removeAttribute('aria-current');
-        }
-      });
+      buttons.forEach((btn) => btn.classList.toggle('active', btn === (toList ? listBtn : gridBtn)));
       container.style.opacity = 0;
       setTimeout(() => {
         container.classList.toggle('list-view', toList);
