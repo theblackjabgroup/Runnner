@@ -5,9 +5,9 @@ document.addEventListener("DOMContentLoaded", () => {
     const preview = item.querySelector(".faq-preview");
     const answer = item.querySelector(".faq-answer");
 
-    const fullText = preview.dataset.answer || "";
-    preview.classList.add("break-words");
+    if (!preview || !answer) return;
 
+    const fullText = preview.dataset.answer || "";
     const styleClass = 'font-bold underline break-all';
 
     const convertLinks = (text) => {
@@ -27,53 +27,29 @@ document.addEventListener("DOMContentLoaded", () => {
     answer.innerHTML = fullWithLinks;
   });
 
-  document.querySelectorAll(".faq-item").forEach(item => {
-    const row = item.querySelector(".faq-row");
-    const btn = item.querySelector(".faq-toggle");
+  document.querySelectorAll(".faq-row").forEach(button => {
+    const item = button.closest(".faq-item");
+    const arrow = button.querySelector(".arrow-svg1");
     const preview = item.querySelector(".faq-preview");
+    const answer = item.querySelector(".faq-answer");
 
-    row.setAttribute("role", "button");
-    row.setAttribute("tabindex", "0");
-    row.setAttribute("aria-expanded", "false");
-    btn.setAttribute("aria-expanded", "false");
-
-    const arrowSvg = btn.querySelector(".arrow-svg1");
-
-    const doToggle = () => {
-      const expanded = btn.getAttribute("aria-expanded") === "true";
-
-      arrowSvg.style.transition = "transform 300ms ease-in-out";
-      arrowSvg.style.transform = expanded ? "rotate(0deg)" : "rotate(-90deg)";
-
-      if (!expanded) {
-        preview.innerHTML = preview.dataset.fullText;
-        btn.setAttribute("aria-expanded", "true");
-        row.setAttribute("aria-expanded", "true");
-      } else {
-        preview.innerHTML = preview.dataset.shortText;
-        btn.setAttribute("aria-expanded", "false");
-        row.setAttribute("aria-expanded", "false");
-      }
+    const toggle = () => {
+      const expanded = button.getAttribute("aria-expanded") === "true";
+      button.setAttribute("aria-expanded", !expanded);
+      arrow.style.transform = expanded ? "rotate(0deg)" : "rotate(-90deg)";
+      preview.innerHTML = expanded ? preview.dataset.shortText : preview.dataset.fullText;
+      item.classList.toggle("open", !expanded);
     };
 
-    row.addEventListener("click", (e) => {
+    button.addEventListener("click", (e) => {
       const selection = window.getSelection();
-      if (!selection || selection.toString().trim() === "") {
-        doToggle();
-      }
+      if (!selection || selection.toString().trim() === "") toggle();
     });
 
-    row.addEventListener("keydown", e => {
+    button.addEventListener("keydown", (e) => {
       if (e.key === "Enter" || e.key === " ") {
         e.preventDefault();
-        doToggle();
-      }
-    });
-
-    btn.addEventListener("keydown", e => {
-      if (e.key === "Enter" || e.key === " ") {
-        e.preventDefault();
-        doToggle();
+        toggle();
       }
     });
   });
