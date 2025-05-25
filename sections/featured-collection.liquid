@@ -3,6 +3,7 @@
     class="featured-collection-page-width overflow-hidden"
     role="region"
     aria-labelledby="featured-collection-heading"
+    aria-describedby="featured-collection-description"
   >
     {% if section.settings.heading != blank %}
       <h2
@@ -75,6 +76,7 @@
               aria-selected="{% if forloop.first %}true{% else %}false{% endif %}"
               aria-controls="tabpanel-{{ block.settings.collection.id }}"
               tabindex="{% if forloop.first %}0{% else %}-1{% endif %}"
+              type="button"
             >
               <span class="label-text">{{ block.settings.label }}</span>
               {% comment %}
@@ -103,6 +105,7 @@
             id="tabpanel-{{ block.settings.collection.id }}"
             role="tabpanel"
             aria-labelledby="tab-{{ block.settings.collection.id }}"
+            aria-live="polite"
             tabindex="0"
           >
             <div class="slider-container relative">
@@ -113,7 +116,11 @@
                 aria-label="Products in {{ block.settings.label }}"
               >
                 {% if block.settings.collection == blank or block.settings.collection.products.size == 0 %}
-                  <div class="product-card flex-none w-[220px] md:w-[450px]" role="listitem">
+                  <div
+                    class="product-card flex-none w-[220px] md:w-[450px]"
+                    role="listitem"
+                    aria-label="No products found"
+                  >
                     <div class="product-image-wrapper relative group" aria-hidden="true">
                       {{ 'product-apparel-1' | placeholder_svg_tag: 'placeholder-svg' }}
                     </div>
@@ -126,7 +133,11 @@
                   </div>
                 {% else %}
                   {% for product in block.settings.collection.products %}
-                    <div class="product-card flex-none w-[220px] md:w-[450px]" role="listitem">
+                    <div
+                      class="product-card flex-none w-[220px] md:w-[450px]"
+                      role="listitem"
+                      aria-label="{{ product.title }}"
+                    >
                       <div class="product-image-wrapper relative group">
                         {% unless product.available %}
                           <div class="absolute top-3 right-4 z-10">
@@ -162,9 +173,10 @@
                               <button
                                 class="image-nav-arrow image-nav-prev"
                                 data-product-id="{{ product.id }}"
-                                aria-label="Previous image"
+                                aria-label="Previous image for {{ product.title }}"
                                 aria-controls="product-images-{{ product.id }}"
                                 tabindex="0"
+                                type="button"
                               >
                                 <svg
                                   xmlns="http://www.w3.org/2000/svg"
@@ -179,9 +191,10 @@
                               <button
                                 class="image-nav-arrow image-nav-next"
                                 data-product-id="{{ product.id }}"
-                                aria-label="Next image"
+                                aria-label="Next image for {{ product.title }}"
                                 aria-controls="product-images-{{ product.id }}"
                                 tabindex="0"
+                                type="button"
                               >
                                 <svg
                                   xmlns="http://www.w3.org/2000/svg"
@@ -220,7 +233,10 @@
                             {% endunless %}
 
                             {% if has_size_variants %}
-                              <div class="size-variants-container bg-white rounded p-2 mb-0 opacity-0 invisible">
+                              <div
+                                class="size-variants-container bg-white rounded p-2 mb-0 opacity-0 invisible"
+                                aria-label="Size options for {{ product.title }}"
+                              >
                                 {% for option in product.options_with_values %}
                                   {% if option.name == 'Size' or option.name == 'size' %}
                                     {% assign size_option_index = forloop.index0 %}
@@ -229,6 +245,8 @@
                                       <div
                                         class="size-options-wrapper flex flex-wrap gap-4 justify-end"
                                         data-option-index="{{ size_option_index }}"
+                                        role="group"
+                                        aria-label="Sizes for {{ product.title }}"
                                       >
                                         {% for value in option.values %}
                                           {% assign variant_available = false %}
@@ -257,6 +275,7 @@
                                               aria-disabled="true"
                                             {% endunless %}
                                             tabindex="0"
+                                            type="button"
                                           >
                                             {{ value }}
                                           </button>
@@ -283,6 +302,7 @@
                                 {% endif %}
                                 aria-label="Add {{ product.title }} to cart"
                                 tabindex="0"
+                                type="button"
                               >
                                 Add to Cart
                               </button>
@@ -295,6 +315,7 @@
                                 aria-label="Get notified when {{ product.title }} is back in stock"
                                 aria-haspopup="dialog"
                                 tabindex="0"
+                                type="button"
                               >
                                 Notify Me When In Stock
                               </button>
@@ -344,6 +365,7 @@
           class="text-black hover:text-gray-700 font-medium"
           aria-label="Close waitlist form"
           tabindex="0"
+          type="button"
         >
           CLOSE
         </button>
@@ -361,6 +383,7 @@
         </p>
 
         <form class="flex flex-col sm:flex-row gap-3 mb-4" role="form" aria-label="Waitlist notification form">
+          <label for="waitlist-email" class="sr-only">Your email</label>
           <input
             type="email"
             id="waitlist-email"
