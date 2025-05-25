@@ -3,6 +3,7 @@
     class="featured-collection-page-width overflow-hidden"
     role="region"
     aria-labelledby="featured-collection-heading"
+    aria-describedby="featured-collection-description"
   >
     {% if section.settings.heading != blank %}
       <h2
@@ -74,6 +75,7 @@
               aria-selected="{% if forloop.first %}true{% else %}false{% endif %}"
               aria-controls="tabpanel-{{ block.settings.collection.id }}"
               tabindex="{% if forloop.first %}0{% else %}-1{% endif %}"
+              type="button"
             >
               <span class="label-text">{{ block.settings.label }}</span>
               {% comment %}
@@ -94,7 +96,7 @@
         </div>
       </nav>
 
-      <div class="products-container w-full md:flex-1 order-2 md:order-none">
+      <main class="products-container w-full md:flex-1 order-2 md:order-none">
         {% for block in section.blocks %}
           <section
             class="collection-products-container {% unless forloop.first %}hidden{% endunless %}"
@@ -102,6 +104,7 @@
             id="tabpanel-{{ block.settings.collection.id }}"
             role="tabpanel"
             aria-labelledby="tab-{{ block.settings.collection.id }}"
+            aria-live="polite"
             tabindex="0"
           >
             <div class="slider-container relative">
@@ -112,7 +115,7 @@
                 aria-label="Products in {{ block.settings.label }}"
               >
                 {% if block.settings.collection == blank or block.settings.collection.products.size == 0 %}
-                  <div
+                  <article
                     class="product-card flex-none w-[220px] md:w-[450px]"
                     role="listitem"
                     aria-label="No products found"
@@ -126,10 +129,10 @@
                         <span class="!text-[1.6rem] uppercase font-medium">—</span>
                       </div>
                     </div>
-                  </div>
+                  </article>
                 {% else %}
                   {% for product in block.settings.collection.products %}
-                    <div
+                    <article
                       class="product-card flex-none w-[220px] md:w-[450px]"
                       role="listitem"
                       aria-label="{{ product.title }}"
@@ -170,6 +173,7 @@
                                 data-product-id="{{ product.id }}"
                                 aria-label="Previous image"
                                 aria-controls="product-images-{{ product.id }}"
+                                type="button"
                               >
                                 <svg
                                   xmlns="http://www.w3.org/2000/svg"
@@ -186,6 +190,7 @@
                                 data-product-id="{{ product.id }}"
                                 aria-label="Next image"
                                 aria-controls="product-images-{{ product.id }}"
+                                type="button"
                               >
                                 <svg
                                   xmlns="http://www.w3.org/2000/svg"
@@ -265,6 +270,7 @@
                                             {% unless variant_available %}
                                               aria-disabled="true"
                                             {% endunless %}
+                                            type="button"
                                           >
                                             {{ value }}
                                           </button>
@@ -290,6 +296,7 @@
                                   data-has-variants="false"
                                 {% endif %}
                                 aria-label="Add {{ product.title }} to cart"
+                                type="button"
                               >
                                 Add to Cart
                               </button>
@@ -301,6 +308,7 @@
                                 data-has-variants="{% if has_size_variants %}true{% else %}false{% endif %}"
                                 aria-label="Get notified when {{ product.title }} is back in stock"
                                 aria-haspopup="dialog"
+                                type="button"
                               >
                                 Notify Me When In Stock
                               </button>
@@ -324,14 +332,14 @@
                           </div>
                         </a>
                       </div>
-                    </div>
+                    </article>
                   {% endfor %}
                 {% endif %}
               </div>
             </div>
           </section>
         {% endfor %}
-      </div>
+      </main>
     </div>
   </section>
 
@@ -349,6 +357,7 @@
           id="close-waitlist-modal"
           class="text-black hover:text-gray-700 font-medium"
           aria-label="Close waitlist form"
+          type="button"
         >
           CLOSE
         </button>
@@ -365,22 +374,25 @@
           Waitlist: Enter your email to get notified when this product becomes available again.
         </p>
 
-        <div class="flex flex-col sm:flex-row gap-3 mb-4">
+        <form class="flex flex-col sm:flex-row gap-3 mb-4" role="form" aria-label="Waitlist notification form">
+          <label for="waitlist-email" class="sr-only">Your email</label>
           <input
             type="email"
             id="waitlist-email"
             placeholder="Your email"
             class="flex-grow border border-gray-300 p-2 md:p-3 rounded text-sm md:text-base"
             aria-label="Your email"
+            required
           >
           <button
             id="get-notified-btn"
             class="bg-black text-white py-2 md:py-3 px-4 md:px-6 font-medium hover:bg-gray-800 rounded text-sm md:text-base"
             aria-label="Submit waitlist request"
+            type="submit"
           >
             GET NOTIFIED
           </button>
-        </div>
+        </form>
       </div>
     </div>
   </div>
