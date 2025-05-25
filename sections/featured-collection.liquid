@@ -1,12 +1,12 @@
 {% if section.settings.enabled %}
   <div class="featured-collection-page-width overflow-hidden ">
     {% if section.settings.heading != blank %}
-      <h2
+      <div
         style="font-weight:500;"
         class="featured-collection-main-heading mb-[-10px] letter-animation"
       >
         {{ section.settings.heading }}
-      </h2>
+      </div>
     {% endif %}
 
     <div class="flex justify-between items-center w-full featured-collection-subheading">
@@ -90,179 +90,205 @@
                 id="product-slider-{{ block.settings.collection.id }}"
                 class="product-slider flex gap-2 md:gap-4 cursor-grab overflow-x-auto custom-scrollbar"
               >
-                {% for product in block.settings.collection.products %}
+                {% if block.settings.collection == blank or block.settings.collection.products.size == 0 %}
                   <div class="product-card flex-none w-[220px] md:w-[450px]">
                     <div class="product-image-wrapper relative group">
-                      {% unless product.available %}
-                        <div class="absolute top-3 right-4 z-10">
-                          <span class="inline-block rounded-xl px-4 text-[12px] tracking-wide font-medium bg-zinc-800 text-white">
-                            SOLD OUT
-                          </span>
-                        </div>
-                      {% endunless %}
+                      {{ 'product-apparel-1' | placeholder_svg_tag: 'placeholder-svg' }}
+                    </div>
+                    <div class="product-details mt-3" style="margin-bottom:8px;">
+                      <h3 class="!text-[1.6rem] uppercase font-medium leading-tight">No products found</h3>
+                      <div class="flex gap-2 items-baseline fc-price">
+                        <span class="!text-[1.6rem] uppercase font-medium">—</span>
+                      </div>
+                    </div>
+                  </div>
+                {% else %}
+                  {% for product in block.settings.collection.products %}
+                    <div class="product-card flex-none w-[220px] md:w-[450px]">
+                      <div class="product-image-wrapper relative group">
+                        {% unless product.available %}
+                          <div class="absolute top-3 right-4 z-10">
+                            <span class="inline-block rounded-xl px-4 text-[12px] tracking-wide font-medium bg-zinc-800 text-white">
+                              SOLD OUT
+                            </span>
+                          </div>
+                        {% endunless %}
 
-                      <a href="{{ product.url }}" class="product-image-link block relative">
-                        <div class="product-images-container relative">
-                          {% if product.images.size > 1 %}
-                            {% for image in product.images %}
-                              <img
-                                src="{{ image | img_url: '450x544', crop: 'center' }}"
-                                alt="{{ product.title }}{% if forloop.index > 1 %} image {{ forloop.index }}{% endif %}"
-                                class="product-image {% if forloop.first %}active{% else %}inactive{% endif %} fc-product-image"
-                                data-index="{{ forloop.index0 }}"
+                        <a href="{{ product.url }}" class="product-image-link block relative">
+                          <div class="product-images-container relative">
+                            {% if product.images.size > 1 %}
+                              {% for image in product.images %}
+                                <img
+                                  src="{{ image | img_url: '450x544', crop: 'center' }}"
+                                  alt="{{ product.title }}{% if forloop.index > 1 %} image {{ forloop.index }}{% endif %}"
+                                  class="product-image {% if forloop.first %}active{% else %}inactive{% endif %} fc-product-image"
+                                  data-index="{{ forloop.index0 }}"
+                                  data-product-id="{{ product.id }}"
+                                  loading="lazy"
+                                  decoding="async"
+                                  width="450"
+                                  height="544"
+                                  style="object-fit: cover; width: 450px; height: 544px;"
+                                >
+                              {% endfor %}
+
+                              <button
+                                class="image-nav-arrow image-nav-prev"
                                 data-product-id="{{ product.id }}"
+                                aria-label="Previous image"
+                                aria-controls="product-images-{{ product.id }}"
+                              >
+                                <svg
+                                  xmlns="http://www.w3.org/2000/svg"
+                                  viewBox="0 0 24 24"
+                                  width="32"
+                                  height="32"
+                                  style="opacity: 0.6;"
+                                >
+                                  <path fill="currentColor" d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/>
+                                </svg>
+                              </button>
+                              <button
+                                class="image-nav-arrow image-nav-next"
+                                data-product-id="{{ product.id }}"
+                                aria-label="Next image"
+                                aria-controls="product-images-{{ product.id }}"
+                              >
+                                <svg
+                                  xmlns="http://www.w3.org/2000/svg"
+                                  viewBox="0 0 24 24"
+                                  width="32"
+                                  height="32"
+                                  style="opacity: 0.6;"
+                                >
+                                  <path fill="currentColor" d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/>
+                                </svg>
+                              </button>
+                            {% else %}
+                              <img
+                                src="{{ product.featured_image | img_url: '450x544', crop: 'center' }}"
+                                alt="{{ product.title }}"
+                                class="fc-product-image"
                                 loading="lazy"
                                 decoding="async"
                                 width="450"
                                 height="544"
                                 style="object-fit: cover; width: 450px; height: 544px;"
                               >
-                            {% endfor %}
+                            {% endif %}
+                          </div>
+                        </a>
 
-                            <button
-                              class="image-nav-arrow image-nav-prev"
-                              data-product-id="{{ product.id }}"
-                              aria-label="Previous image"
-                              aria-controls="product-images-{{ product.id }}"
-                            >
-                              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">
-                                <path fill="currentColor" d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/>
-                              </svg>
-                            </button>
-                            <button
-                              class="image-nav-arrow image-nav-next"
-                              data-product-id="{{ product.id }}"
-                              aria-label="Next image"
-                              aria-controls="product-images-{{ product.id }}"
-                            >
-                              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">
-                                <path fill="currentColor" d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/>
-                              </svg>
-                            </button>
-                          {% else %}
-                            <img
-                              src="{{ product.featured_image | img_url: '450x544', crop: 'center' }}"
-                              alt="{{ product.title }}"
-                              class="fc-product-image"
-                              loading="lazy"
-                              decoding="async"
-                              width="450"
-                              height="544"
-                              style="object-fit: cover; width: 450px; height: 544px;"
-                            >
-                          {% endif %}
-                        </div>
-                      </a>
-
-                      <div class="product-cart-container absolute bottom-4 left-1/2 transform -translate-x-1/2 w-full px-4">
-                        <div class="cart-options-wrapper relative">
-                          {% assign has_size_variants = false %}
-                          {% unless product.has_only_default_variant %}
-                            {% for option in product.options_with_values %}
-                              {% if option.name == 'Size' or option.name == 'size' %}
-                                {% assign has_size_variants = true %}
-                              {% endif %}
-                            {% endfor %}
-                          {% endunless %}
-
-                          {% if has_size_variants %}
-                            <div class="size-variants-container bg-white rounded p-2 mb-0 opacity-0 invisible">
+                        <div class="product-cart-container absolute bottom-4 left-1/2 transform -translate-x-1/2 w-full px-4">
+                          <div class="cart-options-wrapper relative">
+                            {% assign has_size_variants = false %}
+                            {% unless product.has_only_default_variant %}
                               {% for option in product.options_with_values %}
                                 {% if option.name == 'Size' or option.name == 'size' %}
-                                  {% assign size_option_index = forloop.index0 %}
-                                  <div class="size-label-wrapper flex items-center w-full">
-                                    <span class="size-label text-m font-semibold px-2 mr-auto">SELECT SIZE</span>
-                                    <div
-                                      class="size-options-wrapper flex flex-wrap gap-4 justify-end"
-                                      data-option-index="{{ size_option_index }}"
-                                    >
-                                      {% for value in option.values %}
-                                        {% assign variant_available = false %}
-                                        {% for variant in product.variants %}
-                                          {% if variant.options[size_option_index] == value and variant.available %}
-                                            {% assign variant_available = true %}
-                                            {% assign variant_id = variant.id %}
-                                            {% break %}
-                                          {% endif %}
-                                        {% endfor %}
-
-                                        <button
-                                          class="size-option-btn p-5 bg-gray-200 text-s rounded size-animate {% unless variant_available %}unavailable-size{% endunless %}"
-                                          {% if variant_available %}
-                                            data-variant-id="{{ variant_id }}"
-                                            data-product-id="{{ product.id }}"
-                                          {% else %}
-                                            data-waitlist="true"
-                                            data-product-id="{{ product.id }}"
-                                            data-product-title="{{ product.title | escape }}"
-                                            data-variant-size="{{ value }}"
-                                          {% endif %}
-                                          style="--animation-order: {{ forloop.index }}"
-                                          aria-label="Size {{ value }}{% unless variant_available %} - Sold Out{% endunless %}"
-                                          {% unless variant_available %}
-                                            aria-disabled="true"
-                                          {% endunless %}
-                                        >
-                                          {{ value }}
-                                        </button>
-                                      {% endfor %}
-                                    </div>
-                                  </div>
+                                  {% assign has_size_variants = true %}
                                 {% endif %}
                               {% endfor %}
-                            </div>
-                          {% endif %}
+                            {% endunless %}
 
-                          {% if product.available %}
-                            <button
-                              class="add-to-cart-btn w-90 bg-white text-black py-2 px-4 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-                              data-product-id="{{ product.id }}"
-                              {% if product.has_only_default_variant %}
-                                data-variant-id="{{ product.variants.first.id }}"
-                                data-has-variants="false"
-                              {% elsif has_size_variants %}
-                                data-has-variants="true"
-                              {% else %}
-                                data-variant-id="{{ product.variants.first.id }}"
-                                data-has-variants="false"
-                              {% endif %}
-                              aria-label="Add {{ product.title }} to cart"
-                            >
-                              Add to Cart
-                            </button>
-                          {% else %}
-                            <button
-                              class="notify-me-btn w-90 bg-white text-black py-2 px-4 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-                              data-product-id="{{ product.id }}"
-                              data-product-title="{{ product.title | escape }}"
-                              data-has-variants="{% if has_size_variants %}true{% else %}false{% endif %}"
-                              aria-label="Get notified when {{ product.title }} is back in stock"
-                              aria-haspopup="dialog"
-                            >
-                              Notify Me When In Stock
-                            </button>
-                          {% endif %}
+                            {% if has_size_variants %}
+                              <div class="size-variants-container bg-white rounded p-2 mb-0 opacity-0 invisible">
+                                {% for option in product.options_with_values %}
+                                  {% if option.name == 'Size' or option.name == 'size' %}
+                                    {% assign size_option_index = forloop.index0 %}
+                                    <div class="size-label-wrapper flex items-center w-full">
+                                      <span class="size-label text-m font-semibold px-2 mr-auto">SELECT SIZE</span>
+                                      <div
+                                        class="size-options-wrapper flex flex-wrap gap-4 justify-end"
+                                        data-option-index="{{ size_option_index }}"
+                                      >
+                                        {% for value in option.values %}
+                                          {% assign variant_available = false %}
+                                          {% for variant in product.variants %}
+                                            {% if variant.options[size_option_index] == value and variant.available %}
+                                              {% assign variant_available = true %}
+                                              {% assign variant_id = variant.id %}
+                                              {% break %}
+                                            {% endif %}
+                                          {% endfor %}
+
+                                          <button
+                                            class="size-option-btn p-5 bg-gray-200 text-s rounded size-animate {% unless variant_available %}unavailable-size{% endunless %}"
+                                            {% if variant_available %}
+                                              data-variant-id="{{ variant_id }}"
+                                              data-product-id="{{ product.id }}"
+                                            {% else %}
+                                              data-waitlist="true"
+                                              data-product-id="{{ product.id }}"
+                                              data-product-title="{{ product.title | escape }}"
+                                              data-variant-size="{{ value }}"
+                                            {% endif %}
+                                            style="--animation-order: {{ forloop.index }}"
+                                            aria-label="Size {{ value }}{% unless variant_available %} - Sold Out{% endunless %}"
+                                            {% unless variant_available %}
+                                              aria-disabled="true"
+                                            {% endunless %}
+                                          >
+                                            {{ value }}
+                                          </button>
+                                        {% endfor %}
+                                      </div>
+                                    </div>
+                                  {% endif %}
+                                {% endfor %}
+                              </div>
+                            {% endif %}
+
+                            {% if product.available %}
+                              <button
+                                class="add-to-cart-btn w-90 bg-white text-black py-2 px-4 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                                data-product-id="{{ product.id }}"
+                                {% if product.has_only_default_variant %}
+                                  data-variant-id="{{ product.variants.first.id }}"
+                                  data-has-variants="false"
+                                {% elsif has_size_variants %}
+                                  data-has-variants="true"
+                                {% else %}
+                                  data-variant-id="{{ product.variants.first.id }}"
+                                  data-has-variants="false"
+                                {% endif %}
+                                aria-label="Add {{ product.title }} to cart"
+                              >
+                                Add to Cart
+                              </button>
+                            {% else %}
+                              <button
+                                class="notify-me-btn w-90 bg-white text-black py-2 px-4 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                                data-product-id="{{ product.id }}"
+                                data-product-title="{{ product.title | escape }}"
+                                data-has-variants="{% if has_size_variants %}true{% else %}false{% endif %}"
+                                aria-label="Get notified when {{ product.title }} is back in stock"
+                                aria-haspopup="dialog"
+                              >
+                                Notify Me When In Stock
+                              </button>
+                            {% endif %}
+                          </div>
                         </div>
                       </div>
-                    </div>
 
-                    <div class="product-details mt-3" style="margin-bottom:8px;">
-                      <a href="{{ product.url }}">
-                        <h3 class="!text-[1.6rem] uppercase font-medium leading-tight">
-                          {{ product.title | escape }}
-                        </h3>
-                        <div class="flex gap-2 items-baseline fc-price">
-                          <span class="!text-[1.6rem] uppercase font-medium"> {{ product.price | money }} </span>
-                          {%- if product.compare_at_price > product.price -%}
-                            |<span class="!text-[1.6rem] uppercase text-red-600">
-                              {{- product.compare_at_price | money }} FOR MEMBERS</span
-                            >
-                          {%- endif -%}
-                        </div>
-                      </a>
+                      <div class="product-details mt-3" style="margin-bottom:8px;">
+                        <a href="{{ product.url }}">
+                          <h3 class="!text-[1.6rem] uppercase font-medium leading-tight">
+                            {{ product.title | escape }}
+                          </h3>
+                          <div class="flex gap-2 items-baseline fc-price">
+                            <span class="!text-[1.6rem] uppercase font-medium"> {{ product.price | money }} </span>
+                            {%- if product.compare_at_price > product.price -%}
+                              |<span class="!text-[1.6rem] uppercase text-red-600">
+                                {{- product.compare_at_price | money }} FOR MEMBERS</span
+                              >
+                            {%- endif -%}
+                          </div>
+                        </a>
+                      </div>
                     </div>
-                  </div>
-                {% endfor %}
+                  {% endfor %}
+                {% endif %}
               </div>
             </div>
           </div>
@@ -324,11 +350,13 @@
     }
 
     .featured-collection-subheading {
-      margin-top: -30px;
+      /* margin-top: -30px; */
     }
 
-    h2.featured-collection-main-heading {
+    div.featured-collection-main-heading {
+      line-height: 80% !important;
       font-size: 3rem;
+      left: -3px;
     }
 
     .collection-filters {
@@ -336,20 +364,20 @@
     }
 
     @media (min-width: 500px) {
-      h2.featured-collection-main-heading {
+      div.featured-collection-main-heading {
         font-size: 5rem;
       }
     }
 
     @media (min-width: 768px) {
       .collections-container {
-        width: 400px !important;
-        min-width: 400px;
+        width: 350px !important;
+        min-width: 350px;
         max-width: 400px;
       }
 
-      h2.featured-collection-main-heading {
-        font-size: 120px;
+      div.featured-collection-main-heading {
+        font-size: 80px;
       }
 
       .products-container {
@@ -414,13 +442,13 @@
       top: 0;
       left: 0;
       opacity: 0;
-      visibility: hidden;
-      transition: opacity 0.5s ease, visibility 0.5s ease;
+      pointer-events: none;
+      transition: opacity 0.5s ease;
     }
 
     .product-image.active {
       opacity: 1;
-      visibility: visible;
+      pointer-events: auto;
       position: relative;
     }
 
@@ -429,8 +457,8 @@
       top: 50%;
       transform: translateY(-50%);
       z-index: 15;
-      width: 32px;
-      height: 32px;
+      width: 44px;
+      height: 44px;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -441,11 +469,11 @@
     }
 
     .product-image-wrapper:hover .image-nav-arrow {
-      opacity: 1;
+      opacity: 0.6;
     }
 
     .image-nav-arrow:hover {
-      background-color: rgba(68, 68, 68, 0.2);
+      background-color: rgba(68, 68, 68, 0.15);
     }
 
     .image-nav-prev {
