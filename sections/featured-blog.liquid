@@ -63,6 +63,8 @@
   }
 
   .blog-archive-grid.list-view {
+    border-top: 1px solid var(--text);
+    border-bottom: 1px solid var(--text);
     width: 80%;
     display: block;
   }
@@ -128,11 +130,13 @@
     /* z-index: 1001; */
   }
   .blog-archive-card-title {
-    font-size: 4rem;
+    font-size: 32px;
     line-height: 1.1;
     margin: 0 0 1rem;
     font-weight: 500;
     color: var(--text);
+    letter-spacing: -1px;
+    line-height: 85%;
   }
   .blog-archive-card-desc {
     font-size: 2rem;
@@ -243,68 +247,100 @@
 </style>
 
 {% if section.settings.enabled %}
-  <section class="blog-archive-section color-{{ section.settings.color_scheme }}">
-    <div class="blog-archive-section-header">
-      <h2 class="blog-archive-section-title">{{ section.settings.heading }}</h2>
-      <div class="view-toggle">
+  <section
+    class="blog-archive-section color-{{ section.settings.color_scheme }}"
+    role="region"
+    aria-labelledby="blog-archive-section-title"
+    aria-describedby="blog-archive-section-desc"
+  >
+    <header class="blog-archive-section-header">
+      <h2 class="blog-archive-section-title" id="blog-archive-section-title">{{ section.settings.heading }}</h2>
+      <nav class="view-toggle" role="group" aria-label="Toggle blog view">
         <div class="toggle-slider"></div>
-        <button id="gridViewBtn" class="active">Grid</button>
-        <button id="listViewBtn">List</button>
-      </div>
-    </div>
+        <button id="gridViewBtn" class="active" aria-pressed="true" aria-current="true" type="button">Grid</button>
+        <button id="listViewBtn" aria-pressed="false" type="button">List</button>
+      </nav>
+    </header>
 
-    <div class="blog-archive-grid grid-view" id="archiveContainer">
-      {% assign blog_handle = section.settings.blog %}
-      {% assign post_limit = section.settings.post_limit %}
-      {% if blog_handle != blank and blogs[blog_handle].articles.size > 0 %}
-        {% for article in blogs[blog_handle].articles limit: post_limit %}
-          <a href="{{ article.url }}" class="blog-archive-card">
-            <div class="blog-archive-card-image-wrapper">
-              {% comment %} {% if block.settings.image != blank %} {% endcomment %}
-              {% comment %}
-                <img
-                  class="blog-archive-card-image"
-                  src="{{ block.settings.image | image_url }}"
-                  alt="{{ block.settings.title }}"
-                  width="auto"
-                  height="auto"
-                >
-              {% endcomment %}
-              {% if article.image %}
-                {% comment %} {% endif %} {% endcomment %}
-                <img
-                  class="blog-archive-card-image"
-                  src="{{ article.image | image_url }}"
-                  alt="{{ article.title }}"
-                  width="auto"
-                  height="auto"
-                >
-              {% else %}
-                <div style="width:100%; background:#f3f3f3; display:flex; align-items:center; justify-content:center; padding:4rem 0;">
-                  <span style="color:#bbb;">No image</span>
-                </div>
-              {% endif %}
-            </div>
-            <div class="blog-archive-card-content">
-              <p class="blog-archive-card-date">{{ article.published_at | date: '%B %d, %Y' }}</p>
-              <h3 class="blog-archive-card-title">
-                <img
-                  src="{{ "arrow-down.png" | asset_url }}"
-                  alt="Dropdown Icon"
-                  class="w-12 h-6 object-contain transition-transform duration-300 group-hover:-rotate-90 collection-arrow-img blog-archive-card-title-arrow inline-block align-baseline"
-                  width="15px"
-                  height="auto"
-                  aria-hidden="true"
-                  style="margin-bottom:5px;"
-                >
-                {{ article.title }}
-              </h3>
-              <p class="blog-archive-card-desc">{{ article.excerpt | strip_html | truncate: 120 }}</p>
-            </div>
-          </a>
-        {% endfor %}
+    <div id="blog-archive-section-desc" class="sr-only">
+      {% if section.settings.description != blank %}
+        {{ section.settings.description }}
       {% endif %}
     </div>
+
+    <main>
+      <div
+        class="blog-archive-grid grid-view"
+        id="archiveContainer"
+        role="list"
+        aria-live="polite"
+        aria-label="Blog articles list"
+      >
+        {% assign blog_handle = section.settings.blog %}
+        {% assign post_limit = section.settings.post_limit %}
+        {% if blog_handle != blank and blogs[blog_handle].articles.size > 0 %}
+          {% for article in blogs[blog_handle].articles limit: post_limit %}
+            <article
+              role="article"
+              tabindex="0"
+              aria-labelledby="article-title-{{ forloop.index0 }}"
+              aria-describedby="article-date-{{ forloop.index0 }} article-desc-{{ forloop.index0 }}"
+            >
+              <a
+                href="{{ article.url }}"
+                class="blog-archive-card"
+                role="listitem"
+                aria-label="{{ article.title }}"
+                tabindex="0"
+              >
+                <figure class="blog-archive-card-image-wrapper">
+                  {% if article.image %}
+                    <img
+                      class="blog-archive-card-image"
+                      src="{{ article.image | image_url }}"
+                      alt="{{ article.title }}"
+                      width="auto"
+                      height="auto"
+                    >
+                  {% else %}
+                    <div style="width:100%; background:#f3f3f3; display:flex; align-items:center; justify-content:center; padding:4rem 0;">
+                      <span style="color:#bbb;" aria-hidden="true" role="img" aria-label="No image available"
+                        >No image</span
+                      >
+                    </div>
+                  {% endif %}
+                </figure>
+                <div class="blog-archive-card-content">
+                  <time
+                    class="blog-archive-card-date"
+                    id="article-date-{{ forloop.index0 }}"
+                    datetime="{{ article.published_at | date: '%Y-%m-%d' }}"
+                    aria-label="Published on {{ article.published_at | date: '%B %d, %Y' }}"
+                  >
+                    {{ article.published_at | date: '%B %d, %Y' }}
+                  </time>
+                  <h3 class="blog-archive-card-title" id="article-title-{{ forloop.index0 }}">
+                    <img
+                      src="{{ "arrow-down.png" | asset_url }}"
+                      alt=""
+                      class="w-12 h-6 object-contain transition-transform duration-300 group-hover:-rotate-90 collection-arrow-img blog-archive-card-title-arrow inline-block align-baseline"
+                      width="15px"
+                      height="auto"
+                      aria-hidden="true"
+                      style="margin-bottom:5px; position:relative; left:-5px;"
+                    >
+                    {{ article.title }}
+                  </h3>
+                  <p class="blog-archive-card-desc" id="article-desc-{{ forloop.index0 }}">
+                    {{ article.excerpt | strip_html | truncate: 120 }}
+                  </p>
+                </div>
+              </a>
+            </article>
+          {% endfor %}
+        {% endif %}
+      </div>
+    </main>
   </section>
 {% endif %}
 
@@ -377,7 +413,7 @@
       "default": 3,
       "min": 3,
       "max": 9,
-      "step": 3
+      "step": 1
     },
     {
       "type": "color_scheme",
