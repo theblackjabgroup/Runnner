@@ -29,14 +29,15 @@ document.addEventListener("DOMContentLoaded", () => {
 
   document.querySelectorAll(".faq-row").forEach(button => {
     const item = button.closest(".faq-item");
-    const arrow = button.querySelector(".arrow-svg1");
+    const arrow = button.querySelector(".rotate-arrow");
     const preview = item.querySelector(".faq-preview");
     const answer = item.querySelector(".faq-answer");
 
     const toggle = () => {
       const expanded = button.getAttribute("aria-expanded") === "true";
       button.setAttribute("aria-expanded", !expanded);
-      arrow.style.transform = expanded ? "rotate(0deg)" : "rotate(-90deg)";
+      arrow.classList.toggle("rotated", !expanded);
+
       preview.innerHTML = expanded ? preview.dataset.shortText : preview.dataset.fullText;
       item.classList.toggle("open", !expanded);
     };
