@@ -118,6 +118,12 @@ document.addEventListener('DOMContentLoaded', function () {
   }
 
   function initializeCollection(container) {
+    // Check if already initialized to prevent duplicates
+    if (container.hasAttribute('data-initialized')) {
+      return;
+    }
+    container.setAttribute('data-initialized', 'true');
+
     // Initialize product current index for each product
     const productImages = container.querySelectorAll('.product-image');
     productImages.forEach((img) => {
@@ -127,7 +133,7 @@ document.addEventListener('DOMContentLoaded', function () {
       }
     });
 
-    const imageContainers = document.querySelectorAll('.product-image-wrapper');
+    const imageContainers = container.querySelectorAll('.product-image-wrapper');
 
     imageContainers.forEach((wrapper) => {
       const images = Array.from(wrapper.querySelectorAll('.product-image'));
@@ -140,13 +146,16 @@ document.addEventListener('DOMContentLoaded', function () {
         images[0].classList.add('active');
       }
 
-      wrapper.addEventListener('mouseenter', () => {
-        swapImage(1);
-      });
+      // Remove existing event listeners to prevent duplicates
+      wrapper.removeEventListener('mouseenter', wrapper._mouseEnterHandler);
+      wrapper.removeEventListener('mouseleave', wrapper._mouseLeaveHandler);
 
-      wrapper.addEventListener('mouseleave', () => {
-        swapImage(0);
-      });
+      // Create new handlers and store references
+      wrapper._mouseEnterHandler = () => swapImage(1);
+      wrapper._mouseLeaveHandler = () => swapImage(0);
+
+      wrapper.addEventListener('mouseenter', wrapper._mouseEnterHandler);
+      wrapper.addEventListener('mouseleave', wrapper._mouseLeaveHandler);
 
       function swapImage(targetIndex) {
         const currentIndex = productCurrentIndex[productId];
@@ -159,57 +168,36 @@ document.addEventListener('DOMContentLoaded', function () {
       }
     });
 
-    // Image navigation arrows - improved implementation
+    // Image navigation arrows - remove existing listeners first
     const prevButtons = container.querySelectorAll('.image-nav-prev');
     const nextButtons = container.querySelectorAll('.image-nav-next');
 
-    function navigateImage(productId, direction, event) {
-      // Stop event propagation to prevent conflicts with other handlers
-      if (event) {
-        event.preventDefault();
-        event.stopPropagation();
+    // Clean up existing listeners
+    prevButtons.forEach((button) => {
+      if (button._clickHandler) {
+        button.removeEventListener('click', button._clickHandler);
       }
-
-      const imageContainer = container.querySelector(
-        `.product-images-container:has(.product-image[data-product-id="${productId}"])`
-      );
-      if (!imageContainer) return;
-
-      const images = Array.from(imageContainer.querySelectorAll(`.product-image[data-product-id="${productId}"]`));
-      if (images.length <= 1) return;
-
-      // Calculate new index
-      const currentIndex = productCurrentIndex[productId] || 0;
-      const newIndex =
-        direction === 'next' ? (currentIndex + 1) % images.length : (currentIndex - 1 + images.length) % images.length;
-
-      // Update display
-      images.forEach((img, i) => {
-        if (i === newIndex) {
-          img.classList.remove('hidden');
-          img.classList.add('active');
-        } else {
-          img.classList.add('hidden');
-          img.classList.remove('active');
-        }
-      });
-
-      // Update stored index
-      productCurrentIndex[productId] = newIndex;
-    }
+    });
+    nextButtons.forEach((button) => {
+      if (button._clickHandler) {
+        button.removeEventListener('click', button._clickHandler);
+      }
+    });
 
     prevButtons.forEach((button) => {
-      button.addEventListener('click', (e) => {
+      button._clickHandler = (e) => {
         const productId = button.getAttribute('data-product-id');
         navigateImage(productId, 'prev', e);
-      });
+      };
+      button.addEventListener('click', button._clickHandler);
     });
 
     nextButtons.forEach((button) => {
-      button.addEventListener('click', (e) => {
+      button._clickHandler = (e) => {
         const productId = button.getAttribute('data-product-id');
         navigateImage(productId, 'next', e);
-      });
+      };
+      button.addEventListener('click', button._clickHandler);
     });
 
     // Slider drag functionality
@@ -383,112 +371,125 @@ document.addEventListener('DOMContentLoaded', function () {
   const collectionButtons = document.querySelectorAll('.collection-btn');
   const collectionContainers = document.querySelectorAll('.collection-products-container');
 
+  // Initialize all collectionsconst seen = new Set();
+  collectionContainers.forEach((container) => {
+    const id = container.getAttribute('data-collection-id');
+    if (seen.has(id)) {
+      container.remove();
+    } else {
+      seen.add(id);
+    }
+  });
+
+  // Initialize all collections once on page load
+  collectionContainers.forEach((container) => {
+    initializeCollection(container);
+  });
+
   collectionButtons.forEach((button) => {
     // Handle click
     button.addEventListener('click', () => {
       const collectionId = button.getAttribute('data-collection');
 
+      // Reset all buttons
       collectionButtons.forEach((btn) => {
         btn.classList.remove('active');
         btn.setAttribute('aria-pressed', 'false');
-        // Remove invert from all arrows
         const img = btn.querySelector('.collection-arrow-img');
         if (img) img.style.filter = '';
       });
+
+      // Activate clicked button
       button.classList.add('active');
       button.setAttribute('aria-pressed', 'true');
 
       // Invert arrow color for the active button
       const activeImg = button.querySelector('.collection-arrow-img');
       if (activeImg) {
-        // Use setTimeout to ensure the class is applied before the filter
         setTimeout(() => {
           activeImg.style.filter = 'invert(1)';
         }, 0);
       }
 
-      collectionContainers.forEach((container) => {
-        if (container.getAttribute('data-collection-id') === collectionId) {
-          container.classList.remove('hidden');
-          // Initialize functionality for newly shown collection
-          initializeCollection(container);
-        } else {
-          container.classList.add('hidden');
+      // Switch collection containers - just show/hide, no reinitialization
+      // Hide all
+      document.querySelectorAll('.collection-products-container').forEach((c) => c.classList.add('hidden'));
+
+      // Show just the one matching our clicked button
+      const active = document.querySelector(`.collection-products-container[data-collection-id="${collectionId}"]`);
+      if (active) active.classList.remove('hidden');
+
+      // Handle hover
+      button.addEventListener('mouseenter', () => {
+        const img = button.querySelector('.collection-arrow-img');
+        if (img) img.style.filter = 'invert(1)';
+      });
+      button.addEventListener('mouseleave', () => {
+        // Only remove invert if not active
+        if (!button.classList.contains('active')) {
+          const img = button.querySelector('.collection-arrow-img');
+          if (img) img.style.filter = '';
         }
       });
     });
 
-    // Handle hover
-    button.addEventListener('mouseenter', () => {
-      const img = button.querySelector('.collection-arrow-img');
+    // Set initial invert for the first active button
+    const firstActiveBtn = document.querySelector('.collection-btn.active');
+    if (firstActiveBtn) {
+      const img = firstActiveBtn.querySelector('.collection-arrow-img');
       if (img) img.style.filter = 'invert(1)';
-    });
-    button.addEventListener('mouseleave', () => {
-      // Only remove invert if not active
-      if (!button.classList.contains('active')) {
-        const img = button.querySelector('.collection-arrow-img');
-        if (img) img.style.filter = '';
+    }
+
+    // Update cart count on page load to ensure synchronization
+    updateCartCount();
+    // Remove the selective initialization since we now initialize all collections
+    // const initialContainer = document.querySelector('.collection-products-container:not(.hidden)');
+    // if (initialContainer) {
+    //   initializeCollection(initialContainer);
+    // }
+
+    // Letter-by-letter heading animation for featured collection
+    (function () {
+      const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      const heading = document.querySelector('.featured-collection-main-heading.letter-animation');
+      if (!heading) return;
+
+      function animateHeading() {
+        const text = heading.textContent.trim();
+        heading.textContent = '';
+        heading.classList.add('letter-animation-container');
+        heading.setAttribute('aria-label', text);
+
+        // Animate from left to right (starting from first letter)
+        for (let i = 0; i < text.length; i++) {
+          const letterSpan = document.createElement('span');
+          letterSpan.classList.add('animated-letter');
+          letterSpan.textContent = text[i] === ' ' ? '\u00A0' : text[i];
+          letterSpan.setAttribute('aria-hidden', 'true');
+          // Delay so that leftmost letter appears first
+          letterSpan.style.animation = `letterAppear 1s forwards`;
+          letterSpan.style.animationDelay = `${i * 0.07}s`;
+          heading.appendChild(letterSpan);
+        }
       }
-    });
+
+      if (prefersReducedMotion) {
+        heading.style.opacity = '1';
+      } else {
+        // Animate when heading enters viewport
+        const observer = new IntersectionObserver(
+          (entries, observer) => {
+            entries.forEach((entry) => {
+              if (entry.isIntersecting) {
+                animateHeading();
+                observer.unobserve(entry.target);
+              }
+            });
+          },
+          { threshold: 0.1 }
+        );
+        observer.observe(heading);
+      }
+    })();
   });
-
-  // Set initial invert for the first active button
-  const firstActiveBtn = document.querySelector('.collection-btn.active');
-  if (firstActiveBtn) {
-    const img = firstActiveBtn.querySelector('.collection-arrow-img');
-    if (img) img.style.filter = 'invert(1)';
-  }
-
-  // Update cart count on page load to ensure synchronization
-  updateCartCount();
-
-  // Initialize functionality for initially visible collection
-  const initialContainer = document.querySelector('.collection-products-container:not(.hidden)');
-  if (initialContainer) {
-    initializeCollection(initialContainer);
-  }
-
-  // Letter-by-letter heading animation for featured collection
-  (function () {
-    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    const heading = document.querySelector('.featured-collection-main-heading.letter-animation');
-    if (!heading) return;
-
-    function animateHeading() {
-      const text = heading.textContent.trim();
-      heading.textContent = '';
-      heading.classList.add('letter-animation-container');
-      heading.setAttribute('aria-label', text);
-
-      // Animate from left to right (starting from first letter)
-      for (let i = 0; i < text.length; i++) {
-        const letterSpan = document.createElement('span');
-        letterSpan.classList.add('animated-letter');
-        letterSpan.textContent = text[i] === ' ' ? '\u00A0' : text[i];
-        letterSpan.setAttribute('aria-hidden', 'true');
-        // Delay so that leftmost letter appears first
-        letterSpan.style.animation = `letterAppear 1s forwards`;
-        letterSpan.style.animationDelay = `${i * 0.07}s`;
-        heading.appendChild(letterSpan);
-      }
-    }
-
-    if (prefersReducedMotion) {
-      heading.style.opacity = '1';
-    } else {
-      // Animate when heading enters viewport
-      const observer = new IntersectionObserver(
-        (entries, observer) => {
-          entries.forEach((entry) => {
-            if (entry.isIntersecting) {
-              animateHeading();
-              observer.unobserve(entry.target);
-            }
-          });
-        },
-        { threshold: 0.1 }
-      );
-      observer.observe(heading);
-    }
-  })();
 });
