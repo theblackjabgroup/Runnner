@@ -1,6 +1,6 @@
 <div
   class="color-{{ section.settings.color_scheme }} px-2 flex items-center justify-between h-screen"
-  style="padding: {{ section.settings.padding }}px 0; height: 100vh; margin-bottom: {{ section.settings.margin_bottom }}px;"
+  style="padding: {{ section.settings.padding }}px 0; margin-bottom: {{ section.settings.margin_bottom }}px;"
   id="password-section"
 >
   <div
@@ -10,15 +10,15 @@
     aria-labelledby="email-signup-subheading"
   >
     <!-- Text content with fixed width to prevent affecting layout -->
-    <div class="pass-container md:w-[45%] lg:ml-0 flex-shrink-0 space-y-0 text-left pr-4 pl-4 md:pl-20">
-      <p class="pass-heading1 m-0 leading-none break-words w-full flex justify-center md:block md:justify-start whitespace-nowrap">
+    <div class="pass-container md:w-[45%] lg:ml-0 flex-shrink-0 space-y-0 text-left px-4 md:pl-20">
+      <p class="pass-heading1 m-0 leading-none break-words w-full flex justify-center md:block md:justify-start whitespace-nowrap truncate">
         {{ section.settings.heading_1 }}
       </p>
-      <p class="pass-heading2 m-0 leading-none break-words w-full flex justify-center md:block md:justify-start whitespace-nowrap">
+      <p class="pass-heading2 m-0 leading-none break-words w-full flex justify-center md:block md:justify-start whitespace-nowrap truncate">
         {{ section.settings.heading_2 }}
       </p>
       <p
-        class="pass-subheading font-light m-0 uppercase mt-6 tracking-tight leading-none break-words block justify-center text-[64px] md:block md:justify-start"
+        class="pass-subheading font-light m-0 uppercase mt-6 tracking-tight leading-none break-words block justify-center md:block md:justify-start text-wrap"
         id="email-signup-subheading"
       >
         {{ section.settings.subheading }}
@@ -26,7 +26,7 @@
     </div>
 
     <!-- Form Container with fixed width -->
-    <div id="formContainer-password" class="w-full md:w-[80%] flex flex-col items-end lg:mr-0 pr-4 pl-4 md:pr-20">
+    <div id="formContainer-password" class="w-full md:w-[80%] flex flex-col items-end lg:mr-0 px-4 md:pr-20">
       <form
         method="post"
         action="/contact#contact_form"
@@ -37,12 +37,13 @@
         <input type="hidden" name="utf8" value="✓">
         <div class="form-fields-container relative w-full">
           <div class="flex justify-end w-full">
+            <label for="email-input-password" class="sr-only">Email address</label>
             <input
               type="email"
               id="email-input-password"
               placeholder="EMAIL"
               name="contact[email]"
-              class="pass-input w-full px-6 py-4 placeholder:text-[64px] md:placeholder:text-[64px] text-left border focus:outline-none rounded-lg leading-none"
+              class="pass-input w-full px-6 py-4 text-left border mt-4 ml-2 pt-2 pb-2 h-[55px] leading-[50px] md:pt-0 md:pb-0 focus:outline-none focus:ring-1 rounded-lg leading-none"
               aria-label="{{ section.settings.modal_placeholder }}"
             >
           </div>
@@ -51,8 +52,9 @@
           <button
             type="submit"
             id="submitButton-password"
-            class="pass-subscribe w-full px-6 py-4 font-light flex items-center justify-between transition-colors rounded-lg button-with-arrow"
-            aria-label="{{ section.settings.button_text }}"
+            class="pass-subscribe w-full px-6 py-4 font-light flex items-center justify-between cursor-pointer ml-2 mb-4 h-16 text-4xl leading-[50px] pt-2 pb-2 md:h-16 md:mb-0 md:pt-0 md:pb-0
+transition-colors rounded-lg button-with-arrow focus:outline-none focus:ring-1"
+            aria-label="Subscribe to our email list"
           >
             <img
               src="{{ 'arrow-down.png' | asset_url }}"
@@ -73,12 +75,15 @@
         </div>
       </form>
       <div class="flex flex-col md:flex-row justify-end items-center w-[95%] mt-6">
-        <span class="pass-text1 text-[16px] mr-4 cursor-pointer">{{ section.settings.password_text_1 }}</span>
+        <span class="pass-text1 text-[20px] sm:text-[16px] mr-4 mb-2 md:mb-0 cursor-pointer">
+          {{- section.settings.password_text_1 -}}
+        </span>
         <button
           type="button"
           onclick="loadPasswordSection()"
-          class="pass-text2 inline-flex items-center text-[16px] tracking-tight md:text-[20px] px-6 py-0 rounded-md transition-colors"
+          class="pass-text2 inline-flex items-center cursor-pointer text-[16px] tracking-tight md:text-[20px] px-6 py-0 rounded-md transition-colors focus:outline-none focus:ring-1"
           id="enterPasswordBtn"
+          aria-label="Enter password to access the store"
         >
           <svg
             class="w-8 h-8 mr-4"
@@ -86,6 +91,7 @@
             fill="none"
             viewBox="0 0 24 24"
             stroke="currentColor"
+            aria-hidden="true"
           >
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
           </svg>
@@ -95,7 +101,9 @@
     </div>
   </div>
 
-  <div id="successMessage-password" class="hidden text-green-600 text-xl mt-4 text-center">Thanks for subscribing!</div>
+  <div id="successMessage-password" class="hidden text-green-600 text-xl mt-4 text-center" aria-live="polite">
+    Thanks for subscribing!
+  </div>
 </div>
 
 <!-- Password Modal -->
@@ -106,8 +114,14 @@
   aria-modal="true"
   aria-labelledby="passwordModalTitle"
 >
-  <div class="password-page space-y-1">
-    <button id="closeModalBtn" class="absolute top-4 right-4 text-6xl font-bold">&times;</button>
+   <div class="password-page flex flex-col items-center justify-center h-screen text-[var(--text)] bg-[var(--background)]">
+    <button
+      id="closeModalBtn"
+      class="absolute top-4 right-4 text-6xl font-bold cursor-pointer focus:outline-none focus:ring-1"
+      aria-label="Close password modal"
+    >
+      &times;
+    </button>
     <div class="password-header flex flex-col">
       <h1 class="password-title" id="passwordModalTitle">{{ section.settings.modal_title }}</h1>
       <p class="password-subtitle">{{ section.settings.modal_subtitle }}</p>
@@ -132,7 +146,7 @@
           {% endif %}
         >
 
-        <button type="submit" class="password-submit text-[24px]">
+        <button type="submit" class="password-submit text-[24px] w-[30%] px-[2px] py-[4px] mt-8 border-none rounded-[6px] font-semibold uppercase cursor-pointer self-center transition-colors duration-300 ease-in-out md:px-0 md:py-0 md:mt-4 md:font-normal cursor-pointer">
           {{ section.settings.modal_button }}
         </button>
       </div>
@@ -166,15 +180,10 @@
       color: var(--button_label);
     }
 
-    /* Move the hover effect to the parent button instead of the arrow */
     .button-with-arrow:hover .rotate-arrow {
       transform: rotate(-90deg);
     }
-    /* Remove default focus styling */
-    #email-input-password:focus {
-      outline: 1px solid var(--text);
-      box-shadow: none;
-    }
+
     #email-input-password::placeholder {
       font-weight: 200 !important;
       opacity: 0.5 !important;
@@ -201,20 +210,18 @@
     }
 
     .pass-subscribe {
-      height: 64px; font-size: 64px; line-height: 50px; padding-top: 0; padding-bottom: 0;
-      cursor: pointer;
+      height: 64px; font-size: 64px;
       background-color: var(--button);
       color: var(--button_label);
     }
 
     .pass-input {
-      height: 64px; font-size: 64px; line-height: 50px; padding-top: 0; padding-bottom: 0;
+      height: 64px; font-size: 64px; 
     }
 
     .pass-text2 {
       background-color: var(--button);
       color: var(--button_label);
-      cursor: pointer;
     }
 
 
@@ -225,74 +232,10 @@
       }
     }
 
-     @media (max-width: 768px) {
-       .pass-heading1 {
-         font-weight: 500;
-       }
-       .pass-heading2 {
-         font-weight: 500;
-         padding-bottom: 12px;
-       }
-     .pass-input {
-       margin: 8px 0px 0px 8px;
-         padding-top: 8px;
-         padding-bottom: 8px;
-         font-size: 40px;
-         height: 55px;
-       line-height: 50px;
-     }
-       .pass-input::placeholder {
-         font-size: 40px;
-     }
-      .pass-subheading{
-         font-size: 40px;
-       }
-       .pass-text1 {
-       font-size: 20px;
-         margin-bottom: 4px;
-     }
-
-      .pass-container {
-        text-align: center;
-      }
-       .pass-subscribe {
-         margin-left: 8px;
-         padding-top: 8px;
-         padding-bottom: 8px;
-         font-size: 40px;
-         height: 55px;
-       line-height: 50px;
-         margin-bottom: 16px;
-       }
-       #enterPasswordBtn {
-         letter-spacing: 1px;
-       }
-     }
-
-    /* @media (max-width: 767px) {
-      #email-input-password, #submitButton-password {
-        height: 50px !important;
-        line-height: 50px !important;
-      }
-    }
-    @media (min-width: 768px) {
-      #email-input-password, #submitButton-password {
-        height: 80px !important;
-        line-height: 70px !important;
-      }
-    } */
-
     .password-page {
     font-family: {{ section.settings.custom_font.family }}, {{ section.settings.custom_font.fallback_families }};
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    min-height: 100vh;
     margin-top: {{ section.settings.page_margin_top }}px;
     margin-bottom: {{ section.settings.page_margin_bottom }}px;
-    color: var(--text);
-    background-color: var(--background);
   }
 
   .password-header {
@@ -300,7 +243,6 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    /* margin-bottom: 2rem; */
   }
 
   .password-title {
@@ -334,27 +276,50 @@
     color: var(--text);
   }
 
-  .password-input::placeholder { /* Style for placeholder text */
+  .password-input::placeholder { 
     color: var(--text);
-    opacity: 0.7; /* Adjust opacity as needed */
+    opacity: 0.7; 
   }
 
   .password-submit {
-    width: 30%;
-    padding: 4px 2px;
-    margin-top: 2rem;
-    border: none;
-    border-radius: 6px;
     font-weight: 600;
-    text-transform: uppercase;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-    align-self: center;
+    border-radius: 6px;
     background-color: var(--button);
     color: var(--button_label);
   }
+  #closeModalBtn {
+      font-size: 2.5rem;
+      color: var(--text);
+    }
 
     @media (max-width: 768px) {
+       .pass-heading1 {
+         font-weight: 500;
+       }
+       .pass-heading2 {
+         font-weight: 500;
+         padding-bottom: 12px;
+       }
+     .pass-input {
+       font-size: 40px;
+     }
+       .pass-input::placeholder {
+         font-size: 40px;
+     }
+      .pass-subheading{
+         font-size: 40px;
+       }
+
+      .pass-container {
+        text-align: center;
+      }
+       .pass-subscribe {
+         font-size: 40px;
+       }
+       #enterPasswordBtn {
+         letter-spacing: 1px;
+       }
+
     .password-page {
       width: 95vw;
       max-width: 400px;
@@ -394,88 +359,13 @@
       }
     .password-submit {
       font-size: 24px;
-      padding: 0;
-      width: 30%;
       font-weight: 400;
-      margin-top: 1rem;
-      border-radius: 6px;
-    }
-    #closeModalBtn {
-      font-size: 2.5rem;
-      top: 10px;
-      right: 10px;
+      border-radius: 6px
     }
   }
 </style>
 
-<script>
-  document.addEventListener('DOMContentLoaded', function () {
-    const form = document.getElementById('email-signup-form-password');
-    const emailInput = document.getElementById('email-input-password');
-    const submitButton = document.getElementById('submitButton-password');
-    const buttonText = document.getElementById('buttonText-password');
-    const loadingSpinner = document.getElementById('loadingSpinner-password');
-    const successMessage = document.getElementById('successMessage-password');
-    const passwordModal = document.getElementById('passwordModal');
-    const enterPasswordBtn = document.getElementById('enterPasswordBtn');
-    const mainContainer = document.getElementById('mainContainer-password');
-    const closeModalBtn = document.getElementById('closeModalBtn');
-
-    if (!form) return;
-
-    let isSubmitting = false;
-
-    // Password modal functionality
-    enterPasswordBtn.onclick = function () {
-      passwordModal.classList.remove('hidden');
-      mainContainer.style.display = 'none';
-    };
-
-    closeModalBtn.onclick = function () {
-      passwordModal.classList.add('hidden');
-      mainContainer.style.display = 'flex';
-    };
-
-    // Original form functionality
-    emailInput.addEventListener('input', () => {
-      emailInput.classList.remove('error-state', 'empty');
-    });
-
-    form.addEventListener('submit', async (e) => {
-      if (isSubmitting) return;
-
-      const email = emailInput.value.trim();
-
-      if (!email) {
-        emailInput.classList.add('empty', 'error-state');
-        emailInput.focus();
-        return;
-      }
-
-      isSubmitting = true;
-      buttonText.textContent = 'SUBMITTING...';
-      loadingSpinner.classList.remove('hidden');
-      submitButton.disabled = true;
-
-      try {
-        // Simulate submission delay (e.g., API call)
-        await new Promise((resolve) => setTimeout(resolve, 2000));
-        successMessage.classList.remove('hidden');
-        buttonText.textContent = 'SUBSCRIBED';
-        loadingSpinner.classList.add('hidden');
-        emailInput.disabled = true;
-        submitButton.disabled = true;
-      } catch (error) {
-        buttonText.textContent = 'GET NOTIFIED';
-        loadingSpinner.classList.add('hidden');
-        emailInput.classList.add('error-state');
-        submitButton.disabled = false;
-      } finally {
-        isSubmitting = false;
-      }
-    });
-  });
-</script>
+<script src="{{ 'email-signup.js' | asset_url }}" defer="defer"></script>
 
 {% schema %}
 {
@@ -588,7 +478,7 @@
         {
           "type": "text",
           "id": "subheading-1",
-          "label": "t:sections.password_page.blocks.heading.settings.subheading-1.label",
+          "label": "t:sections.password_page.blocks.text.settings.subheading-1.label",
           "default": "Opening Soon"
         }
       ]
