@@ -389,19 +389,21 @@ document.addEventListener('DOMContentLoaded', function () {
         if (img) img.style.filter = '';
       });
 
-      // Activate clicked button
-      button.classList.add('active');
-      button.setAttribute('aria-pressed', 'true');
+      // Activate all buttons that point to the same collection
+      collectionButtons.forEach((btn) => {
+        if (btn.getAttribute('data-collection') === collectionId) {
+          btn.classList.add('active');
+          btn.setAttribute('aria-pressed', 'true');
+          const activeImg = btn.querySelector('.collection-arrow-img');
+          if (activeImg) {
+            setTimeout(() => {
+              activeImg.style.filter = 'invert(1)';
+            }, 0);
+          }
+        }
+      });
 
-      // Invert arrow color for the active button
-      const activeImg = button.querySelector('.collection-arrow-img');
-      if (activeImg) {
-        setTimeout(() => {
-          activeImg.style.filter = 'invert(1)';
-        }, 0);
-      }
-
-      // Switch collection containers - just show/hide, no reinitialization
+      // Switch collection containers - show the one matching the collection ID
       collectionContainers.forEach((container) => {
         if (container.getAttribute('data-collection-id') === collectionId) {
           container.classList.remove('hidden');
@@ -425,11 +427,17 @@ document.addEventListener('DOMContentLoaded', function () {
     });
   });
 
-  // Set initial invert for the first active button
-  const firstActiveBtn = document.querySelector('.collection-btn.active');
-  if (firstActiveBtn) {
-    const img = firstActiveBtn.querySelector('.collection-arrow-img');
-    if (img) img.style.filter = 'invert(1)';
+  // Set initial invert for all active buttons (those pointing to first collection)
+  const firstButton = collectionButtons[0];
+  if (firstButton) {
+    const firstCollection = firstButton.getAttribute('data-collection');
+    collectionButtons.forEach((btn) => {
+      if (btn.getAttribute('data-collection') === firstCollection) {
+        btn.classList.add('active');
+        const img = btn.querySelector('.collection-arrow-img');
+        if (img) img.style.filter = 'invert(1)';
+      }
+    });
   }
 
   // Update cart count on page load to ensure synchronization
