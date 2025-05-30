@@ -1,66 +1,42 @@
 <script src="{{ 'blog-edit.js' | asset_url }}" defer></script>
 <style>
   @media (max-width: 767px) {
-    .card-excerpt {
-      margin-left:25px !important;
-      font-size:12px !important;
-      margin-top:5px;
+    .overlay-content {
+      margin-top: 1.25rem;
     }
-    .overlay-content{
-      margin-top:20px !important; 
-    }
-    #animated-heading {
-      font-size: 2rem !important; 
-      width: 70vw !important; 
+    .excerpt{
+      margin-left:65px !important;
     }
     .hero-image {
-      height: 500px !important; 
+      height: 60vh;
     }
-    .second_section{
-      margin-top:13px !important;
+    .second_section {
+      margin-top: 0rem;
     }
-    .subclass-header svg {
-      width: 24px;
-      height: 24px;
-      margin-right: 8px;
-      margin-top:-10px;
-    }
-    .subclass-header{
-      margin-bottom: 8px !important;
+    .subclass-header {
+      margin-bottom: 0.5rem;
     }
     .subclass-header span {
       font-size: 1.25rem;
     }
-    #arrow-svg1{
-      height: 38px !important;
-      width: 44px !important;
-      margin-left:0px !important;
-      margin-top:6px !important;
+    .arrow-svg1 {
+      height: 2.375rem;
+      width: 2.75rem;
     }
     .subclass-subheader {
-      margin-left: 0 !important;
+      margin-top: 0.625rem;
       font-size: 1rem;
-      margin-top:10px !important;
     }
-    .main_heading{
-      margin-left:-206px !important;
-    }
-    .text-b-mail-color {
-      font-size:25px !important;
-    }
-    .date-tag{
-      font-size:12px !important;
+    #animated-heading{
+      font-size:35px !important;
+      margin-left:15px !important;
     }
   }
 
   :root {
-    --font-heading-family: {{ settings.type_heading_font.family }}, sans-serif;
-    --font-body-family: {{ settings.type_body_font.family }}, sans-serif;
-  }
-
-  .hero-image {
-    object-fit: cover;
-  }
+  --font-heading-family: {{ settings.type_heading_font.family }}, sans-serif;
+  --font-body-family: {{ settings.type_body_font.family }}, sans-serif;
+}
 
   #animated-heading {
     font-family: var(--font-heading-family);
@@ -72,7 +48,9 @@
     transform: translateX(100vw);
     animation: slideInLetter 0.8s forwards;
   }
-
+   .excerpt{
+     font-family: var(--font-heading-family);
+   }
   @keyframes slideInLetter {
     0% {
       opacity: 0;
@@ -84,11 +62,10 @@
     }
   }
 
-  .date-tag, .card-excerpt {
-    font-family: var(--font-body-family);
+  .date-tag {
+    font-family: var(--font-heading-family);
     opacity: 0;
     animation: fadeIn 1s ease-in-out forwards;
-    font-size:15px;
   }
 
   @keyframes fadeIn {
@@ -112,88 +89,82 @@
       transform: translateY(0);
     }
   }
+  @media (prefers-reduced-motion: reduce) {
+  .letter,
+  .fade-up {
+    animation: none !important;
+  }
+}
 
   .fade-up {
-    animation: fadeUp 2.0s ease-out forwards;
-  }
-
-  .card-excerpt {
-    margin-left:150px;
+    animation: fadeUp 2s ease-out forwards;
   }
 
   .overlay-content {
     color: var(--header_text);
+    line-height: 1.75rem;
   }
-
-  .text-new-this-week-color,
-  .text-b-mail-color,
-  .text-article-date-color,
-  .text-card-subtitle-color,
-  .text-card-title-color {
-    color: var(--text);
-  }
-
-  .text-b-mail-color {
-    font-size: 42px;
-    font-weight: 500 !important; 
-  }
-
   .arrow-svg1 {
-    fill: none;
-    margin-left: -38px;
     flex-shrink: 0;
     stroke: var(--header_text);
+    margin-left:20px;
   }
 
-  /* Accessibility Focus Styles */
   :focus {
     outline: 2px solid #f97316;
     outline-offset: 2px;
   }
-
+  .subclass-header,
+.subclass-subheader,
+.blog_highlight-tag,
+.blog_heading-highlight,
+.text-article-date-color {
+  color: var(--text);
+}
+  .arrow-svg1{
+     stroke: var(--header_text);
+    fill: var(--header_text);
+  }
+  .arrow-svgsub{
+    stroke: var(--text);
+    fill: var(--text);
+  }
+ ::selection{
+   color:orange;
+ }
 </style>
 
-<!-- Hero Section -->
 <section id="main-content" class="color-{{ section.settings.color_scheme }} overflow-hidden flex relative">
   {% if section.settings.image != blank %}
     <img
-      class="hero-image absolute md:h-full w-full z-1 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+      class="hero-image object-cover absolute w-full z-10 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 md:h-full"
       src="{{ section.settings.image | image_url: width: 2000 }}"
       alt="Hero Background"
       tabindex="0"
-    width="{{ section.settings.image.width }}"
-  height="{{ section.settings.image.height }}"
+      width="{{ section.settings.image.width }}"
+      height="{{ section.settings.image.height }}"
     />
   {% else %}
-    {{ 'image' | placeholder_svg_tag: 'hero-image absolute md:h-[500px] w-full' }}
+    {{ 'image' | placeholder_svg_tag: 'hero-image absolute w-full md:h-[500px]'}}
   {% endif %}
 
-  <div class="w-full max-w-7xl flex flex-col text-left" style='margin-left:13px;'>
-    <div class="overlay-content max-w-7xl relative z-2 flex flex-col" style="margin-top:55px;">
-      <div class="top-18 left-20 text-xl sm:text-2xl  date-tag" style="font-size:24px;">
+  <div class="w-full max-w-7xl flex flex-col text-left ml-3 relative ">
+    <div class="overlay-content relative z-10 flex flex-col">
+      <div class="date-tag relative text-xl md:text-3xl" style="margin-left: 20px;margin-top: 20px;">
         {{ section.settings.date_text }}
       </div>
 
       <div class="flex flex-row">
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          class="arrow-svg1"
-          id="arrow-svg1"
-          aria-hidden="true"
-          viewBox="0 0 24 24"
-          stroke-width="2"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          style="fill:none;margin-top: 13px;margin-right: 187px;margin-left: 20px;height: 184px;"
-        >
-          <path d="M1.1875 7.7334H7.6599M7.6599 7.7334V1.261M7.6599 7.7334L1.1875 1.261"></path>
+       <svg xmlns="http://www.w3.org/2000/svg" width="59" height="59" viewBox="0 0 9 9" class="arrow-svg1 mt-6">
+        <path d="M1.1875 7.7334H7.6599M7.6599 7.7334V1.261M7.6599 7.7334L1.1875 1.261" stroke-linejoin="round" stroke-linecap="round" />
         </svg>
 
-        <div class="main_heading top-11 left-3 md:left-25 z-10 flex flex-col items-start text-left" style="margin-left: -253px; font-size:120px;">
+
+        <div class="main_heading relative z-10 flex flex-col items-start text-left">
           <div
             id="animated-heading"
-            class="text-4xl sm:text-6xl font-medium uppercase leading-tight sm:leading-none break-words md:w-[40vw] sm:w-[100px] w-[50vw]"
-            style="width:730px; font-size:120px; color: {{ section.settings.color_scheme | default: '#ffffff' }}"
+            class="font-medium uppercase leading-tight sm:leading-none break-words"
+            style="margin-left:40px; font-size:102px; width: clamp(300px, 47vw, 730px); color: {{ section.settings.color_scheme}}"
             aria-label="{{ section.settings.full_text }}"
           >
             <span aria-hidden="true">
@@ -203,7 +174,7 @@
         </div>
       </div>
 
-      <p class="md:bottom-2 md:right-100 text-xl sm:text-2xl uppercase top-60 card-excerpt md:top-180" style="font-size:24px;">
+      <p class="excerpt text-xl md:text-3xl uppercase mb-8 mt-5" style="margin-left:120px;">
         {{ section.settings.excerpt_text }}
       </p>
     </div>
@@ -215,11 +186,11 @@
   <div class="w-full uppercase">
     <div class="flex flex-col md:flex-row md:items-start gap-10">
       <div class="w-2/3 max-w-[300px]">
-        <p class="text-sm md:text-[20px] font-medium text-new-this-week-color">{{ section.settings.top_text }}</p>
-        <h1 class="mt-10 text-b-mail-color">{{ section.settings.main_heading }}</h1>
+        <p class="text-xl md:text-[20px] font-medium blog_highlight-tag ">{{ section.settings.top_text }}</p>
+        <h3 class="mt-10 blog_heading-highlight ">{{ section.settings.main_heading }}</h3>
       </div>
 
-      <div class="flex flex-col md:flex-row md:flex-wrap gap-6 w-full">
+      <div class="flex flex-col md:flex-row md:flex-wrap gap-6 w-full ">
         {% if section.settings.selected_blog != blank %}
           {% assign blog = blogs[section.settings.selected_blog] %}
           {% assign articles_limit = section.settings.articles_per_page %}
@@ -227,17 +198,14 @@
             <a href="{{ article.url }}" class="block w-full md:w-1/3 space-y-2 px-2 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 transition-shadow hover:shadow-lg">
               <div class="aspect-[5/3] overflow-hidden">
                 {% if article.image != blank %}
-                 {% if article.image %}
-  <img
-    src="{{ article.image | image_url: width: 600 }}"
-    width="{{ article.image.width }}"
-    height="{{ article.image.height }}"
-    alt="{{ article.title | escape }}"
-    loading="lazy"
-    class="w-full h-full object-cover"
-  />
-{% endif %}
-
+                  <img
+                    src="{{ article.image | image_url: width: 600 }}"
+                    width="{{ article.image.width }}"
+                    height="{{ article.image.height }}"
+                    alt="{{ article.title | default: 'Blog image' | escape }}"
+                    loading="lazy"
+                    class="arrow-svgsub w-full h-full object-cover"
+                  />
                 {% else %}
                   {{ 'collection-1' | placeholder_svg_tag: 'w-full h-full bg-gray' }}
                 {% endif %}
@@ -245,26 +213,16 @@
 
               <p class="text-sm md:text-[20px] mt-2 text-article-date-color">{{ article.published_at | date: "%m.%d.%y" }}</p>
 
-              <h3 class="subclass-header flex text-sm md:text-[32px] font-bold leading-snug" style="margin-bottom: 25px; line-height:0.8;">
-                <div class="second_section flex-shrink-0" style="margin-top: 7px;margin-left: 43px;">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    class="arrow-svg1 mt-[2px]"
-                    viewBox="0 0 14 14"
-                    fill="none"
-                    stroke-width="2"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    aria-hidden="true"
-                    style="width: 24px; height: 24px;"
-                  >
-                    <path d="M1.1875 7.7334H7.6599M7.6599 7.7334V1.261M7.6599 7.7334L1.1875 1.261" />
-                  </svg>
+              <h3 class="subclass-header flex text-sm md:text-[32px] font-bold leading-snug mb-[25px] leading-[0.8]">
+                <div class="second_section flex-shrink-0 mt-[10px] ml-[43px]">
+                   <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 9 9" class="arrow-svgsub">
+        <path d="M1.1875 7.7334H7.6599M7.6599 7.7334V1.261M7.6599 7.7334L1.1875 1.261" stroke-linejoin="round"/>
+        </svg>
                 </div>
-                <span class="text-card-title-color ml-2">{{ article.title }}</span>
+                <span class="text-card-title-color ml-4">{{ article.title }}</span>
               </h3>
 
-              <span class="subclass-subheader text-sm md:text-[20px] tracking-tight text-card-subtitle-color leading-tight">
+              <span class="subclass-subheader text-sm md:text-[20px] tracking-tight leading-tight">
                 {{ article.content | strip_html | truncate: 50 }}
               </span>
             </a>
@@ -275,25 +233,15 @@
             <div class="block w-full md:w-1/3 space-y-2 px-2">
               {{ 'collection-1' | placeholder_svg_tag: 'w-[500px] h-1/2 aspect-[5/3] bg-gray' }}
               <p class="text-sm md:text-[20px] mt-2 text-article-date-color">00.00.00</p>
-              <h3 class="subclass-header flex text-sm md:text-[32px] font-bold leading-snug">
-                <div class="second_section flex-shrink-0" style="margin-top:10px; margin-left: 43px;">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    class="arrow-svg1 mt-[2px]"
-                    viewBox="0 0 14 14"
-                    fill="none"
-                    stroke-width="2"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    aria-hidden="true"
-                    style="width: 24px; height: 24px;"
-                  >
-                    <path d="M1.1875 7.7334H7.6599M7.6599 7.7334V1.261M7.6599 7.7334L1.1875 1.261" />
+              <h3 class="subclass-header flex text-sm md:text-[32px] font-bold leading-snug mb-[25px] leading-[0.8]">
+                <div class="second_section flex-shrink-0 mt-[10px] ml-[43px]">
+                 <svg xmlns="http://www.w3.org/2000/svg" width="9" height="9" viewBox="0 0 9 9" fill="none">
+                  <path d="M1.1875 7.7334H7.6599M7.6599 7.7334V1.261M7.6599 7.7334L1.1875 1.261" stroke="black" stroke-linejoin="round"/>
                   </svg>
                 </div>
                 <span class="text-card-title-color ml-2">Article Title</span>
               </h3>
-              <span class="subclass-subheader text-sm md:text-[20px] tracking-tight text-card-subtitle-color">
+              <span class="subclass-subheader text-sm md:text-[20px] tracking-tight">
                 Article excerpt goes here...
               </span>
             </div>
@@ -302,12 +250,10 @@
       </div>
     </div>
 
-    <hr class="w-screen max-w-none mx-auto my-8" style="border-top-width: 0px; border-style: solid;" />
+    <hr class="w-screen max-w-none mx-auto my-8 border-t-0 border-solid" />
   </div>
 </section>
-
-
-{% schema %}
+  {% schema %}
 {
   "name": "Blog",
   "tag": "section",
