@@ -118,6 +118,12 @@ document.addEventListener('DOMContentLoaded', function () {
   }
 
   function initializeCollection(container) {
+    // Check if already initialized to prevent duplicates
+    if (container.hasAttribute('data-initialized')) {
+      return;
+    }
+    container.setAttribute('data-initialized', 'true');
+
     // Initialize product current index for each product
     const productImages = container.querySelectorAll('.product-image');
     productImages.forEach((img) => {
@@ -127,101 +133,71 @@ document.addEventListener('DOMContentLoaded', function () {
       }
     });
 
-    // Image hover functionality - improved to work with navigation arrows
-    const imageContainers = container.querySelectorAll('.product-image-wrapper'); // Updated selector
+    const imageContainers = container.querySelectorAll('.product-image-wrapper');
+
     imageContainers.forEach((wrapper) => {
       const images = Array.from(wrapper.querySelectorAll('.product-image'));
       const productId = images[0]?.getAttribute('data-product-id');
-
       if (!productId || images.length <= 1) return;
 
-      // Track if mouse is over the container
-      let isHovering = false;
+      // Initialize index and show first image
+      if (typeof productCurrentIndex[productId] === 'undefined') {
+        productCurrentIndex[productId] = 0;
+        images[0].classList.add('active');
+      }
 
-      wrapper.addEventListener('mouseenter', (e) => {
-        // if (e.target.closest('.add-to-cart-btn, .notify-me-btn')) // Prevent hover effect on buttons
-        isHovering = true;
-        if (images.length >= 2 && productCurrentIndex[productId] === 0) {
-          updateProductImage(productId, 1, images);
-        }
-      });
+      // Remove existing event listeners to prevent duplicates
+      wrapper.removeEventListener('mouseenter', wrapper._mouseEnterHandler);
+      wrapper.removeEventListener('mouseleave', wrapper._mouseLeaveHandler);
 
-      wrapper.addEventListener('mouseleave', () => {
-        if (isHovering && productCurrentIndex[productId] === 1) {
-          updateProductImage(productId, 0, images);
-        }
-        isHovering = false;
-      });
+      // Create new handlers and store references
+      wrapper._mouseEnterHandler = () => swapImage(1);
+      wrapper._mouseLeaveHandler = () => swapImage(0);
 
-      // Helper function to update product image
-      function updateProductImage(productId, newIndex, imageElements) {
-        // Save the new index
-        productCurrentIndex[productId] = newIndex;
+      wrapper.addEventListener('mouseenter', wrapper._mouseEnterHandler);
+      wrapper.addEventListener('mouseleave', wrapper._mouseLeaveHandler);
 
-        // Update the display
-        imageElements.forEach((img, i) => {
-          if (i === newIndex) {
-            img.classList.remove('hidden');
-            img.classList.add('active');
-          } else {
-            img.classList.add('hidden');
-            img.classList.remove('active');
-          }
-        });
+      function swapImage(targetIndex) {
+        const currentIndex = productCurrentIndex[productId];
+        if (currentIndex === targetIndex) return;
+
+        // Crossfade: remove active from current and add to target simultaneously
+        images[currentIndex].classList.remove('active');
+        images[targetIndex].classList.add('active');
+        productCurrentIndex[productId] = targetIndex;
       }
     });
 
-    // Image navigation arrows - improved implementation
+    // Image navigation arrows - remove existing listeners first
     const prevButtons = container.querySelectorAll('.image-nav-prev');
     const nextButtons = container.querySelectorAll('.image-nav-next');
 
-    function navigateImage(productId, direction, event) {
-      // Stop event propagation to prevent conflicts with other handlers
-      if (event) {
-        event.preventDefault();
-        event.stopPropagation();
+    // Clean up existing listeners
+    prevButtons.forEach((button) => {
+      if (button._clickHandler) {
+        button.removeEventListener('click', button._clickHandler);
       }
-
-      const imageContainer = container.querySelector(
-        `.product-images-container:has(.product-image[data-product-id="${productId}"])`
-      );
-      if (!imageContainer) return;
-
-      const images = Array.from(imageContainer.querySelectorAll(`.product-image[data-product-id="${productId}"]`));
-      if (images.length <= 1) return;
-
-      // Calculate new index
-      const currentIndex = productCurrentIndex[productId] || 0;
-      const newIndex =
-        direction === 'next' ? (currentIndex + 1) % images.length : (currentIndex - 1 + images.length) % images.length;
-
-      // Update display
-      images.forEach((img, i) => {
-        if (i === newIndex) {
-          img.classList.remove('hidden');
-          img.classList.add('active');
-        } else {
-          img.classList.add('hidden');
-          img.classList.remove('active');
-        }
-      });
-
-      // Update stored index
-      productCurrentIndex[productId] = newIndex;
-    }
+    });
+    nextButtons.forEach((button) => {
+      if (button._clickHandler) {
+        button.removeEventListener('click', button._clickHandler);
+      }
+    });
 
     prevButtons.forEach((button) => {
-      button.addEventListener('click', (e) => {
+      button._clickHandler = (e) => {
         const productId = button.getAttribute('data-product-id');
         navigateImage(productId, 'prev', e);
-      });
+      };
+      button.addEventListener('click', button._clickHandler);
     });
 
     nextButtons.forEach((button) => {
-      button.addEventListener('click', (e) => {
+      button._clickHandler = (e) => {
         const productId = button.getAttribute('data-product-id');
         navigateImage(productId, 'next', e);
-      });
+      };
+      button.addEventListener('click', button._clickHandler);
     });
 
     // Slider drag functionality
@@ -395,35 +371,40 @@ document.addEventListener('DOMContentLoaded', function () {
   const collectionButtons = document.querySelectorAll('.collection-btn');
   const collectionContainers = document.querySelectorAll('.collection-products-container');
 
+  // Initialize all collections once on page load
+  collectionContainers.forEach((container) => {
+    initializeCollection(container);
+  });
+
   collectionButtons.forEach((button) => {
     // Handle click
     button.addEventListener('click', () => {
       const collectionId = button.getAttribute('data-collection');
 
+      // Reset all buttons
       collectionButtons.forEach((btn) => {
         btn.classList.remove('active');
         btn.setAttribute('aria-pressed', 'false');
-        // Remove invert from all arrows
         const img = btn.querySelector('.collection-arrow-img');
         if (img) img.style.filter = '';
       });
+
+      // Activate clicked button
       button.classList.add('active');
       button.setAttribute('aria-pressed', 'true');
 
       // Invert arrow color for the active button
       const activeImg = button.querySelector('.collection-arrow-img');
       if (activeImg) {
-        // Use setTimeout to ensure the class is applied before the filter
         setTimeout(() => {
           activeImg.style.filter = 'invert(1)';
         }, 0);
       }
 
+      // Switch collection containers - just show/hide, no reinitialization
       collectionContainers.forEach((container) => {
         if (container.getAttribute('data-collection-id') === collectionId) {
           container.classList.remove('hidden');
-          // Initialize functionality for newly shown collection
-          initializeCollection(container);
         } else {
           container.classList.add('hidden');
         }
@@ -453,12 +434,11 @@ document.addEventListener('DOMContentLoaded', function () {
 
   // Update cart count on page load to ensure synchronization
   updateCartCount();
-
-  // Initialize functionality for initially visible collection
-  const initialContainer = document.querySelector('.collection-products-container:not(.hidden)');
-  if (initialContainer) {
-    initializeCollection(initialContainer);
-  }
+  // Remove the selective initialization since we now initialize all collections
+  // const initialContainer = document.querySelector('.collection-products-container:not(.hidden)');
+  // if (initialContainer) {
+  //   initializeCollection(initialContainer);
+  // }
 
   // Letter-by-letter heading animation for featured collection
   (function () {
