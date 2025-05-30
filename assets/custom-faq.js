@@ -29,15 +29,27 @@ document.addEventListener("DOMContentLoaded", () => {
 
   document.querySelectorAll(".faq-row").forEach(button => {
     const item = button.closest(".faq-item");
-    const arrow = button.querySelector(".rotate-arrow");
+    const arrow = button.querySelector(".arrow-svg1");
     const preview = item.querySelector(".faq-preview");
-    const answer = item.querySelector(".faq-answer");
 
     const toggle = () => {
       const expanded = button.getAttribute("aria-expanded") === "true";
-      button.setAttribute("aria-expanded", !expanded);
-      arrow.classList.toggle("rotated", !expanded);
 
+      if (!expanded) {
+        document.querySelectorAll(".faq-item.open").forEach(openItem => {
+          if (openItem !== item) {
+            const openButton = openItem.querySelector(".faq-row");
+            const openArrow = openItem.querySelector(".arrow-svg1");
+            const openPreview = openItem.querySelector(".faq-preview");
+            openButton.setAttribute("aria-expanded", "false");
+            openArrow.style.transform = "rotate(0deg)";
+            openPreview.innerHTML = openPreview.dataset.shortText;
+            openItem.classList.remove("open");
+          }
+        });
+      }
+      button.setAttribute("aria-expanded", !expanded);
+      arrow.style.transform = expanded ? "rotate(0deg)" : "rotate(-90deg)";
       preview.innerHTML = expanded ? preview.dataset.shortText : preview.dataset.fullText;
       item.classList.toggle("open", !expanded);
     };
