@@ -27,19 +27,38 @@ document.addEventListener("DOMContentLoaded", () => {
     answer.innerHTML = fullWithLinks;
   });
 
+  const originalPath = "M1.1875 7.7334H7.6599M7.6599 7.7334V1.261M7.6599 7.7334L1.1875 1.261";
+  const toggledPath = "M7.47241 7.47241L7.47241 1.00001M7.47241 1.00001L1.00001 1.00001M7.47241 1.00001L1.00001 7.47241";
+
   document.querySelectorAll(".faq-row").forEach(button => {
     const item = button.closest(".faq-item");
     const arrow = button.querySelector(".arrow-svg1");
+    const path = arrow.querySelector("path");
     const preview = item.querySelector(".faq-preview");
-    const answer = item.querySelector(".faq-answer");
 
-    const toggle = () => {
-      const expanded = button.getAttribute("aria-expanded") === "true";
-      button.setAttribute("aria-expanded", !expanded);
-      arrow.style.transform = expanded ? "rotate(0deg)" : "rotate(-90deg)";
-      preview.innerHTML = expanded ? preview.dataset.shortText : preview.dataset.fullText;
-      item.classList.toggle("open", !expanded);
-    };
+   const toggle = () => {
+  const expanded = button.getAttribute("aria-expanded") === "true";
+
+  if (!expanded) {
+    document.querySelectorAll(".faq-item.open").forEach(openItem => {
+      if (openItem !== item) {
+        const openButton = openItem.querySelector(".faq-row");
+        const openArrow = openItem.querySelector(".arrow-svg1");
+        const openPreview = openItem.querySelector(".faq-preview");
+        openButton.setAttribute("aria-expanded", "false");
+        openArrow.classList.remove("rotate--90");
+        openPreview.innerHTML = openPreview.dataset.shortText;
+        openItem.classList.remove("open");
+      }
+    });
+  }
+
+  button.setAttribute("aria-expanded", !expanded);
+  arrow.classList.toggle("rotate--90", !expanded);
+  preview.innerHTML = expanded ? preview.dataset.shortText : preview.dataset.fullText;
+  item.classList.toggle("open", !expanded);
+};
+
 
     button.addEventListener("click", (e) => {
       const selection = window.getSelection();
