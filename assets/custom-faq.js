@@ -36,29 +36,29 @@ document.addEventListener("DOMContentLoaded", () => {
     const path = arrow.querySelector("path");
     const preview = item.querySelector(".faq-preview");
 
-    const toggle = () => {
-      const expanded = button.getAttribute("aria-expanded") === "true";
+   const toggle = () => {
+  const expanded = button.getAttribute("aria-expanded") === "true";
 
-      if (!expanded) {
-        document.querySelectorAll(".faq-item.open").forEach(openItem => {
-          if (openItem !== item) {
-            const openButton = openItem.querySelector(".faq-row");
-            const openArrow = openItem.querySelector(".arrow-svg1");
-            const openPath = openArrow.querySelector("path");
-            const openPreview = openItem.querySelector(".faq-preview");
-            openButton.setAttribute("aria-expanded", "false");
-            openPath.setAttribute("d", originalPath);
-            openPreview.innerHTML = openPreview.dataset.shortText;
-            openItem.classList.remove("open");
-          }
-        });
+  if (!expanded) {
+    document.querySelectorAll(".faq-item.open").forEach(openItem => {
+      if (openItem !== item) {
+        const openButton = openItem.querySelector(".faq-row");
+        const openArrow = openItem.querySelector(".arrow-svg1");
+        const openPreview = openItem.querySelector(".faq-preview");
+        openButton.setAttribute("aria-expanded", "false");
+        openArrow.classList.remove("rotate--90");
+        openPreview.innerHTML = openPreview.dataset.shortText;
+        openItem.classList.remove("open");
       }
+    });
+  }
 
-      button.setAttribute("aria-expanded", !expanded);
-      path.setAttribute("d", expanded ? originalPath : toggledPath);
-      preview.innerHTML = expanded ? preview.dataset.shortText : preview.dataset.fullText;
-      item.classList.toggle("open", !expanded);
-    };
+  button.setAttribute("aria-expanded", !expanded);
+  arrow.classList.toggle("rotate--90", !expanded);
+  preview.innerHTML = expanded ? preview.dataset.shortText : preview.dataset.fullText;
+  item.classList.toggle("open", !expanded);
+};
+
 
     button.addEventListener("click", (e) => {
       const selection = window.getSelection();
