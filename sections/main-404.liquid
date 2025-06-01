@@ -37,10 +37,24 @@
       "content": "t:sections.404.animation_header.label"
     },
     {
-      "type": "checkbox",
-      "id": "enable_animation",
-      "label": "t:sections.404.enable_animation.label",
-      "default": true
+      "type": "select",
+      "id": "animation_mode",
+      "label": "Animation Mode",
+      "options": [
+        {
+          "value": "static",
+          "label": "Static"
+        },
+        {
+          "value": "curved",
+          "label": "Curved Animation"
+        },
+        {
+          "value": "slide",
+          "label": "Slide Animation"
+        }
+      ],
+      "default": "curved"
     },
     {
       "type": "range",
@@ -87,7 +101,7 @@
     class="bandit-404-section color-{{ section.settings.color_scheme }}"
     style="{% if section.settings.background_image %}background-image: url({{ section.settings.background_image | image_url }}); background-size: {{ section.settings.background_size }};{% endif %}"
   >
-    {% if section.settings.enable_animation %}
+    {% if section.settings.animation_mode == 'curved' %}
       <svg
         class="svg-text-flow text-flow-10 is-animating"
         xmlns="http://www.w3.org/2000/svg"
@@ -132,6 +146,12 @@
           </textPath>
         </text>
       </svg>
+    {% elsif section.settings.animation_mode == 'slide' %}
+      <div class="slide-animation">
+        <div class="slide-text slide-left">{{ section.settings.first_text }}</div>
+        <div class="slide-text slide-right">{{ section.settings.second_text }}</div>
+        <div class="slide-text slide-left">{{ section.settings.third_text }}</div>
+      </div>
     {% else %}
       <svg class="svg-text-flow text-flow-10" xmlns="http://www.w3.org/2000/svg" viewBox="-100 -100 1400 600">
         <path id="text-flow-10-static" fill="none" d="M1200,287.5H80.5a80,80,0,0,1-80-80V80.5a80,80,0,0,1,80-80h1000"></path>
@@ -161,10 +181,16 @@
       </svg>
     {% endif %}
     <p class="sr-only">{{ section.settings.third_text }}</p>
-    <button class="bandit-404-button" aria-label="Go to homepage" onclick="window.location.href='/'">
-  {{ section.settings.button_text }}
-</button>
-
+    <a href="/" class="main-404-button" aria-label="Go to homepage">
+      <div class="main-404-button-text-container">
+        <div class="main-404-button-text">
+          {{ section.settings.button_text }}
+        </div>
+        <div class="main-404-button-text-hover">
+          {{ section.settings.button_text }}
+        </div>
+      </div>
+    </a>
   </div>
 
   <noscript>
@@ -185,7 +211,7 @@
   }
 
   .bandit-404-section {
-    min-height: 60vh;
+    height: 82vh;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -221,57 +247,177 @@
   }
 
   .text-flow-12 {
-    top: 15vh;
+    top: 30vh;
   }
 
-  .bandit-404-button {
+  .main-404-button {
     cursor: pointer;
     position: relative;
     top: 20vh;
-    padding: 2px 4px;
+    padding: 3px 12px;
     text-decoration: none;
-    font-size: 20px;
+    font-size: 24px;
     line-height: 1;
     font-weight: 500;
     border-radius: 4px;
-    transition: all 0.3s ease;
     text-transform: uppercase;
     letter-spacing: 1px;
     background-color: var(--button);
     color: var(--button_label);
+     overflow: hidden;
+      transition: background-color 0s, color 0s;
   }
 
-  .bandit-404-button:hover {
-    transform: translateY(-2px);
-    opacity: 0.9;
+  .main-404-button:hover {
+     color: var(--button);
+    background-color: var(--button_label);
+    border: 1px solid var(--button);
   }
+
+  .main-404-button-text-container {
+      position: relative;
+      width: 100%;
+      overflow: hidden;
+    }
+
+    .main-404-button-text {
+      display: flex;
+      align-items: center;
+      line-height: 1;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      transition: transform 0.7s ease;
+    }
+
+    .main-404-button:hover .main-404-button-text {
+      transform: translateX(-100%);
+    }
+
+    .main-404-button-text-hover {
+      position: absolute;
+      top: 0;
+      left: 0;
+      display: flex;
+      align-items: center;
+      line-height: 1;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      transform: translateX(100%);
+      transition: transform 0.7s ease;
+    }
+
+    .main-404-button:hover .main-404-button-text-hover {
+      transform: translateX(0);
+    }
+
+  .main-404-button:not(:hover) .main-404-button-text,
+    .main-404-button:not(:hover) .main-404-button-text-hover {
+      transition: none;
+    }
+
+  {% if section.settings.animation_mode == 'slide' %}
+  .main-404-button {
+    top: -5vh;
+  }
+  {% endif %}
 
   @media screen and (max-width: 768px) {
     .bandit-404-section {
-      min-height: 50vh;
+      height: 37vh;
       padding: 8vh 0 10vh;
       font-size: 30px !important;
     }
 
     .text-flow-10 {
-      top: 6vh;
+      top: 2vh;
     }
 
     .text-flow-11 {
-      top: 4vh;
+      top: 3vh;
     }
 
     .text-flow-12 {
-      top: 20vh;
+      top: 16vh;
     }
 
     text {
       font-size: 85px !important;
     }
 
-    .bandit-404-button {
-      top: 10vh;
-      font-size: 10px;
+    .main-404-button {
+    top: 10vh;
+    font-size: 15px;
+    }
+
+    {% if section.settings.animation_mode == 'slide' %}
+    .main-404-button {
+      top: 4vh;
+    }
+    {% endif %}
+  }
+
+  .slide-animation {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+    width: 100%;
+    height: 100%;
+  }
+
+  .slide-text {
+    color: var(--text);
+    font-size: 30px !important;
+    text-transform: uppercase;
+    opacity: 0;
+    transform: translateX(-100%);
+    animation: slideIn 3s forwards;
+    position: absolute;
+    width: 100%;
+    text-align: center;
+  }
+
+  .slide-text:nth-child(1) {
+    animation-delay: 0.3s;
+    top: 2vh;
+  }
+
+  .slide-text:nth-child(2) {
+    animation-delay: 0.3s;
+    top: 6vh;
+  }
+
+  .slide-text:nth-child(3) {
+    animation-delay: 1.3s;
+    top: 30vh;
+  }
+
+  .slide-right {
+    transform: translateX(100%);
+  }
+
+  @keyframes slideIn {
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+
+  @media screen and (max-width: 768px) {
+    .slide-text {
+      font-size: 15px !important;
+    }
+
+    .slide-text:nth-child(1) {
+      top: 1vh;
+    }
+
+    .slide-text:nth-child(2) {
+      top: 3vh;
+    }
+
+    .slide-text:nth-child(3) {
+      top: 16vh;
     }
   }
 </style>
