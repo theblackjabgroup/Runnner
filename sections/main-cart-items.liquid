@@ -168,6 +168,50 @@
       margin-right: 5px;
     }
   }
+
+  .shipping-form,
+  .note-form,
+  .offers-form {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.6s cubic-bezier(0.4, 0, 0.2, 1), padding 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+    opacity: 1; /* Keep container always visible for smooth expansion */
+    padding-top: 0;
+    padding-bottom: 0;
+  }
+
+  .shipping-form.visible,
+  .note-form.visible,
+  .offers-form.visible {
+    max-height: 200px; /* Adjust as needed */
+    padding-top: 16px;  /* Match your design */
+    padding-bottom: 16px;
+  }
+
+  .form-inner {
+    opacity: 0;
+    transition: opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    transition-delay: 0s;
+  }
+
+  .shipping-form.visible .form-inner,
+  .note-form.visible .form-inner,
+  .offers-form.visible .form-inner {
+    opacity: 1;
+    transition-delay: 0.4s; /* Wait for container to expand before fading in */
+  }
+
+  .shipping-arrow,
+  .note-arrow,
+  .offers-arrow {
+    transition: transform 0.8s ease-in-out;
+  }
+
+  .shipping-arrow.rotated,
+  .note-arrow.rotated,
+  .offers-arrow.rotated {
+    transform: rotate(-90deg);
+  }
 {%- endstyle -%}
 
 {%- unless settings.cart_type == 'drawer' -%}
@@ -539,7 +583,6 @@
                                 width="150"
                                 height="{{ 150 | divided_by: item.image.aspect_ratio | ceil }}"
                               >
-                              
                             </div>
                           {% endif %}
                         </td>
@@ -890,14 +933,18 @@
             </a>
           </div>
           <div class="note-form mt-4 hidden w-full !max-w-[250px]">
-            <textarea placeholder="Add your note here..." class="w-full p-2 border rounded mb-2 h-24"></textarea>
-            <button type="button" class="w-full bg-black text-white py-2 rounded">Save Note</button>
+            <div class="form-inner">
+              <textarea placeholder="Add your note here..." class="w-full p-2 border rounded mb-2 h-24"></textarea>
+              <button type="button" class="w-full bg-black text-white py-2 rounded cursor-pointer">Save Note</button>
+            </div>
           </div>
         </div>
-        
+
         <div class="cart__offers !border-b md:border md:rounded-xl mt-4 p-2 md:!p-4 flex flex-col items-start">
           <div class="flex justify-between items-center w-full">
-            <span class="!uppercase !leading-7 !max-w-[250px]">Receive Special Offers And First Look At New Products.</span>
+            <span class="!uppercase !leading-7 !max-w-[250px]"
+              >Receive Special Offers And First Look At New Products.</span
+            >
             <a href="#" class="cart__offers-link toggle-offers-form">
               <span class="svg-wrapper">
                 <svg viewBox="0 0 9 9" fill="none" xmlns="http://www.w3.org/2000/svg" class="offers-arrow">
@@ -907,8 +954,15 @@
             </a>
           </div>
           <div class="offers-form mt-4 hidden w-full !max-w-[250px]">
-            <input type="email" placeholder="Enter your email" class="w-full p-2 border rounded mb-2" id="offers-email">
-            <button type="button" class="w-full bg-black text-white py-2 rounded">Subscribe</button>
+            <div class="form-inner">
+              <input
+                type="email"
+                placeholder="Enter your email"
+                class="w-full p-2 border rounded mb-2"
+                id="offers-email"
+              >
+              <button type="button" class="w-full bg-black text-white py-2 rounded cursor-pointer">Subscribe</button>
+            </div>
           </div>
         </div>
         <div class="cart__shipping !border-b md:border md:rounded-xl mt-4 p-2 md:!p-4 flex flex-col items-start">
@@ -923,104 +977,12 @@
             </a>
           </div>
           <div class="shipping-form mt-4 hidden !max-w-[250px]">
-            <input type="text" placeholder="Enter ZIP code" class="w-full p-2 border rounded mb-2" id="shipping-zip">
-            <button type="button" class="w-full bg-black text-white py-2 rounded">Calculate</button>
+            <div class="form-inner">
+              <input type="text" placeholder="Enter ZIP code" class="w-full p-2 border rounded mb-2" id="shipping-zip">
+              <button type="button" class="w-full bg-black text-white py-2 rounded cursor-pointer">Calculate</button>
+            </div>
           </div>
         </div>
-        <style>
-          .shipping-form,
-          .note-form,
-          .offers-form {
-            max-height: 0;
-            overflow: hidden;
-            transition: max-height 0.3s ease-out, opacity 0.2s ease-out;
-            opacity: 0;
-          }
-          .shipping-form.visible,
-          .note-form.visible,
-          .offers-form.visible {
-            max-height: 200px; /* Adjust based on your content height */
-            opacity: 1;
-            transition: max-height 0.3s ease-in, opacity 0.3s ease-in 0.1s;
-          }
-          .shipping-arrow,
-          .note-arrow,
-          .offers-arrow {
-            transition: transform 0.3s ease;
-          }
-          .shipping-arrow.rotated,
-          .note-arrow.rotated,
-          .offers-arrow.rotated {
-            transform: rotate(-90deg);
-          }
-        </style>
-        <script>
-          document.addEventListener('DOMContentLoaded', function() {
-            // Shipping form toggle
-            const toggleShipping = document.querySelector('.toggle-shipping-form');
-            const shippingForm = document.querySelector('.shipping-form');
-            const shippingArrow = document.querySelector('.shipping-arrow');
-            
-            // Note form toggle
-            const toggleNote = document.querySelector('.toggle-note-form');
-            const noteForm = document.querySelector('.note-form');
-            const noteArrow = document.querySelector('.note-arrow');
-            
-            // Offers form toggle
-            const toggleOffers = document.querySelector('.toggle-offers-form');
-            const offersForm = document.querySelector('.offers-form');
-            const offersArrow = document.querySelector('.offers-arrow');
-            
-            // Toggle shipping form
-            if (toggleShipping) {
-              toggleShipping.addEventListener('click', function(e) {
-                e.preventDefault();
-                shippingForm.classList.toggle('visible');
-                shippingArrow.classList.toggle('rotated');
-                if (shippingForm.classList.contains('hidden')) {
-                  shippingForm.classList.remove('hidden');
-                } else if (!shippingForm.classList.contains('visible')) {
-                  // Wait for the transition to complete before hiding
-                  setTimeout(() => {
-                    shippingForm.classList.add('hidden');
-                  }, 300);
-                }
-              });
-            }
-            
-            // Toggle note form
-            if (toggleNote) {
-              toggleNote.addEventListener('click', function(e) {
-                e.preventDefault();
-                noteForm.classList.toggle('visible');
-                noteArrow.classList.toggle('rotated');
-                if (noteForm.classList.contains('hidden')) {
-                  noteForm.classList.remove('hidden');
-                } else if (!noteForm.classList.contains('visible')) {
-                  setTimeout(() => {
-                    noteForm.classList.add('hidden');
-                  }, 300);
-                }
-              });
-            }
-            
-            // Toggle offers form
-            if (toggleOffers) {
-              toggleOffers.addEventListener('click', function(e) {
-                e.preventDefault();
-                offersForm.classList.toggle('visible');
-                offersArrow.classList.toggle('rotated');
-                if (offersForm.classList.contains('hidden')) {
-                  offersForm.classList.remove('hidden');
-                } else if (!offersForm.classList.contains('visible')) {
-                  setTimeout(() => {
-                    offersForm.classList.add('hidden');
-                  }, 300);
-                }
-              });
-            }
-          });
-        </script>
         <div class="md:pt-20 md:hidden flex items-center justify-center">
           <div class="cart__totals flex flex-col w-[100vw] justify-between">
             <span class="cart__total-label">TOTAL:</span>
@@ -1039,13 +1001,16 @@
           </div>
         </div>
         <div class="md:pt-20 card-hidden">
-          <div class="cart__totals">
-            <span class="cart__total-label">TOTAL:</span>
-            <span class="cart__total-amount">{{ cart.total_price | money }}</span>
+          <div class="cart__totals ">
+            <span class="cart__total-label !text-[3rem]">TOTAL:</span>
+            <span class="cart__total-amount !text-[3rem]">{{ cart.total_price | money }}</span>
           </div>
-          <div class="cart__checkout">
-            <a href="{{ routes.checkout_url }}" class=" !text-3xl button !rounded-xl  !bg-black">
-              <svg height="15" width="15" viewBox="0 0 9 9" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <div class="w-full flex items-center justify-center">
+            <a
+              href="{{ routes.checkout_url }}"
+              class="w-full flex items-center !justify-between !text-[3rem] text-white px-2 !rounded-lg  !bg-black"
+            >
+              <svg height="20" width="20" viewBox="0 0 9 9" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path d="M1.1875 7.7334H7.6599M7.6599 7.7334V1.261M7.6599 7.7334L1.1875 1.261" stroke="white" stroke-linejoin="round"/>
               </svg>
               &nbsp; CHECKOUT
@@ -1094,3 +1059,35 @@
   ]
 }
 {% endschema %}
+
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    function setupToggle(toggleSelector, formSelector, arrowSelector) {
+      const toggle = document.querySelector(toggleSelector);
+      const form = document.querySelector(formSelector);
+      const arrow = document.querySelector(arrowSelector);
+
+      if (toggle && form && arrow) {
+        toggle.addEventListener('click', function (e) {
+          e.preventDefault();
+          if (form.classList.contains('visible')) {
+            form.classList.remove('visible');
+            arrow.classList.remove('rotated');
+            setTimeout(() => {
+              form.classList.add('hidden');
+            }, 600);
+          } else {
+            form.classList.remove('hidden');
+            void form.offsetWidth;
+            form.classList.add('visible');
+            arrow.classList.add('rotated');
+          }
+        });
+      }
+    }
+
+    setupToggle('.toggle-shipping-form', '.shipping-form', '.shipping-arrow');
+    setupToggle('.toggle-note-form', '.note-form', '.note-arrow');
+    setupToggle('.toggle-offers-form', '.offers-form', '.offers-arrow');
+  });
+</script>
