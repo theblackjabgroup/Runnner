@@ -93,84 +93,91 @@
           </div>
         </div>
       </div>
-      {%- comment -%} Tabs {%- endcomment -%}
-      <div class="product-tabs w-[80%]   flex-1 overflow-hidden">
-        <div class="tabs-nav flex border-t border-gray-200">
-          <button
-            class="tab-btn text-[16px] text-left text-black border-black flex-1  border-t-2 hover:text-black hover:border-black transition-colors duration-300"
-            data-tab="description"
-          >
-            DESCRIPTION
-          </button>
-          <button
-            class="tab-btn flex-1 text-[16px] text-left text-gray-500 border-t-2 border-transparent hover:text-black hover:border-black transition-colors duration-300"
-            data-tab="details"
-          >
-            DETAILS
-          </button>
-          <button
-            class="tab-btn flex-1 text-[16px] text-left text-gray-500 border-t-2 border-transparent hover:text-black hover:border-black transition-colors duration-300"
-            data-tab="sizing"
-          >
-            SIZING
-          </button>
+
+      {% comment %} tabs  {% endcomment %}
+      <div class="product-tabs w-[80%] flex-1 overflow-hidden">
+        <!-- Tab Navigation -->
+        <div class="tabs-nav flex justify-evenly space-x-3 h-auto mt-2 w-full">
+          {%- assign tab_index = 0 -%}
+          {%- for block in section.blocks -%}
+            {% if block.type == 'tab_description' or block.type == 'tab_details' or block.type == 'tab_sizing' %}
+              {%- assign tab_index = tab_index | plus: 1 -%}
+              <button
+                class="
+                  tab-btn text-[16px] text-left border-t-2 mr-3 transition-colors duration-300 hover:text-black hover:border-black w-full
+                  {% if tab_index == 1 %}
+                    text-black border-black
+                  {% else %}
+                    text-gray-600 border-gray-400
+                  {% endif %}
+                "
+                data-tab="tab-{{ block.id }}"
+                {{ block.shopify_attributes }}
+              >
+                {{ block.settings.title }}
+              </button>
+            {% endif %}
+          {%- endfor -%}
         </div>
-        <div class="tab-content mt-6 overflow-y-auto ">
-          <div class="tab-pane active " data-content="description">{{ product.description }}</div>
 
-          <div class="tab-pane hidden " data-content="details">
-            {%- if section.settings.metafield_namespace_key != blank -%}
-              <div class="prose prose-lg max-w-none">
-                {{ section.settings.metafield_namespace_key }}
-              </div>
-            {%- else -%}
-              <p class="text-gray-500">No details available for this product.</p>
-            {%- endif -%}
-          </div>
-          <div class="tab-pane hidden " data-content="sizing">
-            <button
-              id="open-size-chart"
-              class="bg-black text-white px-4 py-2 rounded hover:bg-gray-900 transition-colors"
-            >
-              Size Chart
-            </button>
+        <!-- Tab Content -->
+        <div class="tab-content mt-6 overflow-y-auto">
+          {% for block in section.blocks %}
             <div
-              id="size-chart-drawer"
-              class="fixed top-0 right-0 h-full bg-white shadow-lg transform translate-x-full hidden transition-transform duration-300 overflow-y-auto"
-              style="width: 40vw; z-index: 1000;"
-              aria-hidden="true"
+              class="tab-pane {% if forloop.first %}active{% else %}hidden{% endif %}"
+              data-content="tab-{{ block.id }}"
             >
-              <!-- Drawer Header -->
-              <div class="flex justify-between items-center p-4 border-b">
-                <h2 class="text-xl font-semibold">Size Chart</h2>
-                <button
-                  id="close-size-chart"
-                  class="text-gray-500 hover:text-black transition-colors"
-                  aria-label="Close size chart"
-                >
-                  ✕
-                </button>
-              </div>
+              {% case block.type %}
+                {% when 'tab_description' %}
+                  {{ product.description }}
 
-              <!-- Drawer Content -->
-              <div class="p-4">
-                {% if section.settings.size_chart_page != blank %}
-                  <div class="prose max-w-none">
-                    {{ section.settings.size_chart_page.content }}
+                {% when 'tab_details' %}
+                  {% if section.settings.metafield_namespace_key != blank %}
+                    <div class="prose prose-lg max-w-none">
+                      {{ section.settings.metafield_namespace_key }}
+                    </div>
+                  {% else %}
+                    <p class="text-gray-500">No details available for this product.</p>
+                  {% endif %}
+
+                {% when 'tab_sizing' %}
+                  <button
+                    id="open-size-chart"
+                    class="bg-black text-white px-4 py-2 rounded hover:bg-gray-900 transition-colors"
+                  >
+                    Size Chart
+                  </button>
+
+                  <div
+                    id="size-chart-drawer"
+                    class="fixed top-0 right-0 h-full bg-white shadow-lg transform translate-x-full hidden transition-transform duration-300 overflow-y-auto"
+                    style="width: 40vw; z-index: 1000;"
+                    aria-hidden="true"
+                  >
+                    <div class="flex justify-between items-center p-4 border-b">
+                      <h2 class="text-xl font-semibold">Size Chart</h2>
+                      <button
+                        id="close-size-chart"
+                        class="text-gray-500 hover:text-black transition-colors"
+                        aria-label="Close size chart"
+                      >
+                        ✕
+                      </button>
+                    </div>
+                    <div class="p-4">
+                      {% if section.settings.size_chart_page != blank %}
+                        <div class="prose max-w-none">
+                          {{ section.settings.size_chart_page.content }}
+                        </div>
+                      {% else %}
+                        <p class="text-gray-500">No size guide page selected.</p>
+                      {% endif %}
+                    </div>
                   </div>
-                {% else %}
-                  <p class="text-gray-500">No size guide page selected.</p>
-                {% endif %}
-              </div>
+                  <div id="size-chart-backdrop" class="fixed inset-0 bg-black/60 hidden z-[999]">&nbsp;</div>
+              {% endcase %}
             </div>
-
-            <div
-              id="size-chart-backdrop"
-              class="fixed inset-0 bg-black/60 hidden z-[999]"
-            >
-              &nbsp;
-            </div>
-          </div>
+          {% endfor %}
         </div>
       </div>
 
@@ -182,61 +189,107 @@
           {%- assign size_index = forloop.index -%}
         {%- endif -%}
       {%- endfor -%}
-      {%- comment -%} size_index is 1-based, matching Shopify's variant option numbering {%- endcomment -%}
 
-      <div class="size-price-selector px-4 flex flex-col gap-4">
-        <div class="size-selector border-t border-gray-400 py-4 flex justify-between ">
-          <div class="flex items-center mb-4">
-            <span class="text-2xl font-medium text-[14px] pt-4">SELECT SIZE:</span>
-          </div>
-          <div class="size-buttons flex-1 justify-end flex gap-4">
+      <div
+        class="size-price-selector px-4 flex flex-col gap-6 text-[14px]"
+        style="background: cyan"
+      >
+        <!-- DELIVERY SECTION -->
+        {%- for block in section.blocks -%}
+          {%- if block.type == 'delivery_address' -%}
+            <div class="flex justify-between items-start border-b border-gray-300 pb-4" {{ block.shopify_attributes }}>
+              {% if customer and customer.default_address %}
+                <!-- Logged-in: Show saved address -->
+                <div>
+                  <div class="font-semibold uppercase">DELIVER TO</div>
+                  <div class="text-sm leading-relaxed">
+                    {{ customer.default_address | format_address }}
+                  </div>
+                </div>
+                <a href="/account/addresses" class="border px-3 py-1 text-xs font-medium rounded hover:bg-gray-100">
+                  CHANGE
+                </a>
+              {% else %}
+                <!-- Guest: Show login prompt -->
+                <div>
+                  <div class="font-semibold uppercase">DELIVER TO</div>
+                  <div class="text-sm text-gray-600">
+                    Please <a href="/account/login" class="underline text-blue-600">log in</a> to set your delivery
+                    address.
+                  </div>
+                </div>
+              {% endif %}
+            </div>
+          {%- endif -%}
+        {%- endfor -%}
+
+        <!-- QUANTITY SELECTOR -->
+        {%- for block in section.blocks -%}
+          {%- if block.type == 'quantity_selector' -%}
+            <div class="flex justify-between items-center border-b border-gray-300 py-4" {{ block.shopify_attributes }}>
+              <span class="uppercase font-semibold">QUANTITY SELECTOR</span>
+              <div class="flex items-center border rounded">
+                <button type="button" class="px-3 py-1 text-lg hover:bg-gray-100">-</button>
+                <span class="px-3">1</span>
+                <button type="button" class="px-3 py-1 text-lg hover:bg-gray-100">+</button>
+              </div>
+            </div>
+          {%- endif -%}
+        {%- endfor -%}
+
+        <!-- SIZE SELECTOR -->
+        <div class="flex flex-col gap-2">
+          <span class="uppercase font-semibold">SELECT SIZE</span>
+          <div class="flex gap-2 flex-wrap">
             {%- assign size_options = product.options_with_values | where: 'name', 'Size' | first -%}
             {%- for value in size_options.values -%}
-              {% assign size_variant = product.variants
+              {%- assign matching_variant = product.variants
                 | where: 'option'
                 | append: size_index
                 | append: '', value
                 | first
-              %}
+              -%}
 
               <button
                 type="button"
-                class="size-btn relative w-auto h-12 overflow-hidden flex items-center justify-center transition-all duration-300"
-
+                class="
+                  size-btn relative px-3 h-10 min-w-[2.5rem] flex items-center justify-center border rounded font-semibold
+                  {% if forloop.first %}bg-black text-white{% endif %}
+                  {% unless matching_variant.available %}opacity-50 cursor-not-allowed line-through bg-gray-200{% endunless %}
+                "
                 data-value="{{ value | escape }}"
-                aria-label="Size {{ value }}"
+                {% unless matching_variant.available %}
+                  disabled aria-disabled="true"
+                {% endunless %}
+                aria-label="Size {{ value }}{% unless matching_variant.available %} - Sold out{% endunless %}"
               >
-                <span class="relative z-10 text-3xl px-2 font-bold ">{{ value }}</span>
+                {{ value }}
               </button>
             {%- endfor -%}
           </div>
         </div>
 
-        <div class="price-selector flex flex-col gap-2 border-t border-gray-400 py-4">
-          <div class="flex items-center justify-between">
-            <div class="flex items-center gap-2">
-              <span class="text-[24px] font-bold">{{ product.price | money }}</span>
-              {% if product.compare_at_price > product.price %}
-                <span class="text-[24px] text-gray-500">|</span>
-                <span class="text-[24px] line-through text-gray-500">
-                  {{ product.compare_at_price | money }}
-                </span>
+        <!-- PRICE + ACTIONS -->
+        <div class="flex justify-between items-center border-t pt-4">
+          <div class="text-[18px] font-bold">{{ product.price | money }}</div>
 
-                <div class="text-[24px] text-red-600">
-                  Save {{ product.compare_at_price | minus: product.price | money }} (
-                  {{-
-                    product.compare_at_price
-                    | minus: product.price
-                    | times: 100
-                    | divided_by: product.compare_at_price
-                  -}}
-                  %)
-                </div>
-              {% endif %}
-            </div>
-            <button class="flex-1 flex justify-end  bg-black text-white ml-2 px-6 py-3 text-[24px] rounded-xl font-medium hover:bg-gray-900 transition-colors">
-              {% if product.available %}Add to Cart{% else %}Sold Out{% endif %}
+          <div class="flex gap-2">
+            <button
+              class="bg-black text-white px-4 py-2 rounded font-semibold hover:bg-gray-900"
+              type="button"
+            >
+              BUY IT NOW
             </button>
+
+            <form method="post" action="/cart/add">
+              <input type="hidden" name="id" value="{{ product.variants.first.id }}">
+              <button
+                class="bg-amber-600 hover:bg-amber-700 text-white px-4 py-2 rounded font-semibold flex items-center gap-1"
+                type="submit"
+              >
+                <span class="text-lg">→</span> ADD TO CART
+              </button>
+            </form>
           </div>
         </div>
       </div>
@@ -622,33 +675,64 @@
     updateActiveImage();
 
 // tab-pane handling
-     const tabButtons = document.querySelectorAll(".tab-btn");
+document.querySelectorAll(".tab-btn").forEach(btn => {
+  btn.addEventListener("click", () => {
+    const tabId = btn.dataset.tab;
+
+    document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("text-black", "border-black"));
+    btn.classList.add("text-black", "border-black");
+
+    document.querySelectorAll(".tab-pane").forEach(pane => {
+      pane.classList.toggle("active", pane.dataset.content === tabId);
+      pane.classList.toggle("hidden", pane.dataset.content !== tabId);
+    });
+  });
+});
+
+document.getElementById("open-size-chart")?.addEventListener("click", () => {
+  document.getElementById("size-chart-drawer").classList.remove("hidden", "translate-x-full");
+  document.getElementById("size-chart-backdrop").classList.remove("hidden");
+});
+
+document.getElementById("close-size-chart")?.addEventListener("click", () => {
+  document.getElementById("size-chart-drawer").classList.add("translate-x-full", "hidden");
+  document.getElementById("size-chart-backdrop").classList.add("hidden");
+});
+
+// tab buttons active handling
+ const tabButtons = document.querySelectorAll(".tab-btn");
     const tabPanes = document.querySelectorAll(".tab-pane");
 
-    tabButtons.forEach((btn) => {
-      btn.addEventListener("click", () => {
-        const target = btn.dataset.tab;
+    tabButtons.forEach((button) => {
+      button.addEventListener("click", () => {
+        const targetTab = button.getAttribute("data-tab");
 
-        tabButtons.forEach((b) => {
-          b.classList.toggle("active", b === btn);
-          if (b === btn) {
-            b.classList.remove("text-gray-500", "border-transparent");
-            b.classList.add("text-black", "border-black");
-          } else {
-            b.classList.remove("text-black", "border-black");
-            b.classList.add("text-gray-500", "border-transparent");
-          }
+        // Reset styles on all buttons
+        tabButtons.forEach((btn) => {
+          btn.classList.remove("text-black", "border-black");
+          btn.classList.add("text-gray-600", "border-transparent");
         });
 
+        // Activate clicked button
+        button.classList.remove("text-gray-600", "border-transparent");
+        button.classList.add("text-black", "border-black");
+
+        // Toggle tab panes
         tabPanes.forEach((pane) => {
-          pane.classList.toggle("active", pane.dataset.content === target);
-          pane.classList.toggle("hidden", pane.dataset.content !== target);
+          if (pane.getAttribute("data-content") === targetTab) {
+            pane.classList.remove("hidden");
+            pane.classList.add("block");
+          } else {
+            pane.classList.remove("block");
+            pane.classList.add("hidden");
+          }
         });
       });
     });
+
   
 
-
+// color swatch handling 
   const colorSwatches = document.querySelectorAll('.color-swatch');
   const activeColorDisplays = document.querySelectorAll('[data-active-color]');
   let lastSelectedColor = '';
@@ -989,34 +1073,62 @@ backdrop.addEventListener('click', closeDrawer);
   ],
   "blocks": [
     {
-      "type": "tab",
-      "name": "Tab",
-      "limit": 3,
+      "type": "tab_description",
+      "name": "Tab: Description",
+      "limit": 1,
       "settings": [
         {
           "type": "text",
-          "id": "tab_label",
-          "label": "Tab Label",
+          "id": "title",
+          "label": "Tab Title",
           "default": "DESCRIPTION"
-        },
-        {
-          "type": "textarea",
-          "id": "tab_content",
-          "label": "Tab Content",
-          "default": "This is the tab content."
         }
       ]
+    },
+    {
+      "type": "tab_details",
+      "name": "Tab: Details",
+      "limit": 1,
+      "settings": [
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Tab Title",
+          "default": "DETAILS"
+        }
+      ]
+    },
+    {
+      "type": "tab_sizing",
+      "name": "Tab: Sizing",
+      "limit": 1,
+      "settings": [
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Tab Title",
+          "default": "SIZING"
+        }
+      ]
+    },
+    {
+      "type": "delivery_address",
+      "name": "Delivery Address",
+      "limit": 1,
+      "settings": []
+    },
+    {
+      "type": "quantity_selector",
+      "name": "Quantity Selector",
+      "limit": 1,
+      "settings": []
     }
   ],
-  "max_blocks": 3,
+
   "presets": [
     {
       "name": "Product Tabs",
-      "blocks": [
-        { "type": "tab", "settings": { "tab_label": "DESCRIPTION", "tab_content": "{{ product.description }}" } },
-        { "type": "tab", "settings": { "tab_label": "DETAILS", "tab_content": "Enter product details here." } },
-        { "type": "tab", "settings": { "tab_label": "Sizing", "tab_content": "Enter product sizing here." } }
-      ]
+      "blocks": []
     }
   ]
 }
