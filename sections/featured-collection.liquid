@@ -1,13 +1,16 @@
 {% if section.settings.enabled %}
+  {% if section.settings.color_scheme %}
+    {% assign section_classes_fc = section_classes_fc | append: ' color-' | append: section.settings.color_scheme %}
+  {% endif %}
   <div
-    class="featured-collection-page-width overflow-hidden "
+    class="featured-collection-page-width overflow-hidden {{section_classes_fc}}"
     role="region"
     aria-labelledby="featured-collection-heading"
     aria-describedby="featured-collection-description"
   >
     {% if section.settings.heading != blank %}
       <div
-        style="font-weight:500;"
+        style="font-weight:500; color: var(--text);"
         class="featured-collection-main-heading mb-[-10px] letter-animation"
       >
         {{ section.settings.heading }}
@@ -54,7 +57,7 @@
       </div>
     </div>
 
-    <hr class="border-black-300 my-6" aria-hidden="true">
+    <hr class="border-(--text) my-6" aria-hidden="true">
 
     <div class="featured_collection_filters flex flex-col md:flex-row mt-10" style="gap:18px; margin-top:18px;">
       <nav
@@ -140,21 +143,23 @@
                   aria-label="Products in {{ block.settings.label }}"
                 >
                   {% if block.settings.collection == blank or block.settings.collection.products.size == 0 %}
-                    <article
-                      class="product-card flex-none w-[220px] md:w-[450px]"
-                      role="listitem"
-                      aria-label="No products found"
-                    >
-                      <div class="product-image-wrapper relative group" aria-hidden="true">
-                        {{ 'collection-1' | placeholder_svg_tag }}
-                      </div>
-                      <div class="product-details mt-3" style="margin-bottom:8px;">
-                        <h3 class="!text-[1.6rem] uppercase font-medium leading-tight">No products found</h3>
-                        <div class="flex gap-2 items-baseline fc-price" style="margin-top: -6px;">
-                          <span class="!text-[1.6rem] uppercase font-medium">—</span>
+                    {% for i in (1..5) %}
+                      <article
+                        class="product-card flex-none w-[220px] md:w-[450px]"
+                        role="listitem"
+                        aria-label="No products found"
+                      >
+                        <div class="product-image-wrapper relative group" aria-hidden="true">
+                          {{ 'collection-1' | placeholder_svg_tag }}
                         </div>
-                      </div>
-                    </article>
+                        <div class="product-details mt-3" style="margin-bottom:8px;">
+                          <h3 class="!text-[1.6rem] uppercase font-medium leading-tight">No products found</h3>
+                          <div class="flex gap-2 items-baseline fc-price" style="margin-top: -6px;">
+                            <span class="!text-[1.6rem] uppercase font-medium">—</span>
+                          </div>
+                        </div>
+                      </article>
+                    {% endfor %}
                   {% else %}
                     {% for product in block.settings.collection.products %}
                       <article
@@ -165,7 +170,10 @@
                         <div class="product-image-wrapper relative group">
                           {% unless product.available %}
                             <div class="absolute top-3 right-4 z-10">
-                              <span class="inline-block rounded-xl px-4 text-[12px] tracking-wide font-medium bg-zinc-800 text-white">
+                              <span
+                                class="inline-block rounded-xl px-4 text-[12px] tracking-wide font-medium bg-zinc-800"
+                                style="color: rgb(var(--color-background));"
+                              >
                                 SOLD OUT
                               </span>
                             </div>
@@ -251,9 +259,10 @@
 
                               {% if has_size_variants %}
                                 <div
-                                  class="size-variants-container bg-white rounded p-2 mb-0 opacity-0 invisible"
+                                  class="size-variants-container rounded p-2 mb-0 opacity-0 invisible"
                                   role="group"
                                   aria-label="Size options for {{ product.title }}"
+                                  style="background-color:  rgb(var(--color-background));"
                                 >
                                   {% for option in product.options_with_values %}
                                     {% if option.name == 'Size' or option.name == 'size' %}
@@ -304,7 +313,8 @@
 
                               {% if product.available %}
                                 <button
-                                  class="add-to-cart-btn w-90 bg-white text-black py-2 px-4 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                                  class="add-to-cart-btn w-90 text-(--text) py-2 px-4 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                                  style="background-color: rgb(var(--color-background));"
                                   data-product-id="{{ product.id }}"
                                   {% if product.has_only_default_variant %}
                                     data-variant-id="{{ product.variants.first.id }}"
@@ -321,12 +331,13 @@
                                 </button>
                               {% else %}
                                 <button
-                                  class="notify-me-btn w-90 bg-white text-black py-2 px-4 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                                  class="notify-me-btn w-90 text-(--text) py-2 px-4 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-300"
                                   data-product-id="{{ product.id }}"
                                   data-product-title="{{ product.title | escape }}"
                                   data-has-variants="{% if has_size_variants %}true{% else %}false{% endif %}"
                                   aria-label="Get notified when {{ product.title }} is back in stock"
                                   aria-haspopup="dialog"
+                                  style="background-color: rgb(var(--color-background));"
                                 >
                                   Notify Me When In Stock
                                 </button>
@@ -364,16 +375,19 @@
 
   <div
     id="waitlist-modal-overlay"
-    class="fixed inset-0 z-50 bg-black/50 hidden items-center justify-center"
+    class="fixed inset-0 z-50 bg-(--text) hidden items-center justify-center"
     aria-modal="true"
     aria-labelledby="waitlist-product-title"
     aria-describedby="waitlist-product-variant"
   >
-    <div class="bg-white !w-auto md:!w-[50vw] max-w-[90vw] rounded p-4 md:p-10 shadow-lg mx-4">
+    <div
+      class="!w-auto md:!w-[50vw] max-w-[90vw] rounded p-4 md:p-10 shadow-lg mx-4"
+      style="background-color: rgb(var(--color-background));"
+    >
       <div class="flex justify-end p-2 md:p-4">
         <button
           id="close-waitlist-modal"
-          class="text-black hover:text-gray-700 font-medium"
+          class="text-(--text) hover:text-gray-700 font-medium"
           aria-label="Close waitlist form"
         >
           CLOSE
@@ -400,8 +414,9 @@
           >
           <button
             id="get-notified-btn"
-            class="bg-black text-white py-2 md:py-3 px-4 md:px-6 font-medium hover:bg-gray-800 rounded text-sm md:text-base"
+            class="bg-(--text) py-2 md:py-3 px-4 md:px-6 font-medium hover:bg-gray-800 rounded text-sm md:text-base"
             aria-label="Submit waitlist request"
+            style="color: rgb(var(--color-background));"
           >
             GET NOTIFIED
           </button>
@@ -414,7 +429,7 @@
 <style>
     .featured-collection-page-width ::selection {
       /* background: none; */
-      color: var(--hover) !important;
+      color: var(--cr-yellow-2) !important;
     }
     .featured-collection-page-width {
       margin: 0 10px;
@@ -470,10 +485,10 @@
     .collection-filters .collection-btn {
       padding: 0.5rem 1.2rem;
       padding-left: 0;
-      border-bottom: 1px solid black;
+      border-bottom: 1px solid var(--text);
       text-align: left;
-      background: #fff;
-      color: #000;
+      background: rgb(var(--color-background));
+      color: var(--text);
       text-decoration: none;
       transition: all 0.3s ease;
       cursor: pointer;
@@ -497,8 +512,8 @@
 
     .collection-filters .collection-btn:hover,
     .collection-filters .collection-btn.active {
-      background: #000;
-      color: #fff;
+      background: var(--text);
+      color: rgb(var(--color-background));
     }
 
     .product-image-wrapper {
@@ -584,8 +599,8 @@
 
     .add-to-cart-btn:hover,
     .notify-me-btn:hover {
-      background-color: black;
-      color: white;
+      background-color: var(--text);
+      color: rgb(var(--color-background));
     }
 
     .size-variants-container {
@@ -662,7 +677,7 @@
       left: -2px;
       right: -2px;
       height: 1px;
-      background-color: #ccc;
+      background-color: rgb(var(--color-background));
       transform: rotate(-45deg);
     }
 
@@ -705,7 +720,7 @@
       padding: 2px 5px;
       font-weight: bold;
       background-color: #000;
-      color: #fff;
+      color: rgb(var(--color-background));
       text-decoration: none;
       border-radius: 4px;
       transition: background-color 0.3s ease;
@@ -773,7 +788,7 @@
 
     .custom-scrollbar::-webkit-scrollbar-track {
       background-color: transparent;
-      background-image: linear-gradient(to right, black, black);
+      background-image: linear-gradient(to right, var(--text), var(--text));
       background-size: 100% 1px;
       background-repeat: no-repeat;
       background-position: center;
@@ -781,7 +796,7 @@
     }
 
     .custom-scrollbar::-webkit-scrollbar-thumb {
-      background-color: black;
+      background-color: var(--text);
       height: 3px;
       border: none;
       /* border-radius: 4px; */
@@ -832,19 +847,19 @@
       position: relative;
       display: inline-block;
       padding: 2px 7px;
-      background-color: white;
-      color: black;
+      background-color: rgb(var(--color-background));
+      color: var(--text);
       border-radius: 4px;
-      border: black 1px solid !important;
+      border: var(--text) 1px solid !important;
       overflow: hidden;
       transition: background-color 0s, color 0s;
     }
 
     .image-with-text-custom-button:hover {
-      background-color: black;
-      border: white 2px solid;
-      color: white;
-      border: 2px solid white;
+      background-color: var(--text);
+      border: rgb(var(--color-background)) 2px solid;
+      color: rgb(var(--color-background));
+      border: 2px solid rgb(var(--color-background));
     }
 
     .image-with-text-button-text-container {
@@ -924,7 +939,7 @@
         padding: 0 6px !important;
         border: none !important;
         border-radius: 4px !important;
-        background: #f4f4f4 !important;
+        background: rgb(var(--color-background)) !important;
         font-size: 14px !important;
         min-width: fit-content !important;
         height: 24px !important;
@@ -970,8 +985,8 @@
       }
 
       .collection-btn.active {
-        background: #000 !important;
-        color: #fff !important;
+        background: var(--text) !important;
+        color: rgb(var(--color-background)) !important;
       }
 
       .collection-btn .svg-arrow-right {
@@ -1047,6 +1062,12 @@
       "id": "enabled",
       "label": "Enable section",
       "default": true
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "t:sections.all.colors.label",
+      "default": "scheme-1"
     },
     {
       "type": "text",
