@@ -2,7 +2,10 @@
 <section class="product-section section-{{ section.id }}-padding hidden lg:!flex lg:flex-row gap-4 lg:gap-8 px-4 py-8">
   {%- comment -%} Left: Image Gallery {%- endcomment -%}
   <div class="product-gallery w-1/2">
-    <div class="gallery-wrapper sticky top-0 h-screen">
+    <div
+      class="gallery-wrapper sticky top-[80px] h-[calc(100vh-80px)]"
+      style="max-height: calc(100vh - 70px); overflow-y: auto; position: sticky; top: 70px;"
+    >
       <div class="gallery-track w-full h-full relative" data-gallery-track>
         {%- if product.media.size > 0 -%}
           {%- for media in product.media -%}
@@ -48,23 +51,26 @@
 
   {%- comment -%} Right: Product Details {%- endcomment -%}
   <div class="product-details w-1/2 mx-2">
-    <div class="details-inner sticky top-0 h-screen flex flex-col">
+    <div
+      class="details-inner sticky top-[80px] flex flex-col"
+      style="height: calc(100vh - 70px); overflow-y: auto; position: sticky; top: 70px;"
+    >
       {%- comment -%} Header {%- endcomment -%}
-      <div class="product-header w-[80%]   space-y-8">
+      <div class="product-header w-[80%] space-y-8">
         <div class="header-top flex flex-col gap-4">
           <div class="product-status flex items-center gap-4">
             {% if product.available != true %}
-              <span class="inline-flex items-center px-3 py-1 text-2xl tracking-wider bg-black text-white uppercase rounded"
+              <span class="inline-flex items-center px-3 py-1 text-[14px] tracking-wider bg-black text-white uppercase rounded"
                 >Sold Out</span
               >
             {% endif %}
           </div>
-          <h1 class="text-4xl font-bold">{{ product.title }}</h1>
-          <div class="product-variants my-8">
+          <h1 class="text-[42px] font-bold">{{ product.title }}</h1>
+          <div class="product-variants my-4">
             <div class="flex items-center gap-2">
-              <span class="inline-block text-2xl font-medium">SELECT COLOR:</span>
+              <span class="inline-block text-[14px] font-medium">SELECT COLOR:</span>
               {%- assign first_color = product.options_with_values | where: 'name', 'Color' | first -%}
-              <span class="active-color text-2xl" data-active-color>
+              <span class="active-color text-[14px]" data-active-color>
                 {{- first_color.values | first -}}
               </span>
             </div>
@@ -239,7 +245,7 @@
 </section>
 
 <!-- Mobile view -->
-<section class="lg:hidden flex flex-col gap-6 px-4 py-4 mobile-sticky-container">
+<section class="lg:hidden flex flex-col gap-6 px-4 py-4">
   <!-- Mobile Image Gallery -->
   <div class="mobile-gallery">
     <!-- Main Image Stack -->
@@ -247,7 +253,7 @@
       {%- if product.media.size > 0 -%}
         {%- for media in product.media -%}
           <div
-            class="mobile-gallery-item w-full h-full {% unless forloop.first %}absolute top-0 left-0{% endunless %} {% if forloop.first %}relative{% endif %}"
+            class="mobile-gallery-item w-full h-full {% unless forloop.first %}absolute top-0 left-0{% endunless %} {% if forloop.first %}relative active{% endif %}"
             data-mobile-index="{{ forloop.index0 }}"
             style="opacity: {% if forloop.first %}1{% else %}0{% endif %}; transition: opacity 0.3s ease;"
           >
@@ -299,7 +305,7 @@
               >
             {% endif %}
           </div>
-          <h1 class="text-4xl font-bold">{{ product.title }}</h1>
+          <h1 class="font-normal text-[40px] leading-[80%] tracking-normal uppercase">{{ product.title }}</h1>
           <div class="product-variants my-8">
             <div class="flex items-center gap-2">
               <span class="inline-block text-2xl font-medium">SELECT COLOR:</span>
@@ -329,84 +335,34 @@
       </div>
       {%- comment -%} Tabs {%- endcomment -%}
       <div class="product-tabs flex-1">
-        <div class="tabs-nav flex border-t border-gray-200">
-          <button
-            class="tab-btn text-black border-black flex-1 p-4 border-t-2 hover:text-black hover:border-black transition-colors duration-300"
-            data-tab="description"
-          >
-            DESCRIPTION
-          </button>
-          <button
-            class="tab-btn flex-1 p-4 text-gray-500 border-t-2 border-transparent hover:text-black hover:border-black transition-colors duration-300"
-            data-tab="details"
-          >
-            DETAILS
-          </button>
-          <button
-            class="tab-btn flex-1 p-4 text-gray-500 border-t-2 border-transparent hover:text-black hover:border-black transition-colors duration-300"
-            data-tab="sizing"
-          >
-            SIZING
-          </button>
-        </div>
-        <div class="tab-content p-8">
-          <div class="tab-pane active" data-content="description">{{ product.description }}</div>
-          <div class="tab-pane hidden" data-content="details">
-            {%- if section.settings.metafield_namespace_key != blank -%}
-              <div class="prose prose-lg max-w-none">
-                {{ section.settings.metafield_namespace_key }}
-              </div>
-            {%- else -%}
-              <p class="text-gray-500">No details available for this product.</p>
-            {%- endif -%}
-          </div>
-          <div class="tab-pane hidden bg-amber-300" data-content="sizing">
-            {% comment %} mobile-size {% endcomment %}
+        <div class="tabs-nav flex space-x-1 border-t border-gray-200">
+          {% for block in section.blocks %}
             <button
-              id="open-size-chart-mobile"
-              class="bg-black text-white px-4 py-2 rounded hover:bg-gray-900 transition-colors w-full text-center text-2xl"
+              class="tab-btn flex-1 text-left font-normal text-[40px] leading-[80%] tracking-normal {% if forloop.first %}text-black border-black{% else %}text-gray-500 border-transparent{% endif %} border-t-2 hover:text-black hover:border-black transition-colors duration-300"
+              data-tab="{{ block.id }}"
             >
-              View Size Chart
+              {{ block.settings.tab_label }}
             </button>
+          {% endfor %}
+        </div>
 
+        <div class="tab-content mt-4 ">
+          {% for block in section.blocks %}
             <div
-              id="mobile-size-chart-drawer"
-              class="fixed inset-0 z-[9999] w-[100vw] h-[100vh] bg-white overflow-y-auto transform translate-y-full transition-transform duration-300 ease-in-out hidden lg:hidden"
-              aria-hidden="true"
+              class="tab-pane font-normal text-[12px] leading-[15px] tracking-normal text-justify h-[50vh] overflow-y-auto bg-amber-300 {% if forloop.first %}active{% else %}hidden{% endif %}"
+              data-content="{{ block.id }}"
             >
-              <!-- Header -->
-              <div class="flex justify-between items-center p-4 border-b">
-                <h2 class="text-xl font-semibold">Size Chart</h2>
-                <button
-                  id="close-size-chart-mobile"
-                  class="text-gray-500 hover:text-black transition-colors text-2xl"
-                  aria-label="Close size chart"
-                >
-                  ✕
-                </button>
-              </div>
-
-              <!-- Content -->
-              <div class="p-4 overflow-y-auto max-h-[calc(100vh-64px)]">
-                {% if section.settings.size_chart_page != blank %}
-                  <div class="prose max-w-none">
-                    {{ section.settings.size_chart_page.content }}
-                  </div>
-                {% else %}
-                  <p class="text-gray-500">No size guide page selected.</p>
-                {% endif %}
-              </div>
+              {{ block.settings.tab_content }}
             </div>
-          </div>
+          {% endfor %}
         </div>
       </div>
     </div>
   </div>
 
-  <!-- Mobile Sticky Size & Price Selector -->
+  <!-- Mobile  Size & Price Selector -->
   <div
-    class="mobile-sticky-selector w-full shadow-lg transition-all duration-300 sticky-div"
-    data-sticky-selector
+    class=" w-full shadow-lg transition-all duration-300"
   >
     <div class="size-price-selector  flex flex-col gap-4 px-2  max-h-[80vh] w-[100%] ">
       <div class="size-selector border-t border-gray-400 py-4 flex justify-between ">
@@ -620,22 +576,7 @@
     .tab-content {
       height: auto;
     }
-    .mobile-sticky-selector {
-      position: static;
-      transform: translateY(100%);
-      transition: transform 0.3s ease;
-      will-change: transform;
-      z-index: 999;
-    }
 
-    .mobile-sticky-selector.stuck {
-      position: fixed;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      transform: translateY(0);
-      background-color: white;
-    }
   }
 </style>
 
@@ -680,31 +621,32 @@
 
     updateActiveImage();
 
-    const tabBtns = document.querySelectorAll('.tab-btn');
-    const tabPanes = document.querySelectorAll('.tab-pane');
+// tab-pane handling
+     const tabButtons = document.querySelectorAll(".tab-btn");
+    const tabPanes = document.querySelectorAll(".tab-pane");
 
-    tabBtns.forEach((btn) => {
-      btn.addEventListener('click', () => {
+    tabButtons.forEach((btn) => {
+      btn.addEventListener("click", () => {
         const target = btn.dataset.tab;
 
-        tabBtns.forEach((b) => {
-          b.classList.toggle('active', b === btn);
+        tabButtons.forEach((b) => {
+          b.classList.toggle("active", b === btn);
           if (b === btn) {
-            b.classList.remove('text-gray-500', 'border-transparent');
-            b.classList.add('text-black', 'border-black');
+            b.classList.remove("text-gray-500", "border-transparent");
+            b.classList.add("text-black", "border-black");
           } else {
-            b.classList.remove('text-black', 'border-black');
-            b.classList.add('text-gray-500', 'border-transparent');
+            b.classList.remove("text-black", "border-black");
+            b.classList.add("text-gray-500", "border-transparent");
           }
         });
 
         tabPanes.forEach((pane) => {
-          pane.classList.toggle('active', pane.dataset.content === target);
-          pane.classList.toggle('hidden', pane.dataset.content !== target);
+          pane.classList.toggle("active", pane.dataset.content === target);
+          pane.classList.toggle("hidden", pane.dataset.content !== target);
         });
       });
     });
-
+  
 
 
   const colorSwatches = document.querySelectorAll('.color-swatch');
@@ -825,37 +767,18 @@
       }
 
       // Add click handlers to thumbnails
-      thumbnails.forEach((thumb, index) => {
-        thumb.addEventListener('click', () => {
-          showImage(index);
-        });
-      });
+thumbnails.forEach((thumb) => {
+  thumb.addEventListener('click', () => {
+    const index = parseInt(thumb.dataset.thumbIndex);
+    showImage(index);
+  });
+});
+
 
       // Initialize with first image
       showImage(0);
     }
 
-    const stickySelector = document.querySelector('.mobile-sticky-selector');
-    const stickyContainer = document.querySelector('.mobile-sticky-container');
-
-    if (stickySelector && stickyContainer) {
-      const observer = new IntersectionObserver(
-        ([entry]) => {
-          if (entry.isIntersecting) {
-            stickySelector.classList.add('stuck');
-          } else {
-            stickySelector.classList.remove('stuck');
-          }
-        },
-        {
-          root: null,
-          threshold: 0,
-          rootMargin: `0px 0px -100% 0px`, // triggers when container bottom reaches viewport bottom
-        }
-      );
-
-      observer.observe(stickyContainer);
-    }
 
     // variant logic
     const productOptions = {{ product.options | json }};
@@ -1040,7 +963,7 @@ backdrop.addEventListener('click', closeDrawer);
       "step": 4,
       "unit": "px",
       "label": "t:sections.all.padding.padding_top",
-      "default": 36
+      "default": 0
     },
     {
       "type": "range",
@@ -1050,7 +973,7 @@ backdrop.addEventListener('click', closeDrawer);
       "step": 4,
       "unit": "px",
       "label": "t:sections.all.padding.padding_bottom",
-      "default": 36
+      "default": 0
     },
     {
       "type": "text",
@@ -1064,9 +987,36 @@ backdrop.addEventListener('click', closeDrawer);
       "label": "Select a Size Chart Page"
     }
   ],
+  "blocks": [
+    {
+      "type": "tab",
+      "name": "Tab",
+      "limit": 3,
+      "settings": [
+        {
+          "type": "text",
+          "id": "tab_label",
+          "label": "Tab Label",
+          "default": "DESCRIPTION"
+        },
+        {
+          "type": "textarea",
+          "id": "tab_content",
+          "label": "Tab Content",
+          "default": "This is the tab content."
+        }
+      ]
+    }
+  ],
+  "max_blocks": 3,
   "presets": [
     {
-      "name": "Product Details"
+      "name": "Product Tabs",
+      "blocks": [
+        { "type": "tab", "settings": { "tab_label": "DESCRIPTION", "tab_content": "{{ product.description }}" } },
+        { "type": "tab", "settings": { "tab_label": "DETAILS", "tab_content": "Enter product details here." } },
+        { "type": "tab", "settings": { "tab_label": "Sizing", "tab_content": "Enter product sizing here." } }
+      ]
     }
   ]
 }
