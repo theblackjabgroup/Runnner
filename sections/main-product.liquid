@@ -66,6 +66,8 @@
             {% endif %}
           </div>
           <h1 class="text-[42px] font-bold">{{ product.title }}</h1>
+
+          {%- comment -%} Product Variant {%- endcomment -%}
           <div class="product-variants my-4">
             <div class="flex items-center gap-2">
               <span class="inline-block text-[14px] font-medium">SELECT COLOR:</span>
@@ -124,7 +126,7 @@
         <div class="tab-content mt-6 overflow-y-auto">
           {% for block in section.blocks %}
             <div
-              class="tab-pane {% if forloop.first %}active{% else %}hidden{% endif %}"
+              class="tab-pane {% if forloop.first %}active{% else %}hidden{% endif %} tracking-normal leading-none text-[14px]"
               data-content="tab-{{ block.id }}"
             >
               {% case block.type %}
@@ -181,7 +183,7 @@
         </div>
       </div>
 
-      {%- comment -%} Size & Price {%- endcomment -%}
+      {%- comment -%} bottom utility {%- endcomment -%}
       {%- assign option_names = product.options_with_values | map: 'name' -%}
       {%- assign size_index = 0 -%}
       {%- for name in option_names -%}
@@ -191,13 +193,12 @@
       {%- endfor -%}
 
       <div
-        class="size-price-selector px-4 flex flex-col gap-6 text-[14px]"
-        style="background: cyan"
+        class="size-price-selector flex flex-col gap-6 text-[14px]"
       >
         <!-- DELIVERY SECTION -->
         {%- for block in section.blocks -%}
           {%- if block.type == 'delivery_address' -%}
-            <div class="flex justify-between items-start border-b border-gray-300 pb-4" {{ block.shopify_attributes }}>
+            <div class="flex justify-between items-start border-b border-gray-300 py-4" {{ block.shopify_attributes }}>
               {% if customer and customer.default_address %}
                 <!-- Logged-in: Show saved address -->
                 <div>
@@ -213,11 +214,19 @@
                 <!-- Guest: Show login prompt -->
                 <div>
                   <div class="font-semibold uppercase">DELIVER TO</div>
-                  <div class="text-sm text-gray-600">
+                  <div class="text-[14px] text-gray-600">
                     Please <a href="/account/login" class="underline text-blue-600">log in</a> to set your delivery
                     address.
                   </div>
                 </div>
+                <a
+                  href="#"
+                  class="border border-black  text-black px-2 py-1 text-[14px] font-medium rounded transition-colors duration-200 "
+                  onmouseover="this.style.backgroundColor='var(--hover)'"
+                  onmouseleave="this.style.backgroundColor='transparent'"
+                >
+                  CHANGE
+                </a>
               {% endif %}
             </div>
           {%- endif -%}
@@ -226,7 +235,7 @@
         <!-- QUANTITY SELECTOR -->
         {%- for block in section.blocks -%}
           {%- if block.type == 'quantity_selector' -%}
-            <div class="flex justify-between items-center border-b border-gray-300 py-4" {{ block.shopify_attributes }}>
+            <div class="flex justify-between items-center border-b border-gray-300 py-2" {{ block.shopify_attributes }}>
               <span class="uppercase font-semibold">QUANTITY SELECTOR</span>
               <div class="flex items-center border rounded">
                 <button type="button" class="px-3 py-1 text-lg hover:bg-gray-100">-</button>
@@ -238,32 +247,33 @@
         {%- endfor -%}
 
         <!-- SIZE SELECTOR -->
-        <div class="flex flex-col gap-2">
+        <div class="flex justify-between  items-center gap-2">
           <span class="uppercase font-semibold">SELECT SIZE</span>
           <div class="flex gap-2 flex-wrap">
             {%- assign size_options = product.options_with_values | where: 'name', 'Size' | first -%}
             {%- for value in size_options.values -%}
-              {%- assign matching_variant = product.variants
-                | where: 'option'
-                | append: size_index
-                | append: '', value
-                | first
-              -%}
+              {%- assign is_available = false -%}
+              {%- for variant in product.variants -%}
+                {% assign size_option = 'option' | append: size_index %}
+                {% if variant[size_option] == value and variant.available %}
+                  {%- assign is_available = true -%}
+                  {% break %}
+                {% endif %}
+              {%- endfor -%}
 
               <button
                 type="button"
                 class="
                   size-btn relative px-3 h-10 min-w-[2.5rem] flex items-center justify-center border rounded font-semibold
-                  {% if forloop.first %}bg-black text-white{% endif %}
-                  {% unless matching_variant.available %}opacity-50 cursor-not-allowed line-through bg-gray-200{% endunless %}
+                  {% if forloop.first and is_available %}bg-black text-white{% endif %}
+                  {% unless is_available %}opacity-50 cursor-not-allowed bg-gray-200{% endunless %}
                 "
                 data-value="{{ value | escape }}"
-                {% unless matching_variant.available %}
+                {% unless is_available %}
                   disabled aria-disabled="true"
                 {% endunless %}
-                aria-label="Size {{ value }}{% unless matching_variant.available %} - Sold out{% endunless %}"
               >
-                {{ value }}
+                <span class="label">{{ value }}</span>
               </button>
             {%- endfor -%}
           </div>
@@ -635,6 +645,7 @@
 
 <script>
   document.addEventListener('DOMContentLoaded', () => {
+    // desktop gallery handling
     const gallery = document.querySelector('.product-gallery');
     const items = document.querySelectorAll('.gallery-item');
     const totalImages = items.length;
@@ -674,76 +685,76 @@
 
     updateActiveImage();
 
-// tab-pane handling
-document.querySelectorAll(".tab-btn").forEach(btn => {
-  btn.addEventListener("click", () => {
-    const tabId = btn.dataset.tab;
+  // tab-pane handling
+  document.querySelectorAll(".tab-btn").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const tabId = btn.dataset.tab;
 
-    document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("text-black", "border-black"));
-    btn.classList.add("text-black", "border-black");
+      document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("text-black", "border-black"));
+      btn.classList.add("text-black", "border-black");
 
-    document.querySelectorAll(".tab-pane").forEach(pane => {
-      pane.classList.toggle("active", pane.dataset.content === tabId);
-      pane.classList.toggle("hidden", pane.dataset.content !== tabId);
-    });
-  });
-});
-
-document.getElementById("open-size-chart")?.addEventListener("click", () => {
-  document.getElementById("size-chart-drawer").classList.remove("hidden", "translate-x-full");
-  document.getElementById("size-chart-backdrop").classList.remove("hidden");
-});
-
-document.getElementById("close-size-chart")?.addEventListener("click", () => {
-  document.getElementById("size-chart-drawer").classList.add("translate-x-full", "hidden");
-  document.getElementById("size-chart-backdrop").classList.add("hidden");
-});
-
-// tab buttons active handling
- const tabButtons = document.querySelectorAll(".tab-btn");
-    const tabPanes = document.querySelectorAll(".tab-pane");
-
-    tabButtons.forEach((button) => {
-      button.addEventListener("click", () => {
-        const targetTab = button.getAttribute("data-tab");
-
-        // Reset styles on all buttons
-        tabButtons.forEach((btn) => {
-          btn.classList.remove("text-black", "border-black");
-          btn.classList.add("text-gray-600", "border-transparent");
-        });
-
-        // Activate clicked button
-        button.classList.remove("text-gray-600", "border-transparent");
-        button.classList.add("text-black", "border-black");
-
-        // Toggle tab panes
-        tabPanes.forEach((pane) => {
-          if (pane.getAttribute("data-content") === targetTab) {
-            pane.classList.remove("hidden");
-            pane.classList.add("block");
-          } else {
-            pane.classList.remove("block");
-            pane.classList.add("hidden");
-          }
-        });
+      document.querySelectorAll(".tab-pane").forEach(pane => {
+        pane.classList.toggle("active", pane.dataset.content === tabId);
+        pane.classList.toggle("hidden", pane.dataset.content !== tabId);
       });
     });
+  });
 
-  
+  document.getElementById("open-size-chart")?.addEventListener("click", () => {
+    document.getElementById("size-chart-drawer").classList.remove("hidden", "translate-x-full");
+    document.getElementById("size-chart-backdrop").classList.remove("hidden");
+  });
 
-// color swatch handling 
-  const colorSwatches = document.querySelectorAll('.color-swatch');
-  const activeColorDisplays = document.querySelectorAll('[data-active-color]');
-  let lastSelectedColor = '';
+  document.getElementById("close-size-chart")?.addEventListener("click", () => {
+    document.getElementById("size-chart-drawer").classList.add("translate-x-full", "hidden");
+    document.getElementById("size-chart-backdrop").classList.add("hidden");
+  });
 
-  function updateDisplays(color) {
-    activeColorDisplays.forEach(display => {
-      display.textContent = color;
-    });
-  }
+  // tab buttons active handling
+  const tabButtons = document.querySelectorAll(".tab-btn");
+      const tabPanes = document.querySelectorAll(".tab-pane");
 
- function setActiveSwatch(swatch) {
+      tabButtons.forEach((button) => {
+        button.addEventListener("click", () => {
+          const targetTab = button.getAttribute("data-tab");
+
+          // Reset styles on all buttons
+          tabButtons.forEach((btn) => {
+            btn.classList.remove("text-black", "border-black");
+            btn.classList.add("text-gray-600", "border-transparent");
+          });
+
+          // Activate clicked button
+          button.classList.remove("text-gray-600", "border-transparent");
+          button.classList.add("text-black", "border-black");
+
+          // Toggle tab panes
+          tabPanes.forEach((pane) => {
+            if (pane.getAttribute("data-content") === targetTab) {
+              pane.classList.remove("hidden");
+              pane.classList.add("block");
+            } else {
+              pane.classList.remove("block");
+              pane.classList.add("hidden");
+            }
+          });
+        });
+      });
+
+    
+
+  // color swatch handling 
+    const colorSwatches = document.querySelectorAll('.color-swatch');
+    const activeColorDisplays = document.querySelectorAll('[data-active-color]');
+    let lastSelectedColor = '';
+
+    function updateDisplays(color) {
+      activeColorDisplays.forEach(display => {
+        display.textContent = color;
+      });
+    }
+
+  function setActiveSwatch(swatch) {
     const selectedColor = swatch.getAttribute('data-option-value');
 
     // Remove ring from all
@@ -751,22 +762,21 @@ document.getElementById("close-size-chart")?.addEventListener("click", () => {
       el.classList.remove('ring-1', 'ring-offset-1', 'ring-black');
     });
 
-    // Force reflow then add ring (fixes rendering issue)
-    swatch.offsetWidth; // triggers reflow
+    // Force reflow then add ring
+    swatch.offsetWidth;
     swatch.classList.add('ring-1', 'ring-offset-2', 'ring-black');
 
-    // Update display
+    // Update visible color name
     activeColorDisplays.forEach((el) => {
       el.textContent = selectedColor;
     });
 
-    // Remove focus ring delay
+    lastSelectedColor = selectedColor;
+
     swatch.blur();
-   updateVariant();
 
-
+    updateVariant(); 
   }
-
 
   colorSwatches.forEach(swatch => {
     const swatchColor = swatch.getAttribute('data-option-value');
@@ -802,6 +812,7 @@ document.getElementById("close-size-chart")?.addEventListener("click", () => {
       });
     });
 
+    // Image strip handling
     const stripImages = document.querySelectorAll('.strip-image-wrapper');
 
     stripImages.forEach((stripImage) => {
@@ -851,18 +862,17 @@ document.getElementById("close-size-chart")?.addEventListener("click", () => {
       }
 
       // Add click handlers to thumbnails
-thumbnails.forEach((thumb) => {
-  thumb.addEventListener('click', () => {
-    const index = parseInt(thumb.dataset.thumbIndex);
-    showImage(index);
+  thumbnails.forEach((thumb) => {
+    thumb.addEventListener('click', () => {
+      const index = parseInt(thumb.dataset.thumbIndex);
+      showImage(index);
+    });
   });
-});
 
 
       // Initialize with first image
       showImage(0);
     }
-
 
     // variant logic
     const productOptions = {{ product.options | json }};
@@ -898,9 +908,6 @@ thumbnails.forEach((thumb) => {
       priceElement.textContent = `$${(variant.price / 100).toFixed(2)}`;
     }
 
-
-  
-
     // Size button clicks
     document.querySelectorAll('.size-btn').forEach(btn => {
       btn.addEventListener('click', () => {
@@ -931,63 +938,60 @@ thumbnails.forEach((thumb) => {
   sizeBtns.forEach(btn => {
     const size = btn.getAttribute('data-value');
 
-    // Find if there's any variant with this color + size
-    const matchingVariant = productVariants.find(variant => {
-      const colorMatch = colorIndex >= 0 ? variant[`option${colorIndex + 1}`] === color : true;
-      const sizeMatch = sizeIndex >= 0 ? variant[`option${sizeIndex + 1}`] === size : true;
-      return colorMatch && sizeMatch;
-    });
+      // Find if there's any variant with this color + size
+      const existingSlash = btn.querySelector('.unavailable-slash');
+      if (!matchingVariant || !matchingVariant.available) {
+        btn.classList.add('opacity-50', 'cursor-not-allowed');
+        btn.disabled = true;
+        btn.setAttribute('aria-disabled', 'true');
 
-    if (!matchingVariant || !matchingVariant.available) {
-      btn.classList.add('opacity-50', 'cursor-not-allowed');
-      btn.disabled = true;
-      btn.setAttribute('aria-disabled', 'true');
-      btn.querySelector('span').insertAdjacentHTML('afterend', `
-        <span class="absolute inset-0 flex items-center justify-center">
-          <span class="block w-full h-[2px] bg-neutral-900 rotate-135 origin-center"></span>
+    if (!existingSlash) {
+      btn.insertAdjacentHTML('beforeend', `
+        <span class="absolute inset-0 flex items-center justify-center unavailable-slash">
+          <span class="block w-full h-[2px] bg-neutral-900 rotate-[135deg] origin-center"></span>
         </span>
       `);
-    } else {
-      btn.classList.remove('opacity-50', 'cursor-not-allowed');
-      btn.disabled = false;
-      btn.removeAttribute('aria-disabled');
-      const slash = btn.querySelector('.absolute');
-      if (slash) slash.remove();
     }
+      } else {
+        btn.classList.remove('opacity-50', 'cursor-not-allowed');
+          btn.disabled = false;
+      btn.removeAttribute('aria-disabled');
+    if (existingSlash) existingSlash.remove();
+  }
+    });
+  }
+
+
+  function updateVariant() {
+    const variant = findMatchingVariant();
+    updateUI(variant);
+    updateSizeAvailability();
+  }
+
+  // size-chart button functionality
+  const openBtn = document.getElementById('open-size-chart');
+      const closeBtn = document.getElementById('close-size-chart');
+      const drawer = document.getElementById('size-chart-drawer');
+      const backdrop = document.getElementById('size-chart-backdrop');
+
+      if (openBtn && closeBtn && drawer) {
+        openBtn.addEventListener('click', () => {
+    drawer.classList.remove('translate-x-full', 'hidden');
+    backdrop.classList.remove('hidden');
+    document.body.classList.add('overflow-hidden'); 
   });
-}
 
+  function closeDrawer() {
+    drawer.classList.add('translate-x-full');
 
-function updateVariant() {
-  const variant = findMatchingVariant();
-  updateUI(variant);
-  updateSizeAvailability();
-}
+      drawer.classList.add('hidden');
 
-// size-chart button functionality
-const openBtn = document.getElementById('open-size-chart');
-    const closeBtn = document.getElementById('close-size-chart');
-    const drawer = document.getElementById('size-chart-drawer');
-    const backdrop = document.getElementById('size-chart-backdrop');
+    backdrop.classList.add('hidden');
+    document.body.classList.remove('overflow-hidden');  
+  }
 
-    if (openBtn && closeBtn && drawer) {
-      openBtn.addEventListener('click', () => {
-  drawer.classList.remove('translate-x-full', 'hidden');
-  backdrop.classList.remove('hidden');
-  document.body.classList.add('overflow-hidden'); 
-});
-
-function closeDrawer() {
-  drawer.classList.add('translate-x-full');
-
-    drawer.classList.add('hidden');
-
-  backdrop.classList.add('hidden');
-  document.body.classList.remove('overflow-hidden');  
-}
-
-closeBtn.addEventListener('click', closeDrawer);
-backdrop.addEventListener('click', closeDrawer);
+  closeBtn.addEventListener('click', closeDrawer);
+  backdrop.addEventListener('click', closeDrawer);
 
 
 
