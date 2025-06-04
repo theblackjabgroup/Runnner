@@ -134,9 +134,9 @@
                   {{ product.description }}
 
                 {% when 'tab_details' %}
-                  {% if section.settings.metafield_namespace_key != blank %}
+                  {% if block.settings.metafield_namespace_key != blank %}
                     <div class="prose prose-lg max-w-none">
-                      {{ section.settings.metafield_namespace_key }}
+                      {{ block.settings.metafield_namespace_key }}
                     </div>
                   {% else %}
                     <p class="text-gray-500">No details available for this product.</p>
@@ -167,9 +167,9 @@
                       </button>
                     </div>
                     <div class="p-4">
-                      {% if section.settings.size_chart_page != blank %}
+                      {% if block.settings.size_chart_page != blank %}
                         <div class="prose max-w-none">
-                          {{ section.settings.size_chart_page.content }}
+                          {{ block.settings.size_chart_page.content }}
                         </div>
                       {% else %}
                         <p class="text-gray-500">No size guide page selected.</p>
@@ -198,7 +198,7 @@
         <!-- DELIVERY SECTION -->
         {%- for block in section.blocks -%}
           {%- if block.type == 'delivery_address' -%}
-            <div class="flex justify-between items-start border-b border-gray-300 py-4" {{ block.shopify_attributes }}>
+            <div class="flex justify-between items-start border-b border-gray-400 py-4" {{ block.shopify_attributes }}>
               {% if customer and customer.default_address %}
                 <!-- Logged-in: Show saved address -->
                 <div>
@@ -221,9 +221,11 @@
                 </div>
                 <a
                   href="#"
-                  class="border border-black  text-black px-2 py-1 text-[14px] font-medium rounded transition-colors duration-200 "
-                  onmouseover="this.style.backgroundColor='var(--hover)'"
-                  onmouseleave="this.style.backgroundColor='transparent'"
+                  class="border border-black px-2 py-1 text-[14px] font-medium rounded transition-colors duration-200 "
+                  style="background-color: var(--button); color: var(--button_label);"
+                  onmouseenter="this.style.backgroundColor='var(--hover)'"
+                  onmouseleave="this.style.backgroundColor='var(--button)'"
+                  aria-label="Change delivery address"
                 >
                   CHANGE
                 </a>
@@ -235,12 +237,27 @@
         <!-- QUANTITY SELECTOR -->
         {%- for block in section.blocks -%}
           {%- if block.type == 'quantity_selector' -%}
-            <div class="flex justify-between items-center border-b border-gray-300 py-2" {{ block.shopify_attributes }}>
+            <div class="flex justify-between items-center border-b border-gray-400 pb-4" {{ block.shopify_attributes }}>
               <span class="uppercase font-semibold">QUANTITY SELECTOR</span>
               <div class="flex items-center border rounded">
-                <button type="button" class="px-3 py-1 text-lg hover:bg-gray-100">-</button>
-                <span class="px-3">1</span>
-                <button type="button" class="px-3 py-1 text-lg hover:bg-gray-100">+</button>
+                <button
+                  type="button"
+                  id="decreaseQty"
+                  class="px-3 py-1 text-lg hover:bg-gray-100"
+                  aria-label="Decrease quantity"
+                >
+                  -
+                </button>
+                <span id="quantityDisplay" class="px-3">1</span>
+                <input type="hidden" name="quantity" id="quantityInput" value="1">
+                <button
+                  type="button"
+                  id="increaseQty"
+                  class="px-3 py-1 text-lg hover:bg-gray-100"
+                  aria-label="Increase quantity"
+                >
+                  +
+                </button>
               </div>
             </div>
           {%- endif -%}
@@ -272,6 +289,7 @@
                 {% unless is_available %}
                   disabled aria-disabled="true"
                 {% endunless %}
+                aria-label="Size {{ value }}{% unless is_available %} - Sold out{% endunless %}"
               >
                 <span class="label">{{ value }}</span>
               </button>
@@ -280,26 +298,80 @@
         </div>
 
         <!-- PRICE + ACTIONS -->
-        <div class="flex justify-between items-center border-t pt-4">
-          <div class="text-[18px] font-bold">{{ product.price | money }}</div>
+        <div class="flex justify-between items-center border-t pt-4" style="padding-top: 1rem;">
+          <!-- Price + Compare at Price -->
+          <div class="text-[18px] font-bold flex flex-col">
+            <div class="flex items-center gap-2">
+              <span>{{ product.price | money }}</span>
+              {% if product.compare_at_price > product.price %}
+                <span class="text-black text-[14px]">|</span>
+                <span class="line-through text-gray-500">{{ product.compare_at_price | money }}</span>
+              {% endif %}
+            </div>
 
+            {% if product.compare_at_price > product.price %}
+              <div class="text-[14px] text-red-600 font-medium">
+                Save {{ product.compare_at_price | minus: product.price | money }} (
+                {{
+                  product.compare_at_price
+                  | minus: product.price
+                  | times: 100
+                  | divided_by: product.compare_at_price
+                -}}
+                % off)
+              </div>
+            {% endif %}
+          </div>
+
+          <!-- Buy Now + Add to Cart -->
           <div class="flex gap-2">
-            <button
-              class="bg-black text-white px-4 py-2 rounded font-semibold hover:bg-gray-900"
-              type="button"
-            >
-              BUY IT NOW
-            </button>
-
-            <form method="post" action="/cart/add">
-              <input type="hidden" name="id" value="{{ product.variants.first.id }}">
+            {% if product.available %}
+              <!-- BUY IT NOW button -->
               <button
-                class="bg-amber-600 hover:bg-amber-700 text-white px-4 py-2 rounded font-semibold flex items-center gap-1"
-                type="submit"
+                class="bg-black text-white text-4xl px-4 py-2 rounded hover:bg-gray-900"
+                type="button"
+                aria-label="Buy it now"
               >
-                <span class="text-lg">→</span> ADD TO CART
+                BUY IT NOW
               </button>
-            </form>
+
+              <!-- ADD TO CART form -->
+              <form method="post" action="/cart/add">
+                <input type="hidden" name="id" value="{{ product.variants.first.id }}">
+                <button
+                  class="text-white text-4xl px-4 py-2 rounded group flex items-center justify-between gap-2"
+                  style="background-color: var(--button); color: var(--button_label);"
+                  onmouseenter="this.style.backgroundColor='var(--hover)'"
+                  onmouseleave="this.style.backgroundColor='var(--button)'"
+                  aria-label="Add to cart"
+                  type="submit"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    class="w-6 h-6 object-contain transition-transform duration-300 group-hover:-rotate-90 mx-1"
+                    fill="none"
+                    viewBox="0 0 9 9"
+                    stroke-width="1.5"
+                    stroke="currentColor"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    aria-hidden="true"
+                  >
+                    <path d="M1.1875 7.7334H7.6599M7.6599 7.7334V1.261M7.6599 7.7334L1.1875 1.261"/>
+                  </svg>
+                  ADD TO CART
+                </button>
+              </form>
+            {% else %}
+              <!-- SOLD OUT button -->
+              <button
+                class="bg-gray-400 text-white text-4xl px-4 py-2 rounded cursor-not-allowed"
+                type="button"
+                disabled
+              >
+                SOLD OUT
+              </button>
+            {% endif %}
           </div>
         </div>
       </div>
@@ -645,6 +717,36 @@
 
 <script>
   document.addEventListener('DOMContentLoaded', () => {
+    // Quantity selector functionality
+  const increaseBtn = document.getElementById("increaseQty");
+  const decreaseBtn = document.getElementById("decreaseQty");
+  const quantityDisplay = document.getElementById("quantityDisplay");
+  const quantityInput = document.getElementById("quantityInput");
+
+  console.log("Increase Button:", increaseBtn);
+  console.log("Decrease Button:", decreaseBtn);
+  console.log("Quantity Display:", quantityDisplay);
+  console.log("Quantity Input:", quantityInput);
+
+  if (increaseBtn && decreaseBtn && quantityDisplay && quantityInput) {
+    let quantity = 1;
+
+    increaseBtn.addEventListener("click", () => {
+      quantity++;
+      quantityDisplay.textContent = quantity;
+      quantityInput.value = quantity;
+    });
+
+    decreaseBtn.addEventListener("click", () => {
+      if (quantity > 1) {
+        quantity--;
+        quantityDisplay.textContent = quantity;
+        quantityInput.value = quantity;
+      }
+    });
+  }
+
+
     // desktop gallery handling
     const gallery = document.querySelector('.product-gallery');
     const items = document.querySelectorAll('.gallery-item');
@@ -1062,17 +1164,6 @@
       "unit": "px",
       "label": "t:sections.all.padding.padding_bottom",
       "default": 0
-    },
-    {
-      "type": "text",
-      "id": "metafield_namespace_key",
-      "label": "Product Details ",
-      "default": "CONNECT TO A DYNAMIC SOURCE FOR PRODUCT DETAILS"
-    },
-    {
-      "type": "page",
-      "id": "size_chart_page",
-      "label": "Select a Size Chart Page"
     }
   ],
   "blocks": [
@@ -1099,6 +1190,12 @@
           "id": "title",
           "label": "Tab Title",
           "default": "DETAILS"
+        },
+        {
+          "type": "text",
+          "id": "metafield_namespace_key",
+          "label": "Product Details ",
+          "default": "CONNECT TO A DYNAMIC SOURCE FOR PRODUCT DETAILS"
         }
       ]
     },
@@ -1112,6 +1209,12 @@
           "id": "title",
           "label": "Tab Title",
           "default": "SIZING"
+        },
+
+        {
+          "type": "page",
+          "id": "size_chart_page",
+          "label": "Select a Size Chart Page"
         }
       ]
     },
