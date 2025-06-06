@@ -115,18 +115,22 @@
                                 {% endfor %}
                               </ul>
                             {% endif %}
-                            <a
-                              href="#"
-                              class="
-                                relative inline-block text-gray-500 group mt-2
-                                before:absolute before:bottom-0 before:left-0
-                                before:w-full before:h-[2px] before:bg-gray-500
-                                before:scale-x-100 before:origin-left before:transition-transform before:duration-500
-                                hover:before:origin-right hover:before:scale-x-0 hover:text-[var(--hover)]
-                              "
-                            >
-                              SHOP ALL {{ childlink.title }}
-                            </a>
+                            {% comment %}
+                              <a
+                                href="#"
+                                class="
+                                  relative inline-block text-gray-500 group mt-2
+                                  before:absolute before:bottom-0 before:left-0
+                                  before:w-full before:h-[2px] before:bg-gray-500
+                                  before:scale-x-100 before:origin-left before:transition-transform before:duration-500
+                                  hover:before:origin-right hover:before:scale-x-0 hover:text-[var(--hover)]
+                                "
+                              >
+                                SHOP ALL {{ childlink.title }}
+                              </a>
+                            {% endcomment %}
+
+                            <a href="#" class="underline-link"> SHOP ALL {{ childlink.title }} </a>
                           </li>
                         {% endfor %}
                       </ul>
@@ -846,203 +850,236 @@
 <div class="header-offset" data-header-offset></div>
 
 <style>
-  .header-main {
+  {% comment %} test {% endcomment %}
+
+  .underline-link {
     position: relative;
-    width: 100%;
-    transform: translateY(-100%);
-    animation: slideDown 0.5s ease forwards;
-    background: var(--header_background);
+    display: inline-block;
+    color: gray;
+    margin-top: 0.5rem;
+    transition: color 0.3s ease;
   }
 
-  @keyframes slideDown {
-    from {
+  .underline-link::before {
+    content: '';
+    position: absolute;
+    bottom: 4px;
+    left: 0;
+    width: 100%;
+    height: 1px;
+    background-color: gray;
+    transform: scaleX(1);
+    transform-origin: left;
+    transition: transform 0.5s ease;
+  }
+
+  .underline-link:hover {
+    color: var(--hover);
+  }
+
+  .underline-link:hover::before {
+    transform: scaleX(0);
+    transform-origin: right;
+  }
+
+    {% comment %} test end {% endcomment %}
+    .header-main {
+      position: relative;
+      width: 100%;
+      transform: translateY(-100%);
+      animation: slideDown 0.5s ease forwards;
+      background: var(--header_background);
+    }
+
+    @keyframes slideDown {
+      from {
+        transform: translateY(-100%);
+      }
+      to {
+        transform: translateY(0);
+      }
+    }
+
+    .header-main.is-sticky {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      transform: translateY(0);
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .header-main.is-sticky.is-hidden {
       transform: translateY(-100%);
     }
-    to {
-      transform: translateY(0);
+
+    .header-offset {
+      height: 0;
+      transition: height 0.3s ease;
     }
-  }
 
-  .header-main.is-sticky {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    transform: translateY(0);
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-  }
-
-  .header-main.is-sticky.is-hidden {
-    transform: translateY(-100%);
-  }
-
-  .header-offset {
-    height: 0;
-    transition: height 0.3s ease;
-  }
-
-  .header-offset.is-active {
-    height: var(--header-height, 0px);
-  }
-
-  .sticky-disabled {
-    position: relative !important;
-    transform: none !important;
-  }
-
-  .sticky-disabled + .header-offset {
-    display: none !important;
-  }
-
-  /* Mobile submenu scrollbar styling */
-  .submenu.styled-scrollbar {
-    scrollbar-width: thin;
-    scrollbar-color: rgba(0, 0, 0, 0.3) transparent;
-  }
-
-  .submenu.styled-scrollbar::-webkit-scrollbar {
-    width: 4px;
-  }
-
-  .submenu.styled-scrollbar::-webkit-scrollbar-track {
-    background: transparent;
-  }
-
-  .submenu.styled-scrollbar::-webkit-scrollbar-thumb {
-    background-color: rgba(0, 0, 0, 0.3);
-    border-radius: 20px;
-  }
-
-  /* Mobile submenu animations */
-  .submenu {
-    transition: all 400ms cubic-bezier(0.4, 0, 0.2, 1);
-    will-change: opacity, height;
-    height: auto;
-    max-height: 0;
-  }
-
-  .submenu.show {
-    opacity: 1;
-    max-height: 30vh;
-  }
-
-  .submenu:not(.show) {
-    opacity: 0;
-    max-height: 0;
-  }
-
-  .submenu.hidden {
-    display: none;
-  }
-
-  .submenu:not(.hidden) {
-    display: block;
-  }
-
-  /* Add overlay transition */
-  #menu-overlay {
-    transition: opacity 0.3s ease;
-    will-change: opacity;
-  }
-
-  /* Mobile menu transitions */
-  #mobile-menu {
-    will-change: transform;
-    backface-visibility: hidden;
-  }
-
-  #mobile-menu.active {
-    transform: translateX(0) !important;
-  }
-
-  .h-vertical-text-container {
-    width: 26px;
-    overflow: hidden;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-  }
-
-  .h-vertical-text {
-    writing-mode: vertical-rl;
-    text-orientation: mixed;
-    transform: rotate(180deg);
-    animation: scrollText 50s linear infinite;
-    font-size: 16px;
-    white-space: nowrap;
-    padding: 0;
-  }
-
-  .vertical-text:nth-child(n) {
-    animation: scrollText2 50s linear infinite;
-  }
-
-  @keyframes scrollText {
-    0% {
-      transform: translateY(0) rotate(180deg);
+    .header-offset.is-active {
+      height: var(--header-height, 0px);
     }
-    100% {
-      transform: translateY(-100%) rotate(180deg);
-    }
-  }
 
-  @keyframes scrollText2 {
-    0% {
-      transform: translateY(100%) rotate(180deg);
+    .sticky-disabled {
+      position: relative !important;
+      transform: none !important;
     }
-    100% {
-      transform: translateY(0) rotate(180deg);
-    }
-  }
 
-  .horizontal-text-container {
-    position: fixed;
-    top: 100%;
-    left: 0;
-    width: 100%;
-    height: 33px;
-    overflow: hidden;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-top: 1px solid var(--header_text);
-    border-bottom: 1px solid var(--header_text);
-    background: var(--header_background);
-    z-index: 999;
-  }
-
-  .horizontal-text {
-    white-space: nowrap;
-    font-size: 24px;
-    display: inline-block;
-    animation: scrollRight 80s linear infinite;
-    height: 100%;
-    line-height: 32px;
-    font-weight: 500;
-  }
-
-  .horizontal-text:nth-child(n) {
-    animation: scrollRight2 80s linear infinite;
-  }
-
-  @keyframes scrollRight {
-    0% {
-      transform: translateX(-100%);
+    .sticky-disabled + .header-offset {
+      display: none !important;
     }
-    100% {
-      transform: translateX(100%);
-    }
-  }
 
-  @keyframes scrollRight2 {
-    0% {
-      transform: translateX(-100%);
+    /* Mobile submenu scrollbar styling */
+    .submenu.styled-scrollbar {
+      scrollbar-width: thin;
+      scrollbar-color: rgba(0, 0, 0, 0.3) transparent;
     }
-    100% {
-      transform: translateX(100%);
+
+    .submenu.styled-scrollbar::-webkit-scrollbar {
+      width: 4px;
     }
-  }
+
+    .submenu.styled-scrollbar::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    .submenu.styled-scrollbar::-webkit-scrollbar-thumb {
+      background-color: rgba(0, 0, 0, 0.3);
+      border-radius: 20px;
+    }
+
+    /* Mobile submenu animations */
+    .submenu {
+      transition: all 400ms cubic-bezier(0.4, 0, 0.2, 1);
+      will-change: opacity, height;
+      height: auto;
+      max-height: 0;
+    }
+
+    .submenu.show {
+      opacity: 1;
+      max-height: 30vh;
+    }
+
+    .submenu:not(.show) {
+      opacity: 0;
+      max-height: 0;
+    }
+
+    .submenu.hidden {
+      display: none;
+    }
+
+    .submenu:not(.hidden) {
+      display: block;
+    }
+
+    /* Add overlay transition */
+    #menu-overlay {
+      transition: opacity 0.3s ease;
+      will-change: opacity;
+    }
+
+    /* Mobile menu transitions */
+    #mobile-menu {
+      will-change: transform;
+      backface-visibility: hidden;
+    }
+
+    #mobile-menu.active {
+      transform: translateX(0) !important;
+    }
+
+    .h-vertical-text-container {
+      width: 26px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .h-vertical-text {
+      writing-mode: vertical-rl;
+      text-orientation: mixed;
+      transform: rotate(180deg);
+      animation: scrollText 50s linear infinite;
+      font-size: 16px;
+      white-space: nowrap;
+      padding: 0;
+    }
+
+    .vertical-text:nth-child(n) {
+      animation: scrollText2 50s linear infinite;
+    }
+
+    @keyframes scrollText {
+      0% {
+        transform: translateY(0) rotate(180deg);
+      }
+      100% {
+        transform: translateY(-100%) rotate(180deg);
+      }
+    }
+
+    @keyframes scrollText2 {
+      0% {
+        transform: translateY(100%) rotate(180deg);
+      }
+      100% {
+        transform: translateY(0) rotate(180deg);
+      }
+    }
+
+    .horizontal-text-container {
+      position: fixed;
+      top: 100%;
+      left: 0;
+      width: 100%;
+      height: 33px;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-top: 1px solid var(--header_text);
+      border-bottom: 1px solid var(--header_text);
+      background: var(--header_background);
+      z-index: 999;
+    }
+
+    .horizontal-text {
+      white-space: nowrap;
+      font-size: 24px;
+      display: inline-block;
+      animation: scrollRight 80s linear infinite;
+      height: 100%;
+      line-height: 32px;
+      font-weight: 500;
+    }
+
+    .horizontal-text:nth-child(n) {
+      animation: scrollRight2 80s linear infinite;
+    }
+
+    @keyframes scrollRight {
+      0% {
+        transform: translateX(-100%);
+      }
+      100% {
+        transform: translateX(100%);
+      }
+    }
+
+    @keyframes scrollRight2 {
+      0% {
+        transform: translateX(-100%);
+      }
+      100% {
+        transform: translateX(100%);
+      }
+    }
 </style>
 
 <script>
