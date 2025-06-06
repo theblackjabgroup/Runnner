@@ -255,99 +255,84 @@
 {% if section.settings.enabled %}
   <section
     class="blog-archive-section color-{{ section.settings.color_scheme }}"
-    role="region"
     aria-labelledby="blog-archive-section-title"
-    aria-describedby="blog-archive-section-desc"
   >
     <header class="blog-archive-section-header">
       <h2 class="blog-archive-section-title" id="blog-archive-section-title">{{ section.settings.heading }}</h2>
-      <nav class="view-toggle" role="group" aria-label="Toggle blog view">
+      <div class="view-toggle" role="radiogroup" aria-label="Blog view options">
         <div class="toggle-slider"></div>
-        <button id="gridViewBtn" class="active" aria-pressed="true" aria-current="true" type="button">Grid</button>
-        <button id="listViewBtn" aria-pressed="false" type="button">List</button>
-      </nav>
+        <button id="gridViewBtn" class="active" role="radio" aria-checked="true" type="button">Grid</button>
+        <button id="listViewBtn" role="radio" aria-checked="false" type="button">List</button>
+      </div>
     </header>
 
-    <div id="blog-archive-section-desc" class="sr-only">
-      {% if section.settings.description != blank %}
+    {% if section.settings.description != blank %}
+      <div class="sr-only" id="blog-archive-section-desc">
         {{ section.settings.description }}
+      </div>
+    {% endif %}
+
+    <div
+      class="blog-archive-grid grid-view"
+      id="archiveContainer"
+      aria-live="polite"
+      aria-label="Blog articles"
+    >
+      {% assign blog_handle = section.settings.blog %}
+      {% assign post_limit = section.settings.post_limit %}
+      {% if blog_handle != blank and blogs[blog_handle].articles.size > 0 %}
+        {% for article in blogs[blog_handle].articles limit: post_limit %}
+          <article aria-labelledby="article-title-{{ forloop.index0 }}">
+            <a
+              href="{{ article.url }}"
+              class="blog-archive-card"
+              aria-describedby="article-date-{{ forloop.index0 }}"
+            >
+              <div class="blog-archive-card-image-wrapper">
+                {% if article.image %}
+                  <img
+                    class="blog-archive-card-image"
+                    src="{{ article.image | image_url }}"
+                    alt="{{ article.title }}"
+                    width="auto"
+                    height="auto"
+                    loading="lazy"
+                  >
+                {% else %}
+                  <div style="width:100%; background:#f3f3f3; display:flex; align-items:center; justify-content:center; padding:4rem 0;">
+                    <span style="color:#bbb;" aria-hidden="true">No image</span>
+                  </div>
+                {% endif %}
+              </div>
+              <div class="blog-archive-card-content">
+                <time
+                  class="blog-archive-card-date"
+                  id="article-date-{{ forloop.index0 }}"
+                  datetime="{{ article.published_at | date: '%Y-%m-%d' }}"
+                >
+                  {{ article.published_at | date: '%B %d, %Y' }}
+                </time>
+                <h3 class="blog-archive-card-title" id="article-title-{{ forloop.index0 }}">
+                  <img
+                    src="{{ "arrow-down.png" | asset_url }}"
+                    alt=""
+                    class="w-12 h-6 object-contain transition-transform duration-300 group-hover:-rotate-90 collection-arrow-img blog-archive-card-title-arrow inline-block align-baseline"
+                    width="15px"
+                    height="auto"
+                    aria-hidden="true"
+                    style="margin-bottom:5px; position:relative; left:-5px;"
+                  >
+                  {{ article.title }}
+                </h3>
+                <p class="blog-archive-card-desc">
+                  {{ article.excerpt | strip_html | truncate: 120 }}
+                </p>
+              </div>
+            </a>
+          </article>
+        {% endfor %}
       {% endif %}
     </div>
-
-    <main>
-      <div
-        class="blog-archive-grid grid-view"
-        id="archiveContainer"
-        role="list"
-        aria-live="polite"
-        aria-label="Blog articles list"
-      >
-        {% assign blog_handle = section.settings.blog %}
-        {% assign post_limit = section.settings.post_limit %}
-        {% if blog_handle != blank and blogs[blog_handle].articles.size > 0 %}
-          {% for article in blogs[blog_handle].articles limit: post_limit %}
-            <article
-              role="article"
-              tabindex="0"
-              aria-labelledby="article-title-{{ forloop.index0 }}"
-              aria-describedby="article-date-{{ forloop.index0 }} article-desc-{{ forloop.index0 }}"
-            >
-              <a
-                href="{{ article.url }}"
-                class="blog-archive-card"
-                role="listitem"
-                aria-label="{{ article.title }}"
-                tabindex="0"
-              >
-                <figure class="blog-archive-card-image-wrapper">
-                  {% if article.image %}
-                    <img
-                      class="blog-archive-card-image"
-                      src="{{ article.image | image_url }}"
-                      alt="{{ article.title }}"
-                      width="auto"
-                      height="auto"
-                      loading="lazy"
-                    >
-                  {% else %}
-                    <div style="width:100%; background:#f3f3f3; display:flex; align-items:center; justify-content:center; padding:4rem 0;">
-                      <span style="color:#bbb;" aria-hidden="true" role="img" aria-label="No image available"
-                        >No image</span
-                      >
-                    </div>
-                  {% endif %}
-                </figure>
-                <div class="blog-archive-card-content">
-                  <time
-                    class="blog-archive-card-date"
-                    id="article-date-{{ forloop.index0 }}"
-                    datetime="{{ article.published_at | date: '%Y-%m-%d' }}"
-                    aria-label="Published on {{ article.published_at | date: '%B %d, %Y' }}"
-                  >
-                    {{ article.published_at | date: '%B %d, %Y' }}
-                  </time>
-                  <h3 class="blog-archive-card-title" id="article-title-{{ forloop.index0 }}">
-                    <img
-                      src="{{ "arrow-down.png" | asset_url }}"
-                      alt=""
-                      class="w-12 h-6 object-contain transition-transform duration-300 group-hover:-rotate-90 collection-arrow-img blog-archive-card-title-arrow inline-block align-baseline"
-                      width="15px"
-                      height="auto"
-                      aria-hidden="true"
-                      style="margin-bottom:5px; position:relative; left:-5px;"
-                    >
-                    {{ article.title }}
-                  </h3>
-                  <p class="blog-archive-card-desc" id="article-desc-{{ forloop.index0 }}">
-                    {{ article.excerpt | strip_html | truncate: 120 }}
-                  </p>
-                </div>
-              </a>
-            </article>
-          {% endfor %}
-        {% endif %}
-      </div>
-    </main>
   </section>
 {% endif %}
 
@@ -369,7 +354,13 @@
     }
 
     function switchView(toList) {
-      buttons.forEach((btn) => btn.classList.toggle('active', btn === (toList ? listBtn : gridBtn)));
+      // Update ARIA states
+      buttons.forEach((btn) => {
+        const isActive = btn === (toList ? listBtn : gridBtn);
+        btn.classList.toggle('active', isActive);
+        btn.setAttribute('aria-checked', isActive.toString());
+      });
+
       container.style.opacity = 0;
       setTimeout(() => {
         container.classList.toggle('list-view', toList);
@@ -384,6 +375,23 @@
     updateSliderPos(false);
     gridBtn.addEventListener('click', () => switchView(false));
     listBtn.addEventListener('click', () => switchView(true));
+
+    // Handle keyboard navigation for radio group
+    buttons.forEach((btn) => {
+      btn.addEventListener('keydown', (e) => {
+        if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
+          e.preventDefault();
+          const currentIndex = buttons.indexOf(e.target);
+          const nextIndex =
+            e.key === 'ArrowRight'
+              ? (currentIndex + 1) % buttons.length
+              : (currentIndex - 1 + buttons.length) % buttons.length;
+          buttons[nextIndex].focus();
+          switchView(nextIndex === 1);
+        }
+      });
+    });
+
     window.addEventListener('resize', () => updateSliderPos(sectionEl.classList.contains('list-view')));
   });
 </script>
