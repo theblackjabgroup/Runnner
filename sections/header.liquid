@@ -1,6 +1,7 @@
 <header
-  class="header-main will-change-transform p-2 lg:px-3 z-99 bg-[var(--header_background)] transform-gpu {% unless section.settings.enable_sticky %}sticky-disabled{% endunless %}"
+  class="header-main will-change-transform p-2 lg:px-3 bg-[var(--header_background)] transform-gpu {% unless section.settings.enable_sticky %}sticky-disabled{% endunless %}"
   data-header-sticky
+  style="z-index: 999; "
 >
   <div class="relative w-full flex items-center justify-between ">
     <!-- Left: Logo -->
@@ -31,10 +32,10 @@
         class="relative flex justify-end lg:justify-between items-center w-full text-[var(--header_text)]"
       >
         <!-- Left: Menu Items -->
-        <div class="menu-items hidden lg:!flex gap-2 flex-wrap w-2/3 0">
-          <ul class="flex flex-wrap space-x-1">
+        <div class="menu-items hidden lg:!flex  flex-wrap w-2/3 ">
+          <ul class="flex-1 flex flex-wrap space-x-1">
             {%- for link in section.settings.menu.links -%}
-              <li class="group dropdown-group flex items-center justify-center ">
+              <li class="group dropdown-group flex items-center justify-center mr-2">
                 {% if link.links.size > 0 %}
                   <a
                     href="{{ link.url }}"
@@ -81,22 +82,22 @@
                     "
                     style="
                       background: var(--header_background);
-                      top: 85%;
+                      top: 80%;
                       will-change: transform, opacity;
-                      transform: translateY(-30px);
+                      transform: translateY(-300px);
                       transition-property: opacity, transform;
                       transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
-                      transition-duration: 500ms;
-                      z-index: 990;
+                      transition-duration: 800ms;
+                      z-index: -1;
                     "
                   >
-                    <div class="mx-auto p-6  flex">
+                    <div class="mx-auto p-2  flex">
                       <ul class="flex justify-start gap-8 m-2 w-1/2">
                         {% for childlink in link.links %}
                           <li class="min-w-[100px] relative">
                             <a
                               href="{{ childlink.url }}"
-                              class="block text-gray-500 hover:text-[var(--hover)] font-medium text-[14px] mb-6"
+                              class="block text-gray-500 hover:text-[var(--hover)] font-medium text-[14px] mb-4"
                             >
                               {{ childlink.title }}
                             </a>
@@ -114,12 +115,8 @@
                                 {% endfor %}
                               </ul>
                             {% endif %}
-                            <a
-                              href="{{childlink.url}}"
-                              class="relative flex items-center gap-2 !tracking-normal  leading-none group text-[var(--header_text)] mt-4 before:absolute before:bottom-0 before:left-0 before:w-full before:h-[0.15rem] before:bg-[var(--header_text)] before:origin-left before:transition-transform before:duration-1000 before:ease-in-out hover:before:origin-right hover:before:scale-x-0 hover:text-[var(--hover)]"
-                            >
-                              SHOP ALL {{ childlink.title -}}
-                            </a>
+
+                            <a href="#" class="underline-link"> SHOP ALL {{ childlink.title }} </a>
                           </li>
                         {% endfor %}
                       </ul>
@@ -234,7 +231,7 @@
         </div>
 
         <!-- Right: Actions -->
-        <div class="flex lg:!w-1/3  space-x-6 items-center justify-end ">
+        <div class="flex lg:!w-1/3 gap-2 items-center justify-end ">
           <!-- Top Row: Action Utilities -->
 
           <!-- Search -->
@@ -489,7 +486,8 @@
 <!-- Mobile Menu Overlay -->
 <div
   id="menu-overlay"
-  class="fixed inset-0 bg-black opacity-0 pointer-events-none transition-opacity duration-300 z-[101]"
+  class="fixed inset-0 bg-black opacity-0 pointer-events-none transition-opacity duration-300"
+  style="z-index: 999; "
 >
   &nbsp;
 </div>
@@ -497,8 +495,8 @@
 <!-- Mobile Menu -->
 <div
   id="mobile-menu"
-  class="hidden lg:hidden w-[90vw] h-[100vh] fixed top-0 right-0 z-[102] bg-[var(--header_background)] flex"
-  style="transform: translateX(100%); transition: transform 0.3s ease-in-out; background: var(--header_background);"
+  class="hidden lg:hidden w-[90vw] h-[100vh] fixed top-0 right-0  bg-[var(--header_background)] flex"
+  style="transform: translateX(100%); transition: transform 0.3s ease-in-out; background: var(--header_background); z-index: 1000"
 >
   <!-- Vertical Scrolling Text -->
   <div
@@ -838,194 +836,236 @@
 <div class="header-offset" data-header-offset></div>
 
 <style>
-  .header-main {
+  {% comment %} test {% endcomment %}
+
+  .underline-link {
     position: relative;
-    width: 100%;
-    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    transform: translateY(0);
-    background: var(--header_background);
-  }
-
-  .header-main.is-sticky {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    transform: translateY(0);
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-  }
-
-  .header-main.is-sticky.is-hidden {
-    transform: translateY(-100%);
-  }
-
-  .header-offset {
-    height: 0;
-    transition: height 0.3s ease;
-  }
-
-  .header-offset.is-active {
-    height: var(--header-height, 0px);
-  }
-
-  .sticky-disabled {
-    position: relative !important;
-    transform: none !important;
-  }
-
-  .sticky-disabled + .header-offset {
-    display: none !important;
-  }
-
-  /* Mobile submenu scrollbar styling */
-  .submenu.styled-scrollbar {
-    scrollbar-width: thin;
-    scrollbar-color: rgba(0, 0, 0, 0.3) transparent;
-  }
-
-  .submenu.styled-scrollbar::-webkit-scrollbar {
-    width: 4px;
-  }
-
-  .submenu.styled-scrollbar::-webkit-scrollbar-track {
-    background: transparent;
-  }
-
-  .submenu.styled-scrollbar::-webkit-scrollbar-thumb {
-    background-color: rgba(0, 0, 0, 0.3);
-    border-radius: 20px;
-  }
-
-  /* Mobile submenu animations */
-  .submenu {
-    transition: all 400ms cubic-bezier(0.4, 0, 0.2, 1);
-    will-change: opacity, height;
-    height: auto;
-    max-height: 0;
-  }
-
-  .submenu.show {
-    opacity: 1;
-    max-height: 30vh;
-  }
-
-  .submenu:not(.show) {
-    opacity: 0;
-    max-height: 0;
-  }
-
-  .submenu.hidden {
-    display: none;
-  }
-
-  .submenu:not(.hidden) {
-    display: block;
-  }
-
-  /* Add overlay transition */
-  #menu-overlay {
-    transition: opacity 0.3s ease;
-    will-change: opacity;
-  }
-
-  /* Mobile menu transitions */
-  #mobile-menu {
-    will-change: transform;
-    backface-visibility: hidden;
-  }
-
-  #mobile-menu.active {
-    transform: translateX(0) !important;
-  }
-
-  .h-vertical-text-container {
-    width: 26px;
-    overflow: hidden;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-  }
-
-  .h-vertical-text {
-    writing-mode: vertical-rl;
-    text-orientation: mixed;
-    transform: rotate(180deg);
-    animation: scrollText 50s linear infinite;
-    font-size: 16px;
-    white-space: nowrap;
-    padding: 0;
-  }
-
-  .vertical-text:nth-child(n) {
-    animation: scrollText2 50s linear infinite;
-  }
-
-  @keyframes scrollText {
-    0% {
-      transform: translateY(0) rotate(180deg);
-    }
-    100% {
-      transform: translateY(-100%) rotate(180deg);
-    }
-  }
-
-  @keyframes scrollText2 {
-    0% {
-      transform: translateY(100%) rotate(180deg);
-    }
-    100% {
-      transform: translateY(0) rotate(180deg);
-    }
-  }
-
-  .horizontal-text-container {
-    position: fixed;
-    top: 100%;
-    left: 0;
-    width: 100%;
-    height: 33px;
-    overflow: hidden;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-top: 1px solid var(--header_text);
-    border-bottom: 1px solid var(--header_text);
-    background: var(--header_background);
-    z-index: 999;
-  }
-
-  .horizontal-text {
-    white-space: nowrap;
-    font-size: 24px;
     display: inline-block;
-    animation: scrollRight 80s linear infinite;
-    height: 100%;
-    line-height: 32px;
-    font-weight: 500;
+    color: gray;
+    margin-top: 0.5rem;
+    transition: color 0.3s ease;
   }
 
-  .horizontal-text:nth-child(n) {
-    animation: scrollRight2 80s linear infinite;
+  .underline-link::before {
+    content: '';
+    position: absolute;
+    bottom: 4px;
+    left: 0;
+    width: 100%;
+    height: 1px;
+    background-color: gray;
+    transform: scaleX(1);
+    transform-origin: left;
+    transition: transform 0.5s ease;
   }
 
-  @keyframes scrollRight {
-    0% {
-      transform: translateX(-100%);
-    }
-    100% {
-      transform: translateX(100%);
-    }
+  .underline-link:hover {
+    color: var(--hover);
   }
 
-  @keyframes scrollRight2 {
-    0% {
-      transform: translateX(-100%);
-    }
-    100% {
-      transform: translateX(100%);
-    }
+  .underline-link:hover::before {
+    transform: scaleX(0);
+    transform-origin: right;
   }
+
+    {% comment %} test end {% endcomment %}
+    .header-main {
+      position: relative;
+      width: 100%;
+      transform: translateY(-100%);
+      animation: slideDown 0.5s ease forwards;
+      background: var(--header_background);
+    }
+
+    @keyframes slideDown {
+      from {
+        transform: translateY(-100%);
+      }
+      to {
+        transform: translateY(0);
+      }
+    }
+
+    .header-main.is-sticky {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      transform: translateY(0);
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .header-main.is-sticky.is-hidden {
+      transform: translateY(-100%);
+    }
+
+    .header-offset {
+      height: 0;
+      transition: height 0.3s ease;
+    }
+
+    .header-offset.is-active {
+      height: var(--header-height, 0px);
+    }
+
+    .sticky-disabled {
+      position: relative !important;
+      transform: none !important;
+    }
+
+    .sticky-disabled + .header-offset {
+      display: none !important;
+    }
+
+    /* Mobile submenu scrollbar styling */
+    .submenu.styled-scrollbar {
+      scrollbar-width: thin;
+      scrollbar-color: rgba(0, 0, 0, 0.3) transparent;
+    }
+
+    .submenu.styled-scrollbar::-webkit-scrollbar {
+      width: 4px;
+    }
+
+    .submenu.styled-scrollbar::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    .submenu.styled-scrollbar::-webkit-scrollbar-thumb {
+      background-color: rgba(0, 0, 0, 0.3);
+      border-radius: 20px;
+    }
+
+    /* Mobile submenu animations */
+    .submenu {
+      transition: all 400ms cubic-bezier(0.4, 0, 0.2, 1);
+      will-change: opacity, height;
+      height: auto;
+      max-height: 0;
+    }
+
+    .submenu.show {
+      opacity: 1;
+      max-height: 30vh;
+    }
+
+    .submenu:not(.show) {
+      opacity: 0;
+      max-height: 0;
+    }
+
+    .submenu.hidden {
+      display: none;
+    }
+
+    .submenu:not(.hidden) {
+      display: block;
+    }
+
+    /* Add overlay transition */
+    #menu-overlay {
+      transition: opacity 0.3s ease;
+      will-change: opacity;
+    }
+
+    /* Mobile menu transitions */
+    #mobile-menu {
+      will-change: transform;
+      backface-visibility: hidden;
+    }
+
+    #mobile-menu.active {
+      transform: translateX(0) !important;
+    }
+
+    .h-vertical-text-container {
+      width: 26px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .h-vertical-text {
+      writing-mode: vertical-rl;
+      text-orientation: mixed;
+      transform: rotate(180deg);
+      animation: scrollText 50s linear infinite;
+      font-size: 16px;
+      white-space: nowrap;
+      padding: 0;
+    }
+
+    .vertical-text:nth-child(n) {
+      animation: scrollText2 50s linear infinite;
+    }
+
+    @keyframes scrollText {
+      0% {
+        transform: translateY(0) rotate(180deg);
+      }
+      100% {
+        transform: translateY(-100%) rotate(180deg);
+      }
+    }
+
+    @keyframes scrollText2 {
+      0% {
+        transform: translateY(100%) rotate(180deg);
+      }
+      100% {
+        transform: translateY(0) rotate(180deg);
+      }
+    }
+
+    .horizontal-text-container {
+      position: fixed;
+      top: 100%;
+      left: 0;
+      width: 100%;
+      height: 33px;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-top: 1px solid var(--header_text);
+      border-bottom: 1px solid var(--header_text);
+      background: var(--header_background);
+      z-index: 999;
+    }
+
+    .horizontal-text {
+      white-space: nowrap;
+      font-size: 24px;
+      display: inline-block;
+      animation: scrollRight 80s linear infinite;
+      height: 100%;
+      line-height: 32px;
+      font-weight: 500;
+    }
+
+    .horizontal-text:nth-child(n) {
+      animation: scrollRight2 80s linear infinite;
+    }
+
+    @keyframes scrollRight {
+      0% {
+        transform: translateX(-100%);
+      }
+      100% {
+        transform: translateX(100%);
+      }
+    }
+
+    @keyframes scrollRight2 {
+      0% {
+        transform: translateX(-100%);
+      }
+      100% {
+        transform: translateX(100%);
+      }
+    }
 </style>
 
 <script>
@@ -1360,7 +1400,7 @@
           hoverCount--;
 
           megaMenu.style.opacity = '0';
-          megaMenu.style.transform = 'translateY(-20px)';
+          megaMenu.style.transform = 'translateY(-300px)';
           megaMenu.style.pointerEvents = 'none';
 
           if (hoverCount <= 0) {

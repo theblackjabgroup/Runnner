@@ -452,7 +452,7 @@ document.addEventListener('DOMContentLoaded', function () {
   (function () {
     const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     const heading = document.querySelector('.featured-collection-main-heading.letter-animation');
-    if (!heading) return;
+    if (!heading) return; // Exit if animation class is not present (toggle is off)
 
     function animateHeading() {
       const text = heading.textContent.trim();
