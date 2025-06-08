@@ -132,14 +132,16 @@
                 <div class="relative w-full bg-gray-100 flex flex-col items-center justify-center">
                   <img src="{{ 'defaultproduct.svg' | asset_url }}" alt="Default Product" width="430px" height="430px">
                 </div>
-                {% unless block.settings.span_two_columns %}
-                  <span class="text-gray-400 mt-20 w-full text-center text-5xl absolute bottom-0 bg-white flex items-center justify-between gap-2">
-                    Collection
-                    <svg width="20" height="20" viewBox="0 0 9 9" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <path d="M1.1875 7.7334H7.6599M7.6599 7.7334V1.261M7.6599 7.7334L1.1875 1.261" stroke="black" stroke-linejoin="round"/>
-                    </svg>
-                  </span>
-                {% endunless %}
+                {% if block.type == 'collection' %}
+                  {% unless block.settings.span_two_columns %}
+                    <span class="text-gray-400 mt-20 w-full text-center text-5xl absolute bottom-0 bg-white flex items-center justify-between gap-2">
+                      Collection
+                      <svg width="20" height="20" viewBox="0 0 9 9" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M1.1875 7.7334H7.6599M7.6599 7.7334V1.261M7.6599 7.7334L1.1875 1.261" stroke="black" stroke-linejoin="round"/>
+                      </svg>
+                    </span>
+                  {% endunless %}
+                {% endif %}
               </div>
             {% endif %}
           {% endif %}
@@ -152,7 +154,6 @@
 <style>
   .collection-list {
     width: 100%;
-
     margin: 0 auto;
     display: grid;
     grid-template-columns: repeat({{ section.settings.columns_desktop }}, 1fr);
@@ -165,20 +166,62 @@
     height: 410px;
     max-width: 100%;
     overflow: hidden;
+    position: relative;
   }
 
   .collection-list__item[data-span-two="true"] {
     grid-column: span 2;
   }
 
+  .collection-list__item[data-span-two="true"] .video-container,
+  .collection-list__item[data-span-two="true"] .image-container {
+    height: 100%;
+  }
+
+  .collection-list__item:not([data-span-two="true"]) .video-container,
+  .collection-list__item:not([data-span-two="true"]) .image-container {
+    height: calc(100% - 80px);
+  }
+
+  .card-collection {
+    height: calc(100% - 80px);
+  }
+
+  .collection-list__item[data-span-two="true"] .card-collection {
+    height: 100%;
+  }
+
+  .card-collection__content {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .card-collection__media {
+    flex: 1;
+    position: relative;
+  }
+
+  .card-collection__media img {
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .card-collection__heading {
+    margin-top: auto;
+  }
+
   @media screen and (max-width: 749px) {
     .collection-list {
       grid-template-columns: repeat({{ section.settings.columns_mobile }}, 1fr);
       gap: 10px;
-
     }
     .collection-list__item {
       height: 182px;
+    }
+    .collection-list__item:not([data-span-two="true"]) .video-container,
+    .collection-list__item:not([data-span-two="true"]) .image-container {
+      height: calc(100% - 40px);
     }
     .collection-list__item span{
       font-size: 12px;
@@ -190,17 +233,15 @@
       font-size: 12px;
     }
     .card__heading svg{
-    height: 10px;}
+      height: 10px;
+    }
     .collection-list__item[data-span-two="true"] {
       grid-column: span {{ section.settings.columns_mobile }};
-
     }
-
   }
 
   .video-container {
     position: relative;
-    height: 100%;
     background: #000;
   }
 
@@ -249,7 +290,7 @@
       "type": "range",
       "id": "columns_desktop",
       "min": 1,
-      "max": 6,
+      "max": 4,
       "step": 1,
       "default": 4,
       "label": "Number of columns"
@@ -273,20 +314,15 @@
   ],
   "blocks": [
     {
-      "type": "card",
-      "name": "Collection Card",
+      "type": "media",
+      "name": "Media Block",
       "settings": [
-        {
-          "type": "collection",
-          "id": "collection",
-          "label": "Collection"
-        },
         {
           "type": "checkbox",
           "id": "span_two_columns",
           "label": "Span Two Columns",
           "default": false,
-          "info": "Make this card span across two columns"
+          "info": "Make this block span across two columns"
         },
         {
           "type": "header",
@@ -319,6 +355,24 @@
           "default": "image"
         }
       ]
+    },
+    {
+      "type": "collection",
+      "name": "Collection Block",
+      "settings": [
+        {
+          "type": "collection",
+          "id": "collection",
+          "label": "Collection"
+        },
+        {
+          "type": "checkbox",
+          "id": "span_two_columns",
+          "label": "Span Two Columns",
+          "default": false,
+          "info": "Make this block span across two columns"
+        }
+      ]
     }
   ],
   "presets": [
@@ -326,70 +380,62 @@
       "name": "Collections List",
       "blocks": [
         {
-          "type": "card",
+          "type": "media",
           "settings": {
             "span_two_columns": true,
             "image": "shopify://shop_images/collection-placeholder"
           }
         },
         {
-          "type": "card",
+          "type": "collection",
           "settings": {
-            "collection": "",
-            "image": "shopify://shop_images/collection-placeholder"
+            "collection": ""
           }
         },
         {
-          "type": "card",
+          "type": "collection",
           "settings": {
-            "collection": "",
-            "image": "shopify://shop_images/collection-placeholder"
+            "collection": ""
           }
         },
         {
-          "type": "card",
+          "type": "collection",
           "settings": {
-            "collection": "",
-            "image": "shopify://shop_images/collection-placeholder"
+            "collection": ""
           }
         },
         {
-          "type": "card",
+          "type": "collection",
           "settings": {
-            "collection": "",
-            "image": "shopify://shop_images/collection-placeholder"
+            "collection": ""
           }
         },
         {
-          "type": "card",
+          "type": "collection",
           "settings": {
-            "collection": "",
-            "image": "shopify://shop_images/collection-placeholder"
+            "collection": ""
           }
         },
         {
-          "type": "card",
+          "type": "collection",
           "settings": {
-            "collection": "",
-            "image": "shopify://shop_images/collection-placeholder"
+            "collection": ""
           }
         },
         {
-          "type": "card",
+          "type": "collection",
           "settings": {
-            "collection": "",
-            "image": "shopify://shop_images/collection-placeholder"
+            "collection": ""
           }
         },
         {
-          "type": "card",
+          "type": "collection",
           "settings": {
-            "collection": "",
-            "image": "shopify://shop_images/collection-placeholder"
+            "collection": ""
           }
         },
         {
-          "type": "card",
+          "type": "media",
           "settings": {
             "span_two_columns": true,
             "image": "shopify://shop_images/collection-placeholder"
