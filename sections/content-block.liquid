@@ -2,6 +2,9 @@
   {% assign section_classes = 'cb-container-image-and-text' %}
   {% if section.settings.color_scheme %}
     {% assign section_classes = section_classes | append: ' color-' | append: section.settings.color_scheme %}
+    {% unless section.settings.color_scheme == '1' %}
+      {% assign section_classes = section_classes | append: ' invert-arrow' %}
+    {% endunless %}
   {% endif %}
   <section id="section-{{ section.id }}" class="{{ section_classes }}">
     <div class="cb-left">
@@ -184,7 +187,8 @@
   section.cb-container-image-and-text .cb-accordion-header {
     background-color: rgb(var(--color-background));
     border: none;
-    padding: 10px;
+    padding-top: 10px;
+    padding-right: 10px;
     text-align: left;
     cursor: pointer;
     display: flex;
@@ -264,6 +268,11 @@
     transform: rotate(-90deg);
   }
 
+  /* Arrow color inversion for non-1 color schemes */
+  section.cb-container-image-and-text.invert-arrow .collection-arrow-img {
+    filter: invert(1);
+  }
+
   @media screen and (max-width: 900px) {
     section.cb-container-image-and-text {
       flex-direction: column;
@@ -336,6 +345,7 @@
           content.style.transform = 'translateY(0)';
           content.style.padding = '20px 10px';
           content.style.paddingTop = '0';
+          content.style.paddingLeft = '0';
         } else {
           content.style.maxHeight = '0';
           content.style.opacity = '0';
