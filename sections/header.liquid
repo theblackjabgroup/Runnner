@@ -107,7 +107,7 @@
                                   <li>
                                     <a
                                       href="{{ grandchildlink.url }}"
-                                      class="block text-[16px] hover:text-[var(--hover)] font-normal text-[var(--header_text)] leading-none pb-2"
+                                      class="block text-[16px] hover:text-[var(--hover)] font-medium text-[var(--header_text)] leading-none pb-2"
                                     >
                                       {{ grandchildlink.title }}
                                     </a>
@@ -205,20 +205,33 @@
                       </div>
                     </div>
 
-                    <div class="horizontal-text-container">
-                      <div class="horizontal-text">
-                        {{ section.settings.scrolling_text }}
-                      </div>
-                      <div class="horizontal-text">
-                        {{ section.settings.scrolling_text }}
-                      </div>
-                      <div class="horizontal-text">
-                        {{ section.settings.scrolling_text }}
-                      </div>
-                      <div class="horizontal-text">
-                        {{ section.settings.scrolling_text }}
+                    {% comment %} scrolling text {% endcomment %}
+
+                    <div
+                      class="scrolling-text-section"
+                      id="scrolling-text-{{ section.id }}"
+                      style="border-top: 1px solid black; border-bottom: 1px solid black; "
+                    >
+                      <div
+                        class="scrolling-text-container"
+                        data-direction="{{ section.settings.direction }}"
+                      >
+                        <!-- First set of content -->
+                        {% for i in (1..section.settings.repeat_count) %}
+                          <span class="scrolling-text-item">{{ section.settings.scrolling_text }}</span>
+                          <span class="scrolling-separator">{{ section.settings.separator }}</span>
+                        {% endfor %}
+                        <!-- Duplicate set for seamless infinite scrolling -->
+                        {% for i in (1..section.settings.repeat_count) %}
+                          <span class="scrolling-text-item">{{ section.settings.scrolling_text }}</span>
+                          {% unless forloop.last %}
+                            <span class="scrolling-separator">{{ section.settings.separator }}</span>
+                          {% endunless %}
+                        {% endfor %}
                       </div>
                     </div>
+
+                    {% comment %} scrolling text {% endcomment %}
                   </div>
                 {% else %}
                   <a href="{{ link.url }}" class="py-2 px-2 block">
@@ -837,6 +850,84 @@
 
 <style>
   {% comment %} test {% endcomment %}
+  .scrolling-text-section {
+    overflow: hidden;
+    white-space: nowrap;
+    background: {{ section.settings.background_color }};
+    padding: {{ section.settings.vertical_padding }}px 0;
+    position: relative;
+  }
+
+  .scrolling-text-container {
+    display: flex;
+    animation: scroll-{{ section.settings.direction }} {{ section.settings.speed }}s linear infinite;
+    color: {{ section.settings.text_color }};
+    font-size: {{ section.settings.font_size }}px;
+    font-weight: {{ section.settings.font_weight }};
+    text-transform: {{ section.settings.text_transform }};
+    letter-spacing: {{ section.settings.letter_spacing }}px;
+    min-width: 200%; /* Ensure enough content for seamless scrolling */
+  }
+
+  .scrolling-text-item {
+    flex-shrink: 0;
+    white-space: nowrap;
+  }
+
+  .scrolling-separator {
+    flex-shrink: 0;
+    margin: 0 {{ section.settings.separator_spacing }}px;
+    opacity: 0.7;
+  }
+
+  @keyframes scroll-left {
+    0% {
+      transform: translateX(0%);
+    }
+    100% {
+      transform: translateX(-50%);
+    }
+  }
+
+  @keyframes scroll-right {
+    0% {
+      transform: translateX(-50%);
+    }
+    100% {
+      transform: translateX(0%);
+    }
+  }
+
+  /* Initial positioning to avoid blank space */
+  .scrolling-text-container[data-direction="right"] {
+    transform: translateX(-50%);
+  }
+
+  .scrolling-text-container[data-direction="left"] {
+    transform: translateX(0%);
+  }
+
+  /* Pause animation on hover if enabled */
+  {% if section.settings.pause_on_hover %}
+  .scrolling-text-section:hover .scrolling-text-container {
+    animation-play-state: paused;
+  }
+  {% endif %}
+
+  /* Responsive font sizes */
+  @media screen and (max-width: 768px) {
+    .scrolling-text-container {
+      font-size: {{ section.settings.font_size | times: 0.8 }}px;
+    }
+  }
+
+  @media screen and (max-width: 480px) {
+    .scrolling-text-container {
+      font-size: {{ section.settings.font_size | times: 0.6 }}px;
+    }
+  }
+
+  {% comment %} test {% endcomment %}
 
   .underline-link {
     position: relative;
@@ -868,7 +959,7 @@
     transform-origin: right;
   }
 
-    {% comment %} test end {% endcomment %}
+
     .header-main {
       position: relative;
       width: 100%;
@@ -1070,6 +1161,86 @@
 
 <script>
   document.addEventListener('DOMContentLoaded', function () {
+
+// Scrolling Text Section
+const scrollingSection = document.getElementById('scrolling-text-{{ section.id }}');
+const scrollingContainer = scrollingSection.querySelector('.scrolling-text-container');
+
+// Set initial position based on direction to avoid blank space
+function setInitialPosition() {
+  const direction = scrollingContainer.getAttribute('data-direction');
+  if (direction === 'right') {
+    scrollingContainer.style.transform = 'translateX(-50%)';
+  } else {
+    scrollingContainer.style.transform = 'translateX(0%)';
+  }
+  
+  // Force a reflow and restart animation
+  scrollingContainer.style.animation = 'none';
+  scrollingContainer.offsetHeight; // Trigger reflow
+  scrollingContainer.style.animation = `scroll-${direction} {{ section.settings.speed }}s linear infinite`;
+}
+
+// Initialize on load
+setInitialPosition();
+
+// Calculate optimal repeat count based on text length
+function calculateOptimalRepeats() {
+  const textLength = '{{ section.settings.scrolling_text }}'.length;
+  const separatorLength = '{{ section.settings.separator }}'.length;
+  const totalLength = textLength + separatorLength;
+  
+  // Ensure minimum repeats for seamless scrolling
+  const minRepeats = Math.max(8, Math.ceil(200 / totalLength));
+  return Math.min(minRepeats, 20); // Cap at 20 to avoid performance issues
+}
+
+// Dynamic speed control
+function updateScrollSpeed(speed) {
+  scrollingContainer.style.animationDuration = speed + 's';
+}
+
+// Dynamic direction control
+function updateScrollDirection(direction) {
+  scrollingContainer.setAttribute('data-direction', direction);
+  scrollingContainer.style.animationName = 'scroll-' + direction;
+  setInitialPosition();
+}
+
+// Pause/resume functionality
+function pauseScroll() {
+  scrollingContainer.style.animationPlayState = 'paused';
+}
+
+function resumeScroll() {
+  scrollingContainer.style.animationPlayState = 'running';
+}
+
+// Add methods to global scope for external control
+window.ScrollingText = window.ScrollingText || {};
+window.ScrollingText['section-{{ section.id }}'] = {
+  updateSpeed: updateScrollSpeed,
+  updateDirection: updateScrollDirection,
+  pause: pauseScroll,
+  resume: resumeScroll,
+  element: scrollingSection,
+  calculateOptimalRepeats: calculateOptimalRepeats,
+  resetPosition: setInitialPosition
+};
+
+// Optional: Add click to pause/resume
+{% if section.settings.click_to_pause %}
+scrollingSection.addEventListener('click', function() {
+  if (scrollingContainer.style.animationPlayState === 'paused') {
+    resumeScroll();
+  } else {
+    pauseScroll();
+  }
+});
+{% endif %}
+
+
+    // mobile menu toggle
     const hamburgerMenu = document.getElementById('hamburger-menu');
     const mobileMenu = document.getElementById('mobile-menu');
     const closeButton = mobileMenu ? mobileMenu.querySelector('button[aria-label="Close Menu"]') : null;
@@ -1439,16 +1610,179 @@
       "label": "Dropdown Icon"
     },
     {
-      "type": "text",
-      "id": "scrolling_text",
-      "label": "Scrolling Text",
-      "default": "STAY TRUE → KEEP GOING → FIND THE BALANCE → STAY TRUE → KEEP GOING → FIND THE BALANCE → STAY TRUE → KEEP GOING → FIND THE BALANCE → STAY TRUE → KEEP GOING → FIND THE BALANCE →"
-    },
-    {
       "type": "checkbox",
       "id": "enable_sticky",
       "label": "Enable sticky header",
       "default": true
+    },
+    {
+      "type": "header",
+      "content": "Text Content"
+    },
+    {
+      "type": "textarea",
+      "id": "scrolling_text",
+      "label": "Scrolling Text",
+      "default": " STAY TRUE → KEEP GOING → FIND THE BALANCE → LIVE YOUR BEST LIFE ",
+      "info": "Enter any length of text that you want to scroll"
+    },
+    {
+      "type": "text",
+      "id": "separator",
+      "label": "Text Separator",
+      "default": "•",
+      "info": "Character or symbol to separate repeated text"
+    },
+    {
+      "type": "range",
+      "id": "repeat_count",
+      "label": "Text Repetitions",
+      "min": 2,
+      "max": 20,
+      "step": 1,
+      "default": 10,
+      "info": "How many times to repeat the text for seamless scrolling"
+    },
+    {
+      "type": "header",
+      "content": "Animation Settings"
+    },
+    {
+      "type": "select",
+      "id": "direction",
+      "label": "Scroll Direction",
+      "options": [
+        {
+          "value": "left",
+          "label": "Right to Left"
+        },
+        {
+          "value": "right",
+          "label": "Left to Right"
+        }
+      ],
+      "default": "left"
+    },
+    {
+      "type": "range",
+      "id": "speed",
+      "label": "Scroll Speed (seconds)",
+      "min": 5,
+      "max": 60,
+      "step": 1,
+      "default": 20,
+      "info": "Lower numbers = faster scrolling"
+    },
+    {
+      "type": "checkbox",
+      "id": "pause_on_hover",
+      "label": "Pause on Hover",
+      "default": true
+    },
+    {
+      "type": "header",
+      "content": "Styling"
+    },
+    {
+      "type": "range",
+      "id": "font_size",
+      "label": "Font Size (px)",
+      "min": 12,
+      "max": 48,
+      "step": 1,
+      "default": 18
+    },
+    {
+      "type": "select",
+      "id": "font_weight",
+      "label": "Font Weight",
+      "options": [
+        {
+          "value": "300",
+          "label": "Light"
+        },
+        {
+          "value": "400",
+          "label": "Normal"
+        },
+        {
+          "value": "500",
+          "label": "Medium"
+        },
+        {
+          "value": "600",
+          "label": "Semi Bold"
+        },
+        {
+          "value": "700",
+          "label": "Bold"
+        }
+      ],
+      "default": "400"
+    },
+    {
+      "type": "select",
+      "id": "text_transform",
+      "label": "Text Transform",
+      "options": [
+        {
+          "value": "none",
+          "label": "None"
+        },
+        {
+          "value": "uppercase",
+          "label": "UPPERCASE"
+        },
+        {
+          "value": "lowercase",
+          "label": "lowercase"
+        },
+        {
+          "value": "capitalize",
+          "label": "Capitalize"
+        }
+      ],
+      "default": "uppercase"
+    },
+    {
+      "type": "range",
+      "id": "letter_spacing",
+      "label": "Letter Spacing (px)",
+      "min": 0,
+      "max": 5,
+      "step": 0.1,
+      "default": 1
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Text Color",
+      "default": "#000000"
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Background Color",
+      "default": "#ffffff"
+    },
+    {
+      "type": "range",
+      "id": "vertical_padding",
+      "label": "Vertical Padding (px)",
+      "min": 0,
+      "max": 50,
+      "step": 1,
+      "default": 15
+    },
+    {
+      "type": "range",
+      "id": "separator_spacing",
+      "label": "Separator Spacing (px)",
+      "min": 10,
+      "max": 50,
+      "step": 1,
+      "default": 20,
+      "info": "Space around the separator character"
     }
   ],
   "blocks": [
