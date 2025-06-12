@@ -116,58 +116,81 @@
     color: black; 
   }
   
-  .arrow-icon {
-    font-size: 80px;
+ .arrow-hover {
     display: inline-block;
   }
-  
-  /* Updated: Arrow transition is now controlled by button hover */
-  .arrow-svg {
-    height: 266px;
-    width: 270px;
-    margin-top: 200px;
-    margin-left: 10px;
+
+  .arrow-wrapper {
+    display: inline-block;
+    width: 80px;
+    height: 80px;
+    transition: transform 0.3s ease, stroke 0.3s ease, fill 0.3s ease;
+    transform: rotate(-10deg);
+    margin-left:10px
   }
-  
-  .arrow-svg path {
+
+  .arrow-wrapper svg path {
+    fill: white;
     stroke: white;
-    stroke-width: 1.5;
-    stroke-linejoin: round;
-    transition: stroke 0.3s ease, d 0.3s ease;
+    stroke-width: 1.0; /* bold effect */
+    transition: fill 0.3s ease, stroke 0.3s ease;
   }
-  
-  /* Key change: Now triggered by hovering the button instead of the arrow itself */
-  .signup-button:hover .arrow-svg path {
+
+  /* Fixed hover: Now triggers on entire button hover */
+  .signup-button:hover .arrow-wrapper {
+    transform: rotate(-45deg);
+  }
+
+  .signup-button:hover .arrow-wrapper svg path {
+    fill: black;
     stroke: black;
-    d: path("M7.47241 1.00001L7.47241 7.47241M7.47241 7.47241L1.00001 7.47241M7.47241 7.47241L1.00001 1.00001");
   }
-  
+
+  /* Make sure the arrow rotation works on the entire button hover */
+  .signup-button:hover .arrow-hover .arrow-wrapper {
+    transform: rotate(-80deg);
+  }
+
+  .signup-button:hover .arrow-hover .arrow-wrapper svg path {
+    fill: black;
+    stroke: black;
+  }
+
   /* Media Query for smaller screens */
   @media (max-width: 768px) {
-    .email-input12, .signup-button {
+    .email-input12
+    {
       font-size: 30px;
       height: 60px; 
       line-height: 60px; 
     } 
-
-  }
-  
+.signup-button{
+    font-size: 45px;
+      height: 60px;
+}
+  } 
   /* Media Query for very small screens */
   @media (max-width: 480px) {
-    .email-input12, .signup-button {
-      font-size: 24px;
-      height: 50px;
+    .email-input12 {
+      font-size: 30px;
+      height: 45px;
       line-height: 50px; 
-      width: 115%; 
-      margin-left: -24px; 
+      width: 122%; 
+      margin-left: -32px; 
     }
+     .signup-button{
+       font-size: 40px;
+      height: 53px;
+      line-height: 50px; 
+      width: 122%; 
+      margin-left: -32px; 
+     }
 
-    .arrow-svg {
-      height: 130px;
-      width: 110px;
-      margin-top: 85px;
-      margin-left: 10px;
-    }
+     .arrow-wrapper {
+    width: 35px;  
+    height: 35px;
+           margin-top: 15px;
+  }
   }
   
   /* Form success message styling */
@@ -186,7 +209,7 @@
     border-radius: 4px;
     background-color: inherit;
   }
-  @media screen and (min-width: 1024px) {
+@media screen and (min-width: 1024px) {
   .desktop-ml-15 {
     margin-left: 15px;
   }
@@ -198,8 +221,92 @@
     }
 
       .custom-nav-mr-25 {
-      margin-right: 25px;
+      margin-right: 15px;
       margin-left: 0;
+        padding-bottom:10px;
+    }
+  }
+
+  /* Updated Logo Container Styling */
+  .logo-container {
+    width: 100%;
+    margin-top: 20px;
+    padding-left: 30px;
+    order: 2;
+    display: flex;
+    align-items: flex-start;
+  }
+
+  @media (min-width: 768px) {
+    .logo-container {
+      width: 60%;
+      margin-top: 0;
+      margin-left: 10px;
+      order: 1;
+      padding-top: 0;
+    }
+  }
+
+  /* Logo image styling - adjust height to match menu area */
+  .logo-container img {
+    width: 100%;
+    max-width: 570px;
+    height: 75px;
+    object-fit: contain;
+    transform: scale(1.25);
+  }
+
+  @media (min-width: 768px) {
+    .logo-container img {
+      max-width: 570px;
+      height: auto;
+      max-height: 120px;
+      transform: scale(1.25);
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .logo-container img {
+      max-height: 140px;
+              margin-top: -25px;
+    }
+  }
+
+
+  @media (max-width: 480px){
+
+    .logo-container img{
+      margin-left: -20px;
+    margin-bottom: 10px;
+    }
+    
+    
+  }
+  /* Text logo styling (when no image is used) */
+  .logo-container .text-white {
+    margin-left: 0px;
+    font-size: 50px;
+    transform: scale(1.5);
+    line-height: 1.2;
+    margin-top: 0;
+  }
+
+  @media (min-width: 768px) {
+    .logo-container .text-white {
+      transform: scale(1.5);
+      margin-top: 0;
+    }
+  }
+
+  /* Additional styling to ensure proper alignment */
+  .flex.flex-col.md\:flex-row.justify-between.items-start {
+    align-items: flex-start;
+  }
+
+  @media (min-width: 768px) {
+    .flex.flex-col.md\:flex-row.justify-between.items-start {
+      align-items: flex-start;
+      margin-top: 0;
     }
   }
 </style>
@@ -258,11 +365,14 @@
   aria-label="{{ block.settings.button_text | default: 'SIGN ME UP' }}"
   name="commit"
 >
-<span class="arrow-icon" aria-hidden="true">
-    <svg class="arrow-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 37 36">
-      <path d="M7.47241 7.47241L7.47241 1.00001M7.47241 1.00001L1.00001 1.00001M7.47241 1.00001L1.00001 7.47241" stroke="white" stroke-linejoin="round" stroke-linecap="round"></path>
+<div class="arrow-hover">
+  <div class="arrow-wrapper">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 10">
+      <path d="M1.1875 7.7334H7.6599M7.6599 7.7334V1.261M7.6599 7.7334L1.1875 1.261" stroke-linecap="round" >
     </svg>
-</span>
+  </div>
+</div>
+
   <span>{{ block.settings.button_text | default: 'SIGN ME UP' }}</span>
 </button>
 
@@ -276,18 +386,18 @@
           <div class="w-1/2 md:w-full flex pr-1 md:pr-2 mt-[0px] md:mt-[1%] justify-end desktop-ml-15">
 
             <div class="mb-6 w-[350px] md:max-w-[50%] custom-mr-25" {{ block.shopify_attributes }}>
-              <p class="uppercase md:normal-case font-medium text-[18px] md:text-[24px] break-words text-left text-white heading-font"
-   style="word-wrap: break-word; overflow-wrap: break-word;">
+              <p class="uppercase md:normal-case font-medium text-[15px] md:text-[22px] break-words text-left text-white heading-font"
+   style="word-wrap: break-word; overflow-wrap: break-word; margin-bottom: 13px;">
   {{ block.settings.support_heading }}
 </p>
 
-              <p class="md:normal-case mt-1 text-[13px] md:text-[20px] break-words text-left text-white leading-tight body-font" style="word-wrap: break-word; overflow-wrap: break-word; line-height: 1.3;">
+              <p class="md:normal-case mt-1 text-[15px] md:text-[22px] break-words text-left text-white leading-tight body-font" style="word-wrap: break-word; overflow-wrap: break-word; line-height: 1.3;">
                 {{ block.settings.support_text }}
               </p>
            <a
   href="mailto:{{ block.settings.email_address }}"
-  class="relative mt-2 inline-block text-white text-[18px] md:text-[24px] uppercase md:normal-case animated-underline break-words group body-font"
-  style="word-wrap: break-word; overflow-wrap: break-word;"
+  class="relative mt-2 inline-block text-white text-[15px] md:text-[22px] uppercase md:normal-case animated-underline break-words group body-font"
+  style="word-wrap: break-word; overflow-wrap: break-word;  margin-top: 15px;"
 >
   {{ block.settings.email_link_text }}
   <svg
@@ -490,7 +600,7 @@
                       {% when 'menu' %}
                         <div class="menu-block" {{ block.shopify_attributes }}>
                           <div class="flex flex-col w-auto">
-                            <div class="flex flex-col space-y-2">
+                            <div class="flex flex-col space-y-1">
                               {% for link in linklists[block.settings.menu_links].links %}
                                 <a
                                   href="{{ link.url }}"
@@ -511,17 +621,16 @@
 
 
             <!-- Logo Section - Bottom on mobile, left side on desktop -->
-           <div class="logo-container w-full md:w-3/5 mt-5 md:mt-16 pl-[30px] md:ml-[10px] order-2 md:order-1">
+           <div class="logo-container">
               {% if section.settings.logo != blank %}
                 <img 
                   src="{{ section.settings.logo | img_url: 'master' }}" 
                   alt="{{ shop.name }}" 
                   width="450" 
                   height="150"
-                  class="w-full max-w-[220px] md:max-w-[400px] h-[75px] md:h-[130px] lg:h-[150px] object-contain transform scale-125 md:scale-125" 
                   loading="lazy">
               {% else %}
-                <div class="text-white font-bold transform scale-150 md:scale-150 heading-font" style="margin-left:-30px; font-size: 50px;">
+                <div class="text-white font-bold heading-font">
                   {{ shop.name }}
                 </div>
               {% endif %}
