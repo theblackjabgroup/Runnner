@@ -1,8 +1,8 @@
 <div
   class="color-{{ section.settings.color_scheme }} color-{{ section.settings.color_scheme }}-text announcement-bar animate-slideDown"
   style="
-    padding-top: {{ section.settings.padding_vertical }}px;
-    padding-bottom: {{ section.settings.padding_vertical }}px;
+    padding-top: {{ section.settings.padding_vertical_mobile }}px;
+    padding-bottom: {{ section.settings.padding_vertical_mobile }}px;
     padding-left: {{ section.settings.padding_horizontal }}px;
     padding-right: {{ section.settings.padding_horizontal }}px;
     margin-top: {{ section.settings.margin_top }}px;
@@ -36,6 +36,13 @@
     .announcement-bar a::before {
       transition-duration: var(--animation-duration);
     }
+
+    @media (min-width: 768px) {
+      .announcement-bar {
+        padding-top: {{ section.settings.padding_vertical }}px !important;
+        padding-bottom: {{ section.settings.padding_vertical }}px !important;
+      }
+    }
   </style>
   <div class="flex justify-between items-center px-[10px] md:px-[20px] !py-0 text-md w-[100vw]">
     <span
@@ -68,9 +75,15 @@
         {{ section.settings.membership_link_text | default: 'Join The Membership' | escape }}
       </span>
 
-      <svg width="11" height="11" viewBox="0 0 9 9" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M1.1875 7.7334H7.6599M7.6599 7.7334V1.261M7.6599 7.7334L1.1875 1.261" stroke="white" stroke-linejoin="round"/>
-      </svg>
+      {% unless section.settings.hide_arrow_svg %}
+        {% if section.settings.custom_svg != blank %}
+          {{ section.settings.custom_svg }}
+        {% else %}
+          <svg stroke-linecap="round" width="11" height="11" viewBox="0 0 9 9" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M1.1875 7.7334H7.6599M7.6599 7.7334V1.261M7.6599 7.7334L1.1875 1.261" stroke="white" stroke-linejoin="round"/>
+          </svg>
+        {% endif %}
+      {% endunless %}
     </a>
   </div>
 </div>
@@ -119,7 +132,7 @@
       "step": 1,
       "unit": "px",
       "label": "Message Font Size (Mobile)",
-      "default": 14
+      "default": 12
     },
     {
       "type": "range",
@@ -139,7 +152,7 @@
       "step": 1,
       "unit": "px",
       "label": "Link Font Size (Mobile)",
-      "default": 14
+      "default": 12
     },
     {
       "type": "range",
@@ -205,12 +218,22 @@
     },
     {
       "type": "range",
+      "id": "padding_vertical_mobile",
+      "min": 0,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "label": "Top/Bottom Padding (Mobile)",
+      "default": 4
+    },
+    {
+      "type": "range",
       "id": "padding_vertical",
       "min": 0,
       "max": 20,
       "step": 1,
       "unit": "px",
-      "label": "Top/Bottom Padding",
+      "label": "Top/Bottom Padding (Desktop)",
       "default": 0
     },
     {
@@ -297,7 +320,7 @@
       "step": 50,
       "unit": "ms",
       "label": "Animation Speed",
-      "default": 300,
+      "default": 800,
       "info": "Controls the speed of both the underline and arrow animations (0 = instant, 1500 = very slow)"
     },
     {
@@ -345,6 +368,12 @@
       "unit": "px",
       "label": "Border Thickness",
       "default": 1
+    },
+    {
+      "type": "checkbox",
+      "id": "hide_arrow_svg",
+      "label": "Hide Arrow SVG",
+      "default": false
     }
   ],
   "presets": [

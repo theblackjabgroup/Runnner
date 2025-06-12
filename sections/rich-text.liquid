@@ -1,10 +1,6 @@
 {{ 'section-rich-text.css' | asset_url | stylesheet_tag }}
 
 {%- style -%}
-    .rich-text {
-      font-family: {{ section.settings.custom_font.family }}, {{ section.settings.custom_font.fallback_families }};
-    }
-
        .rich-text ::selection {
       text-shadow: none;
       color: var(--cr-yellow-2);
@@ -33,7 +29,7 @@
     .rich-text__blocks {
     display: flex;
     flex-direction: column;
-    align-items: flex-start; /* or center, if you want centered text */
+    align-items: flex-start;
     width: 100%;
   }
 
@@ -41,9 +37,10 @@
   .rich-text__subheading,
   .rich-text__text {
     width: 100%;
-    /* Optionally add: */
     box-sizing: border-box;
+    font-family: var(--font-heading-family);
   }
+
     .text-center {
       text-align: center !important;
     }
@@ -77,24 +74,30 @@
       {% case block.type %}
         {% when 'heading' %}
           #Heading-{{ block.id }} {
-            font-weight: {{ block.settings.font_weight }};
             font-size: {{ block.settings.font_size }}px;
             line-height: {{ block.settings.line_height }};
             margin-bottom: {{ block.settings.spacing }}px !important;
+            font-family: var(--font-heading-family);
+            font-style: var(--font-heading-style);
+            font-weight: 500 !important;
           }
         {% when 'subheading' %}
           #Subheading-{{ block.id }} {
-            font-weight: {{ block.settings.font_weight }};
             font-size: {{ block.settings.font_size }}px;
             line-height: {{ block.settings.line_height }};
             margin-bottom: {{ block.settings.spacing }}px !important;
+            font-family: var(--font-heading-family);
+            font-style: var(--font-heading-style);
+            font-weight: {{ block.settings.font_weight }} !important;
           }
         {% when 'text' %}
           #Text-{{ block.id }} {
-            font-weight: {{ block.settings.font_weight }};
             font-size: {{ block.settings.font_size }}px;
             line-height: {{ block.settings.line_height }};
             margin-bottom: {{ block.settings.spacing }}px !important;
+            font-family: var(--font-body-family);
+            font-style: var(--font-body-style);
+            font-weight: var(--font-body-weight);
           }
       {% endcase %}
     {% endfor %}
@@ -110,24 +113,27 @@
       .rich-text--full-width,
       .content-container--full-width,
       .page-width {
-        padding-left: 1rem !important;
-        padding-right: 1rem !important;
+        padding-left: 5px !important;
+        padding-right: 0px !important;
       }
 
       .rich-text__heading {
-        font-size: 2rem !important;
-        text-align: inherit !important;
+        font-size: 30px !important;
       }
 
       .rich-text__subheading {
-        font-size: 1.1rem !important;
+        font-size: 16px !important;
         text-align: inherit !important;
       }
 
       .rich-text__text {
-        font-size: 1rem !important;
+        font-size: 16px !important;
         text-align: inherit !important;
       }
+    }
+
+    .rich-text__heading {
+      font-weight: var(--heading-weight, 400);
     }
 {%- endstyle -%}
 
@@ -156,7 +162,11 @@
               </h3>
 
             {%- when 'text' -%}
-              <div id="Text-{{ block.id }}" class="rich-text__text rte" {{ block.shopify_attributes }}>
+              <div
+                id="Text-{{ block.id }}"
+                class="rich-text__text rte"
+                {{ block.shopify_attributes }}
+              >
                 {{ block.settings.text }}
               </div>
           {%- endcase -%}
@@ -172,20 +182,14 @@
   "tag": "section",
   "class": "section",
   "disabled_on": {
-      "groups": ["footer", "header"]
-    },
+    "groups": ["footer", "header"]
+  },
   "settings": [
     {
       "type": "color_scheme",
       "id": "color_scheme",
       "default": "scheme-1",
       "label": "Color Scheme"
-    },
-    {
-      "type": "font_picker",
-      "id": "custom_font",
-      "label": "Custom Font",
-      "default": "helvetica_n4"
     },
     {
       "type": "select",
@@ -277,15 +281,6 @@
         },
         {
           "type": "range",
-          "id": "font_weight",
-          "min": 100,
-          "max": 900,
-          "step": 50,
-          "label": "t:sections.rich-text.blocks.heading.settings.font_weight.label",
-          "default": 500
-        },
-        {
-          "type": "range",
           "id": "line_height",
           "min": 1,
           "max": 3,
@@ -348,15 +343,6 @@
         },
         {
           "type": "range",
-          "id": "font_weight",
-          "min": 100,
-          "max": 900,
-          "step": 50,
-          "label": "t:sections.rich-text.blocks.subheading.settings.font_weight.label",
-          "default": 550
-        },
-        {
-          "type": "range",
           "id": "line_height",
           "min": 1,
           "max": 3,
@@ -374,6 +360,30 @@
           "unit": "px",
           "label": "t:sections.rich-text.blocks.subheading.settings.spacing.label",
           "default": 0
+        },
+        {
+          "type": "select",
+          "id": "font_weight",
+          "label": "Font weight",
+          "options": [
+            {
+              "value": "400",
+              "label": "Regular (400)"
+            },
+            {
+              "value": "500",
+              "label": "Medium (500)"
+            },
+            {
+              "value": "600",
+              "label": "Semibold (600)"
+            },
+            {
+              "value": "700",
+              "label": "Bold (700)"
+            }
+          ],
+          "default": "500"
         }
       ]
     },
@@ -395,16 +405,7 @@
           "step": 1,
           "unit": "px",
           "label": "t:sections.rich-text.blocks.text.settings.font_size.label",
-          "default": 20
-        },
-        {
-          "type": "range",
-          "id": "font_weight",
-          "min": 100,
-          "max": 900,
-          "step": 100,
-          "label": "t:sections.rich-text.blocks.text.settings.font_weight.label",
-          "default": 400
+          "default": 19
         },
         {
           "type": "range",

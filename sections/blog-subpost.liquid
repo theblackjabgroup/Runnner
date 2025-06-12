@@ -1,0 +1,199 @@
+<style>
+  @media (max-width: 767px) {
+    .subclass-header {
+      margin-bottom: 0.5rem;
+    }
+    .subclass-header{
+      font-size: 21px !important;
+    }
+    .subclass-subheader {
+      margin-top: 0.625rem;
+      font-size: 13px !important;
+      line-height:0.1;
+    }
+    .blog_heading-highlight{
+      font-size:24px !important;
+      margin-bottom:30px;
+    }
+    .divclass{      
+    width: 358px;
+    margin-left: -9px;
+    }
+    .text-article-date-color{
+      font-size:13px;
+    }
+  }
+
+  :root {
+  --font-heading-family: {{ settings.type_heading_font.family }};
+  --font-body-family: {{ settings.type_body_font.family }};
+}
+  :focus {
+    outline: 2px solid #f97316;
+    outline-offset: 2px;
+  }
+  .subclass-header,
+.subclass-subheader,
+.blog_highlight-tag,
+.blog_heading-highlight,
+.text-article-date-color {
+  color: var(--text);
+}
+  .arrow-svgsub{
+    stroke: var(--text);
+    fill: var(--text); 
+    margin-top: -6px;
+    margin-right: 5px;
+  }
+ ::selection{
+   color:orange;
+ }
+  .subclass-header{
+    font-size:28px;
+  }
+  .subclass-subheader{
+    margin-top:15px;
+    line-height:0.9
+  }
+  .group:hover img {
+    transform: scale(1.1);
+    transition: transform 0.3s;
+  }
+  .zoom-trigger:hover img {
+    transform: scale(1.1);
+    transition: transform 0.3s;
+  }
+  
+  .blog-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+    margin-left: -0.5rem;
+    margin-right: -0.5rem;
+  }
+  
+  .blog-article {
+    flex: 0 0 calc(33.333% - 1rem);
+    max-width: calc(33.333% - 1rem);
+  }
+  
+  @media (max-width: 768px) {
+    .blog-article {
+      flex: 0 0 100%;
+      max-width: 100%;
+    }
+  }
+</style>
+
+<section class="p-6 color-{{ section.settings.color_scheme }}">
+  <div class="w-full uppercase">
+    <div class="divclass flex flex-col md:flex-row md:items-start gap-10">
+      <div class="w-2/3 max-w-[300px]">
+        <p class="text-xl md:text-[20px] font-medium blog_highlight-tag ">{{ section.settings.top_text }}</p>
+        <h1 class="mt-10 blog_heading-highlight" style="font-weight:500; font-size:35px;">{{ section.settings.main_heading }}</h1>
+      </div>
+
+      <div class="blog-grid w-full">
+        {% assign default_blog_handle = 'news' %} 
+
+{% assign blog_handle = section.settings.selected_blog | default: default_blog_handle %}
+{% assign blog = blogs[blog_handle] %}
+{% assign articles_limit = section.settings.articles_per_page %}
+
+{% for article in blog.articles limit: articles_limit %}
+  <a href="{{ article.url }}" class="blog-article block space-y-2 px-2 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 transition-shadow hover:shadow-lg">
+    <div class="zoom-trigger">
+      <div class="aspect-[5/3] overflow-hidden">
+        {% if article.image != blank %}
+          <img
+            src="{{ article.image | image_url: width: 600 }}"
+            width="{{ article.image.width }}"
+            height="{{ article.image.height }}"
+            alt="{{ article.title | default: 'Blog image' | escape }}"
+            loading="lazy"
+            class="w-full h-full object-cover transition-transform duration-300 ease-in-out"
+            style="transform-origin: center center;"
+          />
+        {% else %}
+          {{ 'collection-1' | placeholder_svg_tag: 'w-full h-full bg-gray' }}
+        {% endif %}
+      </div>
+      <div>
+        <p class="text-sm md:text-[20px] mt-2 text-article-date-color">{{ article.published_at | date: "%m.%d.%y" }}</p>
+         <h3 class="subclass-header" id="article-title-{{ forloop.index0 }}">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="19" height="19" viewBox="0 0 9 9" class="arrow-svgsub inline-block"
+                    stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M1.1875 7.7334H7.6599M7.6599 7.7334V1.261M7.6599 7.7334L1.1875 1.261" stroke-linejoin="round"/>
+            </svg>
+                  {{ article.title }}
+                </h3>
+        <span class="subclass-subheader md:text-[19px] font-medium tracking-tight">
+          {{ article.content | strip_html | truncate: 50,"" }}
+        </span>
+      </div>
+    </div>
+  </a>
+{% endfor %}
+      </div>
+    </div>
+
+    <hr class="w-screen max-w-none mx-auto my-8 border-t-0 border-solid" />
+  </div>
+                
+</section>
+                
+                
+  {% schema %}
+{
+  "name": "Blog Posts",
+  "disabled_on": {
+    "groups": ["footer", "header"]
+  },
+  "settings": [
+    {
+      "type": "range",
+      "id": "articles_per_page",
+      "min": 0,
+      "max": 12,
+      "step": 1,
+      "label": "Number of blog articles to display",
+      "default": 3
+    },
+    {
+      "type": "blog",
+      "id": "selected_blog",
+      "label": "Select Blog"
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "default": "scheme-1",
+      "label": "Color Scheme"
+    },
+    {
+      "type": "text",
+      "id": "top_text",
+      "label": "Top Text",
+      "default": "New This Week"
+    },
+    {
+      "type": "text",
+      "id": "main_heading",
+      "label": "Main Heading",
+      "default": "The B-Mail"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Blog Posts",
+      "category": "Blog",
+      "settings": {
+        "selected_blog": "news",
+        "articles_per_page": 3,
+        "top_text": "New This Week",
+        "main_heading": "The B-Mail"
+    }
+    }
+  ]
+}
+{% endschema %}

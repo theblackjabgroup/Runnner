@@ -1,6 +1,7 @@
 <header
-  class="header-main will-change-transform p-2 lg:px-3 z-99 bg-[var(--header_background)] transform-gpu {% unless section.settings.enable_sticky %}sticky-disabled{% endunless %}"
+  class="header-main will-change-transform p-2 lg:px-3 bg-[var(--header_background)] transform-gpu {% unless section.settings.enable_sticky %}sticky-disabled{% endunless %}"
   data-header-sticky
+  style="z-index: 999; "
 >
   <div class="relative w-full flex items-center justify-between ">
     <!-- Left: Logo -->
@@ -31,10 +32,10 @@
         class="relative flex justify-end lg:justify-between items-center w-full text-[var(--header_text)]"
       >
         <!-- Left: Menu Items -->
-        <div class="menu-items hidden lg:!flex gap-2 flex-wrap w-2/3 0">
-          <ul class="flex flex-wrap space-x-1">
+        <div class="menu-items hidden lg:!flex  flex-wrap w-2/3 ">
+          <ul class="flex-1 flex flex-wrap space-x-1">
             {%- for link in section.settings.menu.links -%}
-              <li class="group dropdown-group flex items-center justify-center ">
+              <li class="group dropdown-group flex items-center justify-center mr-2">
                 {% if link.links.size > 0 %}
                   <a
                     href="{{ link.url }}"
@@ -80,33 +81,34 @@
                       opacity-0 pointer-events-none
                     "
                     style="
-                      background: var(--header_background);
-                      top: 85%;
+                                     background: var(--header_background);
+                      top: 100%;
+                      padding-top: 0px;
                       will-change: transform, opacity;
-                      transform: translateY(-30px);
+                      transform: translateY(-300px);
                       transition-property: opacity, transform;
                       transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
-                      transition-duration: 500ms;
-                      z-index: 990;
+                      transition-duration: 300ms;
+                      z-index: -1;
                     "
                   >
-                    <div class="mx-auto p-6  flex">
+                    <div class="mx-auto p-2  flex">
                       <ul class="flex justify-start gap-8 m-2 w-1/2">
                         {% for childlink in link.links %}
                           <li class="min-w-[100px] relative">
                             <a
                               href="{{ childlink.url }}"
-                              class="block text-gray-500 hover:text-[var(--hover)] font-medium text-[14px] mb-6"
+                              class="block text-gray-500 hover:text-[var(--hover)] font-medium text-[14px] mb-4"
                             >
                               {{ childlink.title }}
                             </a>
                             {% if childlink.links.size > 0 %}
-                              <ul class=" space-y-0">
+                              <ul class="">
                                 {% for grandchildlink in childlink.links %}
                                   <li>
                                     <a
                                       href="{{ grandchildlink.url }}"
-                                      class="block text-[16px] hover:text-[var(--hover)] font-normal text-[var(--header_text)]"
+                                      class="block text-[16px] hover:text-[var(--hover)] font-medium text-[var(--header_text)] leading-none pb-2"
                                     >
                                       {{ grandchildlink.title }}
                                     </a>
@@ -114,12 +116,8 @@
                                 {% endfor %}
                               </ul>
                             {% endif %}
-                            <a
-                              href="{{childlink.url}}"
-                              class="relative flex items-center gap-2 !tracking-normal  leading-none group text-[var(--header_text)] mt-4 before:absolute before:bottom-0 before:left-0 before:w-full before:h-[0.15rem] before:bg-[var(--header_text)] before:origin-left before:transition-transform before:duration-1000 before:ease-in-out hover:before:origin-right hover:before:scale-x-0 hover:text-[var(--hover)]"
-                            >
-                              SHOP ALL {{ childlink.title -}}
-                            </a>
+
+                            <a href="#" class="underline-link text-[14px]"> SHOP ALL {{ childlink.title }} </a>
                           </li>
                         {% endfor %}
                       </ul>
@@ -208,20 +206,33 @@
                       </div>
                     </div>
 
-                    <div class="horizontal-text-container">
-                      <div class="horizontal-text">
-                        {{ section.settings.scrolling_text }}
-                      </div>
-                      <div class="horizontal-text">
-                        {{ section.settings.scrolling_text }}
-                      </div>
-                      <div class="horizontal-text">
-                        {{ section.settings.scrolling_text }}
-                      </div>
-                      <div class="horizontal-text">
-                        {{ section.settings.scrolling_text }}
+                    {% comment %} scrolling text {% endcomment %}
+
+                    <div
+                      class="scrolling-text-section"
+                      id="scrolling-text-{{ section.id }}"
+                      style="border-top: 1px solid black; border-bottom: 1px solid black; "
+                    >
+                      <div
+                        class="scrolling-text-container"
+                        data-direction="{{ section.settings.direction }}"
+                      >
+                        <!-- First set of content -->
+                        {% for i in (1..section.settings.repeat_count) %}
+                          <span class="scrolling-text-item">{{ section.settings.scrolling_text }}</span>
+                          <span class="scrolling-separator">{{ section.settings.separator }}</span>
+                        {% endfor %}
+                        <!-- Duplicate set for seamless infinite scrolling -->
+                        {% for i in (1..section.settings.repeat_count) %}
+                          <span class="scrolling-text-item">{{ section.settings.scrolling_text }}</span>
+                          {% unless forloop.last %}
+                            <span class="scrolling-separator">{{ section.settings.separator }}</span>
+                          {% endunless %}
+                        {% endfor %}
                       </div>
                     </div>
+
+                    {% comment %} scrolling text {% endcomment %}
                   </div>
                 {% else %}
                   <a href="{{ link.url }}" class="py-2 px-2 block">
@@ -234,14 +245,14 @@
         </div>
 
         <!-- Right: Actions -->
-        <div class="flex lg:!w-1/3  space-x-6 items-center justify-end ">
+        <div class="flex lg:!w-1/3 gap-2 items-center justify-end ">
           <!-- Top Row: Action Utilities -->
 
           <!-- Search -->
           <div class="relative ">
             <button
               id="search-toggle"
-              class="flex items-center justify-center text-[var(--header_text)] hover:text-[var(--hover)]"
+              class="flex items-center justify-center text-[var(--header_text)] hover:text-[var(--hover)] pr-2"
               aria-label="Toggle search"
               aria-expanded="false"
             >
@@ -489,7 +500,8 @@
 <!-- Mobile Menu Overlay -->
 <div
   id="menu-overlay"
-  class="fixed inset-0 bg-black opacity-0 pointer-events-none transition-opacity duration-300 z-[101]"
+  class="fixed inset-0 bg-black opacity-0 pointer-events-none transition-opacity duration-300"
+  style="z-index: 999; "
 >
   &nbsp;
 </div>
@@ -497,8 +509,8 @@
 <!-- Mobile Menu -->
 <div
   id="mobile-menu"
-  class="hidden lg:hidden w-[90vw] h-[100vh] fixed top-0 right-0 z-[102] bg-[var(--header_background)] flex"
-  style="transform: translateX(100%); transition: transform 0.3s ease-in-out; background: var(--header_background);"
+  class="hidden lg:hidden w-[90vw] h-[100vh] fixed top-0 right-0  bg-[var(--header_background)] flex"
+  style="transform: translateX(100%); transition: transform 0.3s ease-in-out; background: var(--header_background); z-index: 1000"
 >
   <!-- Vertical Scrolling Text -->
   <div
@@ -838,198 +850,385 @@
 <div class="header-offset" data-header-offset></div>
 
 <style>
-  .header-main {
+  {% comment %} test {% endcomment %}
+  .scrolling-text-section {
+    overflow: hidden;
+    white-space: nowrap;
+    background: {{ section.settings.background_color }};
+    padding: {{ section.settings.vertical_padding }}px 0;
     position: relative;
-    width: 100%;
-    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    transform: translateY(0);
-    background: var(--header_background);
   }
 
-  .header-main.is-sticky {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    transform: translateY(0);
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-  }
-
-  .header-main.is-sticky.is-hidden {
-    transform: translateY(-100%);
-  }
-
-  .header-offset {
-    height: 0;
-    transition: height 0.3s ease;
-  }
-
-  .header-offset.is-active {
-    height: var(--header-height, 0px);
-  }
-
-  .sticky-disabled {
-    position: relative !important;
-    transform: none !important;
-  }
-
-  .sticky-disabled + .header-offset {
-    display: none !important;
-  }
-
-  /* Mobile submenu scrollbar styling */
-  .submenu.styled-scrollbar {
-    scrollbar-width: thin;
-    scrollbar-color: rgba(0, 0, 0, 0.3) transparent;
-  }
-
-  .submenu.styled-scrollbar::-webkit-scrollbar {
-    width: 4px;
-  }
-
-  .submenu.styled-scrollbar::-webkit-scrollbar-track {
-    background: transparent;
-  }
-
-  .submenu.styled-scrollbar::-webkit-scrollbar-thumb {
-    background-color: rgba(0, 0, 0, 0.3);
-    border-radius: 20px;
-  }
-
-  /* Mobile submenu animations */
-  .submenu {
-    transition: all 400ms cubic-bezier(0.4, 0, 0.2, 1);
-    will-change: opacity, height;
-    height: auto;
-    max-height: 0;
-  }
-
-  .submenu.show {
-    opacity: 1;
-    max-height: 30vh;
-  }
-
-  .submenu:not(.show) {
-    opacity: 0;
-    max-height: 0;
-  }
-
-  .submenu.hidden {
-    display: none;
-  }
-
-  .submenu:not(.hidden) {
-    display: block;
-  }
-
-  /* Add overlay transition */
-  #menu-overlay {
-    transition: opacity 0.3s ease;
-    will-change: opacity;
-  }
-
-  /* Mobile menu transitions */
-  #mobile-menu {
-    will-change: transform;
-    backface-visibility: hidden;
-  }
-
-  #mobile-menu.active {
-    transform: translateX(0) !important;
-  }
-
-  .h-vertical-text-container {
-    width: 26px;
-    overflow: hidden;
+  .scrolling-text-container {
     display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
+    animation: scroll-{{ section.settings.direction }} {{ section.settings.speed }}s linear infinite;
+    color: {{ section.settings.text_color }};
+    font-size: {{ section.settings.font_size }}px;
+    font-weight: {{ section.settings.font_weight }};
+    text-transform: {{ section.settings.text_transform }};
+    letter-spacing: {{ section.settings.letter_spacing }}px;
+    min-width: 200%; /* Ensure enough content for seamless scrolling */
   }
 
-  .h-vertical-text {
-    writing-mode: vertical-rl;
-    text-orientation: mixed;
-    transform: rotate(180deg);
-    animation: scrollText 50s linear infinite;
-    font-size: 16px;
+  .scrolling-text-item {
+    flex-shrink: 0;
     white-space: nowrap;
-    padding: 0;
   }
 
-  .vertical-text:nth-child(n) {
-    animation: scrollText2 50s linear infinite;
+  .scrolling-separator {
+    flex-shrink: 0;
+    margin: 0 {{ section.settings.separator_spacing }}px;
+    opacity: 0.7;
   }
 
-  @keyframes scrollText {
+  @keyframes scroll-left {
     0% {
-      transform: translateY(0) rotate(180deg);
+      transform: translateX(0%);
     }
     100% {
-      transform: translateY(-100%) rotate(180deg);
+      transform: translateX(-50%);
     }
   }
 
-  @keyframes scrollText2 {
+  @keyframes scroll-right {
     0% {
-      transform: translateY(100%) rotate(180deg);
+      transform: translateX(-50%);
     }
     100% {
-      transform: translateY(0) rotate(180deg);
+      transform: translateX(0%);
     }
   }
 
-  .horizontal-text-container {
-    position: fixed;
-    top: 100%;
-    left: 0;
-    width: 100%;
-    height: 33px;
-    overflow: hidden;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-top: 1px solid var(--header_text);
-    border-bottom: 1px solid var(--header_text);
-    background: var(--header_background);
-    z-index: 999;
+  /* Initial positioning to avoid blank space */
+  .scrolling-text-container[data-direction="right"] {
+    transform: translateX(-50%);
   }
 
-  .horizontal-text {
-    white-space: nowrap;
-    font-size: 24px;
+  .scrolling-text-container[data-direction="left"] {
+    transform: translateX(0%);
+  }
+
+  /* Pause animation on hover if enabled */
+  {% if section.settings.pause_on_hover %}
+  .scrolling-text-section:hover .scrolling-text-container {
+    animation-play-state: paused;
+  }
+  {% endif %}
+
+  /* Responsive font sizes */
+  @media screen and (max-width: 768px) {
+    .scrolling-text-container {
+      font-size: {{ section.settings.font_size | times: 0.8 }}px;
+    }
+  }
+
+  @media screen and (max-width: 480px) {
+    .scrolling-text-container {
+      font-size: {{ section.settings.font_size | times: 0.6 }}px;
+    }
+  }
+
+  {% comment %} test {% endcomment %}
+
+  .underline-link {
+    position: relative;
     display: inline-block;
-    animation: scrollRight 80s linear infinite;
-    height: 100%;
-    line-height: 32px;
-    font-weight: 500;
+    color: gray;
+    margin-top: 0.5rem;
+    transition: color 0.3s ease;
   }
 
-  .horizontal-text:nth-child(n) {
-    animation: scrollRight2 80s linear infinite;
+  .underline-link::before {
+    content: '';
+    position: absolute;
+    bottom: 4px;
+    left: 0;
+    width: 100%;
+    height: 1px;
+    background-color: gray;
+    transform: scaleX(1);
+    transform-origin: left;
+    transition: transform 0.5s ease;
   }
 
-  @keyframes scrollRight {
-    0% {
-      transform: translateX(-100%);
-    }
-    100% {
-      transform: translateX(100%);
-    }
+  .underline-link:hover {
+    color: var(--hover);
   }
 
-  @keyframes scrollRight2 {
-    0% {
-      transform: translateX(-100%);
-    }
-    100% {
-      transform: translateX(100%);
-    }
+  .underline-link:hover::before {
+    transform: scaleX(0);
+    transform-origin: right;
   }
+
+
+    .header-main {
+      position: relative;
+      width: 100%;
+      transform: translateY(-100%);
+      animation: slideDown 0.5s ease forwards;
+      background: var(--header_background);
+    }
+
+    @keyframes slideDown {
+      from {
+        transform: translateY(-100%);
+      }
+      to {
+        transform: translateY(0);
+      }
+    }
+
+    .header-main.is-sticky {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      transform: translateY(0);
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .header-main.is-sticky.is-hidden {
+      transform: translateY(-100%);
+    }
+
+    .header-offset {
+      height: 0;
+      transition: height 0.3s ease;
+    }
+
+    .header-offset.is-active {
+      height: var(--header-height, 0px);
+    }
+
+    .sticky-disabled {
+      position: relative !important;
+      transform: none !important;
+    }
+
+    .sticky-disabled + .header-offset {
+      display: none !important;
+    }
+
+    /* Mobile submenu scrollbar styling */
+    .submenu.styled-scrollbar {
+      scrollbar-width: thin;
+      scrollbar-color: rgba(0, 0, 0, 0.3) transparent;
+    }
+
+    .submenu.styled-scrollbar::-webkit-scrollbar {
+      width: 4px;
+    }
+
+    .submenu.styled-scrollbar::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    .submenu.styled-scrollbar::-webkit-scrollbar-thumb {
+      background-color: rgba(0, 0, 0, 0.3);
+      border-radius: 20px;
+    }
+
+    /* Mobile submenu animations */
+    .submenu {
+      transition: all 400ms cubic-bezier(0.4, 0, 0.2, 1);
+      will-change: opacity, height;
+      height: auto;
+      max-height: 0;
+    }
+
+    .submenu.show {
+      opacity: 1;
+      max-height: 30vh;
+    }
+
+    .submenu:not(.show) {
+      opacity: 0;
+      max-height: 0;
+    }
+
+    .submenu.hidden {
+      display: none;
+    }
+
+    .submenu:not(.hidden) {
+      display: block;
+    }
+
+    /* Add overlay transition */
+    #menu-overlay {
+      transition: opacity 0.3s ease;
+      will-change: opacity;
+    }
+
+    /* Mobile menu transitions */
+    #mobile-menu {
+      will-change: transform;
+      backface-visibility: hidden;
+    }
+
+    #mobile-menu.active {
+      transform: translateX(0) !important;
+    }
+
+    .h-vertical-text-container {
+      width: 26px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .h-vertical-text {
+      writing-mode: vertical-rl;
+      text-orientation: mixed;
+      transform: rotate(180deg);
+      animation: scrollText 50s linear infinite;
+      font-size: 16px;
+      white-space: nowrap;
+      padding: 0;
+    }
+
+    .vertical-text:nth-child(n) {
+      animation: scrollText2 50s linear infinite;
+    }
+
+    @keyframes scrollText {
+      0% {
+        transform: translateY(0) rotate(180deg);
+      }
+      100% {
+        transform: translateY(-100%) rotate(180deg);
+      }
+    }
+
+    @keyframes scrollText2 {
+      0% {
+        transform: translateY(100%) rotate(180deg);
+      }
+      100% {
+        transform: translateY(0) rotate(180deg);
+      }
+    }
+
+    .horizontal-text-container {
+      position: fixed;
+      top: 100%;
+      left: 0;
+      width: 100%;
+      height: 33px;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-top: 1px solid var(--header_text);
+      border-bottom: 1px solid var(--header_text);
+      background: var(--header_background);
+      z-index: 999;
+    }
+
+    .horizontal-text {
+      white-space: nowrap;
+      font-size: 24px;
+      display: inline-block;
+      animation: scrollRight 80s linear infinite;
+      height: 100%;
+      line-height: 32px;
+      font-weight: 500;
+    }
+
+    .horizontal-text:nth-child(n) {
+      animation: scrollRight2 80s linear infinite;
+    }
+
+    @keyframes scrollRight {
+      0% {
+        transform: translateX(-100%);
+      }
+      100% {
+        transform: translateX(100%);
+      }
+    }
+
+    @keyframes scrollRight2 {
+      0% {
+        transform: translateX(-100%);
+      }
+      100% {
+        transform: translateX(100%);
+      }
+    }
 </style>
 
 <script>
   document.addEventListener('DOMContentLoaded', function () {
+    // Scrolling Text Section
+    const scrollingSection = document.getElementById('scrolling-text-{{ section.id }}');
+    const scrollingContainer = scrollingSection.querySelector('.scrolling-text-container');
+
+    // Set initial position based on direction to avoid blank space
+    function setInitialPosition() {
+      const direction = scrollingContainer.getAttribute('data-direction');
+      if (direction === 'right') {
+        scrollingContainer.style.transform = 'translateX(-50%)';
+      } else {
+        scrollingContainer.style.transform = 'translateX(0%)';
+      }
+
+      // Force a reflow and restart animation
+      scrollingContainer.style.animation = 'none';
+      scrollingContainer.offsetHeight; // Trigger reflow
+      scrollingContainer.style.animation = `scroll-${direction} {{ section.settings.speed }}s linear infinite`;
+    }
+
+    // Initialize on load
+    setInitialPosition();
+
+    // Calculate optimal repeat count based on text length
+    function calculateOptimalRepeats() {
+      const textLength = '{{ section.settings.scrolling_text }}'.length;
+      const separatorLength = '{{ section.settings.separator }}'.length;
+      const totalLength = textLength + separatorLength;
+
+      // Ensure minimum repeats for seamless scrolling
+      const minRepeats = Math.max(8, Math.ceil(200 / totalLength));
+      return Math.min(minRepeats, 20); // Cap at 20 to avoid performance issues
+    }
+
+    // Dynamic speed control
+    function updateScrollSpeed(speed) {
+      scrollingContainer.style.animationDuration = speed + 's';
+    }
+
+    // Dynamic direction control
+    function updateScrollDirection(direction) {
+      scrollingContainer.setAttribute('data-direction', direction);
+      scrollingContainer.style.animationName = 'scroll-' + direction;
+      setInitialPosition();
+    }
+
+    // Pause/resume functionality
+    function pauseScroll() {
+      scrollingContainer.style.animationPlayState = 'paused';
+    }
+
+    function resumeScroll() {
+      scrollingContainer.style.animationPlayState = 'running';
+    }
+
+    // Add methods to global scope for external control
+    window.ScrollingText = window.ScrollingText || {};
+    window.ScrollingText['section-{{ section.id }}'] = {
+      updateSpeed: updateScrollSpeed,
+      updateDirection: updateScrollDirection,
+      pause: pauseScroll,
+      resume: resumeScroll,
+      element: scrollingSection,
+      calculateOptimalRepeats: calculateOptimalRepeats,
+      resetPosition: setInitialPosition,
+    };
+
+    // mobile menu toggle
     const hamburgerMenu = document.getElementById('hamburger-menu');
     const mobileMenu = document.getElementById('mobile-menu');
     const closeButton = mobileMenu ? mobileMenu.querySelector('button[aria-label="Close Menu"]') : null;
@@ -1301,20 +1500,33 @@
       }
     });
 
-    // Bottom bar
+    // Bottom Bar Indicator Logic
     const bottomBarIndicator = document.getElementById('bottom-bar-indicator');
+    const menuItems = document.querySelectorAll('.menu-items ul > li.dropdown-group');
+    const dropdownGroups = document.querySelectorAll('.dropdown-group');
+    const megaMenuOverlay = document.getElementById('mega-menu-overlay');
 
+    let hoverCount = 0;
+    let activeTimeout = null;
+    let indicatorTimeout = null;
+
+    // Initialize bottom bar
     if (bottomBarIndicator) {
       bottomBarIndicator.style.width = '100%';
       bottomBarIndicator.style.transform = 'translateX(0)';
     }
 
-    const menuItems = document.querySelectorAll('.menu-items ul > li.dropdown-group');
-
+    // Bottom bar indicator logic with debouncing
     menuItems.forEach((item) => {
       const link = item.querySelector('a');
 
       item.addEventListener('mouseenter', () => {
+        // Clear any pending reset
+        if (indicatorTimeout) {
+          clearTimeout(indicatorTimeout);
+          indicatorTimeout = null;
+        }
+
         const rect = link.getBoundingClientRect();
         const containerRect = item.closest('.menu-items').getBoundingClientRect();
         const left = rect.left - containerRect.left;
@@ -1324,50 +1536,147 @@
         bottomBarIndicator.style.width = `${width}px`;
       });
 
-      item.addEventListener('mouseleave', () => {
-        // Reset only when leaving the whole dropdown group
-        bottomBarIndicator.style.width = `100%`;
-        bottomBarIndicator.style.transform = `translateX(0) translateY(0px)`;
+      item.addEventListener('mouseleave', (e) => {
+        // Only reset if we're not moving to a child element (like the submenu)
+        const relatedTarget = e.relatedTarget;
+        if (!item.contains(relatedTarget)) {
+          // Delay the reset to prevent flickering
+          indicatorTimeout = setTimeout(() => {
+            bottomBarIndicator.style.width = `100%`;
+            bottomBarIndicator.style.transform = `translateX(0) translateY(0px)`;
+          }, 100);
+        }
       });
     });
 
-    const dropdownGroups = document.querySelectorAll('.dropdown-group');
-    const megaMenuOverlay = document.getElementById('mega-menu-overlay');
+    // Keep track of currently active dropdown
+    let currentActiveGroup = null;
 
-    let hoverCount = 0;
+    // Function to close all dropdowns except the specified one
+    const closeAllDropdowns = (exceptGroup = null) => {
+      dropdownGroups.forEach((group) => {
+        if (group !== exceptGroup) {
+          const megaMenu = group.querySelector('[id^="mega-menu-"]');
+          if (megaMenu) {
+            group.classList.remove('active-submenu');
+            megaMenu.style.opacity = '0';
+            megaMenu.style.transform = 'translateY(-300px)';
+            megaMenu.style.pointerEvents = 'none';
+          }
+        }
+      });
 
+      // Reset hover count when closing all
+      if (!exceptGroup) {
+        hoverCount = 0;
+        currentActiveGroup = null;
+        if (megaMenuOverlay) {
+          megaMenuOverlay.classList.add('opacity-0', 'pointer-events-none');
+          megaMenuOverlay.classList.remove('opacity-50');
+        }
+      }
+    };
+
+    // Dropdown menu logic with proper single-dropdown management
     dropdownGroups.forEach((group) => {
       const megaMenu = group.querySelector('[id^="mega-menu-"]');
 
       if (megaMenu) {
-        group.addEventListener('mouseenter', () => {
-          hoverCount++;
+        // Create a hover area that includes both the menu item and dropdown
+        const hoverArea = {
+          element: group,
+          isHovering: false,
+        };
 
+        const showDropdown = () => {
+          // Clear any pending timeouts
+          if (activeTimeout) {
+            clearTimeout(activeTimeout);
+            activeTimeout = null;
+          }
+
+          // Close other dropdowns first
+          if (currentActiveGroup && currentActiveGroup !== group) {
+            closeAllDropdowns();
+          }
+
+          // Set this as the active group
+          currentActiveGroup = group;
+          hoverCount = 1; // Reset to 1 since only one should be active
+          hoverArea.isHovering = true;
           group.classList.add('active-submenu');
 
-          megaMenuOverlay.classList.remove('opacity-0', 'pointer-events-none');
-          megaMenuOverlay.classList.add('opacity-50');
+          if (megaMenuOverlay) {
+            megaMenuOverlay.classList.remove('opacity-0', 'pointer-events-none');
+            megaMenuOverlay.classList.add('opacity-50');
+          }
 
           requestAnimationFrame(() => {
             megaMenu.style.opacity = '1';
             megaMenu.style.transform = 'translateY(0)';
             megaMenu.style.pointerEvents = 'auto';
+            megaMenu.style.zIndex = '1000';
           });
-        });
+        };
 
-        group.addEventListener('mouseleave', () => {
-          group.classList.remove('active-submenu');
-          hoverCount--;
+        const hideDropdown = () => {
+          hoverArea.isHovering = false;
 
-          megaMenu.style.opacity = '0';
-          megaMenu.style.transform = 'translateY(-20px)';
-          megaMenu.style.pointerEvents = 'none';
+          // Small delay to allow mouse to move to submenu
+          activeTimeout = setTimeout(() => {
+            if (!hoverArea.isHovering) {
+              group.classList.remove('active-submenu');
 
-          if (hoverCount <= 0) {
-            megaMenuOverlay.classList.add('opacity-0', 'pointer-events-none');
-            megaMenuOverlay.classList.remove('opacity-50');
+              megaMenu.style.opacity = '0';
+              megaMenu.style.transform = 'translateY(-300px)';
+              megaMenu.style.pointerEvents = 'none';
+
+              // If this was the active group, clear it
+              if (currentActiveGroup === group) {
+                currentActiveGroup = null;
+                hoverCount = 0;
+
+                if (megaMenuOverlay) {
+                  megaMenuOverlay.classList.add('opacity-0', 'pointer-events-none');
+                  megaMenuOverlay.classList.remove('opacity-50');
+                }
+              }
+            }
+          }, 150);
+        };
+
+        // Main menu item events
+        group.addEventListener('mouseenter', showDropdown);
+        group.addEventListener('mouseleave', (e) => {
+          // Check if mouse is moving to the submenu
+          const relatedTarget = e.relatedTarget;
+          if (!group.contains(relatedTarget) && !megaMenu.contains(relatedTarget)) {
+            hideDropdown();
           }
         });
+
+        // Submenu events
+        megaMenu.addEventListener('mouseenter', () => {
+          hoverArea.isHovering = true;
+          if (activeTimeout) {
+            clearTimeout(activeTimeout);
+            activeTimeout = null;
+          }
+        });
+
+        megaMenu.addEventListener('mouseleave', (e) => {
+          const relatedTarget = e.relatedTarget;
+          if (!group.contains(relatedTarget)) {
+            hideDropdown();
+          }
+        });
+      }
+    });
+
+    // Handle clicks outside to close dropdowns
+    document.addEventListener('click', (e) => {
+      if (!e.target.closest('.dropdown-group')) {
+        closeAllDropdowns();
       }
     });
   });
@@ -1399,16 +1708,179 @@
       "label": "Dropdown Icon"
     },
     {
-      "type": "text",
-      "id": "scrolling_text",
-      "label": "Scrolling Text",
-      "default": "STAY TRUE → KEEP GOING → FIND THE BALANCE → STAY TRUE → KEEP GOING → FIND THE BALANCE → STAY TRUE → KEEP GOING → FIND THE BALANCE → STAY TRUE → KEEP GOING → FIND THE BALANCE →"
-    },
-    {
       "type": "checkbox",
       "id": "enable_sticky",
       "label": "Enable sticky header",
       "default": true
+    },
+    {
+      "type": "header",
+      "content": "Text Content"
+    },
+    {
+      "type": "textarea",
+      "id": "scrolling_text",
+      "label": "Scrolling Text",
+      "default": " STAY TRUE → KEEP GOING → FIND THE BALANCE → LIVE YOUR BEST LIFE ",
+      "info": "Enter any length of text that you want to scroll"
+    },
+    {
+      "type": "text",
+      "id": "separator",
+      "label": "Text Separator",
+      "default": "•",
+      "info": "Character or symbol to separate repeated text"
+    },
+    {
+      "type": "range",
+      "id": "repeat_count",
+      "label": "Text Repetitions",
+      "min": 2,
+      "max": 20,
+      "step": 1,
+      "default": 10,
+      "info": "How many times to repeat the text for seamless scrolling"
+    },
+    {
+      "type": "header",
+      "content": "Animation Settings"
+    },
+    {
+      "type": "select",
+      "id": "direction",
+      "label": "Scroll Direction",
+      "options": [
+        {
+          "value": "left",
+          "label": "Right to Left"
+        },
+        {
+          "value": "right",
+          "label": "Left to Right"
+        }
+      ],
+      "default": "left"
+    },
+    {
+      "type": "range",
+      "id": "speed",
+      "label": "Scroll Speed (seconds)",
+      "min": 5,
+      "max": 60,
+      "step": 1,
+      "default": 20,
+      "info": "Lower numbers = faster scrolling"
+    },
+    {
+      "type": "checkbox",
+      "id": "pause_on_hover",
+      "label": "Pause on Hover",
+      "default": true
+    },
+    {
+      "type": "header",
+      "content": "Styling"
+    },
+    {
+      "type": "range",
+      "id": "font_size",
+      "label": "Font Size (px)",
+      "min": 12,
+      "max": 48,
+      "step": 1,
+      "default": 18
+    },
+    {
+      "type": "select",
+      "id": "font_weight",
+      "label": "Font Weight",
+      "options": [
+        {
+          "value": "300",
+          "label": "Light"
+        },
+        {
+          "value": "400",
+          "label": "Normal"
+        },
+        {
+          "value": "500",
+          "label": "Medium"
+        },
+        {
+          "value": "600",
+          "label": "Semi Bold"
+        },
+        {
+          "value": "700",
+          "label": "Bold"
+        }
+      ],
+      "default": "400"
+    },
+    {
+      "type": "select",
+      "id": "text_transform",
+      "label": "Text Transform",
+      "options": [
+        {
+          "value": "none",
+          "label": "None"
+        },
+        {
+          "value": "uppercase",
+          "label": "UPPERCASE"
+        },
+        {
+          "value": "lowercase",
+          "label": "lowercase"
+        },
+        {
+          "value": "capitalize",
+          "label": "Capitalize"
+        }
+      ],
+      "default": "uppercase"
+    },
+    {
+      "type": "range",
+      "id": "letter_spacing",
+      "label": "Letter Spacing (px)",
+      "min": 0,
+      "max": 5,
+      "step": 0.1,
+      "default": 1
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Text Color",
+      "default": "#000000"
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Background Color",
+      "default": "#ffffff"
+    },
+    {
+      "type": "range",
+      "id": "vertical_padding",
+      "label": "Vertical Padding (px)",
+      "min": 0,
+      "max": 50,
+      "step": 1,
+      "default": 15
+    },
+    {
+      "type": "range",
+      "id": "separator_spacing",
+      "label": "Separator Spacing (px)",
+      "min": 10,
+      "max": 50,
+      "step": 1,
+      "default": 20,
+      "info": "Space around the separator character"
     }
   ],
   "blocks": [

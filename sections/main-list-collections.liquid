@@ -15,74 +15,135 @@
         {% endif %}
         {{ block.shopify_attributes }}
       >
-        {% if block.settings.video_url != blank or block.settings.video != blank %}
-          {% if block.settings.video_url contains 'youtube.com' or block.settings.video_url contains 'youtu.be' %}
-            {% # Convert youtube URL to embed URL %}
-            {% if block.settings.video_url contains 'watch?v=' %}
-              {% assign video_id = block.settings.video_url | split: 'watch?v=' | last | split: '&' | first %}
-            {% elsif block.settings.video_url contains 'youtu.be/' %}
-              {% assign video_id = block.settings.video_url | split: 'youtu.be/' | last %}
+        {% if block.settings.media_display_type == 'video' %}
+          {% if block.settings.video_url != blank or block.settings.video != blank %}
+            {% if block.settings.video_url contains 'youtube.com' or block.settings.video_url contains 'youtu.be' %}
+              {% if block.settings.video_url contains 'watch?v=' %}
+                {% assign video_id = block.settings.video_url | split: 'watch?v=' | last | split: '&' | first %}
+              {% elsif block.settings.video_url contains 'youtu.be/' %}
+                {% assign video_id = block.settings.video_url | split: 'youtu.be/' | last %}
+              {% endif %}
+              <div class="video-container relative w-full h-full">
+                <iframe
+                  src="https://www.youtube.com/embed/{{ video_id }}?autoplay=1&mute=1&loop=1&playlist={{ video_id }}&controls=0"
+                  class="absolute inset-0 w-full h-full"
+                  frameborder="0"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowfullscreen
+                ></iframe>
+              </div>
+            {% elsif block.settings.video != blank %}
+              <div class="video-container relative aspect-video w-full">
+                {{
+                  block.settings.video
+                  | video_tag:
+                    autoplay: true,
+                    loop: true,
+                    muted: true,
+                    controls: true,
+                    class: 'w-full h-full object-cover'
+                }}
+              </div>
             {% endif %}
-            <div class="video-container relative w-full h-full">
-              <iframe
-                src="https://www.youtube.com/embed/{{ video_id }}?autoplay=1&mute=1&loop=1&playlist={{ video_id }}&controls=0"
-                class="absolute inset-0 w-full h-full"
-                frameborder="0"
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                allowfullscreen
-              ></iframe>
-            </div>
-          {% elsif block.settings.video != blank %}
-            <div class="video-container relative aspect-video w-full">
-              {{
-                block.settings.video
-                | video_tag:
-                  autoplay: true,
-                  loop: true,
-                  muted: true,
-                  controls: true,
-                  class: 'w-full h-full object-cover'
-              }}
+          {% elsif block.settings.image != blank %}
+            <div class="image-container relative aspect-video w-full">
+              <img
+                srcset="
+                  {%- if block.settings.image.width >= 165 -%}{{ block.settings.image | image_url: width: 165 }} 165w,{%- endif -%}
+                  {%- if block.settings.image.width >= 360 -%}{{ block.settings.image | image_url: width: 360 }} 360w,{%- endif -%}
+                  {%- if block.settings.image.width >= 535 -%}{{ block.settings.image | image_url: width: 535 }} 535w,{%- endif -%}
+                  {%- if block.settings.image.width >= 750 -%}{{ block.settings.image | image_url: width: 750 }} 750w,{%- endif -%}
+                "
+                src="{{ block.settings.image | image_url: width: 750 }}"
+                class="w-full h-full object-cover"
+                loading="lazy"
+                width="100"
+                height="100"
+                sizes="
+                  (min-width: 990px) {% if block.settings.span_two_columns %}66vw{% else %}33vw{% endif %},
+                  (min-width: 750px) {% if block.settings.span_two_columns %}50vw{% else %}33vw{% endif %},
+                  100vw
+                "
+                alt="{{ block.settings.image.alt | escape }}"
+              >
             </div>
           {% endif %}
-        {% elsif block.settings.image != blank %}
-          <div class="image-container relative aspect-video w-full">
-            <img
-              srcset="
-                {%- if block.settings.image.width >= 165 -%}{{ block.settings.image | image_url: width: 165 }} 165w,{%- endif -%}
-                {%- if block.settings.image.width >= 360 -%}{{ block.settings.image | image_url: width: 360 }} 360w,{%- endif -%}
-                {%- if block.settings.image.width >= 535 -%}{{ block.settings.image | image_url: width: 535 }} 535w,{%- endif -%}
-                {%- if block.settings.image.width >= 750 -%}{{ block.settings.image | image_url: width: 750 }} 750w,{%- endif -%}
-              "
-              src="{{ block.settings.image | image_url: width: 750 }}"
-              class="w-full h-full object-cover"
-              loading="lazy"
-              width="100"
-              height="100"
-              sizes="
-                (min-width: 990px) {% if block.settings.span_two_columns %}66vw{% else %}33vw{% endif %},
-                (min-width: 750px) {% if block.settings.span_two_columns %}50vw{% else %}33vw{% endif %},
-                100vw
-              "
-              alt="{{ block.settings.image.alt | escape }}"
-            >
-          </div>
         {% else %}
-          {% if block.settings.collection != blank %}
-            {% render 'card-collection',
-              card_collection: block.settings.collection,
-              media_aspect_ratio: section.settings.image_ratio,
-              columns: section.settings.columns_desktop
-            %}
-          {% else %}
-           <div >
-            <div class=" relative w-full bg-gray-100 flex flex-col items-center justify-center">
-              <img src="{{ 'defaultproduct.svg' | asset_url }}" alt="Default Product" width="430px" height="430px">
+          {% if block.settings.image != blank %}
+            <div class="image-container relative aspect-video w-full">
+              <img
+                srcset="
+                  {%- if block.settings.image.width >= 165 -%}{{ block.settings.image | image_url: width: 165 }} 165w,{%- endif -%}
+                  {%- if block.settings.image.width >= 360 -%}{{ block.settings.image | image_url: width: 360 }} 360w,{%- endif -%}
+                  {%- if block.settings.image.width >= 535 -%}{{ block.settings.image | image_url: width: 535 }} 535w,{%- endif -%}
+                  {%- if block.settings.image.width >= 750 -%}{{ block.settings.image | image_url: width: 750 }} 750w,{%- endif -%}
+                "
+                src="{{ block.settings.image | image_url: width: 750 }}"
+                class="w-full h-full object-cover"
+                loading="lazy"
+                width="100"
+                height="100"
+                sizes="
+                  (min-width: 990px) {% if block.settings.span_two_columns %}66vw{% else %}33vw{% endif %},
+                  (min-width: 750px) {% if block.settings.span_two_columns %}50vw{% else %}33vw{% endif %},
+                  100vw
+                "
+                alt="{{ block.settings.image.alt | escape }}"
+              >
+            </div>
+          {% elsif block.settings.video_url != blank or block.settings.video != blank %}
+            {% if block.settings.video_url contains 'youtube.com' or block.settings.video_url contains 'youtu.be' %}
+              {% if block.settings.video_url contains 'watch?v=' %}
+                {% assign video_id = block.settings.video_url | split: 'watch?v=' | last | split: '&' | first %}
+              {% elsif block.settings.video_url contains 'youtu.be/' %}
+                {% assign video_id = block.settings.video_url | split: 'youtu.be/' | last %}
+              {% endif %}
+              <div class="video-container relative w-full h-full">
+                <iframe
+                  src="https://www.youtube.com/embed/{{ video_id }}?autoplay=1&mute=1&loop=1&playlist={{ video_id }}&controls=0"
+                  class="absolute inset-0 w-full h-full"
+                  frameborder="0"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowfullscreen
+                ></iframe>
               </div>
-              {% unless block.settings.span_two_columns %}
-                <span class="text-gray-400 mt-20 block text-center text-5xl absolute bottom-0 bg-white"> Collection  </span>
-              {% endunless %}
-           </div>
+            {% elsif block.settings.video != blank %}
+              <div class="video-container relative aspect-video w-full">
+                {{
+                  block.settings.video
+                  | video_tag:
+                    autoplay: true,
+                    loop: true,
+                    muted: true,
+                    controls: true,
+                    class: 'w-full h-full object-cover'
+                }}
+              </div>
+            {% endif %}
+          {% else %}
+            {% if block.settings.collection != blank %}
+              {% render 'card-collection',
+                card_collection: block.settings.collection,
+                media_aspect_ratio: section.settings.image_ratio,
+                columns: section.settings.columns_desktop
+              %}
+            {% else %}
+              <div>
+                <div class="relative w-full bg-gray-100 flex flex-col items-center justify-center">
+                  <img src="{{ 'defaultproduct.svg' | asset_url }}" alt="Default Product" width="430px" height="430px">
+                </div>
+                {% if block.type == 'collection' %}
+                  {% unless block.settings.span_two_columns %}
+                    <span class="text-gray-400 mt-20 w-full text-center text-5xl absolute bottom-0 bg-white flex items-center justify-between gap-2">
+                      Collection
+                      <svg width="20" height="20" viewBox="0 0 9 9" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M1.1875 7.7334H7.6599M7.6599 7.7334V1.261M7.6599 7.7334L1.1875 1.261" stroke="black" stroke-linejoin="round"/>
+                      </svg>
+                    </span>
+                  {% endunless %}
+                {% endif %}
+              </div>
+            {% endif %}
           {% endif %}
         {% endif %}
       </li>
@@ -93,7 +154,6 @@
 <style>
   .collection-list {
     width: 100%;
-
     margin: 0 auto;
     display: grid;
     grid-template-columns: repeat({{ section.settings.columns_desktop }}, 1fr);
@@ -103,13 +163,53 @@
   }
 
   .collection-list__item {
-    height: 430px;
+    height: 410px;
     max-width: 100%;
     overflow: hidden;
+    position: relative;
   }
 
   .collection-list__item[data-span-two="true"] {
     grid-column: span 2;
+    height:410px;
+  }
+
+  .collection-list__item[data-span-two="true"] .video-container,
+  .collection-list__item[data-span-two="true"] .image-container {
+    height: 100%;
+  }
+
+  .collection-list__item:not([data-span-two="true"]) .video-container,
+  .collection-list__item:not([data-span-two="true"]) .image-container {
+    height: calc(100% - 80px);
+  }
+
+  .card-collection {
+    height: calc(100% - 80px);
+  }
+
+  .collection-list__item[data-span-two="true"] .card-collection {
+    height: 100%;
+  }
+
+  .card-collection__content {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .card-collection__media {
+    flex: 1;
+    position: relative;
+  }
+
+  .card-collection__media img[data-span-two="true"] {
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .card-collection__heading {
+    margin-top: auto;
   }
 
   @media screen and (max-width: 749px) {
@@ -118,7 +218,23 @@
       gap: 10px;
     }
     .collection-list__item {
-      height: 250px;
+      height: 182px;
+    }
+    .collection-list__item:not([data-span-two="true"]) .video-container,
+    .collection-list__item:not([data-span-two="true"]) .image-container {
+      height: calc(100% - 40px);
+    }
+    .collection-list__item span{
+      font-size: 12px;
+    }
+    .collection-list__item svg{
+      height: 10px;
+    }
+    .card__heading a{
+      font-size: 12px;
+    }
+    .card__heading svg{
+      height: 10px;
     }
     .collection-list__item[data-span-two="true"] {
       grid-column: span {{ section.settings.columns_mobile }};
@@ -127,7 +243,6 @@
 
   .video-container {
     position: relative;
-    height: 100%;
     background: #000;
   }
 
@@ -169,16 +284,16 @@
           "label": "Square"
         }
       ],
-      "default": "adapt",
-      "label": "Image ratio"
+      "default": "portrait",
+      "label": "Portrait"
     },
     {
       "type": "range",
       "id": "columns_desktop",
       "min": 1,
-      "max": 6,
+      "max": 4,
       "step": 1,
-      "default": 4,
+      "default": 3,
       "label": "Number of columns"
     },
     {
@@ -200,20 +315,15 @@
   ],
   "blocks": [
     {
-      "type": "card",
-      "name": "Collection Card",
+      "type": "media",
+      "name": "Media Block",
       "settings": [
-        {
-          "type": "collection",
-          "id": "collection",
-          "label": "Collection"
-        },
         {
           "type": "checkbox",
           "id": "span_two_columns",
           "label": "Span Two Columns",
           "default": false,
-          "info": "Make this card span across two columns"
+          "info": "Make this block span across two columns"
         },
         {
           "type": "header",
@@ -233,6 +343,35 @@
           "type": "image_picker",
           "id": "image",
           "label": "Image"
+        },
+        {
+          "type": "select",
+          "id": "media_display_type",
+          "label": "Display Type",
+          "info": "Choose what to display when both image and video are uploaded",
+          "options": [
+            { "value": "image", "label": "Show Image" },
+            { "value": "video", "label": "Show Video" }
+          ],
+          "default": "image"
+        }
+      ]
+    },
+    {
+      "type": "collection",
+      "name": "Collection Block",
+      "settings": [
+        {
+          "type": "collection",
+          "id": "collection",
+          "label": "Collection"
+        },
+        {
+          "type": "checkbox",
+          "id": "span_two_columns",
+          "label": "Span Two Columns",
+          "default": false,
+          "info": "Make this block span across two columns"
         }
       ]
     }
@@ -242,72 +381,51 @@
       "name": "Collections List",
       "blocks": [
         {
-          "type": "card",
+          "type": "media",
           "settings": {
             "span_two_columns": true,
             "image": "shopify://shop_images/collection-placeholder"
           }
         },
         {
-          "type": "card",
+          "type": "collection",
           "settings": {
-            "collection": "",
+            "collection": ""
+          }
+        },
+        {
+          "type": "collection",
+          "settings": {
+            "collection": ""
+          }
+        },
+        {
+          "type": "media",
+          "settings": {
             "image": "shopify://shop_images/collection-placeholder"
           }
         },
         {
-          "type": "card",
+          "type": "collection",
           "settings": {
-            "collection": "",
-            "image": "shopify://shop_images/collection-placeholder"
+            "collection": ""
           }
         },
         {
-          "type": "card",
+          "type": "collection",
           "settings": {
-            "collection": "",
-            "image": "shopify://shop_images/collection-placeholder"
+            "collection": ""
           }
         },
         {
-          "type": "card",
+          "type": "collection",
           "settings": {
-            "collection": "",
-            "image": "shopify://shop_images/collection-placeholder"
+            "collection": ""
           }
         },
         {
-          "type": "card",
+          "type": "media",
           "settings": {
-            "collection": "",
-            "image": "shopify://shop_images/collection-placeholder"
-          }
-        },
-        {
-          "type": "card",
-          "settings": {
-            "collection": "",
-            "image": "shopify://shop_images/collection-placeholder"
-          }
-        },
-        {
-          "type": "card",
-          "settings": {
-            "collection": "",
-            "image": "shopify://shop_images/collection-placeholder"
-          }
-        },
-        {
-          "type": "card",
-          "settings": {
-            "collection": "",
-            "image": "shopify://shop_images/collection-placeholder"
-          }
-        },
-        {
-          "type": "card",
-          "settings": {
-            "span_two_columns": true,
             "image": "shopify://shop_images/collection-placeholder"
           }
         }
