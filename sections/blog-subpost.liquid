@@ -24,6 +24,28 @@
     }
   }
 
+#load-more-btn {
+  background-color: black;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  cursor: pointer;
+  font-size: 16px;
+  margin-top: 20px;
+  display: inline-block;
+}
+
+#load-more-btn:hover {
+  background-color: white;
+  color:black;
+  border:1px solid black;
+}
+
+#load-more-btn:disabled {
+  background-color: #6c757d;
+  cursor: not-allowed;
+}
+
   :root {
   --font-heading-family: {{ settings.type_heading_font.family }};
   --font-body-family: {{ settings.type_body_font.family }};
@@ -83,7 +105,43 @@
       max-width: 100%;
     }
   }
+
+  .hidden-articles {
+    display: none;
+  }
+
+  .show-articles {
+    display: flex;
+  }
 </style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const loadMoreBtn = document.getElementById('load-more-btn');
+  
+  if (loadMoreBtn) {
+    loadMoreBtn.addEventListener('click', function() {
+      const hiddenArticles = document.querySelectorAll('.blog-article.hidden-articles');
+      const articlesPerLoad = parseInt(loadMoreBtn.getAttribute('data-articles-per-load')) || 3;
+      
+      for (let i = 0; i < Math.min(articlesPerLoad, hiddenArticles.length); i++) {
+        hiddenArticles[i].classList.remove('hidden-articles');
+        hiddenArticles[i].classList.add('show-articles');
+      }
+      
+      const remainingHidden = document.querySelectorAll('.blog-article.hidden-articles');
+      if (remainingHidden.length === 0) {
+        loadMoreBtn.style.display = 'none';
+      }
+      
+      const remaining = remainingHidden.length;
+      if (remaining > 0) {
+        loadMoreBtn.setAttribute('data-remaining', remaining);
+      }
+    });
+  }
+});
+</script>
 
 <section class="p-6 color-{{ section.settings.color_scheme }}">
   <div class="w-full uppercase">
@@ -93,57 +151,71 @@
         <h1 class="mt-10 blog_heading-highlight" style="font-weight:500; font-size:35px;">{{ section.settings.main_heading }}</h1>
       </div>
 
-      <div class="blog-grid w-full">
-        {% assign default_blog_handle = 'news' %} 
-
-{% assign blog_handle = section.settings.selected_blog | default: default_blog_handle %}
-{% assign blog = blogs[blog_handle] %}
-{% assign articles_limit = section.settings.articles_per_page %}
-
-{% for article in blog.articles limit: articles_limit %}
-  <a href="{{ article.url }}" class="blog-article block space-y-2 px-2 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 transition-shadow hover:shadow-lg">
-    <div class="zoom-trigger">
-      <div class="aspect-[5/3] overflow-hidden">
-        {% if article.image != blank %}
-          <img
-            src="{{ article.image | image_url: width: 600 }}"
-            width="{{ article.image.width }}"
-            height="{{ article.image.height }}"
-            alt="{{ article.title | default: 'Blog image' | escape }}"
-            loading="lazy"
-            class="w-full h-full object-cover transition-transform duration-300 ease-in-out"
-            style="transform-origin: center center;"
-          />
-        {% else %}
-          {{ 'collection-1' | placeholder_svg_tag: 'w-full h-full bg-gray' }}
-        {% endif %}
-      </div>
-      <div>
-        <p class="text-sm md:text-[20px] mt-2 text-article-date-color">{{ article.published_at | date: "%m.%d.%y" }}</p>
-         <h3 class="subclass-header" id="article-title-{{ forloop.index0 }}">
+      <div class="blog-grid w-full" id="blog-posts-container">
+        {% assign default_blog_handle = 'news' %}
+        {% assign blog_handle = section.settings.selected_blog | default: default_blog_handle %}
+        {% assign blog = blogs[blog_handle] %}
+        {% assign articles_limit = section.settings.articles_per_page %}
+        {% assign articles_count = blog.articles.size %}
+        
+        {% comment %} Load all articles but hide the ones beyond the initial limit {% endcomment %}
+        {% for article in blog.articles %}
+          {% if forloop.index <= articles_limit %}
+            {% assign article_class = 'blog-article block space-y-2 px-2 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 transition-shadow hover:shadow-lg' %}
+          {% else %}
+            {% assign article_class = 'blog-article hidden-articles block space-y-2 px-2 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 transition-shadow hover:shadow-lg' %}
+          {% endif %}
+          
+          <a href="{{ article.url }}" class="{{ article_class }}">
+            <div class="zoom-trigger">
+              <div class="aspect-[5/3] overflow-hidden">
+                {% if article.image != blank %}
+                  <img
+                    src="{{ article.image | image_url: width: 600 }}"
+                    width="{{ article.image.width }}"
+                    height="{{ article.image.height }}"
+                    alt="{{ article.title | default: 'Blog image' | escape }}"
+                    loading="lazy"
+                    class="w-full h-full object-cover transition-transform duration-300 ease-in-out"
+                    style="transform-origin: center center;"
+                  />
+                {% else %}
+                  {{ 'collection-1' | placeholder_svg_tag: 'w-full h-full bg-gray' }}
+                {% endif %}
+              </div>
+              <div>
+                <p class="text-sm md:text-[20px] mt-2 text-article-date-color">{{ article.published_at | date: "%m.%d.%y" }}</p>
+                <h3 class="subclass-header" id="article-title-{{ forloop.index0 }}">
                   <svg xmlns="http://www.w3.org/2000/svg" width="19" height="19" viewBox="0 0 9 9" class="arrow-svgsub inline-block"
                     stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M1.1875 7.7334H7.6599M7.6599 7.7334V1.261M7.6599 7.7334L1.1875 1.261" stroke-linejoin="round"/>
-            </svg>
+                    <path d="M1.1875 7.7334H7.6599M7.6599 7.7334V1.261M7.6599 7.7334L1.1875 1.261" stroke-linejoin="round"/>
+                  </svg>
                   {{ article.title }}
                 </h3>
-        <span class="subclass-subheader md:text-[19px] font-medium tracking-tight">
-          {{ article.content | strip_html | truncate: 50,"" }}
-        </span>
-      </div>
-    </div>
-  </a>
-{% endfor %}
+                <span class="subclass-subheader md:text-[19px] font-medium tracking-tight">
+                  {{ article.content | strip_html | truncate: 50,"" }}
+                </span>
+              </div>
+            </div>
+          </a>
+        {% endfor %}
       </div>
     </div>
 
-    <hr class="w-screen max-w-none mx-auto my-8 border-t-0 border-solid" />
+    {% assign remaining_articles = articles_count | minus: articles_limit %}
+    {% if remaining_articles > 0 %}
+      <div class="w-full flex justify-center mt-8">
+        <button id="load-more-btn" 
+                data-remaining="{{ remaining_articles }}"
+                data-articles-per-load="{{ articles_limit }}">
+          Load More
+        </button>
+      </div>
+    {% endif %}
   </div>
-                
 </section>
-                
-                
-  {% schema %}
+
+{% schema %}
 {
   "name": "Blog Posts",
   "disabled_on": {
@@ -156,7 +228,7 @@
       "min": 0,
       "max": 12,
       "step": 1,
-      "label": "Number of blog articles to display",
+      "label": "Number of blog articles to display initially",
       "default": 3
     },
     {
