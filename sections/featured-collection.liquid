@@ -351,12 +351,13 @@
                             <h3 class="!text-[1.6rem] uppercase leading-tight" style="font-weight: 600 !important;">
                               {{ product.title | escape }}
                             </h3>
-                            <div class="flex gap-2 items-baseline fc-price">
+                            <div id="fc-product-price" class="flex gap-2 items-baseline fc-price">
                               <span class="!text-[1.6rem] uppercase">
                                 {{ product.price | money }}
                               </span>
                               {%- if product.compare_at_price > product.price -%}
-                                |<span class="!text-[1.6rem] uppercase text-red-600">
+                                <span id="fc-product-dash">|</span>
+                                <span class="!text-[1.6rem] uppercase text-red-600">
                                   {{- product.compare_at_price | money }} FOR MEMBERS</span
                                 >
                               {%- endif -%}
@@ -601,8 +602,8 @@
 
     .add-to-cart-btn:hover,
     .notify-me-btn:hover {
-      background-color: var(--text);
-      color: rgb(var(--color-background));
+      background-color: var(--text) !important;
+      color: rgb(var(--color-background)) !important;
     }
 
     .size-variants-container {
@@ -661,6 +662,16 @@
       align-items: center;
       justify-content: center;
       cursor: pointer;
+      opacity: 1; /* Ensure buttons are visible */
+      visibility: visible; /* Ensure buttons are visible */
+      background-color: transparent;
+      color: #000;
+    }
+
+    .size-option-btn:hover {
+      transform: translateY(-2px);
+      background-color: #000 !important;
+      color: #fff !important;
     }
 
     .unavailable-size {
@@ -688,8 +699,8 @@
     }
 
     .size-option-btn.size-animate {
-      opacity: 0;
-      transform: translateY(20px);
+      opacity: 1; /* Changed from 0 to 1 */
+      transform: translateY(0); /* Changed from translateY(20px) to 0 */
       animation: sizeAppear 0.3s ease forwards;
       animation-delay: calc(0.1s * var(--animation-order));
     }
@@ -707,13 +718,14 @@
 
     .size-variants-container:not(.active) .size-option-btn {
       animation: none;
-      opacity: 0;
-      transform: translateY(20px);
+      opacity: 1; /* Changed from 0 to 1 */
+      transform: translateY(0); /* Changed from translateY(20px) to 0 */
     }
 
     .size-variants-container.active .size-option-btn {
       animation: sizeAppear 0.3s ease forwards;
       animation-delay: calc(0.1s * var(--animation-order));
+      opacity: 1; /* Ensure visible during animation */
     }
 
     .shop-all-button {
@@ -946,6 +958,17 @@
         min-width: fit-content !important;
         height: 24px !important;
         text-transform: uppercase;
+      }
+
+      #fc-product-dash{
+        display: none;
+      }
+
+      #fc-product-price{
+        flex-direction: column;
+        gap: 0;
+        line-height: 1.2;
+        padding-top: 6px;
       }
 
       .collection-btn:hover{
