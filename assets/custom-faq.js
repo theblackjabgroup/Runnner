@@ -56,7 +56,13 @@ document.addEventListener("DOMContentLoaded", () => {
       });
 
       const isExpanded = wrapper.dataset.expanded === "true";
-      span.innerHTML = isExpanded ? wrapper.dataset.shortText : wrapper.dataset.fullText;
+span.classList.remove("faq-animate-fadeup");
+void span.offsetWidth;
+span.innerHTML = isExpanded ? wrapper.dataset.shortText : wrapper.dataset.fullText;
+if (!isExpanded) {
+  span.classList.add("faq-animate-fadeup");
+}
+
       wrapper.dataset.expanded = (!isExpanded).toString();
       svg.classList.toggle("rotate--90", !isExpanded);
     });
