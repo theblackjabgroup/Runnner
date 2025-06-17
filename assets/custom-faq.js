@@ -1,6 +1,6 @@
 document.addEventListener("DOMContentLoaded", () => {
   const urlPattern = /(https?:\/\/[^\s<]+(?:\.[a-z]{2,})(?:\/[^\s<]*)?)/gi;
-  const styleClass = 'font-bold underline break-all';
+  const styleClass = 'font-medium underline break-all';
 
   const convertLinks = (text) => {
     return text.replace(urlPattern, match => {
