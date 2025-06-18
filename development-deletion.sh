@@ -1,6 +1,12 @@
 #!/bin/bash
+set -e
 
-themes=$(shopify theme list | grep development | awk -F'#' '{print $2}' | awk '{print $1}')
+themes=$(shopify theme list --json | jq -r '.[] | select(.role == "development") | .id')
+
+if [ -z "$themes" ]; then
+  echo "No development themes found."
+  exit 0
+fi
 
 echo "Deleting the following development themes: $themes"
 
