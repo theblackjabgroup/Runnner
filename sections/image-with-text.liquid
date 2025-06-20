@@ -66,6 +66,48 @@
       transform: translateX(500%);
       position: relative;
     }
+
+    /* Animation ready states for all blocks */
+    .letter-animation {
+      opacity: 0;
+    }
+
+    .letter-animation.animation-ready {
+      opacity: 1;
+    }
+
+    .button-animation {
+      opacity: 0;
+    }
+
+    .button-animation.animation-ready {
+      opacity: 1;
+    }
+
+    .date-animation {
+      opacity: 0;
+    }
+
+    .date-animation.animation-ready {
+      opacity: 1;
+    }
+
+    .text-animation {
+      opacity: 0;
+    }
+
+    .text-animation.animation-ready {
+      opacity: 1;
+    }
+
+    /* Non-animated states */
+    .no-animation .letter-animation,
+    .no-animation .button-animation,
+    .no-animation .date-animation,
+    .no-animation .text-animation {
+      opacity: 1 !important;
+    }
+
   .image-with-text-custom-button-css {
     position: relative;
     display: inline-block;
@@ -476,7 +518,7 @@
               {% when 'date' %}
                 <div
                   id="TextContent-{{ section.id }}-{{ forloop.index }}"
-                  class="image-with-text-date mb-3"
+                  class="image-with-text-date mb-3 {% if section.settings.enable_text_animation %}date-animation{% endif %}"
                   style="color: {{ block.settings.text_color }}; font-weight: {{ block.settings.font_weight }};"
                 >
                   {{ block.settings.date }}
@@ -484,7 +526,7 @@
               {% when 'text' %}
                 <div
                   id="TextContent-{{ section.id }}-{{ forloop.index }}"
-                  class="image-with-text-text-content mb-6"
+                  class="image-with-text-text-content mb-6 {% if section.settings.enable_text_animation %}text-animation{% endif %}"
                   style="color: {{ block.settings.text_color }}; font-weight: {{ block.settings.font_weight }};"
                 >
                   {% if section.settings.enable_text_animation %}
@@ -538,7 +580,7 @@
                   {% endif %}
                 </div>
               {% when 'button' %}
-                <div class="image-with-text-button-container color-{{ section.settings.color_scheme }} {% if section.settings.text_alignment == 'center' %}text-center{% elsif section.settings.text_alignment == 'right' %}text-right{% else %}text-left{% endif %}">
+                <div class="image-with-text-button-container color-{{ section.settings.color_scheme }} {% if section.settings.text_alignment == 'center' %}text-center{% elsif section.settings.text_alignment == 'right' %}text-right{% else %}text-left{% endif %} {% if section.settings.enable_button_animation %}button-animation{% endif %}">
                   <a
                     href="{{ block.settings.button_link }}"
                     class="image-with-text-custom-button-css"
@@ -691,10 +733,6 @@ styleElement.textContent = `
   }
 }
 
-.button-animation {
-  opacity: 0; 
-}
-
 .button-animation.animated {
   animation: buttonAppear 0.8s forwards;
   animation-delay: ${buttonAnimationDelay}s; 
@@ -704,88 +742,143 @@ document.head.appendChild(styleElement);
 
 const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
+// Set initial states based on animation settings
+const sectionElement = document.querySelector('.image-with-text-media-section-{{ section.id }}');
+if (sectionElement) {
+  if (prefersReducedMotion || (!{{ section.settings.enable_text_animation }} && !{{ section.settings.enable_button_animation }})) {
+    sectionElement.classList.add('no-animation');
+  } else {
+    // For elements that should be animated, ensure they start hidden
+    {% if section.settings.enable_text_animation %}
+    sectionElement.querySelectorAll('.letter-animation, .date-animation, .text-animation').forEach(element => {
+      element.style.opacity = '0';
+    });
+    {% else %}
+    sectionElement.querySelectorAll('.letter-animation, .date-animation, .text-animation').forEach(element => {
+      element.style.opacity = '1';
+    });
+    {% endif %}
+
+    {% if section.settings.enable_button_animation %}
+    sectionElement.querySelectorAll('.button-animation').forEach(button => {
+      button.style.opacity = '0';
+    });
+    {% else %}
+    sectionElement.querySelectorAll('.button-animation').forEach(button => {
+      button.style.opacity = '1';
+    });
+    {% endif %}
+  }
+}
+
 if (prefersReducedMotion) {
-document.querySelectorAll('.letter-animation').forEach(element => {
-  element.style.opacity = '1';
-});
-document.querySelectorAll('.button-animation').forEach(button => {
-  button.style.opacity = '1';
-});
-} else {
-const observer = new IntersectionObserver((entries, observer) => {
-  entries.forEach(entry => {
-    if (entry.isIntersecting) {
-      {% if section.settings.enable_text_animation %}
-      const headingElements = entry.target.querySelectorAll('.letter-animation');
-      
-      headingElements.forEach(element => {
-        const text = element.textContent.trim();
-        element.textContent = '';
-        element.classList.add('letter-animation-container');
-        element.setAttribute('aria-label', text);
-
-        for (let i = 0; i < text.length; i++) {
-          const letterSpan = document.createElement('span');
-          letterSpan.classList.add('animated-letter');
-          letterSpan.textContent = text[i] === ' ' ? '\u00A0' : text[i]; 
-          letterSpan.setAttribute('aria-hidden', 'true'); 
-
-          letterSpan.style.animation = `letterAppear 1s forwards`; 
-          letterSpan.style.animationDelay = `${i * 0.07}s`; 
-          
-          element.appendChild(letterSpan);
-        }
-      });
-
-      const textContentElements = entry.target.querySelectorAll('.image-with-text-text-content p.letter-animation');
-      
-      textContentElements.forEach(element => {
-        const text = element.textContent.trim();
-        element.textContent = '';
-        element.classList.add('letter-animation-container');
-        element.setAttribute('aria-label', text);
-
-        for (let i = 0; i < text.length; i++) {
-          const letterSpan = document.createElement('span');
-          letterSpan.classList.add('animated-letter');
-          letterSpan.textContent = text[i] === ' ' ? '\u00A0' : text[i]; 
-          letterSpan.setAttribute('aria-hidden', 'true'); 
-
-          letterSpan.style.animation = `letterAppear 1s forwards`; 
-          letterSpan.style.animationDelay = `${i * 0.07}s`; 
-          
-          element.appendChild(letterSpan);
-        }
-      });
-      {% endif %}
-
-      {% if section.settings.enable_button_animation %}
-      const buttons = entry.target.querySelectorAll('.image-with-text-button-container');
-      buttons.forEach(button => {
-        button.classList.add('button-animation');
-        setTimeout(() => {
-          button.classList.add('animated');
-        }, 100);
-      });
-      {% else %}
-      const buttons = entry.target.querySelectorAll('.image-with-text-button-container');
-      buttons.forEach(button => {
-        button.style.opacity = '1';
-      });
-      {% endif %}
-
-      observer.unobserve(entry.target);
-    }
+  // For reduced motion, make everything visible immediately
+  document.querySelectorAll('.letter-animation, .date-animation, .text-animation, .button-animation').forEach(element => {
+    element.style.opacity = '1';
   });
-}, {
-  root: null, 
-  rootMargin: '0px', 
-  threshold: 0.1 
-});
+} else {
+  const observer = new IntersectionObserver((entries, observer) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        {% if section.settings.enable_text_animation %}
+        // Handle heading animations
+        const headingElements = entry.target.querySelectorAll('.letter-animation');
+        
+        headingElements.forEach(element => {
+          const text = element.textContent.trim();
+          element.textContent = '';
+          element.classList.add('letter-animation-container', 'animation-ready');
+          element.setAttribute('aria-label', text);
+          element.style.opacity = '1'; // Make container visible
 
-document.querySelectorAll('.image-with-text-media-section-{{ section.id }}').forEach(section => {
-  observer.observe(section);
-});
+          for (let i = 0; i < text.length; i++) {
+            const letterSpan = document.createElement('span');
+            letterSpan.classList.add('animated-letter');
+            letterSpan.textContent = text[i] === ' ' ? '\u00A0' : text[i]; 
+            letterSpan.setAttribute('aria-hidden', 'true'); 
+
+            letterSpan.style.animation = `letterAppear 1s forwards`; 
+            letterSpan.style.animationDelay = `${i * 0.07}s`; 
+            
+            element.appendChild(letterSpan);
+          }
+        });
+
+        // Handle text content animations
+        const textContentElements = entry.target.querySelectorAll('.image-with-text-text-content p.letter-animation');
+        
+        textContentElements.forEach(element => {
+          const text = element.textContent.trim();
+          element.textContent = '';
+          element.classList.add('letter-animation-container', 'animation-ready');
+          element.setAttribute('aria-label', text);
+          element.style.opacity = '1'; // Make container visible
+
+          for (let i = 0; i < text.length; i++) {
+            const letterSpan = document.createElement('span');
+            letterSpan.classList.add('animated-letter');
+            letterSpan.textContent = text[i] === ' ' ? '\u00A0' : text[i]; 
+            letterSpan.setAttribute('aria-hidden', 'true'); 
+
+            letterSpan.style.animation = `letterAppear 1s forwards`; 
+            letterSpan.style.animationDelay = `${i * 0.07}s`; 
+            
+            element.appendChild(letterSpan);
+          }
+        });
+
+        // Handle date animations
+        const dateElements = entry.target.querySelectorAll('.date-animation');
+        dateElements.forEach((element, index) => {
+          element.classList.add('animation-ready');
+          element.style.opacity = '1';
+          element.style.animation = 'buttonAppear 0.8s forwards';
+          element.style.animationDelay = `${index * 0.2}s`;
+        });
+
+        // Handle text block animations
+        const textElements = entry.target.querySelectorAll('.text-animation');
+        textElements.forEach((element, index) => {
+          element.classList.add('animation-ready');
+          element.style.opacity = '1';
+          element.style.animation = 'buttonAppear 0.8s forwards';
+          element.style.animationDelay = `${index * 0.3}s`;
+        });
+        {% else %}
+        // If text animation is disabled, make text visible immediately
+        const textElements = entry.target.querySelectorAll('.letter-animation, .date-animation, .text-animation');
+        textElements.forEach(element => {
+          element.style.opacity = '1';
+        });
+        {% endif %}
+
+        {% if section.settings.enable_button_animation %}
+        const buttons = entry.target.querySelectorAll('.button-animation');
+        buttons.forEach(button => {
+          button.classList.add('animation-ready');
+          setTimeout(() => {
+            button.classList.add('animated');
+          }, 100);
+        });
+        {% else %}
+        const buttons = entry.target.querySelectorAll('.button-animation');
+        buttons.forEach(button => {
+          button.style.opacity = '1';
+        });
+        {% endif %}
+
+        observer.unobserve(entry.target);
+      }
+    });
+  }, {
+    root: null, 
+    rootMargin: '0px', 
+    threshold: 0.1 
+  });
+
+  document.querySelectorAll('.image-with-text-media-section-{{ section.id }}').forEach(section => {
+    observer.observe(section);
+  });
 }
 
 const buttons = document.querySelectorAll('.image-with-text-custom-button-css');
