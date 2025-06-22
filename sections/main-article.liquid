@@ -198,6 +198,9 @@
     }
     /* Mobile optimizations */
     @media (max-width: 768px) {
+      .blog-grid{
+        margin-top:0px !important;
+      }
          .blog-article {
       flex: 0 0 100%;
       max-width: 100%;
@@ -300,6 +303,10 @@
       }
     }
    @media (max-width: 768px) {
+     .social-media{
+       padding:10px;
+       font-size: 13px !important;
+     }
       body {
         overflow-x: hidden;
       }
@@ -367,6 +374,25 @@
       opacity: 1;
       transform: translateY(0);
     }
+    .animated-text {
+  will-change: transform, opacity;
+  backface-visibility: hidden;
+  transform: translateZ(0);
+  position: relative; /* Important for stable animation layer */
+  z-index: 2;
+}
+.letter {
+  display: inline-block;
+  opacity: 0;
+  transform: translateX(100vw);
+  animation: slideInLetter 0.8s forwards;
+  will-change: transform, opacity;
+}
+.overlay-content {
+  transition: transform 0.4s ease, opacity 0.4s ease;
+  will-change: transform, opacity;
+}
+
   </style>
 
 <script>
@@ -378,7 +404,7 @@
     for (let i = 0; i < text.length; i++) {
       const char = text[i] === ' ' ? '&nbsp;' : text[i];
       const delay = i * 0.05;
-      html += `<span class="letter" style="animation-delay: ${delay}s;">${char}</span>`;
+      html += <span class="letter" style="animation-delay: ${delay}s;">${char}</span>;
     }
     
     headingEl.innerHTML = html;
@@ -388,11 +414,11 @@
     
     const dateEl = document.querySelector('.date-tag');
     if (dateEl) {
-      dateEl.style.animationDelay = `${textAnimationCompleteTime + 0.2}s`;
+      dateEl.style.animationDelay = ${textAnimationCompleteTime + 0.2}s;
     }
     const arrowEl = document.querySelector('svg');
     if (arrowEl) {
-      arrowEl.style.animationDelay = `${textAnimationCompleteTime + 0.4}s`;
+      arrowEl.style.animationDelay = ${textAnimationCompleteTime + 0.4}s;
     }
   }
     const parallaxImage = document.querySelector('.parallax-image-overlay img');
@@ -462,7 +488,7 @@
   overlay.classList.remove('mobile-fixed', 'mobile-absolute');
   if (startParallax && !shouldStopParallax) {
     overlay.style.position = 'fixed';
-    overlay.style.top = `${OFFSET_TOP}px`;
+    overlay.style.top = ${OFFSET_TOP}px;
     overlay.style.zIndex = '10';
     overlay.style.transform = 'translateZ(0)';
     if (isMobile) {
@@ -474,17 +500,23 @@
       overlay.style.paddingRight = '10px';
     } else {
       initDesktopAnimation();
-      overlay.style.left = `${Math.max(0, containerRect.left)}px`;
-      overlay.style.width = `${containerRect.width}px`;
+      overlay.style.left = ${Math.max(0, containerRect.left)}px;
+      overlay.style.width = ${containerRect.width}px;
       overlay.style.paddingLeft = '';
       overlay.style.paddingRight = '';
       overlay.style.maxWidth = '';
     }
   } else if (shouldStopParallax) {
     overlay.style.position = 'absolute';
-    overlay.style.top = `${Math.max(0, container.offsetHeight - overlayHeight-55)}px`;
+    overlay.style.top = ${Math.max(0, container.offsetHeight - overlayHeight-55)}px;
     overlay.style.zIndex = '';
-    overlay.style.transform = 'translateZ(0)';
+    overlay.style.transition = 'none';
+    overlay.style.transform = 'translateY(-20px)';
+    overlay.style.opacity = '1';
+
+    requestAnimationFrame(() => {
+      overlay.style.opacity = '1';
+    });
     
     if (isMobile) {
       overlay.classList.add('mobile-absolute');
@@ -590,6 +622,8 @@
   style="min-height: 145vh;"
 >
   <div class="parallax-container relative" style="min-height: 140vh;">
+    <div class="overlay-placeholder" style="height: 180px;"></div>
+
      <div class="overlay-content max-w-7xl relative flex flex-col" style="margin-top: 55px;">
       {% if section.settings.show_date %}
         <div class="ml-4 text-4xl show_date">{{ article.published_at | date: '%m.%d.%y' }} &nbsp;&nbsp;</div>
@@ -676,7 +710,7 @@
   </div>
 </div>
 <div class="border-t border-b border-black py-2 " style="margin-left:1vw; margin-right:1vw;">
-  <div class="flex flex-col md:flex-row font-medium md:items-center md:space-x-10 space-y-4 md:space-y-0 color-{{ section.settings.color_scheme }} items-center">
+  <div class="social-media color-{{ section.settings.color_scheme }} items-center">
     <span class="sharebtn text-2xl text-black items-center" style="margin-right:250px; margin-top:0.7vw;">SHARE</span>
 
     {% if settings.social_facebook_link != blank %}
@@ -710,7 +744,7 @@
       <div class="w-2/3 max-w-[300px]">
         <h1 class="mt-10 blog_heading-highlight" style="font-weight:500; font-size:35px; line-height:0.9;">{{ section.settings.main_heading }}</h1>
       </div>
-      <div class="blog-grid w-full">
+      <div class="blog-grid w-full" style="margin-top:30px;">
         {% assign default_blog_handle = 'news' %} 
 {% assign blog_handle = section.settings.selected_blog | default: default_blog_handle %}
 {% assign blog = blogs[blog_handle] %}
