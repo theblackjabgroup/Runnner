@@ -5,6 +5,12 @@
   "name": "Blog Article",
   "settings": [
     {
+  "type": "checkbox",
+  "id": "show_blog_section",
+  "label": "Show Blog Section",
+  "default": true
+},
+    {
       "type": "text",
       "id": "full_text",
       "label": "Full Heading Text",
@@ -198,8 +204,12 @@
     }
     /* Mobile optimizations */
     @media (max-width: 768px) {
+      .section-2-header{
+        font-size:24px;
+      }
       .blog-grid{
         margin-top:0px !important;
+        margin-left:0px !important;
       }
          .blog-article {
       flex: 0 0 100%;
@@ -207,7 +217,8 @@
     }
        .blog_heading-highlight{
       font-size:24px !important;
-      margin-bottom:30px;
+      margin-bottom:35px;
+         margin-top:5px !important;
     }
       .parallax-image-overlay {
         position: absolute !important;
@@ -303,6 +314,14 @@
       }
     }
    @media (max-width: 768px) {
+     .blog-article-section{
+      line-height:1.3;
+       margin-top:3px !important;
+       margin-bottom:20px;
+     }
+     .animated-text{
+       line-height:1 !important;
+     }
      .social-media{
        padding:10px;
        font-size: 13px !important;
@@ -628,9 +647,9 @@
       {% if section.settings.show_date %}
         <div class="ml-4 text-4xl show_date">{{ article.published_at | date: '%m.%d.%y' }} &nbsp;&nbsp;</div>
       {% endif %}
-      <div class="flex flex-row items-start">
+      <div class="flex flex-row items-start px-2" style="width:65vw;">
          <div
-           class="font-medium uppercase leading-none tracking-tighter text-left md:w-[65vw] w-[55vw]"
+           class="font-medium uppercase leading-none tracking-tighter text-left"
           style="font-size: clamp(2rem, 8vw, 11rem);line-height: 0.8; color: {{ section.settings.color_scheme }};"
         >
         <svg
@@ -666,6 +685,7 @@
   class="blog-article-container color-{{ section.settings.color_scheme }} {% unless article.image %}no-image{% endunless %}"
   style="margin-top: -40px;"
 >
+  {% if section.settings.show_blog_section %}
   <div
     class="blog-article-content {% unless article.image %}centered-content{% endunless %}"
     style="color: rgb(var(--color-text));"
@@ -708,31 +728,32 @@
       </div>
     </div>
   </div>
+  {% endif %}
 </div>
-<div class="border-t border-b border-black py-2 " style="margin-left:1vw; margin-right:1vw;">
-  <div class="social-media color-{{ section.settings.color_scheme }} items-center">
-    <span class="sharebtn text-2xl text-black items-center" style="margin-right:250px; margin-top:0.7vw;">SHARE</span>
+<div class="border-t border-b border-black py-4 " style="margin-left:1vw; margin-right:1vw;  font-weight:500;">
+  <div class="social-media color-{{ section.settings.color_scheme }} items-center ">
+    <span class="sharebtn text-xl md:text-2xl text-black items-center;" style="margin-right:265px; margin-top:0.7vw">SHARE</span>
 
     {% if settings.social_facebook_link != blank %}
-        <a href="{{ settings.social_facebook_link }}" target="_blank" rel="noopener" aria-label="Facebook" class="text-2xl text-black">
+        <a href="{{ settings.social_facebook_link }}" target="_blank" rel="noopener" aria-label="Facebook" class="text-xl md:text-2xl text-black">
         FACEBOOK
       </a>
     {% endif %}
 
     {% if settings.social_twitter_link != blank %}
-       <a href="{{settings.social_twitter_link }}" target="_blank" rel="noopener" aria-label="Twitter" class="text-2xl text-black">
+       <a href="{{settings.social_twitter_link }}" target="_blank" rel="noopener" aria-label="Twitter" class="text-xl md:text-2xl text-black">
         TWITTER
       </a>
     {% endif %}
 
     {% if settings.social_email_link != blank %}
-      <a href="{{ settings.social_email_link }}" class="text-2xl text-black" aria-label="Email">
+      <a href="{{ settings.social_email_link }}" class="text-xl md:text-2xl text-black" aria-label="Email">
         EMAIL
       </a>
     {% endif %}
 
     {% if settings.social_linkedin_link != blank %}
-       <a href="{{ settings.social_linkedin_link }}" target="_blank" rel="noopener" aria-label="LinkedIn" class="text-2xl text-black">
+       <a href="{{ settings.social_linkedin_link }}" target="_blank" rel="noopener" aria-label="LinkedIn" class="text-xl md:text-2xl text-black">
         LINKEDIN
       </a>
     {% endif %}
@@ -744,7 +765,7 @@
       <div class="w-2/3 max-w-[300px]">
         <h1 class="mt-10 blog_heading-highlight" style="font-weight:500; font-size:35px; line-height:0.9;">{{ section.settings.main_heading }}</h1>
       </div>
-      <div class="blog-grid w-full" style="margin-top:30px;">
+      <div class="blog-grid w-full" style="margin-top:30px; margin-left:18px;">
         {% assign default_blog_handle = 'news' %} 
 {% assign blog_handle = section.settings.selected_blog | default: default_blog_handle %}
 {% assign blog = blogs[blog_handle] %}
