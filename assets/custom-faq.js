@@ -1,6 +1,6 @@
 document.addEventListener("DOMContentLoaded", () => {
   const urlPattern = /(https?:\/\/[^\s<]+(?:\.[a-z]{2,})(?:\/[^\s<]*)?)/gi;
-  const styleClass = 'font-bold underline break-all';
+  const styleClass = 'font-medium underline break-all';
 
   const convertLinks = (text) => {
     return text.replace(urlPattern, match => {
@@ -56,7 +56,13 @@ document.addEventListener("DOMContentLoaded", () => {
       });
 
       const isExpanded = wrapper.dataset.expanded === "true";
-      span.innerHTML = isExpanded ? wrapper.dataset.shortText : wrapper.dataset.fullText;
+span.classList.remove("faq-animate-fadeup");
+void span.offsetWidth;
+span.innerHTML = isExpanded ? wrapper.dataset.shortText : wrapper.dataset.fullText;
+if (!isExpanded) {
+  span.classList.add("faq-animate-fadeup");
+}
+
       wrapper.dataset.expanded = (!isExpanded).toString();
       svg.classList.toggle("rotate--90", !isExpanded);
     });

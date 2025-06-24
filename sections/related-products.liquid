@@ -1,254 +1,654 @@
-{{ 'component-card.css' | asset_url | stylesheet_tag }}
-{{ 'component-price.css' | asset_url | stylesheet_tag }}
-{{ 'section-related-products.css' | asset_url | stylesheet_tag }}
-
-{% if section.settings.image_shape == 'blob' %}
-  {{ 'mask-blobs.css' | asset_url | stylesheet_tag }}
-{%- endif -%}
-
-{%- style -%}
-  .section-{{ section.id }}-padding {
-    padding-top: {{ section.settings.padding_top | times: 0.75 | round: 0 }}px;
-    padding-bottom: {{ section.settings.padding_bottom | times: 0.75 | round: 0 }}px;
-  }
-
-  @media screen and (min-width: 750px) {
-    .section-{{ section.id }}-padding {
-      padding-top: {{ section.settings.padding_top }}px;
-      padding-bottom: {{ section.settings.padding_bottom }}px;
-    }
-  }
-{%- endstyle -%}
-
-<div class="color-{{ section.settings.color_scheme }} gradient">
-  <product-recommendations
-    class="related-products page-width section-{{ section.id }}-padding isolate{% if settings.animations_reveal_on_scroll %} scroll-trigger animate--slide-in{% endif %}"
-    data-url="{{ routes.product_recommendations_url }}?limit={{ section.settings.products_to_show }}"
-    data-section-id="{{ section.id }}"
-    data-product-id="{{ product.id }}"
+ {% if section.settings.enabled %}
+  {% if section.settings.color_scheme %}
+    {% assign section_classes_rp = 'related-products-section' %}
+    {% assign section_classes_rp = section_classes_rp | append: ' color-' | append: section.settings.color_scheme %}
+  {% endif %}
+  <div
+    class="related-products-page-width overflow-hidden {{section_classes_rp}}"
+    role="region"
+    aria-labelledby="related-products-heading"
+    aria-describedby="related-products-description"
   >
-    {% if recommendations.performed and recommendations.products_count > 0 %}
-      <h2 class="related-products__heading inline-richtext {{ section.settings.heading_size }}">
-        {{ section.settings.heading }}
-      </h2>
-      <ul
-        class="grid product-grid grid--{{ section.settings.columns_desktop }}-col-desktop grid--{{ section.settings.columns_mobile }}-col-tablet-down"
-        role="list"
+    {% if section.settings.heading != blank %}
+      <div
+        style="font-weight:500; color: var(--text);"
+        class="related-products-main-heading mb-[-10px]{% if section.settings.enable_letter_animation %} letter-animation{% endif %}"
       >
-        {% assign skip_card_product_styles = false %}
-        {% for recommendation in recommendations.products %}
-          <li class="grid__item">
-            {% render 'card-product',
-              card_product: recommendation,
-              media_aspect_ratio: section.settings.image_ratio,
-              image_shape: section.settings.image_shape,
-              show_secondary_image: section.settings.show_secondary_image,
-              show_vendor: section.settings.show_vendor,
-              show_rating: section.settings.show_rating,
-              skip_styles: skip_card_product_styles
-            %}
-          </li>
-          {%- assign skip_card_product_styles = true -%}
-        {% endfor %}
-      </ul>
+        {{ section.settings.heading }}
+      </div>
     {% endif %}
-  </product-recommendations>
-  {% if section.settings.image_shape == 'arch' %}
-    {{ 'mask-arch.svg' | inline_asset_content }}
-  {%- endif -%}
-</div>
+
+    
+
+    <hr class="border-(--text) my-6" aria-hidden="true">
+
+    <main class="related-products-container w-full mt-10" style="margin-top:18px;">
+      <div class="slider-container relative">
+        <div
+          id="related-product-slider"
+          class="product-slider flex gap-2 md:gap-4 cursor-grab overflow-x-auto custom-scrollbar"
+          role="list"
+          aria-label="Related Products"
+        >
+          {% if collections.all.products.size == 0 %}
+            {% for i in (1..5) %}
+              <article
+                class="product-card flex-none w-[220px] md:w-[450px]"
+                role="listitem"
+                aria-label="No products found"
+              >
+                <div class="product-image-wrapper relative group" aria-hidden="true">
+                  {{ 'collection-1' | placeholder_svg_tag }}
+                </div>
+                <div class="product-details mt-3" style="margin-bottom:8px;">
+                  <h3 class="!text-[1.6rem] uppercase font-medium leading-tight">No products found</h3>
+                  {% if section.settings.show_vendor %}
+                    <div class="product-vendor text-sm text-gray-600 uppercase">—</div>
+                  {% endif %}
+                  <div class="flex gap-2 items-baseline rp-price" style="margin-top: -6px;">
+                    <span class="!text-[1.6rem] uppercase font-medium">—</span>
+                  </div>
+                </div>
+              </article>
+            {% endfor %}
+          {% else %}
+            {% for product in collections.all.products limit: section.settings.products_to_show %}
+              <article
+                class="product-card flex-none w-[220px] md:w-[450px]"
+                role="listitem"
+                aria-label="{{ product.title }}"
+              >
+                <div class="product-image-wrapper relative group">
+                  {% unless product.available %}
+                    <div class="absolute top-3 right-4 z-10">
+                      <span
+                        class="inline-block rounded-xl px-4 text-[12px] tracking-wide font-medium bg-zinc-800"
+                        style="color: rgb(var(--color-background));"
+                      >
+                        SOLD OUT
+                      </span>
+                    </div>
+                  {% endunless %}
+
+                  <a
+                    href="{{ product.url }}"
+                    class="product-image-link block relative"
+                    aria-label="{{ product.title }}"
+                  >
+                    <div class="product-images-container relative">
+                      {% if product.images.size > 1 %}
+                        {% for image in product.images %}
+                          <img
+                            src="{{ image | img_url: '450x544', crop: 'center' }}"
+                            alt="{{ product.title }}{% if forloop.index > 1 %} image {{ forloop.index }}{% endif %}"
+                            class="product-image {% if forloop.first %}active{% else %}inactive{% endif %} rp-product-image"
+                            data-index="{{ forloop.index0 }}"
+                            data-product-id="{{ product.id }}"
+                            loading="lazy"
+                            decoding="async"
+                            width="450"
+                            height="544"
+                            style="object-fit: cover; width: 450px; height: 544px;"
+                          >
+                        {% endfor %}
+
+                        <button
+                          class="image-nav-arrow image-nav-prev"
+                          data-product-id="{{ product.id }}"
+                          aria-label="Previous image for {{ product.title }}"
+                        >
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            viewBox="0 0 24 24"
+                            width="32"
+                            height="32"
+                            style="opacity: 0.6;"
+                          >
+                            <path fill="currentColor" d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/>
+                          </svg>
+                        </button>
+                        <button
+                          class="image-nav-arrow image-nav-next"
+                          data-product-id="{{ product.id }}"
+                          aria-label="Next image for {{ product.title }}"
+                        >
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            viewBox="0 0 24 24"
+                            width="32"
+                            height="32"
+                            style="opacity: 0.6;"
+                          >
+                            <path fill="currentColor" d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/>
+                          </svg>
+                        </button>
+                      {% else %}
+                        <img
+                          src="{{ product.featured_image | img_url: '450x544', crop: 'center' }}"
+                          alt="{{ product.title }}"
+                          class="rp-product-image"
+                          loading="lazy"
+                          decoding="async"
+                          width="450"
+                          height="544"
+                          style="object-fit: cover; width: 450px; height: 544px;"
+                        >
+                      {% endif %}
+                    </div>
+                  </a>
+
+                  <div class="product-cart-container absolute bottom-4 left-1/2 transform -translate-x-1/2 w-full px-4">
+                    <div class="cart-options-wrapper relative">
+                      {% assign has_size_variants = false %}
+                      {% unless product.has_only_default_variant %}
+                        {% for option in product.options_with_values %}
+                          {% if option.name == 'Size' or option.name == 'size' %}
+                            {% assign has_size_variants = true %}
+                          {% endif %}
+                        {% endfor %}
+                      {% endunless %}
+
+                      {% if product.available %}
+                        <button
+                          class="add-to-cart-btn w-90 text-(--text) py-2 px-4 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                          style="background-color: rgb(var(--color-background));"
+                          data-product-id="{{ product.id }}"
+                          {% if product.has_only_default_variant %}
+                            data-variant-id="{{ product.variants.first.id }}"
+                            data-has-variants="false"
+                          {% elsif has_size_variants %}
+                            data-has-variants="true"
+                          {% else %}
+                            data-variant-id="{{ product.variants.first.id }}"
+                            data-has-variants="false"
+                          {% endif %}
+                          aria-label="Add {{ product.title }} to cart"
+                        >
+                          Add to Cart
+                        </button>
+                      {% else %}
+                        <button
+                          class="notify-me-btn w-90 text-(--text) py-2 px-4 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                          data-product-id="{{ product.id }}"
+                          data-product-title="{{ product.title | escape }}"
+                          data-has-variants="{% if has_size_variants %}true{% else %}false{% endif %}"
+                          aria-label="Get notified when {{ product.title }} is back in stock"
+                          aria-haspopup="dialog"
+                          style="background-color: rgb(var(--color-background));"
+                        >
+                          Notify Me When In Stock
+                        </button>
+                      {% endif %}
+                    </div>
+                  </div>
+                </div>
+
+                <div class="product-details mt-3" style="margin-bottom:8px;">
+                  <a href="{{ product.url }}" aria-label="{{ product.title }}">
+                    <h3 class="!text-[1.6rem] uppercase font-medium leading-tight">
+                      {{ product.title | escape }}
+                    </h3>
+                    {% if section.settings.show_vendor and product.vendor != blank %}
+                      <div class="product-vendor text-sm text-gray-600 uppercase" style="margin-top: 2px;">
+                        {{ product.vendor | escape }}
+                      </div>
+                    {% endif %}
+                    <div class="flex gap-2 items-baseline rp-price">
+                      <span class="!text-[1.6rem] uppercase font-medium"> {{ product.price | money }} </span>
+                      {%- if product.compare_at_price > product.price -%}
+                        |<span class="!text-[1.6rem] uppercase text-red-600">
+                          {{- product.compare_at_price | money }} FOR MEMBERS</span
+                        >
+                      {%- endif -%}
+                    </div>
+                  </a>
+                </div>
+              </article>
+            {% endfor %}
+          {% endif %}
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <div
+    id="rp-waitlist-modal-overlay"
+    class="fixed inset-0 z-50 bg-(--text) hidden items-center justify-center"
+    aria-modal="true"
+    aria-labelledby="rp-waitlist-product-title"
+    aria-describedby="rp-waitlist-product-variant"
+  >
+    <div
+      class="!w-auto md:!w-[50vw] max-w-[90vw] rounded p-4 md:p-10 shadow-lg mx-4"
+      style="background-color: rgb(var(--color-background));"
+    >
+      <div class="flex justify-end p-2 md:p-4">
+        <button
+          id="close-rp-waitlist-modal"
+          class="text-(--text) hover:text-gray-700 font-medium"
+          aria-label="Close waitlist form"
+        >
+          CLOSE
+        </button>
+      </div>
+
+      <h2 class="text-xl md:text-2xl font-bold mb-2" id="rp-waitlist-product-title">PRODUCT TITLE</h2>
+
+      <div class="text-gray-600 mb-4" id="rp-waitlist-product-variant">XS / PORT</div>
+
+      <hr class="border-gray-300 mx-2 md:mx-6" aria-hidden="true">
+
+      <div class="my-4 md:my-6">
+        <p class="font-medium mb-4 text-sm md:text-base">
+          Waitlist: Enter your email to get notified when this product becomes available again.
+        </p>
+
+        <div class="flex flex-col sm:flex-row gap-3 mb-4" aria-label="Waitlist notification form">
+          <input
+            type="email"
+            id="rp-waitlist-email"
+            placeholder="Your email"
+            class="flex-grow border border-gray-300 p-2 md:p-3 rounded text-sm md:text-base"
+          >
+          <button
+            id="rp-get-notified-btn"
+            class="bg-(--text) py-2 md:py-3 px-4 md:px-6 font-medium hover:bg-gray-800 rounded text-sm md:text-base"
+            aria-label="Submit waitlist request"
+            style="color: rgb(var(--color-background));"
+          >
+            GET NOTIFIED
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endif %}
+
+<style>
+    .related-products-page-width ::selection {
+      /* background: none; */
+      color: var(--cr-yellow-2) !important;
+    }
+    .related-products-page-width {
+      margin: 0 10px;
+      overflow-y: hidden;
+    }
+
+    div.related-products-main-heading {
+      line-height: 80% !important;
+      font-size: 3.5rem;
+      left: -3px;
+    }
+
+    @media (min-width: 500px) {
+      div.related-products-main-heading {
+        font-size: 5rem;
+      }
+    }
+
+    @media (min-width: 768px) {
+      div.related-products-main-heading {
+        padding-top: {{ section.settings.padding_top }}px;
+        font-size: 80px;
+      }
+
+      .related-products-container {
+        overflow: hidden;
+      }
+
+      .slider-container {
+        margin-right: -1.5rem;
+      }
+
+      .product-slider {
+        padding-right: 1.5rem;
+      }
+    }
+
+    .product-image-wrapper {
+      position: relative;
+      overflow: hidden;
+    }
+
+    .product-images-container {
+      position: relative;
+    }
+
+    /* Updated image transition styles */
+    .product-image {
+      position: absolute;
+      top: 0;
+      left: 0;
+      opacity: 0;
+      /* pointer-events: none; */
+      transition: opacity 0.5s ease;
+    }
+
+    .product-image.active {
+      opacity: 1;
+      /* pointer-events: auto; */
+      position: relative;
+    }
+
+    .rp-price{
+        margin-top: -6px !important;
+      }
+
+    .product-vendor {
+      font-size: 15px;
+      color: black;
+      text-transform: uppercase;
+      margin-top: 2px;
+      margin-bottom: 2px;
+    }
+
+    .image-nav-arrow {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      z-index: 15;
+      width: 44px;
+      height: 44px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      transition: opacity 0.3s ease, background-color 0.3s ease;
+      cursor: pointer;
+      border: none;
+    }
+
+    .product-image-wrapper:hover .image-nav-arrow {
+      opacity: 0.6;
+    }
+
+    .image-nav-arrow:hover {
+      background-color: rgba(68, 68, 68, 0.15);
+    }
+
+    .image-nav-prev {
+      left: 0px;
+    }
+
+    .image-nav-next {
+      right: 0px;
+    }
+
+    .product-cart-container {
+      z-index: 10;
+      width: 90%;
+    }
+
+    .cart-options-wrapper {
+      position: relative;
+    }
+
+    .add-to-cart-btn,
+    .notify-me-btn {
+      transition: all 0.3s ease;
+      width: 110%;
+      left: -5%;
+      height: 40px;
+      position: relative;
+      z-index: 5;
+      cursor: pointer;
+    }
+
+    .add-to-cart-btn:hover,
+    .notify-me-btn:hover {
+      background-color: var(--text);
+      color: rgb(var(--color-background));
+    }
+
+    {% if section.settings.uppercase_text %}
+      .related-products-page-width h2 {
+        text-transform: uppercase !important;
+      }
+    {% endif %}
+
+    hr {
+      border: 0;
+      background: #000;
+      margin: 0 !important;
+    }
+
+    .slider-container {
+      position: relative;
+      width: 100%;
+      overflow-x: auto;
+      overflow-y: hidden;
+      -webkit-overflow-scrolling: touch;
+      height: auto;
+      padding-bottom: 24px;
+    }
+
+    .product-slider {
+      display: flex;
+      gap: 18px;
+      overflow-y: hidden;
+    }
+
+    .product-card {
+      flex-shrink: 0;
+      height: auto;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+      overflow: hidden;
+    }
+
+    .product-slider::-webkit-scrollbar:vertical {
+      display: none;
+    }
+
+    .cursor-grab {
+      cursor: grab;
+      padding-bottom: 12px;
+    }
+
+    .cursor-grabbing {
+      cursor: grabbing;
+    }
+
+    .custom-scrollbar::-webkit-scrollbar {
+      height: 8px;
+      background: transparent;
+      transform: translateY(-50%);
+    }
+
+    .custom-scrollbar::-webkit-scrollbar-track {
+      background-color: transparent;
+      background-image: linear-gradient(to right, var(--text), var(--text));
+      background-size: 100% 1px;
+      background-repeat: no-repeat;
+      background-position: center;
+      border: none;
+    }
+
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background-color: var(--text);
+      height: 3px;
+      border: none;
+      /* border-radius: 4px; */
+      margin-top: -1px;
+    }
+
+    .custom-scrollbar::-webkit-scrollbar-button:single-button {
+      display: none;
+      width: 0;
+      height: 0;
+    }
+
+    #rp-waitlist-modal-overlay {
+      transition: opacity 0.3s ease;
+    }
+
+    #rp-waitlist-modal-overlay.hidden {
+      opacity: 0;
+      /* pointer-events: none; */
+    }
+
+    #rp-waitlist-product-title {
+      text-transform: uppercase;
+      font-weight: bold;
+    }
+
+    #rp-waitlist-email {
+      border: 1px solid #ccc;
+    }
+
+    #rp-get-notified-btn {
+      white-space: nowrap;
+      text-transform: uppercase;
+    }
+
+    .product-image-wrapper {
+    position: relative;
+    overflow: hidden;
+  }
+  .product-image {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: opacity 0.5s ease-in-out;
+    opacity: 0;
+    /* pointer-events: none; */
+  }
+  .product-image.active {
+    opacity: 1;
+    /* pointer-events: auto; */
+  }
+
+    @media (max-width: 768px) {
+      .product-slider {
+        gap: 8px;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+      }
+      .product-slider::-webkit-scrollbar {
+        display: none;
+      }
+
+      .slider-container {
+        overflow-x: hidden !important;
+      }
+
+      .related-products-main-heading {
+        padding-top: {{ section.settings.padding_top }}px;
+      }
+
+      .rp-product-image {
+        width: 225px !important;
+        height: 277px !important;
+      }
+
+      .rp-price{
+        margin-top: -6px
+      }
+
+      .cursor-grab{
+        padding-bottom: 0px;
+      }
+
+      .size-variants-container,
+      .product-cart-container,
+      .cart-options-wrapper {
+        display: none !important;
+        opacity: 0 !important;
+        visibility: hidden !important;
+      }
+    }
+
+    @keyframes letterAppear {
+      0% {
+        transform: translateX(10000%);
+        opacity: 0;
+      }
+      100% {
+        transform: translateX(0);
+        opacity: 1;
+      }
+    }
+    .letter-animation-container {
+      display: inline-block;
+      width: 100%;
+      overflow: visible;
+      position: relative;
+    }
+    .animated-letter {
+      display: inline-block;
+      opacity: 0;
+      transform: translateX(500%);
+      position: relative;
+    }
+
+    /* Ensure hidden elements are completely removed from layout */
+    .hidden {
+      display: none !important;
+    }
+</style>
+
+<script src="{{ 'featured-collection.js' | asset_url }}" defer></script>
 
 {% schema %}
 {
-  "name": "t:sections.related-products.name",
+  "name": "Related Products",
   "tag": "section",
   "class": "section",
   "settings": [
     {
-      "type": "paragraph",
-      "content": "t:sections.related-products.settings.paragraph__1.content"
-    },
-    {
-      "type": "inline_richtext",
-      "id": "heading",
-      "default": "t:sections.related-products.settings.paragraph__1.default",
-      "label": "t:sections.related-products.settings.heading.label"
-    },
-    {
-      "type": "select",
-      "id": "heading_size",
-      "options": [
-        {
-          "value": "h2",
-          "label": "t:sections.all.heading_size.options__1.label"
-        },
-        {
-          "value": "h1",
-          "label": "t:sections.all.heading_size.options__2.label"
-        },
-        {
-          "value": "h0",
-          "label": "t:sections.all.heading_size.options__3.label"
-        },
-        {
-          "value": "hxl",
-          "label": "t:sections.all.heading_size.options__4.label"
-        },
-        {
-          "value": "hxxl",
-          "label": "t:sections.all.heading_size.options__5.label"
-        }
-      ],
-      "default": "h1",
-      "label": "t:sections.all.heading_size.label"
-    },
-    {
-      "type": "range",
-      "id": "products_to_show",
-      "min": 2,
-      "max": 10,
-      "step": 1,
-      "default": 4,
-      "label": "t:sections.related-products.settings.products_to_show.label"
-    },
-    {
-      "type": "range",
-      "id": "columns_desktop",
-      "min": 1,
-      "max": 6,
-      "step": 1,
-      "default": 4,
-      "label": "t:sections.related-products.settings.columns_desktop.label"
-    },
-    {
-      "type": "select",
-      "id": "columns_mobile",
-      "default": "2",
-      "label": "t:sections.related-products.settings.columns_mobile.label",
-      "options": [
-        {
-          "value": "1",
-          "label": "t:sections.related-products.settings.columns_mobile.options__1.label"
-        },
-        {
-          "value": "2",
-          "label": "t:sections.related-products.settings.columns_mobile.options__2.label"
-        }
-      ]    
+      "type": "checkbox",
+      "id": "enabled",
+      "label": "Enable section",
+      "default": true
     },
     {
       "type": "color_scheme",
       "id": "color_scheme",
       "label": "t:sections.all.colors.label",
-      "info": "t:sections.all.colors.has_cards_info",
       "default": "scheme-1"
     },
     {
-      "type": "header",
-      "content": "t:sections.related-products.settings.header__2.content"
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Related Products"
     },
     {
-      "type": "select",
-      "id": "image_ratio",
-      "options": [
-        {
-          "value": "adapt",
-          "label": "t:sections.related-products.settings.image_ratio.options__1.label"
-        },
-        {
-          "value": "portrait",
-          "label": "t:sections.related-products.settings.image_ratio.options__2.label"
-        },
-        {
-          "value": "square",
-          "label": "t:sections.related-products.settings.image_ratio.options__3.label"
-        }
-      ],
-      "default": "adapt",
-      "label": "t:sections.related-products.settings.image_ratio.label"
-    },
-    {
-      "type": "select",
-      "id": "image_shape",
-      "options": [
-        {
-          "value": "default",
-          "label": "t:sections.all.image_shape.options__1.label"
-        },
-        {
-          "value": "arch",
-          "label": "t:sections.all.image_shape.options__2.label"
-        },
-        {
-          "value": "blob",
-          "label": "t:sections.all.image_shape.options__3.label"
-        },
-        {
-          "value": "chevronleft",
-          "label": "t:sections.all.image_shape.options__4.label"
-        },
-        {
-          "value": "chevronright",
-          "label": "t:sections.all.image_shape.options__5.label"
-        },
-        {
-          "value": "diamond",
-          "label": "t:sections.all.image_shape.options__6.label"
-        },
-        {
-          "value": "parallelogram",
-          "label": "t:sections.all.image_shape.options__7.label"
-        },
-        {
-          "value": "round",
-          "label": "t:sections.all.image_shape.options__8.label"
-        }
-      ],
-      "default": "default",
-      "label": "t:sections.all.image_shape.label"
-    },
-    {
-      "type": "checkbox",
-      "id": "show_secondary_image",
-      "default": false,
-      "label": "t:sections.related-products.settings.show_secondary_image.label"
+      "type": "range",
+      "id": "products_to_show",
+      "label": "Number of products to show",
+      "min": 1,
+      "max": 50,
+      "step": 1,
+      "default": 12,
+      "info": "Select how many products to display in the related products section"
     },
     {
       "type": "checkbox",
       "id": "show_vendor",
+      "label": "Show product vendor",
       "default": false,
-      "label": "t:sections.related-products.settings.show_vendor.label"
-    },
-    {
-      "type": "checkbox",
-      "id": "show_rating",
-      "default": false,
-      "label": "t:sections.related-products.settings.show_rating.label",
-      "info": "t:sections.related-products.settings.show_rating.info"
-    },
-    {
-      "type": "header",
-      "content": "t:sections.all.padding.section_padding_heading"
+      "info": "Display the vendor/brand name below the product title"
     },
     {
       "type": "range",
       "id": "padding_top",
+      "label": "Top Padding",
       "min": 0,
-      "max": 100,
-      "step": 4,
+      "max": 50,
+      "step": 1,
       "unit": "px",
-      "label": "t:sections.all.padding.padding_top",
-      "default": 36
-    },
+      "default": 15
+    }
+  ],
+  "presets": [
     {
-      "type": "range",
-      "id": "padding_bottom",
-      "min": 0,
-      "max": 100,
-      "step": 4,
-      "unit": "px",
-      "label": "t:sections.all.padding.padding_bottom",
-      "default": 36
+      "name": "Related Products"
     }
   ]
 }

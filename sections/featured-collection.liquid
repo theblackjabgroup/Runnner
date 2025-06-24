@@ -17,7 +17,10 @@
       </div>
     {% endif %}
 
-    <div class="flex justify-between items-center w-full featured-collection-subheading" style="padding-top: 10px;">
+    <div
+      class="flex justify-between items-center w-full featured-collection-subheading"
+      style="padding-top: 10px; color: var(--text);"
+    >
       <div class="flex-grow md:text-[24px] text-2xl md:mt-[-20px]">
         {% if section.settings.description != blank %}
           {{ section.settings.description }}
@@ -86,14 +89,48 @@
                   <path fill="currentColor" d="M26.79,9.21A35.06,35.06,0,0,0,37,16.2v3.66a35.34,35.34,0,0,0-10.21,7A12.84,12.84,0,0,0,23.21,36H17.56q0-6.22,3-10a15.4,15.4,0,0,1,8.06-5.2V20.6H0V15.43H28.63v-.3A15.16,15.16,0,0,1,20.57,10q-3-3.77-3-10h5.65a13,13,0,0,0,.87,5A12.79,12.79,0,0,0,26.79,9.21Z"/>
                 </svg>
               {% endcomment %}
-              <img
-                src="{{ "arrow-down.png" | asset_url }}"
+              {% comment %}
+                <img
+                  src="{{ "arrow-down.png" | asset_url }}"
+                  alt="Dropdown Icon"
+                  class="w-12 h-6 object-contain transition-transform duration-300 group-hover:-rotate-90 collection-arrow-img"
+                  width="100%"
+                  height="auto"
+                  aria-hidden="true"
+                >
+              {% endcomment %}
+              <div
+                class="object-contain transition-transform duration-300 group-hover:-rotate-90 fc-arrow-img"
                 alt="Dropdown Icon"
-                class="w-12 h-6 object-contain transition-transform duration-300 group-hover:-rotate-90 collection-arrow-img"
-                width="100%"
-                height="auto"
-                aria-hidden="true"
               >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  class="featured-collection-arrow-svg w-5 h-5 object-contain transition-transform duration-300 ease-in-out group-hover:-rotate-90 mx-1"
+                  fill="none"
+                  viewBox="0 0 9 9"
+                  stroke-width="1.5"
+                  stroke="currentColor"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  aria-hidden="true"
+                >
+                  <path d="M1.1875 7.7334H7.6599M7.6599 7.7334V1.261M7.6599 7.7334L1.1875 1.261"/>
+                </svg>
+                {% comment %}
+                  <svg
+                    class="featured-collection-arrow-svg transition-transform duration-200 ease-in-out"
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="25px"
+                    height="25px"
+                    stroke-width="10"
+                    viewBox="0 0 20 20"
+                  >
+                    <g transform="rotate(270 12 12)">
+                      <path fill="currentColor" d="M1.1875 7.7334H7.6599M7.6599 7.7334V1.261M7.6599 7.7334L1.1875 1.261"></path>
+                    </g>
+                  </svg>
+                {% endcomment %}
+              </div>
             </button>
           {% endfor %}
         </div>
@@ -169,10 +206,10 @@
                       >
                         <div class="product-image-wrapper relative group">
                           {% unless product.available %}
-                            <div class="absolute top-3 right-4 z-10">
+                            <div class="absolute top-3 right-4 z-2">
                               <span
                                 class="inline-block rounded-xl px-4 text-[12px] tracking-wide font-medium bg-zinc-800"
-                                style="color: rgb(var(--color-background));"
+                                style="color: rgb(var(--color-background)); background-color: var(--text);"
                               >
                                 SOLD OUT
                               </span>
@@ -188,7 +225,16 @@
                               {% if product.images.size > 1 %}
                                 {% for image in product.images %}
                                   <img
-                                    src="{{ image | img_url: '450x544', crop: 'center' }}"
+                                    srcset="
+                                      {%- if image.width >= 165 -%}{{ image | image_url: width: 165 }} 165w,{%- endif -%}
+                                      {%- if image.width >= 360 -%}{{ image | image_url: width: 360 }} 360w,{%- endif -%}
+                                      {%- if image.width >= 535 -%}{{ image | image_url: width: 535 }} 535w,{%- endif -%}
+                                      {%- if image.width >= 750 -%}{{ image | image_url: width: 750 }} 750w,{%- endif -%}
+                                      {%- if image.width >= 1070 -%}{{ image | image_url: width: 1070 }} 1070w,{%- endif -%}
+                                      {%- if image.width >= 1500 -%}{{ image | image_url: width: 1500 }} 1500w,{%- endif -%}
+                                      {{ image | image_url }} {{ image.width }}w
+                                    "
+                                    src="{{ image | image_url: width: 750, crop: 'center' }}"
                                     alt="{{ product.title }}{% if forloop.index > 1 %} image {{ forloop.index }}{% endif %}"
                                     class="product-image {% if forloop.first %}active{% else %}inactive{% endif %} fc-product-image"
                                     data-index="{{ forloop.index0 }}"
@@ -208,12 +254,10 @@
                                 >
                                   <svg
                                     xmlns="http://www.w3.org/2000/svg"
-                                    viewBox="0 0 24 24"
-                                    width="32"
-                                    height="32"
-                                    style="opacity: 0.6;"
+                                    stroke="currentColor"
+                                    viewBox="0 0 9 9"
                                   >
-                                    <path fill="currentColor" d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/>
+                                    <path fill="currentColor" d="M1.1875 7.7334H7.6599M7.6599 7.7334V1.261M7.6599 7.7334L1.1875 1.261"></path>
                                   </svg>
                                 </button>
                                 <button
@@ -223,12 +267,10 @@
                                 >
                                   <svg
                                     xmlns="http://www.w3.org/2000/svg"
-                                    viewBox="0 0 24 24"
-                                    width="32"
-                                    height="32"
-                                    style="opacity: 0.6;"
+                                    stroke="currentColor"
+                                    viewBox="0 0 9 9"
                                   >
-                                    <path fill="currentColor" d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/>
+                                    <path fill="currentColor" d="M1.1875 7.7334H7.6599M7.6599 7.7334V1.261M7.6599 7.7334L1.1875 1.261"></path>
                                   </svg>
                                 </button>
                               {% else %}
@@ -268,7 +310,11 @@
                                     {% if option.name == 'Size' or option.name == 'size' %}
                                       {% assign size_option_index = forloop.index0 %}
                                       <div class="size-label-wrapper flex items-center w-full">
-                                        <span class="size-label text-m font-semibold px-2 mr-auto">SELECT SIZE</span>
+                                        <span
+                                          class="size-label text-m px-2 mr-auto"
+                                          style="color: var(--text); background-color: rgb(var(--color-background));"
+                                          >SELECT SIZE</span
+                                        >
                                         <div
                                           class="size-options-wrapper flex flex-wrap gap-4 justify-end"
                                           data-option-index="{{ size_option_index }}"
@@ -284,7 +330,7 @@
                                             {% endfor %}
 
                                             <button
-                                              class="size-option-btn p-5 bg-gray-200 text-s rounded size-animate {% unless variant_available %}unavailable-size{% endunless %}"
+                                              class="size-option-btn p-5 text-s rounded size-animate {% unless variant_available %}unavailable-size{% endunless %}"
                                               {% if variant_available %}
                                                 data-variant-id="{{ variant_id }}"
                                                 data-product-id="{{ product.id }}"
@@ -295,7 +341,7 @@
                                                 data-variant-size="{{ value }}"
                                                 aria-disabled="true"
                                               {% endif %}
-                                              style="--animation-order: {{ forloop.index }}"
+                                              style="--animation-order: {{ forloop.index }}; background-color: rgb(var(--color-background)); color: var(--text);"
                                               aria-label="Size {{ value }}{% unless variant_available %} - Sold Out{% endunless %}"
                                               {% unless variant_available %}
                                                 aria-disabled="true"
@@ -314,7 +360,7 @@
                               {% if product.available %}
                                 <button
                                   class="add-to-cart-btn w-90 text-(--text) py-2 px-4 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-                                  style="background-color: rgb(var(--color-background));"
+                                  style="background-color: rgb(var(--color-background)); color: var(--text);"
                                   data-product-id="{{ product.id }}"
                                   {% if product.has_only_default_variant %}
                                     data-variant-id="{{ product.variants.first.id }}"
@@ -337,7 +383,7 @@
                                   data-has-variants="{% if has_size_variants %}true{% else %}false{% endif %}"
                                   aria-label="Get notified when {{ product.title }} is back in stock"
                                   aria-haspopup="dialog"
-                                  style="background-color: rgb(var(--color-background));"
+                                  style="background-color: rgb(var(--color-background)); color: var(--text);"
                                 >
                                   Notify Me When In Stock
                                 </button>
@@ -348,11 +394,18 @@
 
                         <div class="product-details mt-3" style="margin-bottom:8px;">
                           <a href="{{ product.url }}" aria-label="{{ product.title }}">
-                            <h3 class="!text-[1.6rem] uppercase leading-tight" style="font-weight: 600 !important;">
+                            <h3
+                              class="!text-[1.6rem] uppercase leading-tight"
+                              style="font-weight: 600 !important; color: var(--text);"
+                            >
                               {{ product.title | escape }}
                             </h3>
-                            <div id="fc-product-price" class="flex gap-2 items-baseline fc-price">
-                              <span class="!text-[1.6rem] uppercase">
+                            <div
+                              id="fc-product-price"
+                              class="flex gap-2 items-baseline fc-price"
+                              style="color: var(--text);"
+                            >
+                              <span class="!text-[1.6rem] uppercase" style="color: var(--text);">
                                 {{ product.price | money }}
                               </span>
                               {%- if product.compare_at_price > product.price -%}
@@ -435,8 +488,14 @@
       color: var(--cr-yellow-2) !important;
     }
     .featured-collection-page-width {
-      margin: 0 20px;
+      margin: 0 1vw;
       overflow-y: hidden;
+    }
+
+    @media (max-width: 749px) {
+      .featured-collection-page-width {
+        margin: 0 10px;
+      }
     }
 
     .featured-collection-subheading {
@@ -493,7 +552,7 @@
       background: rgb(var(--color-background));
       color: var(--text);
       text-decoration: none;
-      transition: all 0.3s ease;
+      transition: all 0.5s ease;
       cursor: pointer;
       display: flex;
       align-items: center;
@@ -504,7 +563,7 @@
 
     .svg-arrow-right {
       opacity: 0;
-      transition: opacity 0.3s ease, transform 0.3s ease;
+      transition: opacity 0.5s ease, transform 0.5s ease;
       transform: translateX(-4px);
     }
     .collection-btn:hover .svg-arrow-right,
@@ -517,6 +576,21 @@
     .collection-filters .collection-btn.active {
       background: var(--text);
       color: rgb(var(--color-background));
+    }
+
+    .collection-filters .collection-btn.active .featured-collection-arrow-svg{
+      fill: var(--background);
+      transform: rotate(-90deg);
+    }
+
+    .collection-filters .collection-btn:hover .featured-collection-arrow-svg{
+      fill: var(--background);
+      transform: rotate(-90deg);
+    }
+
+    .collection-filters .collection-btn .featured-collection-arrow-svg{
+      fill: var(--text);
+      /* transform: rotate(45deg); */
     }
 
     .product-image-wrapper {
@@ -535,7 +609,7 @@
       left: 0;
       opacity: 0;
       /* pointer-events: none; */
-      transition: opacity 0.5s ease;
+      transition: opacity 0.7s ease;
     }
 
     .product-image.active {
@@ -559,7 +633,7 @@
       align-items: center;
       justify-content: center;
       opacity: 0;
-      transition: opacity 0.3s ease, background-color 0.3s ease;
+      transition: opacity 0.5s ease, background-color 0.5s ease;
       cursor: pointer;
       border: none;
     }
@@ -570,6 +644,25 @@
 
     .image-nav-arrow:hover {
       background-color: rgba(68, 68, 68, 0.15);
+    }
+
+    .image-nav-arrow:hover svg {
+      transition: opacity 0.5s ease;
+      opacity: 0.6;
+    }
+
+    .image-nav-arrow svg{
+      opacity: 0;
+      width: 15px;
+      height: 15px;
+    }
+
+    .image-nav-prev svg {
+      transform: rotate(135deg);
+    }
+
+    .image-nav-next svg {
+      transform: rotate(-45deg);
     }
 
     .image-nav-prev {
@@ -591,7 +684,7 @@
 
     .add-to-cart-btn,
     .notify-me-btn {
-      transition: all 0.3s ease;
+      transition: all 0.5s ease;
       width: 110%;
       left: -5%;
       height: 40px;
@@ -614,7 +707,7 @@
       left: -5%;
       height: 100%;
       z-index: 10;
-      transition: all 0.3s ease;
+      transition: all 0.5s ease;
       transform: translateY(0);
       display: flex;
       justify-content: center;
@@ -653,10 +746,10 @@
     }
 
     .size-option-btn {
-      transition: all 0.2s ease;
+      transition: all 0.4s ease;
       width: 30px;
       height: 30px;
-      border: 1px solid #000;
+      border: 1px solid var(--text);
       padding: 2px;
       display: flex;
       align-items: center;
@@ -665,21 +758,21 @@
       opacity: 1; /* Ensure buttons are visible */
       visibility: visible; /* Ensure buttons are visible */
       background-color: transparent;
-      color: #000;
+      color: var(--text);
     }
 
     .size-option-btn:hover {
       transform: translateY(-2px);
-      background-color: #000 !important;
-      color: #fff !important;
+      background-color: var(--text) !important;
+      color: rgb(var(--color-background)) !important;
     }
 
     .unavailable-size {
       opacity: 1;
       position: relative;
       cursor: not-allowed;
-      border-color: #ccc;
-      color: #ccc;
+      border-color: var(--disabled_text);
+      color: var(--disabled_text);
       overflow: hidden;
     }
 
@@ -737,7 +830,7 @@
       color: rgb(var(--color-background));
       text-decoration: none;
       border-radius: 4px;
-      transition: background-color 0.3s ease;
+      transition: background-color 0.5s ease;
     }
 
     .shop-all-button:hover {
@@ -745,7 +838,7 @@
     }
 
     {% if section.settings.uppercase_text %}
-      .featured-collection-page-width h2 {
+      .featured-collection-main-heading {
         text-transform: uppercase !important;
       }
     {% endif %}
@@ -824,7 +917,7 @@
     }
 
     #waitlist-modal-overlay {
-      transition: opacity 0.3s ease;
+      transition: opacity 0.5s ease;
     }
 
     #waitlist-modal-overlay.hidden {
@@ -866,7 +959,7 @@
       border-radius: 4px;
       border: var(--text) 1px solid !important;
       overflow: hidden;
-      transition: background-color 0s, color 0s;
+      transition: background-color 0.3s, color 0.3s;
     }
 
     .featured-collection-custom-button:hover {
@@ -889,7 +982,7 @@
       line-height: 1;
       text-transform: uppercase;
       letter-spacing: 0.05em;
-      transition: transform 0.7s ease;
+      transition: transform 1s ease;
     }
 
     .featured-collection-custom-button:hover .featured-collection-button-text {
@@ -907,7 +1000,7 @@
       text-transform: uppercase;
       letter-spacing: 0.05em;
       transform: translateX(100%);
-      transition: transform 0.7s ease;
+      transition: transform 1s ease;
     }
 
     .featured-collection-custom-button:hover .featured-collection-button-text-hover {
@@ -981,6 +1074,14 @@
 
       .featured-collection-button-text{
         font-size: 14px;
+      }
+
+      .featured-collection-button-text-hover{
+        font-size: 14px;
+      }
+
+      .collection-filters .collection-btn .fc-arrow-img{
+        display: none;
       }
 
       .product-slider {
