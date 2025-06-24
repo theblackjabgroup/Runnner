@@ -170,7 +170,7 @@
                     style="width: 40vw; z-index: 1001;"
                     aria-hidden="true"
                   >
-                    <div class="flex justify-between items-center p-4 border-b">
+                    <div class="flex justify-between items-center p-4 border-b" style="margin-top: 9vh">
                       <h2 class="text-xl font-semibold">Size Chart</h2>
                       <button
                         id="close-size-chart"
@@ -952,8 +952,15 @@
 
 <script>
   document.addEventListener('DOMContentLoaded', () => {
-    console.log("Script loaded");
-console.log("Strip images found:", document.querySelectorAll('.strip-image-wrapper').length);
+
+    function lockBodyScroll() {
+      document.body.style.overflow = 'hidden';
+      document.body.style.touchAction = 'none';
+    }
+    function unlockBodyScroll() {
+      document.body.style.overflow = '';
+      document.body.style.touchAction = '';
+    }
 
       // size-chart button functionality
       const openBtn = document.getElementById("open-size-chart");
@@ -969,11 +976,13 @@ console.log("Strip images found:", document.querySelectorAll('.strip-image-wrapp
           setTimeout(() => {
             drawer.classList.remove("translate-x-full");
           }, 20); 
+          lockBodyScroll();
         });
       
         const closeDrawer = () => {
           drawer.classList.add("translate-x-full");
           backdrop.classList.add("hidden");
+          unlockBodyScroll(); 
       
           setTimeout(() => {
             drawer.classList.add("hidden");
@@ -1032,7 +1041,13 @@ console.log("Strip images found:", document.querySelectorAll('.strip-image-wrapp
       let scrollLockUntil = 0; // time until scroll is locked out
     
       function updateActiveImage() {
-        // Skip scroll-based update if recently clicked
+
+        if (totalImages === 1) {
+          items[0].classList.add('is-active');
+          stripImages[0].classList.add('active');
+          return;
+        }
+      // Skip scroll-based update if recently clicked
         if (Date.now() < scrollLockUntil) return;
     
         const galleryTop = gallery.offsetTop;
@@ -1232,24 +1247,6 @@ tabButtons.forEach((button) => {
       });
     });
 
-    // Image strip handling
-    {% comment %} const stripImages = document.querySelectorAll('.strip-image-wrapper');
-
-    stripImages.forEach((stripImage) => {
-      stripImage.addEventListener('click', () => {
-        const targetIndex = parseInt(stripImage.dataset.stripIndex);
-        console.log("Clicked strip index:", targetIndex);
-
-
-        items.forEach((item, index) => {
-          item.classList.toggle('is-active', index === targetIndex);
-        });
-
-        stripImages.forEach((img) => {
-          img.classList.toggle('active', img === stripImage);
-        });
-      });
-    });  {% endcomment %}
 
     // Mobile Gallery Handling
     if (window.innerWidth < 1024) {
@@ -1283,13 +1280,12 @@ tabButtons.forEach((button) => {
         currentIndex = index;
       }
 
-      // Add click handlers to thumbnails
-  thumbnails.forEach((thumb) => {
-    thumb.addEventListener('click', () => {
-      const index = parseInt(thumb.dataset.thumbIndex);
-      showImage(index);
-    });
-  });
+      thumbnails.forEach((thumb) => {
+        thumb.addEventListener('click', () => {
+          const index = parseInt(thumb.dataset.thumbIndex);
+          showImage(index);
+        });
+      });
 
 
       // Initialize with first image
