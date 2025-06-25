@@ -411,6 +411,16 @@
   transition: transform 0.4s ease, opacity 0.4s ease;
   will-change: transform, opacity;
 }
+.fade-in-up {
+  opacity: 0;
+  transform: translateY(40px);
+  transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+}
+
+.fade-in-up.active {
+  opacity: 1;
+  transform: translateY(0);
+}
 
   </style>
 
@@ -422,14 +432,14 @@
     let html = '';
     for (let i = 0; i < text.length; i++) {
       const char = text[i] === ' ' ? '&nbsp;' : text[i];
-      const delay = i * 0.05;
+      const delay = i * 0.07;
       html += `<span class="letter" style="animation-delay: ${delay}s;">${char}</span>`;
     }
     
     headingEl.innerHTML = html;
     
-    const lastLetterDelay = (text.length - 1) * 0.05;
-    const textAnimationCompleteTime = lastLetterDelay + 0.2;
+    const lastLetterDelay = (text.length - 1) * 0.07;
+    const textAnimationCompleteTime = lastLetterDelay + 5;
     
     const dateEl = document.querySelector('.date-tag');
     if (dateEl) {
@@ -474,21 +484,31 @@
         ticking = true;
       }
     }
-    if (parallaxImage) {
-      parallaxImage.classList.add('fade-in-up');
-      const observer = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-          if (entry.isIntersecting) {
-            parallaxImage.classList.add('active');
-            observer.unobserve(parallaxImage);
-          }
-        });
-      }, { 
-        threshold: 0.1,
-        rootMargin: '0px 0px -50px 0px'
+   if (parallaxImage && headingEl) {
+  const text = headingEl.innerText;
+  const lastLetterDelay = (text.length - 1) * 0.07;
+  const textAnimationCompleteTime = lastLetterDelay + 5;
+
+  // Delay fade-in until text animation is complete
+  setTimeout(() => {
+    parallaxImage.classList.add('fade-in-up');
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          parallaxImage.classList.add('active');
+          observer.unobserve(parallaxImage);
+        }
       });
-      observer.observe(parallaxImage);
-    }
+    }, {
+      threshold: 0.1,
+      rootMargin: '0px 0px -50px 0px'
+    });
+    observer.observe(parallaxImage);
+    console.log(`Parallax fade-in scheduled after ${textAnimationCompleteTime + 0.3} seconds`);
+
+  }, (textAnimationCompleteTime + 0.3) * 1000); // buffer after text animation
+}
+
   function onScroll() {
   ticking = false;
   
@@ -762,7 +782,7 @@
 <section class="p-6 color-{{ section.settings.color_scheme }}">
   <div class="w-full uppercase">
     <div class="flex flex-col md:flex-row md:items-start gap-10">
-      <div class="w-2/3 max-w-[300px]">
+      <div class="w-2/3 max-w-[300px]" style="width:320px; margin-right:40px;"> 
         <h1 class="mt-10 blog_heading-highlight" style="font-weight:500; font-size:35px; line-height:0.9;">{{ section.settings.main_heading }}</h1>
       </div>
       <div class="blog-grid w-full" style="margin-top:30px; margin-left:18px;">
