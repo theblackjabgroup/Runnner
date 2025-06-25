@@ -1,8 +1,4 @@
 {%- style -%}
-    .image-with-text-section-{{ section.id }}-padding {
-      padding-top: {{ section.settings.padding_top | times: 0.75 | round: 0 }}px;
-      padding-bottom: {{ section.settings.padding_bottom | times: 0.75 | round: 0 }}px;
-    }
     .image-with-text-media-section-{{ section.id }} ::selection {
       /* background: none; */
       color: var(--cr-yellow-2) !important;
@@ -66,6 +62,48 @@
       transform: translateX(500%);
       position: relative;
     }
+
+    /* Animation ready states for all blocks */
+    .letter-animation {
+      opacity: 0;
+    }
+
+    .letter-animation.animation-ready {
+      opacity: 1;
+    }
+
+    .button-animation {
+      opacity: 0;
+    }
+
+    .button-animation.animation-ready {
+      opacity: 1;
+    }
+
+    .date-animation {
+      opacity: 0;
+    }
+
+    .date-animation.animation-ready {
+      opacity: 1;
+    }
+
+    .text-animation {
+      opacity: 0;
+    }
+
+    .text-animation.animation-ready {
+      opacity: 1;
+    }
+
+    /* Non-animated states */
+    .no-animation .letter-animation,
+    .no-animation .button-animation,
+    .no-animation .date-animation,
+    .no-animation .text-animation {
+      opacity: 1 !important;
+    }
+
   .image-with-text-custom-button-css {
     position: relative;
     display: inline-block;
@@ -187,7 +225,6 @@
       display: flex;
       width: 100%;
       height: 100%;
-      justify-content: {{ section.settings.horizontal_position }};
       align-items: {{ section.settings.vertical_position }};
     }
 
@@ -238,21 +275,17 @@
       }
 
       .image-with-text-button-arrow {
-        margin-left: 18px;
-      }
-
-      .image-with-text-button-arrow {
-
+        margin-left: 0px;
       }
     }
 
     .image-with-text-button-container {
-      margin-top: 35px;
+      margin-top: 10px;
     }
 
     @media (max-width: 749px) {
       .image-with-text-button-container {
-        margin-top: 30px;
+        margin-top: 10px;
       }
     }
 
@@ -340,6 +373,17 @@
     position: relative;
     z-index: 1;
   }
+
+  .image-with-text-media-section-{{ section.id }}{
+    padding: 0px 1vw;
+    margin: 10px 0px;
+  }
+
+  @media (max-width: 749px) {
+    .image-with-text-media-section-{{ section.id }} {
+      padding: 0px 1vw;
+    }
+  }
 {%- endstyle -%}
 
 {% if section.settings.enabled %}
@@ -348,7 +392,6 @@
     class="image-with-text-media-section-{{ section.id }} relative w-full overflow-hidden image-with-text-section-{{ section.id }}-padding"
     role="region"
     aria-label="Image with text section"
-    style="padding: 0px 20px; margin: 10px 0px;"
   >
     <div class="image-with-text-media-container-{{ section.id }}">
       {% if section.settings.use_video %}
@@ -468,10 +511,18 @@
                 >
                   {{ block.settings.heading }}
                 </h2>
+              {% when 'date' %}
+                <div
+                  id="TextContent-{{ section.id }}-{{ forloop.index }}"
+                  class="image-with-text-date mb-3 {% if section.settings.enable_text_animation %}date-animation{% endif %}"
+                  style="color: {{ block.settings.text_color }}; font-weight: {{ block.settings.font_weight }};"
+                >
+                  {{ block.settings.date }}
+                </div>
               {% when 'text' %}
                 <div
                   id="TextContent-{{ section.id }}-{{ forloop.index }}"
-                  class="image-with-text-text-content mb-6"
+                  class="image-with-text-text-content mb-6 {% if section.settings.enable_text_animation %}text-animation{% endif %}"
                   style="color: {{ block.settings.text_color }}; font-weight: {{ block.settings.font_weight }};"
                 >
                   {% if section.settings.enable_text_animation %}
@@ -525,7 +576,7 @@
                   {% endif %}
                 </div>
               {% when 'button' %}
-                <div class="image-with-text-button-container color-{{ section.settings.color_scheme }} {% if section.settings.text_alignment == 'center' %}text-center{% elsif section.settings.text_alignment == 'right' %}text-right{% else %}text-left{% endif %}">
+                <div class="image-with-text-button-container color-{{ section.settings.color_scheme }} {% if section.settings.text_alignment == 'center' %}text-center{% elsif section.settings.text_alignment == 'right' %}text-right{% else %}text-left{% endif %} {% if section.settings.enable_button_animation %}button-animation{% endif %}">
                   <a
                     href="{{ block.settings.button_link }}"
                     class="image-with-text-custom-button-css"
@@ -562,21 +613,21 @@
                               >
                             {% endcomment %}
                             <div
-                              class="w-12 h-6 object-contain transition-transform duration-300 group-hover:-rotate-90 collection-arrow-img"
+                              class="object-contain transition-transform duration-300 group-hover:-rotate-90 collection-arrow-img"
                               alt="Dropdown Icon"
                             >
                               <svg
-                                class="image-with-text-arrow-svg transition-transform duration-200 ease-in-out"
                                 xmlns="http://www.w3.org/2000/svg"
-                                width="20px"
-                                height="20px"
-                                stroke-width="10"
-                                viewBox="0 0 20 20"
-                                style="transform: scale(1.5); fill: var(--text); transform: rotate(45deg); margin-top: -8px;"
+                                class="image-with-text-arrow-svg w-5 h-5 object-contain transition-transform duration-200 ease-in-out group-hover:-rotate-90 mx-1"
+                                fill="none"
+                                viewBox="0 0 9 9"
+                                stroke-width="1.5"
+                                stroke="currentColor"
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                aria-hidden="true"
                               >
-                                <g transform="rotate(270 12 12)">
-                                  <path stroke-width="10" d="M12 4c.552 0 1 .448 1 1v10.586l3.293-3.293a1 1 0 1 1 1.414 1.414l-5 5a1 1 0 0 1-1.414 0l-5-5a1 1 0 0 1 1.414-1.414L11 15.586V5c0-.552.448-1 1-1z"/>
-                                </g>
+                                <path d="M1.1875 7.7334H7.6599M7.6599 7.7334V1.261M7.6599 7.7334L1.1875 1.261"/>
                               </svg>
                             </div>
                           </span>
@@ -609,21 +660,21 @@
                               >
                             {% endcomment %}
                             <div
-                              class="w-12 h-6 object-contain transition-transform duration-300 group-hover:-rotate-90 collection-arrow-img"
+                              class="object-contain transition-transform duration-300 group-hover:-rotate-90 collection-arrow-img"
                               alt="Dropdown Icon"
                             >
                               <svg
-                                class="image-with-text-arrow-svg transition-transform duration-200 ease-in-out"
                                 xmlns="http://www.w3.org/2000/svg"
-                                width="20px"
-                                height="20px"
-                                stroke-width="5"
-                                viewBox="0 0 20 20"
-                                style="transform: scale(1.5); fill: rgb(var(--color-background)); transform: rotate(45deg); margin-top: -8px;"
+                                class="image-with-text-arrow-svg w-5 h-5 object-contain transition-transform duration-200 ease-in-out group-hover:-rotate-90 mx-1"
+                                fill="none"
+                                viewBox="0 0 9 9"
+                                stroke-width="1.5"
+                                stroke="currentColor"
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                aria-hidden="true"
                               >
-                                <g transform="rotate(270 12 12)">
-                                  <path stroke-width="5" d="M12 4c.552 0 1 .448 1 1v10.586l3.293-3.293a1 1 0 1 1 1.414 1.414l-5 5a1 1 0 0 1-1.414 0l-5-5a1 1 0 0 1 1.414-1.414L11 15.586V5c0-.552.448-1 1-1z"/>
-                                </g>
+                                <path d="M1.1875 7.7334H7.6599M7.6599 7.7334V1.261M7.6599 7.7334L1.1875 1.261"/>
                               </svg>
                             </div>
                           </span>
@@ -678,10 +729,6 @@ styleElement.textContent = `
   }
 }
 
-.button-animation {
-  opacity: 0; 
-}
-
 .button-animation.animated {
   animation: buttonAppear 0.8s forwards;
   animation-delay: ${buttonAnimationDelay}s; 
@@ -691,88 +738,143 @@ document.head.appendChild(styleElement);
 
 const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
+// Set initial states based on animation settings
+const sectionElement = document.querySelector('.image-with-text-media-section-{{ section.id }}');
+if (sectionElement) {
+  if (prefersReducedMotion || (!{{ section.settings.enable_text_animation }} && !{{ section.settings.enable_button_animation }})) {
+    sectionElement.classList.add('no-animation');
+  } else {
+    // For elements that should be animated, ensure they start hidden
+    {% if section.settings.enable_text_animation %}
+    sectionElement.querySelectorAll('.letter-animation, .date-animation, .text-animation').forEach(element => {
+      element.style.opacity = '0';
+    });
+    {% else %}
+    sectionElement.querySelectorAll('.letter-animation, .date-animation, .text-animation').forEach(element => {
+      element.style.opacity = '1';
+    });
+    {% endif %}
+
+    {% if section.settings.enable_button_animation %}
+    sectionElement.querySelectorAll('.button-animation').forEach(button => {
+      button.style.opacity = '0';
+    });
+    {% else %}
+    sectionElement.querySelectorAll('.button-animation').forEach(button => {
+      button.style.opacity = '1';
+    });
+    {% endif %}
+  }
+}
+
 if (prefersReducedMotion) {
-document.querySelectorAll('.letter-animation').forEach(element => {
-  element.style.opacity = '1';
-});
-document.querySelectorAll('.button-animation').forEach(button => {
-  button.style.opacity = '1';
-});
-} else {
-const observer = new IntersectionObserver((entries, observer) => {
-  entries.forEach(entry => {
-    if (entry.isIntersecting) {
-      {% if section.settings.enable_text_animation %}
-      const headingElements = entry.target.querySelectorAll('.letter-animation');
-      
-      headingElements.forEach(element => {
-        const text = element.textContent.trim();
-        element.textContent = '';
-        element.classList.add('letter-animation-container');
-        element.setAttribute('aria-label', text);
-
-        for (let i = 0; i < text.length; i++) {
-          const letterSpan = document.createElement('span');
-          letterSpan.classList.add('animated-letter');
-          letterSpan.textContent = text[i] === ' ' ? '\u00A0' : text[i]; 
-          letterSpan.setAttribute('aria-hidden', 'true'); 
-
-          letterSpan.style.animation = `letterAppear 1s forwards`; 
-          letterSpan.style.animationDelay = `${i * 0.07}s`; 
-          
-          element.appendChild(letterSpan);
-        }
-      });
-
-      const textContentElements = entry.target.querySelectorAll('.image-with-text-text-content p.letter-animation');
-      
-      textContentElements.forEach(element => {
-        const text = element.textContent.trim();
-        element.textContent = '';
-        element.classList.add('letter-animation-container');
-        element.setAttribute('aria-label', text);
-
-        for (let i = 0; i < text.length; i++) {
-          const letterSpan = document.createElement('span');
-          letterSpan.classList.add('animated-letter');
-          letterSpan.textContent = text[i] === ' ' ? '\u00A0' : text[i]; 
-          letterSpan.setAttribute('aria-hidden', 'true'); 
-
-          letterSpan.style.animation = `letterAppear 1s forwards`; 
-          letterSpan.style.animationDelay = `${i * 0.07}s`; 
-          
-          element.appendChild(letterSpan);
-        }
-      });
-      {% endif %}
-
-      {% if section.settings.enable_button_animation %}
-      const buttons = entry.target.querySelectorAll('.image-with-text-button-container');
-      buttons.forEach(button => {
-        button.classList.add('button-animation');
-        setTimeout(() => {
-          button.classList.add('animated');
-        }, 100);
-      });
-      {% else %}
-      const buttons = entry.target.querySelectorAll('.image-with-text-button-container');
-      buttons.forEach(button => {
-        button.style.opacity = '1';
-      });
-      {% endif %}
-
-      observer.unobserve(entry.target);
-    }
+  // For reduced motion, make everything visible immediately
+  document.querySelectorAll('.letter-animation, .date-animation, .text-animation, .button-animation').forEach(element => {
+    element.style.opacity = '1';
   });
-}, {
-  root: null, 
-  rootMargin: '0px', 
-  threshold: 0.1 
-});
+} else {
+  const observer = new IntersectionObserver((entries, observer) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        {% if section.settings.enable_text_animation %}
+        // Handle heading animations
+        const headingElements = entry.target.querySelectorAll('.letter-animation');
+        
+        headingElements.forEach(element => {
+          const text = element.textContent.trim();
+          element.textContent = '';
+          element.classList.add('letter-animation-container', 'animation-ready');
+          element.setAttribute('aria-label', text);
+          element.style.opacity = '1'; // Make container visible
 
-document.querySelectorAll('.image-with-text-media-section-{{ section.id }}').forEach(section => {
-  observer.observe(section);
-});
+          for (let i = 0; i < text.length; i++) {
+            const letterSpan = document.createElement('span');
+            letterSpan.classList.add('animated-letter');
+            letterSpan.textContent = text[i] === ' ' ? '\u00A0' : text[i]; 
+            letterSpan.setAttribute('aria-hidden', 'true'); 
+
+            letterSpan.style.animation = `letterAppear 1s forwards`; 
+            letterSpan.style.animationDelay = `${i * 0.07}s`; 
+            
+            element.appendChild(letterSpan);
+          }
+        });
+
+        // Handle text content animations
+        const textContentElements = entry.target.querySelectorAll('.image-with-text-text-content p.letter-animation');
+        
+        textContentElements.forEach(element => {
+          const text = element.textContent.trim();
+          element.textContent = '';
+          element.classList.add('letter-animation-container', 'animation-ready');
+          element.setAttribute('aria-label', text);
+          element.style.opacity = '1'; // Make container visible
+
+          for (let i = 0; i < text.length; i++) {
+            const letterSpan = document.createElement('span');
+            letterSpan.classList.add('animated-letter');
+            letterSpan.textContent = text[i] === ' ' ? '\u00A0' : text[i]; 
+            letterSpan.setAttribute('aria-hidden', 'true'); 
+
+            letterSpan.style.animation = `letterAppear 1s forwards`; 
+            letterSpan.style.animationDelay = `${i * 0.07}s`; 
+            
+            element.appendChild(letterSpan);
+          }
+        });
+
+        // Handle date animations
+        const dateElements = entry.target.querySelectorAll('.date-animation');
+        dateElements.forEach((element, index) => {
+          element.classList.add('animation-ready');
+          element.style.opacity = '1';
+          element.style.animation = 'buttonAppear 0.8s forwards';
+          element.style.animationDelay = `${index * 0.2}s`;
+        });
+
+        // Handle text block animations
+        const textElements = entry.target.querySelectorAll('.text-animation');
+        textElements.forEach((element, index) => {
+          element.classList.add('animation-ready');
+          element.style.opacity = '1';
+          element.style.animation = 'buttonAppear 0.8s forwards';
+          element.style.animationDelay = `${index * 0.3}s`;
+        });
+        {% else %}
+        // If text animation is disabled, make text visible immediately
+        const textElements = entry.target.querySelectorAll('.letter-animation, .date-animation, .text-animation');
+        textElements.forEach(element => {
+          element.style.opacity = '1';
+        });
+        {% endif %}
+
+        {% if section.settings.enable_button_animation %}
+        const buttons = entry.target.querySelectorAll('.button-animation');
+        buttons.forEach(button => {
+          button.classList.add('animation-ready');
+          setTimeout(() => {
+            button.classList.add('animated');
+          }, 100);
+        });
+        {% else %}
+        const buttons = entry.target.querySelectorAll('.button-animation');
+        buttons.forEach(button => {
+          button.style.opacity = '1';
+        });
+        {% endif %}
+
+        observer.unobserve(entry.target);
+      }
+    });
+  }, {
+    root: null, 
+    rootMargin: '0px', 
+    threshold: 0.1 
+  });
+
+  document.querySelectorAll('.image-with-text-media-section-{{ section.id }}').forEach(section => {
+    observer.observe(section);
+  });
 }
 
 const buttons = document.querySelectorAll('.image-with-text-custom-button-css');
@@ -901,26 +1003,6 @@ button.addEventListener('keydown', function(event) {
     },
     {
       "type": "select",
-      "id": "horizontal_position",
-      "label": "Horizontal position",
-      "options": [
-        {
-          "value": "flex-start",
-          "label": "Left"
-        },
-        {
-          "value": "center",
-          "label": "Center"
-        },
-        {
-          "value": "flex-end",
-          "label": "Right"
-        }
-      ],
-      "default": "center"
-    },
-    {
-      "type": "select",
       "id": "text_alignment",
       "label": "Text alignment",
       "options": [
@@ -1006,7 +1088,7 @@ button.addEventListener('keydown', function(event) {
       "step": 50,
       "unit": "px",
       "label": "Section height (desktop)",
-      "default": 650
+      "default": 750
     },
     {
       "type": "range",
@@ -1016,10 +1098,47 @@ button.addEventListener('keydown', function(event) {
       "step": 50,
       "unit": "px",
       "label": "Section height (mobile)",
-      "default": 350
+      "default": 600
     }
   ],
   "blocks": [
+    {
+      "type": "date",
+      "name": "Date",
+      "settings": [
+        {
+          "type": "text",
+          "id": "date",
+          "label": "Date"
+        },
+        {
+          "type": "select",
+          "id": "font_weight",
+          "label": "Font weight",
+          "options": [
+            {
+              "value": "400",
+              "label": "Regular (400)"
+            },
+            {
+              "value": "500",
+              "label": "Medium (500)"
+            },
+            {
+              "value": "900",
+              "label": "Black (900)"
+            }
+          ],
+          "default": "500"
+        },
+        {
+          "type": "color",
+          "id": "text_color",
+          "label": "Text Color",
+          "default": "#FFFFFF"
+        }
+      ]
+    },
     {
       "type": "heading",
       "name": "Heading",
@@ -1325,11 +1444,10 @@ button.addEventListener('keydown', function(event) {
         }
       ],
       "settings": {
-        "horizontal_position": "center",
         "vertical_content_position": "center",
         "text_alignment": "center",
-        "enable_text_animation": true,
-        "enable_button_animation": true,
+        "enable_text_animation": false,
+        "enable_button_animation": false,
         "button_animation_delay": 1.5
       }
     }

@@ -1,28 +1,35 @@
 <style>
-  .blog-archive-section {
-    padding: 2rem 0;
-    margin: 0 2rem;
+  .featured-blog-section {
+    padding: 20px 0;
+    margin: 0 1vw;
     background-color: rgb(var(--color-background)) !important;
     color: var(--text) !important;
-    border-top: 2px solid var(--text);
+    border-top: 1px solid var(--text);
     /* margin-right: 0; */
   }
-  .blog-archive-section ::selection {
+
+  @media (max-width: 749px) {
+    .featured-blog-section {
+      margin: 0 1vw;
+    }
+  }
+
+  .featured-blog-section ::selection {
     /* background: none; */
     color: var(--cr-yellow-2) !important;
   }
-  .blog-archive-section-title {
+  .featured-blog-section-title {
     font-size: 32px;
-    font-weight: 500;
+    font-weight: 400;
     margin: 0;
     padding: 0;
   }
 
-  .blog-archive-section-header {
+  .featured-blog-section-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin: 20px 0 40px 0;
+    margin: 0px 0 20px 0;
   }
   .view-toggle {
     position: relative;
@@ -45,16 +52,15 @@
   }
   .view-toggle button {
     position: relative;
-    padding: 0rem 0.4rem;
+    padding: 0.4rem 0.6rem;
     border: none;
     background: transparent;
     color: var(--text);
-    border-radius: 5px;
     cursor: pointer;
     font-size: 24px;
     z-index: 1;
     transition: color 0.3s ease;
-    line-height: 24px;
+    line-height: 20px;
     text-transform: uppercase;
   }
   .view-toggle button.active {
@@ -62,43 +68,69 @@
     background-color: var(--text);
   }
 
-  .blog-archive-grid {
+  .featured-blog-grid {
     margin: 0 0 2rem auto;
     transition: opacity 0.3s ease;
     opacity: 1;
     overflow: visible;
   }
 
-  .blog-archive-grid.list-view {
-    border-top: 1px solid var(--text);
+  .featured-blog-grid.list-view {
     border-bottom: 1px solid var(--text);
     width: 80%;
     display: block;
   }
 
+  .featured-blog-grid.list-view .fb-arrow-svg-wrapper {
+    padding-right: 5px;
+  }
+
+  .featured-blog-grid.list-view .fb-arrow-svg {
+    width: 20px;
+    height: 20px;
+    transition: all 0.3s ease;
+  }
+
   @media (max-width: 749px) {
-    .blog-archive-grid {
+    .featured-blog-grid {
       width: 100% !important;
       margin: 0 0 2rem;
     }
   }
-  .blog-archive-grid.grid-view {
+  .featured-blog-grid.grid-view {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     gap: 20px;
   }
-  @media (max-width: 990px) {
-    .blog-archive-grid.grid-view {
+  @media (max-width: 1024px) {
+    .featured-blog-grid.grid-view {
       grid-template-columns: repeat(2, 1fr);
+    }
+    .featured-blog-grid {
+      width: 100% !important;
+    }
+
+    .featured-blog-grid.list-view .featured-blog-card:hover .featured-blog-card-image-wrapper {
+      left: 5px !important;
+      width: 200px !important;
+      transform: translate(0, -50%) !important;
+    }
+
+    .featured-blog-grid.list-view .featured-blog-card-title {
+      font-size: 24px;
+    }
+
+    .view-toggle button {
+      font-size: 20px;
     }
   }
   @media (max-width: 749px) {
-    .blog-archive-grid.grid-view {
+    .featured-blog-grid.grid-view {
       grid-template-columns: 1fr;
     }
   }
 
-  .blog-archive-card {
+  .featured-blog-card {
     position: relative;
     display: flex;
     flex-direction: column;
@@ -107,11 +139,11 @@
     overflow: visible;
     transition: background 0.3s ease, color 0.3s ease;
   }
-  .blog-archive-card-image-wrapper {
+  .featured-blog-card-image-wrapper {
     width: 100%;
     overflow: hidden;
   }
-  .blog-archive-card-image {
+  .featured-blog-card-image {
     display: block;
     width: 100%;
     height: auto;
@@ -119,24 +151,25 @@
     transform-origin: center center;
     transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   }
-  .blog-archive-card:hover .blog-archive-card-image {
+  .featured-blog-card:hover .featured-blog-card-image {
     transform: scale(1.08);
   }
-  .blog-archive-card-content {
+  .featured-blog-card-content {
     padding: 1.8rem 1rem;
     display: flex;
     flex-direction: column;
     flex: 1 1 auto;
   }
-  .blog-archive-card-date {
+  .featured-blog-card-date {
     position: relative;
-    font-size: 2rem;
     margin: 0 1rem 20px 0;
     color: var(--text);
     white-space: nowrap;
-    /* z-index: 1001; */
+    font-size: 22px;
+    margin: 0;
+    min-width: 300px;
   }
-  .blog-archive-card-title {
+  /* .featured-blog-card-title {
     font-size: 32px;
     line-height: 1.1;
     margin: 0 0 1rem;
@@ -144,8 +177,8 @@
     color: var(--text);
     letter-spacing: -1px;
     line-height: 85%;
-  }
-  .blog-archive-card-desc {
+  } */
+  .featured-blog-card-desc {
     font-size: 2rem;
     margin: 0;
     color: var(--text);
@@ -153,52 +186,41 @@
   }
 
   /* List view overrides */
-  .blog-archive-grid.list-view .blog-archive-card {
+  .featured-blog-grid.list-view .featured-blog-card {
     flex-direction: row;
     align-items: center;
-    padding: 1rem 0;
+    padding: 15px 0;
     border-top: 1px solid var(--text);
-    border-bottom: 1px solid var(--text);
   }
-  .blog-archive-grid.list-view .blog-archive-card:hover {
+  .featured-blog-grid.list-view .featured-blog-card:hover {
     background: var(--text);
     color: rgb(var(--color-background));
   }
-  .blog-archive-grid.list-view .blog-archive-card:hover .blog-archive-card-title,
-  .blog-archive-grid.list-view .blog-archive-card:hover .blog-archive-card-date {
+  .featured-blog-grid.list-view .featured-blog-card:hover .featured-blog-card-title,
+  .featured-blog-grid.list-view .featured-blog-card:hover .featured-blog-card-date {
     color: rgb(var(--color-background));
   }
 
+  .featured-blog-grid.list-view .featured-blog-card:hover .fb-arrow-svg {
+    filter: invert(1);
+  }
+
   /* Hide description and image wrapper by default in list view */
-  .blog-archive-grid.list-view .blog-archive-card-desc,
-  .blog-archive-grid.list-view .blog-archive-card-image-wrapper {
+  .featured-blog-grid.list-view .featured-blog-card-desc,
+  .featured-blog-grid.list-view .featured-blog-card-image-wrapper {
     display: none;
   }
 
   /* Side-by-side date and title with ellipsis */
-  .blog-archive-grid.list-view .blog-archive-card-content {
+  .featured-blog-grid.list-view .featured-blog-card-content {
     flex-direction: row;
     align-items: center;
     padding: 0;
     gap: 1rem;
   }
-  .blog-archive-grid.list-view .blog-archive-card-date {
-    font-size: 2.5rem;
-    margin: 0;
-    min-width: 30rem;
-  }
-  .blog-archive-grid.list-view .blog-archive-card-title {
-    font-size: 3rem;
-    margin: 0;
-    flex: 1;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    line-height: normal;
-  }
 
   /* Preview image on hover in list view */
-  .blog-archive-grid.list-view .blog-archive-card:hover .blog-archive-card-image-wrapper {
+  .featured-blog-grid.list-view .featured-blog-card:hover .featured-blog-card-image-wrapper {
     display: block;
     position: absolute;
     top: 50%;
@@ -208,58 +230,103 @@
     z-index: 1000;
     overflow: visible;
   }
-  .blog-archive-grid.list-view .blog-archive-card:hover .blog-archive-card-title-arrow {
+  .featured-blog-grid.list-view .featured-blog-card:hover .featured-blog-card-title-arrow {
     filter: invert(1) brightness(2);
   }
-  .blog-archive-grid.list-view .blog-archive-card:hover .blog-archive-card-date {
+  .featured-blog-grid.list-view .featured-blog-card:hover .featured-blog-card-date {
     color: rgb(var(--color-background));
-    z-index: 1001;
   }
-  .blog-archive-grid.list-view .blog-archive-card:hover .blog-archive-card-image {
+  .featured-blog-grid.list-view .featured-blog-card:hover .featured-blog-card-image {
     width: 100%;
     height: auto;
   }
-  .blog-archive-grid.list-view .blog-archive-card-content,
-  .blog-archive-grid.list-view .blog-archive-card-title,
-  .blog-archive-grid.list-view .blog-archive-card-date {
+  /* .featured-blog-grid.list-view .featured-blog-card-content,
+  .featured-blog-grid.list-view .featured-blog-card-title,
+  .featured-blog-grid.list-view .featured-blog-card-date {
     min-width: 0;
+  } */
+
+  .featured-blog-grid.list-view .featured-blog-card-content {
+    white-space: nowrap; /* Prevent text wrapping */
+    text-overflow: ellipsis; /* Add ellipsis for overflowed text */
+    max-width: 100%;
   }
 
-  .blog-archive-grid.list-view .blog-archive-card-title {
-    /* allow flex-shrink */
+  .featured-blog-grid.grid-view .fb-arrow-svg {
+    width: 20px;
+    height: 20px;
+  }
+
+  .featured-blog-grid.list-view .featured-blog-card-title {
     flex-shrink: 1;
-    /* permit it to become smaller than its contents */
     min-width: 0;
-    /* make sure it spans the remaining space */
     width: 100%;
-    display: block;
-    /* your existing ellipsis rules */
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    white-space: nowrap; /* Prevent text wrapping */
+    overflow: hidden; /* Hide overflowing text */
+    text-overflow: ellipsis; /* Add ellipsis for overflowed text */
+    max-width: 100%;
+    /* Ensure the title stays within its container */
+    margin: 0;
+    line-height: normal;
+    display: flex;
+    align-items: center;
+    color: var(--text);
+    font-weight: normal;
   }
 
   @media (max-width: 600px) {
-    .blog-archive-grid.list-view .blog-archive-card-content {
+    .featured-blog-card-content {
+      padding: 5px 0 10px 0;
+    }
+
+    .featured-blog-card-date {
+      padding-bottom: 10px;
+    }
+
+    .featured-blog-card-title {
+      font-size: 20px;
+    }
+
+    .featured-blog-grid.list-view .featured-blog-card-content {
       flex-direction: column;
       padding: 1rem 0;
       gap: 0.5rem;
       align-items: flex-start;
     }
 
-    .blog-archive-grid.list-view .blog-archive-card-title {
-      max-width: calc(100vw - 4rem); /* account for any padding/margins */
+    .featured-blog-grid.list-view .featured-blog-card-title {
+      max-width: calc(100vw - 32px);
+      padding-left: 30px;
+    }
+    .view-toggle button {
+      font-size: 16px;
+    }
+    .featured-blog-section-title {
+      font-size: 24px;
+    }
+
+    .featured-blog-grid.list-view .featured-blog-card-title {
+      font-size: 16px;
+    }
+
+    .featured-blog-grid.list-view .fb-arrow-svg {
+      width: 15px;
+      height: 15px;
+    }
+
+    .featured-blog-card-date {
+      font-size: 14px;
     }
   }
 </style>
 
 {% if section.settings.enabled %}
   <section
-    class="blog-archive-section color-{{ section.settings.color_scheme }}"
-    aria-labelledby="blog-archive-section-title"
+    class="featured-blog-section color-{{ section.settings.color_scheme }}"
+    aria-labelledby="featured-blog-section-title"
   >
-    <header class="blog-archive-section-header">
-      <h2 class="blog-archive-section-title" id="blog-archive-section-title">{{ section.settings.heading }}</h2>
+    <header class="featured-blog-section-header">
+      <h2 class="featured-blog-section-title" id="featured-blog-section-title">{{ section.settings.heading }}</h2>
       <div class="view-toggle" role="radiogroup" aria-label="Blog view options">
         <div class="toggle-slider"></div>
         <button
@@ -277,13 +344,13 @@
     </header>
 
     {% if section.settings.description != blank %}
-      <div class="sr-only" id="blog-archive-section-desc">
+      <div class="sr-only" id="featured-blog-section-desc">
         {{ section.settings.description }}
       </div>
     {% endif %}
 
     <div
-      class="blog-archive-grid grid-view"
+      class="featured-blog-grid grid-view"
       id="archiveContainer"
       aria-live="polite"
       aria-label="Blog articles"
@@ -295,14 +362,23 @@
           <article aria-labelledby="article-title-{{ forloop.index0 }}">
             <a
               href="{{ article.url }}"
-              class="blog-archive-card"
+              class="featured-blog-card"
               aria-describedby="article-date-{{ forloop.index0 }}"
             >
-              <div class="blog-archive-card-image-wrapper">
+              <div class="featured-blog-card-image-wrapper">
                 {% if article.image %}
                   <img
-                    class="blog-archive-card-image"
-                    src="{{ article.image | image_url }}"
+                    class="featured-blog-card-image"
+                    srcset="
+                      {%- if article.image.width >= 165 -%}{{ article.image | image_url: width: 165 }} 165w,{%- endif -%}
+                      {%- if article.image.width >= 360 -%}{{ article.image | image_url: width: 360 }} 360w,{%- endif -%}
+                      {%- if article.image.width >= 535 -%}{{ article.image | image_url: width: 535 }} 535w,{%- endif -%}
+                      {%- if article.image.width >= 750 -%}{{ article.image | image_url: width: 750 }} 750w,{%- endif -%}
+                      {%- if article.image.width >= 1070 -%}{{ article.image | image_url: width: 1070 }} 1070w,{%- endif -%}
+                      {%- if article.image.width >= 1500 -%}{{ article.image | image_url: width: 1500 }} 1500w,{%- endif -%}
+                      {{ article.image | image_url }} {{ article.image.width }}w
+                    "
+                    src="{{ article.image | image_url: width: 750 }}"
                     alt="{{ article.title }}"
                     width="auto"
                     height="auto"
@@ -316,27 +392,47 @@
                   {% endcomment %}
                 {% endif %}
               </div>
-              <div class="blog-archive-card-content">
+              <div class="featured-blog-card-content">
                 <time
-                  class="blog-archive-card-date"
+                  class="featured-blog-card-date"
                   id="article-date-{{ forloop.index0 }}"
                   datetime="{{ article.published_at | date: '%Y-%m-%d' }}"
                 >
                   {{ article.published_at | date: '%B %d, %Y' }}
                 </time>
-                <h3 class="blog-archive-card-title" id="article-title-{{ forloop.index0 }}">
-                  <img
-                    src="{{ "arrow-down.png" | asset_url }}"
-                    alt=""
-                    class="w-12 h-6 object-contain transition-transform duration-300 group-hover:-rotate-90 collection-arrow-img blog-archive-card-title-arrow inline-block align-baseline"
-                    width="15px"
-                    height="auto"
-                    aria-hidden="true"
-                    style="margin-bottom:5px; position:relative; left:-5px;"
+                <h3 class="featured-blog-card-title" id="article-title-{{ forloop.index0 }}">
+                  <div
+                    class="fb-arrow-svg-wrapper object-contain transition-transform duration-300 group-hover:-rotate-90 featured-blog-card-title-arrow inline-block align-baseline"
+                    alt="Dropdown Icon"
                   >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      class="fb-arrow-svg w-5 h-5 object-contain transition-transform duration-200 ease-in-out group-hover:-rotate-90 mx-1"
+                      fill="none"
+                      viewBox="0 0 9 9"
+                      stroke-width="1"
+                      stroke="currentColor"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      aria-hidden="true"
+                    >
+                      <path d="M1.1875 7.7334H7.6599M7.6599 7.7334V1.261M7.6599 7.7334L1.1875 1.261"/>
+                    </svg>
+                  </div>
+                  {% comment %}
+                    <img
+                      src="{{ "arrow-down.png" | asset_url }}"
+                      alt=""
+                      class="w-12 h-6 object-contain transition-transform duration-300 group-hover:-rotate-90 featured-blog-card-title-arrow inline-block align-baseline"
+                      width="15px"
+                      height="auto"
+                      aria-hidden="true"
+                      style="margin-bottom:5px; position:relative; left:-5px;"
+                    >
+                  {% endcomment %}
                   {{ article.title }}
                 </h3>
-                <p class="blog-archive-card-desc">
+                <p class="featured-blog-card-desc">
                   {{ article.excerpt | strip_html | truncate: 120 }}
                 </p>
               </div>
@@ -352,7 +448,7 @@
   document.addEventListener('DOMContentLoaded', () => {
     const gridBtn = document.getElementById('gridViewBtn');
     const listBtn = document.getElementById('listViewBtn');
-    const sectionEl = document.querySelector('.blog-archive-section');
+    const sectionEl = document.querySelector('.featured-blog-section');
     const slider = document.querySelector('.toggle-slider');
     const container = document.getElementById('archiveContainer');
     const buttons = [gridBtn, listBtn];

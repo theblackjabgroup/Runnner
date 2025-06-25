@@ -170,7 +170,7 @@
                     style="width: 40vw; z-index: 1001;"
                     aria-hidden="true"
                   >
-                    <div class="flex justify-between items-center p-4 border-b">
+                    <div class="flex justify-between items-center p-4 border-b" style="margin-top: 9vh">
                       <h2 class="text-xl font-semibold">Size Chart</h2>
                       <button
                         id="close-size-chart"
@@ -854,7 +854,7 @@
     top: 50%;
     left: 10px;
     transform: translateY(-50%);
-    z-index: 10;
+    z-index: 100;
     transition: opacity 0.3s ease;
   }
 
@@ -884,7 +884,6 @@
     transform: scale(1.1);
     border: 1px solid black;
   }
-
   .strip-image {
     width: 100%;
     height: 100%;
@@ -953,6 +952,16 @@
 
 <script>
   document.addEventListener('DOMContentLoaded', () => {
+
+    function lockBodyScroll() {
+      document.body.style.overflow = 'hidden';
+      document.body.style.touchAction = 'none';
+    }
+    function unlockBodyScroll() {
+      document.body.style.overflow = '';
+      document.body.style.touchAction = '';
+    }
+
       // size-chart button functionality
       const openBtn = document.getElementById("open-size-chart");
       const closeBtn = document.getElementById("close-size-chart");
@@ -967,11 +976,13 @@
           setTimeout(() => {
             drawer.classList.remove("translate-x-full");
           }, 20); 
+          lockBodyScroll();
         });
       
         const closeDrawer = () => {
           drawer.classList.add("translate-x-full");
           backdrop.classList.add("hidden");
+          unlockBodyScroll(); 
       
           setTimeout(() => {
             drawer.classList.add("hidden");
@@ -1019,93 +1030,126 @@
 
 
     // desktop gallery handling
-    const gallery = document.querySelector('.product-gallery');
-    const items = document.querySelectorAll('.gallery-item');
-    const totalImages = items.length;
-
-    if (!gallery || !items.length) return;
-
-    function updateActiveImage() {
-      const galleryTop = gallery.offsetTop;
-      const scrollPosition = window.pageYOffset;
-      const sectionHeight = gallery.offsetHeight;
-      const windowHeight = window.innerHeight;
-      const scrollableDistance = sectionHeight - windowHeight;
-
-      const scrollFraction = (scrollPosition - galleryTop) / scrollableDistance;
-      const imageIndex = Math.min(Math.floor(scrollFraction * (totalImages - 0.1)), totalImages - 1);
-
-      items.forEach((item, index) => {
-        item.classList.toggle('is-active', index === Math.max(0, imageIndex));
-      });
-
+ 
+      const gallery = document.querySelector('.product-gallery');
+      const items = document.querySelectorAll('.gallery-item');
       const stripImages = document.querySelectorAll('.strip-image-wrapper');
-      stripImages.forEach((img, index) => {
-        img.classList.toggle('active', index === Math.max(0, imageIndex));
-      });
-    }
+      const totalImages = items.length;
+    
+      if (!gallery || !items.length || !stripImages.length) return;
+    
+      let scrollLockUntil = 0; // time until scroll is locked out
+    
+      function updateActiveImage() {
 
-    let ticking = false;
-    window.addEventListener('scroll', () => {
-      if (!ticking) {
-        window.requestAnimationFrame(() => {
-          updateActiveImage();
-          ticking = false;
+        if (totalImages === 1) {
+          items[0].classList.add('is-active');
+          stripImages[0].classList.add('active');
+          return;
+        }
+      // Skip scroll-based update if recently clicked
+        if (Date.now() < scrollLockUntil) return;
+    
+        const galleryTop = gallery.offsetTop;
+        const scrollPosition = window.pageYOffset;
+        const sectionHeight = gallery.offsetHeight;
+        const windowHeight = window.innerHeight;
+        const scrollableDistance = sectionHeight - windowHeight;
+    
+        const scrollFraction = (scrollPosition - galleryTop) / scrollableDistance;
+        const imageIndex = Math.min(Math.floor(scrollFraction * (totalImages - 0.1)), totalImages - 1);
+        const targetIndex = Math.max(0, imageIndex);
+    
+        items.forEach((item, index) => {
+          item.classList.toggle('is-active', index === targetIndex);
         });
-        ticking = true;
+    
+        stripImages.forEach((img, index) => {
+          img.classList.toggle('active', index === targetIndex);
+        });
       }
-    });
-
-    updateActiveImage();
+    
+      // Throttle scroll handler using requestAnimationFrame
+      let ticking = false;
+      window.addEventListener('scroll', () => {
+        if (!ticking) {
+          window.requestAnimationFrame(() => {
+            updateActiveImage();
+            ticking = false;
+          });
+          ticking = true;
+        }
+      });
+    
+      // Manual image switching on click
+      stripImages.forEach((stripImage, index) => {
+        stripImage.addEventListener('click', () => {
+          scrollLocked = true;
+          setTimeout(() => {
+            scrollLocked = false;
+          }, 2000);
+          
+    
+          items.forEach((item, i) => {
+            item.classList.toggle('is-active', i === index);
+          });
+    
+          stripImages.forEach((img, i) => {
+            img.classList.toggle('active', i === index);
+          });
+        });
+      });
+    
+      // Set initial active image
+      updateActiveImage();
 
     // tab-btn handling
    const tabButtons = document.querySelectorAll(".tab-btn");
-const tabPanes = document.querySelectorAll(".tab-pane");
+   const tabPanes = document.querySelectorAll(".tab-pane");
 
-tabButtons.forEach((button) => {
-  button.addEventListener("click", () => {
-    const targetTab = button.getAttribute("data-tab");
-    const borderDiv = button.querySelector(".tab-top-bar"); // Get the border div with specific class
+  tabButtons.forEach((button) => {
+    button.addEventListener("click", () => {
+      const targetTab = button.getAttribute("data-tab");
+      const borderDiv = button.querySelector(".tab-top-bar"); // Get the border div with specific class
 
-    // Reset all tabs to inactive state
-    tabButtons.forEach((btn) => {
-      const btnBorderDiv = btn.querySelector(".tab-top-bar");
+      // Reset all tabs to inactive state
+      tabButtons.forEach((btn) => {
+        const btnBorderDiv = btn.querySelector(".tab-top-bar");
+        
+        // Remove active classes from button
+        btn.classList.remove("text-black", "active-tab");
+        btn.classList.add("text-gray-600");
+        
+        // Reset border div to inactive state
+        if (btnBorderDiv) {
+          btnBorderDiv.classList.remove("bg-black");
+          btnBorderDiv.classList.add("bg-gray-400");
+        }
+      });
+
+      // Set clicked tab to active state
+      button.classList.remove("text-gray-600");
+      button.classList.add("text-black", "active-tab");
       
-      // Remove active classes from button
-      btn.classList.remove("text-black", "active-tab");
-      btn.classList.add("text-gray-600");
-      
-      // Reset border div to inactive state
-      if (btnBorderDiv) {
-        btnBorderDiv.classList.remove("bg-black");
-        btnBorderDiv.classList.add("bg-gray-400");
+      // Set border div to active state
+      if (borderDiv) {
+        borderDiv.classList.remove("bg-gray-400");
+        borderDiv.classList.add("bg-black");
       }
-    });
 
-    // Set clicked tab to active state
-    button.classList.remove("text-gray-600");
-    button.classList.add("text-black", "active-tab");
-    
-    // Set border div to active state
-    if (borderDiv) {
-      borderDiv.classList.remove("bg-gray-400");
-      borderDiv.classList.add("bg-black");
-    }
-
-    // Handle tab pane visibility
-    tabPanes.forEach((pane) => {
-      if (pane.getAttribute("data-content") === targetTab) {
-        pane.classList.remove("hidden");
-        pane.classList.add("block");
-      } else {
-        pane.classList.add("hidden");
-        pane.classList.remove("block");
-      }
-    });
+      // Handle tab pane visibility
+      tabPanes.forEach((pane) => {
+        if (pane.getAttribute("data-content") === targetTab) {
+          pane.classList.remove("hidden");
+          pane.classList.add("block");
+        } else {
+          pane.classList.add("hidden");
+          pane.classList.remove("block");
+        }
+      });
   });
 });
 
-// Optional: Add hover effects programmatically
 tabButtons.forEach((button) => {
   const borderDiv = button.querySelector(".tab-top-bar");
   
@@ -1203,22 +1247,6 @@ tabButtons.forEach((button) => {
       });
     });
 
-    // Image strip handling
-    const stripImages = document.querySelectorAll('.strip-image-wrapper');
-
-    stripImages.forEach((stripImage) => {
-      stripImage.addEventListener('click', () => {
-        const targetIndex = parseInt(stripImage.dataset.stripIndex);
-
-        items.forEach((item, index) => {
-          item.classList.toggle('is-active', index === targetIndex);
-        });
-
-        stripImages.forEach((img) => {
-          img.classList.toggle('active', img === stripImage);
-        });
-      });
-    });
 
     // Mobile Gallery Handling
     if (window.innerWidth < 1024) {
@@ -1252,13 +1280,12 @@ tabButtons.forEach((button) => {
         currentIndex = index;
       }
 
-      // Add click handlers to thumbnails
-  thumbnails.forEach((thumb) => {
-    thumb.addEventListener('click', () => {
-      const index = parseInt(thumb.dataset.thumbIndex);
-      showImage(index);
-    });
-  });
+      thumbnails.forEach((thumb) => {
+        thumb.addEventListener('click', () => {
+          const index = parseInt(thumb.dataset.thumbIndex);
+          showImage(index);
+        });
+      });
 
 
       // Initialize with first image
