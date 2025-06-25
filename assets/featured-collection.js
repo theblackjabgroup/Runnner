@@ -177,25 +177,54 @@ document.addEventListener('DOMContentLoaded', function () {
       if (button._clickHandler) {
         button.removeEventListener('click', button._clickHandler);
       }
+      // Remove hover handlers if present
+      if (button._mouseenterHandler) {
+        button.removeEventListener('mouseenter', button._mouseenterHandler);
+      }
+      if (button._mouseleaveHandler) {
+        button.removeEventListener('mouseleave', button._mouseleaveHandler);
+      }
     });
     nextButtons.forEach((button) => {
       if (button._clickHandler) {
         button.removeEventListener('click', button._clickHandler);
       }
+      if (button._mouseenterHandler) {
+        button.removeEventListener('mouseenter', button._mouseenterHandler);
+      }
+      if (button._mouseleaveHandler) {
+        button.removeEventListener('mouseleave', button._mouseleaveHandler);
+      }
     });
 
     prevButtons.forEach((button) => {
       button._clickHandler = (e) => {
+        e.preventDefault();
         const productId = button.getAttribute('data-product-id');
-        navigateImage(productId, 'prev', e);
+        const wrapper = button.closest('.product-image-wrapper');
+        const images = Array.from(wrapper.querySelectorAll('.product-image'));
+        if (images.length <= 1) return;
+        let currentIndex = images.findIndex((img) => img.classList.contains('active'));
+        let prevIndex = (currentIndex - 1 + images.length) % images.length;
+        images[currentIndex].classList.remove('active');
+        images[prevIndex].classList.add('active');
+        productCurrentIndex[productId] = prevIndex;
       };
       button.addEventListener('click', button._clickHandler);
     });
 
     nextButtons.forEach((button) => {
       button._clickHandler = (e) => {
+        e.preventDefault();
         const productId = button.getAttribute('data-product-id');
-        navigateImage(productId, 'next', e);
+        const wrapper = button.closest('.product-image-wrapper');
+        const images = Array.from(wrapper.querySelectorAll('.product-image'));
+        if (images.length <= 1) return;
+        let currentIndex = images.findIndex((img) => img.classList.contains('active'));
+        let nextIndex = (currentIndex + 1) % images.length;
+        images[currentIndex].classList.remove('active');
+        images[nextIndex].classList.add('active');
+        productCurrentIndex[productId] = nextIndex;
       };
       button.addEventListener('click', button._clickHandler);
     });
