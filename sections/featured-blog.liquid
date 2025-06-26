@@ -201,7 +201,7 @@
   .featured-blog-grid.list-view .featured-blog-card {
     flex-direction: row;
     align-items: center;
-    padding: 15px 0;
+    padding: 10px 0;
     border-top: 1px solid var(--text);
   }
   .featured-blog-grid.list-view .featured-blog-card:hover {
@@ -211,6 +211,10 @@
   .featured-blog-grid.list-view .featured-blog-card:hover .featured-blog-card-title,
   .featured-blog-grid.list-view .featured-blog-card:hover .featured-blog-card-date {
     color: rgb(var(--color-background));
+  }
+
+  .featured-blog-grid.list-view .featured-blog-card:hover .featured-blog-card-date {
+    z-index: 1002;
   }
 
   .featured-blog-grid.list-view .featured-blog-card:hover .fb-arrow-svg {
@@ -290,6 +294,56 @@
     padding: 0;
   }
 
+  .load-more-btn-fb-container {
+    margin-top: 50px;
+    display: flex;
+    justify-content: end;
+  }
+
+  .load-more-btn-fb {
+    background-color: var(--text);
+    color: rgb(var(--color-background));
+    padding: 4px 10px;
+    border: 1px solid var(--text);
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 20px;
+    line-height: 1;
+    transition: background-color 0.3s;
+  }
+  .load-more-btn-fb:hover {
+    background-color: rgb(var(--color-background)); /* adjust if needed */
+    color: var(--text);
+    border: 1px solid var(--text);
+  }
+
+  /* Fade In Animation */
+  @keyframes fadeInAnimation {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .blog-article {
+    opacity: 0;
+    transition: opacity 0.6s ease, transform 0.6s ease;
+  }
+
+  .blog-article.visible {
+    opacity: 1;
+    transform: translateY(0);
+    animation: fadeInAnimation 0.6s ease forwards;
+  }
+
+  .blog-article:not(.visible) {
+    transform: translateY(20px);
+  }
+
   @media (max-width: 600px) {
     .view-toggle button {
       padding: 0px 4.5px;
@@ -346,12 +400,43 @@
     .featured-blog-card-date {
       font-size: 14px;
     }
+
+    .load-more-btn-fb {
+      font-size: 16px;
+      line-height: 1;
+      padding: 1px 6px;
+    }
   }
 
   @media (min-width: 1024px) {
     .featured-blog-grid.list-view .featured-blog-card-date {
       font-size: 18px;
     }
+    .load-more-btn-fb {
+      font-size: 24px;
+      line-height: 1;
+    }
+  }
+
+  /* Ensure the container doesn’t clip anything */
+  .featured-blog-grid.list-view {
+    overflow: visible !important;
+  }
+
+  /* Base stacking context for each card/article */
+  .featured-blog-grid.list-view .blog-article {
+    position: relative;
+    z-index: 1;
+  }
+
+  /* On hover, lift the whole card and its preview */
+  .featured-blog-grid.list-view .blog-article:hover {
+    z-index: 1000; /* high enough to clear siblings */
+  }
+
+  /* And make sure the preview wrapper itself is on top */
+  .featured-blog-grid.list-view .blog-article:hover .featured-blog-card-image-wrapper {
+    z-index: 1001; /* even higher */
   }
 </style>
 
@@ -397,12 +482,20 @@
       id="archiveContainer"
       aria-live="polite"
       aria-label="Blog articles"
+      data-post-limit="{{ section.settings.post_limit }}"
+      data-total-posts="{% if blog_handle != blank %}{{ blogs[blog_handle].articles.size }}{% else %}0{% endif %}"
     >
       {% assign blog_handle = section.settings.blog %}
       {% assign post_limit = section.settings.post_limit %}
       {% if blog_handle != blank and blogs[blog_handle].articles.size > 0 %}
-        {% for article in blogs[blog_handle].articles limit: post_limit %}
-          <article aria-labelledby="article-title-{{ forloop.index0 }}">
+        {% for article in blogs[blog_handle].articles %}
+          <article
+            aria-labelledby="article-title-{{ forloop.index0 }}"
+            class="blog-article"
+            {% if forloop.index > post_limit %}
+              style="display: none;"
+            {% endif %}
+          >
             <a
               href="{{ article.url }}"
               class="featured-blog-card"
@@ -484,6 +577,11 @@
         {% endfor %}
       {% endif %}
     </div>
+    {% if blogs[blog_handle].articles.size > section.settings.post_limit %}
+      <div class="load-more-btn-fb-container">
+        <button class="load-more-btn-fb" data-increment="6">LOAD MORE</button>
+      </div>
+    {% endif %}
   </section>
 {% endif %}
 
@@ -495,6 +593,107 @@
     const slider = document.querySelector('.toggle-slider');
     const container = document.getElementById('archiveContainer');
     const buttons = [gridBtn, listBtn];
+    const loadMoreBtn = document.querySelector('.load-more-btn-fb');
+
+    // Add scroll animation with Intersection Observer
+    const setupScrollAnimation = () => {
+      const blogArticles = document.querySelectorAll('#archiveContainer .blog-article');
+
+      // Create observer with options
+      const options = {
+        root: null, // viewport
+        rootMargin: '0px',
+        threshold: 0.15, // 15% of element needs to be visible
+      };
+
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('visible');
+            // Once we've shown it, no need to observe anymore
+            observer.unobserve(entry.target);
+          }
+        });
+      }, options);
+
+      // Observe all blog articles
+      blogArticles.forEach((article) => {
+        observer.observe(article);
+      });
+    };
+
+    // Run setup initially
+    setTimeout(setupScrollAnimation, 100);
+
+    // Load more functionality
+    if (loadMoreBtn) {
+      console.log('Load more button found');
+      const increment = parseInt(loadMoreBtn.dataset.increment || '6', 10);
+      const postLimit = parseInt(container.dataset.postLimit || '5', 10);
+      const totalPosts = parseInt(container.dataset.totalPosts || '0', 10);
+      let currentlyVisible = postLimit;
+
+      console.log(`Initial settings: limit=${postLimit}, total=${totalPosts}, increment=${increment}`);
+
+      loadMoreBtn.addEventListener('click', function () {
+        console.log('Load more button clicked');
+        const blogArticles = document.querySelectorAll('#archiveContainer .blog-article');
+        console.log(`Found ${blogArticles.length} total articles, showing next batch from ${currentlyVisible}`);
+
+        // Calculate how many more articles to show
+        const endIndex = Math.min(currentlyVisible + increment, blogArticles.length);
+        console.log(`Will show articles from index ${currentlyVisible} to ${endIndex - 1}`);
+
+        // Show the next batch of articles
+        for (let i = currentlyVisible; i < endIndex; i++) {
+          if (blogArticles[i]) {
+            blogArticles[i].style.display = '';
+            console.log(`Showing article at index ${i}`);
+
+            // Create a new observer for this newly visible article
+            const observer = new IntersectionObserver(
+              (entries) => {
+                entries.forEach((entry) => {
+                  if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                    observer.unobserve(entry.target);
+                  }
+                });
+              },
+              {
+                threshold: 0.15,
+              }
+            );
+
+            observer.observe(blogArticles[i]);
+          }
+        }
+
+        // Update the counter
+        currentlyVisible = endIndex;
+        console.log(`Updated currently visible to ${currentlyVisible}`);
+
+        // Hide the button if we've shown all articles
+        if (currentlyVisible >= blogArticles.length) {
+          loadMoreBtn.style.display = 'none';
+          console.log('All articles shown, hiding button');
+        }
+      });
+
+      // Fix initial visibility for grid/list view switchover
+      const updateVisibilityAfterViewChange = () => {
+        const blogArticles = document.querySelectorAll('#archiveContainer .blog-article');
+        blogArticles.forEach((article, index) => {
+          article.style.display = index < currentlyVisible ? '' : 'none';
+        });
+
+        // Re-initialize the scroll animation for visible articles
+        setTimeout(setupScrollAnimation, 300);
+      };
+
+      gridBtn.addEventListener('click', updateVisibilityAfterViewChange);
+      listBtn.addEventListener('click', updateVisibilityAfterViewChange);
+    }
 
     function updateSliderPos(isList) {
       const activeBtn = isList ? listBtn : gridBtn;
@@ -519,6 +718,11 @@
         sectionEl.classList.toggle('list-view', toList);
         updateSliderPos(toList);
         container.style.opacity = 1;
+
+        // Reset and re-initialize fade-in animations
+        const blogArticles = document.querySelectorAll('#archiveContainer .blog-article');
+        blogArticles.forEach((article) => article.classList.remove('visible'));
+        setupScrollAnimation();
       }, 300);
     }
 
@@ -579,7 +783,7 @@
       "label": "Number of Posts to Display",
       "default": 3,
       "min": 3,
-      "max": 9,
+      "max": 20,
       "step": 1
     },
     {
