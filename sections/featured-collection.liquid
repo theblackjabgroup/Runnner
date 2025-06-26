@@ -301,19 +301,21 @@
 
                               {% if has_size_variants %}
                                 <div
-                                  class="size-variants-container rounded p-2 mb-0 opacity-0 invisible"
+                                  class="size-variants-container p-2 mb-0 opacity-0 invisible"
                                   role="group"
                                   aria-label="Size options for {{ product.title }}"
-                                  style="background-color:  rgb(var(--color-background));"
+                                  style="background-color: var(--text);"
                                 >
                                   {% for option in product.options_with_values %}
                                     {% if option.name == 'Size' or option.name == 'size' %}
                                       {% assign size_option_index = forloop.index0 %}
-                                      <div class="size-label-wrapper flex items-center w-full">
+                                      <div
+                                        class="size-label-wrapper flex items-center w-full"
+                                      >
                                         <span
                                           class="size-label text-m px-2 mr-auto"
-                                          style="color: var(--text); background-color: rgb(var(--color-background));"
-                                          >SELECT SIZE</span
+                                          style="color: rgb(var(--color-background)); background-color: var(--text);"
+                                          >SIZE</span
                                         >
                                         <div
                                           class="size-options-wrapper flex flex-wrap gap-4 justify-end"
@@ -341,7 +343,7 @@
                                                 data-variant-size="{{ value }}"
                                                 aria-disabled="true"
                                               {% endif %}
-                                              style="--animation-order: {{ forloop.index }}; background-color: rgb(var(--color-background)); color: var(--text);"
+                                              style="--animation-order: {{ forloop.index }}; background-color: var(--text); color: rgb(var(--color-background));"
                                               aria-label="Size {{ value }}{% unless variant_available %} - Sold Out{% endunless %}"
                                               {% unless variant_available %}
                                                 aria-disabled="true"
@@ -373,7 +375,7 @@
                                   {% endif %}
                                   aria-label="Add {{ product.title }} to cart"
                                 >
-                                  Add to Cart
+                                  ADD TO CART
                                 </button>
                               {% else %}
                                 <button
@@ -385,7 +387,7 @@
                                   aria-haspopup="dialog"
                                   style="background-color: rgb(var(--color-background)); color: var(--text);"
                                 >
-                                  Notify Me When In Stock
+                                  NOTIFY ME WHEN IN STOCK
                                 </button>
                               {% endif %}
                             </div>
@@ -396,7 +398,7 @@
                           <a href="{{ product.url }}" aria-label="{{ product.title }}">
                             <h3
                               class="!text-[1.6rem] uppercase leading-tight"
-                              style="font-weight: 600 !important; color: var(--text);"
+                              style="color: var(--text);"
                             >
                               {{ product.title | escape }}
                             </h3>
@@ -646,7 +648,7 @@
       background-color: rgba(68, 68, 68, 0.15);
     }
 
-    .image-nav-arrow:hover svg {
+    .product-image-wrapper:hover .image-nav-arrow svg {
       transition: opacity 0.5s ease;
       opacity: 0.6;
     }
@@ -687,7 +689,9 @@
       transition: all 0.5s ease;
       width: 110%;
       left: -5%;
-      height: 40px;
+      height: 50px;
+      border-radius: 8px;
+      font-size: 20px;
       position: relative;
       z-index: 5;
       cursor: pointer;
@@ -700,6 +704,7 @@
     }
 
     .size-variants-container {
+      border-radius: 8px;
       position: absolute;
       bottom: 0;
       left: 0;
@@ -711,7 +716,10 @@
       transform: translateY(0);
       display: flex;
       justify-content: center;
-      padding: 2px;
+      padding: 5px 10px;
+      font-size: 20px;
+      background-color: var(--text);
+      color: rgb(var(--color-background));
     }
 
     .size-label-wrapper {
@@ -719,12 +727,13 @@
       width: 110%;
       left: -5%;
       align-items: center;
+      border-radius: 8px;
     }
 
     .size-label {
       margin-right: auto;
-      font-weight: 600;
-      color: #000;
+      border-radius: 8px;
+      color: var(--text);
     }
 
     .product-cart-container:hover .size-variants-container,
@@ -749,7 +758,10 @@
       transition: all 0.4s ease;
       width: 30px;
       height: 30px;
-      border: 1px solid var(--text);
+      border-radius: 5px;
+      color: rgb(var(--color-background));
+      font-size: 18px;
+      border: 1.5px solid rgb(var(--color-background));
       padding: 2px;
       display: flex;
       align-items: center;
@@ -758,22 +770,26 @@
       opacity: 1; /* Ensure buttons are visible */
       visibility: visible; /* Ensure buttons are visible */
       background-color: transparent;
-      color: var(--text);
     }
 
     .size-option-btn:hover {
       transform: translateY(-2px);
-      background-color: var(--text) !important;
-      color: rgb(var(--color-background)) !important;
+      background-color: rgb(var(--color-background)) !important;
+      color: var(--text) !important;
     }
 
     .unavailable-size {
       opacity: 1;
       position: relative;
       cursor: not-allowed;
-      border-color: var(--disabled_text);
-      color: var(--disabled_text);
+      border-color: var(--disabled_text) !important;
+      color: var(--disabled_text) !important;
       overflow: hidden;
+    }
+
+    .unavailable-size:hover{
+      background-color: var(--disabled_text) !important;
+      color: var(--text);
     }
 
     .unavailable-size::after {
@@ -782,9 +798,13 @@
       top: 50%;
       left: -2px;
       right: -2px;
-      height: 1px;
-      background-color: rgb(var(--color-background));
+      height: 2px;
+      background-color: var(--disabled_text);
       transform: rotate(-45deg);
+    }
+
+    .unavailable-size:hover::after{
+      height: 0px;
     }
 
     .size-option-btn:hover {
