@@ -99,7 +99,11 @@
               </div>
               <div class="cb-accordion-content">
                 <h4>{{ block.settings.subheading }}</h4>
-                <p>{{ block.settings.content }}</p>
+                {% assign paragraphs = block.settings.content | split: '||' %}
+                {% comment %} <p>{{ block.settings.content }}</p> {% endcomment %}
+                {% for paragraph in paragraphs %}
+                  <p>{{ paragraph }}</p>
+                {% endfor %}
               </div>
             </div>
           {% endif %}
@@ -130,6 +134,7 @@
     box-sizing: border-box;
     align-items: flex-start;
     overflow-y: auto;
+    overflow-x: hidden; /* Prevent horizontal scroll */
     /* padding: 0 20px; */
     display: flex;
     flex-direction: column;
@@ -165,11 +170,13 @@
 
   section.cb-container-image-and-text #cb-left-img {
     /* pointer-events: none; */
+    position: sticky;
+    top: 55px;
   }
 
   section.cb-container-image-and-text ::selection {
     /* background: none; */
-    color: var(--cr-yellow-2) !important;
+    color: var(--sale_badge) !important;
   }
 
   section.cb-container-image-and-text .cb-right-data {
@@ -375,6 +382,35 @@
       line-height: 2.2rem;
     }
   }
+
+  @media screen and (max-width: 625px) {
+    section.cb-container-image-and-text #cb-right {
+      padding-left: 0;
+      padding-right: 0;
+    }
+    section.cb-container-image-and-text {
+      padding-left: 1vw;
+      padding-right: 1vw;
+    }
+  }
+
+  @media screen and (min-width: 1025px) {
+    section.cb-container-image-and-text .cb-right h2 {
+      font-size: 24px !important;
+    }
+
+    section.cb-container-image-and-text .cb-right p {
+      font-size: 19px !important;
+    }
+
+    section.cb-container-image-and-text .cb-accordion-header h3 {
+      font-size: 32px !important;
+    }
+
+    section.cb-container-image-and-text .cb-accordion-content h4 {
+      font-size: 24px !important;
+    }
+  }
 </style>
 
 <script>
@@ -462,6 +498,7 @@
           "type": "textarea",
           "id": "paragraph_text",
           "label": "Paragraph Text",
+          "info": "Separate paragraphs using ||",
           "default": "Enter your paragraph text here."
         }
       ]
@@ -486,6 +523,7 @@
           "type": "textarea",
           "id": "content",
           "label": "Content",
+          "info": "Separate paragraphs using ||",
           "default": "Accordion content goes here."
         }
       ]
