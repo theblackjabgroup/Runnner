@@ -659,7 +659,7 @@
     }
 
     .cart-sidebar-total {
-      font-size: 3rem;
+      font-size: 2.5rem;
     }
     .cart-sidebar-checkout{
         font-size:4rem;
@@ -810,47 +810,44 @@
             {% endif %}
           </div>
 
-          <div class="cart-item-controls">
-            <form method="post" action="/cart/change" style="display:inline;">
-              <input type="hidden" name="id" value="{{ item.key }}">
-              <div class="cart-item-qty">
-                <button
-                  class="cart-item-qty-btn"
-                  type="submit"
-                  name="quantity"
-                  value="{{ item.quantity | minus: 1 }}"
-                  {% if item.quantity <= 1 %}disabled{% endif %}
-                  aria-label="Decrease quantity"
-                >
-                  −
-                </button>
-                <input
-                  class="cart-item-qty-input"
-                  type="text"
-                  value="{{ item.quantity }}"
-                  readonly
-                  aria-label="Current quantity"
-                >
-                <button
-                  class="cart-item-qty-btn"
-                  type="submit"
-                  name="quantity"
-                  value="{{ item.quantity | plus: 1 }}"
-                  aria-label="Increase quantity"
-                >
-                  +
-                </button>
-              </div>
-
-            </form>
-
-            <form method="post" action="/cart/change" style="display:inline;">
-              <input type="hidden" name="id" value="{{ item.key }}">
-              <input type="hidden" name="quantity" value="0">
-              <button class="cart-item-remove" type="submit" aria-label="Remove item">
-                [REMOVE]
+          <div class="cart-item-controls" data-item-key="{{ item.key }}">
+            <div class="cart-item-qty">
+              <button
+                class="cart-item-qty-btn js-cart-qty-btn"
+                type="button"
+                data-action="decrease"
+                data-item-key="{{ item.key }}"
+                {% if item.quantity <= 1 %}disabled{% endif %}
+                aria-label="Decrease quantity"
+              >
+                −
               </button>
-            </form>
+              <input
+                class="cart-item-qty-input"
+                type="text"
+                value="{{ item.quantity }}"
+                readonly
+                aria-label="Current quantity"
+                data-item-key="{{ item.key }}"
+              >
+              <button
+                class="cart-item-qty-btn js-cart-qty-btn"
+                type="button"
+                data-action="increase"
+                data-item-key="{{ item.key }}"
+                aria-label="Increase quantity"
+              >
+                +
+              </button>
+            </div>
+            <button
+              class="cart-item-remove js-cart-remove-btn"
+              type="button"
+              data-item-key="{{ item.key }}"
+              aria-label="Remove item"
+            >
+              [REMOVE]
+            </button>
           </div>
         </div>
       </div>
@@ -921,18 +918,18 @@
         <span>{{ cart.total_price | money_with_currency }}</span>
       </div>
 
-      <a href="{{ routes.checkout_url }}" class="cart-sidebar-checkout" aria-label="Proceed to checkout">
+      <button type="button" class="cart-sidebar-checkout" id="checkout-btn" aria-label="Proceed to checkout">
         <span>Checkout</span>
         <svg stroke-linecap="round" width="32" height="32" viewBox="0 0 35 35" fill="none" xmlns="http://www.w3.org/2000/svg">
           <path d="M3.16406 30.9824H30.9305M30.9305 30.9824V3.21602M30.9305 30.9824L3.16406 3.21602" stroke="white" stroke-width="4" stroke-linejoin="round"/>
         </svg>
-      </a>
+      </button>
     </div>
   </div>
 </div>
 
 <script>
-  document.addEventListener('DOMContentLoaded', function () {
+  function initSidebarDropdowns() {
     const headers = document.querySelectorAll('.js-sidebar-header');
 
     headers.forEach(function (header) {
@@ -998,5 +995,74 @@
         }, 200);
       }
     });
+  }
+
+  document.addEventListener('DOMContentLoaded', function () {
+    initSidebarDropdowns();
+
+    // --- AJAX Cart Quantity & Remove ---
+   function updateCartUI() {
+     // Reload the cart section via AJAX (fetch the section and replace)
+     fetch(window.location.pathname + '?section_id=main-cart-items')
+       .then(res => res.text())
+       .then(html => {
+         const parser = new DOMParser();
+         const doc = parser.parseFromString(html, 'text/html');
+         const newCart = doc.querySelector('.cart-main-layout');
+         if (newCart) {
+           document.querySelector('.cart-main-layout').replaceWith(newCart);
+           initSidebarDropdowns(); // Re-initialize sidebar dropdowns after AJAX update
+         }
+       });
+   }
+
+    document.body.addEventListener('click', function(e) {
+      // Quantity buttons
+      if (e.target.classList.contains('js-cart-qty-btn')) {
+        const btn = e.target;
+        const itemKey = btn.dataset.itemKey;
+        const action = btn.dataset.action;
+        const qtyInput = document.querySelector('.cart-item-qty-input[data-item-key="' + itemKey + '"]');
+        let currentQty = parseInt(qtyInput.value, 10);
+        let newQty = action === 'increase' ? currentQty + 1 : currentQty - 1;
+        if (newQty < 1) newQty = 1;
+
+        fetch('/cart/change.js', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+          body: JSON.stringify({ id: itemKey, quantity: newQty })
+        })
+        .then(res => res.json())
+        .then(data => {
+          updateCartUI();
+        });
+      }
+
+      // Remove button
+      if (e.target.classList.contains('js-cart-remove-btn')) {
+        const btn = e.target;
+        const itemKey = btn.dataset.itemKey;
+        fetch('/cart/change.js', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+          body: JSON.stringify({ id: itemKey, quantity: 0 })
+        })
+        .then(res => res.json())
+        .then(data => {
+          updateCartUI();
+        });
+      }
+    });
+   // Checkout button JS redirect (robust event delegation, prevent form submit)
+   document.body.addEventListener('click', function(e) {
+     const checkoutBtn = e.target.closest('#checkout-btn');
+     if (checkoutBtn) {
+       // Prevent form submission if inside a form
+       if (checkoutBtn.form) {
+         e.preventDefault();
+       }
+       window.location.href = "{{ routes.checkout_url }}";
+     }
+   });
   });
 </script>
