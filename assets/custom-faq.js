@@ -29,7 +29,9 @@ document.addEventListener("DOMContentLoaded", () => {
     container.dataset.expanded = "false";
     while (svg.nextSibling) 
       svg.parentNode.removeChild(svg.nextSibling);
-    svg.insertAdjacentHTML("afterend", shortHTML);
+    svg.insertAdjacentHTML("afterend", `<span class="preview-text fadeUpIn">${container.dataset.shortHTML}</span>`);
+
+    
 
     container.style.overflow = "hidden";
     container.style.transition = "max-height 0.5s ease";
@@ -42,7 +44,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
       if (!isExpanded) {
         while (svg.nextSibling) svg.parentNode.removeChild(svg.nextSibling);
-        svg.insertAdjacentHTML("afterend", container.dataset.fullHTML);
+        svg.insertAdjacentHTML("afterend", `<span class="preview-text fadeUpIn">${container.dataset.fullHTML}</span>`);
 
         container.style.maxHeight = "0px";
         requestAnimationFrame(() => {
