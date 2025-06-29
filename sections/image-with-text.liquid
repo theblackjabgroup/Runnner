@@ -46,6 +46,7 @@
       }
     }
 
+    /* Animation styling for word-level control */
     .letter-animation-container {
       display: inline-block;
       width: 100%;
@@ -53,7 +54,38 @@
       overflow: visible;
       position: relative;
     }
-  .image-with-text-text-content{
+    
+    /* Style for each word container */
+    .animated-word {
+      display: inline-block;
+      white-space: nowrap; /* Ensure words don't break */
+      margin-right: 0.2em; /* Optional: slight spacing between words */
+    }
+    
+    /* Style for individual letters */
+    .animated-letter {
+      display: inline-block;
+      opacity: 0;
+      transform: translateX(500%);
+      position: relative;
+    }
+    
+    /* Style for spaces between words */
+    .animated-space {
+      display: inline-block;
+      opacity: 0;
+      transform: translateX(500%);
+      position: relative;
+      /* Adjust this if needed for proper spacing */
+    }
+    
+    /* Ensure headings don't break words at boundaries */
+    .image-with-text-heading {
+      word-break: keep-all; /* Prevent breaking words */
+      overflow-wrap: break-word; /* Allow wrapping between words */
+    }
+
+    .image-with-text-text-content{
     font-size: 24px;
   }
 
@@ -790,21 +822,47 @@ if (prefersReducedMotion) {
           element.classList.add('letter-animation-container', 'animation-ready');
           element.setAttribute('aria-label', text);
           element.style.opacity = '1'; // Make container visible
-
-          for (let i = 0; i < text.length; i++) {
-            const letterSpan = document.createElement('span');
-            letterSpan.classList.add('animated-letter');
-            letterSpan.textContent = text[i] === ' ' ? '\u00A0' : text[i]; 
-            letterSpan.setAttribute('aria-hidden', 'true'); 
-
-            letterSpan.style.animation = `letterAppear 1s forwards`; 
-            letterSpan.style.animationDelay = `${i * 0.07}s`; 
+          
+          // Split the text into words first
+          const words = text.split(' ');
+          
+          let letterIndex = 0;
+          words.forEach((word, wordIndex) => {
+            // Create a word container span
+            const wordSpan = document.createElement('span');
+            wordSpan.classList.add('animated-word');
+            wordSpan.style.display = 'inline-block';
+            wordSpan.style.whiteSpace = 'nowrap'; // Prevent word breaking
             
-            element.appendChild(letterSpan);
-          }
+            for (let i = 0; i < word.length; i++) {
+              const letterSpan = document.createElement('span');
+              letterSpan.classList.add('animated-letter');
+              letterSpan.textContent = word[i];
+              letterSpan.setAttribute('aria-hidden', 'true');
+              
+              letterSpan.style.animation = `letterAppear 1s forwards`;
+              letterSpan.style.animationDelay = `${letterIndex * 0.07}s`;
+              letterIndex++;
+              
+              wordSpan.appendChild(letterSpan);
+            }
+            
+            element.appendChild(wordSpan);
+            
+            // Add space between words (except for the last word)
+            if (wordIndex < words.length - 1) {
+              const spaceSpan = document.createElement('span');
+              spaceSpan.classList.add('animated-space');
+              spaceSpan.innerHTML = '&nbsp;';
+              spaceSpan.style.animation = `letterAppear 1s forwards`;
+              spaceSpan.style.animationDelay = `${letterIndex * 0.07}s`;
+              letterIndex++;
+              element.appendChild(spaceSpan);
+            }
+          });
         });
 
-        // Handle text content animations
+        // Handle text content animations - similar approach for paragraph text
         const textContentElements = entry.target.querySelectorAll('.image-with-text-text-content p.letter-animation');
         
         textContentElements.forEach(element => {
@@ -813,18 +871,44 @@ if (prefersReducedMotion) {
           element.classList.add('letter-animation-container', 'animation-ready');
           element.setAttribute('aria-label', text);
           element.style.opacity = '1'; // Make container visible
-
-          for (let i = 0; i < text.length; i++) {
-            const letterSpan = document.createElement('span');
-            letterSpan.classList.add('animated-letter');
-            letterSpan.textContent = text[i] === ' ' ? '\u00A0' : text[i]; 
-            letterSpan.setAttribute('aria-hidden', 'true'); 
-
-            letterSpan.style.animation = `letterAppear 1s forwards`; 
-            letterSpan.style.animationDelay = `${i * 0.07}s`; 
+          
+          // Split the text into words first
+          const words = text.split(' ');
+          
+          let letterIndex = 0;
+          words.forEach((word, wordIndex) => {
+            // Create a word container span
+            const wordSpan = document.createElement('span');
+            wordSpan.classList.add('animated-word');
+            wordSpan.style.display = 'inline-block';
+            wordSpan.style.whiteSpace = 'nowrap'; // Prevent word breaking
             
-            element.appendChild(letterSpan);
-          }
+            for (let i = 0; i < word.length; i++) {
+              const letterSpan = document.createElement('span');
+              letterSpan.classList.add('animated-letter');
+              letterSpan.textContent = word[i];
+              letterSpan.setAttribute('aria-hidden', 'true');
+              
+              letterSpan.style.animation = `letterAppear 1s forwards`;
+              letterSpan.style.animationDelay = `${letterIndex * 0.07}s`;
+              letterIndex++;
+              
+              wordSpan.appendChild(letterSpan);
+            }
+            
+            element.appendChild(wordSpan);
+            
+            // Add space between words (except for the last word)
+            if (wordIndex < words.length - 1) {
+              const spaceSpan = document.createElement('span');
+              spaceSpan.classList.add('animated-space');
+              spaceSpan.innerHTML = '&nbsp;';
+              spaceSpan.style.animation = `letterAppear 1s forwards`;
+              spaceSpan.style.animationDelay = `${letterIndex * 0.07}s`;
+              letterIndex++;
+              element.appendChild(spaceSpan);
+            }
+          });
         });
 
         // Handle date animations
