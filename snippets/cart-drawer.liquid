@@ -708,16 +708,20 @@
               </div>
             </label>
             <label class="pricing-option !text-[1.5rem] border-b py-2 flex items-center justify-center gap-3 ">
-              <input type="radio" name="pricing" value="member">
+              <input id="subscribe-radio" type="radio" name="pricing" value="member">
               <div class="flex justify-between w-full">
-                <span>BECOME A MEMBER AND SAVE 10%</span>
+                <span>SUBSCRIBE AND SAVE 10%</span>
                 <span>${{ cart.total_price | times: 0.9 | money_without_currency }}</span>
               </div>
             </label>
+            <div id="subscribe-form" style="display:none; margin-top: 10px;">
+              <input type="email" id="subscribe-email" placeholder="Enter your email" style="padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
+              <button type="button" id="subscribe-btn" style="padding: 8px 16px; background: #000; color: #fff; border: none; border-radius: 4px; margin-left: 8px;">Subscribe</button>
+            </div>
+
           </div>
         </div>
 
-        <!-- CTAs -->
 
         <div class="cart__ctas" {{ block.shopify_attributes }}>
           <button
@@ -740,3 +744,27 @@
     </div>
   </div>
 </cart-drawer>
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    var subscribeRadio = document.getElementById('subscribe-radio');
+    var regularRadio = document.querySelector('input[name="pricing"][value="regular"]');
+    var subscribeForm = document.getElementById('subscribe-form');
+
+    function toggleSubscribeForm() {
+      if (subscribeRadio.checked) {
+        subscribeForm.style.display = 'block';
+      } else {
+        subscribeForm.style.display = 'none';
+      }
+    }
+
+    if (subscribeRadio && subscribeForm) {
+      subscribeRadio.addEventListener('change', toggleSubscribeForm);
+      if (regularRadio) {
+        regularRadio.addEventListener('change', toggleSubscribeForm);
+      }
+      // Initial state
+      toggleSubscribeForm();
+    }
+  });
+</script>
