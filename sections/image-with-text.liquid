@@ -46,13 +46,46 @@
       }
     }
 
+    /* Animation styling for word-level control */
     .letter-animation-container {
       display: inline-block;
       width: 100%;
+      /* max-width: 550px; */
       overflow: visible;
       position: relative;
     }
-  .image-with-text-text-content{
+    
+    /* Style for each word container */
+    .animated-word {
+      display: inline-block;
+      white-space: nowrap; /* Ensure words don't break */
+      margin-right: 0.2em; /* Optional: slight spacing between words */
+    }
+    
+    /* Style for individual letters */
+    .animated-letter {
+      display: inline-block;
+      opacity: 0;
+      transform: translateX(500%);
+      position: relative;
+    }
+    
+    /* Style for spaces between words */
+    .animated-space {
+      display: inline-block;
+      opacity: 0;
+      transform: translateX(500%);
+      position: relative;
+      /* Adjust this if needed for proper spacing */
+    }
+    
+    /* Ensure headings don't break words at boundaries */
+    .image-with-text-heading {
+      word-break: keep-all; /* Prevent breaking words */
+      overflow-wrap: break-word; /* Allow wrapping between words */
+    }
+
+    .image-with-text-text-content{
     font-size: 24px;
   }
 
@@ -225,13 +258,14 @@
       display: flex;
       width: 100%;
       height: 100%;
+      justify-content: {{ section.settings.horizontal_position }};
       align-items: {{ section.settings.vertical_position }};
     }
 
     .image-with-text-text-content-container-{{ section.id }} {
       width: 100%;
-      /* max-width: calc({{ section.settings.content_width }}% + 2rem); */
-      padding: {{ section.settings.content_padding }}px;
+      max-width: {{ section.settings.content_width }}px;
+      padding: {{ section.settings.content_padding }}px {{ section.settings.content_padding | plus: 14 }}px;
       display: flex;
       flex-direction: column;
       height: 100%;
@@ -270,8 +304,8 @@
 
     @media (max-width: 749px) {
       .image-with-text-text-content-container-{{ section.id }} {
-        max-width: calc({{ section.settings.content_width_mobile }}% + 1rem);
-        padding: {{ section.settings.content_padding | times: 0.75 | round: 0 }}px;
+        max-width: {{ section.settings.content_width_mobile }}px;
+        padding: {{ section.settings.content_padding_mobile | plus: 10 }}px;
       }
 
       .image-with-text-button-arrow {
@@ -280,12 +314,14 @@
     }
 
     .image-with-text-button-container {
-      margin-top: 10px;
+      margin-top: 20px;
+      margin-bottom: 20px;
     }
 
     @media (max-width: 749px) {
       .image-with-text-button-container {
         margin-top: 10px;
+        margin-bottom: 10px;
       }
     }
 
@@ -355,7 +391,7 @@
       opacity: 1;
       z-index: 2;
       /* pointer-events: none; */
-      transition: opacity {{ section.settings.overlay_duration | default: 2.5 }}s ease-out;
+      transition: opacity {{ section.settings.overlay_duration | default: 1 }}s ease-out;
       display: block !important;
     }
 
@@ -381,7 +417,7 @@
 
   @media (max-width: 749px) {
     .image-with-text-media-section-{{ section.id }} {
-      padding: 0px 1vw;
+      padding: 0px 8px;
     }
   }
 {%- endstyle -%}
@@ -484,7 +520,7 @@
       {% endif %}
       <div class="image-with-text-media-overlay-{{ section.id }}"></div>
     </div>
-    <div class="absolute inset-0 px-12 image-with-text-text-content-wrapper-{{ section.id }}" style="z-index:3;">
+    <div class="absolute inset-0 image-with-text-text-content-wrapper-{{ section.id }}" style="z-index:3;">
       <div
         class="
           image-with-text-text-content-container-{{ section.id }}
@@ -507,7 +543,7 @@
                 <h2
                   id="Heading-{{ section.id }}-{{ forloop.index }}"
                   class="image-with-text-heading mb-4 {{ heading_class }} {% if section.settings.enable_text_animation %}letter-animation{% endif %}"
-                  style="color:{{ block.settings.text_color }}; font-weight: {{ block.settings.font_weight }};"
+                  style="color:{{ block.settings.text_color }}; font-weight: {{ block.settings.font_weight }}; margin-bottom: 20px;"
                 >
                   {{ block.settings.heading }}
                 </h2>
@@ -699,7 +735,7 @@ window.addEventListener('load', function() {
     setTimeout(() => {
       overlay.style.opacity = '0';
       overlay.addEventListener('transitionend', () => overlay.remove());
-    }, {{ section.settings.overlay_duration | times: 1000 | default: 2500 }});
+    }, {{ section.settings.overlay_duration | times: 1000 | default: 1000 }});
   });
 
 document.addEventListener('DOMContentLoaded', function() {
@@ -786,21 +822,47 @@ if (prefersReducedMotion) {
           element.classList.add('letter-animation-container', 'animation-ready');
           element.setAttribute('aria-label', text);
           element.style.opacity = '1'; // Make container visible
-
-          for (let i = 0; i < text.length; i++) {
-            const letterSpan = document.createElement('span');
-            letterSpan.classList.add('animated-letter');
-            letterSpan.textContent = text[i] === ' ' ? '\u00A0' : text[i]; 
-            letterSpan.setAttribute('aria-hidden', 'true'); 
-
-            letterSpan.style.animation = `letterAppear 1s forwards`; 
-            letterSpan.style.animationDelay = `${i * 0.07}s`; 
+          
+          // Split the text into words first
+          const words = text.split(' ');
+          
+          let letterIndex = 0;
+          words.forEach((word, wordIndex) => {
+            // Create a word container span
+            const wordSpan = document.createElement('span');
+            wordSpan.classList.add('animated-word');
+            wordSpan.style.display = 'inline-block';
+            wordSpan.style.whiteSpace = 'nowrap'; // Prevent word breaking
             
-            element.appendChild(letterSpan);
-          }
+            for (let i = 0; i < word.length; i++) {
+              const letterSpan = document.createElement('span');
+              letterSpan.classList.add('animated-letter');
+              letterSpan.textContent = word[i];
+              letterSpan.setAttribute('aria-hidden', 'true');
+              
+              letterSpan.style.animation = `letterAppear 1s forwards`;
+              letterSpan.style.animationDelay = `${letterIndex * 0.07}s`;
+              letterIndex++;
+              
+              wordSpan.appendChild(letterSpan);
+            }
+            
+            element.appendChild(wordSpan);
+            
+            // Add space between words (except for the last word)
+            if (wordIndex < words.length - 1) {
+              const spaceSpan = document.createElement('span');
+              spaceSpan.classList.add('animated-space');
+              spaceSpan.innerHTML = '&nbsp;';
+              spaceSpan.style.animation = `letterAppear 1s forwards`;
+              spaceSpan.style.animationDelay = `${letterIndex * 0.07}s`;
+              letterIndex++;
+              element.appendChild(spaceSpan);
+            }
+          });
         });
 
-        // Handle text content animations
+        // Handle text content animations - similar approach for paragraph text
         const textContentElements = entry.target.querySelectorAll('.image-with-text-text-content p.letter-animation');
         
         textContentElements.forEach(element => {
@@ -809,18 +871,44 @@ if (prefersReducedMotion) {
           element.classList.add('letter-animation-container', 'animation-ready');
           element.setAttribute('aria-label', text);
           element.style.opacity = '1'; // Make container visible
-
-          for (let i = 0; i < text.length; i++) {
-            const letterSpan = document.createElement('span');
-            letterSpan.classList.add('animated-letter');
-            letterSpan.textContent = text[i] === ' ' ? '\u00A0' : text[i]; 
-            letterSpan.setAttribute('aria-hidden', 'true'); 
-
-            letterSpan.style.animation = `letterAppear 1s forwards`; 
-            letterSpan.style.animationDelay = `${i * 0.07}s`; 
+          
+          // Split the text into words first
+          const words = text.split(' ');
+          
+          let letterIndex = 0;
+          words.forEach((word, wordIndex) => {
+            // Create a word container span
+            const wordSpan = document.createElement('span');
+            wordSpan.classList.add('animated-word');
+            wordSpan.style.display = 'inline-block';
+            wordSpan.style.whiteSpace = 'nowrap'; // Prevent word breaking
             
-            element.appendChild(letterSpan);
-          }
+            for (let i = 0; i < word.length; i++) {
+              const letterSpan = document.createElement('span');
+              letterSpan.classList.add('animated-letter');
+              letterSpan.textContent = word[i];
+              letterSpan.setAttribute('aria-hidden', 'true');
+              
+              letterSpan.style.animation = `letterAppear 1s forwards`;
+              letterSpan.style.animationDelay = `${letterIndex * 0.07}s`;
+              letterIndex++;
+              
+              wordSpan.appendChild(letterSpan);
+            }
+            
+            element.appendChild(wordSpan);
+            
+            // Add space between words (except for the last word)
+            if (wordIndex < words.length - 1) {
+              const spaceSpan = document.createElement('span');
+              spaceSpan.classList.add('animated-space');
+              spaceSpan.innerHTML = '&nbsp;';
+              spaceSpan.style.animation = `letterAppear 1s forwards`;
+              spaceSpan.style.animationDelay = `${letterIndex * 0.07}s`;
+              letterIndex++;
+              element.appendChild(spaceSpan);
+            }
+          });
         });
 
         // Handle date animations
@@ -1003,6 +1091,26 @@ button.addEventListener('keydown', function(event) {
     },
     {
       "type": "select",
+      "id": "horizontal_position",
+      "label": "Horizontal position",
+      "options": [
+        {
+          "value": "flex-start",
+          "label": "Left"
+        },
+        {
+          "value": "center",
+          "label": "Center"
+        },
+        {
+          "value": "flex-end",
+          "label": "Right"
+        }
+      ],
+      "default": "center"
+    },
+    {
+      "type": "select",
       "id": "text_alignment",
       "label": "Text alignment",
       "options": [
@@ -1049,22 +1157,22 @@ button.addEventListener('keydown', function(event) {
     {
       "type": "range",
       "id": "content_width",
-      "min": 30,
-      "max": 100,
-      "step": 5,
-      "unit": "%",
+      "min": 200,
+      "max": 1000,
+      "step": 10,
+      "unit": "px",
       "label": "Content width (desktop)",
-      "default": 60
+      "default": 600
     },
     {
       "type": "range",
       "id": "content_width_mobile",
       "min": 50,
-      "max": 100,
-      "step": 5,
-      "unit": "%",
+      "max": 500,
+      "step": 10,
+      "unit": "px",
       "label": "Content width (mobile)",
-      "default": 90
+      "default": 300
     },
     {
       "type": "range",
@@ -1075,6 +1183,16 @@ button.addEventListener('keydown', function(event) {
       "unit": "px",
       "label": "Content padding",
       "default": 20
+    },
+    {
+      "type": "range",
+      "id": "content_padding_mobile",
+      "min": 0,
+      "max": 60,
+      "step": 5,
+      "unit": "px",
+      "label": "Content padding (mobile)",
+      "default": 5
     },
     {
       "type": "header",
@@ -1444,6 +1562,7 @@ button.addEventListener('keydown', function(event) {
         }
       ],
       "settings": {
+        "horizontal_position": "center",
         "vertical_content_position": "center",
         "text_alignment": "center",
         "enable_text_animation": false,
