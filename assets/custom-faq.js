@@ -11,77 +11,57 @@ document.addEventListener("DOMContentLoaded", () => {
   const wrappers = document.querySelectorAll(".faq-item");
 
   wrappers.forEach(item => {
-    const wrapper = item.querySelector(".faq-toggle span");
+    const wrapper = item.querySelector(".faq-toggle");
     if (!wrapper) return;
 
-    const svg = wrapper.querySelector("svg");
-    const textNode = Array.from(wrapper.childNodes).find(n => n.nodeType === Node.TEXT_NODE && n.textContent.trim().length > 0);
-    if (!svg || !textNode) return;
+    const container = wrapper.querySelector("div");
+    const svg = container.querySelector("svg");
+    if (!container || !svg) return;
 
     svg.classList.add("arrow-svg1");
 
-    const fullText = textNode.textContent.trim().replace(/\s+/g, " ");
-    const shortText = fullText.split(" ").slice(0, 6).join(" ") + "...";
-    const lines = fullText.split(". ").filter(Boolean).map(line => convertLinks(line));
+    const originalText = container.innerText.trim().replace(/\s+/g, " ");
+    const fullHTML = convertLinks(originalText);
+    const shortHTML = convertLinks(originalText.split(" ").slice(0, 6).join(" ") + "...");
 
-    wrapper.innerHTML = "";
-    wrapper.style.alignItems = "flex-start";
-    wrapper.style.gap = "10px";
+    container.dataset.fullHTML = fullHTML;
+    container.dataset.shortHTML = shortHTML;
+    container.dataset.expanded = "false";
+    while (svg.nextSibling) 
+      svg.parentNode.removeChild(svg.nextSibling);
+    svg.insertAdjacentHTML("afterend", `<span class="preview-text fadeUpIn">${container.dataset.shortHTML}</span>`);
 
-    const contentWrapper = document.createElement("div");
-    contentWrapper.className = "faq-text-wrapper";
-    contentWrapper.style.maxHeight = "100px";
-    contentWrapper.style.overflow = "hidden";
-    contentWrapper.style.transition = "max-height 0.6s ease";
+    
 
-    const contentSpan = document.createElement("span");
-    contentSpan.className = "preview-text block select-text selection:bg-yellow-200 selection:text-black";
-    contentSpan.innerHTML = convertLinks(shortText);
-
-    contentWrapper.appendChild(contentSpan);
-    wrapper.appendChild(svg);
-    wrapper.appendChild(contentWrapper);
-
-    wrapper.dataset.shortText = convertLinks(shortText);
-    wrapper.dataset.fullLines = JSON.stringify(lines);
-    wrapper.dataset.expanded = "false";
+    container.style.overflow = "hidden";
+    container.style.transition = "max-height 0.5s ease";
+    container.style.maxHeight = container.scrollHeight + "px";
 
     item.addEventListener("click", () => {
-      const isExpanded = wrapper.dataset.expanded === "true";
-      const fullLines = JSON.parse(wrapper.dataset.fullLines);
-      wrapper.dataset.expanded = (!isExpanded).toString();
-      svg.classList.toggle("rotate--90", !isExpanded);
+      const isExpanded = container.dataset.expanded === "true";
+      container.dataset.expanded = (!isExpanded).toString();
+      wrapper.setAttribute("data-expanded", (!isExpanded).toString());
 
       if (!isExpanded) {
-        contentSpan.innerHTML = "";
+        while (svg.nextSibling) svg.parentNode.removeChild(svg.nextSibling);
+        svg.insertAdjacentHTML("afterend", `<span class="preview-text fadeUpIn">${container.dataset.fullHTML}</span>`);
 
-        let i = 0;
-        contentWrapper.style.maxHeight = "0px";
-
-        setTimeout(() => {
-          const interval = setInterval(() => {
-            if (i >= fullLines.length) {
-              clearInterval(interval);
-              contentWrapper.style.maxHeight = contentSpan.scrollHeight + 40 + "px";
-              return;
-            }
-
-            const line = document.createElement("div");
-            line.innerHTML = fullLines[i];
-            line.style.opacity = "0";
-            line.style.transition = "opacity 2.3s ease";
-            contentSpan.appendChild(line);
-            requestAnimationFrame(() => {
-              line.style.opacity = "1";
-            });
-
-            contentWrapper.style.maxHeight = contentSpan.scrollHeight + 40 + "px";
-            i++;
-          }, 100);
-        }, 100);
+        container.style.maxHeight = "0px";
+        requestAnimationFrame(() => {
+          container.style.maxHeight = container.scrollHeight + "px";
+        });
       } else {
-        contentSpan.innerHTML = wrapper.dataset.shortText;
-        contentWrapper.style.maxHeight = "100px";
+        const currentHeight = container.scrollHeight;
+        container.style.maxHeight = currentHeight + "px";
+
+        requestAnimationFrame(() => {
+          container.style.maxHeight = "25px";
+        });
+        setTimeout(() => {
+          while (svg.nextSibling) svg.parentNode.removeChild(svg.nextSibling);
+          svg.insertAdjacentHTML("afterend", container.dataset.shortHTML);
+          container.style.maxHeight = container.scrollHeight + "px";
+        }, 200);
       }
     });
   });
