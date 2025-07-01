@@ -1,5 +1,8 @@
 <!-- Desktop view -->
-<section class="product-section section-{{ section.id }}-padding hidden lg:!flex lg:flex-row gap-4 lg:gap-8 px-4 py-8">
+<section
+  class="product-section section-{{ section.id }}-padding hidden lg:!flex lg:flex-row gap-4 lg:gap-8 px-4 py-8"
+  style="background-color: var();"
+>
   {%- comment -%} Left: Image Gallery {%- endcomment -%}
   <div class="product-gallery w-1/2">
     <div
@@ -119,13 +122,14 @@
                 <!-- Div acting as top border -->
                 <div
                   class="
-                    tab-top-bar absolute top-0 left-0 right-0 h-0.5 rounded transition-colors duration-300
+                    tab-top-bar absolute top-0 left-0 right-0 rounded transition-colors duration-300
                     {% if tab_index == 1 %}
                       bg-black
                     {% else %}
                       bg-gray-400 group-hover:bg-black
                     {% endif %}
                   "
+                  style="height: 3px; "
                 >
                   &nbsp;
                 </div>
@@ -333,7 +337,7 @@
         </div>
 
         <!-- PRICE + ACTIONS -->
-        <div class="flex justify-between items-center border-t pt-4" style="padding-top: 1rem;">
+        <div class="flex justify-between items-center border-t border-gray-400 pt-4" style="padding-top: 1rem;">
           <!-- Price + Compare at Price -->
           <div class="text-[18px] font-bold flex flex-col">
             <div class="flex items-center gap-2">
@@ -829,6 +833,15 @@
     }
   }
 
+  #size-chart-drawer {
+    transition: transform 0.4s cubic-bezier(0.4,0,0.2,1);
+    transform: translateX(100%);
+    will-change: transform;
+  }
+  #size-chart-drawer.open {
+    transform: translateX(0);
+  }
+
   .product-section {
     display: flex;
     height: calc(100vh * {{product.media.size}});
@@ -981,21 +994,19 @@
         openBtn.addEventListener("click", () => {
           drawer.classList.remove("hidden");
           backdrop.classList.remove("hidden");
-      
           setTimeout(() => {
-            drawer.classList.remove("translate-x-full");
-          }, 20); 
+            drawer.classList.add("open");
+          }, 20);
           lockBodyScroll();
         });
       
         const closeDrawer = () => {
-          drawer.classList.add("translate-x-full");
+          drawer.classList.remove("open");
           backdrop.classList.add("hidden");
-          unlockBodyScroll(); 
-      
+          unlockBodyScroll();
           setTimeout(() => {
             drawer.classList.add("hidden");
-          }, 100); 
+          }, 400); // Match the CSS transition duration
         };
       
         closeBtn.addEventListener("click", closeDrawer);
@@ -1406,6 +1417,12 @@ tabButtons.forEach((button) => {
   "tag": "section",
   "class": "section",
   "settings": [
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "Color scheme",
+      "default": "background-1"
+    },
     {
       "type": "range",
       "id": "padding_top",
