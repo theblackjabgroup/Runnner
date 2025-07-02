@@ -8,34 +8,14 @@
   },
   "settings": [
     {
-      "type": "text",
-      "id": "top_strip_text",
-      "label": "Top Strip Text",
-      "default": "BANDIT GRAND PRIX → BANDIT GRAND PRIX → BANDIT GRAND PRIX → BANDIT GRAND PRIX → BANDIT GRAND PRIX →"
+      "type": "header",
+      "content": "General Settings"
     },
      {
       "type": "color_scheme",
       "id": "color_scheme",
       "default": "scheme-1",
       "label": "Color Scheme"
-    },
-    {
-      "type": "text",
-      "id": "middle_strip_large_text",
-      "label": "Middle Strip Large Text",
-      "default": "JULY 5TH"
-    },
-    {
-      "type": "text",
-      "id": "middle_strip_small_text",
-      "label": "Middle Strip Small Text",
-      "default": "BROOKLYN STOREHOUSE"
-    },
-    {
-      "type": "text",
-      "id": "bottom_strip_text",
-      "label": "Bottom Strip Text",
-      "default": "OPEN HEATS → 3K SUPER FINALS → AFTERPARTY → OPEN HEATS → 3K SUPER FINALS → AFTERPARTY →"
     },
     {
       "type": "range",
@@ -56,6 +36,45 @@
       "unit": "s",
       "label": "Scroll Speed (seconds)",
       "default": 30
+    },
+    {
+      "type": "range",
+      "id": "separator_size",
+      "min": 10,
+      "max": 60,
+      "step": 2,
+      "unit": "px",
+      "label": "Separator Image Size",
+      "default": 30
+    },
+    {
+      "type": "header",
+      "content": "Spacing Settings"
+    },
+    {
+      "type": "range",
+      "id": "section_padding_top",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "unit": "px",
+      "label": "Section Padding Top",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "section_padding_bottom",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "unit": "px",
+      "label": "Section Padding Bottom",
+      "default": 0
+    },
+
+    {
+      "type": "header",
+      "content": "Color Settings"
     },
     {
       "type": "color",
@@ -94,23 +113,107 @@
       "default": "#dc2626"
     }
   ],
+  "blocks": [
+    {
+      "type": "top_strip_block",
+      "name": "Top Strip Text",
+      "limit": 1,
+      "settings": [
+        {
+          "type": "text",
+          "id": "text",
+          "label": "Text",
+          "default": "BANDIT GRAND PRIX"
+        },
+        {
+          "type": "image_picker",
+          "id": "separator_image",
+          "label": "Separator Image (optional)"
+        }
+      ]
+    },
+    {
+      "type": "middle_strip_block",
+      "name": "Middle Strip Text",
+      "limit": 1,
+      "settings": [
+        {
+          "type": "text",
+          "id": "large_text",
+          "label": "Large Text",
+          "default": "JULY 5TH"
+        },
+        {
+          "type": "text",
+          "id": "small_text",
+          "label": "Small Text",
+          "default": "BROOKLYN"
+        }
+      ]
+    },
+    {
+      "type": "bottom_strip_block",
+      "name": "Bottom Strip Text",
+      "limit": 1,
+      "settings": [
+        {
+          "type": "text",
+          "id": "text",
+          "label": "Text",
+          "default": "OPEN HEATS"
+        },
+        {
+          "type": "image_picker",
+          "id": "separator_image",
+          "label": "Separator Image (optional)"
+        }
+      ]
+    }
+  ],
   "presets": [
     {
       "name": "Scrolling Text Banners",
+      "blocks": [
+        {
+          "type": "top_strip_block",
+          "settings": {
+            "text": "BANDIT GRAND PRIX"
+          }
+        },
+        {
+          "type": "middle_strip_block",
+          "settings": {
+            "large_text": "JULY 5TH",
+            "small_text": "BROOKLYN"
+          }
+        },
+        {
+          "type": "bottom_strip_block",
+          "settings": {
+            "text": "OPEN HEATS"
+          }
+        }
+      ]
     }
   ]
 }
 {% endschema %}
+
 <style>
+  .middle-strip-item .small-text {
+  display: inline-block;
+  max-width: 100px;           
+  word-wrap: break-word;
+}
   * {
     box-sizing: border-box;
   }
 
   .scrolling-text-section {
     overflow: hidden;
-    padding-top: 2rem;
-    padding-bottom: 2rem;
-    background-color: #000; /* or whatever background you want */
+    padding-top: {{ section.settings.section_padding_top }}px;
+    padding-bottom: {{ section.settings.section_padding_bottom }}px;
+    background-color: rgb(var(--color-background));
   }
 
   .scrolling-banner {
@@ -131,6 +234,7 @@
     display: flex;
     height: 100%;
     width: fit-content;
+    align-items: center;
   }
 
   .scrolling-text-wrapper {
@@ -152,6 +256,27 @@
     font-size: 60px;
     display: inline-flex;
     align-items: center;
+    margin-right: 20px;
+  }
+
+  .separator {
+    margin-right: 15px;
+    display: inline-flex;
+    align-items: center;
+    height: 100%;
+  }
+
+  .separator img {
+    height: {{ section.settings.separator_size }}px;
+    width: auto;
+    object-fit: contain;
+    display: block;
+    max-width: none;
+  }
+
+  .separator-text {
+    font-size: 40px;
+    font-weight: 500;
   }
 
   .middle-strip-item {
@@ -179,7 +304,12 @@
     white-space: normal;
     width: max-content;
     margin-left: 20px;
-    margin-right: -5px;
+    margin-right: -5px; 
+  }
+
+  .small-text-line {
+    display: block;
+    margin-bottom: 2px;
   }
 
   @keyframes scrollInfinite {
@@ -199,6 +329,7 @@
 
   .top-strip {
     background-color: {{ section.settings.top_strip_bg_color }};
+        margin-top: 15px;
   }
 
   .middle-strip {
@@ -209,7 +340,8 @@
     background-color: {{ section.settings.bottom_strip_bg_color }};
   }
 
-  .top-strip .text-item {
+  .top-strip .text-item,
+  .top-strip .separator-text {
     color: {{ section.settings.top_strip_text_color }};
   }
 
@@ -218,115 +350,144 @@
     color: {{ section.settings.middle_strip_text_color }};
   }
 
-  .bottom-strip .text-item {
+  .bottom-strip .text-item,
+  .bottom-strip .separator-text {
     color: {{ section.settings.bottom_strip_text_color }};
   }
 
   @media (max-width: 480px) {
+    .scrolling-text-section {
+      padding-top: {{ section.settings.section_padding_top | divided_by: 2 }}px;
+      padding-bottom: {{ section.settings.section_padding_bottom | divided_by: 2 }}px;
+    }
+    
     .scrolling-banner {
       height: 20px;
       padding-top: 10px;
       padding-bottom: 10px;
     }
-    .large-text{
+    
+    .large-text {
       font-size: 25px;
     }
-    .text-item{
-      font-size:25px;
-      
+    
+    .text-item {
+      font-size: 25px;
     }
+    
+    .separator-text {
+      font-size: 20px;
+    }
+    
+    .separator img {
+      height: {{ section.settings.separator_size | divided_by: 2 }}px;
+    }
+    
     .small-text {
-      font-size:10px;
+      font-size: 10px;
       margin-left: 6px;
-    margin-right: -14px;
+      margin-right: -14px;
+    }
+    
+    .separator {
+      margin: 0 8px;
     }
   }
 </style>
 
-<div class="scrolling-text-section color-{{ section.settings.color_scheme }} ">
-  <!-- Top Rotated Strip (Slowest) -->
+<div class="scrolling-text-section color-{{ section.settings.color_scheme }}">
+  <!-- Top Rotated Strip -->
+  {% assign top_blocks = section.blocks | where: 'type', 'top_strip_block' %}
+  {% if top_blocks.size > 0 %}
   <div class="banner-strip top-strip">
     <div class="scrolling-banner">
       <div class="scrolling-text-top-wrapper">
-        <div class="text-item">{{ section.settings.top_strip_text }}</div>
-        <div class="text-item">{{ section.settings.top_strip_text }}</div>
-        <div class="text-item">{{ section.settings.top_strip_text }}</div>
-        <div class="text-item">{{ section.settings.top_strip_text }}</div>
-      </div>
-    </div>
-  </div>
-  
-  <!-- Middle Rotated Strip (Medium Speed) -->
-  <div class="banner-strip middle-strip">
-    <div class="scrolling-banner">
-      <div class="scrolling-text-wrapper">
-        {% for i in (1..8) %}
-          <div class="middle-strip-item">
-            <span class="large-text">{{ section.settings.middle_strip_large_text }}</span>
-            <span class="small-text">
-            {% assign words = section.settings.middle_strip_small_text | split: ' ' %}
-            {% for word in words %}
-              <span>{{ word }}</span><br>
-            {% endfor %}
-            </span>
-          </div>
+        {% for i in (1..20) %}
+          {% for block in top_blocks %}
+            {% if block.settings.text != blank %}
+              <span class="text-item">{{ block.settings.text }}</span>
+              {% if block.settings.separator_image %}
+                <span class="separator">
+                  <img src="{{ block.settings.separator_image | image_url: width: 100 }}" 
+                       alt="separator" 
+                       loading="lazy"
+                       width="{{ section.settings.separator_size }}"
+                       height="{{ section.settings.separator_size }}">
+                </span>
+              {% endif %}
+            {% endif %}
+          {% endfor %}
         {% endfor %}
       </div>
     </div>
   </div>
+  {% endif %}
   
-  <!-- Bottom Rotated Strip -->
-  <div class="banner-strip bottom-strip">
+  <!-- Middle Rotated Strip -->
+  {% assign middle_blocks = section.blocks | where: 'type', 'middle_strip_block' %}
+  {% if middle_blocks.size > 0 %}
+  <div class="banner-strip middle-strip">
     <div class="scrolling-banner">
-      <div class="scrolling-text-slow-wrapper">
-        <div class="text-item">{{ section.settings.bottom_strip_text }}</div>
-        <div class="text-item">{{ section.settings.bottom_strip_text }}</div>
-        <div class="text-item">{{ section.settings.bottom_strip_text }}</div>
-        <div class="text-item">{{ section.settings.bottom_strip_text }}</div>
+      <div class="scrolling-text-wrapper">
+        {% for i in (1..20) %}
+          {% for block in middle_blocks %}
+            {% if block.settings.large_text != blank or block.settings.small_text != blank %}
+              <div class="middle-strip-item">
+                {% if block.settings.large_text != blank %}
+                  <span class="large-text">{{ block.settings.large_text }}</span>
+                {% endif %}
+                {% if block.settings.small_text != blank %}
+                  <span class="small-text">{{ block.settings.small_text }}</span>
+                {% endif %}
+              </div>
+            {% endif %}
+          {% endfor %}
+        {% endfor %}
       </div>
     </div>
   </div>
+  {% endif %}
+  
+  <!-- Bottom Rotated Strip -->
+  {% assign bottom_blocks = section.blocks | where: 'type', 'bottom_strip_block' %}
+  {% if bottom_blocks.size > 0 %}
+  <div class="banner-strip bottom-strip">
+    <div class="scrolling-banner">
+      <div class="scrolling-text-slow-wrapper">
+        {% for i in (1..20) %}
+          {% for block in bottom_blocks %}
+            {% if block.settings.text != blank %}
+              <span class="text-item">{{ block.settings.text }}</span>
+              {% if block.settings.separator_image %}
+                <span class="separator">
+                  <img src="{{ block.settings.separator_image | image_url: width: 100 }}" 
+                       alt="separator" 
+                       loading="lazy"
+                       width="{{ section.settings.separator_size }}"
+                       height="{{ section.settings.separator_size }}">
+                </span>
+              {% endif %}
+            {% endif %}
+          {% endfor %}
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+  {% endif %}
 </div>
 
 <script>
   document.addEventListener('DOMContentLoaded', function() {
-    // This script ensures we have enough copies of text to create a seamless scrolling effect
     const wrappers = document.querySelectorAll('.scrolling-text-wrapper, .scrolling-text-top-wrapper, .scrolling-text-slow-wrapper');
     
     wrappers.forEach(wrapper => {
-      const firstItem = wrapper.querySelector('.text-item, .middle-strip-item');
-      if (!firstItem) return;
-      
-      const itemWidth = firstItem.offsetWidth;
       const containerWidth = window.innerWidth;
+      const wrapperWidth = wrapper.scrollWidth;
       
-      // Calculate how many copies we need based on container width
-      const requiredCopies = Math.ceil((containerWidth * 3) / itemWidth);
-      let currentCopies;
-      
-      if (wrapper.querySelector('.middle-strip-item')) {
-        currentCopies = wrapper.querySelectorAll('.middle-strip-item').length;
-        
-        // Add more copies if needed for middle strip
-        if (requiredCopies > currentCopies) {
-          const textContent = firstItem.outerHTML;
-          for (let i = currentCopies; i < requiredCopies; i++) {
-            wrapper.insertAdjacentHTML('beforeend', textContent);
-          }
-        }
-      } else {
-        currentCopies = wrapper.querySelectorAll('.text-item').length;
-        
-        // Add more copies if needed for top and bottom strips
-        if (requiredCopies > currentCopies) {
-          const textContent = firstItem.innerHTML;
-          for (let i = currentCopies; i < requiredCopies; i++) {
-            const newItem = document.createElement('div');
-            newItem.className = firstItem.className;
-            newItem.innerHTML = textContent;
-            wrapper.appendChild(newItem);
-          }
-        }
+      // Ensure we have enough content for seamless scrolling
+      if (wrapperWidth < containerWidth * 2) {
+        const content = wrapper.innerHTML;
+        wrapper.innerHTML = content + content;
       }
     });
   });
