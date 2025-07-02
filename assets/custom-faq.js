@@ -39,9 +39,11 @@ document.addEventListener("DOMContentLoaded", () => {
     container.dataset.fullHTML = fullHTML;
     container.dataset.shortHTML = shortHTML;
     container.dataset.expanded = "false";
+
     while (svg.nextSibling) {
       svg.parentNode.removeChild(svg.nextSibling);
     }
+
     const previewSpan = document.createElement('span');
     previewSpan.className = 'preview-text';
     previewSpan.innerHTML = shortHTML;
@@ -57,20 +59,52 @@ document.addEventListener("DOMContentLoaded", () => {
     newButton.addEventListener("click", (e) => {
       e.preventDefault();
 
-      const currentContainer = newButton.parentNode.querySelector(".faq-toggle div");
-      const previewSpan = currentContainer.querySelector('.preview-text');
-      const currentWrapper = newButton.parentNode.querySelector(".faq-toggle");
+      const currentItem = newButton.closest(".faq-item");
+      const currentContainer = currentItem.querySelector(".faq-toggle div");
+      const currentPreviewSpan = currentContainer.querySelector('.preview-text');
+      const currentWrapper = currentItem.querySelector(".faq-toggle");
 
       const isExpanded = currentContainer.dataset.expanded === "true";
       const newState = !isExpanded;
 
+      // Collapse all other FAQ items
+      wrappers.forEach((otherItem) => {
+        if (otherItem !== currentItem) {
+          const otherContainer = otherItem.querySelector(".faq-toggle div");
+          const otherPreviewSpan = otherContainer.querySelector(".preview-text");
+          const otherWrapper = otherItem.querySelector(".faq-toggle");
+          const wasExpanded = otherContainer.dataset.expanded === "true";
+
+          if (wasExpanded) {
+            otherContainer.dataset.expanded = "false";
+            otherWrapper.setAttribute("data-expanded", "false");
+            const otherButton = otherItem.querySelector(".faq-row");
+            if (otherButton) {
+              otherButton.setAttribute("aria-expanded", "false");
+            }
+
+            const otherHeight = otherContainer.scrollHeight;
+            otherContainer.style.maxHeight = otherHeight + "px";
+            requestAnimationFrame(() => {
+              otherContainer.style.maxHeight = "60px";
+              setTimeout(() => {
+                otherPreviewSpan.innerHTML = otherContainer.dataset.shortHTML;
+                otherPreviewSpan.classList.remove("fadeUpIn");
+                otherContainer.style.maxHeight = otherContainer.scrollHeight + "px";
+              }, 250);
+            });
+          }
+        }
+      });
+
+      // Toggle current item
       currentContainer.dataset.expanded = newState.toString();
       currentWrapper.setAttribute("data-expanded", newState.toString());
       newButton.setAttribute("aria-expanded", newState.toString());
 
       if (newState) {
-        previewSpan.innerHTML = currentContainer.dataset.fullHTML;
-        previewSpan.classList.add("fadeUpIn");
+        currentPreviewSpan.innerHTML = currentContainer.dataset.fullHTML;
+        currentPreviewSpan.classList.add("fadeUpIn");
 
         currentContainer.style.maxHeight = "0px";
         requestAnimationFrame(() => {
@@ -82,8 +116,8 @@ document.addEventListener("DOMContentLoaded", () => {
         requestAnimationFrame(() => {
           currentContainer.style.maxHeight = "60px";
           setTimeout(() => {
-            previewSpan.innerHTML = currentContainer.dataset.shortHTML;
-            previewSpan.classList.remove("fadeUpIn");
+            currentPreviewSpan.innerHTML = currentContainer.dataset.shortHTML;
+            currentPreviewSpan.classList.remove("fadeUpIn");
             currentContainer.style.maxHeight = currentContainer.scrollHeight + "px";
           }, 250);
         });
