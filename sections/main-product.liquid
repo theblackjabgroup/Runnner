@@ -1,7 +1,7 @@
 <!-- Desktop view -->
 <section
   class="product-section section-{{ section.id }}-padding hidden lg:!flex lg:flex-row gap-4 lg:gap-8 px-4 py-8"
-  style="background-color: var();"
+  style="background-color: var(--background); color: var(--text);"
 >
   {%- comment -%} Left: Image Gallery {%- endcomment -%}
   <div class="product-gallery w-1/2">
@@ -16,14 +16,27 @@
               class="gallery-item absolute inset-0 w-full h-full {% if forloop.first %}is-active{% endif %}"
               data-index="{{ forloop.index0 }}"
             >
-              <img
-                src="{{ media | image_url: width: 1200 }}"
-                alt="{{ media.alt | escape }}"
-                class="w-full h-full object-cover"
-                loading="{% if forloop.first %}eager{% else %}lazy{% endif %}"
-                width="full"
-                height="full"
-              >
+              {% if media.media_type == 'image' %}
+                <img
+                  src="{{ media | image_url: width: 1200 }}"
+                  alt="{{ media.alt | escape }}"
+                  class="w-full h-full object-cover"
+                  loading="{% if forloop.first %}eager{% else %}lazy{% endif %}"
+                  width="full"
+                  height="full"
+                >
+              {% elsif media.media_type == 'video' %}
+                {{
+                  media
+                  | video_tag:
+                    autoplay: true,
+                    loop: true,
+                    muted: true,
+                    playsinline: true,
+                    controls: true,
+                    class: 'w-full h-full object-cover'
+                }}
+              {% endif %}
             </div>
           {%- endfor -%}
         {%- endif -%}
@@ -36,14 +49,33 @@
                 class="strip-image-wrapper {% if forloop.first %}active{% endif %}"
                 data-strip-index="{{ forloop.index0 }}"
               >
-                <img
-                  src="{{ media | image_url: width: 150 }}"
-                  alt="{{ media.alt | escape }}"
-                  class="strip-image"
-                  loading="lazy"
-                  width="150"
-                  height="full"
-                >
+                {% if media.media_type == 'video' %}
+                  <div class="relative w-full h-full">
+                    <img
+                      src="{{ media.preview_image | image_url: width: 150 }}"
+                      alt="{{ media.alt | escape }}"
+                      class="strip-image"
+                      loading="lazy"
+                      width="150"
+                      height="full"
+                    >
+                    <span class="video-play-icon absolute inset-0 flex items-center justify-center pointer-events-none">
+                      <svg width="32" height="32" fill="none" viewBox="0 0 32 32">
+                        <circle cx="16" cy="16" r="16" fill="rgba(0,0,0,0.5)"/>
+                        <polygon points="13,10 24,16 13,22" fill="white"/>
+                      </svg>
+                    </span>
+                  </div>
+                {% else %}
+                  <img
+                    src="{{ media | image_url: width: 150 }}"
+                    alt="{{ media.alt | escape }}"
+                    class="strip-image"
+                    loading="lazy"
+                    width="150"
+                    height="full"
+                  >
+                {% endif %}
               </div>
             {%- endfor -%}
           </div>
@@ -246,10 +278,10 @@
                 </div>
                 <a
                   href="#"
-                  class="border border-black px-2 py-1 text-[14px] font-medium rounded-xl transition-colors duration-200 "
-                  style="background: white; color: black;"
-                  onmouseenter="this.style.backgroundColor='black'; this.style.color='white';"
-                  onmouseleave="this.style.backgroundColor='white'; this.style.color='black';"
+                  class="border border-black px-2 py-0 text-[14px] font-medium rounded-xl transition-colors duration-200 "
+                  style="background-color: var(--secondary_button_label); color: var(--secondary_button_text_color);"
+                  onmouseenter="this.style.backgroundColor='var(--hover)'"
+                  onmouseleave="this.style.backgroundColor='var(--secondary_button_label)'"
                   aria-label="Change delivery address"
                 >
                   CHANGE
@@ -264,7 +296,7 @@
           {%- if block.type == 'quantity_selector' -%}
             <div class="flex justify-between items-center border-b border-gray-400 pb-4" {{ block.shopify_attributes }}>
               <span class="font-medium uppercase ">QUANTITY SELECTOR</span>
-              <div class="flex items-center border rounded-xl overflow-hidden h-10">
+              <div class="flex items-center py-1 border rounded-xl overflow-hidden h-10">
                 <button
                   type="button"
                   id="decreaseQty"
@@ -368,6 +400,9 @@
               <!-- BUY IT NOW button -->
               <button
                 class="bg-black text-white text-4xl px-6 py-4 rounded hover:bg-gray-900"
+                style="background-color: var(--secondary_button_label); color: var(--secondary_button_text_color);"
+                onmouseenter="this.style.backgroundColor='var(--hover)'"
+                onmouseleave="this.style.backgroundColor='var(--secondary_button_label)'"
                 type="button"
                 aria-label="Buy it now"
               >
@@ -404,7 +439,7 @@
             {% else %}
               <!-- SOLD OUT button -->
               <button
-                class="bg-gray-400 text-white text-4xl px-4 py-2 rounded cursor-not-allowed"
+                class="bg-gray-400 text-white text-4xl px-6 py-3 rounded cursor-not-allowed"
                 type="button"
                 disabled
               >
@@ -431,23 +466,36 @@
             data-mobile-index="{{ forloop.index0 }}"
             style="opacity: {% if forloop.first %}1{% else %}0{% endif %}; transition: opacity 0.3s ease;"
           >
-            <img
-              srcset="
-                {%- if media.width >= 165 -%}{{ media | image_url: width: 165 }} 165w,{%- endif -%}
-                {%- if media.width >= 360 -%}{{ media | image_url: width: 360 }} 360w,{%- endif -%}
-                {%- if media.width >= 535 -%}{{ media | image_url: width: 535 }} 535w,{%- endif -%}
-                {%- if media.width >= 750 -%}{{ media | image_url: width: 750 }} 750w,{%- endif -%}
-                {%- if media.width >= 1070 -%}{{ media | image_url: width: 1070 }} 1070w,{%- endif -%}
-                {%- if media.width >= 1500 -%}{{ media | image_url: width: 1500 }} 1500w,{%- endif -%}
-                {{ media | image_url }} {{ media.width }}w
-              "
-              src="{{ media | image_url: width: 1200 }}"
-              alt="{{ media.alt | escape }}"
-              class="w-full h-full object-cover"
-              loading="{% if forloop.first %}eager{% else %}lazy{% endif %}"
-              width="full"
-              height="full"
-            >
+            {% if media.media_type == 'image' %}
+              <img
+                srcset="
+                  {%- if media.width >= 165 -%}{{ media | image_url: width: 165 }} 165w,{%- endif -%}
+                  {%- if media.width >= 360 -%}{{ media | image_url: width: 360 }} 360w,{%- endif -%}
+                  {%- if media.width >= 535 -%}{{ media | image_url: width: 535 }} 535w,{%- endif -%}
+                  {%- if media.width >= 750 -%}{{ media | image_url: width: 750 }} 750w,{%- endif -%}
+                  {%- if media.width >= 1070 -%}{{ media | image_url: width: 1070 }} 1070w,{%- endif -%}
+                  {%- if media.width >= 1500 -%}{{ media | image_url: width: 1500 }} 1500w,{%- endif -%}
+                  {{ media | image_url }} {{ media.width }}w
+                "
+                src="{{ media | image_url: width: 1200 }}"
+                alt="{{ media.alt | escape }}"
+                class="w-full h-full object-cover"
+                loading="{% if forloop.first %}eager{% else %}lazy{% endif %}"
+                width="full"
+                height="full"
+              >
+            {% elsif media.media_type == 'video' %}
+              {{
+                media
+                | video_tag:
+                  autoplay: true,
+                  loop: true,
+                  muted: true,
+                  playsinline: true,
+                  controls: true,
+                  class: 'w-full h-full object-cover'
+              }}
+            {% endif %}
           </div>
         {%- endfor -%}
       {%- endif -%}
@@ -636,9 +684,9 @@
               <a
                 href="#"
                 class="border border-black px-2 py-1 text-[14px] font-medium rounded transition-colors duration-200 "
-                style="background-color: white; color: black;"
-                onmouseenter="this.style.backgroundColor='black'; this.style.color='white';"
-                onmouseleave="this.style.backgroundColor='white'; this.style.color='black';"
+                style="background-color: var(--secondary_button_label); color: var(--secondary_button_text_color);"
+                onmouseenter="this.style.backgroundColor='var(--hover)'"
+                onmouseleave="this.style.backgroundColor='var(--secondary_button_label)'"
                 aria-label="Change delivery address"
               >
                 CHANGE
@@ -655,9 +703,9 @@
               <a
                 href="#"
                 class="border border-black px-2 py-1 text-[14px] font-medium rounded transition-colors duration-200 "
-                style="background: white; color: black;"
-                onmouseenter="this.style.backgroundColor='black'; this.style.color='white';"
-                onmouseleave="this.style.backgroundColor='white'; this.style.color='black';"
+                style="background-color: var(--secondary_button_label); color: var(--secondary_button_text_color);"
+                onmouseenter="this.style.backgroundColor='var(--hover)'"
+                onmouseleave="this.style.backgroundColor='var(--secondary_button_label)'"
                 aria-label="Change delivery address"
               >
                 CHANGE
@@ -834,7 +882,7 @@
   }
 
   #size-chart-drawer {
-    transition: transform 0.4s cubic-bezier(0.4,0,0.2,1);
+    transition: transform 1s cubic-bezier(0.4,0,0.2,1);
     transform: translateX(100%);
     will-change: transform;
   }
@@ -1082,8 +1130,18 @@
     
         items.forEach((item, index) => {
           item.classList.toggle('is-active', index === targetIndex);
+          const video = item.querySelector('video');
+          if (video) {
+            if (index === targetIndex) {
+              video.muted = true;
+              video.play().catch(() => {}); // Prevents errors if play is interrupted
+            } else {
+              video.pause();
+              video.currentTime = 0;
+            }
+          }
         });
-    
+        
         stripImages.forEach((img, index) => {
           img.classList.toggle('active', index === targetIndex);
         });
@@ -1112,6 +1170,18 @@
     
           items.forEach((item, i) => {
             item.classList.toggle('is-active', i === index);
+            const video = item.querySelector('video');
+            if (video) {
+              if (i === index) {
+                video.muted = true; // Ensure muted for autoplay
+                video.play();
+              } else {
+                video.pause();
+                video.currentTime = 0;
+              }
+            }
+            
+            
           });
     
           stripImages.forEach((img, i) => {
