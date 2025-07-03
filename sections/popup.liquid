@@ -35,9 +35,7 @@
   {% endfor %}
 </h2>
 
-
-
-              <p class="popup-sub-header text-sub-header-color mb-2 text-base md:text-2xl !font-[500] tracking-tighter text-center" style="width:325px;">
+              <p class="popup-sub-header text-sub-header-color mb-2 text-base md:text-2xl !font-[500] tracking-tighter text-center" style="width:310px; margin-left:19px;">
   {{ section.settings.sub_header }}
 </p>
 
@@ -47,24 +45,50 @@
   {% endif %}
 </p>
 
-              <div class="email-holder">
-            <input
-  type="email"
-  placeholder="Email address"
-  class="emailaddr w-full px-4 focus:outline-none focus:ring-2 focus:ring-black border-input-color placeholder:text-[16px];"
-  style="font-family: var(--font-primary); border-radius: 5px; height: 46px; width:306px; border-width:2.5px; margin-left:10px;"
-/>
+              <!-- Shopify Customer Form for Email Signup -->
+              {% form 'customer', id: 'email-signup-form', class: 'email-signup-container newsletter-form' %}
+                {% if form.posted_successfully? %}
+                  <script>
+                    // Auto-trigger thank you popup on successful submission
+                    document.addEventListener('DOMContentLoaded', function() {
+                      setTimeout(function() {
+                        updatePopupToThankYou();
+                      }, 100);
+                    });
+                  </script>
+                {% endif %}
 
+                {% if form.errors %}
+                  <div class="form-errors mb-4">
+                    {% for error in form.errors %}
+                      <p class="text-red-500 text-sm">{{ error }}</p>
+                    {% endfor %}
+                  </div>
+                {% endif %}
 
-</div>
+                <div class="email-holder">
+                  <input
+                    type="email"
+                    name="customer[email]"
+                    placeholder="Email address"
+                    class="emailaddr w-full px-4 focus:outline-none focus:ring-2 focus:ring-black border-input-color placeholder:text-[16px]"
+                    style="font-family: var(--font-primary); border-radius: 5px; height: 46px; width:306px; border-width:2.5px; margin-left:10px;"
+                    required
+                  />
+                  
+                  <!-- Hidden fields for customer creation -->
+                  <input type="hidden" name="customer[tags]" value="newsletter-signup">
+                  <input type="hidden" name="customer[accepts_marketing]" value="true">
+                </div>
 
-
- <button
-  id="get-access"
-  class="bg-black text-white transition duration-200 cursor-pointer !font-[600]"
-  style="font-family: var(--font-primary); border-radius: 5px; font-size: 14px; height: 53px; margin-top: 5px; margin-left:10px; width:306px;">
-  {{ section.settings.btn }}
-</button>
+                <button
+                  type="submit"
+                  id="get-access"
+                  class="bg-black text-white transition duration-200 cursor-pointer !font-[600]"
+                  style="font-family: var(--font-primary); border-radius: 5px; font-size: 14px; height: 53px; margin-top: 5px; margin-left:10px; width:306px;">
+                  {{ section.settings.btn }}
+                </button>
+              {% endform %}
 
             </div>
           </div>
@@ -140,6 +164,13 @@
     background-color: orange; 
     color: black; 
   }
+
+  .form-errors {
+    color: #ef4444;
+    font-size: 14px;
+    margin-bottom: 1rem;
+  }
+
   @media(max-width:1296px){
     #popup-content{
       width:59vw !important;
@@ -156,18 +187,19 @@
       margin-left:0px !important;
     }
     .emailaddr{
-      width:315px !important;
-      margin-right:25px;
+      width:325px !important;
+      margin-left:0px !important;
     }
     #get-access{
-      width:315px !important;
-      margin-right:25px;
+      width:325px !important;
+      margin-left:0px !important;
     }
     .popup-header{
-      margin-left:37px !important;
+      margin-left:45px !important;
     }
     .popup-sub-header{
-      margin-left:21px !important;
+      margin-left:30px !important;
+      width: 290px;
     }
     .divisionpopup{
       height:600px !important;
@@ -178,7 +210,6 @@
   }
     
 </style>
-
 
 <script>
   function showPromo() {
@@ -193,124 +224,134 @@
 
   function attachEventListeners() {
     const closeButton = document.getElementById('promo-close');
-    const getAccessButton = document.getElementById('get-access');
-    const emailInput = document.querySelector('.email-holder input[type="email"]');
 
     if (closeButton) {
       closeButton.addEventListener('click', hidePromo);
     }
 
-    if (getAccessButton) {
-      getAccessButton.addEventListener('click', function (event) {
-        event.preventDefault();
-        validateAndSubmitEmail();
-      });
-    }
-
-    if (emailInput) {
-      emailInput.addEventListener('keyup', function (event) {
-        if (event.key === 'Enter') {
-          event.preventDefault();
-          validateAndSubmitEmail();
+    // Handle form submission with AJAX for better user experience
+    const form = document.getElementById('email-signup-form');
+    if (form) {
+      form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const formData = new FormData(form);
+        const email = formData.get('customer[email]');
+        
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!email || !emailRegex.test(email)) {
+          alert('Please enter a valid email address.');
+          return;
         }
+        fetch(form.action, {
+          method: 'POST',
+          body: formData,
+          headers: {
+            'X-Requested-With': 'XMLHttpRequest'
+          }
+        })
+        .then(response => response.text())
+        .then(data => {
+          // Clear the form
+          form.reset();
+          
+          // Show thank you popup
+          updatePopupToThankYou();
+          console.log('Email submitted successfully:', email);
+        })
+        .catch(error => {
+          console.error('Error submitting form:', error);
+          alert('There was an error submitting your email. Please try again.');
+        });
       });
     }
   }
 
-  function validateAndSubmitEmail() {
-    const emailInput = document.querySelector('.email-holder input[type="email"]');
-    const email = emailInput.value.trim();
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  function updatePopupToThankYou() {
+    const textSection = document.querySelector('#popup-inner .w-full.md\\:w-1\\/2');
 
-    if (!email) {
-      alert('Please enter your email address.');
-      return;
+    if (textSection) {
+      textSection.innerHTML = `
+        <div class="w-full max-w-md text-center px-0">
+          <h3 class="popup-header !font-[500] mb-4 !tracking-tighter uppercase text-base md:text-lg">
+            {{ section.settings.popupheader }}
+          </h3>
+          <p class="popup-bracket-header text-sm md:text-xl text-black-200 mb-6 md:mb-8 font-[400] tracking-tighter py-2">
+            ({{ section.settings.bracket }})
+          </p>
+
+          {% form 'customer', id: 'contact-signup-form', class: 'contact-signup-container' %}
+            <div class="email-holder my-2">
+              <input
+                type="tel"
+                name="customer[phone]"
+                placeholder="Contact number"
+                class="w-full px-4 py-2 border-[2.5px] border-black rounded-md focus:outline-none focus:ring-2 focus:ring-black"
+                style="font-family: var(--font-primary);"
+              />
+              <input type="hidden" name="customer[tags]" value="newsletter-signup,phone-collected">
+            </div>
+            <button
+              type="submit"
+              id="submit-contact"
+              class="w-full bg-black text-white py-4  hover:bg-orange-500 transition duration-200 cursor-pointer !font-[500] rounded-lg"
+              style="font-family: var(--font-primary); ">
+              {{ section.settings.secondbtn }}
+            </button>
+          {% endform %}
+
+          <div id="accept-offer" class="mt-6 text-xl text-black-700 underline cursor-pointer hover:text-black font-sans hover:text-orange-500 mb-6 font-medium">
+            {{ section.settings.offertext }}
+          </div>
+
+          <div class="text-sm md:text-lg mt-4 font-sans text-black-500 break-words leading-none">
+            {{ section.settings.declaration }}
+          </div>
+        </div>
+      `;
+
+      attachContactSubmitListener();
+      attachAcceptOfferListener();
     }
-
-    if (!emailRegex.test(email)) {
-      alert('Please enter a valid email address.');
-      return;
-    }
-
-    emailInput.value = '';
-
-    updatePopupToThankYou();
-    console.log('Email submitted:', email);
   }
-
- function updatePopupToThankYou() {
-  const textSection = document.querySelector('#popup-inner .w-full.md\\:w-1\\/2');
-
-  if (textSection) {
-    textSection.innerHTML = `
-      <div class="w-full max-w-md text-center px-0">
-        <h3 class="popup-header !font-[500] mb-4 !tracking-tighter uppercase text-base md:text-lg">
-          {{ section.settings.popupheader }}
-        </h3>
-        <p class="popup-bracket-header text-sm md:text-xl text-black-200 mb-6 md:mb-8 font-[400] tracking-tighter py-2">
-          ({{ section.settings.bracket }})
-        </p>
-
-        <div class="email-holder my-2">
-          <input
-            type="tel"
-            placeholder="Contact number"
-            class="w-full px-4 py-2 border-[2.5px] border-black rounded-md focus:outline-none focus:ring-2 focus:ring-black"
-            style="font-family: var(--font-primary);"
-          />
-        </div>
-        <button
-          id="submit-contact"
-          class="w-full bg-black text-white py-4  hover:bg-orange-500 transition duration-200 cursor-pointer !font-[500] rounded-lg"
-          style="font-family: var(--font-primary); ">
-          {{ section.settings.secondbtn }}
-        </button>
-
-        <div id="accept-offer" class="mt-6 text-xl text-black-700 underline cursor-pointer hover:text-black font-sans hover:text-orange-500 mb-6 font-medium">
-          {{ section.settings.offertext }}
-        </div>
-
-        <div class="text-sm md:text-lg mt-4 font-sans text-black-500 break-words leading-none">
-          {{ section.settings.declaration }}
-        </div>
-      </div>
-    `;
-
-    attachContactSubmitListener();
-    attachAcceptOfferListener();
-  }
-}
-
 
   function attachContactSubmitListener() {
-    const submitContactButton = document.getElementById('submit-contact');
-    const contactInput = document.querySelector('.email-holder input[type="tel"]');
+    const contactForm = document.getElementById('contact-signup-form');
 
-    if (submitContactButton && contactInput) {
-      function submitContact() {
-        const contactNumber = contactInput.value.trim();
+    if (contactForm) {
+      contactForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const formData = new FormData(contactForm);
+        const contactNumber = formData.get('customer[phone]');
+        
         if (!contactNumber) {
           alert('Please enter your contact number.');
           return;
         }
-        if (!/^[0-9]{10,15}$/.test(contactNumber)) {
+        if (!/^[0-9+\-\s()]{10,15}$/.test(contactNumber)) {
           alert('Please enter a valid contact number.');
           return;
         }
-        contactInput.value = '';
-        hidePromo();
-      }
 
-      submitContactButton.addEventListener('click', function (event) {
-        event.preventDefault();
-        submitContact();
-      });
-
-      contactInput.addEventListener('keyup', function (event) {
-        if (event.key === 'Enter') {
-          event.preventDefault();
-          submitContact();
-        }
+        // Submit contact form via AJAX
+        fetch(contactForm.action, {
+          method: 'POST',
+          body: formData,
+          headers: {
+            'X-Requested-With': 'XMLHttpRequest'
+          }
+        })
+        .then(response => response.text())
+        .then(data => {
+          contactForm.reset();
+          hidePromo();
+          console.log('Contact submitted successfully:', contactNumber);
+        })
+        .catch(error => {
+          console.error('Error submitting contact:', error);
+          alert('There was an error submitting your contact. Please try again.');
+        });
       });
     }
   }
@@ -337,7 +378,6 @@
     }
   });
 </script>
-
 
 {% schema %}
 {
