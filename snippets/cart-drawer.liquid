@@ -41,13 +41,31 @@
     writing-mode: vertical-rl;
     text-orientation: mixed;
     transform: rotate(180deg);
-    animation: scrollText {{ settings.scroll_speed }}s linear infinite !important;    color: black !important;
+    animation: scrollText {{ settings.scroll_speed }}s linear infinite !important;
+    color: black !important;
     font-size: 24px;
     white-space: nowrap;
   }
 
   .vertical-text-cart-drawer:nth-child(2) {
-  animation: scrollText2 {{ settings.scroll_speed }}s linear infinite !important;  }
+    animation: scrollText2 {{ settings.scroll_speed }}s linear infinite !important;
+  }
+
+  .vertical-text-cart-drawer .separator-image {
+    width: 20px;
+    height: 20px;
+    object-fit: contain;
+    margin: 0 5px;
+    display: inline-block;
+    vertical-align: middle;
+  }
+
+  @media only screen and (max-width: 600px) {
+    .vertical-text-cart-drawer .separator-image {
+      width: 15px;
+      height: 15px;
+    }
+  }
 
   @keyframes scrollText {
     0% {
@@ -113,14 +131,42 @@
       aria-label="{{ 'sections.cart.title' | t }}"
       tabindex="-1"
     >
-        <div class="vertical-text-cart-drawer-container">
-          <div class="vertical-text-cart-drawer">
+      <div class="vertical-text-cart-drawer-container">
+        <div class="vertical-text-cart-drawer">
+          {% if settings.vertical_scroll_image %}
+            {% assign text_parts = settings.vertical_scroll_text | split: '→' %}
+            {% for part in text_parts %}
+              {{ part | strip }}
+              {% unless forloop.last %}
+                <img
+                  src="{{ settings.vertical_scroll_image | image_url: width: 40 }}"
+                  alt="Separator"
+                  class="separator-image"
+                >
+              {% endunless %}
+            {% endfor %}
+          {% else %}
             {{ settings.vertical_scroll_text }}
-          </div>
-          <div class="vertical-text-cart-drawer">
-            {{ settings.vertical_scroll_text }}
-          </div>
+          {% endif %}
         </div>
+        <div class="vertical-text-cart-drawer">
+          {% if settings.vertical_scroll_image %}
+            {% assign text_parts = settings.vertical_scroll_text | split: '→' %}
+            {% for part in text_parts %}
+              {{ part | strip }}
+              {% unless forloop.last %}
+                <img
+                  src="{{ settings.vertical_scroll_image | image_url: width: 40 }}"
+                  alt="Separator"
+                  class="separator-image"
+                >
+              {% endunless %}
+            {% endfor %}
+          {% else %}
+            {{ settings.vertical_scroll_text }}
+          {% endif %}
+        </div>
+      </div>
 
       {%- if cart == empty -%}
         <div class="drawer__inner-empty">
@@ -711,19 +757,33 @@
                 <span>${{ cart.total_price | times: 0.9 | money_without_currency }}</span>
               </div>
             </label>
-            <div id="subscribe-form" style="display:none; margin-top: 10px; " >
-              <input type="email" id="subscribe-email" placeholder="Enter your email" style="padding: 8px; border: 1px solid #ccc; border-radius: 4px; ">
-              <button type="button" id="subscribe-btn" style="padding: 5px 10px; background: #000; color: #fff; border: none; margin-top:10px; border-radius: 4px; display:flex; align-items:center; text-transform: uppercase; font-weight: bold; font-size: 2rem;" >
-              <svg width="20" height="20"  class="!mr-2" viewBox="0 0 9 9" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M1.1875 7.7334H7.6599M7.6599 7.7334V1.261M7.6599 7.7334L1.1875 1.261" stroke="white" stroke-linejoin="round"/>
-              </svg>
-              &nbsp; Subscribe
+            <div id="subscribe-form" style="display:none; margin-top: 10px; ">
+              <input
+                type="email"
+                id="subscribe-email"
+                placeholder="Enter your email"
+                style="padding: 8px; border: 1px solid #ccc; border-radius: 4px; "
+              >
+              <button
+                type="button"
+                id="subscribe-btn"
+                style="padding: 5px 10px; background: #000; color: #fff; border: none; margin-top:10px; border-radius: 4px; display:flex; align-items:center; text-transform: uppercase; font-weight: bold; font-size: 2rem;"
+              >
+                <svg
+                  width="20"
+                  height="20"
+                  class="!mr-2"
+                  viewBox="0 0 9 9"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path d="M1.1875 7.7334H7.6599M7.6599 7.7334V1.261M7.6599 7.7334L1.1875 1.261" stroke="white" stroke-linejoin="round"/>
+                </svg>
+                &nbsp; Subscribe
               </button>
             </div>
-
           </div>
         </div>
-
 
         <div class="cart__ctas" {{ block.shopify_attributes }}>
           <button
@@ -747,7 +807,7 @@
   </div>
 </cart-drawer>
 <script>
-  document.addEventListener('DOMContentLoaded', function() {
+  document.addEventListener('DOMContentLoaded', function () {
     var subscribeRadio = document.getElementById('subscribe-radio');
     var regularRadio = document.querySelector('input[name="pricing"][value="regular"]');
     var subscribeForm = document.getElementById('subscribe-form');
@@ -772,7 +832,7 @@
     }
 
     if (subscribeBtn && subscribeEmail) {
-      subscribeBtn.addEventListener('click', function() {
+      subscribeBtn.addEventListener('click', function () {
         var email = subscribeEmail.value.trim();
         if (!email) {
           alert('Please enter a valid email address.');
@@ -782,21 +842,21 @@
         fetch('/contact', {
           method: 'POST',
           headers: {
-            'Content-Type': 'application/x-www-form-urlencoded'
+            'Content-Type': 'application/x-www-form-urlencoded',
           },
-          body: 'form_type=newsletter&contact[email]=' + encodeURIComponent(email) + '&utf8=✓'
+          body: 'form_type=newsletter&contact[email]=' + encodeURIComponent(email) + '&utf8=✓',
         })
-        .then(function(response) {
-          if (response.ok) {
-            alert('Thank you for subscribing!');
-            subscribeEmail.value = '';
-          } else {
+          .then(function (response) {
+            if (response.ok) {
+              alert('Thank you for subscribing!');
+              subscribeEmail.value = '';
+            } else {
+              alert('There was a problem subscribing. Please try again.');
+            }
+          })
+          .catch(function () {
             alert('There was a problem subscribing. Please try again.');
-          }
-        })
-        .catch(function() {
-          alert('There was a problem subscribing. Please try again.');
-        });
+          });
       });
     }
   });
