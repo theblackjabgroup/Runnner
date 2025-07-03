@@ -182,7 +182,7 @@
                   {% if block.settings.collection == blank or block.settings.collection.products.size == 0 %}
                     {% for i in (1..5) %}
                       <article
-                        class="product-card flex-none w-[220px] md:w-[400px]"
+                        class="product-card flex-none"
                         role="listitem"
                         aria-label="No products found"
                       >
@@ -190,7 +190,7 @@
                           {{ 'collection-1' | placeholder_svg_tag }}
                         </div>
                         <div class="product-details mt-3" style="margin-bottom:8px;">
-                          <h3 class="!text-[1.6rem] uppercase font-medium leading-tight">No products found</h3>
+                          <h3 class="uppercase font-medium leading-tight">No products found</h3>
                           <div class="flex gap-2 items-baseline fc-price" style="margin-top: -6px;">
                             <span class="!text-[1.6rem] uppercase font-medium">—</span>
                           </div>
@@ -200,7 +200,7 @@
                   {% else %}
                     {% for product in block.settings.collection.products %}
                       <article
-                        class="product-card flex-none w-[220px] md:w-[400px]"
+                        class="product-card flex-none"
                         role="listitem"
                         aria-label="{{ product.title }}"
                       >
@@ -241,9 +241,9 @@
                                     data-product-id="{{ product.id }}"
                                     loading="lazy"
                                     decoding="async"
-                                    width="400"
-                                    height="484"
-                                    style="object-fit: cover; width: 400px; height: 484px;"
+                                    width="440"
+                                    height="530"
+                                    style="object-fit: cover;"
                                   >
                                 {% endfor %}
 
@@ -275,14 +275,14 @@
                                 </button>
                               {% else %}
                                 <img
-                                  src="{{ product.featured_image | img_url: '400x484', crop: 'center' }}"
+                                  src="{{ product.featured_image | img_url: '440x530', crop: 'center' }}"
                                   alt="{{ product.title }}"
                                   class="fc-product-image"
                                   loading="lazy"
                                   decoding="async"
-                                  width="400"
-                                  height="484"
-                                  style="object-fit: cover; width: 400px; height: 484px;"
+                                  width="440"
+                                  height="530"
+                                  style="object-fit: cover;"
                                 >
                               {% endif %}
                             </div>
@@ -397,7 +397,7 @@
                         <div class="product-details mt-3" style="margin-bottom:8px;">
                           <a href="{{ product.url }}" aria-label="{{ product.title }}">
                             <h3
-                              class="!text-[1.6rem] uppercase leading-tight"
+                              class="uppercase leading-tight fc-product-title"
                               style="color: var(--text);"
                             >
                               {{ product.title | escape }}
@@ -407,12 +407,12 @@
                               class="flex gap-2 items-baseline fc-price"
                               style="color: var(--text);"
                             >
-                              <span class="!text-[1.6rem] uppercase" style="color: var(--text);">
+                              <span class="uppercase" style="color: var(--text);">
                                 {{ product.price | money }}
                               </span>
                               {%- if product.compare_at_price > product.price -%}
                                 <span id="fc-product-dash">|</span>
-                                <span class="!text-[1.6rem] uppercase text-red-600">
+                                <span class="uppercase text-red-600">
                                   {{- product.compare_at_price | money }} FOR MEMBERS</span
                                 >
                               {%- endif -%}
@@ -518,6 +518,16 @@
     @media (min-width: 500px) {
       div.featured-collection-main-heading {
         font-size: 48px;
+      }
+    }
+
+    @media (max-width: 500px) {
+      .product-image, .fc-product-image, .product-image-wrapper{
+        width: 255px !important;
+        height: 306px !important;
+      }
+      .sold-out{
+        font-size: 11px !important;
       }
     }
 
@@ -646,6 +656,10 @@
 
     .fc-price{
         margin-top: -6px !important;
+      }
+
+      .product-details .fc-product-title, .product-details .fc-product-price{
+        font-size: 13px;
       }
 
     .image-nav-arrow {
@@ -1080,6 +1094,18 @@
     /* pointer-events: auto; */
   }
 
+  .product-image, .fc-product-image, .product-image-wrapper{
+      width: 440px;
+      height: 530px;
+    }
+
+  @media (max-width: 1025px){
+    .product-image, .fc-product-image, .product-image-wrapper{
+      width: 350px;
+      height: 420px;
+    }
+  }
+
     @media (max-width: 768px) {
       .collection-filters {
         gap: 5px;
@@ -1150,11 +1176,6 @@
         padding-top: {{ section.settings.padding_top }}px;
       }
 
-      .fc-product-image {
-        width: 225px !important;
-        height: 277px !important;
-      }
-
       .fc-price{
         margin-top: -6px
       }
@@ -1181,12 +1202,6 @@
         display: none !important;
         opacity: 0 !important;
         visibility: hidden !important;
-      }
-    }
-
-    @media (max-width: 425px) {
-      .featured-collection-subheading {
-        /* margin-top: -10px; */
       }
     }
 
