@@ -1,4 +1,3 @@
-<script src="{{ 'blog-edit.js' | asset_url }}" defer></script>
 
 {% schema %}
 {
@@ -92,6 +91,7 @@
     transform: translateY(40px);
     animation: fadeInUpImage 1.2s ease-out forwards;
     animation-delay: 0.2s;
+    
   }
 
   .blog-article-section {
@@ -175,7 +175,7 @@
     position: absolute;
     top: 0;
     right: 0;
-    height: 58%;
+    height: 128%;
     width: 50vw;
     z-index: 20;
     pointer-events: none;
@@ -426,13 +426,13 @@
   }
   
 </style>
-
-
 <script>
-  document.addEventListener('DOMContentLoaded', function() {
-  const headingEl = document.querySelector('.font-medium.uppercase.leading-none.tracking-tighter.text-left .animated-text') || 
-                   document.querySelector('.animated-text');
-  
+document.addEventListener('DOMContentLoaded', function () {
+  const headingEl = document.querySelector('.font-medium.uppercase.leading-none.tracking-tighter.text-left .animated-text') ||
+    document.querySelector('.animated-text');
+
+  let parallaxImage = null;
+
   if (headingEl) {
     const text = headingEl.innerText;
     let html = '';
@@ -441,12 +441,12 @@
       const delay = i * 0.05;
       html += `<span class="letter" style="animation-delay: ${delay}s;">${char}</span>`;
     }
-    
+
     headingEl.innerHTML = html;
-    
+
     const lastLetterDelay = (text.length - 1) * 0.07;
-    const textAnimationCompleteTime = lastLetterDelay + 0.8; 
-    
+    const textAnimationCompleteTime = lastLetterDelay + 0.8;
+
     const dateEl = document.querySelector('.date-tag');
     if (dateEl) {
       dateEl.style.animationDelay = `${textAnimationCompleteTime + 0.2}s`;
@@ -456,18 +456,20 @@
       arrowEl.style.animationDelay = `${textAnimationCompleteTime + 0.4}s`;
     }
 
-    const parallaxImage = document.querySelector('.parallax-image-overlay img');
+    parallaxImage = document.querySelector('.parallax-image-overlay img');
     if (parallaxImage) {
-      parallaxImage.style.animation = 'none';
+      parallaxImage.style.position = 'absolute';
+      parallaxImage.style.top = '0';
+      parallaxImage.style.left = '0';
+      parallaxImage.style.width = '100%';
       parallaxImage.style.opacity = '0';
       parallaxImage.style.transform = 'translateY(40px)';
-      
+      parallaxImage.style.transition = 'none';
+
       setTimeout(() => {
         parallaxImage.style.transition = 'opacity 1.2s ease-out, transform 1.2s ease-out';
         parallaxImage.style.opacity = '1';
         parallaxImage.style.transform = 'translateY(0)';
-        
-        console.log(`Parallax fade-in triggered after ${textAnimationCompleteTime + 0.6} seconds`);
       }, (textAnimationCompleteTime) * 1000);
     }
   }
@@ -477,30 +479,21 @@
   let ticking = false;
   let isMobile = false;
   let isTablet = false;
-  let lastScrollY = 0;
 
   function detectDevice() {
     const width = window.innerWidth;
-    const userAgent = navigator.userAgent.toLowerCase();
     const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
-    
+
     isMobile = width <= 768;
     isTablet = width > 768 && width <= 1024 && isTouchDevice;
-    
+
     document.body.className = document.body.className.replace(/\b(mobile|tablet|desktop)\b/g, '');
-    if (isMobile) {
-      document.body.classList.add('mobile');
-    } else if (isTablet) {
-      document.body.classList.add('tablet');
-    } else {
-      document.body.classList.add('desktop');
-    }
+    document.body.classList.add(isMobile ? 'mobile' : isTablet ? 'tablet' : 'desktop');
+
     return { isMobile, isTablet };
   }
 
-  const deviceInfo = detectDevice();
-  isMobile = deviceInfo.isMobile;
-  isTablet = deviceInfo.isTablet;
+  ({ isMobile, isTablet } = detectDevice());
 
   function requestTick() {
     if (!ticking) {
@@ -511,27 +504,35 @@
 
   function onScroll() {
     ticking = false;
-    
-    if (!overlay) 
-      return;
+
+    if (!overlay) return;
+
     const container = document.querySelector('.parallax-container');
-    if (!container) 
-      return;
+    if (!container) return;
+
     const containerRect = container.getBoundingClientRect();
     const overlayHeight = overlay.offsetHeight;
     const viewportHeight = window.innerHeight;
-    const currentScrollY = window.pageYOffset || document.documentElement.scrollTop;
     const startParallax = containerRect.top <= OFFSET_TOP;
     const stopPoint = containerRect.bottom - overlayHeight - OFFSET_TOP;
     const shouldStopParallax = stopPoint <= OFFSET_TOP;
+
     overlay.classList.remove('mobile-fixed', 'mobile-absolute');
-    const parallaxImage = document.querySelector('.parallax-image-overlay img');
+
     if (startParallax && !shouldStopParallax) {
       overlay.style.position = 'fixed';
+      overlay.style.top = `${OFFSET_TOP}px`;
       overlay.style.zIndex = '10';
       overlay.style.transform = 'translateZ(0)';
+
+      if (parallaxImage) {
+        parallaxImage.style.position = 'absolute';
+        parallaxImage.style.top = `${OFFSET_TOP + 55}px`;
+        parallaxImage.style.transform = 'translateY(0)';
+      }
+
       if (isMobile) {
-         overlay.classList.add('mobile-fixed');
+        overlay.classList.add('mobile-fixed');
         overlay.style.left = '0';
         overlay.style.width = '100vw';
         overlay.style.maxWidth = '100vw';
@@ -546,16 +547,19 @@
       }
     } else if (shouldStopParallax) {
       overlay.style.position = 'absolute';
-      overlay.style.top = `${Math.max(0, container.offsetHeight - overlayHeight-55)}px`;
+      overlay.style.top = `${Math.max(0, container.offsetHeight - overlayHeight - OFFSET_TOP)}px`;
       overlay.style.zIndex = '';
       overlay.style.transition = 'none';
       overlay.style.transform = 'translateY(-20px)';
+      
       overlay.style.opacity = '1';
 
-      requestAnimationFrame(() => {
-        overlay.style.opacity = '1';
-      });
-      
+      if (parallaxImage) {
+        parallaxImage.style.position = 'absolute';
+        parallaxImage.style.transform = 'translateY(0)';
+        paral
+      }
+
       if (isMobile) {
         overlay.classList.add('mobile-absolute');
         overlay.style.paddingLeft = '10px';
@@ -576,70 +580,63 @@
       overlay.style.paddingLeft = '';
       overlay.style.paddingRight = '';
       overlay.style.maxWidth = '';
-    }
-    if (isMobile) {
-      const image = document.querySelector('.parallax-image-overlay img');
-      if (image) {
-        const scrollDistance = window.scrollY;
+
+      if (parallaxImage) {
+        parallaxImage.style.position = 'absolute';
+        parallaxImage.style.top = '0';
+        parallaxImage.style.transform = 'translateY(0)';
       }
     }
-    lastScrollY = currentScrollY;
   }
 
-  let resizeTimeout;
-  let orientationTimeout;
-  
   function handleResize() {
     clearTimeout(resizeTimeout);
     resizeTimeout = setTimeout(() => {
-      const newDeviceInfo = detectDevice();
-      isMobile = newDeviceInfo.isMobile;
-      isTablet = newDeviceInfo.isTablet;
+      ({ isMobile, isTablet } = detectDevice());
       requestTick();
     }, 16);
   }
+
   function handleOrientationChange() {
     clearTimeout(orientationTimeout);
     orientationTimeout = setTimeout(() => {
-      const newDeviceInfo = detectDevice();
-      isMobile = newDeviceInfo.isMobile;
-      isTablet = newDeviceInfo.isTablet;
+      ({ isMobile, isTablet } = detectDevice());
       requestTick();
-    }, 100); 
+    }, 100);
   }
+
   const scrollOptions = { passive: true };
-  const resizeOptions = { passive: true };
   window.addEventListener('scroll', requestTick, scrollOptions);
-  window.addEventListener('resize', handleResize, resizeOptions);
+  window.addEventListener('resize', handleResize, scrollOptions);
+
   if (isMobile || isTablet) {
     window.addEventListener('touchmove', requestTick, scrollOptions);
-    window.addEventListener('orientationchange', handleOrientationChange, resizeOptions);
-    
+    window.addEventListener('orientationchange', handleOrientationChange, scrollOptions);
+
     let lastTouchEnd = 0;
     document.addEventListener('touchend', function (event) {
-      const now = (new Date()).getTime();
-      if (now - lastTouchEnd <= 300) {
-        event.preventDefault();
-      }
+      const now = new Date().getTime();
+      if (now - lastTouchEnd <= 300) event.preventDefault();
       lastTouchEnd = now;
     }, false);
+
     let scrollTimer = null;
-    window.addEventListener('scroll', function() {
-      if (scrollTimer !== null) {
-        clearTimeout(scrollTimer);        
-      }
-      scrollTimer = setTimeout(function() {
+    window.addEventListener('scroll', function () {
+      if (scrollTimer !== null) clearTimeout(scrollTimer);
+      scrollTimer = setTimeout(() => {
         document.body.style.pointerEvents = 'auto';
       }, 150);
     }, scrollOptions);
   }
+
   requestTick();
-  
-  const parallaxImage = document.querySelector('.parallax-image-overlay img');
+
+  // Preload parallax image
   if (parallaxImage && parallaxImage.src) {
     const img = new Image();
     img.src = parallaxImage.src;
   }
+
   if (isMobile && 'performance' in window) {
     const observer = new PerformanceObserver((list) => {
       for (const entry of list.getEntries()) {
@@ -648,15 +645,18 @@
         }
       }
     });
-    
     try {
       observer.observe({ entryTypes: ['measure'] });
     } catch (e) {
       console.log('Performance observer not supported');
     }
   }
+
+  let resizeTimeout;
+  let orientationTimeout;
 });
 </script>
+
 <section
   id="parallax-section"
   class="section1 color-{{ section.settings.color_scheme }} relative overflow-hidden items-start"
@@ -691,7 +691,7 @@
       </div>
     </div>
     {% if article.image %}
-  <div class="parallax-image-overlay px-6 mb-10" style="margin-top: 423px;">
+  <div class="parallax-image-overlay px-6 mb-10" style="margin-top: 409px;">
     {{
       article.image
       | image_url: width: 1200
