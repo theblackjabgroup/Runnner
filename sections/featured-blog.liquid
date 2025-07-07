@@ -1,7 +1,7 @@
 <style>
   .featured-blog-section {
-    padding: 20px 0;
-    margin: 0 1vw;
+    padding: 20px 1vw;
+    margin: 0;
     background-color: rgb(var(--color-background)) !important;
     color: var(--text) !important;
     border-top: 1px solid var(--text);
@@ -10,7 +10,8 @@
 
   @media (max-width: 749px) {
     .featured-blog-section {
-      margin: 0 8px;
+      padding: 0 8px;
+      padding-top: 20px;
     }
   }
 
@@ -84,7 +85,7 @@
   }
 
   .featured-blog-grid.list-view {
-    border-bottom: 1px solid var(--text);
+    /* border-bottom: 1px solid var(--text); */
     width: 80%;
     display: block;
   }
@@ -110,7 +111,20 @@
     grid-template-columns: repeat(3, 1fr);
     gap: 40px 20px;
   }
-  @media (max-width: 1024px) {
+
+  @media (min-width: 700px) {
+    .featured-blog-grid.list-view .featured-blog-card-date {
+      min-width: 300px;
+    }
+  }
+
+  @media (min-width: 900px) {
+    .featured-blog-grid.list-view .featured-blog-card-date {
+      min-width: 450px;
+    }
+  }
+
+  @media (max-width: 1025px) {
     .featured-blog-grid.grid-view {
       grid-template-columns: repeat(2, 1fr);
     }
@@ -125,7 +139,7 @@
     }
 
     .featured-blog-grid.list-view .featured-blog-card-title {
-      font-size: 24px;
+      font-size: 20px;
     }
 
     .view-toggle button {
@@ -175,21 +189,30 @@
     white-space: nowrap;
     font-size: 16px;
     margin: 0;
-    min-width: 300px;
   }
 
   .featured-blog-card-title {
     line-height: 1;
   }
+
+  /* Show/Hide title spans based on view */
+  .featured-blog-grid.grid-view .list-view-title {
+    display: none;
+  }
+
+  .featured-blog-grid.list-view .grid-view-title {
+    display: none;
+  }
+
   /* .featured-blog-card-title {
-    font-size: 32px;
-    line-height: 1.1;
-    margin: 0 0 1rem;
-    font-weight: 500;
-    color: var(--text);
-    letter-spacing: -1px;
-    line-height: 85%;
-  } */
+   font-size: 32px;
+   line-height: 1.1;
+   margin: 0 0 1rem;
+   font-weight: 500;
+   color: var(--text);
+   letter-spacing: -1px;
+   line-height: 85%;
+ } */
   .featured-blog-card-desc {
     font-size: 2rem;
     margin: 0;
@@ -197,12 +220,25 @@
     flex-grow: 1;
   }
 
+  /* List view separators */
+  .featured-blog-grid.list-view .list-separator {
+    display: block;
+    height: 1px;
+    background-color: var(--text);
+    width: 100%;
+    margin: 0;
+  }
+
+  .featured-blog-grid.grid-view .list-separator {
+    display: none;
+  }
+
   /* List view overrides */
   .featured-blog-grid.list-view .featured-blog-card {
     flex-direction: row;
     align-items: center;
     padding: 10px 0;
-    border-top: 1px solid var(--text);
+    border-top: none;
   }
   .featured-blog-grid.list-view .featured-blog-card:hover {
     background: var(--text);
@@ -257,10 +293,10 @@
     height: auto;
   }
   /* .featured-blog-grid.list-view .featured-blog-card-content,
-  .featured-blog-grid.list-view .featured-blog-card-title,
-  .featured-blog-grid.list-view .featured-blog-card-date {
-    min-width: 0;
-  } */
+ .featured-blog-grid.list-view .featured-blog-card-title,
+ .featured-blog-grid.list-view .featured-blog-card-date {
+   min-width: 0;
+ } */
 
   .featured-blog-grid.list-view .featured-blog-card-content {
     white-space: nowrap; /* Prevent text wrapping */
@@ -329,19 +365,25 @@
     }
   }
 
-  .blog-article {
+  .blog-article-fb {
     opacity: 0;
     transition: opacity 0.6s ease, transform 0.6s ease;
   }
 
-  .blog-article.visible {
+  .blog-article-fb.visible {
     opacity: 1;
     transform: translateY(0);
     animation: fadeInAnimation 0.6s ease forwards;
   }
 
-  .blog-article:not(.visible) {
+  .blog-article-fb:not(.visible) {
     transform: translateY(20px);
+  }
+
+  @media (max-width: 1025px) {
+    .featured-blog-grid.list-view .featured-blog-card-date {
+      font-size: 14px !important;
+    }
   }
 
   @media (max-width: 600px) {
@@ -408,10 +450,15 @@
     }
   }
 
-  @media (min-width: 1024px) {
+  @media (min-width: 1025px) {
     .featured-blog-grid.list-view .featured-blog-card-date {
-      font-size: 18px;
+      font-size: 20px;
     }
+
+    .featured-blog-grid.list-view .featured-blog-card-title {
+      font-size: 24px;
+    }
+
     .load-more-btn-fb {
       font-size: 24px;
       line-height: 1;
@@ -424,18 +471,18 @@
   }
 
   /* Base stacking context for each card/article */
-  .featured-blog-grid.list-view .blog-article {
+  .featured-blog-grid.list-view .blog-article-fb {
     position: relative;
     z-index: 1;
   }
 
   /* On hover, lift the whole card and its preview */
-  .featured-blog-grid.list-view .blog-article:hover {
+  .featured-blog-grid.list-view .blog-article-fb:hover {
     z-index: 1000; /* high enough to clear siblings */
   }
 
   /* And make sure the preview wrapper itself is on top */
-  .featured-blog-grid.list-view .blog-article:hover .featured-blog-card-image-wrapper {
+  .featured-blog-grid.list-view .blog-article-fb:hover .featured-blog-card-image-wrapper {
     z-index: 1001; /* even higher */
   }
 </style>
@@ -485,13 +532,16 @@
       data-post-limit="{{ section.settings.post_limit }}"
       data-total-posts="{% if blog_handle != blank %}{{ blogs[blog_handle].articles.size }}{% else %}0{% endif %}"
     >
+      <!-- Separator before container (only visible in list view) -->
+      <div class="list-separator"></div>
+
       {% assign blog_handle = section.settings.blog %}
       {% assign post_limit = section.settings.post_limit %}
       {% if blog_handle != blank and blogs[blog_handle].articles.size > 0 %}
         {% for article in blogs[blog_handle].articles %}
           <article
             aria-labelledby="article-title-{{ forloop.index0 }}"
-            class="blog-article"
+            class="blog-article-fb"
             {% if forloop.index > post_limit %}
               style="display: none;"
             {% endif %}
@@ -566,13 +616,16 @@
                       style="margin-bottom:5px; position:relative; left:-5px;"
                     >
                   {% endcomment %}
-                  {{ article.title }}
+                  <span class="grid-view-title">{{ article.title }}</span>
+                  <span class="list-view-title">{{ article.title | truncate: 40, '...' }}</span>
                 </h3>
                 <p class="featured-blog-card-desc">
                   {{ article.excerpt | strip_html | truncate: 120 }}
                 </p>
               </div>
             </a>
+            <!-- Separator after each card (only visible in list view) -->
+            <div class="list-separator"></div>
           </article>
         {% endfor %}
       {% endif %}
@@ -597,7 +650,7 @@
 
     // Add scroll animation with Intersection Observer
     const setupScrollAnimation = () => {
-      const blogArticles = document.querySelectorAll('#archiveContainer .blog-article');
+      const blogArticles = document.querySelectorAll('#archiveContainer .blog-article-fb');
 
       // Create observer with options
       const options = {
@@ -637,7 +690,7 @@
 
       loadMoreBtn.addEventListener('click', function () {
         // console.log('Load more button clicked');
-        const blogArticles = document.querySelectorAll('#archiveContainer .blog-article');
+        const blogArticles = document.querySelectorAll('#archiveContainer .blog-article-fb');
         // console.log(`Found ${blogArticles.length} total articles, showing next batch from ${currentlyVisible}`);
 
         // Calculate how many more articles to show
@@ -682,7 +735,7 @@
 
       // Fix initial visibility for grid/list view switchover
       const updateVisibilityAfterViewChange = () => {
-        const blogArticles = document.querySelectorAll('#archiveContainer .blog-article');
+        const blogArticles = document.querySelectorAll('#archiveContainer .blog-article-fb');
         blogArticles.forEach((article, index) => {
           article.style.display = index < currentlyVisible ? '' : 'none';
         });
@@ -720,7 +773,7 @@
         container.style.opacity = 1;
 
         // Reset and re-initialize fade-in animations
-        const blogArticles = document.querySelectorAll('#archiveContainer .blog-article');
+        const blogArticles = document.querySelectorAll('#archiveContainer .blog-article-fb');
         blogArticles.forEach((article) => article.classList.remove('visible'));
         setupScrollAnimation();
       }, 300);
