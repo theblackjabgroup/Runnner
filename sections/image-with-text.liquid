@@ -20,6 +20,10 @@
         font-size: 20px !important ;
         line-height: 2rem !important;
       }
+      .image-with-text-heading-size-very-small {
+        font-size: 14px !important ;
+        line-height: 14px !important;
+      }
       .image-with-text-button{
         font-size: 16px !important;
       }
@@ -81,7 +85,8 @@
     /* Ensure headings don't break words at boundaries */
     .image-with-text-heading {
       word-break: keep-all; /* Prevent breaking words */
-      overflow-wrap: break-word; /* Allow wrapping between words */
+      overflow-wrap: break-word;
+      line-height: 1.2; /* Allow wrapping between words */
     }
 
     .image-with-text-text-content{
@@ -141,8 +146,9 @@
     display: inline-block;
     padding: 2px 7px;
     border: 1px solid transparent;
-    background-color:var(--secondary_button_label);
-    color: var(--secondary_button_text_color);
+    background-color:var(--button_label);
+    border: 1px solid transparent;
+    color: var(--text);
     border-radius: 5px;
     overflow: hidden;
     transition: background-color var(--duration-medium), color var(--duration-medium);
@@ -150,9 +156,9 @@
 
   .image-with-text-custom-button-css:hover,
   .image-with-text-custom-button-css:focus {
-    background-color: var(--hovered_secondary_button_label);
-    color: var(--hovered_secondary_button_text_color);
-    border: 1px solid var(--hovered_secondary_button_text_color);
+    background-color: var(--text);
+    color: var(--button_label);
+    border: 1px solid var(--button_label);
     outline: none;
     text-decoration: none;
   }
@@ -206,38 +212,48 @@
     margin-left: 24px;
   }
     .image-with-text-media-section-{{ section.id }} {
-      height: {{ section.settings.height_mobile }}px;
-      min-height: {{ section.settings.height_mobile }}px;
+      height: {{ section.settings.height_mobile }}vh;
+      min-height: {{ section.settings.height_mobile }}vh;
     }
 
     @media screen and (min-width: 750px) {
       .image-with-text-media-section-{{ section.id }} {
-        height: {{ section.settings.height }}px;
-        min-height: {{ section.settings.height }}px;
+        height: {{ section.settings.height }}vh;
+        min-height: {{ section.settings.height }}vh;
       }
     }
 
     .image-with-text-heading-size-small {
       font-size: 50px;
-      line-height: 4rem;
+      line-height: 5rem;
+    }
+
+    .image-with-text-heading-size-very-small {
+      font-size: 35px;
+      line-height: 3.5rem;
     }
 
     @media (min-width: 750px) {
       .image-with-text-heading-size-small {
         font-size: 50px;
-        line-height: 4rem;
+        line-height: 5rem;
+      }
+
+      .image-with-text-heading-size-very-small {
+        font-size: 30px;
+        line-height: 3rem;
       }
     }
 
     .image-with-text-heading-size-medium {
       font-size: 60px;
-      line-height: 5rem;
+      line-height: 6rem;
     }
 
     @media (min-width: 750px) {
       .image-with-text-heading-size-medium {
         font-size: 60px;
-        line-height: 5rem;
+        line-height: 6rem;
       }
     }
 
@@ -300,6 +316,10 @@
       from { opacity: 1; }
       to   { opacity: 0; }
     } */
+
+    .image-with-text-button-container{
+      background-color: transparent;
+    }
 
     @media (max-width: 749px) {
       .image-with-text-text-content-container-{{ section.id }} {
@@ -407,6 +427,40 @@
     display: block;
     position: relative;
     z-index: 1;
+    overflow: hidden;
+    background: #000;
+  }
+
+  .image-with-text-iframe iframe {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 100vw;
+    height: 100vh;
+    transform: translate(-50%, -50%);
+    border: none;
+    outline: none;
+    min-width: 100%;
+    min-height: 100%;
+  }
+
+  /* Ensure video fills container completely for Vimeo */
+  .image-with-text-iframe iframe[src*="vimeo"] {
+    width: 150% !important;
+    height: 150% !important;
+    min-width: 150% !important;
+    min-height: 150% !important;
+    transform: translate(-50%, -50%) scale(1);
+    transform-origin: center center;
+  }
+
+  /* For YouTube videos */
+  .image-with-text-iframe iframe[src*="youtube"] {
+    width: 150% !important;
+    height: 150% !important;
+    min-width: 150% !important;
+    min-height: 150% !important;
+    transform: translate(-50%, -50%);
   }
 
   .image-with-text-media-section-{{ section.id }}{
@@ -417,6 +471,23 @@
   @media (max-width: 749px) {
     .image-with-text-media-section-{{ section.id }} {
       padding: 0px 8px;
+    }
+
+    .image-with-text-iframe iframe[src*="vimeo"] {
+      width: 200% !important;
+      height: 200% !important;
+      min-width: 200% !important;
+      min-height: 200% !important;
+      transform: translate(-50%, -50%) scale(1);
+      transform-origin: center center;
+    }
+
+    .image-with-text-iframe iframe[src*="youtube"] {
+      width: 200% !important;
+      height: 200% !important;
+      min-width: 200% !important;
+      min-height: 200% !important;
+      transform: translate(-50%, -50%);
     }
   }
 {%- endstyle -%}
@@ -444,12 +515,11 @@
                 allowfullscreen
                 title="Background video"
                 aria-label="Background video"
-                style="width: 100%; height: 100%; display: block; position: relative; z-index: 1;"
               ></iframe>
             {% elsif section.settings.video_url.type == 'vimeo' %}
               <iframe
                 class="w-full h-full object-cover"
-                src="https://player.vimeo.com/video/{{ section.settings.video_url.id }}?background=1&autoplay=1&loop=1&byline=0&title=0&wmode=opaque"
+                src="https://player.vimeo.com/video/{{ section.settings.video_url.id }}?controls=false&loop=true&muted=true&playsinline=true&background=1"
                 frameborder="0"
                 allow="autoplay; fullscreen; picture-in-picture"
                 allowfullscreen
@@ -459,7 +529,6 @@
                 loading="lazy"
                 data-ready="true"
                 data-gtm-yt-inspected-9="true"
-                style="width: 100%; height: 100%; min-height: 100%; display: block; position: relative; z-index: 1;"
               ></iframe>
             {% endif %}
           </div>
@@ -533,7 +602,9 @@
             {% case block.type %}
               {% when 'heading' %}
                 {% assign heading_class = '' %}
-                {% if block.settings.heading_size == 'small' %}
+                {% if block.settings.heading_size == 'very-small' %}
+                  {% assign heading_class = 'image-with-text-heading-size-very-small' %}
+                {% elsif block.settings.heading_size == 'small' %}
                   {% assign heading_class = 'image-with-text-heading-size-small' %}
                 {% elsif block.settings.heading_size == 'medium' %}
                   {% assign heading_class = 'image-with-text-heading-size-medium' %}
@@ -546,7 +617,7 @@
                   class="image-with-text-heading mb-4 {{ heading_class }} {% if section.settings.enable_text_animation %}letter-animation{% endif %}"
                   style="color:{{ block.settings.text_color }}; font-weight: {{ block.settings.font_weight }}; margin-bottom: 20px;"
                 >
-                  {{ block.settings.heading }}
+                  {{ block.settings.heading | replace: '||', '<br>' }}
                 </h2>
               {% when 'date' %}
                 <div
@@ -623,8 +694,8 @@
                     tabindex="0"
                     style="font-weight: {{ block.settings.font_weight }}; overflow: visible;"
                   >
-                    <div class="image-with-text-button-text-container color-{{ section.settings.color_scheme }}">
-                      <div class="image-with-text-button-text color-{{ section.settings.color_scheme }}">
+                    <div class="image-with-text-button-text-container">
+                      <div class="image-with-text-button-text">
                         {{ block.settings.button_label | escape }}
                         {% if block.settings.show_button_arrow %}
                           <span class="image-with-text-button-arrow" aria-hidden="true">
@@ -994,6 +1065,12 @@ button.addEventListener('keydown', function(event) {
       "default": true
     },
     {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "t:sections.all.colors.label",
+      "default": "scheme-1"
+    },
+    {
       "type": "header",
       "content": "Media Settings"
     },
@@ -1211,22 +1288,22 @@ button.addEventListener('keydown', function(event) {
     {
       "type": "range",
       "id": "height",
-      "min": 300,
-      "max": 800,
-      "step": 50,
-      "unit": "px",
+      "min": 30,
+      "max": 100,
+      "step": 5,
+      "unit": "vh",
       "label": "Section height (desktop)",
-      "default": 750
+      "default": 70
     },
     {
       "type": "range",
       "id": "height_mobile",
-      "min": 200,
-      "max": 600,
-      "step": 50,
-      "unit": "px",
+      "min": 30,
+      "max": 100,
+      "step": 5,
+      "unit": "vh",
       "label": "Section height (mobile)",
-      "default": 600
+      "default": 60
     }
   ],
   "blocks": [
@@ -1275,6 +1352,7 @@ button.addEventListener('keydown', function(event) {
           "type": "text",
           "id": "heading",
           "label": "Heading",
+          "info": "Separate heading line using ||",
           "default": "HEADING"
         },
         {
@@ -1282,6 +1360,10 @@ button.addEventListener('keydown', function(event) {
           "id": "heading_size",
           "label": "Heading size",
           "options": [
+            {
+              "value": "very-small",
+              "label": "Very Small"
+            },
             {
               "value": "small",
               "label": "Small"
