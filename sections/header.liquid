@@ -85,7 +85,6 @@
                       background: var(--header_background);
                       top: 100%;
                       padding-top: 0px;
-                      {% comment %} will-change: transform, opacity; {% endcomment %}
                       transform: translateY(-300px);
                       transition-property: opacity, transform;
                       transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
@@ -252,13 +251,25 @@
                         <!-- First set of content -->
                         {% for i in (1..section.settings.repeat_count) %}
                           <span class="scrolling-text-item">{{ section.settings.scrolling_text }}</span>
-                          <span class="scrolling-separator">{{ section.settings.separator }}</span>
+                          <img
+                            class="scrolling-separator"
+                            src="{{ section.settings.separator_image | image_url }}"
+                            alt="separator"
+                            height="100%"
+                            width="100%"
+                          >
                         {% endfor %}
                         <!-- Duplicate set for seamless infinite scrolling -->
                         {% for i in (1..section.settings.repeat_count) %}
                           <span class="scrolling-text-item">{{ section.settings.scrolling_text }}</span>
                           {% unless forloop.last %}
-                            <span class="scrolling-separator">{{ section.settings.separator }}</span>
+                            <img
+                              class="scrolling-separator"
+                              src="{{ section.settings.separator_image | image_url }}"
+                              alt="separator"
+                              height="100%"
+                              width="100%"
+                            >
                           {% endunless %}
                         {% endfor %}
                       </div>
@@ -543,40 +554,41 @@
 <!-- Mobile Menu -->
 <div
   id="mobile-menu"
-  class="hidden lg:hidden w-[90vw] h-[100vh] fixed top-0 right-0  bg-[var(--header_background)] flex"
+  class=" lg:hidden w-[90vw] h-[100vh] fixed top-0 right-0  bg-[var(--header_background)] flex"
   style="transform: translateX(100%); transition: transform 0.3s ease-in-out; background: var(--header_background); z-index: 1000"
 >
   <!-- Vertical Scrolling Text -->
   <div
-    class="vertical-text-container"
-    style="
-      background-color: {{ section.settings.background_color }};
-      color: {{ section.settings.text_color }};
-      width: 25px;
-      height: 100vh;
-      border-right: 1px solid black;
-      border-left: 1px solid black;
-    "
-    data-direction="{{ section.settings.direction }}"
+    class="scrolling-text-section"
+    id="scrolling-text-{{ section.id }}"
+    style="border-top: 1px solid black; border-bottom: 1px solid black; "
   >
-    <div class="vertical-track">
+    <div
+      class="scrolling-text-container"
+      data-direction="{{ section.settings.direction }}"
+    >
+      <!-- First set of content -->
       {% for i in (1..section.settings.repeat_count) %}
-        <span
-          class="vertical-text-item"
-          style="
-            text-transform: {{ section.settings.text_transform }};
-            letter-spacing: {{ section.settings.letter_spacing }}px;
-          "
+        <span class="scrolling-text-item">{{ section.settings.scrolling_text }}</span>
+        <img
+          class="scrolling-separator"
+          src="{{ section.settings.separator_image | image_url }}"
+          alt="separator"
+          height="100%"
+          width="100%"
         >
-          {{ section.settings.scrolling_text }}
-        </span>
+      {% endfor %}
+      <!-- Duplicate set for seamless infinite scrolling -->
+      {% for i in (1..section.settings.repeat_count) %}
+        <span class="scrolling-text-item">{{ section.settings.scrolling_text }}</span>
         {% unless forloop.last %}
-          <span
-            class="vertical-separator"
-            style="margin-bottom: {{ section.settings.separator_spacing }}px; margin-top: {{ section.settings.separator_spacing }}px;"
+          <img
+            class="scrolling-separator"
+            src="{{ section.settings.separator_image | image_url }}"
+            alt="separator"
+            height="100%"
+            width="100%"
           >
-            {{ section.settings.separator }}
-          </span>
         {% endunless %}
       {% endfor %}
     </div>
@@ -930,112 +942,64 @@
 <div class="header-offset" data-header-offset></div>
 
 <style>
-    .scrolling-text-section {
-      overflow: hidden;
-      white-space: nowrap;
-      background: {{ section.settings.background_color }};
-      padding: {{ section.settings.vertical_padding }}px 0;
-      position: relative;
-    }
+  {% comment %} Styles for the scrolling text section starts {% endcomment %}
 
-    .scrolling-text-container {
-      display: flex;
-      animation: scroll-{{ section.settings.direction }} {{ section.settings.speed }}s linear infinite;
-      color: {{ section.settings.text_color }};
-      font-size: {{ section.settings.font_size }}px;
-      font-weight: {{ section.settings.font_weight }};
-      text-transform: {{ section.settings.text_transform }};
-      letter-spacing: {{ section.settings.letter_spacing }}px;
-      min-width: 200%;
-    }
+  .scrolling-text-section {
+    overflow: hidden;
+    white-space: nowrap;
+    background: {{ section.settings.background_color }};
+    padding: {{ section.settings.vertical_padding }}px 0;
+    position: relative;
+  }
 
-    .scrolling-text-item {
-      flex-shrink: 0;
-      white-space: nowrap;
-    }
+  .scrolling-text-container {
+    display: flex;
+    align-items: center;
+    animation: scroll-{{ section.settings.direction }} {{ section.settings.speed }}s linear infinite;
+    color: {{ section.settings.text_color }};
+    font-size: {{ section.settings.font_size }}px;
+    font-weight: {{ section.settings.font_weight }};
+    text-transform: {{ section.settings.text_transform }};
+    letter-spacing: {{ section.settings.letter_spacing }}px;
+    min-width: 200%;
+  }
 
-    .scrolling-separator {
-      flex-shrink: 0;
-      margin: 0 {{ section.settings.separator_spacing }}px;
-      opacity: 0.7;
-    }
+  .scrolling-text-item {
+    flex-shrink: 0;
+    white-space: nowrap;
+  }
 
-    @keyframes scroll-left {
-      0% {
-        transform: translateX(0%);
-      }
-      100% {
-        transform: translateX(-50%);
-      }
-    }
+  .scrolling-separator {
+    flex-shrink: 0;
+    margin: 0 {{ section.settings.separator_spacing }}px;
+    opacity: 0.7;
+    height: {{ section.settings.font_size }}px;
+    width: auto;
+    max-width: {{ section.settings.font_size | times: 1.5 }}px;
+    object-fit: contain;
+    vertical-align: middle;
+  }
 
-    @keyframes scroll-right {
-      0% {
-        transform: translateX(-50%);
-      }
-      100% {
-        transform: translateX(0%);
-      }
-    }
-
-    .scrolling-text-container[data-direction="right"] {
-      transform: translateX(-50%);
-    }
-
-    .scrolling-text-container[data-direction="left"] {
+  @keyframes scroll-left {
+    0% {
       transform: translateX(0%);
     }
-
-    @media screen and (max-width: 768px) {
-      .scrolling-text-container {
-        font-size: {{ section.settings.font_size | times: 0.8 }}px;
-      }
+    100% {
+      transform: translateX(-50%);
     }
+  }
 
-    @media screen and (max-width: 480px) {
-      .scrolling-text-container {
-        font-size: {{ section.settings.font_size | times: 0.6 }}px;
-      }
+  @keyframes scroll-right {
+    0% {
+      transform: translateX(-50%);
     }
-
-    .search-input:focus {
-      outline: none;
+    100% {
+      transform: translateX(0%);
     }
-
-
-
-   /* Simple Vertical Scrolling Text CSS */
-
-  .vertical-text-container {
-    overflow: hidden;
-    position: relative;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 100%;
   }
 
-  .vertical-track {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    white-space: nowrap;
-    position: absolute;
-  }
-
-  .vertical-text-item {
-    display: block;
-    text-align: center;
-    writing-mode: sideways-lr;
-  }
-
-  .vertical-separator {
-    display: block;
-    text-align: center;
-  }
-
-  /* Animation keyframes */
-  @keyframes scroll-up {
+  /* Mobile vertical scrolling animations */
+  @keyframes scroll-bottom-to-top {
     0% {
       transform: translateY(0%);
     }
@@ -1044,365 +1008,464 @@
     }
   }
 
-  @keyframes scroll-down {
+  @keyframes scroll-top-to-bottom {
     0% {
-      transform: translateY(-10%);
+      transform: translateY(-50%);
     }
     100% {
       transform: translateY(0%);
     }
   }
 
-  /* Direction classes */
-  .vertical-scroll-up {
-    animation: scroll-up linear infinite;
+  .scrolling-text-container[data-direction="right"] {
+    transform: translateX(-50%);
   }
 
-  .vertical-scroll-down {
-    animation: scroll-down linear infinite;
+  .scrolling-text-container[data-direction="left"] {
+    transform: translateX(0%);
   }
 
-    .underline-link {
-      position: relative;
-      display: inline;
-      color: gray;
-      margin-top: 0.5rem;
-      line-height: 1.2%;
-      transition: color 0.3s ease;
+  /* Mobile styles - vertical scrolling */
+  @media screen and (max-width: 768px) {
+    .scrolling-text-section {
+      display: flex;
+      height: 100vh;
+      width: 28px;
+      padding:0;
+      overflow-x: hidden;
+      overflow-y: hidden;
+      border-top: none;
+      border-bottom: none;
+      border-left: 1px solid black;
+      border-right: 1px solid black;
     }
 
-    .underline-link::after {
-      content: '';
-      position: absolute;
-      bottom: -2px;
-      left: 0;
+    .scrolling-text-container {
+      writing-mode: sideways-lr;
+      text-orientation: mixed;
+      min-height: 200%;
+      min-width: auto;
       width: 100%;
-      height: 1px;
-      background-color: gray;
-      transform: scaleX(1);
-      transform-origin: left;
-      transition: transform 0.5s ease;
+      align-items: center;
+      justify-content: flex-start;
+      font-size: 12px;
     }
 
-    .underline-link:hover {
-      color: var(--hover);
+    .scrolling-text-item {
+      white-space: normal;
+      text-align: center;
+      width: 100%;
+      padding: 10px 0;
     }
 
-    .underline-link:hover::after {
-      transform: scaleX(0);
-      transform-origin: right;
+    .scrolling-separator {
+      margin: 0 {{ section.settings.separator_spacing }}px ;
+      height: 14px;
+      max-width: {{ section.settings.font_size | times: 0.8 | times: 1.5 }}px;
+      transform: rotate(-90deg); /* Keep images upright */
     }
 
-      .header-main {
-        position: relative;
-        width: 100%;
-        transform: translateY(-100%);
-        animation: slideDown 0.5s ease forwards;
-        background: var(--header_background);
-        padding: 5px 1vw;
+    /* Override animations for mobile vertical scrolling */
+    .scrolling-text-container[data-direction="left"] {
+      animation: scroll-bottom-to-top {{ section.settings.speed }}s linear infinite;
+      transform: translateY(0%);
+    }
+
+    .scrolling-text-container[data-direction="right"] {
+      animation: scroll-top-to-bottom {{ section.settings.speed }}s linear infinite;
+      transform: translateY(-50%);
+    }
+  }
+
+  @media screen and (max-width: 480px) {
+    .scrolling-text-section {
+      height: 100vh; /* Smaller height for very small screens */
+    }
+
+    .scrolling-text-container {
+      font-size: 14px;
+      font-weight: {{section.settings.font_weight  }};
+    }
+
+    .scrolling-separator {
+      height: 16px;
+      max-width: {{ section.settings.font_size | times: 0.6 | times: 1.5 }}px;
+    }
+  }
+
+      .search-input:focus {
+        outline: none;
       }
 
-      @keyframes slideDown {
-        from {
+      .underline-link {
+        position: relative;
+        display: inline;
+        color: gray;
+        margin-top: 0.5rem;
+        line-height: 1.2%;
+        transition: color 0.3s ease;
+      }
+
+      .underline-link::after {
+        content: '';
+        position: absolute;
+        bottom: -2px;
+        left: 0;
+        width: 100%;
+        height: 1px;
+        background-color: gray;
+        transform: scaleX(1);
+        transform-origin: left;
+        transition: transform 0.5s ease;
+      }
+
+      .underline-link:hover {
+        color: var(--hover);
+      }
+
+      .underline-link:hover::after {
+        transform: scaleX(0);
+        transform-origin: right;
+      }
+
+        .header-main {
+          position: relative;
+          width: 100%;
+          transform: translateY(-100%);
+          animation: slideDown 0.5s ease forwards;
+          background: var(--header_background);
+          padding: 5px 1vw;
+        }
+
+        @keyframes slideDown {
+          from {
+            transform: translateY(-100%);
+          }
+          to {
+            transform: translateY(0);
+          }
+        }
+
+        .header-main.is-sticky {
+          position: fixed;
+          top: 0;
+          left: 0;
+          right: 0;
+          transform: translateY(0);
+          box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .header-main.is-sticky.is-hidden {
           transform: translateY(-100%);
         }
-        to {
-          transform: translateY(0);
+
+        .header-offset {
+          height: 0;
+          transition: height 0.3s ease;
         }
-      }
 
-      .header-main.is-sticky {
-        position: fixed;
-        top: 0;
-        left: 0;
-        right: 0;
-        transform: translateY(0);
-        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-      }
-
-      .header-main.is-sticky.is-hidden {
-        transform: translateY(-100%);
-      }
-
-      .header-offset {
-        height: 0;
-        transition: height 0.3s ease;
-      }
-
-      .header-offset.is-active {
-        height: var(--header-height, 0px);
-      }
-
-      .sticky-disabled {
-        position: relative !important;
-        transform: none !important;
-      }
-
-      .sticky-disabled + .header-offset {
-        display: none !important;
-      }
-
-      /* Mobile submenu scrollbar styling */
-      .submenu.styled-scrollbar {
-        scrollbar-width: thin;
-        scrollbar-color: rgba(0, 0, 0, 0.3) transparent;
-      }
-
-      .submenu.styled-scrollbar::-webkit-scrollbar {
-        width: 4px;
-      }
-
-      .submenu.styled-scrollbar::-webkit-scrollbar-track {
-        background: transparent;
-      }
-
-      .submenu.styled-scrollbar::-webkit-scrollbar-thumb {
-        background-color: rgba(0, 0, 0, 0.3);
-        border-radius: 20px;
-      }
-
-      /* Mobile submenu animations */
-      .submenu {
-        transition: all 400ms cubic-bezier(0.4, 0, 0.2, 1);
-        will-change: opacity, height;
-        height: auto;
-        max-height: 0;
-      }
-
-      .submenu.show {
-        opacity: 1;
-        max-height: 30vh;
-      }
-
-      .submenu:not(.show) {
-        opacity: 0;
-        max-height: 0;
-      }
-
-      .submenu.hidden {
-        display: none;
-      }
-
-      .submenu:not(.hidden) {
-        display: block;
-      }
-
-      /* Add overlay transition */
-      #menu-overlay {
-        transition: opacity 0.3s ease;
-        will-change: opacity;
-      }
-
-      /* Mobile menu transitions */
-      #mobile-menu {
-        will-change: transform;
-        backface-visibility: hidden;
-      }
-
-      #mobile-menu.active {
-        transform: translateX(0) !important;
-      }
-
-      .h-vertical-text-container {
-        width: 26px;
-        overflow: hidden;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-      }
-
-      .h-vertical-text {
-        writing-mode: vertical-rl;
-        text-orientation: mixed;
-        transform: rotate(180deg);
-        animation: scrollText 50s linear infinite;
-        font-size: 16px;
-        white-space: nowrap;
-        padding: 0;
-      }
-
-      .vertical-text:nth-child(n) {
-        animation: scrollText2 50s linear infinite;
-      }
-
-      @keyframes scrollText {
-        0% {
-          transform: translateY(0) rotate(180deg);
+        .header-offset.is-active {
+          height: var(--header-height, 0px);
         }
-        100% {
-          transform: translateY(-100%) rotate(180deg);
-        }
-      }
 
-      @keyframes scrollText2 {
-        0% {
-          transform: translateY(100%) rotate(180deg);
+        .sticky-disabled {
+          position: relative !important;
+          transform: none !important;
         }
-        100% {
-          transform: translateY(0) rotate(180deg);
-        }
-      }
 
-      .horizontal-text-container {
-        position: fixed;
-        top: 100%;
-        left: 0;
-        width: 100%;
-        height: 33px;
-        overflow: hidden;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        border-top: 1px solid var(--header_text);
-        border-bottom: 1px solid var(--header_text);
-        background: var(--header_background);
-        z-index: 995;
-      }
-
-      .horizontal-text {
-        white-space: nowrap;
-        font-size: 24px;
-        display: inline-block;
-        animation: scrollRight 80s linear infinite;
-        height: 100%;
-        line-height: 32px;
-        font-weight: 500;
-      }
-
-      .horizontal-text:nth-child(n) {
-        animation: scrollRight2 80s linear infinite;
-      }
-
-      @keyframes scrollRight {
-        0% {
-          transform: translateX(-100%);
+        .sticky-disabled + .header-offset {
+          display: none !important;
         }
-        100% {
-          transform: translateX(100%);
-        }
-      }
 
-      @keyframes scrollRight2 {
-        0% {
-          transform: translateX(-100%);
+        /* Mobile submenu scrollbar styling */
+        .submenu.styled-scrollbar {
+          scrollbar-width: thin;
+          scrollbar-color: rgba(0, 0, 0, 0.3) transparent;
         }
-        100% {
-          transform: translateX(100%);
+
+        .submenu.styled-scrollbar::-webkit-scrollbar {
+          width: 4px;
         }
-      }
+
+        .submenu.styled-scrollbar::-webkit-scrollbar-track {
+          background: transparent;
+        }
+
+        .submenu.styled-scrollbar::-webkit-scrollbar-thumb {
+          background-color: rgba(0, 0, 0, 0.3);
+          border-radius: 20px;
+        }
+
+        /* Mobile submenu animations */
+        .submenu {
+          transition: all 400ms cubic-bezier(0.4, 0, 0.2, 1);
+          will-change: opacity, height;
+          height: auto;
+          max-height: 0;
+        }
+
+        .submenu.show {
+          opacity: 1;
+          max-height: 30vh;
+        }
+
+        .submenu:not(.show) {
+          opacity: 0;
+          max-height: 0;
+        }
+
+        .submenu.hidden {
+          display: none;
+        }
+
+        .submenu:not(.hidden) {
+          display: block;
+        }
+
+        /* Add overlay transition */
+        #menu-overlay {
+          transition: opacity 0.3s ease;
+          will-change: opacity;
+        }
+
+        /* Mobile menu transitions */
+        #mobile-menu {
+          will-change: transform;
+          backface-visibility: hidden;
+        }
+
+        #mobile-menu.active {
+          transform: translateX(0) !important;
+        }
+
+        .h-vertical-text-container {
+          width: 26px;
+          overflow: hidden;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+        }
+
+        .h-vertical-text {
+          writing-mode: vertical-rl;
+          text-orientation: mixed;
+          transform: rotate(180deg);
+          animation: scrollText 50s linear infinite;
+          font-size: 16px;
+          white-space: nowrap;
+          padding: 0;
+        }
+
+        .vertical-text:nth-child(n) {
+          animation: scrollText2 50s linear infinite;
+        }
+
+        @keyframes scrollText {
+          0% {
+            transform: translateY(0) rotate(180deg);
+          }
+          100% {
+            transform: translateY(-100%) rotate(180deg);
+          }
+        }
+
+        @keyframes scrollText2 {
+          0% {
+            transform: translateY(100%) rotate(180deg);
+          }
+          100% {
+            transform: translateY(0) rotate(180deg);
+          }
+        }
+
+        .horizontal-text-container {
+          position: fixed;
+          top: 100%;
+          left: 0;
+          width: 100%;
+          height: 33px;
+          overflow: hidden;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          border-top: 1px solid var(--header_text);
+          border-bottom: 1px solid var(--header_text);
+          background: var(--header_background);
+          z-index: 995;
+        }
+
+        .horizontal-text {
+          white-space: nowrap;
+          font-size: 24px;
+          display: inline-block;
+          animation: scrollRight 80s linear infinite;
+          height: 100%;
+          line-height: 32px;
+          font-weight: 500;
+        }
+
+        .horizontal-text:nth-child(n) {
+          animation: scrollRight2 80s linear infinite;
+        }
+
+        @keyframes scrollRight {
+          0% {
+            transform: translateX(-100%);
+          }
+          100% {
+            transform: translateX(100%);
+          }
+        }
+
+        @keyframes scrollRight2 {
+          0% {
+            transform: translateX(-100%);
+          }
+          100% {
+            transform: translateX(100%);
+          }
+        }
 </style>
 
 <script>
   document.addEventListener('DOMContentLoaded', function () {
-    // vertical scrolling text
-    const verticalContainer = document.querySelector('.vertical-text-container');
+// horizontal Scrolling Text Section
+const scrollingSection = document.getElementById('scrolling-text-{{ section.id }}');
+const scrollingContainer = scrollingSection.querySelector('.scrolling-text-container');
 
-    if (!verticalContainer) return;
+// Check if we're on mobile
+function isMobile() {
+  return window.innerWidth <= 768;
+}
 
-    const verticalTrack = verticalContainer.querySelector('.vertical-track');
-
-    // Initialize scrolling
-    function initializeVerticalScroll() {
-      const direction = verticalContainer.getAttribute('data-direction');
-
-      // Map horizontal directions to vertical
-      let verticalDirection;
-      if (direction === 'left') {
-        verticalDirection = 'up'; // right-to-left becomes bottom-to-top
-      } else if (direction === 'right') {
-        verticalDirection = 'down'; // left-to-right becomes top-to-bottom
-      } else {
-        verticalDirection = direction; // use as-is if already up/down
-      }
-
-      // Apply animation
-      verticalTrack.classList.remove('vertical-scroll-up', 'vertical-scroll-down');
-      verticalTrack.classList.add('vertical-scroll-' + verticalDirection);
-      verticalTrack.style.animationDuration = '20s';
+// Set initial position based on direction and device type
+function setInitialPosition() {
+  const direction = scrollingContainer.getAttribute('data-direction');
+  const mobile = isMobile();
+  
+  if (mobile) {
+    // Mobile vertical scrolling
+    if (direction === 'right') {
+      scrollingContainer.style.transform = 'translateY(-50%)';
+    } else {
+      scrollingContainer.style.transform = 'translateY(0%)';
     }
-
-    // Initialize on load
-    initializeVerticalScroll();
-
-    // Functions for external control
-
-    function updateDirection(newDirection) {
-      verticalContainer.setAttribute('data-direction', newDirection);
-      initializeVerticalScroll();
+  } else {
+    // Desktop horizontal scrolling
+    if (direction === 'right') {
+      scrollingContainer.style.transform = 'translateX(-50%)';
+    } else {
+      scrollingContainer.style.transform = 'translateX(0%)';
     }
+  }
 
-    // Add to global scope for external control
-    window.VerticalScrollText = {
-      updateDirection: updateDirection,
-      element: verticalContainer,
-    };
+  // Force a reflow and restart animation
+  scrollingContainer.style.animation = 'none';
+  scrollingContainer.offsetHeight; // Trigger reflow
+  
+  if (mobile) {
+    const animationName = direction === 'left' ? 'scroll-bottom-to-top' : 'scroll-top-to-bottom';
+    scrollingContainer.style.animation = `${animationName} {{ section.settings.speed }}s linear infinite`;
+  } else {
+    scrollingContainer.style.animation = `scroll-${direction} {{ section.settings.speed }}s linear infinite`;
+  }
+}
 
-    // horizontal Scrolling Text Section
-    const scrollingSection = document.getElementById('scrolling-text-{{ section.id }}');
-    const scrollingContainer = scrollingSection.querySelector('.scrolling-text-container');
+// Initialize on load
+setInitialPosition();
 
-    // Set initial position based on direction to avoid blank space
-    function setInitialPosition() {
-      const direction = scrollingContainer.getAttribute('data-direction');
-      if (direction === 'right') {
-        scrollingContainer.style.transform = 'translateX(-50%)';
-      } else {
-        scrollingContainer.style.transform = 'translateX(0%)';
-      }
+// Handle window resize to switch between mobile and desktop
+function handleResize() {
+  setInitialPosition();
+}
 
-      // Force a reflow and restart animation
-      scrollingContainer.style.animation = 'none';
-      scrollingContainer.offsetHeight; // Trigger reflow
-      scrollingContainer.style.animation = `scroll-${direction} {{ section.settings.speed }}s linear infinite`;
+// Add resize listener with debounce
+let resizeTimeout;
+window.addEventListener('resize', function() {
+  clearTimeout(resizeTimeout);
+  resizeTimeout = setTimeout(handleResize, 150);
+});
+
+// Calculate optimal repeat count based on text length and device type
+function calculateOptimalRepeats() {
+  const textLength = '{{ section.settings.scrolling_text }}'.length;
+  const estimatedImageWidth = {{ section.settings.font_size }} * 1.5;
+  const separatorSpacing = {{ section.settings.separator_spacing }} * 2;
+  
+  let totalLength;
+  if (isMobile()) {
+    // For mobile vertical, consider height rather than width
+    totalLength = textLength + (estimatedImageWidth + separatorSpacing) / 15;
+  } else {
+    totalLength = textLength + (estimatedImageWidth + separatorSpacing) / 10;
+  }
+
+  const minRepeats = Math.max(8, Math.ceil(200 / totalLength));
+  return Math.min(minRepeats, 20);
+}
+
+// Dynamic speed control
+function updateScrollSpeed(speed) {
+  scrollingContainer.style.animationDuration = speed + 's';
+}
+
+// Dynamic direction control
+function updateScrollDirection(direction) {
+  scrollingContainer.setAttribute('data-direction', direction);
+  const mobile = isMobile();
+  
+  if (mobile) {
+    const animationName = direction === 'left' ? 'scroll-bottom-to-top' : 'scroll-top-to-bottom';
+    scrollingContainer.style.animationName = animationName;
+  } else {
+    scrollingContainer.style.animationName = 'scroll-' + direction;
+  }
+  
+  setInitialPosition();
+}
+
+// Pause/resume functionality
+function pauseScroll() {
+  scrollingContainer.style.animationPlayState = 'paused';
+}
+
+function resumeScroll() {
+  scrollingContainer.style.animationPlayState = 'running';
+}
+
+// Image loading optimization
+function optimizeImageLoading() {
+  const separatorImages = scrollingContainer.querySelectorAll('.scrolling-separator');
+  separatorImages.forEach(img => {
+    if (!img.hasAttribute('loading')) {
+      img.setAttribute('loading', 'lazy');
     }
+    
+    img.addEventListener('error', function() {
+      console.warn('Scrolling separator image failed to load:', this.src);
+      this.style.display = 'none';
+    });
+  });
+}
 
-    // Initialize on load
-    setInitialPosition();
+// Initialize image optimization
+optimizeImageLoading();
 
-    // Calculate optimal repeat count based on text length
-    function calculateOptimalRepeats() {
-      const textLength = '{{ section.settings.scrolling_text }}'.length;
-      const separatorLength = '{{ section.settings.separator }}'.length;
-      const totalLength = textLength + separatorLength;
+// Add methods to global scope for external control
+window.ScrollingText = window.ScrollingText || {};
+window.ScrollingText['section-{{ section.id }}'] = {
+  updateSpeed: updateScrollSpeed,
+  updateDirection: updateScrollDirection,
+  pause: pauseScroll,
+  resume: resumeScroll,
+  element: scrollingSection,
+  calculateOptimalRepeats: calculateOptimalRepeats,
+  resetPosition: setInitialPosition,
+  optimizeImages: optimizeImageLoading,
+  isMobile: isMobile
+};
 
-      // Ensure minimum repeats for seamless scrolling
-      const minRepeats = Math.max(8, Math.ceil(200 / totalLength));
-      return Math.min(minRepeats, 20); // Cap at 20 to avoid performance issues
-    }
-
-    // Dynamic speed control
-    function updateScrollSpeed(speed) {
-      scrollingContainer.style.animationDuration = speed + 's';
-    }
-
-    // Dynamic direction control
-    function updateScrollDirection(direction) {
-      scrollingContainer.setAttribute('data-direction', direction);
-      scrollingContainer.style.animationName = 'scroll-' + direction;
-      setInitialPosition();
-    }
-
-    // Pause/resume functionality
-    function pauseScroll() {
-      scrollingContainer.style.animationPlayState = 'paused';
-    }
-
-    function resumeScroll() {
-      scrollingContainer.style.animationPlayState = 'running';
-    }
-
-    // Add methods to global scope for external control
-    window.ScrollingText = window.ScrollingText || {};
-    window.ScrollingText['section-{{ section.id }}'] = {
-      updateSpeed: updateScrollSpeed,
-      updateDirection: updateScrollDirection,
-      pause: pauseScroll,
-      resume: resumeScroll,
-      element: scrollingSection,
-      calculateOptimalRepeats: calculateOptimalRepeats,
-      resetPosition: setInitialPosition,
-    };
 
     // mobile menu toggle
     const hamburgerMenu = document.getElementById('hamburger-menu');
@@ -1900,13 +1963,6 @@
       "info": "Enter any length of text that you want to scroll"
     },
     {
-      "type": "text",
-      "id": "separator",
-      "label": "Text Separator",
-      "default": "•",
-      "info": "Character or symbol to separate repeated text"
-    },
-    {
       "type": "range",
       "id": "repeat_count",
       "label": "Text Repetitions",
@@ -1955,6 +2011,11 @@
     {
       "type": "header",
       "content": "Styling"
+    },
+    {
+      "type": "image_picker",
+      "id": "separator_image",
+      "label": "Separator Image"
     },
     {
       "type": "range",
