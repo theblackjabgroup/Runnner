@@ -353,31 +353,22 @@
     border: 1px solid var(--text);
   }
 
-  /* Fade In Animation */
-  @keyframes fadeInAnimation {
-    from {
-      opacity: 0;
-      transform: translateY(20px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
+  /* Removed fade-in animation and transitions */
+  /* @keyframes fadeInAnimation { ... } */
 
   .blog-article-fb {
-    opacity: 0;
-    transition: opacity 0.6s ease, transform 0.6s ease;
+    opacity: 1;
+    transition: none;
   }
 
   .blog-article-fb.visible {
     opacity: 1;
-    transform: translateY(0);
-    animation: fadeInAnimation 0.6s ease forwards;
+    transform: none;
+    animation: none;
   }
 
   .blog-article-fb:not(.visible) {
-    transform: translateY(20px);
+    transform: none;
   }
 
   @media (max-width: 1025px) {
@@ -648,100 +639,34 @@
     const buttons = [gridBtn, listBtn];
     const loadMoreBtn = document.querySelector('.load-more-btn-fb');
 
-    // Add scroll animation with Intersection Observer
-    const setupScrollAnimation = () => {
-      const blogArticles = document.querySelectorAll('#archiveContainer .blog-article-fb');
-
-      // Create observer with options
-      const options = {
-        root: null, // viewport
-        rootMargin: '0px',
-        threshold: 0.15, // 15% of element needs to be visible
-      };
-
-      const observer = new IntersectionObserver((entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            entry.target.classList.add('visible');
-            // Once we've shown it, no need to observe anymore
-            observer.unobserve(entry.target);
-          }
-        });
-      }, options);
-
-      // Observe all blog articles
-      blogArticles.forEach((article) => {
-        observer.observe(article);
-      });
-    };
-
-    // Run setup initially
-    setTimeout(setupScrollAnimation, 100);
+    // Remove scroll animation logic
+    // No IntersectionObserver, no fade-in
 
     // Load more functionality
     if (loadMoreBtn) {
-      // console.log('Load more button found');
       const increment = parseInt(loadMoreBtn.dataset.increment || '6', 10);
       const postLimit = parseInt(container.dataset.postLimit || '5', 10);
-      const totalPosts = parseInt(container.dataset.totalPosts || '0', 10);
       let currentlyVisible = postLimit;
 
-      // console.log(`Initial settings: limit=${postLimit}, total=${totalPosts}, increment=${increment}`);
-
       loadMoreBtn.addEventListener('click', function () {
-        // console.log('Load more button clicked');
         const blogArticles = document.querySelectorAll('#archiveContainer .blog-article-fb');
-        // console.log(`Found ${blogArticles.length} total articles, showing next batch from ${currentlyVisible}`);
-
-        // Calculate how many more articles to show
         const endIndex = Math.min(currentlyVisible + increment, blogArticles.length);
-        // console.log(`Will show articles from index ${currentlyVisible} to ${endIndex - 1}`);
-
-        // Show the next batch of articles
         for (let i = currentlyVisible; i < endIndex; i++) {
           if (blogArticles[i]) {
             blogArticles[i].style.display = '';
-            // console.log(`Showing article at index ${i}`);
-
-            // Create a new observer for this newly visible article
-            const observer = new IntersectionObserver(
-              (entries) => {
-                entries.forEach((entry) => {
-                  if (entry.isIntersecting) {
-                    entry.target.classList.add('visible');
-                    observer.unobserve(entry.target);
-                  }
-                });
-              },
-              {
-                threshold: 0.15,
-              }
-            );
-
-            observer.observe(blogArticles[i]);
           }
         }
-
-        // Update the counter
         currentlyVisible = endIndex;
-        // console.log(`Updated currently visible to ${currentlyVisible}`);
-
-        // Hide the button if we've shown all articles
         if (currentlyVisible >= blogArticles.length) {
           loadMoreBtn.style.display = 'none';
-          // console.log('All articles shown, hiding button');
         }
       });
 
-      // Fix initial visibility for grid/list view switchover
       const updateVisibilityAfterViewChange = () => {
         const blogArticles = document.querySelectorAll('#archiveContainer .blog-article-fb');
         blogArticles.forEach((article, index) => {
           article.style.display = index < currentlyVisible ? '' : 'none';
         });
-
-        // Re-initialize the scroll animation for visible articles
-        setTimeout(setupScrollAnimation, 300);
       };
 
       gridBtn.addEventListener('click', updateVisibilityAfterViewChange);
@@ -757,13 +682,11 @@
     }
 
     function switchView(toList) {
-      // Update ARIA states
       buttons.forEach((btn) => {
         const isActive = btn === (toList ? listBtn : gridBtn);
         btn.classList.toggle('active', isActive);
         btn.setAttribute('aria-checked', isActive.toString());
       });
-
       container.style.opacity = 0;
       setTimeout(() => {
         container.classList.toggle('list-view', toList);
@@ -771,20 +694,13 @@
         sectionEl.classList.toggle('list-view', toList);
         updateSliderPos(toList);
         container.style.opacity = 1;
-
-        // Reset and re-initialize fade-in animations
-        const blogArticles = document.querySelectorAll('#archiveContainer .blog-article-fb');
-        blogArticles.forEach((article) => article.classList.remove('visible'));
-        setupScrollAnimation();
       }, 300);
     }
 
-    // Initialize slider
     updateSliderPos(false);
     gridBtn.addEventListener('click', () => switchView(false));
     listBtn.addEventListener('click', () => switchView(true));
 
-    // Handle keyboard navigation for radio group
     buttons.forEach((btn) => {
       btn.addEventListener('keydown', (e) => {
         if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
@@ -846,6 +762,13 @@
       "default": "scheme-1"
     }
   ],
-  "presets": [{ "name": "Featured Blogs" }]
+  "presets": [
+    {
+      "name": "Featured Blogs",
+      "settings": {
+        "blog": "news"
+      }
+    }
+  ]
 }
 {% endschema %}
