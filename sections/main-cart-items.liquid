@@ -1,4 +1,3 @@
-
 <style>
   :root {
     --cart-spacing-xs: 0.5rem;
@@ -240,7 +239,6 @@
     justify-content: space-between;
     align-items: center;
     cursor: pointer;
-    margin-bottom: var(--cart-spacing-sm);
   }
 
   .cart-sidebar-label {
@@ -254,8 +252,8 @@
   }
 
   .cart-sidebar-arrow {
-    width: 2rem;
-    height: 2rem;
+    width: 27.77px;
+    height: 27.77px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -398,7 +396,7 @@
     color: var(--cart-color-bg);
     font-size: 5rem;
     font-weight: 900;
-    border-radius: var(--cart-border-radius-sm);
+    border-radius: 5px;
     display: flex;
     flex-direction: row-reverse;
     padding:0 var(--cart-spacing-lg);
@@ -545,7 +543,7 @@
     }
 
     .cart-sidebar-header {
-      padding: 0.5rem 0;
+      padding: 0rem 0;
     }
 
     .cart-sidebar-label {
@@ -634,7 +632,7 @@
   }
 
   /* Tablet Responsive */
-  @media (min-width: 769px) and (max-width: 1424px) {
+  @media (min-width: 769px) and (max-width: 1500px) {
     .cart-main-layout {
       padding: var(--cart-spacing-lg);
     }
@@ -659,7 +657,7 @@
     }
 
     .cart-sidebar-total {
-      font-size: 3rem;
+      font-size:3rem;
     }
     .cart-sidebar-checkout{
         font-size:4rem;
@@ -810,47 +808,46 @@
             {% endif %}
           </div>
 
-          <div class="cart-item-controls">
-            <form method="post" action="/cart/change" style="display:inline;">
-              <input type="hidden" name="id" value="{{ item.key }}">
-              <div class="cart-item-qty">
-                <button
-                  class="cart-item-qty-btn"
-                  type="submit"
-                  name="quantity"
-                  value="{{ item.quantity | minus: 1 }}"
-                  {% if item.quantity <= 1 %}disabled{% endif %}
-                  aria-label="Decrease quantity"
-                >
-                  −
-                </button>
-                <input
-                  class="cart-item-qty-input"
-                  type="text"
-                  value="{{ item.quantity }}"
-                  readonly
-                  aria-label="Current quantity"
-                >
-                <button
-                  class="cart-item-qty-btn"
-                  type="submit"
-                  name="quantity"
-                  value="{{ item.quantity | plus: 1 }}"
-                  aria-label="Increase quantity"
-                >
-                  +
-                </button>
-              </div>
-
-            </form>
-
-            <form method="post" action="/cart/change" style="display:inline;">
-              <input type="hidden" name="id" value="{{ item.key }}">
-              <input type="hidden" name="quantity" value="0">
-              <button class="cart-item-remove" type="submit" aria-label="Remove item">
-                [REMOVE]
+          <div class="cart-item-controls" data-item-key="{{ item.key }}">
+            <div class="cart-item-qty">
+              <button
+                class="cart-item-qty-btn js-cart-qty-btn"
+                type="button"
+                data-action="decrease"
+                data-item-key="{{ item.key }}"
+                {% if item.quantity <= 1 %}
+                  disabled
+                {% endif %}
+                aria-label="Decrease quantity"
+              >
+                −
               </button>
-            </form>
+              <input
+                class="cart-item-qty-input"
+                type="text"
+                value="{{ item.quantity }}"
+                readonly
+                aria-label="Current quantity"
+                data-item-key="{{ item.key }}"
+              >
+              <button
+                class="cart-item-qty-btn js-cart-qty-btn"
+                type="button"
+                data-action="increase"
+                data-item-key="{{ item.key }}"
+                aria-label="Increase quantity"
+              >
+                +
+              </button>
+            </div>
+            <button
+              class="cart-item-remove js-cart-remove-btn"
+              type="button"
+              data-item-key="{{ item.key }}"
+              aria-label="Remove item"
+            >
+              [REMOVE]
+            </button>
           </div>
         </div>
       </div>
@@ -859,13 +856,26 @@
 
   <div class="cart-sidebar">
     <div class="cart-sidebar-box">
-      <div class="cart-sidebar-header js-sidebar-header" tabindex="0" role="button" aria-label="Toggle order note form" style="outline: none;">
+      <div
+        class="cart-sidebar-header js-sidebar-header"
+        tabindex="0"
+        role="button"
+        aria-label="Toggle order note form"
+        style="outline: none;"
+      >
         <div class="cart-sidebar-label">
           Add A Note To<br>
           Your Order:
         </div>
         <div class="cart-sidebar-arrow js-sidebar-arrow">
-            <svg stroke-linecap="round" width="24" height="24" viewBox="0 0 9 9" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <svg
+            stroke-linecap="round"
+            width="24"
+            height="24"
+            viewBox="0 0 9 9"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
             <path d="M1.1875 7.7334H7.6599M7.6599 7.7334V1.261M7.6599 7.7334L1.1875 1.261" stroke="black" stroke-width="1.5" stroke-linejoin="round"/>
           </svg>
         </div>
@@ -877,12 +887,23 @@
     </div>
 
     <div class="cart-sidebar-box">
-      <div class="cart-sidebar-header js-sidebar-header" tabindex="0" role="button" aria-label="Toggle newsletter signup" style="outline: none;">
-        <div class="cart-sidebar-label">
-          Receive Special Offers And First Look At New Products.
-        </div>
+      <div
+        class="cart-sidebar-header js-sidebar-header"
+        tabindex="0"
+        role="button"
+        aria-label="Toggle newsletter signup"
+        style="outline: none;"
+      >
+        <div class="cart-sidebar-label">Receive Special Offers And First Look At New Products.</div>
         <div class="cart-sidebar-arrow js-sidebar-arrow">
-            <svg stroke-linecap="round" width="24" height="24" viewBox="0 0 9 9" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <svg
+            stroke-linecap="round"
+            width="24"
+            height="24"
+            viewBox="0 0 9 9"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
             <path d="M1.1875 7.7334H7.6599M7.6599 7.7334V1.261M7.6599 7.7334L1.1875 1.261" stroke="black" stroke-width="1.5" stroke-linejoin="round"/>
           </svg>
         </div>
@@ -891,7 +912,15 @@
         <input type="email" placeholder="Enter your email" aria-label="Email address" required>
         <button type="submit" class="form-submit-button2">
           Subscribe
-          <svg class="subscribe-arrow" width="16" height="16" viewBox="0 0 9 9" fill="none" xmlns="http://www.w3.org/2000/svg" style="margin-left: 0.5rem;">
+          <svg
+            class="subscribe-arrow"
+            width="16"
+            height="16"
+            viewBox="0 0 9 9"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+            style="margin-left: 0.5rem;"
+          >
             <path d="M1.1875 7.7334H7.6599M7.6599 7.7334V1.261M7.6599 7.7334L1.1875 1.261" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>
           </svg>
         </button>
@@ -899,12 +928,23 @@
     </div>
 
     <div class="cart-sidebar-box">
-      <div class="cart-sidebar-header js-sidebar-header" tabindex="0" role="button" aria-label="Toggle shipping calculator" style="outline: none;">
-        <div class="cart-sidebar-label">
-          Estimate Shipping Rates
-        </div>
+      <div
+        class="cart-sidebar-header js-sidebar-header"
+        tabindex="0"
+        role="button"
+        aria-label="Toggle shipping calculator"
+        style="outline: none;"
+      >
+        <div class="cart-sidebar-label">Estimate Shipping Rates</div>
         <div class="cart-sidebar-arrow js-sidebar-arrow">
-            <svg stroke-linecap="round" width="24" height="24" viewBox="0 0 9 9" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <svg
+            stroke-linecap="round"
+            width="24"
+            height="24"
+            viewBox="0 0 9 9"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
             <path d="M1.1875 7.7334H7.6599M7.6599 7.7334V1.261M7.6599 7.7334L1.1875 1.261" stroke="black" stroke-width="1.5" stroke-linejoin="round"/>
           </svg>
         </div>
@@ -921,18 +961,25 @@
         <span>{{ cart.total_price | money_with_currency }}</span>
       </div>
 
-      <a href="{{ routes.checkout_url }}" class="cart-sidebar-checkout" aria-label="Proceed to checkout">
+      <button type="button" class="cart-sidebar-checkout" id="checkout-btn" aria-label="Proceed to checkout">
         <span>Checkout</span>
-        <svg stroke-linecap="round" width="32" height="32" viewBox="0 0 35 35" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M3.16406 30.9824H30.9305M30.9305 30.9824V3.21602M30.9305 30.9824L3.16406 3.21602" stroke="white" stroke-width="4" stroke-linejoin="round"/>
+        <svg
+          stroke-linecap="round"
+          width="32"
+          height="32"
+          viewBox="0 0 35 35"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path d="M3.16406 30.9824H30.9305M30.9305 30.9824V3.21602M30.9305 30.9824L3.16406 3.21602" stroke="white" stroke-width="8" stroke-linejoin="round"/>
         </svg>
-      </a>
+      </button>
     </div>
   </div>
 </div>
 
 <script>
-  document.addEventListener('DOMContentLoaded', function () {
+  function initSidebarDropdowns() {
     const headers = document.querySelectorAll('.js-sidebar-header');
 
     headers.forEach(function (header) {
@@ -957,7 +1004,7 @@
 
         // Toggle current form with a slight delay if we're opening a new one
         if (!isCurrentlyExpanded) {
-          setTimeout(function() {
+          setTimeout(function () {
             form.classList.add('expanded');
             arrow.classList.add('expanded');
           }, 100);
@@ -971,31 +1018,100 @@
       header.addEventListener('click', toggleForm);
 
       // Keyboard support
-      header.addEventListener('keydown', function(e) {
+      header.addEventListener('keydown', function (e) {
         if (e.key === 'Enter' || e.key === ' ') {
           toggleForm(e);
         }
       });
 
       // Prevent form submission from closing the accordion
-      form.addEventListener('submit', function(e) {
+      form.addEventListener('submit', function (e) {
         e.preventDefault();
         // Handle form submission here if needed
       });
     });
 
     // Smooth scroll behavior for better UX
-    document.addEventListener('click', function(e) {
+    document.addEventListener('click', function (e) {
       if (e.target.closest('.js-sidebar-header')) {
-        setTimeout(function() {
+        setTimeout(function () {
           const expandedForm = document.querySelector('.cart-sidebar-form.expanded');
           if (expandedForm) {
             expandedForm.scrollIntoView({
               behavior: 'smooth',
-              block: 'nearest'
+              block: 'nearest',
             });
           }
         }, 200);
+      }
+    });
+  }
+
+  document.addEventListener('DOMContentLoaded', function () {
+    initSidebarDropdowns();
+
+    // --- AJAX Cart Quantity & Remove ---
+    function updateCartUI() {
+      // Reload the cart section via AJAX (fetch the section and replace)
+      fetch(window.location.pathname + '?section_id=main-cart-items')
+        .then((res) => res.text())
+        .then((html) => {
+          const parser = new DOMParser();
+          const doc = parser.parseFromString(html, 'text/html');
+          const newCart = doc.querySelector('.cart-main-layout');
+          if (newCart) {
+            document.querySelector('.cart-main-layout').replaceWith(newCart);
+            initSidebarDropdowns(); // Re-initialize sidebar dropdowns after AJAX update
+          }
+        });
+    }
+
+    document.body.addEventListener('click', function (e) {
+      // Quantity buttons
+      if (e.target.classList.contains('js-cart-qty-btn')) {
+        const btn = e.target;
+        const itemKey = btn.dataset.itemKey;
+        const action = btn.dataset.action;
+        const qtyInput = document.querySelector('.cart-item-qty-input[data-item-key="' + itemKey + '"]');
+        let currentQty = parseInt(qtyInput.value, 10);
+        let newQty = action === 'increase' ? currentQty + 1 : currentQty - 1;
+        if (newQty < 1) newQty = 1;
+
+        fetch('/cart/change.js', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+          body: JSON.stringify({ id: itemKey, quantity: newQty }),
+        })
+          .then((res) => res.json())
+          .then((data) => {
+            updateCartUI();
+          });
+      }
+
+      // Remove button
+      if (e.target.classList.contains('js-cart-remove-btn')) {
+        const btn = e.target;
+        const itemKey = btn.dataset.itemKey;
+        fetch('/cart/change.js', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+          body: JSON.stringify({ id: itemKey, quantity: 0 }),
+        })
+          .then((res) => res.json())
+          .then((data) => {
+            updateCartUI();
+          });
+      }
+    });
+    // Checkout button JS redirect (robust event delegation, prevent form submit)
+    document.body.addEventListener('click', function (e) {
+      const checkoutBtn = e.target.closest('#checkout-btn');
+      if (checkoutBtn) {
+        // Prevent form submission if inside a form
+        if (checkoutBtn.form) {
+          e.preventDefault();
+        }
+        window.location.href = '{{ routes.checkout_url }}';
       }
     });
   });

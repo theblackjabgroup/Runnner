@@ -18,7 +18,7 @@
     {% endif %}
 
     <div
-      class="flex justify-between items-center w-full featured-collection-subheading"
+      class="flex justify-between items-start w-full featured-collection-subheading"
       style="padding-top: 10px; color: var(--text);"
     >
       <div class="flex-grow md:text-[24px] text-2xl md:mt-[-20px]">
@@ -105,7 +105,7 @@
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
-                  class="featured-collection-arrow-svg w-5 h-5 object-contain transition-transform duration-300 ease-in-out group-hover:-rotate-90 mx-1"
+                  class="featured-collection-arrow-svg w-5 h-5 object-contain transition-transform duration-300 ease-in-out group-hover:-rotate-90 mx-1 {% if section.settings.arrow_on_hover %} featured-collection-arrow-svg-only-on-hover{% endif %}"
                   fill="none"
                   viewBox="0 0 9 9"
                   stroke-width="1.5"
@@ -182,7 +182,7 @@
                   {% if block.settings.collection == blank or block.settings.collection.products.size == 0 %}
                     {% for i in (1..5) %}
                       <article
-                        class="product-card flex-none w-[220px] md:w-[400px]"
+                        class="product-card flex-none"
                         role="listitem"
                         aria-label="No products found"
                       >
@@ -190,7 +190,7 @@
                           {{ 'collection-1' | placeholder_svg_tag }}
                         </div>
                         <div class="product-details mt-3" style="margin-bottom:8px;">
-                          <h3 class="!text-[1.6rem] uppercase font-medium leading-tight">No products found</h3>
+                          <h3 class="uppercase font-medium leading-tight">No products found</h3>
                           <div class="flex gap-2 items-baseline fc-price" style="margin-top: -6px;">
                             <span class="!text-[1.6rem] uppercase font-medium">—</span>
                           </div>
@@ -200,7 +200,7 @@
                   {% else %}
                     {% for product in block.settings.collection.products %}
                       <article
-                        class="product-card flex-none w-[220px] md:w-[400px]"
+                        class="product-card flex-none"
                         role="listitem"
                         aria-label="{{ product.title }}"
                       >
@@ -208,8 +208,8 @@
                           {% unless product.available %}
                             <div class="absolute top-3 right-4 z-2">
                               <span
-                                class="inline-block rounded-xl px-4 text-[12px] tracking-wide font-medium bg-zinc-800"
-                                style="color: rgb(var(--color-background)); background-color: var(--text);"
+                                class="tracking-wide font-medium bg-zinc-800 sold-out"
+                                style="background-color: rgb(var(--color-background)); color: var(--text);"
                               >
                                 SOLD OUT
                               </span>
@@ -241,9 +241,9 @@
                                     data-product-id="{{ product.id }}"
                                     loading="lazy"
                                     decoding="async"
-                                    width="400"
-                                    height="484"
-                                    style="object-fit: cover; width: 400px; height: 484px;"
+                                    width="440"
+                                    height="530"
+                                    style="object-fit: cover;"
                                   >
                                 {% endfor %}
 
@@ -275,14 +275,14 @@
                                 </button>
                               {% else %}
                                 <img
-                                  src="{{ product.featured_image | img_url: '400x484', crop: 'center' }}"
+                                  src="{{ product.featured_image | img_url: '440x530', crop: 'center' }}"
                                   alt="{{ product.title }}"
                                   class="fc-product-image"
                                   loading="lazy"
                                   decoding="async"
-                                  width="400"
-                                  height="484"
-                                  style="object-fit: cover; width: 400px; height: 484px;"
+                                  width="440"
+                                  height="530"
+                                  style="object-fit: cover;"
                                 >
                               {% endif %}
                             </div>
@@ -301,19 +301,21 @@
 
                               {% if has_size_variants %}
                                 <div
-                                  class="size-variants-container rounded p-2 mb-0 opacity-0 invisible"
+                                  class="size-variants-container p-2 mb-0 opacity-0 invisible"
                                   role="group"
                                   aria-label="Size options for {{ product.title }}"
-                                  style="background-color:  rgb(var(--color-background));"
+                                  style="background-color: var(--text);"
                                 >
                                   {% for option in product.options_with_values %}
                                     {% if option.name == 'Size' or option.name == 'size' %}
                                       {% assign size_option_index = forloop.index0 %}
-                                      <div class="size-label-wrapper flex items-center w-full">
+                                      <div
+                                        class="size-label-wrapper flex items-center w-full"
+                                      >
                                         <span
                                           class="size-label text-m px-2 mr-auto"
-                                          style="color: var(--text); background-color: rgb(var(--color-background));"
-                                          >SELECT SIZE</span
+                                          style="color: rgb(var(--color-background)); background-color: var(--text);"
+                                          >SIZE</span
                                         >
                                         <div
                                           class="size-options-wrapper flex flex-wrap gap-4 justify-end"
@@ -341,7 +343,7 @@
                                                 data-variant-size="{{ value }}"
                                                 aria-disabled="true"
                                               {% endif %}
-                                              style="--animation-order: {{ forloop.index }}; background-color: rgb(var(--color-background)); color: var(--text);"
+                                              style="--animation-order: {{ forloop.index }}; background-color: var(--text); color: rgb(var(--color-background));"
                                               aria-label="Size {{ value }}{% unless variant_available %} - Sold Out{% endunless %}"
                                               {% unless variant_available %}
                                                 aria-disabled="true"
@@ -373,7 +375,7 @@
                                   {% endif %}
                                   aria-label="Add {{ product.title }} to cart"
                                 >
-                                  Add to Cart
+                                  ADD TO CART
                                 </button>
                               {% else %}
                                 <button
@@ -385,7 +387,7 @@
                                   aria-haspopup="dialog"
                                   style="background-color: rgb(var(--color-background)); color: var(--text);"
                                 >
-                                  Notify Me When In Stock
+                                  NOTIFY ME WHEN IN STOCK
                                 </button>
                               {% endif %}
                             </div>
@@ -395,8 +397,8 @@
                         <div class="product-details mt-3" style="margin-bottom:8px;">
                           <a href="{{ product.url }}" aria-label="{{ product.title }}">
                             <h3
-                              class="!text-[1.6rem] uppercase leading-tight"
-                              style="font-weight: 600 !important; color: var(--text);"
+                              class="uppercase leading-tight fc-product-title"
+                              style="color: var(--text);"
                             >
                               {{ product.title | escape }}
                             </h3>
@@ -405,12 +407,12 @@
                               class="flex gap-2 items-baseline fc-price"
                               style="color: var(--text);"
                             >
-                              <span class="!text-[1.6rem] uppercase" style="color: var(--text);">
+                              <span class="uppercase" style="color: var(--text);">
                                 {{ product.price | money }}
                               </span>
                               {%- if product.compare_at_price > product.price -%}
                                 <span id="fc-product-dash">|</span>
-                                <span class="!text-[1.6rem] uppercase text-red-600">
+                                <span class="uppercase text-red-600">
                                   {{- product.compare_at_price | money }} FOR MEMBERS</span
                                 >
                               {%- endif -%}
@@ -488,23 +490,24 @@
       color: var(--cr-yellow-2) !important;
     }
     .featured-collection-page-width {
-      margin: 0 1vw;
+      padding: {{ settings.sections_spacing }}px {{ settings.side_space}}px;
       overflow-y: hidden;
     }
 
     @media (max-width: 749px) {
-      .featured-collection-page-width {
-        margin: 0 1vw;
-      }
+      /* .featured-collection-page-width {
+        margin: 0 8px;
+      } */
     }
 
-    .featured-collection-subheading {
+    .featured-collection-subheading p {
       /* margin-top: -30px; */
+      line-height: 1;
     }
 
     div.featured-collection-main-heading {
       line-height: 80% !important;
-      font-size: 3.5rem;
+      font-size: 48px;
       left: -3px;
     }
 
@@ -514,7 +517,17 @@
 
     @media (min-width: 500px) {
       div.featured-collection-main-heading {
-        font-size: 5rem;
+        font-size: 48px;
+      }
+    }
+
+    @media (max-width: 500px) {
+      .product-image, .fc-product-image, .product-image-wrapper{
+        width: 255px !important;
+        height: 306px !important;
+      }
+      .sold-out{
+        font-size: 11px !important;
       }
     }
 
@@ -544,10 +557,33 @@
       }
     }
 
+    @media (min-width: 900px) {
+      div.featured-collection-main-heading {
+        font-size: 100px;
+      }
+    }
+
+    @media (min-width: 1080px) {
+      div.featured-collection-main-heading {
+        font-size: 120px;
+      }
+    }
+
+    .sold-out{
+      padding: 0px 4px;
+      border-radius: {{ settings.buttons_radius |  minus: 2 }}px;
+      line-height: 20px;
+      display: inline-block;
+      font-size: 14px;
+      border: {{ settings.buttons_border_thickness }}px solid var(--text);
+      color: var(--text);
+      background-color: rgb(var(--color-background));
+    }
+
     .collection-filters .collection-btn {
       padding: 0.5rem 1.2rem;
       padding-left: 0;
-      border-bottom: 1px solid var(--text);
+      border-bottom: {{ settings.buttons_border_thickness }}px solid var(--text);
       text-align: left;
       background: rgb(var(--color-background));
       color: var(--text);
@@ -576,21 +612,30 @@
     .collection-filters .collection-btn.active {
       background: var(--text);
       color: rgb(var(--color-background));
+      border-bottom: {{ settings.buttons_border_thickness }}px solid rgb(var(--color-background));
     }
 
     .collection-filters .collection-btn.active .featured-collection-arrow-svg{
+      opacity: 1;
       fill: var(--background);
       transform: rotate(-90deg);
     }
 
     .collection-filters .collection-btn:hover .featured-collection-arrow-svg{
+      opacity: 1;
       fill: var(--background);
       transform: rotate(-90deg);
     }
 
     .collection-filters .collection-btn .featured-collection-arrow-svg{
+      opacity: 1;
       fill: var(--text);
       /* transform: rotate(45deg); */
+    }
+
+    .collection-filters .collection-btn .featured-collection-arrow-svg-only-on-hover{
+      opacity: 0;
+      transition: transform 0s ease !important;
     }
 
     .product-image-wrapper {
@@ -622,6 +667,10 @@
         margin-top: -6px !important;
       }
 
+      .product-details .fc-product-title, .product-details .fc-product-price{
+        font-size: 13px;
+      }
+
     .image-nav-arrow {
       position: absolute;
       top: 50%;
@@ -646,7 +695,7 @@
       background-color: rgba(68, 68, 68, 0.15);
     }
 
-    .image-nav-arrow:hover svg {
+    .product-image-wrapper:hover .image-nav-arrow svg {
       transition: opacity 0.5s ease;
       opacity: 0.6;
     }
@@ -687,7 +736,9 @@
       transition: all 0.5s ease;
       width: 110%;
       left: -5%;
-      height: 40px;
+      height: 50px;
+      border-radius: {{ settings.buttons_radius }}px;
+      font-size: 20px;
       position: relative;
       z-index: 5;
       cursor: pointer;
@@ -700,6 +751,7 @@
     }
 
     .size-variants-container {
+      border-radius: {{ settings.buttons_radius }}px;
       position: absolute;
       bottom: 0;
       left: 0;
@@ -711,7 +763,10 @@
       transform: translateY(0);
       display: flex;
       justify-content: center;
-      padding: 2px;
+      padding: 5px 10px;
+      font-size: 20px;
+      background-color: var(--text);
+      color: rgb(var(--color-background));
     }
 
     .size-label-wrapper {
@@ -719,12 +774,13 @@
       width: 110%;
       left: -5%;
       align-items: center;
+      border-radius: {{ settings.buttons_radius }}px;
     }
 
     .size-label {
       margin-right: auto;
-      font-weight: 600;
-      color: #000;
+      border-radius: {{ settings.buttons_radius }}px;
+      color: var(--text);
     }
 
     .product-cart-container:hover .size-variants-container,
@@ -749,7 +805,10 @@
       transition: all 0.4s ease;
       width: 30px;
       height: 30px;
-      border: 1px solid var(--text);
+      border-radius: {{ settings.buttons_radius }}px;
+      color: rgb(var(--color-background));
+      font-size: 18px;
+      border: {{ settings.buttons_border_thickness }}px solid rgb(var(--color-background));
       padding: 2px;
       display: flex;
       align-items: center;
@@ -758,22 +817,26 @@
       opacity: 1; /* Ensure buttons are visible */
       visibility: visible; /* Ensure buttons are visible */
       background-color: transparent;
-      color: var(--text);
     }
 
     .size-option-btn:hover {
       transform: translateY(-2px);
-      background-color: var(--text) !important;
-      color: rgb(var(--color-background)) !important;
+      background-color: rgb(var(--color-background)) !important;
+      color: var(--text) !important;
     }
 
     .unavailable-size {
       opacity: 1;
       position: relative;
       cursor: not-allowed;
-      border-color: var(--disabled_text);
-      color: var(--disabled_text);
+      border-color: var(--disabled_text) !important;
+      color: var(--disabled_text) !important;
       overflow: hidden;
+    }
+
+    .unavailable-size:hover{
+      background-color: var(--disabled_text) !important;
+      color: var(--text);
     }
 
     .unavailable-size::after {
@@ -782,9 +845,13 @@
       top: 50%;
       left: -2px;
       right: -2px;
-      height: 1px;
-      background-color: rgb(var(--color-background));
+      height: 2px;
+      background-color: var(--disabled_text);
       transform: rotate(-45deg);
+    }
+
+    .unavailable-size:hover::after{
+      height: 0px;
     }
 
     .size-option-btn:hover {
@@ -829,7 +896,7 @@
       background-color: #000;
       color: rgb(var(--color-background));
       text-decoration: none;
-      border-radius: 4px;
+      border-radius: {{ settings.buttons_radius |  minus: 1 }}px;
       transition: background-color 0.5s ease;
     }
 
@@ -931,7 +998,7 @@
     }
 
     #waitlist-email {
-      border: 1px solid #ccc;
+      border: {{ settings.buttons_border_thickness }}px solid #ccc;
     }
 
     #get-notified-btn {
@@ -956,17 +1023,17 @@
       padding: 2px 7px;
       background-color: rgb(var(--color-background));
       color: var(--text);
-      border-radius: 4px;
-      border: var(--text) 1px solid !important;
+      border-radius: {{ settings.buttons_radius |  minus: 1 }}px;
+      border: var(--text) {{ settings.buttons_border_thickness }}px solid !important;
       overflow: hidden;
       transition: background-color 0.3s, color 0.3s;
     }
 
     .featured-collection-custom-button:hover {
       background-color: var(--text);
-      border: rgb(var(--color-background)) 2px solid;
+      border: rgb(var(--color-background)) {{ settings.buttons_border_thickness | plus: 1 }}px solid;
       color: rgb(var(--color-background));
-      border: 2px solid rgb(var(--color-background));
+      border: {{ settings.buttons_border_thickness | plus: 1 }}px solid rgb(var(--color-background));
     }
 
     .featured-collection-button-text-container {
@@ -1036,6 +1103,18 @@
     /* pointer-events: auto; */
   }
 
+  .product-image, .fc-product-image, .product-image-wrapper{
+      width: 440px;
+      height: 530px;
+    }
+
+  @media (max-width: 1025px){
+    .product-image, .fc-product-image, .product-image-wrapper{
+      width: 350px;
+      height: 420px;
+    }
+  }
+
     @media (max-width: 768px) {
       .collection-filters {
         gap: 5px;
@@ -1045,11 +1124,11 @@
       .collection-btn {
         padding: 0 6px !important;
         border: none !important;
-        border-radius: 4px !important;
+        border-radius: {{ settings.buttons_radius |  minus: 1 }}px; !important;
         background: rgba(199, 199, 199, 0.9) !important;
-        font-size: 14px !important;
+        font-size: 12px !important;
         min-width: fit-content !important;
-        height: 24px !important;
+        height: 22px !important;
         text-transform: uppercase;
       }
 
@@ -1106,11 +1185,6 @@
         padding-top: {{ section.settings.padding_top }}px;
       }
 
-      .fc-product-image {
-        width: 225px !important;
-        height: 277px !important;
-      }
-
       .fc-price{
         margin-top: -6px
       }
@@ -1137,12 +1211,6 @@
         display: none !important;
         opacity: 0 !important;
         visibility: hidden !important;
-      }
-    }
-
-    @media (max-width: 425px) {
-      .featured-collection-subheading {
-        /* margin-top: -10px; */
       }
     }
 
@@ -1222,7 +1290,7 @@
       "info": "If enabled, the heading will animate letter by letter when it comes into view."
     },
     {
-      "type": "richtext",
+      "type": "text",
       "id": "description",
       "label": "Description",
       "default": "<p>Browse our featured products</p>"
@@ -1262,6 +1330,12 @@
       "step": 1,
       "unit": "px",
       "default": 15
+    },
+    {
+      "type": "checkbox",
+      "id": "arrow_on_hover",
+      "label": "Show arrows only on hover",
+      "default": false
     }
   ],
   "blocks": [

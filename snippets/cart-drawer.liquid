@@ -16,15 +16,15 @@
     visibility: hidden;
   }
   @media only screen and (max-width: 600px) {
-    .vertical-text-container {
+    .vertical-text-cart-drawer-container {
       width: 25px !important;
     }
-    .vertical-text {
+    .vertical-text-cart-drawer {
       font-size: 15px !important;
       padding: 0px 0 !important;
     }
   }
-  .vertical-text-container {
+  .vertical-text-cart-drawer-container {
     position: fixed;
     left: 0px;
     top: 0;
@@ -36,19 +36,35 @@
     border: 1px solid black;
   }
 
-  .vertical-text {
+  .vertical-text-cart-drawer {
     position: absolute;
     writing-mode: vertical-rl;
     text-orientation: mixed;
     transform: rotate(180deg);
-    animation: scrollText 15s linear infinite !important;
-    color: #000;
+    animation: scrollText {{ settings.scroll_speed }}s linear infinite !important;
+    color: black !important;
     font-size: 24px;
     white-space: nowrap;
   }
 
-  .vertical-text:nth-child(2) {
-    animation: scrollText2 15s linear infinite !important;
+  .vertical-text-cart-drawer:nth-child(2) {
+    animation: scrollText2 {{ settings.scroll_speed }}s linear infinite !important;
+  }
+
+  .vertical-text-cart-drawer .separator-image {
+    width: 20px;
+    height: 20px;
+    object-fit: contain;
+    margin: 0 5px;
+    display: inline-block;
+    vertical-align: middle;
+  }
+
+  @media only screen and (max-width: 600px) {
+    .vertical-text-cart-drawer .separator-image {
+      width: 15px;
+      height: 15px;
+    }
   }
 
   @keyframes scrollText {
@@ -115,16 +131,47 @@
       aria-label="{{ 'sections.cart.title' | t }}"
       tabindex="-1"
     >
-      <div class="vertical-text-container">
-        <div class="vertical-text">
-          {{ settings.vertical_scroll_text }} STAY TRUE → KEEP GOING → FIND THE BALANCE → STAY TRUE → KEEP GOING → FIND
-          THE BALANCE → STAY TRUE → KEEP GOING → FIND THE BALANCE →
+      <div class="vertical-text-cart-drawer-container">
+        <div class="vertical-text-cart-drawer">
+          {% if settings.vertical_scroll_image %}
+            {% assign text_parts = settings.vertical_scroll_text | split: '→' %}
+            {% for part in text_parts %}
+              {{ part | strip }}
+              {% unless forloop.last %}
+                <img
+                  src="{{ settings.vertical_scroll_image | image_url: width: 40 }}"
+                  alt="Separator"
+                  class="separator-image"
+                  width="100"
+                  height="100"
+                >
+              {% endunless %}
+            {% endfor %}
+          {% else %}
+            {{ settings.vertical_scroll_text }}
+          {% endif %}
         </div>
-        <div class="vertical-text">
-          {{ settings.vertical_scroll_text }} STAY TRUE → KEEP GOING → FIND THE BALANCE → STAY TRUE → KEEP GOING → FIND
-          THE BALANCE → STAY TRUE → KEEP GOING → FIND THE BALANCE →
+        <div class="vertical-text-cart-drawer">
+          {% if settings.vertical_scroll_image %}
+            {% assign text_parts = settings.vertical_scroll_text | split: '→' %}
+            {% for part in text_parts %}
+              {{ part | strip }}
+              {% unless forloop.last %}
+                <img
+                  src="{{ settings.vertical_scroll_image | image_url: width: 40 }}"
+                  alt="Separator"
+                  class="separator-image"
+                  width="100"
+                  height="100"
+                >
+              {% endunless %}
+            {% endfor %}
+          {% else %}
+            {{ settings.vertical_scroll_text }}
+          {% endif %}
         </div>
       </div>
+
       {%- if cart == empty -%}
         <div class="drawer__inner-empty">
           <div class="cart-drawer__warnings center{% if settings.cart_drawer_collection != blank %} cart-drawer__warnings--has-collection{% endif %}">
@@ -708,16 +755,39 @@
               </div>
             </label>
             <label class="pricing-option !text-[1.5rem] border-b py-2 flex items-center justify-center gap-3 ">
-              <input type="radio" name="pricing" value="member">
+              <input id="subscribe-radio" type="radio" name="pricing" value="member">
               <div class="flex justify-between w-full">
-                <span>BECOME A MEMBER AND SAVE 10%</span>
+                <span>SUBSCRIBE AND SAVE 10%</span>
                 <span>${{ cart.total_price | times: 0.9 | money_without_currency }}</span>
               </div>
             </label>
+            <div id="subscribe-form" style="display:none; margin-top: 10px; ">
+              <input
+                type="email"
+                id="subscribe-email"
+                placeholder="Enter your email"
+                style="padding: 8px; border: 1px solid #ccc; border-radius: 4px; "
+              >
+              <button
+                type="button"
+                id="subscribe-btn"
+                style="padding: 5px 10px; background: #000; color: #fff; border: none; margin-top:10px; border-radius: 4px; display:flex; align-items:center; text-transform: uppercase; font-weight: bold; font-size: 2rem;"
+              >
+                <svg
+                  width="20"
+                  height="20"
+                  class="!mr-2"
+                  viewBox="0 0 9 9"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path d="M1.1875 7.7334H7.6599M7.6599 7.7334V1.261M7.6599 7.7334L1.1875 1.261" stroke="white" stroke-linejoin="round"/>
+                </svg>
+                &nbsp; Subscribe
+              </button>
+            </div>
           </div>
         </div>
-
-        <!-- CTAs -->
 
         <div class="cart__ctas" {{ block.shopify_attributes }}>
           <button
@@ -740,3 +810,58 @@
     </div>
   </div>
 </cart-drawer>
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    var subscribeRadio = document.getElementById('subscribe-radio');
+    var regularRadio = document.querySelector('input[name="pricing"][value="regular"]');
+    var subscribeForm = document.getElementById('subscribe-form');
+    var subscribeBtn = document.getElementById('subscribe-btn');
+    var subscribeEmail = document.getElementById('subscribe-email');
+
+    function toggleSubscribeForm() {
+      if (subscribeRadio.checked) {
+        subscribeForm.style.display = 'block';
+      } else {
+        subscribeForm.style.display = 'none';
+      }
+    }
+
+    if (subscribeRadio && subscribeForm) {
+      subscribeRadio.addEventListener('change', toggleSubscribeForm);
+      if (regularRadio) {
+        regularRadio.addEventListener('change', toggleSubscribeForm);
+      }
+      // Initial state
+      toggleSubscribeForm();
+    }
+
+    if (subscribeBtn && subscribeEmail) {
+      subscribeBtn.addEventListener('click', function () {
+        var email = subscribeEmail.value.trim();
+        if (!email) {
+          alert('Please enter a valid email address.');
+          return;
+        }
+        // Ajax POST to Shopify newsletter endpoint
+        fetch('/contact', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+          },
+          body: 'form_type=newsletter&contact[email]=' + encodeURIComponent(email) + '&utf8=✓',
+        })
+          .then(function (response) {
+            if (response.ok) {
+              alert('Thank you for subscribing!');
+              subscribeEmail.value = '';
+            } else {
+              alert('There was a problem subscribing. Please try again.');
+            }
+          })
+          .catch(function () {
+            alert('There was a problem subscribing. Please try again.');
+          });
+      });
+    }
+  });
+</script>

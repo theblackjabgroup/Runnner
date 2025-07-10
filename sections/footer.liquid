@@ -2,7 +2,6 @@
 {{ 'component-newsletters.css' | asset_url | stylesheet_tag }}
 
 <style>
- 
   .sr-only {
     position: absolute;
     width: 1px;
@@ -21,45 +20,156 @@
     outline: 2px solid #4d90fe;
     outline-offset: 2px;
   }
-  /* Mobile-only margin-left */
-.mobile-ml-10 {
-  margin-left: 10px;
-}
-
-@media (min-width: 480px) {
+  
+  /* Enhanced mobile-only margin-left with more breakpoints */
   .mobile-ml-10 {
-    margin-left: 0px; /* Override on md and up */
+    margin-left: 10px;
   }
-}
+
+  @media (min-width: 480px) {
+    .mobile-ml-10 {
+      margin-left: 0px;
+    }
+  }
+
+  @media (min-width: 640px) {
+    .mobile-ml-10 {
+      margin-left: 0px;
+    }
+  }
 
   .mobile-ml-150 {
-  margin-left: 10px;
-}
-
-@media (min-width: 480px) {
-  .mobile-ml-10 {
-    margin-left: -10px; /* match md and larger value */
+    margin-left: 10px;
   }
-}
 
+  @media (min-width: 480px) {
+    .mobile-ml-150 {
+      margin-left: -10px;
+    }
+  }
 
-.hover-icon-button:hover  {
-  fill: #000000; /* Change to black on hover */
-}
+  @media (min-width: 640px) {
+    .mobile-ml-150 {
+      margin-left: -5px;
+    }
+  }
+
+  .hover-icon-button:hover {
+    fill: #000000;
+  }
   
   footer .heading-font {
     font-family: var(--font-heading-family);
     font-style: var(--font-heading-style);
+    color: {{ section.settings.menu_item_color }};
   }
 
   footer .body-font {
     font-family: var(--font-body-family);
     font-style: var(--font-body-style);
+    color: {{ section.settings.menu_item_color }};
+  }
+
+  /* All footer text elements except email input */
+  footer p,
+  footer a,
+  footer span,
+  footer div {
+    color: {{ section.settings.menu_item_color }} !important;
+  }
+
+  /* Specific overrides for input and button text */
+  footer .email-input12 {
+    color: {{ section.settings.email_input_color | default: '#FFFFFF' }} !important;
+    border-color: {{ section.settings.email_input_color | default: '#FFFFFF' }};
+  }
+
+  footer .email-input12::placeholder {
+    color: {{ section.settings.email_input_color | default: '#FFFFFF' }} !important;
+  }
+
+  footer .signup-button {
+    color: {{ section.settings.menu_item_color }} !important;
   }
 
   :root {
     --cr-yellow-2: #d68c00;
     --cr-yellow-1: #c9c3ad;
+  }
+  
+  /* Animated Background Effect */
+  .animated-footer-background {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-size: 120% 120%;
+    background-position: center;
+    background-repeat: no-repeat;
+    animation: backgroundMove 10s linear infinite;
+    z-index: 1;
+  }
+  
+  /* Solid black background when no image */
+  .animated-footer-background.no-image {
+    background: #000000 !important;
+    animation: none;
+  }
+  
+  @keyframes backgroundMove {
+    0% {
+      background-position: 0% 0%;
+      background-size: 120% 120%;
+    }
+    25% {
+      background-position: 100% 0%;
+      background-size: 125% 125%;
+    }
+    50% {
+      background-position: 100% 100%;
+      background-size: 120% 120%;
+    }
+    75% {
+      background-position: 0% 100%;
+      background-size: 115% 115%;
+    }
+    100% {
+      background-position: 0% 0%;
+      background-size: 120% 120%;
+    }
+  }
+  
+  .animated-grain {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: var(--inputs-border-opacity);
+    background: rgba(0, 0, 0, 0.3);
+    pointer-events: none;
+    animation: grainMove 0.5s linear infinite;
+    z-index: 2;
+  }
+  
+  @keyframes grainMove {
+    0%, 100% { transform: translate(0, 0); }
+    10% { transform: translate(-1px, -1px); }
+    20% { transform: translate(1px, -1px); }
+    30% { transform: translate(-1px, 1px); }
+    40% { transform: translate(1px, 1px); }
+    50% { transform: translate(-1px, -1px); }
+    60% { transform: translate(1px, -1px); }
+    70% { transform: translate(-1px, 1px); }
+    80% { transform: translate(1px, 1px); }
+    90% { transform: translate(-1px, -1px); }
+  }
+  
+  /* Footer content positioning */
+  .footer-content {
+    position: relative;
+    z-index: 3;
   }
   
   .email-input.error {
@@ -73,34 +183,100 @@
   }
 
   .success-message {
-    color: green;
+    color: {{ section.settings.menu_item_color }};
     font-weight: bold;
   }
 
-  /* Added styling for social icons in support section */
+  /* Enhanced responsive social icons in support section */
   .support-social-icons {
     display: flex;
     margin-top: 60px;
     gap: 10px;
+    align-items: center;
   }
- 
 
-  @media screen and (max-width: 767px) {
+  @media screen and (max-width: 375px) {
+    .support-social-icons {
+      margin-top: 15px;
+      gap: 8px;
+    }
+  }
+
+  @media screen and (min-width: 376px) and (max-width: 480px) {
+    .support-social-icons {
+      margin-top: 18px;
+      gap: 9px;
+    }
+  }
+
+  @media screen and (min-width: 481px) and (max-width: 767px) {
     .support-social-icons {
       margin-top: 20px;
     }
   }
-  
-  /* Newsletter Form Styling */
+
+  @media screen and (min-width: 768px) and (max-width: 1023px) {
+    .support-social-icons {
+      margin-top: 40px;
+    }
+  }
+
+  @media screen and (min-width: 1024px) {
+    .support-social-icons {
+      margin-top: 40px;
+    }
+  }
+
+  /* Fixed Social Icons Hover Effect */
+  .support-social-icons .social-icon {
+    transition: all 0.3s ease;
+  }
+
+  .support-social-icons .social-icon:hover svg {
+    fill: {{ section.settings.hover_color | default: '#808080' }} !important;
+  }
+
+  .support-social-icons .social-icon:hover {
+    color: {{ section.settings.hover_color | default: '#808080' }} !important;
+  }
+
+  /* Ensure the SVG inherits the color properly */
+  .support-social-icons .social-icon svg {
+    fill: {{ section.settings.menu_item_color }};
+    transition: fill 0.3s ease;
+  }
+
+  /* Enhanced responsive Newsletter Form Styling */
   .email-signup-section {
     padding: 20px;
     text-align: center;
     width: 100%;
     box-sizing: border-box;
   }
-  
-  
- 
+
+  @media screen and (max-width: 375px) {
+    .email-signup-section {
+      padding: 15px;
+    }
+  }
+
+  @media screen and (min-width: 376px) and (max-width: 480px) {
+    .email-signup-section {
+      padding: 18px;
+    }
+  }
+
+  @media screen and (min-width: 481px) and (max-width: 767px) {
+    .email-signup-section {
+      padding: 20px;
+    }
+  }
+
+  @media screen and (min-width: 768px) {
+    .email-signup-section {
+      padding: 25px;
+    }
+  }
   
   /* Text span inside signup button */
   .signup-button span {
@@ -108,15 +284,20 @@
     display: flex;
     align-items: center;
     height: 100%;
+    color: {{ section.settings.menu_item_color }} !important;
   }
   
   /* Hover effect for signup button */
-  .signup-button:hover  {
+  .signup-button:hover {
     background-color: white;
-    color: black; 
+    color: black !important; 
+  }
+
+  .signup-button:hover span {
+    color: black !important;
   }
   
- .arrow-hover {
+  .arrow-hover {
     display: inline-block;
   }
 
@@ -126,13 +307,12 @@
     height: 80px;
     transition: transform 0.3s ease, stroke 0.3s ease, fill 0.3s ease;
     transform: rotate(-10deg);
-    margin-left:10px
+    margin-left: 10px;
   }
 
   .arrow-wrapper svg path {
-    fill: white;
-    stroke: white;
-    stroke-width: 1.0; /* bold effect */
+    fill: {{ section.settings.menu_item_color }};
+    stroke: {{ section.settings.menu_item_color }};
     transition: fill 0.3s ease, stroke 0.3s ease;
   }
 
@@ -156,85 +336,260 @@
     stroke: black;
   }
 
-  /* Media Query for smaller screens */
-  @media (max-width: 768px) {
-    .email-input12
-    {
-      font-size: 30px;
-      height: 60px; 
-      line-height: 60px; 
+  /* Enhanced responsive media queries for email input and button */
+  @media screen and (max-width: 375px) {
+    .email-input12 {
+      font-size: 28px;
+      height: 50px; 
+      line-height: 50px;
+      width: 110%;
+      margin-left: -20px;
     } 
-.signup-button{
-    font-size: 45px;
-      height: 60px;
-}
-  } 
-  /* Media Query for very small screens */
-  @media (max-width: 480px) {
+    .signup-button {
+      font-size: 35px;
+      height: 50px;
+      line-height: 50px;
+      width: 110%;
+      margin-left: -20px;
+      justify-content: space-around !important;
+    }
+    .arrow-wrapper {
+      width: 30px;  
+      height: 30px !important;
+     margin-bottom:-3px;
+    }
+  }
+
+  @media screen and (min-width: 376px) and (max-width: 480px) {
     .email-input12 {
       font-size: 30px;
-      height: 45px;
-      line-height: 50px; 
-      width: 122%; 
-      margin-left: -32px; 
+      height: 55px; 
+      line-height: 55px;
+      width: 115%;
+      margin-left: -25px;
+    } 
+    .signup-button {
+      font-size: 38px;
+      height: 55px;
+      line-height: 55px;
+      width: 115%;
+      margin-left: -25px;
+      justify-content: space-around !important;
     }
-     .signup-button{
-       font-size: 40px;
-      height: 53px;
-      line-height: 55px; 
-      width: 122%; 
-      margin-left: -32px; 
-     }
-
-     .arrow-wrapper {
-    width: 35px;  
-    height: 35px;
-           margin-top: 15px;
+    .arrow-wrapper {
+      width: 32px;  
+      height: 32px !important;
+      align-item:center;
+    }
   }
+
+  @media screen and (min-width: 481px) and (max-width: 640px) {
+    .email-input12 {
+      font-size: 32px;
+      height: 60px; 
+      line-height: 60px;
+      width: 118%;
+      margin-left: -28px;
+    } 
+    .signup-button {
+      font-size: 40px;
+      height: 60px;
+      line-height: 60px;
+      width: 118%;
+      margin-left: -28px;
+      justify-content: space-around !important;
+    }
+    .arrow-wrapper {
+      width: 35px;  
+      height: 35px !important;
+      align-item:center;
+    }
+  }
+
+  @media screen and (min-width: 641px) and (max-width: 767px) {
+    .email-input12 {
+      font-size: 34px;
+      height: 65px; 
+      line-height: 65px;
+      width: 120%;
+      margin-left: -30px;
+    } 
+    .signup-button {
+      font-size: 42px;
+      height: 65px;
+      line-height: 65px;
+      width: 120%;
+      margin-left: -30px;
+      justify-content: space-around !important;
+    }
+    .arrow-wrapper {
+      width: 40px;  
+      height: 40px !important;
+      align-item:center;
+    }
+  }
+
+  @media screen and (min-width: 768px) and (max-width: 1023px) {
+    .email-input12 {
+      font-size: 36px;
+      height: 70px; 
+      line-height: 70px;
+    } 
+    .signup-button {
+      font-size: 80px;
+      height: 100px;
+      line-height: 70px;
+    }
+    .arrow-wrapper {
+      width: 50px;  
+      height: 50px !important;
+     align-item:center;
+    }
+  }
+
+  @media screen and (min-width: 1024px) and (max-width: 1295px) {
+    .email-input12 {
+      font-size: 100px;
+      height: 100px; 
+      line-height: 75px;
+    } 
+    .signup-button {
+      font-size: 100px;
+      height: 100px;
+      line-height: 75px;
+    }
+    .arrow-wrapper {
+      width: 60px;  
+      height: 60px !important;
+      align-item:center;
+    }
+  }
+
+  @media screen and (min-width: 1296px) {
+    .email-input12 {
+      font-size: 100px;
+      height: 100px; 
+      line-height: 80px;
+    } 
+    .signup-button {
+      font-size: 100px;
+      height: 100px;
+      line-height: 80px;
+    }
+    .arrow-wrapper {
+      width: 70px;  
+      height: 70px !important;
+      align-item:center;
+    }
   }
   
   /* Form success message styling */
   .newsletter-form__message--success {
-    color: #FFFFFF;
+    color: {{ section.settings.menu_item_color }};
     padding: 15px;
     margin: 10px 0;
-    border-radius: 4px;
+    border-radius: var(--inputs-radius);
+
     background-color: inherit;
   }
   
   .newsletter-form__message--error {
-    color: #FFFFFF;
+    color: {{ section.settings.menu_item_color }};
     padding: 15px;
     margin: 10px 0;
-    border-radius: 4px;
+    border-radius: var(--inputs-radius);
+
     background-color: inherit;
   }
-@media screen and (min-width: 1024px) {
-  .desktop-ml-15 {
-    margin-left: 15px;
-  }
-}
 
+  /* Enhanced responsive desktop margins */
+  @media screen and (min-width: 1024px) {
+    .desktop-ml-15 {
+      margin-left: 15px;
+    }
+  }
+
+  @media screen and (min-width: 1200px) {
+    .desktop-ml-15 {
+      margin-left: 18px;
+    }
+  }
+
+  @media screen and (min-width: 1400px) {
+    .desktop-ml-15 {
+      margin-left: 20px;
+    }
+  }
+
+  /* Enhanced responsive custom margins */
   @media (min-width: 768px) {
     .custom-mr-25 {
       margin-right: 25px;
     }
 
-      .custom-nav-mr-25 {
+    .custom-nav-mr-25 {
       margin-right: 15px;
       margin-left: 0;
-        padding-bottom:10px;
+      padding-bottom: 10px;
     }
   }
 
-  /* Updated Logo Container Styling */
+  @media (min-width: 1024px) {
+    .custom-mr-25 {
+      margin-right: 30px;
+    }
+
+    .custom-nav-mr-25 {
+      margin-right: 20px;
+      padding-bottom: 12px;
+    }
+  }
+
+  @media (min-width: 1200px) {
+    .custom-mr-25 {
+      margin-right: 35px;
+    }
+
+    .custom-nav-mr-25 {
+      margin-right: 25px;
+      padding-bottom: 15px;
+    }
+  }
+
+  /* Enhanced responsive Logo Container Styling */
   .logo-container {
     width: 100%;
     margin-top: 20px;
     padding-left: 30px;
+    padding-bottom: 20px;
     order: 2;
     display: flex;
     align-items: flex-start;
+    overflow: visible;
+  }
+
+  @media screen and (max-width: 375px) {
+    .logo-container {
+      padding-left: 20px;
+      padding-bottom: 15px;
+      margin-top: 15px;
+    }
+  }
+
+  @media screen and (min-width: 376px) and (max-width: 480px) {
+    .logo-container {
+      padding-left: 25px;
+      padding-bottom: 18px;
+      margin-top: 18px;
+    }
+  }
+
+  @media screen and (min-width: 481px) and (max-width: 767px) {
+    .logo-container {
+      padding-left: 30px;
+      padding-bottom: 20px;
+      margin-top: 20px;
+    }
   }
 
   @media (min-width: 768px) {
@@ -244,16 +599,72 @@
       margin-left: 10px;
       order: 1;
       padding-top: 0;
+      padding-bottom: 30px;
     }
   }
 
-  /* Logo image styling - adjust height to match menu area */
+  @media (min-width: 1024px) {
+    .logo-container {
+      width: 65%;
+      margin-left: 15px;
+      padding-bottom: 35px;
+    }
+  }
+
+  @media (min-width: 1200px) {
+    .logo-container {
+      width: 70%;
+      margin-left: 20px;
+      padding-bottom: 40px;
+    }
+  }
+
+  /* Enhanced responsive logo image styling */
   .logo-container img {
     width: 100%;
     max-width: 570px;
-    height: 75px;
+    height: auto;
+    min-height: 75px;
     object-fit: contain;
+    object-position: center top;
     transform: scale(1.12);
+    margin-bottom: 15px;
+  }
+
+  @media screen and (max-width: 375px) {
+    .logo-container img {
+      margin-left: -29px !important;
+      margin-bottom: 8px !important;
+      width: 370px !important;
+      transform: scale(1.0);
+    }
+  }
+
+  @media screen and (min-width: 376px) and (max-width: 480px) {
+    .logo-container img {
+      margin-left: -22px !important;
+      margin-bottom: 10px !important;
+      width: 400px !important;
+      transform: scale(1.05);
+    }
+  }
+
+  @media screen and (min-width: 481px) and (max-width: 640px) {
+    .logo-container img {
+      margin-left: -20px !important;
+      margin-bottom: 12px !important;
+      width: 450px !important;
+      transform: scale(1.08);
+    }
+  }
+
+  @media screen and (min-width: 641px) and (max-width: 767px) {
+    .logo-container img {
+      margin-left: -18px !important;
+      margin-bottom: 15px !important;
+      width: 500px !important;
+      transform: scale(1.10);
+    }
   }
 
   @media (min-width: 768px) {
@@ -270,31 +681,76 @@
       max-height: 140px;
       margin-top: 0px;
       transform: scale(1.45);
-      margin-left:60px;
-      margin-top:2px;
+      margin-left: 60px;
+      margin-top: 2px;
     }
   }
-  @media (max-width: 480px){
 
-    .logo-container img{
-      margin-left: -35px;
-    margin-bottom: 10px;
+  @media (min-width: 1200px) {
+    .logo-container img {
+      max-height: 150px;
+      transform: scale(1.50);
+      margin-left: 70px;
     }
-    
-    
   }
-  /* Text logo styling (when no image is used) */
-  .logo-container .text-white {
+
+  @media (min-width: 1400px) {
+    .logo-container img {
+      max-height: 160px;
+      transform: scale(1.55);
+      margin-left: 80px;
+    }
+  }
+  
+  /* Enhanced responsive text logo styling */
+  .logo-container .text-logo {
     margin-left: 0px;
     font-size: 50px;
     transform: scale(1.5);
     line-height: 1.2;
     margin-top: 0;
+    color: {{ section.settings.menu_item_color }} !important;
   }
+
+  @media screen and (max-width: 375px) {
+    .logo-container .text-logo {
+      font-size: 35px;
+      transform: scale(1.2);
+    }
+  }
+
+  @media screen and (min-width: 376px) and (max-width: 480px) {
+    .logo-container .text-logo {
+      font-size: 40px;
+      transform: scale(1.3);
+    }
+  }
+
+  @media screen and (min-width: 481px) and (max-width: 767px) {
+    .logo-container .text-logo {
+      font-size: 45px;
+      transform: scale(1.4);
+    }
+  }
+  
   @media (min-width: 768px) {
-    .logo-container .text-white {
+    .logo-container .text-logo {
       transform: scale(1.5);
       margin-top: 0;
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .logo-container .text-logo {
+      font-size: 55px;
+      transform: scale(1.6);
+    }
+  }
+
+  @media (min-width: 1200px) {
+    .logo-container .text-logo {
+      font-size: 60px;
+      transform: scale(1.7);
     }
   }
 
@@ -309,126 +765,244 @@
       margin-top: 0;
     }
   }
+
+  /* Enhanced responsive breakpoint for arrow and logo */
+  @media screen and (max-width: 1295px) {
+    .arrow-wrapper {
+      height: 69px;
+    }
+    .logo-container img {
+      width: 470px; 
+      margin-left: 40px;
+    }
+  }
+
+  @media screen and (min-width: 1296px) and (max-width: 1399px) {
+    .arrow-wrapper {
+      height: 72px;
+    }
+    .logo-container img {
+      width: 550px; 
+      margin-left: 50px;
+    }
+  }
+
+  @media screen and (min-width: 1400px) {
+    .arrow-wrapper {
+      height: 75px;
+    }
+    .logo-container img {
+      width: 510px; 
+      margin-left: 50px;
+    }
+  }
+
+  /* Enhanced responsive support section text */
+  .support-section-text {
+    font-size: 15px;
+  }
+
+  @media screen and (max-width: 375px) {
+    .support-section-text {
+      font-size: 13px;
+    }
+  }
+
+  @media screen and (min-width: 376px) and (max-width: 480px) {
+    .support-section-text {
+      font-size: 14px;
+    }
+  }
+
+  @media screen and (min-width: 481px) and (max-width: 767px) {
+    .support-section-text {
+      font-size: 15px;
+    }
+  }
+
+  @media screen and (min-width: 768px) {
+    .support-section-text {
+      font-size: 22px;
+    }
+  }
+
+  @media screen and (min-width: 1024px) {
+    .support-section-text {
+      font-size: 24px;
+    }
+  }
+
+  @media screen and (min-width: 1200px) {
+    .support-section-text {
+      font-size: 26px;
+    }
+  }
+
+  /* Enhanced responsive menu section */
+  .menu-section {
+    margin-left: -10px;
+  }
+
+  @media screen and (max-width: 375px) {
+    .menu-section {
+      margin-left: -5px;
+    }
+  }
+
+  @media screen and (min-width: 376px) and (max-width: 480px) {
+    .menu-section {
+      margin-left: -7px;
+    }
+  }
+
+  @media screen and (min-width: 481px) and (max-width: 767px) {
+    .menu-section {
+      margin-left: -8px;
+    }
+  }
+
+  @media screen and (min-width: 768px) {
+    .menu-section {
+      margin-left: -10px;
+    }
+  }
+
+  @media screen and (min-width: 1024px) {
+    .menu-section {
+      margin-right: 20px;
+    }
+  }
+
+  @media screen and (min-width: 1200px) {
+    .menu-section {
+      margin-right: 20px;
+    }
+  }
 </style>
 
+
 <footer
-  class="color-{{ section.settings.color_scheme }} bg-black text-white p-4 sm:px-6 md:px-8 md:py-8"
+  class="color-{{ section.settings.color_scheme }}p-4 sm:px-6 md:px-8 md:py-8 relative overflow-hidden"
+
   style="
     padding-top: {{ section.settings.padding_top }}px;
     padding-bottom: {{ section.settings.padding_bottom }}px;
     margin-top: {{ section.settings.margin_top }}px;
     margin-bottom: {{ section.settings.margin_bottom }}px;
+    background: #000;
   "
   role="contentinfo"
 >
-  {% for block in section.blocks %}
-    <div class="w-full">
-      {% case block.type %}
-        {% when 'email_signup' %}
-          <div
-            class="email-signup-section {% if section.settings.color_scheme != blank %}color-{{ section.settings.color_scheme }}{% endif %}"
-            {{ block.shopify_attributes }}
-          >
-            {% form 'customer', id: 'email-signup-form', class: 'email-signup-container newsletter-form' %}
-              <input type="hidden" name="contact[tags]" value="newsletter">
-              <input type="hidden" name="form_type" value="customer">
-              
-              <div 
-                id="message-container" 
-                class="message-container"
-                style="display: none;"
-                aria-live="polite" 
-                role="status"
-              >
-                <div class="newsletter-form__message--success">
-                  {{ 'newsletter.success' | t | default: 'Thanks for signing up!' }}
-                </div>
-              </div>
-
-              <div id="form-fields-container12" class="form-fields-container12">
-                <label for="email-input12" class="sr-only">
-                  {{- block.settings.email_placeholder | default: 'EMAIL' -}}
-                </label>
-                <input
-                  type="email"
-                  id="email-input12"
-                  name="contact[email]"
-                  class="email-input12 body-font"
-                  placeholder="{{ block.settings.email_placeholder | default: 'EMAIL' }}"
-                  required
-                  autocomplete="email"
-                  aria-required="true"
-                >
-           <button
-  type="submit"
-  class="signup-button body-font newsletter-form__button hover-icon-button"
-  aria-label="{{ block.settings.button_text | default: 'SIGN ME UP' }}"
-  name="commit"
->
-<div class="arrow-hover">
-  <div class="arrow-wrapper">
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 10">
-      <path d="M1.1875 7.7334H7.6599M7.6599 7.7334V1.261M7.6599 7.7334L1.1875 1.261" stroke-linecap="round" >
-    </svg>
+  <!-- Animated Background Effect -->
+  <div class="animated-footer-background {% if section.settings.background_image == blank %}no-image{% endif %}"
+       {% if section.settings.background_image != blank %}
+         style="background-image: url('{{ section.settings.background_image | img_url: 'master' }}');"
+       {% endif %}>
   </div>
-</div>
+  <div class="animated-grain"></div>
+  
+  <!-- Footer Content -->
+  <div class="footer-content">
+    {% for block in section.blocks %}
+      <div class="w-full">
+        {% case block.type %}
+          {% when 'email_signup' %}
+            <div
+              class="email-signup-section"
+              {{ block.shopify_attributes }}
+            >
+              {% form 'customer', id: 'email-signup-form', class: 'email-signup-container newsletter-form' %}
+                <input type="hidden" name="contact[tags]" value="newsletter">
+                <input type="hidden" name="form_type" value="customer">
+                
+                <div 
+                  id="message-container" 
+                  class="message-container"
+                  style="display: none;"
+                  aria-live="polite" 
+                  role="status"
+                >
+                  <div class="newsletter-form__message--success">
+                    {{ 'newsletter.success' | t | default: 'Thanks for signing up!' }}
+                  </div>
+                </div>
 
-  <span>{{ block.settings.button_text | default: 'SIGN ME UP' }}</span>
-</button>
+                <div id="form-fields-container12" class="form-fields-container12">
+                  <label for="email-input12" class="sr-only">
+                    {{- block.settings.email_placeholder | default: 'EMAIL' -}}
+                  </label>
+                  <input
+                    type="email"
+                    id="email-input12"
+                    name="contact[email]"
+                    class="email-input12 body-font"
+                    placeholder="{{ block.settings.email_placeholder | default: 'EMAIL' }}"
+                    required
+                    autocomplete="email"
+                    aria-required="true"
+                  >
+                  <button
+                    type="submit"
+                    class="signup-button body-font newsletter-form__button hover-icon-button"
+                    aria-label="{{ block.settings.button_text | default: 'SIGN ME UP' }}"
+                    name="commit"
+                  >
+                    <div class="arrow-hover">
+                      <div class="arrow-wrapper">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 10">
+                          <path d="M1.1875 7.7334H7.6599M7.6599 7.7334V1.261M7.6599 7.7334L1.1875 1.261" stroke-linecap="round">
+                        </svg>
+                      </div>
+                    </div>
+                    <span>{{ block.settings.button_text | default: 'SIGN ME UP' }}</span>
+                  </button>
+                </div>
+              {% endform %}
+            </div>
 
-              </div>
-            {% endform %}
-          </div>
+          {% when 'support' %}
+            <div class="w-1/2 md:w-full flex pr-1 md:pr-2 mt-[0px] md:mt-[1%] justify-end desktop-ml-15">
+              <div style="margin-left: 5px;" class="mb-6 w-[350px] md:max-w-[50%] custom-mr-25 md:ml-0" {{ block.shopify_attributes }}>
 
-
-
-        {% when 'support' %}
-          <div class="w-1/2 md:w-full flex pr-1 md:pr-2 mt-[0px] md:mt-[1%] justify-end desktop-ml-15">
-
-            <div class="mb-6 w-[350px] md:max-w-[50%] custom-mr-25" {{ block.shopify_attributes }}>
-              <p class="uppercase md:normal-case font-medium text-[15px] md:text-[22px] break-words text-left text-white heading-font"
-   style="word-wrap: break-word; overflow-wrap: break-word; margin-bottom: 13px;">
+               <p class="uppercase md:normal-case font-medium text-[15px] md:text-[22px] break-words text-left heading-font"
+   style="word-wrap: break-word; overflow-wrap: break-word; margin-bottom: 15px; margin-top: -3px; color: {{ section.settings.menu_item_color }}; line-height: normal;">
   {{ block.settings.support_heading }}
 </p>
 
-              <p class="md:normal-case mt-1 text-[15px] md:text-[22px] break-words text-left text-white leading-tight body-font" style="word-wrap: break-word; overflow-wrap: break-word; line-height: 1.3;">
-                {{ block.settings.support_text }}
-              </p>
-           <a
-  href="mailto:{{ block.settings.email_address }}"
-  class="relative mt-2 inline-block text-white text-[15px] md:text-[22px] uppercase md:normal-case animated-underline break-words group body-font"
-  style="word-wrap: break-word; overflow-wrap: break-word;  margin-top: 15px;"
->
-  {{ block.settings.email_link_text }}
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    width="20"
-    height="20"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="white"
-    stroke-width="2"
-    stroke-linecap="round"
-    stroke-linejoin="round"
-    style="display: inline-block;vertical-align: middle;margin-left: -17px;height: 50px;margin-bottom: -18px;width: 30px; rotate:80deg;"
-  >
-     <path d="M7.47241 7.47241L7.47241 1.00001M7.47241 1.00001L1.00001 1.00001M7.47241 1.00001L1.00001 7.47241" stroke="white" stroke-linejoin="round"></path>
-    
-  </svg>
-</a>
+                <p class="md:normal-case mt-1 text-[15px] md:text-[22px] break-words text-left leading-tight body-font" 
+                   style="word-wrap: break-word; overflow-wrap: break-word; line-height: 1.3; color: {{ section.settings.menu_item_color }};">
+                  {{ block.settings.support_text }}
+                </p>
+                
+                <a
+                  href="mailto:{{ block.settings.email_address }}"
+                  class="relative mt-2 inline-block text-[15px] md:text-[22px] uppercase md:normal-case animated-underline break-words group body-font"
+                  style="word-wrap: break-word; overflow-wrap: break-word; margin-top: 15px; color: {{ section.settings.menu_item_color }};"
+                >
+                  {{ block.settings.email_link_text }}
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="20"
+                    height="20"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="{{ section.settings.menu_item_color }}"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    style="display: inline-block;vertical-align: middle;margin-left: -17px;height: 50px;margin-bottom: -18px;width: 30px; rotate:80deg;"
+                  >
+                    <path d="M7.47241 7.47241L7.47241 1.00001M7.47241 1.00001L1.00001 1.00001M7.47241 1.00001L1.00001 7.47241" stroke="{{ section.settings.menu_item_color }}" stroke-linejoin="round"></path>
+                  </svg>
+                </a>
 
-
-
-             <div class="support-social-icons social-icons-hover" aria-labelledby="social-heading-support">
+                <div class="support-social-icons social-icons-hover" aria-labelledby="social-heading-support">
                 <h4 id="social-heading-support" class="sr-only">Follow Us</h4>
                 {%- if settings.social_facebook_link != blank -%}
                   <a
                     href="{{ settings.social_facebook_link }}"
                     class="social-icon"
                     aria-label="Facebook"
-                    style="color: {{ section.settings.menu_item_color }}; transition: color 0.3s ease;" 
-  onmouseover="this.style.color='grey'" 
-  onmouseout="this.style.color='{{ section.settings.menu_item_color }}'"
                   >
                     {{
                       'icon-facebook.svg'
@@ -444,9 +1018,6 @@
                     href="{{ settings.social_instagram_link }}"
                     class="social-icon"
                     aria-label="Instagram"
-                   style="color: {{ section.settings.menu_item_color }}; transition: color 0.3s ease;" 
-  onmouseover="this.style.color='grey'" 
-  onmouseout="this.style.color='{{ section.settings.menu_item_color }}'"
                   >
                     {{
                       'icon-instagram.svg'
@@ -462,9 +1033,6 @@
                     href="{{ settings.social_youtube_link }}"
                     class="social-icon"
                     aria-label="YouTube"
-                     style="color: {{ section.settings.menu_item_color }}; transition: color 0.3s ease;" 
-  onmouseover="this.style.color='grey'" 
-  onmouseout="this.style.color='{{ section.settings.menu_item_color }}'"
                   >
                     {{
                       'icon-youtube.svg'
@@ -480,9 +1048,6 @@
                     href="{{ settings.social_tiktok_link }}"
                     class="social-icon"
                     aria-label="TikTok"
-                     style="color: {{ section.settings.menu_item_color }}; transition: color 0.3s ease;" 
-  onmouseover="this.style.color='grey'" 
-  onmouseout="this.style.color='{{ section.settings.menu_item_color }}'"
                   >
                     {{
                       'icon-tiktok.svg'
@@ -498,9 +1063,6 @@
                     href="{{ settings.social_twitter_link }}"
                     class="social-icon"
                     aria-label="Twitter"
-                     style="color: {{ section.settings.menu_item_color }}; transition: color 0.3s ease;" 
-  onmouseover="this.style.color='grey'" 
-  onmouseout="this.style.color='{{ section.settings.menu_item_color }}'"
                   >
                     {{
                       'icon-twitter.svg'
@@ -516,9 +1078,6 @@
                     href="{{ settings.social_pinterest_link }}"
                     class="social-icon"
                     aria-label="Pinterest"
-                     style="color: {{ section.settings.menu_item_color }}; transition: color 0.3s ease;" 
-  onmouseover="this.style.color='grey'" 
-  onmouseout="this.style.color='{{ section.settings.menu_item_color }}'"
                   >
                     {{
                       'icon-pinterest.svg'
@@ -534,9 +1093,6 @@
                     href="{{ settings.social_snapchat_link }}"
                     class="social-icon"
                     aria-label="Snapchat"
-                     style="color: {{ section.settings.menu_item_color }}; transition: color 0.3s ease;" 
-  onmouseover="this.style.color='grey'" 
-  onmouseout="this.style.color='{{ section.settings.menu_item_color }}'"
                   >
                     {{
                       'icon-snapchat.svg'
@@ -552,9 +1108,6 @@
                     href="{{ settings.social_tumblr_link }}"
                     class="social-icon"
                     aria-label="Tumblr"
-                     style="color: {{ section.settings.menu_item_color }}; transition: color 0.3s ease;" 
-  onmouseover="this.style.color='grey'" 
-  onmouseout="this.style.color='{{ section.settings.menu_item_color }}'"
                   >
                     {{
                       'icon-tumblr.svg'
@@ -570,9 +1123,6 @@
                     href="{{ settings.social_vimeo_link }}"
                     class="social-icon"
                     aria-label="Vimeo"
-                     style="color: {{ section.settings.menu_item_color }}; transition: color 0.3s ease;" 
-  onmouseover="this.style.color='grey'" 
-  onmouseout="this.style.color='{{ section.settings.menu_item_color }}'"
                   >
                     {{
                       'icon-vimeo.svg'
@@ -586,61 +1136,60 @@
               </div>
             </div>
           </div>
-        {% when 'social_icons' %}
-          
-          <div class="hidden" {{ block.shopify_attributes }}></div>
+            <div class="hidden" {{ block.shopify_attributes }}></div>
 
-          <div class="flex flex-col md:flex-row justify-between items-start w-full" style="margin-left:10px">
-            <!-- Menu Section - Top on mobile, right side on desktop -->
-            <nav class="menu-section w-full md:w-2/5 order-1 md:order-2 custom-nav-mr-25" aria-label="Footer Navigation">
-              <div class="flex flex-wrap justify-start md:justify-end" style="margin-left:-10px;">
-                <div class="flex flex-row flex-wrap justify-start md:justify-end gap-7 w-full mr-[20px] md:ml-0 mobile-ml-5">
-                  {% for block in section.blocks %}
-                    {% case block.type %}
-                      {% when 'menu' %}
-                        <div class="menu-block" {{ block.shopify_attributes }}>
-                          <div class="flex flex-col w-auto">
-                            <div class="flex flex-col space-y-1">
-                              {% for link in linklists[block.settings.menu_links].links %}
-                                <a
-                                  href="{{ link.url }}"
-                                  class="text-[16px] body-font"
-                                  style="color: {{ section.settings.menu_item_color }}; line-height: 25px;"
-                                >
-                                  {{- link.title -}}
-                                </a>
-                              {% endfor %}
+            <div class="flex flex-col md:flex-row justify-between items-start w-full" style="margin-left:10px">
+              <!-- Menu Section - Top on mobile, right side on desktop -->
+              <nav class="menu-section w-full md:w-2/5 order-1 md:order-2 custom-nav-mr-25" aria-label="Footer Navigation">
+                <div class="flex flex-wrap justify-start md:justify-end" style="margin-left:-10px;">
+                  <div style="padding-left: 10px;" class="flex flex-row flex-wrap justify-start md:justify-end gap-7 w-full mr-[20px] md:ml-0" {{ block.shopify_attributes }}>
+
+                    {% for block in section.blocks %}
+                      {% case block.type %}
+                        {% when 'menu' %}
+                          <div class="menu-block" {{ block.shopify_attributes }}>
+                            <div class="flex flex-col w-auto">
+                              <div class="flex flex-col space-y-1">
+                                {% for link in linklists[block.settings.menu_links].links %}
+                                  <a
+                                    href="{{ link.url }}"
+                                    class="text-[16px] body-font"
+                                    style="color: {{ section.settings.menu_item_color }}; line-height: 25px;"
+                                  >
+                                    {{- link.title -}}
+                                  </a>
+                                {% endfor %}
+                              </div>
                             </div>
                           </div>
-                        </div>
-                    {% endcase %}
-                  {% endfor %}
+                      {% endcase %}
+                    {% endfor %}
+                  </div>
                 </div>
+              </nav>
+
+              <!-- Logo Section - Bottom on mobile, left side on desktop -->
+              <div class="logo-container">
+                {% if section.settings.logo != blank %}
+                  <img 
+                    src="{{ section.settings.logo | img_url: 'master' }}" 
+                    alt="{{ shop.name }}" 
+                    width="450" 
+                    height="450"
+                    loading="lazy">
+                {% else %}
+                  <div class="text-logo font-bold heading-font">
+                    {{ shop.name }}
+                  </div>
+                {% endif %}
               </div>
-            </nav>
-
-
-            <!-- Logo Section - Bottom on mobile, left side on desktop -->
-           <div class="logo-container">
-              {% if section.settings.logo != blank %}
-                <img 
-                  src="{{ section.settings.logo | img_url: 'master' }}" 
-                  alt="{{ shop.name }}" 
-                  width="450" 
-                  height="450"
-                  loading="lazy">
-              {% else %}
-                <div class="text-white font-bold heading-font">
-                  {{ shop.name }}
-                </div>
-              {% endif %}
             </div>
-          </div>
-      {% endcase %}
-    </div>
-  {% endfor %}
+        {% endcase %}
+      </div>
+    {% endfor %}
+  </div>
 </footer>
-
+                            
 <script>
 document.addEventListener('DOMContentLoaded', function() {
   
@@ -778,11 +1327,11 @@ document.addEventListener('DOMContentLoaded', function() {
       "id": "logo",
       "label": "Logo Image"
     },
-    {
-      "type": "color_scheme",
-      "id": "color_scheme",
-      "default": "scheme-1",
-      "label": "Color Scheme"
+   {
+      "type": "image_picker",
+      "id": "background_image",
+      "label": "Background Image",
+      "info": "Select an image from your files for the animated background effect. Leave empty to use the default pattern."
     },
     {
       "type": "header",
@@ -829,11 +1378,23 @@ document.addEventListener('DOMContentLoaded', function() {
       "default": 0
     },
     {
+  "type": "color",
+  "id": "email_input_color",
+  "label": "Email Input Color",
+  "default": "#FFFFFF"
+},
+    {
       "type": "color",
       "id": "menu_item_color",
-      "label": "Menu Item Color",
+      "label": "Footer Text Color",
       "default": "#FFFFFF"
-    }
+    },
+    {
+  "type": "color",
+  "id": "hover_color",
+  "label": "Hover Color",
+  "default": "#808080"
+}
   ],
   "blocks": [
     {
@@ -867,19 +1428,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
       ]
     },
-    {
-      "type": "scroll_tracker",
-      "name": "Scroll Tracker",
-      "limit": 1,
-      "settings": [
-        {
-          "type": "text",
-          "id": "scroll_text",
-          "label": "Scroll Text",
-          "default": "YOU HAVE SCROLLED"
-        }
-      ]
-    },
+    
     {
       "type": "menu",
       "name": "Menu",
@@ -945,9 +1494,7 @@ document.addEventListener('DOMContentLoaded', function() {
         {
           "type": "email_signup"
         },
-        {
-          "type": "scroll_tracker"
-        },
+       
         {
           "type": "support"
         },
