@@ -480,13 +480,13 @@ document.addEventListener('DOMContentLoaded', function () {
   // Letter-by-letter heading animation for featured collection
   (function () {
     const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    const heading = document.querySelector('.featured-collection-main-heading.letter-animation');
+    const heading = document.querySelector('.featured-collection-main-heading.fc-letter-animation');
     if (!heading) return; // Exit if animation class is not present (toggle is off)
 
     function animateHeading() {
       const text = heading.textContent.trim();
       heading.textContent = '';
-      heading.classList.add('letter-animation-container');
+      heading.classList.add('fc-letter-animation-container');
       heading.setAttribute('aria-label', text);
 
       // Animate from left to right (starting from first letter)
