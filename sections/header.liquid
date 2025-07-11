@@ -1,9 +1,9 @@
 <header
-  class="header-main bg-[var(--header_background)] transform-gpu {% unless section.settings.enable_sticky %}sticky-disabled{% endunless %}"
+  class="header-main relative bg-[var(--header_background)] transform-gpu {% unless section.settings.enable_sticky %}sticky-disabled{% endunless %}"
   data-header-sticky
   style="z-index: 999; "
 >
-  <div class="relative w-full flex items-center justify-between ">
+  <div class=" w-full flex items-center justify-between ">
     <!-- Left: Logo -->
     <div class="flex items-center justify-center  ">
       <a href="/">
@@ -78,18 +78,19 @@
                     role="region"
                     aria-label="{{ link.title }} submenu"
                     class="
-                      fixed left-0 right-0 w-full
-                      opacity-0 pointer-events-none
+                      absolute left-0 right-0 w-full
+                      pointer-events-none
                     "
                     style="
                       background: var(--header_background);
                       top: 100%;
                       padding-top: 0px;
-                      transform: translateY(-300px);
-                      transition-property: opacity, transform;
+                      transform: translateY(-300%);
+                      transition-property: transform;
                       transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
                       transition-duration: 800ms;
-                      z-index: 995 !important;
+                      z-index: -1 !important;
+                      opacity: 1;
                     "
                   >
                     <div class="mx-auto p-2  flex">
@@ -1739,184 +1740,196 @@ window.ScrollingText['section-{{ section.id }}'] = {
       }
     });
 
-    // Bottom Bar Indicator Logic
-    const bottomBarIndicator = document.getElementById('bottom-bar-indicator');
-    const menuItems = document.querySelectorAll('.menu-items ul > li.dropdown-group');
-    const dropdownGroups = document.querySelectorAll('.dropdown-group');
-    const megaMenuOverlay = document.getElementById('mega-menu-overlay');
+{% comment %} test start {% endcomment %}
+// Bottom Bar Indicator Logic
+const bottomBarIndicator = document.getElementById('bottom-bar-indicator');
+const menuItems = document.querySelectorAll('.menu-items ul > li.dropdown-group');
+const dropdownGroups = document.querySelectorAll('.dropdown-group');
+const megaMenuOverlay = document.getElementById('mega-menu-overlay');
 
-    let hoverCount = 0;
-    let activeTimeout = null;
-    let indicatorTimeout = null;
+let hoverCount = 0;
+let activeTimeout = null;
+let indicatorTimeout = null;
 
-    // Initialize bottom bar
-    if (bottomBarIndicator) {
-      bottomBarIndicator.style.width = '100%';
-      bottomBarIndicator.style.transform = 'translateX(0)';
+// Initialize bottom bar
+if (bottomBarIndicator) {
+  bottomBarIndicator.style.width = '100%';
+  bottomBarIndicator.style.transform = 'translateX(0)';
+}
+
+// Bottom bar indicator logic with debouncing
+menuItems.forEach((item) => {
+  const link = item.querySelector('a');
+
+  item.addEventListener('mouseenter', () => {
+    // Clear any pending reset
+    if (indicatorTimeout) {
+      clearTimeout(indicatorTimeout);
+      indicatorTimeout = null;
     }
 
-    // Bottom bar indicator logic with debouncing
-    menuItems.forEach((item) => {
-      const link = item.querySelector('a');
+    const rect = link.getBoundingClientRect();
+    const containerRect = item.closest('.menu-items').getBoundingClientRect();
+    const left = rect.left - containerRect.left;
+    const width = rect.width;
 
-      item.addEventListener('mouseenter', () => {
-        // Clear any pending reset
-        if (indicatorTimeout) {
-          clearTimeout(indicatorTimeout);
-          indicatorTimeout = null;
-        }
+    bottomBarIndicator.style.transform = `translateX(${left}px) translateY(-6px)`;
+    bottomBarIndicator.style.width = `${width}px`;
+  });
 
-        const rect = link.getBoundingClientRect();
-        const containerRect = item.closest('.menu-items').getBoundingClientRect();
-        const left = rect.left - containerRect.left;
-        const width = rect.width;
+  item.addEventListener('mouseleave', (e) => {
+    // Only reset if we're not moving to a child element (like the submenu)
+    const relatedTarget = e.relatedTarget;
+    if (!item.contains(relatedTarget)) {
+      // Delay the reset to prevent flickering
+      indicatorTimeout = setTimeout(() => {
+        bottomBarIndicator.style.width = `100%`;
+        bottomBarIndicator.style.transform = `translateX(0) translateY(0px)`;
+      }, 100);
+    }
+  });
+});
 
-        bottomBarIndicator.style.transform = `translateX(${left}px) translateY(-6px)`;
-        bottomBarIndicator.style.width = `${width}px`;
-      });
+// Keep track of currently active dropdown
+let currentActiveGroup = null;
 
-      item.addEventListener('mouseleave', (e) => {
-        // Only reset if we're not moving to a child element (like the submenu)
-        const relatedTarget = e.relatedTarget;
-        if (!item.contains(relatedTarget)) {
-          // Delay the reset to prevent flickering
-          indicatorTimeout = setTimeout(() => {
-            bottomBarIndicator.style.width = `100%`;
-            bottomBarIndicator.style.transform = `translateX(0) translateY(0px)`;
-          }, 100);
-        }
-      });
-    });
-
-    // Keep track of currently active dropdown
-    let currentActiveGroup = null;
-
-    // Function to close all dropdowns except the specified one
-    const closeAllDropdowns = (exceptGroup = null) => {
-      dropdownGroups.forEach((group) => {
-        if (group !== exceptGroup) {
-          const megaMenu = group.querySelector('[id^="mega-menu-"]');
-          if (megaMenu) {
-            group.classList.remove('active-submenu');
-            megaMenu.style.opacity = '0';
-            megaMenu.style.transform = 'translateY(-300px)';
-            megaMenu.style.pointerEvents = 'none';
-          }
-        }
-      });
-
-      // Reset hover count when closing all
-      if (!exceptGroup) {
-        hoverCount = 0;
-        currentActiveGroup = null;
-        if (megaMenuOverlay) {
-          megaMenuOverlay.classList.add('opacity-0', 'pointer-events-none');
-          megaMenuOverlay.classList.remove('opacity-50');
-        }
+// Function to close all dropdowns except the specified one
+const closeAllDropdowns = (exceptGroup = null) => {
+  dropdownGroups.forEach((group) => {
+    if (group !== exceptGroup) {
+      const megaMenu = group.querySelector('[id^="mega-menu-"]');
+      if (megaMenu) {
+        group.classList.remove('active-submenu');
+        // Drawer style: slide up to hide
+        megaMenu.style.transform = 'translateY(-300%)';
+        megaMenu.style.pointerEvents = 'none';
       }
+    }
+  });
+
+  // Reset hover count when closing all
+  if (!exceptGroup) {
+    hoverCount = 0;
+    currentActiveGroup = null;
+    if (megaMenuOverlay) {
+      megaMenuOverlay.classList.add('opacity-0', 'pointer-events-none');
+      megaMenuOverlay.classList.remove('opacity-50');
+    }
+  }
+};
+
+// Dropdown menu logic with drawer-style animation
+dropdownGroups.forEach((group) => {
+  const megaMenu = group.querySelector('[id^="mega-menu-"]');
+
+  if (megaMenu) {
+    // Create a hover area that includes both the menu item and dropdown
+    const hoverArea = {
+      element: group,
+      isHovering: false,
     };
 
-    // Dropdown menu logic with proper single-dropdown management
-    dropdownGroups.forEach((group) => {
-      const megaMenu = group.querySelector('[id^="mega-menu-"]');
-
-      if (megaMenu) {
-        // Create a hover area that includes both the menu item and dropdown
-        const hoverArea = {
-          element: group,
-          isHovering: false,
-        };
-
-        const showDropdown = () => {
-          // Clear any pending timeouts
-          if (activeTimeout) {
-            clearTimeout(activeTimeout);
-            activeTimeout = null;
-          }
-
-          // Close other dropdowns first
-          if (currentActiveGroup && currentActiveGroup !== group) {
-            closeAllDropdowns();
-          }
-
-          // Set this as the active group
-          currentActiveGroup = group;
-          hoverCount = 1; // Reset to 1 since only one should be active
-          hoverArea.isHovering = true;
-          group.classList.add('active-submenu');
-
-          if (megaMenuOverlay) {
-            megaMenuOverlay.classList.remove('opacity-0', 'pointer-events-none');
-            megaMenuOverlay.classList.add('opacity-50');
-          }
-
-          requestAnimationFrame(() => {
-            megaMenu.style.opacity = '1';
-            megaMenu.style.transform = 'translateY(0)';
-            megaMenu.style.pointerEvents = 'auto';
-          });
-        };
-
-        const hideDropdown = () => {
-          hoverArea.isHovering = false;
-
-          // Small delay to allow mouse to move to submenu
-          activeTimeout = setTimeout(() => {
-            if (!hoverArea.isHovering) {
-              group.classList.remove('active-submenu');
-
-              megaMenu.style.opacity = '0';
-              megaMenu.style.transform = 'translateY(-300px)';
-              megaMenu.style.pointerEvents = 'none';
-
-              // If this was the active group, clear it
-              if (currentActiveGroup === group) {
-                currentActiveGroup = null;
-                hoverCount = 0;
-
-                if (megaMenuOverlay) {
-                  megaMenuOverlay.classList.add('opacity-0', 'pointer-events-none');
-                  megaMenuOverlay.classList.remove('opacity-50');
-                }
-              }
-            }
-          }, 150);
-        };
-
-        // Main menu item events
-        group.addEventListener('mouseenter', showDropdown);
-        group.addEventListener('mouseleave', (e) => {
-          // Check if mouse is moving to the submenu
-          const relatedTarget = e.relatedTarget;
-          if (!group.contains(relatedTarget) && !megaMenu.contains(relatedTarget)) {
-            hideDropdown();
-          }
-        });
-
-        // Submenu events
-        megaMenu.addEventListener('mouseenter', () => {
-          hoverArea.isHovering = true;
-          if (activeTimeout) {
-            clearTimeout(activeTimeout);
-            activeTimeout = null;
-          }
-        });
-
-        megaMenu.addEventListener('mouseleave', (e) => {
-          const relatedTarget = e.relatedTarget;
-          if (!group.contains(relatedTarget)) {
-            hideDropdown();
-          }
-        });
+    const showDropdown = () => {
+      // Clear any pending timeouts
+      if (activeTimeout) {
+        clearTimeout(activeTimeout);
+        activeTimeout = null;
       }
-    });
 
-    // Handle clicks outside to close dropdowns
-    document.addEventListener('click', (e) => {
-      if (!e.target.closest('.dropdown-group')) {
+      // Close other dropdowns first
+      if (currentActiveGroup && currentActiveGroup !== group) {
         closeAllDropdowns();
       }
+
+      // Set this as the active group
+      currentActiveGroup = group;
+      hoverCount = 1; // Reset to 1 since only one should be active
+      hoverArea.isHovering = true;
+      group.classList.add('active-submenu');
+
+      if (megaMenuOverlay) {
+        megaMenuOverlay.classList.remove('opacity-0', 'pointer-events-none');
+        megaMenuOverlay.classList.add('opacity-50');
+      }
+
+      // Drawer style: slide down to show
+      requestAnimationFrame(() => {
+        megaMenu.style.transform = 'translateY(0)';
+        megaMenu.style.pointerEvents = 'auto';
+      });
+    };
+
+    const hideDropdown = () => {
+      hoverArea.isHovering = false;
+
+      // Small delay to allow mouse to move to submenu
+      activeTimeout = setTimeout(() => {
+        if (!hoverArea.isHovering) {
+          group.classList.remove('active-submenu');
+
+          // Drawer style: slide up to hide
+          megaMenu.style.transform = 'translateY(-300%)';
+          megaMenu.style.pointerEvents = 'none';
+
+          // If this was the active group, clear it
+          if (currentActiveGroup === group) {
+            currentActiveGroup = null;
+            hoverCount = 0;
+
+            if (megaMenuOverlay) {
+              megaMenuOverlay.classList.add('opacity-0', 'pointer-events-none');
+              megaMenuOverlay.classList.remove('opacity-50');
+            }
+          }
+        }
+      }, 150);
+    };
+
+    // Main menu item events
+    group.addEventListener('mouseenter', showDropdown);
+    group.addEventListener('mouseleave', (e) => {
+      // Check if mouse is moving to the submenu
+      const relatedTarget = e.relatedTarget;
+      if (!group.contains(relatedTarget) && !megaMenu.contains(relatedTarget)) {
+        hideDropdown();
+      }
     });
+
+    // Submenu events
+    megaMenu.addEventListener('mouseenter', () => {
+      hoverArea.isHovering = true;
+      if (activeTimeout) {
+        clearTimeout(activeTimeout);
+        activeTimeout = null;
+      }
+    });
+
+    megaMenu.addEventListener('mouseleave', (e) => {
+      const relatedTarget = e.relatedTarget;
+      if (!group.contains(relatedTarget)) {
+        hideDropdown();
+      }
+    });
+  }
+});
+
+// Handle clicks outside to close dropdowns
+document.addEventListener('click', (e) => {
+  if (!e.target.closest('.dropdown-group')) {
+    closeAllDropdowns();
+  }
+});
+
+// Initialize all submenus to hidden state
+dropdownGroups.forEach((group) => {
+  const megaMenu = group.querySelector('[id^="mega-menu-"]');
+  if (megaMenu) {
+    megaMenu.style.transform = 'translateY(-300%)';
+    megaMenu.style.pointerEvents = 'none';
+  }
+});
+
+{% comment %} test end {% endcomment %}
   });
 </script>
 
