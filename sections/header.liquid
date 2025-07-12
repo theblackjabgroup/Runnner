@@ -238,18 +238,7 @@
                         <!-- First set of content -->
                         {% for i in (1..section.settings.repeat_count) %}
                           <span class="scrolling-text-item">{{ section.settings.scrolling_text }}</span>
-                          <img
-                            class="scrolling-separator"
-                            src="{{ section.settings.separator_image | image_url }}"
-                            alt="separator"
-                            height="100%"
-                            width="100%"
-                          >
-                        {% endfor %}
-                        <!-- Duplicate set for seamless infinite scrolling -->
-                        {% for i in (1..section.settings.repeat_count) %}
-                          <span class="scrolling-text-item">{{ section.settings.scrolling_text }}</span>
-                          {% unless forloop.last %}
+                          {% if section.settings.separator_image != blank %}
                             <img
                               class="scrolling-separator"
                               src="{{ section.settings.separator_image | image_url }}"
@@ -257,6 +246,25 @@
                               height="100%"
                               width="100%"
                             >
+                          {% else %}
+                            <span class=" text-[var(--header_text)] px-2">–</span>
+                          {% endif %}
+                        {% endfor %}
+                        <!-- Duplicate set for seamless infinite scrolling -->
+                        {% for i in (1..section.settings.repeat_count) %}
+                          <span class="scrolling-text-item">{{ section.settings.scrolling_text }}</span>
+                          {% unless forloop.last %}
+                            {% if section.settings.separator_image != blank %}
+                              <img
+                                class="scrolling-separator"
+                                src="{{ section.settings.separator_image | image_url }}"
+                                alt="separator"
+                                height="100%"
+                                width="100%"
+                              >
+                            {% else %}
+                              <span class="scrolling-separator text-[var(--header_text)] px-2">–</span>
+                            {% endif %}
                           {% endunless %}
                         {% endfor %}
                       </div>
@@ -1174,8 +1182,8 @@
           pointer-events: none;
           transform: translateY(-20px);
           transition:
-            opacity 0.5s ease,
-            transform 0.5s ease;
+            opacity 0.8s ease,
+            transform 0.8s ease;
           z-index: 998;           /* just below header (999) */
         }
 
