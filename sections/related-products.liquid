@@ -31,19 +31,19 @@
           {% if collections.all.products.size == 0 %}
             {% for i in (1..5) %}
               <article
-                class="product-card flex-none w-[220px] md:w-[450px]"
+                class="product-card flex-none w-[350px] h-[458px]"
                 role="listitem"
                 aria-label="No products found"
               >
-                <div class="product-image-wrapper relative group" aria-hidden="true">
+                <div class="product-image-wrapper relative group w-[350px] h-[420px]" aria-hidden="true">
                   {{ 'collection-1' | placeholder_svg_tag }}
                 </div>
-                <div class="product-details mt-3" style="margin-bottom:8px;">
-                  <h3 class="!text-[1.6rem] uppercase font-medium leading-tight">No products found</h3>
+                <div class="product-details mt-3 h-[38px]" style="margin-top:10px; margin-bottom:8px;">
+                  <h3 class="!text-[1.6rem] uppercase font-medium leading-tight" style="margin-bottom: 5px ;color: var(--text); ">No products found</h3>
                   {% if section.settings.show_vendor %}
-                    <div class="product-vendor text-sm text-gray-600 uppercase">—</div>
+                    <div class="product-vendor custom-vendor-style">—</div>
                   {% endif %}
-                  <div class="flex gap-2 items-baseline rp-price" style="margin-top: -6px;">
+                  <div class="flex gap-2 items-baseline rp-price white-text">
                     <span class="!text-[1.6rem] uppercase font-medium">—</span>
                   </div>
                 </div>
@@ -52,19 +52,16 @@
           {% else %}
             {% for product in collections.all.products limit: section.settings.products_to_show %}
               <article
-                class="product-card flex-none w-[220px] md:w-[450px]"
+                class="product-card flex-none w-[350px] h-[458px]"
                 role="listitem"
                 aria-label="{{ product.title }}"
               >
-                <div class="product-image-wrapper relative group">
+                <div class="product-image-wrapper relative group w-[350px] h-[420px]">
                   {% unless product.available %}
                    <div class="absolute top-3 right-4 z-2">
-                      <span
-                        class="inline-block rounded-xl px-4 text-[12px] tracking-wide font-medium bg-zinc-800"
-                        style="color: rgb(var(--color-background));"
-                      >
+                      <div class="sold-out-badge">
                         SOLD OUT
-                      </span>
+                      </div>
                     </div>
                   {% endunless %}
 
@@ -77,7 +74,7 @@
                       {% if product.images.size > 1 %}
                         {% for image in product.images %}
                           <img
-                            src="{{ image | img_url: '450x544', crop: 'center' }}"
+                            src="{{ image | img_url: '350x420', crop: 'center' }}"
                             alt="{{ product.title }}{% if forloop.index > 1 %} image {{ forloop.index }}{% endif %}"
                             class="product-image {% if forloop.first %}active{% else %}inactive{% endif %} rp-product-image"
                             data-index="{{ forloop.index0 }}"
@@ -149,7 +146,7 @@
                       {% if product.available %}
                         <button
                           class="add-to-cart-btn w-90 text-(--text) py-2 px-4 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-                          style="background-color: rgb(var(--color-background));"
+                          style="background-color: rgb(var(--color-background)); color: var(--text);"
                           data-product-id="{{ product.id }}"
                           {% if product.has_only_default_variant %}
                             data-variant-id="{{ product.variants.first.id }}"
@@ -172,7 +169,7 @@
                           data-has-variants="{% if has_size_variants %}true{% else %}false{% endif %}"
                           aria-label="Get notified when {{ product.title }} is back in stock"
                           aria-haspopup="dialog"
-                          style="background-color: rgb(var(--color-background));"
+                          style="background-color: rgb(var(--color-background)); color: var(--text);"
                         >
                           Notify Me When In Stock
                         </button>
@@ -181,9 +178,9 @@
                   </div>
                 </div>
 
-                <div class="product-details mt-3" style="margin-bottom:8px;">
+                <div class="product-details mt-3 h-[38px]" style="margin-bottom:8px;">
                   <a href="{{ product.url }}" aria-label="{{ product.title }}">
-                    <h3 class="!text-[1.6rem] uppercase font-medium leading-tight">
+                    <h3 class="!text-[1.6rem] uppercase font-medium leading-tight" style="margin-bottom: 5px;color: var(--text);">
                       {{ product.title | escape }}
                     </h3>
                     {% if section.settings.show_vendor and product.vendor != blank %}
@@ -191,7 +188,8 @@
                         {{ product.vendor | escape }}
                       </div>
                     {% endif %}
-                    <div class="flex gap-2 items-baseline rp-price">
+                    <div class="rp-price custom-rp-style">
+
                       <span class="!text-[1.6rem] uppercase font-medium"> {{ product.price | money }} </span>
                       {%- if product.compare_at_price > product.price -%}
                         |<span class="!text-[1.6rem] uppercase text-red-600">
@@ -270,6 +268,21 @@
 {% endif %}
 
 <style>
+    /* Sold Out Badge Styles */
+    .sold-out-badge {
+      padding: 0px 4px;
+      border-radius: 3px;
+      line-height: 20px;
+      display: inline-block;
+      font-size: 14px;
+      border: 1px solid black;
+      color: black;
+      background-color: rgb(var(--color-foreground));
+      font-weight: medium;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
     .related-products-page-width ::selection {
       /* background: none; */
       color: var(--cr-yellow-2) !important;
@@ -283,8 +296,16 @@
       line-height: 40% !important;
       font-size: 3.5rem;
       left: -3px;
+      padding-top: 20px;
     }
-
+ .custom-rp-style {
+  display: flex;
+  gap: 0.5rem;
+  align-items: baseline;
+  margin-top: -6px;
+  color: var(--text);
+}
+ 
     @media (min-width: 500px) {
       div.related-products-main-heading {
         font-size: 5rem;
@@ -293,7 +314,7 @@
 
     @media (min-width: 768px) {
       div.related-products-main-heading {
-        padding-top: {{ section.settings.padding_top }}px;
+        padding-top: 20px;
         font-size: 40px;
         padding-bottom: 25px;
         padding-left: 12px;
@@ -305,7 +326,8 @@
       }
 
       .slider-container {
-        margin-right: -1.5rem;
+        margin-right: 0;
+        overflow-x: hidden;
       }
 
       .product-slider {
@@ -344,10 +366,11 @@
 
     .product-vendor {
       font-size: 15px;
-      color: black;
+      color:  var(--text);
       text-transform: uppercase;
       margin-top: 2px;
       margin-bottom: 2px;
+      font-weight:500;
     }
 
     .image-nav-arrow {
@@ -423,7 +446,7 @@
     .slider-container {
       position: relative;
       width: 100%;
-      overflow-x: auto;
+      overflow-x: hidden;
       overflow-y: hidden;
       -webkit-overflow-scrolling: touch;
       height: auto;
@@ -434,6 +457,8 @@
       display: flex;
       gap: 18px;
       overflow-y: hidden;
+       width: calc(4 * 350px + 3 * 18px);
+        max-width: 100%;
     }
 
     .product-card {
@@ -542,6 +567,24 @@
     opacity: 1;
     /* pointer-events: auto; */
   }
+@media (max-width: 1440px) {
+      .product-slider {
+        width: 100%;
+        overflow-x: auto;
+        justify-content: flex-start;
+      }
+      
+      .custom-scrollbar-container {
+        display: flex;
+        justify-content: center;
+        width: 100%;
+        margin-top: 16px;
+      }
+      
+      .slider-container {
+        overflow-x: auto;
+      }
+    }
 
     @media (max-width: 768px) {
       .product-slider {
@@ -563,9 +606,9 @@
       }
 
       .rp-product-image {
-        width: 225px !important;
-        height: 277px !important;
-      }
+      width: 350px !important;
+      height: 420px !important;
+    }
 
       .rp-price{
         margin-top: -6px
@@ -780,5 +823,3 @@ document.addEventListener('DOMContentLoaded', function() {
   ]
 }
 {% endschema %}
-
-
