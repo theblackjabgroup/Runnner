@@ -75,23 +75,9 @@
                   <!-- sub-menu dropdown -->
                   <div
                     id="mega-menu-{{ forloop.index }}"
+                    class="mega-menu-dropdown"
                     role="region"
                     aria-label="{{ link.title }} submenu"
-                    class="
-                      absolute left-0 right-0 w-full
-                      pointer-events-none
-                    "
-                    style="
-                      background: var(--header_background);
-                      top: 100%;
-                      padding-top: 0px;
-                      transform: translateY(-300%);
-                      transition-property: transform;
-                      transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
-                      transition-duration: 800ms;
-                      z-index: -1 !important;
-                      opacity: 1;
-                    "
                   >
                     <div class="mx-auto p-2  flex">
                       <ul class="flex justify-start gap-8 m-2 w-1/2">
@@ -1178,6 +1164,28 @@
           display: none !important;
         }
 
+        .mega-menu-dropdown {
+          position: fixed;        /* so it sits relative to viewport */
+          left: 0; right: 0;
+          width: 100vw;
+          background: var(--header_background);
+          display: none;          /* hidden by default */
+          opacity: 0;
+          pointer-events: none;
+          transform: translateY(-20px);
+          transition:
+            opacity 0.5s ease,
+            transform 0.5s ease;
+          z-index: 998;           /* just below header (999) */
+        }
+
+        .mega-menu-dropdown.open {
+          display: block;
+          opacity: 1;
+          pointer-events: auto;
+          transform: translateY(0);
+        }
+
         /* Mobile submenu scrollbar styling */
         .submenu.styled-scrollbar {
           scrollbar-width: thin;
@@ -1331,141 +1339,228 @@
 
 <script>
   document.addEventListener('DOMContentLoaded', function () {
-// horizontal Scrolling Text Section
-const scrollingSection = document.getElementById('scrolling-text-{{ section.id }}');
-const scrollingContainer = scrollingSection.querySelector('.scrolling-text-container');
-
-// Check if we're on mobile
-function isMobile() {
-  return window.innerWidth <= 768;
-}
-
-// Set initial position based on direction and device type
-function setInitialPosition() {
-  const direction = scrollingContainer.getAttribute('data-direction');
-  const mobile = isMobile();
-  
-  if (mobile) {
-    // Mobile vertical scrolling
-    if (direction === 'right') {
-      scrollingContainer.style.transform = 'translateY(-50%)';
-    } else {
-      scrollingContainer.style.transform = 'translateY(0%)';
-    }
-  } else {
-    // Desktop horizontal scrolling
-    if (direction === 'right') {
-      scrollingContainer.style.transform = 'translateX(-50%)';
-    } else {
-      scrollingContainer.style.transform = 'translateX(0%)';
-    }
-  }
-
-  // Force a reflow and restart animation
-  scrollingContainer.style.animation = 'none';
-  scrollingContainer.offsetHeight; // Trigger reflow
-  
-  if (mobile) {
-    const animationName = direction === 'left' ? 'scroll-bottom-to-top' : 'scroll-top-to-bottom';
-    scrollingContainer.style.animation = `${animationName} {{ section.settings.speed }}s linear infinite`;
-  } else {
-    scrollingContainer.style.animation = `scroll-${direction} {{ section.settings.speed }}s linear infinite`;
-  }
-}
-
-// Initialize on load
-setInitialPosition();
-
-// Handle window resize to switch between mobile and desktop
-function handleResize() {
-  setInitialPosition();
-}
-
-// Add resize listener with debounce
-let resizeTimeout;
-window.addEventListener('resize', function() {
-  clearTimeout(resizeTimeout);
-  resizeTimeout = setTimeout(handleResize, 150);
-});
-
-// Calculate optimal repeat count based on text length and device type
-function calculateOptimalRepeats() {
-  const textLength = '{{ section.settings.scrolling_text }}'.length;
-  const estimatedImageWidth = {{ section.settings.font_size }} * 1.5;
-  const separatorSpacing = {{ section.settings.separator_spacing }} * 2;
-  
-  let totalLength;
-  if (isMobile()) {
-    // For mobile vertical, consider height rather than width
-    totalLength = textLength + (estimatedImageWidth + separatorSpacing) / 15;
-  } else {
-    totalLength = textLength + (estimatedImageWidth + separatorSpacing) / 10;
-  }
-
-  const minRepeats = Math.max(8, Math.ceil(200 / totalLength));
-  return Math.min(minRepeats, 20);
-}
-
-// Dynamic speed control
-function updateScrollSpeed(speed) {
-  scrollingContainer.style.animationDuration = speed + 's';
-}
-
-// Dynamic direction control
-function updateScrollDirection(direction) {
-  scrollingContainer.setAttribute('data-direction', direction);
-  const mobile = isMobile();
-  
-  if (mobile) {
-    const animationName = direction === 'left' ? 'scroll-bottom-to-top' : 'scroll-top-to-bottom';
-    scrollingContainer.style.animationName = animationName;
-  } else {
-    scrollingContainer.style.animationName = 'scroll-' + direction;
-  }
-  
-  setInitialPosition();
-}
-
-// Pause/resume functionality
-function pauseScroll() {
-  scrollingContainer.style.animationPlayState = 'paused';
-}
-
-function resumeScroll() {
-  scrollingContainer.style.animationPlayState = 'running';
-}
-
-// Image loading optimization
-function optimizeImageLoading() {
-  const separatorImages = scrollingContainer.querySelectorAll('.scrolling-separator');
-  separatorImages.forEach(img => {
-    if (!img.hasAttribute('loading')) {
-      img.setAttribute('loading', 'lazy');
-    }
     
-    img.addEventListener('error', function() {
-      console.warn('Scrolling separator image failed to load:', this.src);
-      this.style.display = 'none';
+    /* -- sub menu logic -- */
+    document.querySelectorAll('.dropdown-group').forEach(group => {
+      const trigger = group.querySelector('a');
+      const menu    = group.querySelector('.mega-menu-dropdown');
+      let   hideTimer;
+    
+      if (!menu) return;
+    
+      function positionMenu() {
+        const header = document.querySelector('[data-header-sticky]');
+        const top    = header ? header.offsetHeight - 1 : 0; 
+        menu.style.top = `${top}px`;
+      }
+    
+      function openMenu() {
+        clearTimeout(hideTimer);
+        positionMenu();
+        menu.classList.add('open');
+      }
+    
+      function closeMenu() {
+        menu.classList.remove('open');
+        // after fade‐out, takeing it out of the flow
+        menu.addEventListener('transitionend', function _fin(e) {
+          if (e.propertyName === 'opacity' && !menu.classList.contains('open')) {
+            menu.style.display = 'none';
+            menu.removeEventListener('transitionend', _fin);
+          }
+        });
+      }
+    
+      function scheduleClose() {
+        clearTimeout(hideTimer);
+        // only hide after 150ms of actually being outside both elements
+        hideTimer = setTimeout(closeMenu, 150);
+      }
+    
+      // whenever we show, ensure it’s in the layout so the transition can run
+      trigger.addEventListener('mouseenter', () => {
+        menu.style.display = 'block';
+        openMenu();
+      });
+      menu.addEventListener   ('mouseenter', openMenu);
+    
+      // when we leave *either* element, start the hide timer
+      trigger.addEventListener('mouseleave', scheduleClose);
+      menu.addEventListener   ('mouseleave', scheduleClose);
     });
-  });
-}
+    
 
-// Initialize image optimization
-optimizeImageLoading();
+    /* -- bottom bar indicator logic -- */
+    const bottomBarIndicator = document.getElementById('bottom-bar-indicator');
+    const menuItems = document.querySelectorAll('.menu-items ul > li.dropdown-group');
+    let indicatorTimeout = null;
 
-// Add methods to global scope for external control
-window.ScrollingText = window.ScrollingText || {};
-window.ScrollingText['section-{{ section.id }}'] = {
-  updateSpeed: updateScrollSpeed,
-  updateDirection: updateScrollDirection,
-  pause: pauseScroll,
-  resume: resumeScroll,
-  element: scrollingSection,
-  calculateOptimalRepeats: calculateOptimalRepeats,
-  resetPosition: setInitialPosition,
-  optimizeImages: optimizeImageLoading,
-  isMobile: isMobile
-};
+    if (bottomBarIndicator) {
+      bottomBarIndicator.style.width = '100%';
+      bottomBarIndicator.style.transform = 'translateX(0)';
+    }
+
+    menuItems.forEach((item) => {
+      const link = item.querySelector('a');
+
+      item.addEventListener('mouseenter', () => {
+        if (indicatorTimeout) clearTimeout(indicatorTimeout);
+        const rect = link.getBoundingClientRect();
+        const containerRect = item.closest('.menu-items').getBoundingClientRect();
+        const left = rect.left - containerRect.left;
+        const width = rect.width;
+
+        bottomBarIndicator.style.transform = `translateX(${left}px) translateY(-6px)`;
+        bottomBarIndicator.style.width = `${width}px`;
+      });
+
+      item.addEventListener('mouseleave', (e) => {
+        const related = e.relatedTarget;
+        if (!item.contains(related)) {
+          indicatorTimeout = setTimeout(() => {
+            bottomBarIndicator.style.width = '100%';
+            bottomBarIndicator.style.transform = 'translateX(0) translateY(0px)';
+          }, 100);
+        }
+      });
+    });
+
+
+    // horizontal Scrolling Text Section
+    const scrollingSection = document.getElementById('scrolling-text-{{ section.id }}');
+    const scrollingContainer = scrollingSection.querySelector('.scrolling-text-container');
+
+    // Check if we're on mobile
+    function isMobile() {
+      return window.innerWidth <= 768;
+    }
+
+    // Set initial position based on direction and device type
+    function setInitialPosition() {
+      const direction = scrollingContainer.getAttribute('data-direction');
+      const mobile = isMobile();
+      
+      if (mobile) {
+        // Mobile vertical scrolling
+        if (direction === 'right') {
+          scrollingContainer.style.transform = 'translateY(-50%)';
+        } else {
+          scrollingContainer.style.transform = 'translateY(0%)';
+        }
+      } else {
+        // Desktop horizontal scrolling
+        if (direction === 'right') {
+          scrollingContainer.style.transform = 'translateX(-50%)';
+        } else {
+          scrollingContainer.style.transform = 'translateX(0%)';
+        }
+      }
+
+      // Force a reflow and restart animation
+      scrollingContainer.style.animation = 'none';
+      scrollingContainer.offsetHeight; // Trigger reflow
+      
+      if (mobile) {
+        const animationName = direction === 'left' ? 'scroll-bottom-to-top' : 'scroll-top-to-bottom';
+        scrollingContainer.style.animation = `${animationName} {{ section.settings.speed }}s linear infinite`;
+      } else {
+        scrollingContainer.style.animation = `scroll-${direction} {{ section.settings.speed }}s linear infinite`;
+      }
+    }
+
+    // Initialize on load
+    setInitialPosition();
+
+    // Handle window resize to switch between mobile and desktop
+    function handleResize() {
+      setInitialPosition();
+    }
+
+    // Add resize listener with debounce
+    let resizeTimeout;
+    window.addEventListener('resize', function() {
+      clearTimeout(resizeTimeout);
+      resizeTimeout = setTimeout(handleResize, 150);
+    });
+
+    // Calculate optimal repeat count based on text length and device type
+    function calculateOptimalRepeats() {
+      const textLength = '{{ section.settings.scrolling_text }}'.length;
+      const estimatedImageWidth = {{ section.settings.font_size }} * 1.5;
+      const separatorSpacing = {{ section.settings.separator_spacing }} * 2;
+      
+      let totalLength;
+      if (isMobile()) {
+        // For mobile vertical, consider height rather than width
+        totalLength = textLength + (estimatedImageWidth + separatorSpacing) / 15;
+      } else {
+        totalLength = textLength + (estimatedImageWidth + separatorSpacing) / 10;
+      }
+
+      const minRepeats = Math.max(8, Math.ceil(200 / totalLength));
+      return Math.min(minRepeats, 20);
+    }
+
+    // Dynamic speed control
+    function updateScrollSpeed(speed) {
+      scrollingContainer.style.animationDuration = speed + 's';
+    }
+
+    // Dynamic direction control
+    function updateScrollDirection(direction) {
+      scrollingContainer.setAttribute('data-direction', direction);
+      const mobile = isMobile();
+      
+      if (mobile) {
+        const animationName = direction === 'left' ? 'scroll-bottom-to-top' : 'scroll-top-to-bottom';
+        scrollingContainer.style.animationName = animationName;
+      } else {
+        scrollingContainer.style.animationName = 'scroll-' + direction;
+      }
+      
+      setInitialPosition();
+    }
+
+    // Pause/resume functionality
+    function pauseScroll() {
+      scrollingContainer.style.animationPlayState = 'paused';
+    }
+
+    function resumeScroll() {
+      scrollingContainer.style.animationPlayState = 'running';
+    }
+
+    // Image loading optimization
+    function optimizeImageLoading() {
+      const separatorImages = scrollingContainer.querySelectorAll('.scrolling-separator');
+      separatorImages.forEach(img => {
+        if (!img.hasAttribute('loading')) {
+          img.setAttribute('loading', 'lazy');
+        }
+        
+        img.addEventListener('error', function() {
+          console.warn('Scrolling separator image failed to load:', this.src);
+          this.style.display = 'none';
+        });
+      });
+    }
+
+    // Initialize image optimization
+    optimizeImageLoading();
+
+    // Add methods to global scope for external control
+    window.ScrollingText = window.ScrollingText || {};
+    window.ScrollingText['section-{{ section.id }}'] = {
+      updateSpeed: updateScrollSpeed,
+      updateDirection: updateScrollDirection,
+      pause: pauseScroll,
+      resume: resumeScroll,
+      element: scrollingSection,
+      calculateOptimalRepeats: calculateOptimalRepeats,
+      resetPosition: setInitialPosition,
+      optimizeImages: optimizeImageLoading,
+      isMobile: isMobile
+    };
 
 
     // mobile menu toggle
@@ -1740,196 +1835,7 @@ window.ScrollingText['section-{{ section.id }}'] = {
       }
     });
 
-{% comment %} test start {% endcomment %}
-// Bottom Bar Indicator Logic
-const bottomBarIndicator = document.getElementById('bottom-bar-indicator');
-const menuItems = document.querySelectorAll('.menu-items ul > li.dropdown-group');
-const dropdownGroups = document.querySelectorAll('.dropdown-group');
-const megaMenuOverlay = document.getElementById('mega-menu-overlay');
 
-let hoverCount = 0;
-let activeTimeout = null;
-let indicatorTimeout = null;
-
-// Initialize bottom bar
-if (bottomBarIndicator) {
-  bottomBarIndicator.style.width = '100%';
-  bottomBarIndicator.style.transform = 'translateX(0)';
-}
-
-// Bottom bar indicator logic with debouncing
-menuItems.forEach((item) => {
-  const link = item.querySelector('a');
-
-  item.addEventListener('mouseenter', () => {
-    // Clear any pending reset
-    if (indicatorTimeout) {
-      clearTimeout(indicatorTimeout);
-      indicatorTimeout = null;
-    }
-
-    const rect = link.getBoundingClientRect();
-    const containerRect = item.closest('.menu-items').getBoundingClientRect();
-    const left = rect.left - containerRect.left;
-    const width = rect.width;
-
-    bottomBarIndicator.style.transform = `translateX(${left}px) translateY(-6px)`;
-    bottomBarIndicator.style.width = `${width}px`;
-  });
-
-  item.addEventListener('mouseleave', (e) => {
-    // Only reset if we're not moving to a child element (like the submenu)
-    const relatedTarget = e.relatedTarget;
-    if (!item.contains(relatedTarget)) {
-      // Delay the reset to prevent flickering
-      indicatorTimeout = setTimeout(() => {
-        bottomBarIndicator.style.width = `100%`;
-        bottomBarIndicator.style.transform = `translateX(0) translateY(0px)`;
-      }, 100);
-    }
-  });
-});
-
-// Keep track of currently active dropdown
-let currentActiveGroup = null;
-
-// Function to close all dropdowns except the specified one
-const closeAllDropdowns = (exceptGroup = null) => {
-  dropdownGroups.forEach((group) => {
-    if (group !== exceptGroup) {
-      const megaMenu = group.querySelector('[id^="mega-menu-"]');
-      if (megaMenu) {
-        group.classList.remove('active-submenu');
-        // Drawer style: slide up to hide
-        megaMenu.style.transform = 'translateY(-300%)';
-        megaMenu.style.pointerEvents = 'none';
-      }
-    }
-  });
-
-  // Reset hover count when closing all
-  if (!exceptGroup) {
-    hoverCount = 0;
-    currentActiveGroup = null;
-    if (megaMenuOverlay) {
-      megaMenuOverlay.classList.add('opacity-0', 'pointer-events-none');
-      megaMenuOverlay.classList.remove('opacity-50');
-    }
-  }
-};
-
-// Dropdown menu logic with drawer-style animation
-dropdownGroups.forEach((group) => {
-  const megaMenu = group.querySelector('[id^="mega-menu-"]');
-
-  if (megaMenu) {
-    // Create a hover area that includes both the menu item and dropdown
-    const hoverArea = {
-      element: group,
-      isHovering: false,
-    };
-
-    const showDropdown = () => {
-      // Clear any pending timeouts
-      if (activeTimeout) {
-        clearTimeout(activeTimeout);
-        activeTimeout = null;
-      }
-
-      // Close other dropdowns first
-      if (currentActiveGroup && currentActiveGroup !== group) {
-        closeAllDropdowns();
-      }
-
-      // Set this as the active group
-      currentActiveGroup = group;
-      hoverCount = 1; // Reset to 1 since only one should be active
-      hoverArea.isHovering = true;
-      group.classList.add('active-submenu');
-
-      if (megaMenuOverlay) {
-        megaMenuOverlay.classList.remove('opacity-0', 'pointer-events-none');
-        megaMenuOverlay.classList.add('opacity-50');
-      }
-
-      // Drawer style: slide down to show
-      requestAnimationFrame(() => {
-        megaMenu.style.transform = 'translateY(0)';
-        megaMenu.style.pointerEvents = 'auto';
-      });
-    };
-
-    const hideDropdown = () => {
-      hoverArea.isHovering = false;
-
-      // Small delay to allow mouse to move to submenu
-      activeTimeout = setTimeout(() => {
-        if (!hoverArea.isHovering) {
-          group.classList.remove('active-submenu');
-
-          // Drawer style: slide up to hide
-          megaMenu.style.transform = 'translateY(-300%)';
-          megaMenu.style.pointerEvents = 'none';
-
-          // If this was the active group, clear it
-          if (currentActiveGroup === group) {
-            currentActiveGroup = null;
-            hoverCount = 0;
-
-            if (megaMenuOverlay) {
-              megaMenuOverlay.classList.add('opacity-0', 'pointer-events-none');
-              megaMenuOverlay.classList.remove('opacity-50');
-            }
-          }
-        }
-      }, 150);
-    };
-
-    // Main menu item events
-    group.addEventListener('mouseenter', showDropdown);
-    group.addEventListener('mouseleave', (e) => {
-      // Check if mouse is moving to the submenu
-      const relatedTarget = e.relatedTarget;
-      if (!group.contains(relatedTarget) && !megaMenu.contains(relatedTarget)) {
-        hideDropdown();
-      }
-    });
-
-    // Submenu events
-    megaMenu.addEventListener('mouseenter', () => {
-      hoverArea.isHovering = true;
-      if (activeTimeout) {
-        clearTimeout(activeTimeout);
-        activeTimeout = null;
-      }
-    });
-
-    megaMenu.addEventListener('mouseleave', (e) => {
-      const relatedTarget = e.relatedTarget;
-      if (!group.contains(relatedTarget)) {
-        hideDropdown();
-      }
-    });
-  }
-});
-
-// Handle clicks outside to close dropdowns
-document.addEventListener('click', (e) => {
-  if (!e.target.closest('.dropdown-group')) {
-    closeAllDropdowns();
-  }
-});
-
-// Initialize all submenus to hidden state
-dropdownGroups.forEach((group) => {
-  const megaMenu = group.querySelector('[id^="mega-menu-"]');
-  if (megaMenu) {
-    megaMenu.style.transform = 'translateY(-300%)';
-    megaMenu.style.pointerEvents = 'none';
-  }
-});
-
-{% comment %} test end {% endcomment %}
   });
 </script>
 
