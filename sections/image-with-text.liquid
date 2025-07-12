@@ -210,15 +210,22 @@
   .image-with-text-button-arrow {
     margin-left: 24px;
   }
-    .image-with-text-media-section-{{ section.id }} {
-      height: {{ section.settings.img_height_mobile }}px;
-      min-height: {{ section.settings.img_height_mobile }}px;
+    /* For videos: use 16:9 aspect ratio with padding compensation */
+    .image-with-text-media-section-{{ section.id }}[data-video="true"] {
+      width: 100vw;
+      min-height: 450px;
+      height: calc(100vw * 9 / 16 + {{ settings.sections_spacing | times: 2 }}px);
     }
 
-    @media screen and (min-width: 750px) {
-      .image-with-text-media-section-{{ section.id }} {
+    /* For images: use the old section height settings */
+    .image-with-text-media-section-{{ section.id }}[data-video="false"] {
+      width: 100vw;
+      height: {{ section.settings.img_height_mobile }}px;
+    }
+
+    @media (min-width: 750px) {
+      .image-with-text-media-section-{{ section.id }}[data-video="false"] {
         height: {{ section.settings.img_height }}px;
-        min-height: {{ section.settings.img_height }}px;
       }
     }
 
@@ -279,7 +286,7 @@
     .image-with-text-text-content-container-{{ section.id }} {
       width: 100%;
       max-width: {{ section.settings.content_width }}px;
-      padding: {{ section.settings.content_padding }}px {{ section.settings.content_padding | plus: 14 }}px;
+      padding: {{ section.settings.content_padding }}px {{ section.settings.content_padding | plus: settings.side_space }}px;
       display: flex;
       flex-direction: column;
       height: 100%;
@@ -445,20 +452,20 @@
 
   /* Ensure video fills container completely for Vimeo */
   .image-with-text-iframe iframe[src*="vimeo"] {
-    width: 150% !important;
-    height: 150% !important;
-    min-width: 150% !important;
-    min-height: 150% !important;
+    width: 100% !important;
+    height: 100% !important;
+    min-width: 100% !important;
+    min-height: 100% !important;
     transform: translate(-50%, -50%) scale(1);
     transform-origin: center center;
   }
 
   /* For YouTube videos */
   .image-with-text-iframe iframe[src*="youtube"] {
-    width: 150% !important;
-    height: 150% !important;
-    min-width: 150% !important;
-    min-height: 150% !important;
+    width: 100% !important;
+    height: 100% !important;
+    min-width: 100% !important;
+    min-height: 100% !important;
     transform: translate(-50%, -50%);
   }
 
@@ -491,6 +498,7 @@
   <section
     id="ImageWithText-{{ section.id }}"
     class="image-with-text-media-section-{{ section.id }} relative w-full overflow-hidden image-with-text-section-{{ section.id }}-padding"
+    data-video="{% if section.settings.use_video %}true{% else %}false{% endif %}"
     role="region"
     aria-label="Image with text section"
   >
@@ -696,7 +704,7 @@
                             >
                               <svg
                                 xmlns="http://www.w3.org/2000/svg"
-                                class="image-with-text-arrow-svg w-5 h-5 object-contain transition-transform duration-200 ease-in-out group-hover:-rotate-90 mx-1"
+                                class="image-with-text-arrow-svg object-contain transition-transform duration-200 ease-in-out group-hover:-rotate-90 mx-1"
                                 fill="none"
                                 viewBox="0 0 9 9"
                                 stroke-width="1.5"
@@ -704,6 +712,7 @@
                                 stroke-linecap="round"
                                 stroke-linejoin="round"
                                 aria-hidden="true"
+                                style="width: 16px; height: 17px;"
                               >
                                 <path d="M1.1875 7.7334H7.6599M7.6599 7.7334V1.261M7.6599 7.7334L1.1875 1.261"/>
                               </svg>
@@ -743,7 +752,7 @@
                             >
                               <svg
                                 xmlns="http://www.w3.org/2000/svg"
-                                class="image-with-text-arrow-svg w-5 h-5 object-contain transition-transform duration-200 ease-in-out group-hover:-rotate-90 mx-1"
+                                class="image-with-text-arrow-svg object-contain transition-transform duration-200 ease-in-out group-hover:-rotate-90 mx-1"
                                 fill="none"
                                 viewBox="0 0 9 9"
                                 stroke-width="1.5"
@@ -751,6 +760,7 @@
                                 stroke-linecap="round"
                                 stroke-linejoin="round"
                                 aria-hidden="true"
+                                style="width: 16px; height: 17px;"
                               >
                                 <path d="M1.1875 7.7334H7.6599M7.6599 7.7334V1.261M7.6599 7.7334L1.1875 1.261"/>
                               </svg>
