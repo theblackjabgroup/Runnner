@@ -1,7 +1,8 @@
 {% schema %}
 {
   "name": "Scrolling Marquee",
- "disabled_on": {
+  "class": "shopify-section-scrolling-marquee",
+  "disabled_on": {
     "groups": ["header"],
     "templates": ["*"]
   },
@@ -10,7 +11,8 @@
       "type": "text",
       "id": "marquee_text",
       "label": "Marquee Text",
-      "default": "SUBSCRIBE FOR EMAILS→"
+      "default": "SUBSCRIBE FOR EMAILS→",
+      "info": "Enter the text that will scroll across the screen"
     },
     {
       "type": "color_scheme",
@@ -26,7 +28,14 @@
       "max": 300,
       "step": 5,
       "default": 230,
+      "unit": "s",
       "info": "Lower number = faster scroll"
+    },
+    {
+      "type": "checkbox",
+      "id": "pause_on_hover",
+      "label": "Pause on hover",
+      "default": false
     }
   ],
   "presets": [
@@ -38,38 +47,66 @@
 }
 {% endschema %}
 
-<div class="marquee-wrapper w-full overflow-hidden color-{{ section.settings.color_scheme }} border-t border-black" {{ section.shopify_attributes }}>
-  <div class="marquee-container flex whitespace-nowrap">
-    {% assign marquee_text = section.settings.marquee_text | strip %}
-    {% assign scroll_speed = section.settings.scroll_speed | default: 70 %}
+
+{%- liquid
+  assign marquee_text = section.settings.marquee_text | strip | default: 'SUBSCRIBE FOR EMAILS→'
+  assign scroll_speed = section.settings.scroll_speed | default: 230
+  assign color_scheme = section.settings.color_scheme | default: 'scheme-1'
+  assign pause_on_hover = section.settings.pause_on_hover | default: false
+  
+  # Sanitize and validate scroll speed
+  if scroll_speed < 10
+    assign scroll_speed = 10
+  elsif scroll_speed > 300
+    assign scroll_speed = 300
+  endif
+-%}
+
+<section 
+  class="marquee-wrapper w-full overflow-hidden color-{{ color_scheme }} border-t border-black" 
+  role="banner"
+  aria-label="Scrolling announcement"
+  {{ section.shopify_attributes }}
+>
+  <div class="marquee-container flex whitespace-nowrap" 
+       {% if pause_on_hover %}data-pause-on-hover="true"{% endif %}>
     
-    <div class="marquee-content flex flex-row font-semibold">
-      {% for i in (1..10) %}
-        <span class="px-2">{{ marquee_text }}</span>
-      {% endfor %}
+    <!-- Primary content -->
+    <div class="marquee-content flex flex-row font-semibold" 
+         role="text" 
+         aria-label="{{ marquee_text | escape }}">
+      {%- for i in (1..10) -%}
+        <span class="px-1.5" aria-hidden="true">{{ marquee_text }}</span>
+      {%- endfor -%}
     </div>
     
     <!-- Duplicate content for seamless looping -->
-    <div class="marquee-content flex flex-row font-semibold">
-      {% for i in (1..10) %}
-        <span class="px-2">{{ marquee_text }}</span>
-      {% endfor %}
+    <div class="marquee-content flex flex-row font-semibold" 
+         role="text" 
+         aria-hidden="true">
+      {%- for i in (1..10) -%}
+        <span class="px-1.5">{{ marquee_text }}</span>
+      {%- endfor -%}
     </div>
+    
   </div>
-</div>
+</section>
 
 <style>
+  /* Scrolling Marquee Styles */
   .marquee-wrapper {
     padding: 0.5rem 0; /* Even padding on top and bottom */
     display: flex;
     align-items: center;
     border-top: 1px solid black; /* Added black border at the top */
+    position: relative;
   }
   
   .marquee-container {
     display: flex;
-    animation: scroll-x {{ section.settings.scroll_speed | default: 40 }}s linear infinite;
+    animation: scroll-x {{ scroll_speed }}s linear infinite;
     height: auto;
+    will-change: transform;
   }
   
   .marquee-content {
@@ -79,8 +116,15 @@
     font-weight: 400;
     margin-top: 8px;
     margin-bottom: 8px;
+    flex-shrink: 0;
   }
   
+  /* Pause animation on hover if enabled */
+  .marquee-container[data-pause-on-hover="true"]:hover {
+    animation-play-state: paused;
+  }
+  
+  /* Smooth scrolling animation */
   @keyframes scroll-x {
     0% {
       transform: translateX(-50%);
@@ -89,4 +133,43 @@
       transform: translateX(0);
     }
   }
+  
+  /* Reduced motion support */
+  @media (prefers-reduced-motion: reduce) {
+    .marquee-container {
+      animation-duration: {{ scroll_speed | times: 3 }}s;
+    }
+  }
+  
+  /* High contrast mode support */
+  @media (prefers-contrast: high) {
+    .marquee-wrapper {
+      border-color: currentColor;
+    }
+  }
 </style>
+
+<script>
+  // Initialize marquee functionality
+  document.addEventListener('DOMContentLoaded', function() {
+    const marqueeContainers = document.querySelectorAll('.marquee-container');
+    
+    marqueeContainers.forEach(function(container) {
+      // Ensure animation starts smoothly
+      container.style.animationDelay = '0s';
+      
+      // Add focus management for accessibility
+      container.addEventListener('focus', function() {
+        if (this.hasAttribute('data-pause-on-hover')) {
+          this.style.animationPlayState = 'paused';
+        }
+      });
+      
+      container.addEventListener('blur', function() {
+        if (this.hasAttribute('data-pause-on-hover')) {
+          this.style.animationPlayState = 'running';
+        }
+      });
+    });
+  });
+</script>
