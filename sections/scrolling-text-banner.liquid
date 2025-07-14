@@ -1,9 +1,9 @@
 {% schema %}
 {
-  "name": "Scrolling text Banner",
+  "name": "Scrolling Text Banner",
   "class": "scrolling-text-section1",
   "tag": "section",
-   "disabled_on": {
+  "disabled_on": {
     "groups": ["header", "footer"]
   },
   "settings": [
@@ -11,7 +11,6 @@
       "type": "header",
       "content": "General Settings"
     },
-    
     {
       "type": "range",
       "id": "banner_height",
@@ -20,7 +19,8 @@
       "step": 5,
       "unit": "px",
       "label": "Banner Height",
-      "default": 55
+      "default": 55,
+      "info": "Height of each scrolling text strip"
     },
     {
       "type": "range",
@@ -30,7 +30,8 @@
       "step": 1,
       "unit": "s",
       "label": "Scroll Speed (seconds)",
-      "default": 30
+      "default": 30,
+      "info": "Higher number = slower scroll"
     },
     {
       "type": "range",
@@ -40,7 +41,14 @@
       "step": 2,
       "unit": "px",
       "label": "Separator Image Size",
-      "default": 30
+      "default": 30,
+      "info": "Size of separator images between text elements"
+    },
+    {
+      "type": "checkbox",
+      "id": "pause_on_hover",
+      "label": "Pause animation on hover",
+      "default": false
     },
     {
       "type": "header",
@@ -103,12 +111,14 @@
           "type": "text",
           "id": "text",
           "label": "Text",
-          "default": "BANDIT GRAND PRIX"
+          "default": "BANDIT GRAND PRIX",
+          "info": "Text to display in the top scrolling strip"
         },
         {
           "type": "image_picker",
           "id": "separator_image",
-          "label": "Separator Image (optional)"
+          "label": "Separator Image (optional)",
+          "info": "Image to display between text repetitions"
         }
       ]
     },
@@ -121,13 +131,15 @@
           "type": "text",
           "id": "large_text",
           "label": "Large Text",
-          "default": "JULY 5TH"
+          "default": "JULY 5TH",
+          "info": "Main text displayed in larger font"
         },
         {
           "type": "text",
           "id": "small_text",
           "label": "Small Text",
-          "default": "BROOKLYN"
+          "default": "BROOKLYN",
+          "info": "Secondary text displayed in smaller font"
         }
       ]
     },
@@ -140,19 +152,21 @@
           "type": "text",
           "id": "text",
           "label": "Text",
-          "default": "OPEN HEATS"
+          "default": "OPEN HEATS",
+          "info": "Text to display in the bottom scrolling strip"
         },
         {
           "type": "image_picker",
           "id": "separator_image",
-          "label": "Separator Image (optional)"
+          "label": "Separator Image (optional)",
+          "info": "Image to display between text repetitions"
         }
       ]
     }
   ],
   "presets": [
     {
-      "name": "Scrolling Text Banners",
+      "name": "Scrolling Text Banner",
       "blocks": [
         {
           "type": "top_strip_block",
@@ -179,34 +193,71 @@
 }
 {% endschema %}
 
+
+{%- liquid
+  # Sanitize and validate settings
+  assign banner_height = section.settings.banner_height | default: 55
+  assign scroll_speed = section.settings.scroll_speed | default: 30
+  assign separator_size = section.settings.separator_size | default: 30
+  assign pause_on_hover = section.settings.pause_on_hover | default: false
+  assign background_color = section.settings.background_color | default: '#ffffff'
+  
+  # Validate ranges
+  if banner_height < 45
+    assign banner_height = 45
+  elsif banner_height > 150
+    assign banner_height = 150
+  endif
+  
+  if scroll_speed < 5
+    assign scroll_speed = 5
+  elsif scroll_speed > 50
+    assign scroll_speed = 50
+  endif
+  
+  if separator_size < 10
+    assign separator_size = 10
+  elsif separator_size > 60
+    assign separator_size = 60
+  endif
+  
+  # Get blocks by type
+  assign top_blocks = section.blocks | where: 'type', 'top_strip_block'
+  assign middle_blocks = section.blocks | where: 'type', 'middle_strip_block'
+  assign bottom_blocks = section.blocks | where: 'type', 'bottom_strip_block'
+-%}
+
 <style>
+  /* Scrolling Text Banner Styles */
   .middle-strip-item .small-text {
-  display: inline-block;
-  max-width: 100px;           
-  word-wrap: break-word;
-}
+    display: inline-block;
+    max-width: 100px;           
+    word-wrap: break-word;
+  }
+  
   * {
     box-sizing: border-box;
   }
-
+  
   .scrolling-text-section1 {
     overflow: hidden;
-    background-color: {{ section.settings.background_color }};
+    background-color: {{ background_color }};
     padding-top: 20px;
     padding-bottom: 20px;
+    position: relative;
   }
-
+  
   .scrolling-banner {
     white-space: nowrap;
     overflow: hidden;
-    height: {{ section.settings.banner_height }}px;
+    height: {{ banner_height }}px;
     display: flex;
     align-items: center;
     position: relative;
     padding-top: 15px;
     padding-bottom: 15px;
   }
-
+  
   .scrolling-text-wrapper,
   .scrolling-text-top-wrapper,
   .scrolling-text-slow-wrapper {
@@ -215,20 +266,29 @@
     height: 100%;
     width: fit-content;
     align-items: center;
+    will-change: transform;
   }
-
+  
   .scrolling-text-wrapper {
-    animation: scrollInfinite {{ section.settings.scroll_speed | times: 4 }}s linear infinite;
+    animation: scrollInfinite {{ scroll_speed | times: 4 }}s linear infinite;
   }
-
+  
   .scrolling-text-top-wrapper {
-    animation: scrollInfinite {{ section.settings.scroll_speed | times: 4 }}s linear infinite;
+    animation: scrollInfinite {{ scroll_speed | times: 4 }}s linear infinite;
   }
-
+  
   .scrolling-text-slow-wrapper {
-    animation: scrollInfinite {{ section.settings.scroll_speed | times: 1.8 }}s linear infinite;
+    animation: scrollInfinite {{ scroll_speed | times: 1.8 }}s linear infinite;
   }
-
+  
+  {% if pause_on_hover %}
+  .scrolling-text-wrapper:hover,
+  .scrolling-text-top-wrapper:hover,
+  .scrolling-text-slow-wrapper:hover {
+    animation-play-state: paused;
+  }
+  {% endif %}
+  
   .text-item {
     font-weight: 500;
     letter-spacing: -0.03em;
@@ -237,34 +297,37 @@
     display: inline-flex;
     align-items: center;
     margin-right: 20px;
+    flex-shrink: 0;
   }
-
+  
   .separator {
     margin-right: 15px;
     display: inline-flex;
     align-items: center;
     height: 100%;
+    flex-shrink: 0;
   }
-
+  
   .separator img {
-    height: {{ section.settings.separator_size }}px;
+    height: {{ separator_size }}px;
     width: auto;
     object-fit: contain;
     display: block;
     max-width: none;
   }
-
+  
   .separator-text {
     font-size: 40px;
     font-weight: 500;
   }
-
+  
   .middle-strip-item {
     display: inline-flex;
     align-items: center;
     margin-right: 30px;
+    flex-shrink: 0;
   }
-
+  
   .large-text {
     font-weight: 500;
     letter-spacing: -0.03em;
@@ -273,7 +336,7 @@
     display: inline-block;
     margin-right: 15px;
   }
-
+  
   .small-text {
     font-weight: 500;
     letter-spacing: -0.02em;
@@ -286,12 +349,12 @@
     margin-left: 20px;
     margin-right: -5px; 
   }
-
+  
   .small-text-line {
     display: block;
     margin-bottom: 2px;
   }
-
+  
   @keyframes scrollInfinite {
     0% {
       transform: translateX(-50%);
@@ -300,47 +363,65 @@
       transform: translateX(0);
     }
   }
-
+  
   .banner-strip {
     transform: rotate(-1deg);
     padding: 5px 0px;
     overflow: visible;
+    position: relative;
   }
-
+  
   .top-strip {
     background-color: {{ section.settings.top_strip_bg_color }};
-        margin-top: 15px;
+    margin-top: 15px;
   }
-
+  
   .middle-strip {
     background-color: {{ section.settings.middle_strip_bg_color }};
   }
-
+  
   .bottom-strip {
     background-color: {{ section.settings.bottom_strip_bg_color }};
   }
-
+  
   .top-strip .text-item,
   .top-strip .separator-text {
     color: {{ section.settings.top_strip_text_color }};
   }
-
+  
   .middle-strip .large-text,
   .middle-strip .small-text {
     color: {{ section.settings.middle_strip_text_color }};
   }
-
+  
   .bottom-strip .text-item,
   .bottom-strip .separator-text {
     color: {{ section.settings.bottom_strip_text_color }};
   }
-
+  
+  /* Reduced motion support */
+  @media (prefers-reduced-motion: reduce) {
+    .scrolling-text-wrapper,
+    .scrolling-text-top-wrapper,
+    .scrolling-text-slow-wrapper {
+      animation-duration: {{ scroll_speed | times: 8 }}s;
+    }
+  }
+  
+  /* High contrast mode support */
+  @media (prefers-contrast: high) {
+    .banner-strip {
+      border: 1px solid currentColor;
+    }
+  }
+  
+  /* Mobile responsive styles */
   @media (max-width: 480px) {
     .scrolling-text-section1 {
- height:auto;
-      width:auto;
-      padding-top:10px;
-      padding-bottom:10px;
+      height: auto;
+      width: auto;
+      padding-top: 10px;
+      padding-bottom: 10px;
     }
     
     .scrolling-banner {
@@ -351,10 +432,12 @@
     
     .large-text {
       font-size: 30px;
+      margin-left: -16px;
     }
     
     .text-item {
       font-size: 30px;
+      margin-right:-1px;
     }
     
     .separator-text {
@@ -362,7 +445,7 @@
     }
     
     .separator img {
-      height: {{ section.settings.separator_size | divided_by: 2 }}px;
+      height: {{ separator_size | divided_by: 2 }}px;
     }
     
     .small-text {
@@ -377,100 +460,132 @@
   }
 </style>
 
-<div class="scrolling-text-section1">
+<section class="scrolling-text-section1" 
+         role="banner" 
+         aria-label="Scrolling text banner"
+         {{ section.shopify_attributes }}>
+  
   <!-- Top Rotated Strip -->
-  {% assign top_blocks = section.blocks | where: 'type', 'top_strip_block' %}
-  {% if top_blocks.size > 0 %}
-  <div class="banner-strip top-strip">
-    <div class="scrolling-banner">
-      <div class="scrolling-text-top-wrapper">
-        {% for i in (1..20) %}
-          {% for block in top_blocks %}
-            {% if block.settings.text != blank %}
-              <span class="text-item">{{ block.settings.text }}</span>
-              {% if block.settings.separator_image %}
-                <span class="separator">
-                  <img src="{{ block.settings.separator_image | image_url: width: 100 }}" 
-                       alt="separator" 
-                       loading="lazy"
-                       width="{{ section.settings.separator_size }}"
-                       height="{{ section.settings.separator_size }}">
-                </span>
-              {% endif %}
-            {% endif %}
-          {% endfor %}
-        {% endfor %}
+  {%- if top_blocks.size > 0 -%}
+    <div class="banner-strip top-strip">
+      <div class="scrolling-banner">
+        <div class="scrolling-text-top-wrapper" 
+             role="marquee" 
+             aria-label="Top scrolling text">
+          {%- for i in (1..20) -%}
+            {%- for block in top_blocks -%}
+              {%- if block.settings.text != blank -%}
+                <span class="text-item">{{ block.settings.text | escape }}</span>
+                {%- if block.settings.separator_image -%}
+                  <span class="separator">
+                    <img src="{{ block.settings.separator_image | image_url: width: 100 }}" 
+                         alt="Separator"
+                         loading="lazy"
+                         width="{{ separator_size }}"
+                         height="{{ separator_size }}">
+                  </span>
+                {%- endif -%}
+              {%- endif -%}
+            {%- endfor -%}
+          {%- endfor -%}
+        </div>
       </div>
     </div>
-  </div>
-  {% endif %}
+  {%- endif -%}
   
   <!-- Middle Rotated Strip -->
-  {% assign middle_blocks = section.blocks | where: 'type', 'middle_strip_block' %}
-  {% if middle_blocks.size > 0 %}
-  <div class="banner-strip middle-strip">
-    <div class="scrolling-banner">
-      <div class="scrolling-text-wrapper">
-        {% for i in (1..20) %}
-          {% for block in middle_blocks %}
-            {% if block.settings.large_text != blank or block.settings.small_text != blank %}
-              <div class="middle-strip-item">
-                {% if block.settings.large_text != blank %}
-                  <span class="large-text">{{ block.settings.large_text }}</span>
-                {% endif %}
-                {% if block.settings.small_text != blank %}
-                  <span class="small-text">{{ block.settings.small_text }}</span>
-                {% endif %}
-              </div>
-            {% endif %}
-          {% endfor %}
-        {% endfor %}
+  {%- if middle_blocks.size > 0 -%}
+    <div class="banner-strip middle-strip">
+      <div class="scrolling-banner">
+        <div class="scrolling-text-wrapper" 
+             role="marquee" 
+             aria-label="Middle scrolling text">
+          {%- for i in (1..20) -%}
+            {%- for block in middle_blocks -%}
+              {%- if block.settings.large_text != blank or block.settings.small_text != blank -%}
+                <div class="middle-strip-item">
+                  {%- if block.settings.large_text != blank -%}
+                    <span class="large-text">{{ block.settings.large_text | escape }}</span>
+                  {%- endif -%}
+                  {%- if block.settings.small_text != blank -%}
+                    <span class="small-text">{{ block.settings.small_text | escape }}</span>
+                  {%- endif -%}
+                </div>
+              {%- endif -%}
+            {%- endfor -%}
+          {%- endfor -%}
+        </div>
       </div>
     </div>
-  </div>
-  {% endif %}
+  {%- endif -%}
   
   <!-- Bottom Rotated Strip -->
-  {% assign bottom_blocks = section.blocks | where: 'type', 'bottom_strip_block' %}
-  {% if bottom_blocks.size > 0 %}
-  <div class="banner-strip bottom-strip">
-    <div class="scrolling-banner">
-      <div class="scrolling-text-slow-wrapper">
-        {% for i in (1..20) %}
-          {% for block in bottom_blocks %}
-            {% if block.settings.text != blank %}
-              <span class="text-item">{{ block.settings.text }}</span>
-              {% if block.settings.separator_image %}
-                <span class="separator">
-                  <img src="{{ block.settings.separator_image | image_url: width: 100 }}" 
-                       alt="separator" 
-                       loading="lazy"
-                       width="{{ section.settings.separator_size }}"
-                       height="{{ section.settings.separator_size }}">
-                </span>
-              {% endif %}
-            {% endif %}
-          {% endfor %}
-        {% endfor %}
+  {%- if bottom_blocks.size > 0 -%}
+    <div class="banner-strip bottom-strip">
+      <div class="scrolling-banner">
+        <div class="scrolling-text-slow-wrapper" 
+             role="marquee" 
+             aria-label="Bottom scrolling text">
+          {%- for i in (1..20) -%}
+            {%- for block in bottom_blocks -%}
+              {%- if block.settings.text != blank -%}
+                <span class="text-item">{{ block.settings.text | escape }}</span>
+                {%- if block.settings.separator_image -%}
+                  <span class="separator">
+                    <img src="{{ block.settings.separator_image | image_url: width: 100 }}" 
+                         alt="Separator"
+                         loading="lazy"
+                         width="{{ separator_size }}"
+                         height="{{ separator_size }}">
+                  </span>
+                {%- endif -%}
+              {%- endif -%}
+            {%- endfor -%}
+          {%- endfor -%}
+        </div>
       </div>
     </div>
-  </div>
-  {% endif %}
-</div>
+  {%- endif -%}
+</section>
 
 <script>
+  // Initialize scrolling text banner functionality
   document.addEventListener('DOMContentLoaded', function() {
-    const wrappers = document.querySelectorAll('.scrolling-text-wrapper, .scrolling-text-top-wrapper, .scrolling-text-slow-wrapper');
+    const scrollingWrappers = document.querySelectorAll('.scrolling-text-wrapper, .scrolling-text-top-wrapper, .scrolling-text-slow-wrapper');
     
-    wrappers.forEach(wrapper => {
-      const containerWidth = window.innerWidth;
-      const wrapperWidth = wrapper.scrollWidth;
-      
-      // Ensure we have enough content for seamless scrolling
-      if (wrapperWidth < containerWidth * 2) {
-        const content = wrapper.innerHTML;
-        wrapper.innerHTML = content + content;
-      }
+    function initializeScrollingBanner() {
+      scrollingWrappers.forEach(function(wrapper) {
+        const containerWidth = window.innerWidth;
+        const wrapperWidth = wrapper.scrollWidth;
+        
+        // Ensure we have enough content for seamless scrolling
+        if (wrapperWidth < containerWidth * 2) {
+          const content = wrapper.innerHTML;
+          wrapper.innerHTML = content + content;
+        }
+        
+        // Add focus management for accessibility
+        wrapper.addEventListener('focus', function() {
+          this.style.animationPlayState = 'paused';
+        });
+        
+        wrapper.addEventListener('blur', function() {
+          this.style.animationPlayState = 'running';
+        });
+        
+        // Ensure smooth animation start
+        wrapper.style.animationDelay = '0s';
+      });
+    }
+    
+    // Initialize on load
+    initializeScrollingBanner();
+    
+    // Reinitialize on window resize to maintain proper scrolling
+    let resizeTimeout;
+    window.addEventListener('resize', function() {
+      clearTimeout(resizeTimeout);
+      resizeTimeout = setTimeout(initializeScrollingBanner, 250);
     });
   });
 </script>
