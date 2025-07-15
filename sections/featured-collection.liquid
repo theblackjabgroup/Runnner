@@ -11,7 +11,7 @@
     {% if section.settings.heading != blank %}
       <div
         style="font-weight:500; color: var(--text);"
-        class="featured-collection-main-heading mb-[-10px]{% if section.settings.enable_letter_animation %} letter-animation{% endif %}"
+        class="featured-collection-main-heading mb-[-10px]{% if section.settings.enable_letter_animation %} fc-letter-animation{% endif %}"
       >
         {{ section.settings.heading }}
       </div>
@@ -19,7 +19,7 @@
 
     <div
       class="flex justify-between items-start w-full featured-collection-subheading"
-      style="padding-top: 10px; color: var(--text);"
+      style="padding-top: 10px; color: var(--text); padding-bottom: 8px;"
     >
       <div class="flex-grow md:text-[24px] text-2xl md:mt-[-20px]">
         {% if section.settings.description != blank %}
@@ -62,7 +62,7 @@
 
     <hr class="border-(--text) my-6" aria-hidden="true">
 
-    <div class="featured_collection_filters flex flex-col md:flex-row mt-10" style="gap:18px; margin-top:18px;">
+    <div class="featured_collection_filters flex flex-col md:flex-row mt-10" style="gap:18px; margin-top:25px;">
       <nav
         class="collections-container text-[24px] w-full md:w-[400px] min-w-[350px] order-1 md:order-none mb-4 md:mb-0"
         aria-label="Collection filters"
@@ -275,7 +275,16 @@
                                 </button>
                               {% else %}
                                 <img
-                                  src="{{ product.featured_image | img_url: '440x530', crop: 'center' }}"
+                                  srcset="
+                                    {%- if product.featured_image.width >= 165 -%}{{ product.featured_image | image_url: width: 165 }} 165w,{%- endif -%}
+                                    {%- if product.featured_image.width >= 360 -%}{{ product.featured_image | image_url: width: 360 }} 360w,{%- endif -%}
+                                    {%- if product.featured_image.width >= 535 -%}{{ product.featured_image | image_url: width: 535 }} 535w,{%- endif -%}
+                                    {%- if product.featured_image.width >= 750 -%}{{ product.featured_image | image_url: width: 750 }} 750w,{%- endif -%}
+                                    {%- if product.featured_image.width >= 1070 -%}{{ product.featured_image | image_url: width: 1070 }} 1070w,{%- endif -%}
+                                    {%- if product.featured_image.width >= 1500 -%}{{ product.featured_image | image_url: width: 1500 }} 1500w,{%- endif -%}
+                                    {{ product.featured_image | image_url }} {{ product.featured_image.width }}w
+                                  "
+                                  src="{{ product.featured_image | image_url: width: 750, crop: 'center' }}"
                                   alt="{{ product.title }}"
                                   class="fc-product-image"
                                   loading="lazy"
@@ -570,6 +579,7 @@
     }
 
     .sold-out{
+      font-weight: bold;
       padding: 0px 4px;
       border-radius: {{ settings.buttons_radius |  minus: 2 }}px;
       line-height: 20px;
@@ -668,7 +678,11 @@
       }
 
       .product-details .fc-product-title, .product-details .fc-product-price{
-        font-size: 13px;
+        font-size: 15px;
+      }
+
+      .product-details .fc-product-title{
+        padding-bottom: 5px;
       }
 
     .image-nav-arrow {
@@ -928,7 +942,7 @@
 
     .product-slider {
       display: flex;
-      gap: 18px;
+      gap: 26px;
       overflow-y: hidden;
     }
 
@@ -947,7 +961,7 @@
 
     .cursor-grab {
       cursor: grab;
-      padding-bottom: 12px;
+      padding-bottom: 16px;
     }
 
     .cursor-grabbing {
@@ -1020,7 +1034,7 @@
     .featured-collection-custom-button {
       position: relative;
       display: inline-block;
-      padding: 2px 7px;
+      padding: 2px 5px;
       background-color: rgb(var(--color-background));
       color: var(--text);
       border-radius: {{ settings.buttons_radius |  minus: 1 }}px;
@@ -1224,7 +1238,7 @@
         opacity: 1;
       }
     }
-    .letter-animation-container {
+    .fc-letter-animation-container {
       display: inline-block;
       width: 100%;
       overflow: visible;

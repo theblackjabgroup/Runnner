@@ -1,26 +1,4 @@
 <style>
-  .load-more-btn-fb-container {
-    margin-top: 50px;
-    display: flex;
-    justify-content: end;
-  }
-  
-  .load-more-btn-fb {
-    background-color: var(--text);
-    color: rgb(var(--color-background));
-    padding: 4px 10px;
-    border: 1px solid var(--text);
-    border-radius: {{ settings.buttons_radius }}px;
-    cursor: pointer;
-    font-size: 20px;
-    line-height: 1;
-    transition: background-color 0.3s;
-  }
-  .load-more-btn-fb:hover {
-    background-color: rgb(var(--color-background)); /* adjust if needed */
-    color: var(--text);
-    border: 1px solid var(--text);
-  }
   @media (max-width: 767px) {
     .blog-article{
       padding:0.75rem;
@@ -59,28 +37,6 @@
   .text-article-date-color {
     margin-top: 6px;
     margin-bottom: 7px;
-  }
-
-  #load-more-btn {
-    background-color: black;
-    color: white;
-    border: none;
-    padding: 10px 20px;
-    cursor: pointer;
-    font-size: 16px;
-    margin-top: 20px;
-    display: inline-block;
-  }
-
-  #load-more-btn:hover {
-    background-color: white;
-    color: black;
-    border: 1px solid black;
-  }
-
-  #load-more-btn:disabled {
-    background-color: #6c757d;
-    cursor: not-allowed;
   }
 
   :root {
@@ -162,6 +118,58 @@
   .show-articles {
     display: flex;
   }
+.load-more-btn-fb-container {
+  margin-top: 50px;
+  display: flex;
+  justify-content: end;
+}
+
+.load-more-btn-fb {
+  position: relative;
+  overflow: hidden;
+  padding: 10px 20px;
+  background-color: var(--text);
+  color: rgb(var(--color-background));
+  border: 1px solid var(--text);
+  border-radius: {{ settings.buttons_radius }}px;
+  font-size: 20px;
+  text-transform: uppercase;
+  cursor: pointer;
+  line-height: 0;
+  transition: background-color 0.3s, color 0.3s, border 0.3s;
+  width:138px;
+}
+.load-more-btn-fb:hover {
+  background-color: rgb(var(--color-background));
+  color: var(--text);
+  border: 1px solid var(--text);
+}
+.load-more-text-container {
+  position: relative;
+  display: inline-block;
+  width: 100%;
+  height: 100%;
+}
+.load-more-text,
+.load-more-text-hover {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  transition: transform 0.7s ease;
+  white-space: nowrap;
+}
+.load-more-text-hover {
+  transform: translate(50%, -50%);
+}
+.load-more-btn-fb:hover .load-more-text {
+  transform: translate(-150%, -50%);
+}
+
+.load-more-btn-fb:hover .load-more-text-hover {
+  transform: translate(-50%, -50%);
+}
+
 </style>
 
 <script>
@@ -258,9 +266,15 @@
 
     {% assign remaining_articles = articles_count | minus: articles_limit %}
     {% if remaining_articles > 0 %}
-     <div class="load-more-btn-fb-container">
-       <button id="load-more-btn-fb" class="load-more-btn-fb" data-articles-per-load="6">LOAD MORE</button>
-      </div>
+    <div class="load-more-btn-fb-container" style="margin-bottom:40px;">
+  <button id="load-more-btn-fb" class="load-more-btn-fb">
+    <span class="load-more-text-container">
+      <span class="load-more-text" style=margin-left:5px;>LOAD MORE &nbsp;</span>
+      <span class="load-more-text-hover">&nbsp;LOAD MORE</span>
+    </span>
+  </button>
+</div>
+
     {% endif %}
   </div>
 </section>

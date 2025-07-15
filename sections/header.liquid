@@ -1,9 +1,9 @@
 <header
-  class="header-main bg-[var(--header_background)] transform-gpu {% unless section.settings.enable_sticky %}sticky-disabled{% endunless %}"
+  class="header-main relative bg-[var(--header_background)] transform-gpu {% unless section.settings.enable_sticky %}sticky-disabled{% endunless %}"
   data-header-sticky
   style="z-index: 999; "
 >
-  <div class="relative w-full flex items-center justify-between ">
+  <div class=" w-full flex items-center justify-between ">
     <!-- Left: Logo -->
     <div class="flex items-center justify-center  ">
       <a href="/">
@@ -75,22 +75,10 @@
                   <!-- sub-menu dropdown -->
                   <div
                     id="mega-menu-{{ forloop.index }}"
+                    class="mega-menu-dropdown"
                     role="region"
                     aria-label="{{ link.title }} submenu"
-                    class="
-                      fixed left-0 right-0 w-full
-                      opacity-0 pointer-events-none
-                    "
-                    style="
-                      background: var(--header_background);
-                      top: 100%;
-                      padding-top: 0px;
-                      transform: translateY(-300px);
-                      transition-property: opacity, transform;
-                      transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
-                      transition-duration: 800ms;
-                      z-index: 995 !important;
-                    "
+                    style="display: none; "
                   >
                     <div class="mx-auto p-2  flex">
                       <ul class="flex justify-start gap-8 m-2 w-1/2">
@@ -251,18 +239,7 @@
                         <!-- First set of content -->
                         {% for i in (1..section.settings.repeat_count) %}
                           <span class="scrolling-text-item">{{ section.settings.scrolling_text }}</span>
-                          <img
-                            class="scrolling-separator"
-                            src="{{ section.settings.separator_image | image_url }}"
-                            alt="separator"
-                            height="100%"
-                            width="100%"
-                          >
-                        {% endfor %}
-                        <!-- Duplicate set for seamless infinite scrolling -->
-                        {% for i in (1..section.settings.repeat_count) %}
-                          <span class="scrolling-text-item">{{ section.settings.scrolling_text }}</span>
-                          {% unless forloop.last %}
+                          {% if section.settings.separator_image != blank %}
                             <img
                               class="scrolling-separator"
                               src="{{ section.settings.separator_image | image_url }}"
@@ -270,6 +247,25 @@
                               height="100%"
                               width="100%"
                             >
+                          {% else %}
+                            <span class=" text-[var(--header_text)] px-2">–</span>
+                          {% endif %}
+                        {% endfor %}
+                        <!-- Duplicate set for seamless infinite scrolling -->
+                        {% for i in (1..section.settings.repeat_count) %}
+                          <span class="scrolling-text-item">{{ section.settings.scrolling_text }}</span>
+                          {% unless forloop.last %}
+                            {% if section.settings.separator_image != blank %}
+                              <img
+                                class="scrolling-separator"
+                                src="{{ section.settings.separator_image | image_url }}"
+                                alt="separator"
+                                height="100%"
+                                width="100%"
+                              >
+                            {% else %}
+                              <span class="scrolling-separator text-[var(--header_text)] px-2">–</span>
+                            {% endif %}
                           {% endunless %}
                         {% endfor %}
                       </div>
@@ -325,7 +321,7 @@
                 class="searchbox-container mx-auto w-full "
               >
                 <form
-                  action="/search"
+                  action="{{ routes.search_url }}"
                   method="get"
                   class="flex items-center gap-4 w-full mx-2 "
                   role="search"
@@ -377,17 +373,17 @@
                   >
                   <div class="flex flex-wrap gap-4">
                     <a
-                      href="/search?q=new"
+                      href="{{ routes.search_url }}?q=new"
                       class="px-1 bg-gray-400 hover:bg-black  hover:text-white transition-colors duration-200 rounded-md text-[16px] lg:text-[20px] font-medium "
                       >New Arrivals</a
                     >
                     <a
-                      href="/search?q=sale"
+                      href="{{ routes.search_url }}?q=sale"
                       class="px-1 bg-gray-400 hover:bg-black hover:text-white transition-colors duration-200 rounded-md text-[16px] lg:text-[20px] font-medium"
                       >Sale</a
                     >
                     <a
-                      href="/search?q=bestsellers"
+                      href="{{ routes.search_url }}?q=bestsellers"
                       class="px-1 bg-gray-400 hover:bg-black hover:text-white transition-colors duration-200 rounded-md text-[16px] lg:text-[20px] font-medium"
                       >Bestsellers</a
                     >
@@ -472,7 +468,7 @@
 
           <!-- Login -->
           <a
-            href="/account/login"
+            href="{{routes.account_login_url }}"
             class="hidden lg:!inline-flex items-center gap-2 rounded-xl px-2  text-[16px] text-[var(--header_text)] hover:text-gray-700 "
             aria-label="Login"
           >
@@ -850,11 +846,12 @@
                 </li>
               {% endfor %}
             </ul>
+            ss
           </div>
         </div>
 
         <a
-          href="/account/login"
+          href="{{ routes.account_login_url }}"
           class="inline-flex items-center rounded-xl px-2 "
           style="width: min-content;  background: var(--header_text); color: var(--header_background);"
           aria-label="Login"
@@ -1134,7 +1131,7 @@
           transform: translateY(-100%);
           animation: slideDown 0.5s ease forwards;
           background: var(--header_background);
-          padding: 5px 1vw;
+          padding: 5px {{ settings.side_space }}px;
         }
 
         @keyframes slideDown {
@@ -1152,7 +1149,6 @@
           left: 0;
           right: 0;
           transform: translateY(0);
-          box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
         }
 
         .header-main.is-sticky.is-hidden {
@@ -1176,6 +1172,26 @@
         .sticky-disabled + .header-offset {
           display: none !important;
         }
+
+        .mega-menu-dropdown {
+          position: absolute;
+          top: 85%;
+          left: 0;
+          right: 0;
+          z-index: 998;
+          background: var(--header_background);
+          overflow: hidden;
+          pointer-events: none;
+          max-height: 0;
+          transition: max-height 800ms cubic-bezier(0.4,0,0.2,1);
+        }
+
+        .mega-menu-dropdown.open {
+          pointer-events: auto;
+          max-height: 60vh;
+        }
+
+
 
         /* Mobile submenu scrollbar styling */
         .submenu.styled-scrollbar {
@@ -1237,234 +1253,255 @@
         #mobile-menu.active {
           transform: translateX(0) !important;
         }
-
-        .h-vertical-text-container {
-          width: 26px;
-          overflow: hidden;
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          justify-content: center;
-        }
-
-        .h-vertical-text {
-          writing-mode: vertical-rl;
-          text-orientation: mixed;
-          transform: rotate(180deg);
-          animation: scrollText 50s linear infinite;
-          font-size: 16px;
-          white-space: nowrap;
-          padding: 0;
-        }
-
-        .vertical-text:nth-child(n) {
-          animation: scrollText2 50s linear infinite;
-        }
-
-        @keyframes scrollText {
-          0% {
-            transform: translateY(0) rotate(180deg);
-          }
-          100% {
-            transform: translateY(-100%) rotate(180deg);
-          }
-        }
-
-        @keyframes scrollText2 {
-          0% {
-            transform: translateY(100%) rotate(180deg);
-          }
-          100% {
-            transform: translateY(0) rotate(180deg);
-          }
-        }
-
-        .horizontal-text-container {
-          position: fixed;
-          top: 100%;
-          left: 0;
-          width: 100%;
-          height: 33px;
-          overflow: hidden;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          border-top: 1px solid var(--header_text);
-          border-bottom: 1px solid var(--header_text);
-          background: var(--header_background);
-          z-index: 995;
-        }
-
-        .horizontal-text {
-          white-space: nowrap;
-          font-size: 24px;
-          display: inline-block;
-          animation: scrollRight 80s linear infinite;
-          height: 100%;
-          line-height: 32px;
-          font-weight: 500;
-        }
-
-        .horizontal-text:nth-child(n) {
-          animation: scrollRight2 80s linear infinite;
-        }
-
-        @keyframes scrollRight {
-          0% {
-            transform: translateX(-100%);
-          }
-          100% {
-            transform: translateX(100%);
-          }
-        }
-
-        @keyframes scrollRight2 {
-          0% {
-            transform: translateX(-100%);
-          }
-          100% {
-            transform: translateX(100%);
-          }
-        }
 </style>
 
 <script>
   document.addEventListener('DOMContentLoaded', function () {
-// horizontal Scrolling Text Section
-const scrollingSection = document.getElementById('scrolling-text-{{ section.id }}');
-const scrollingContainer = scrollingSection.querySelector('.scrolling-text-container');
+    
+    /* -- sub menu logic -- */
+document.querySelectorAll('.dropdown-group').forEach(group => {
+  const trigger = group.querySelector('a');
+  const menu    = group.querySelector('.mega-menu-dropdown');
+  if (!menu) return;
 
-// Check if we're on mobile
-function isMobile() {
-  return window.innerWidth <= 768;
-}
+  // track currently open menu
+  if (typeof window._currentOpenMenu === 'undefined') {
+    window._currentOpenMenu = null;
+  }
 
-// Set initial position based on direction and device type
-function setInitialPosition() {
-  const direction = scrollingContainer.getAttribute('data-direction');
-  const mobile = isMobile();
-  
-  if (mobile) {
-    // Mobile vertical scrolling
-    if (direction === 'right') {
-      scrollingContainer.style.transform = 'translateY(-50%)';
-    } else {
-      scrollingContainer.style.transform = 'translateY(0%)';
+  let closeTimer = null;
+
+  // when the max-height transition finishes and we're closed, actually hide & disable interactions
+  menu.addEventListener('transitionend', function onEnd(e) {
+    if (e.propertyName === 'max-height' && !menu.classList.contains('open')) {
+      menu.style.display        = 'none';
+      menu.style.pointerEvents  = 'none';
+      window._currentOpenMenu   = null;
     }
-  } else {
-    // Desktop horizontal scrolling
-    if (direction === 'right') {
-      scrollingContainer.style.transform = 'translateX(-50%)';
-    } else {
-      scrollingContainer.style.transform = 'translateX(0%)';
+  });
+
+  function doOpen(m) {
+    // make sure it's in the layout
+    m.style.display        = 'block';
+    m.style.pointerEvents  = 'auto';
+    m.offsetHeight; // force reflow
+    m.classList.add('open');
+    window._currentOpenMenu = m;
+  }
+
+  function openMenu() {
+    clearTimeout(closeTimer);
+
+    const old = window._currentOpenMenu;
+    if (old && old !== menu) {
+      // close the old one first, then open ours
+      old.classList.remove('open');
+      old.addEventListener('transitionend', function handler(e) {
+        if (e.propertyName === 'max-height' && !old.classList.contains('open')) {
+          old.removeEventListener('transitionend', handler);
+          doOpen(menu);
+        }
+      });
+    } else if (old !== menu) {
+      doOpen(menu);
     }
   }
 
-  // Force a reflow and restart animation
-  scrollingContainer.style.animation = 'none';
-  scrollingContainer.offsetHeight; // Trigger reflow
-  
-  if (mobile) {
-    const animationName = direction === 'left' ? 'scroll-bottom-to-top' : 'scroll-top-to-bottom';
-    scrollingContainer.style.animation = `${animationName} {{ section.settings.speed }}s linear infinite`;
-  } else {
-    scrollingContainer.style.animation = `scroll-${direction} {{ section.settings.speed }}s linear infinite`;
+  function closeMenu() {
+    menu.classList.remove('open');
+    // pointer-events will get turned off in the transitionend above
   }
-}
 
-// Initialize on load
-setInitialPosition();
+  // when you leave trigger or submenu start a 150 ms timer to close
+  trigger.addEventListener('mouseleave', () => {
+    clearTimeout(closeTimer);
+    closeTimer = setTimeout(closeMenu, 150);
+  });
+  menu.addEventListener('mouseleave', () => {
+    clearTimeout(closeTimer);
+    closeTimer = setTimeout(closeMenu, 150);
+  });
 
-// Handle window resize to switch between mobile and desktop
-function handleResize() {
-  setInitialPosition();
-}
-
-// Add resize listener with debounce
-let resizeTimeout;
-window.addEventListener('resize', function() {
-  clearTimeout(resizeTimeout);
-  resizeTimeout = setTimeout(handleResize, 150);
+  // as soon as you re-enter either area cancel that close
+  trigger.addEventListener('mouseenter', openMenu);
+  menu.addEventListener('mouseenter', openMenu);
 });
 
-// Calculate optimal repeat count based on text length and device type
-function calculateOptimalRepeats() {
-  const textLength = '{{ section.settings.scrolling_text }}'.length;
-  const estimatedImageWidth = {{ section.settings.font_size }} * 1.5;
-  const separatorSpacing = {{ section.settings.separator_spacing }} * 2;
-  
-  let totalLength;
-  if (isMobile()) {
-    // For mobile vertical, consider height rather than width
-    totalLength = textLength + (estimatedImageWidth + separatorSpacing) / 15;
-  } else {
-    totalLength = textLength + (estimatedImageWidth + separatorSpacing) / 10;
-  }
 
-  const minRepeats = Math.max(8, Math.ceil(200 / totalLength));
-  return Math.min(minRepeats, 20);
-}
 
-// Dynamic speed control
-function updateScrollSpeed(speed) {
-  scrollingContainer.style.animationDuration = speed + 's';
-}
-
-// Dynamic direction control
-function updateScrollDirection(direction) {
-  scrollingContainer.setAttribute('data-direction', direction);
-  const mobile = isMobile();
-  
-  if (mobile) {
-    const animationName = direction === 'left' ? 'scroll-bottom-to-top' : 'scroll-top-to-bottom';
-    scrollingContainer.style.animationName = animationName;
-  } else {
-    scrollingContainer.style.animationName = 'scroll-' + direction;
-  }
-  
-  setInitialPosition();
-}
-
-// Pause/resume functionality
-function pauseScroll() {
-  scrollingContainer.style.animationPlayState = 'paused';
-}
-
-function resumeScroll() {
-  scrollingContainer.style.animationPlayState = 'running';
-}
-
-// Image loading optimization
-function optimizeImageLoading() {
-  const separatorImages = scrollingContainer.querySelectorAll('.scrolling-separator');
-  separatorImages.forEach(img => {
-    if (!img.hasAttribute('loading')) {
-      img.setAttribute('loading', 'lazy');
-    }
     
-    img.addEventListener('error', function() {
-      console.warn('Scrolling separator image failed to load:', this.src);
-      this.style.display = 'none';
+
+    /* -- bottom bar indicator logic -- */
+    const bottomBarIndicator = document.getElementById('bottom-bar-indicator');
+    const menuItems = document.querySelectorAll('.menu-items ul > li.dropdown-group');
+    let indicatorTimeout = null;
+
+    if (bottomBarIndicator) {
+      bottomBarIndicator.style.width = '100%';
+      bottomBarIndicator.style.transform = 'translateX(0)';
+    }
+
+    menuItems.forEach((item) => {
+      const link = item.querySelector('a');
+
+      item.addEventListener('mouseenter', () => {
+        if (indicatorTimeout) clearTimeout(indicatorTimeout);
+        const rect = link.getBoundingClientRect();
+        const containerRect = item.closest('.menu-items').getBoundingClientRect();
+        const left = rect.left - containerRect.left;
+        const width = rect.width;
+
+        bottomBarIndicator.style.transform = `translateX(${left}px) translateY(-6px)`;
+        bottomBarIndicator.style.width = `${width}px`;
+      });
+
+      item.addEventListener('mouseleave', (e) => {
+        const related = e.relatedTarget;
+        if (!item.contains(related)) {
+          indicatorTimeout = setTimeout(() => {
+            bottomBarIndicator.style.width = '100%';
+            bottomBarIndicator.style.transform = 'translateX(0) translateY(0px)';
+          }, 100);
+        }
+      });
     });
-  });
-}
 
-// Initialize image optimization
-optimizeImageLoading();
 
-// Add methods to global scope for external control
-window.ScrollingText = window.ScrollingText || {};
-window.ScrollingText['section-{{ section.id }}'] = {
-  updateSpeed: updateScrollSpeed,
-  updateDirection: updateScrollDirection,
-  pause: pauseScroll,
-  resume: resumeScroll,
-  element: scrollingSection,
-  calculateOptimalRepeats: calculateOptimalRepeats,
-  resetPosition: setInitialPosition,
-  optimizeImages: optimizeImageLoading,
-  isMobile: isMobile
-};
+    // horizontal Scrolling Text Section
+    const scrollingSection = document.getElementById('scrolling-text-{{ section.id }}');
+    const scrollingContainer = scrollingSection.querySelector('.scrolling-text-container');
+
+    // Check if we're on mobile
+    function isMobile() {
+      return window.innerWidth <= 768;
+    }
+
+    // Set initial position based on direction and device type
+    function setInitialPosition() {
+      const direction = scrollingContainer.getAttribute('data-direction');
+      const mobile = isMobile();
+      
+      if (mobile) {
+        // Mobile vertical scrolling
+        if (direction === 'right') {
+          scrollingContainer.style.transform = 'translateY(-50%)';
+        } else {
+          scrollingContainer.style.transform = 'translateY(0%)';
+        }
+      } else {
+        // Desktop horizontal scrolling
+        if (direction === 'right') {
+          scrollingContainer.style.transform = 'translateX(-50%)';
+        } else {
+          scrollingContainer.style.transform = 'translateX(0%)';
+        }
+      }
+
+      // Force a reflow and restart animation
+      scrollingContainer.style.animation = 'none';
+      scrollingContainer.offsetHeight; // Trigger reflow
+      
+      if (mobile) {
+        const animationName = direction === 'left' ? 'scroll-bottom-to-top' : 'scroll-top-to-bottom';
+        scrollingContainer.style.animation = `${animationName} {{ section.settings.speed }}s linear infinite`;
+      } else {
+        scrollingContainer.style.animation = `scroll-${direction} {{ section.settings.speed }}s linear infinite`;
+      }
+    }
+
+    // Initialize on load
+    setInitialPosition();
+
+    // Handle window resize to switch between mobile and desktop
+    function handleResize() {
+      setInitialPosition();
+    }
+
+    // Add resize listener with debounce
+    let resizeTimeout;
+    window.addEventListener('resize', function() {
+      clearTimeout(resizeTimeout);
+      resizeTimeout = setTimeout(handleResize, 150);
+    });
+
+    // Calculate optimal repeat count based on text length and device type
+    function calculateOptimalRepeats() {
+      const textLength = '{{ section.settings.scrolling_text }}'.length;
+      const estimatedImageWidth = {{ section.settings.font_size }} * 1.5;
+      const separatorSpacing = {{ section.settings.separator_spacing }} * 2;
+      
+      let totalLength;
+      if (isMobile()) {
+        // For mobile vertical, consider height rather than width
+        totalLength = textLength + (estimatedImageWidth + separatorSpacing) / 15;
+      } else {
+        totalLength = textLength + (estimatedImageWidth + separatorSpacing) / 10;
+      }
+
+      const minRepeats = Math.max(8, Math.ceil(200 / totalLength));
+      return Math.min(minRepeats, 20);
+    }
+
+    // Dynamic speed control
+    function updateScrollSpeed(speed) {
+      scrollingContainer.style.animationDuration = speed + 's';
+    }
+
+    // Dynamic direction control
+    function updateScrollDirection(direction) {
+      scrollingContainer.setAttribute('data-direction', direction);
+      const mobile = isMobile();
+      
+      if (mobile) {
+        const animationName = direction === 'left' ? 'scroll-bottom-to-top' : 'scroll-top-to-bottom';
+        scrollingContainer.style.animationName = animationName;
+      } else {
+        scrollingContainer.style.animationName = 'scroll-' + direction;
+      }
+      
+      setInitialPosition();
+    }
+
+    // Pause/resume functionality
+    function pauseScroll() {
+      scrollingContainer.style.animationPlayState = 'paused';
+    }
+
+    function resumeScroll() {
+      scrollingContainer.style.animationPlayState = 'running';
+    }
+
+    // Image loading optimization
+    function optimizeImageLoading() {
+      const separatorImages = scrollingContainer.querySelectorAll('.scrolling-separator');
+      separatorImages.forEach(img => {
+        if (!img.hasAttribute('loading')) {
+          img.setAttribute('loading', 'lazy');
+        }
+        
+        img.addEventListener('error', function() {
+          console.warn('Scrolling separator image failed to load:', this.src);
+          this.style.display = 'none';
+        });
+      });
+    }
+
+    // Initialize image optimization
+    optimizeImageLoading();
+
+    // Add methods to global scope for external control
+    window.ScrollingText = window.ScrollingText || {};
+    window.ScrollingText['section-{{ section.id }}'] = {
+      updateSpeed: updateScrollSpeed,
+      updateDirection: updateScrollDirection,
+      pause: pauseScroll,
+      resume: resumeScroll,
+      element: scrollingSection,
+      calculateOptimalRepeats: calculateOptimalRepeats,
+      resetPosition: setInitialPosition,
+      optimizeImages: optimizeImageLoading,
+      isMobile: isMobile
+    };
 
 
     // mobile menu toggle
@@ -1625,14 +1662,6 @@ window.ScrollingText['section-{{ section.id }}'] = {
         isFixed = true;
       }
 
-      // if (isFixed) {
-      //   if (currentScroll > lastScroll + 10) {
-      //     header.classList.add('is-hidden');
-      //   } else if (currentScroll < lastScroll - 10) {
-      //     header.classList.remove('is-hidden');
-      //   }
-      // }
-
       lastScroll = currentScroll;
     };
 
@@ -1739,184 +1768,7 @@ window.ScrollingText['section-{{ section.id }}'] = {
       }
     });
 
-    // Bottom Bar Indicator Logic
-    const bottomBarIndicator = document.getElementById('bottom-bar-indicator');
-    const menuItems = document.querySelectorAll('.menu-items ul > li.dropdown-group');
-    const dropdownGroups = document.querySelectorAll('.dropdown-group');
-    const megaMenuOverlay = document.getElementById('mega-menu-overlay');
 
-    let hoverCount = 0;
-    let activeTimeout = null;
-    let indicatorTimeout = null;
-
-    // Initialize bottom bar
-    if (bottomBarIndicator) {
-      bottomBarIndicator.style.width = '100%';
-      bottomBarIndicator.style.transform = 'translateX(0)';
-    }
-
-    // Bottom bar indicator logic with debouncing
-    menuItems.forEach((item) => {
-      const link = item.querySelector('a');
-
-      item.addEventListener('mouseenter', () => {
-        // Clear any pending reset
-        if (indicatorTimeout) {
-          clearTimeout(indicatorTimeout);
-          indicatorTimeout = null;
-        }
-
-        const rect = link.getBoundingClientRect();
-        const containerRect = item.closest('.menu-items').getBoundingClientRect();
-        const left = rect.left - containerRect.left;
-        const width = rect.width;
-
-        bottomBarIndicator.style.transform = `translateX(${left}px) translateY(-6px)`;
-        bottomBarIndicator.style.width = `${width}px`;
-      });
-
-      item.addEventListener('mouseleave', (e) => {
-        // Only reset if we're not moving to a child element (like the submenu)
-        const relatedTarget = e.relatedTarget;
-        if (!item.contains(relatedTarget)) {
-          // Delay the reset to prevent flickering
-          indicatorTimeout = setTimeout(() => {
-            bottomBarIndicator.style.width = `100%`;
-            bottomBarIndicator.style.transform = `translateX(0) translateY(0px)`;
-          }, 100);
-        }
-      });
-    });
-
-    // Keep track of currently active dropdown
-    let currentActiveGroup = null;
-
-    // Function to close all dropdowns except the specified one
-    const closeAllDropdowns = (exceptGroup = null) => {
-      dropdownGroups.forEach((group) => {
-        if (group !== exceptGroup) {
-          const megaMenu = group.querySelector('[id^="mega-menu-"]');
-          if (megaMenu) {
-            group.classList.remove('active-submenu');
-            megaMenu.style.opacity = '0';
-            megaMenu.style.transform = 'translateY(-300px)';
-            megaMenu.style.pointerEvents = 'none';
-          }
-        }
-      });
-
-      // Reset hover count when closing all
-      if (!exceptGroup) {
-        hoverCount = 0;
-        currentActiveGroup = null;
-        if (megaMenuOverlay) {
-          megaMenuOverlay.classList.add('opacity-0', 'pointer-events-none');
-          megaMenuOverlay.classList.remove('opacity-50');
-        }
-      }
-    };
-
-    // Dropdown menu logic with proper single-dropdown management
-    dropdownGroups.forEach((group) => {
-      const megaMenu = group.querySelector('[id^="mega-menu-"]');
-
-      if (megaMenu) {
-        // Create a hover area that includes both the menu item and dropdown
-        const hoverArea = {
-          element: group,
-          isHovering: false,
-        };
-
-        const showDropdown = () => {
-          // Clear any pending timeouts
-          if (activeTimeout) {
-            clearTimeout(activeTimeout);
-            activeTimeout = null;
-          }
-
-          // Close other dropdowns first
-          if (currentActiveGroup && currentActiveGroup !== group) {
-            closeAllDropdowns();
-          }
-
-          // Set this as the active group
-          currentActiveGroup = group;
-          hoverCount = 1; // Reset to 1 since only one should be active
-          hoverArea.isHovering = true;
-          group.classList.add('active-submenu');
-
-          if (megaMenuOverlay) {
-            megaMenuOverlay.classList.remove('opacity-0', 'pointer-events-none');
-            megaMenuOverlay.classList.add('opacity-50');
-          }
-
-          requestAnimationFrame(() => {
-            megaMenu.style.opacity = '1';
-            megaMenu.style.transform = 'translateY(0)';
-            megaMenu.style.pointerEvents = 'auto';
-          });
-        };
-
-        const hideDropdown = () => {
-          hoverArea.isHovering = false;
-
-          // Small delay to allow mouse to move to submenu
-          activeTimeout = setTimeout(() => {
-            if (!hoverArea.isHovering) {
-              group.classList.remove('active-submenu');
-
-              megaMenu.style.opacity = '0';
-              megaMenu.style.transform = 'translateY(-300px)';
-              megaMenu.style.pointerEvents = 'none';
-
-              // If this was the active group, clear it
-              if (currentActiveGroup === group) {
-                currentActiveGroup = null;
-                hoverCount = 0;
-
-                if (megaMenuOverlay) {
-                  megaMenuOverlay.classList.add('opacity-0', 'pointer-events-none');
-                  megaMenuOverlay.classList.remove('opacity-50');
-                }
-              }
-            }
-          }, 150);
-        };
-
-        // Main menu item events
-        group.addEventListener('mouseenter', showDropdown);
-        group.addEventListener('mouseleave', (e) => {
-          // Check if mouse is moving to the submenu
-          const relatedTarget = e.relatedTarget;
-          if (!group.contains(relatedTarget) && !megaMenu.contains(relatedTarget)) {
-            hideDropdown();
-          }
-        });
-
-        // Submenu events
-        megaMenu.addEventListener('mouseenter', () => {
-          hoverArea.isHovering = true;
-          if (activeTimeout) {
-            clearTimeout(activeTimeout);
-            activeTimeout = null;
-          }
-        });
-
-        megaMenu.addEventListener('mouseleave', (e) => {
-          const relatedTarget = e.relatedTarget;
-          if (!group.contains(relatedTarget)) {
-            hideDropdown();
-          }
-        });
-      }
-    });
-
-    // Handle clicks outside to close dropdowns
-    document.addEventListener('click', (e) => {
-      if (!e.target.closest('.dropdown-group')) {
-        closeAllDropdowns();
-      }
-    });
   });
 </script>
 

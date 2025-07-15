@@ -12,113 +12,176 @@
 <script src="{{ 'quantity-popover.js' | asset_url }}" defer="defer"></script>
 
 <style>
-  .drawer {
-    visibility: hidden;
-  }
-  @media only screen and (max-width: 600px) {
+    .cart-drawer .cart-item > td + td{
+        padding-left:0 !important;
+    }
+    .drawer {
+      visibility: hidden;
+    }
+    .svg-wrapper {
+      font-weight: 600;
+  font-size:20px}
+    @media only screen and (max-width: 600px) {
+      .vertical-text-cart-drawer-container {
+        width: 25px !important;
+      }
+      .vertical-text-cart-drawer {
+        font-size: 15px !important;
+        padding: 0px 0 !important;
+      }
+    }
     .vertical-text-cart-drawer-container {
-      width: 25px !important;
+      position: fixed;
+      left: 0px;
+      top: 0;
+      bottom: 0;
+      width: 40px;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      border: 1px solid black;
     }
+
     .vertical-text-cart-drawer {
-      font-size: 15px !important;
-      padding: 0px 0 !important;
+      position: absolute;
+      writing-mode: vertical-rl;
+      text-orientation: mixed;
+      transform: rotate(180deg);
+      animation: scrollText {{ settings.scroll_speed }}s linear infinite !important;
+      color: black !important;
+      font-size: 24px;
+      white-space: nowrap;
     }
-  }
-  .vertical-text-cart-drawer-container {
-    position: fixed;
-    left: 0px;
-    top: 0;
-    bottom: 0;
-    width: 40px;
-    overflow: hidden;
-    display: flex;
-    align-items: center;
-    border: 1px solid black;
-  }
 
-  .vertical-text-cart-drawer {
-    position: absolute;
-    writing-mode: vertical-rl;
-    text-orientation: mixed;
-    transform: rotate(180deg);
-    animation: scrollText {{ settings.scroll_speed }}s linear infinite !important;
-    color: black !important;
-    font-size: 24px;
-    white-space: nowrap;
-  }
+    .vertical-text-cart-drawer:nth-child(2) {
+      animation: scrollText2 {{ settings.scroll_speed }}s linear infinite !important;
+    }
 
-  .vertical-text-cart-drawer:nth-child(2) {
-    animation: scrollText2 {{ settings.scroll_speed }}s linear infinite !important;
-  }
-
-  .vertical-text-cart-drawer .separator-image {
-    width: 20px;
-    height: 20px;
-    object-fit: contain;
-    margin: 0 5px;
-    display: inline-block;
-    vertical-align: middle;
-  }
-
-  @media only screen and (max-width: 600px) {
     .vertical-text-cart-drawer .separator-image {
-      width: 15px;
-      height: 15px;
+      width: 20px;
+      height: 20px;
+      object-fit: contain;
+      margin: 0 5px;
+      display: inline-block;
+      vertical-align: middle;
     }
-  }
 
-  @keyframes scrollText {
-    0% {
-      transform: translateY(0) rotate(180deg);
+    @media only screen and (max-width: 600px) {
+      .vertical-text-cart-drawer .separator-image {
+        width: 15px;
+        height: 15px;
+      }
     }
-    100% {
-      transform: translateY(-100%) rotate(180deg);
+
+    @keyframes scrollText {
+      0% {
+        transform: translateY(0) rotate(180deg);
+      }
+      100% {
+        transform: translateY(-100%) rotate(180deg);
+      }
     }
-  }
 
-  @keyframes scrollText2 {
-    0% {
-      transform: translateY(100%) rotate(180deg);
+    @keyframes scrollText2 {
+      0% {
+        transform: translateY(100%) rotate(180deg);
+      }
+      100% {
+        transform: translateY(0) rotate(180deg);
+      }
     }
-    100% {
-      transform: translateY(0) rotate(180deg);
+
+    /* Hide the default radio */
+    .pricing-option [type='radio'] {
+      -webkit-appearance: none;
+      background-color: #fff;
+      border: 2px solid #111;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      position: relative;
+      outline: none;
+      cursor: pointer;
+      margin-right: 10px;
+      transition: border-color 0.2s;
+      vertical-align: middle;
+      box-sizing: border-box;
     }
-  }
 
-  /* Hide the default radio */
-  .pricing-option [type='radio'] {
-    -webkit-appearance: none;
-    background-color: #fff;
-    border: 2px solid #111;
-    width: 20px;
-    height: 20px;
-    border-radius: 50%;
-    position: relative;
-    outline: none;
-    cursor: pointer;
-    margin-right: 10px;
-    transition: border-color 0.2s;
-    vertical-align: middle;
-    box-sizing: border-box;
-  }
+    /* Only show the black dot when checked */
+    .pricing-option input[type='radio']:checked::before {
+      content: '';
+      display: block;
+      width: 10px;
+      height: 10px;
+      background: #111;
+      border-radius: 50%;
+      position: absolute;
+      top: 3px;
+      left: 3px;
+    }
 
-  /* Only show the black dot when checked */
-  .pricing-option input[type='radio']:checked::before {
-    content: '';
-    display: block;
-    width: 10px;
-    height: 10px;
-    background: #111;
-    border-radius: 50%;
-    position: absolute;
-    top: 3px;
-    left: 3px;
-  }
+    /* Optional: focus state */
+    .pricing-option input[type='radio']:focus {
+      box-shadow: 0 0 0 2px #1112;
+    }
 
-  /* Optional: focus state */
-  .pricing-option input[type='radio']:focus {
-    box-shadow: 0 0 0 2px #1112;
-  }
+    /* Quantity button hover effects */
+    .quantity__button:hover {
+      background-color: #f5f5f5 !important;
+    }
+
+    /* Checkout button hover effects */
+    #CartDrawer-Checkout {
+      position: relative;
+      overflow: hidden;
+      transition: background-color 0.3s ease, color 0.3s ease, border 0.3s ease;
+      border: 2px solid black;
+      background-color: black !important;
+      color: white !important;
+    }
+
+    #CartDrawer-Checkout:hover {
+      background-color: white !important;
+      color: black !important;
+      border: 2px solid black !important;
+    }
+
+    #CartDrawer-Checkout:hover svg path {
+      stroke: black !important;
+    }
+
+    .checkout-button-text-container {
+      position: relative;
+      width: 100%;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+    }
+
+    .checkout-button-text {
+      display: flex;
+      align-items: center;
+      transition: transform 0.3s ease;
+    }
+
+    #CartDrawer-Checkout:hover .checkout-button-text {
+      transform: translateX(-100%);
+    }
+
+    .checkout-button-text-hover {
+      position: absolute;
+      top: 0;
+      left: 0;
+      display: flex;
+      align-items: center;
+      transform: translateX(100%);
+      transition: transform 0.3s ease;
+    }
+
+    #CartDrawer-Checkout:hover .checkout-button-text-hover {
+      transform: translateX(0);
+    }
 </style>
 
 <cart-drawer class="drawer {% if cart == empty %} is-empty{% endif %}">
@@ -205,16 +268,16 @@
         </div>
       {%- endif -%}
       <div class="drawer__header border-b !py-[1.5rem]">
-        <h2 class="drawer__heading md:!text-[2.5rem] !text-[1.5rem] !font-normal !mb-0">
+        <h2 class="drawer__heading !text-[16px] !font-normal !mb-0">
           {{ 'sections.cart.title' | t }} ({{ cart.item_count }})
         </h2>
         <button
-          class="drawer__close"
+          class="drawer__close  !text-[16px]"
           type="button"
           onclick="this.closest('cart-drawer').close()"
           aria-label="{{ 'accessibility.close' | t }}"
         >
-          <span class="svg-wrapper uppercase !mr-[25px]  md:mb-3 mb-6 md:!text-[1.7rem] !text-[1.1rem]"> close </span>
+          <span class=" uppercase !mr-[25px]  md:mb-3 mb-6  !text-[16px]"> close </span>
         </button>
       </div>
       <cart-drawer-items
@@ -319,9 +382,7 @@
                                             | escape
                                           -}}
                                         </span>
-                                        <span class="svg-wrapper">
-                                          {{- 'icon-minus.svg' | inline_asset_content -}}
-                                        </span>
+                                        <span class="svg-wrapper"> - </span>
                                       </button>
                                       <input
                                         class="quantity__input !border-r !border-l "
@@ -350,9 +411,7 @@
                                             | escape
                                           -}}
                                         </span>
-                                        <span class="svg-wrapper">
-                                          {{- 'icon-plus.svg' | inline_asset_content -}}
-                                        </span>
+                                        <span class="svg-wrapper"> + </span>
                                       </button>
                                     </quantity-input>
                                   </div>
@@ -541,9 +600,7 @@
                                             | escape
                                           -}}
                                         </span>
-                                        <span class="svg-wrapper">
-                                          {{- 'icon-minus.svg' | inline_asset_content -}}
-                                        </span>
+                                        <span class="svg-wrapper"> - </span>
                                       </button>
                                       <input
                                         class="quantity__input !border-r !border-l "
@@ -572,9 +629,7 @@
                                             | escape
                                           -}}
                                         </span>
-                                        <span class="svg-wrapper">
-                                          {{- 'icon-plus.svg' | inline_asset_content -}}
-                                        </span>
+                                        <span class="svg-wrapper"> + </span>
                                       </button>
                                     </quantity-input>
                                   </div>
@@ -749,14 +804,14 @@
           <div class="cart-drawer__pricing-options !flex !flex-col !mt-0">
             <label class="pricing-option !text-[1.5rem] border-b py-2 flex items-center justify-center gap-3 ">
               <input type="radio" name="pricing" value="regular" checked>
-              <div class="flex justify-between w-full">
+              <div class="flex justify-between w-full !font-medium">
                 <span>REGULAR PRICE</span>
                 <span>${{ cart.total_price | money_without_currency }}</span>
               </div>
             </label>
             <label class="pricing-option !text-[1.5rem] border-b py-2 flex items-center justify-center gap-3 ">
               <input id="subscribe-radio" type="radio" name="pricing" value="member">
-              <div class="flex justify-between w-full">
+              <div class="flex justify-between w-full !font-medium">
                 <span>SUBSCRIBE AND SAVE 10%</span>
                 <span>${{ cart.total_price | times: 0.9 | money_without_currency }}</span>
               </div>
@@ -793,17 +848,41 @@
           <button
             type="submit"
             id="CartDrawer-Checkout"
-            class=" button !text-[3rem] !bg-black !w-auto !rounded-lg !p-0 !px-4 !ml-auto mt-5"
+            class=" button !text-[3rem]  !w-auto !rounded-lg !p-0 !px-4 !ml-auto mt-5"
             name="checkout"
             form="CartDrawer-Form"
             {% if cart == empty %}
               disabled
             {% endif %}
           >
-            <svg width="20" height="20" class="!mr-2" viewBox="0 0 9 9" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M1.1875 7.7334H7.6599M7.6599 7.7334V1.261M7.6599 7.7334L1.1875 1.261" stroke="white" stroke-linejoin="round"/>
-            </svg>
-            &nbsp; CHECKOUT
+            <div class="checkout-button-text-container">
+              <div class="checkout-button-text">
+                <svg
+                  width="20"
+                  height="20"
+                  class="!mr-2"
+                  viewBox="0 0 9 9"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path d="M1.1875 7.7334H7.6599M7.6599 7.7334V1.261M7.6599 7.7334L1.1875 1.261" stroke="white" stroke-linejoin="round"/>
+                </svg>
+                &nbsp; CHECKOUT
+              </div>
+              <div class="checkout-button-text-hover">
+                <svg
+                  width="20"
+                  height="20"
+                  class="!mr-2"
+                  viewBox="0 0 9 9"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path d="M1.1875 7.7334H7.6599M7.6599 7.7334V1.261M7.6599 7.7334L1.1875 1.261" stroke="black" stroke-linejoin="round"/>
+                </svg>
+                &nbsp; CHECKOUT
+              </div>
+            </div>
           </button>
         </div>
       </div>
