@@ -78,6 +78,7 @@
                     class="mega-menu-dropdown"
                     role="region"
                     aria-label="{{ link.title }} submenu"
+                    style="display: none; "
                   >
                     <div class="mx-auto p-2  flex">
                       <ul class="flex justify-start gap-8 m-2 w-1/2">
@@ -320,7 +321,7 @@
                 class="searchbox-container mx-auto w-full "
               >
                 <form
-                  action="/search"
+                  action="{{ routes.search_url }}"
                   method="get"
                   class="flex items-center gap-4 w-full mx-2 "
                   role="search"
@@ -372,17 +373,17 @@
                   >
                   <div class="flex flex-wrap gap-4">
                     <a
-                      href="/search?q=new"
+                      href="{{ routes.search_url }}?q=new"
                       class="px-1 bg-gray-400 hover:bg-black  hover:text-white transition-colors duration-200 rounded-md text-[16px] lg:text-[20px] font-medium "
                       >New Arrivals</a
                     >
                     <a
-                      href="/search?q=sale"
+                      href="{{ routes.search_url }}?q=sale"
                       class="px-1 bg-gray-400 hover:bg-black hover:text-white transition-colors duration-200 rounded-md text-[16px] lg:text-[20px] font-medium"
                       >Sale</a
                     >
                     <a
-                      href="/search?q=bestsellers"
+                      href="{{ routes.search_url }}?q=bestsellers"
                       class="px-1 bg-gray-400 hover:bg-black hover:text-white transition-colors duration-200 rounded-md text-[16px] lg:text-[20px] font-medium"
                       >Bestsellers</a
                     >
@@ -467,7 +468,7 @@
 
           <!-- Login -->
           <a
-            href="/account/login"
+            href="{{routes.account_login_url }}"
             class="hidden lg:!inline-flex items-center gap-2 rounded-xl px-2  text-[16px] text-[var(--header_text)] hover:text-gray-700 "
             aria-label="Login"
           >
@@ -845,11 +846,12 @@
                 </li>
               {% endfor %}
             </ul>
+            ss
           </div>
         </div>
 
         <a
-          href="/account/login"
+          href="{{ routes.account_login_url }}"
           class="inline-flex items-center rounded-xl px-2 "
           style="width: min-content;  background: var(--header_text); color: var(--header_background);"
           aria-label="Login"
@@ -1172,26 +1174,24 @@
         }
 
         .mega-menu-dropdown {
-          position: fixed;        /* so it sits relative to viewport */
-          left: 0; right: 0;
-          width: 100vw;
+          position: absolute;
+          top: 85%;
+          left: 0;
+          right: 0;
+          z-index: 998;
           background: var(--header_background);
-          display: none;          /* hidden by default */
-          opacity: 0;
+          overflow: hidden;
           pointer-events: none;
-          transform: translateY(-20px);
-          transition:
-            opacity 0.8s ease,
-            transform 0.8s ease;
-          z-index: 998;           /* just below header (999) */
+          max-height: 0;
+          transition: max-height 800ms cubic-bezier(0.4,0,0.2,1);
         }
 
         .mega-menu-dropdown.open {
-          display: block;
-          opacity: 1;
           pointer-events: auto;
-          transform: translateY(0);
+          max-height: 60vh;
         }
+
+
 
         /* Mobile submenu scrollbar styling */
         .submenu.styled-scrollbar {
@@ -1253,148 +1253,82 @@
         #mobile-menu.active {
           transform: translateX(0) !important;
         }
-
-        .h-vertical-text-container {
-          width: 26px;
-          overflow: hidden;
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          justify-content: center;
-        }
-
-        .h-vertical-text {
-          writing-mode: vertical-rl;
-          text-orientation: mixed;
-          transform: rotate(180deg);
-          animation: scrollText 50s linear infinite;
-          font-size: 16px;
-          white-space: nowrap;
-          padding: 0;
-        }
-
-        .vertical-text:nth-child(n) {
-          animation: scrollText2 50s linear infinite;
-        }
-
-        @keyframes scrollText {
-          0% {
-            transform: translateY(0) rotate(180deg);
-          }
-          100% {
-            transform: translateY(-100%) rotate(180deg);
-          }
-        }
-
-        @keyframes scrollText2 {
-          0% {
-            transform: translateY(100%) rotate(180deg);
-          }
-          100% {
-            transform: translateY(0) rotate(180deg);
-          }
-        }
-
-        .horizontal-text-container {
-          position: fixed;
-          top: 100%;
-          left: 0;
-          width: 100%;
-          height: 33px;
-          overflow: hidden;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          border-top: 1px solid var(--header_text);
-          border-bottom: 1px solid var(--header_text);
-          background: var(--header_background);
-          z-index: 995;
-        }
-
-        .horizontal-text {
-          white-space: nowrap;
-          font-size: 24px;
-          display: inline-block;
-          animation: scrollRight 80s linear infinite;
-          height: 100%;
-          line-height: 32px;
-          font-weight: 500;
-        }
-
-        .horizontal-text:nth-child(n) {
-          animation: scrollRight2 80s linear infinite;
-        }
-
-        @keyframes scrollRight {
-          0% {
-            transform: translateX(-100%);
-          }
-          100% {
-            transform: translateX(100%);
-          }
-        }
-
-        @keyframes scrollRight2 {
-          0% {
-            transform: translateX(-100%);
-          }
-          100% {
-            transform: translateX(100%);
-          }
-        }
 </style>
 
 <script>
   document.addEventListener('DOMContentLoaded', function () {
     
     /* -- sub menu logic -- */
-    document.querySelectorAll('.dropdown-group').forEach(group => {
-      const trigger = group.querySelector('a');
-      const menu    = group.querySelector('.mega-menu-dropdown');
-      let   hideTimer;
-    
-      if (!menu) return;
-    
-      function positionMenu() {
-        const header = document.querySelector('[data-header-sticky]');
-        const top    = header ? header.offsetHeight - 1 : 0; 
-        menu.style.top = `${top}px`;
-      }
-    
-      function openMenu() {
-        clearTimeout(hideTimer);
-        positionMenu();
-        menu.classList.add('open');
-      }
-    
-      function closeMenu() {
-        menu.classList.remove('open');
-        // after fade‐out, takeing it out of the flow
-        menu.addEventListener('transitionend', function _fin(e) {
-          if (e.propertyName === 'opacity' && !menu.classList.contains('open')) {
-            menu.style.display = 'none';
-            menu.removeEventListener('transitionend', _fin);
-          }
-        });
-      }
-    
-      function scheduleClose() {
-        clearTimeout(hideTimer);
-        // only hide after 150ms of actually being outside both elements
-        hideTimer = setTimeout(closeMenu, 150);
-      }
-    
-      // whenever we show, ensure it’s in the layout so the transition can run
-      trigger.addEventListener('mouseenter', () => {
-        menu.style.display = 'block';
-        openMenu();
+document.querySelectorAll('.dropdown-group').forEach(group => {
+  const trigger = group.querySelector('a');
+  const menu    = group.querySelector('.mega-menu-dropdown');
+  if (!menu) return;
+
+  // track currently open menu
+  if (typeof window._currentOpenMenu === 'undefined') {
+    window._currentOpenMenu = null;
+  }
+
+  let closeTimer = null;
+
+  // when the max-height transition finishes and we're closed, actually hide & disable interactions
+  menu.addEventListener('transitionend', function onEnd(e) {
+    if (e.propertyName === 'max-height' && !menu.classList.contains('open')) {
+      menu.style.display        = 'none';
+      menu.style.pointerEvents  = 'none';
+      window._currentOpenMenu   = null;
+    }
+  });
+
+  function doOpen(m) {
+    // make sure it's in the layout
+    m.style.display        = 'block';
+    m.style.pointerEvents  = 'auto';
+    m.offsetHeight; // force reflow
+    m.classList.add('open');
+    window._currentOpenMenu = m;
+  }
+
+  function openMenu() {
+    clearTimeout(closeTimer);
+
+    const old = window._currentOpenMenu;
+    if (old && old !== menu) {
+      // close the old one first, then open ours
+      old.classList.remove('open');
+      old.addEventListener('transitionend', function handler(e) {
+        if (e.propertyName === 'max-height' && !old.classList.contains('open')) {
+          old.removeEventListener('transitionend', handler);
+          doOpen(menu);
+        }
       });
-      menu.addEventListener   ('mouseenter', openMenu);
-    
-      // when we leave *either* element, start the hide timer
-      trigger.addEventListener('mouseleave', scheduleClose);
-      menu.addEventListener   ('mouseleave', scheduleClose);
-    });
+    } else if (old !== menu) {
+      doOpen(menu);
+    }
+  }
+
+  function closeMenu() {
+    menu.classList.remove('open');
+    // pointer-events will get turned off in the transitionend above
+  }
+
+  // when you leave trigger or submenu start a 150 ms timer to close
+  trigger.addEventListener('mouseleave', () => {
+    clearTimeout(closeTimer);
+    closeTimer = setTimeout(closeMenu, 150);
+  });
+  menu.addEventListener('mouseleave', () => {
+    clearTimeout(closeTimer);
+    closeTimer = setTimeout(closeMenu, 150);
+  });
+
+  // as soon as you re-enter either area cancel that close
+  trigger.addEventListener('mouseenter', openMenu);
+  menu.addEventListener('mouseenter', openMenu);
+});
+
+
+
     
 
     /* -- bottom bar indicator logic -- */
@@ -1727,14 +1661,6 @@
         headerOffset.classList.add('is-active');
         isFixed = true;
       }
-
-      // if (isFixed) {
-      //   if (currentScroll > lastScroll + 10) {
-      //     header.classList.add('is-hidden');
-      //   } else if (currentScroll < lastScroll - 10) {
-      //     header.classList.remove('is-hidden');
-      //   }
-      // }
 
       lastScroll = currentScroll;
     };
