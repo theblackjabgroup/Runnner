@@ -1,0 +1,225 @@
+<style>
+  .prod-diff-section {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    width: 100vw;
+    overflow: hidden;
+  }
+
+  .prod-diff-container {
+    position: relative;
+    width: 70vw;
+    height: 1000px;
+  }
+
+  .prod-diff-wrapper {
+    position: absolute;
+    top: 0;
+    height: 1000px;
+    overflow: hidden;
+  }
+
+  .prod-diff-wrapper.prod-diff-left {
+    left: 0;
+    width: 50%;
+  }
+
+  .prod-diff-wrapper.prod-diff-right {
+    right: 0;
+    width: 50%;
+  }
+
+  .prod-diff-img {
+    position: absolute;
+    top: -20%;
+    left: 0;
+    width: 70vw;
+    height: 1000px;
+    object-fit: cover;
+  }
+
+  .slider-container {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    z-index: 10;
+  }
+
+  .slider-divider {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 15px;
+    background-color: transparent;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 15;
+    cursor: ew-resize;
+  }
+
+  .slider-handle {
+    position: absolute;
+    height: 40px;
+    width: 40px;
+    background-color: white;
+    border-radius: 50%;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    cursor: ew-resize;
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .slider-handle::before,
+  .slider-handle::after {
+    content: '';
+    position: absolute;
+    height: 12px;
+    width: 2px;
+    background-color: #555;
+  }
+
+  .slider-handle::before {
+    transform: translateX(-4px);
+  }
+
+  .slider-handle::after {
+    transform: translateX(4px);
+  }
+
+  .prod-diff-wrapper.prod-diff-left .prod-diff-img {
+    left: 0;
+  }
+
+  /* This will be dynamically set by JavaScript */
+  .prod-diff-wrapper.prod-diff-right .prod-diff-img {
+    left: -35vw;
+  }
+</style>
+
+<section class="prod-diff-section">
+  <div class="prod-diff-container">
+    <div class="prod-diff-wrapper prod-diff-left">
+      {% if product and product.featured_image %}
+        <img
+          src="{{ product.featured_image | image_url: width: 1200 }}"
+          alt="Before"
+          class="prod-diff-img"
+          width="600"
+          height="auto"
+        >
+      {% else %}
+        <img
+          src="https://cdn.shopify.com/s/files/1/0533/2089/files/placeholder-images-image_large.png"
+          alt="Before"
+          class="prod-diff-img"
+          width="600"
+          height="auto"
+        >
+      {% endif %}
+    </div>
+
+    <div class="prod-diff-wrapper prod-diff-right">
+      {% if product and product.images.size > 1 %}
+        <img
+          src="{{ product.images[1] | image_url: width: 1200 }}"
+          alt="After"
+          class="prod-diff-img"
+          width="600"
+          height="auto"
+        >
+      {% else %}
+        <img
+          src="https://cdn.shopify.com/s/files/1/0533/2089/files/placeholder-images-image_large.png"
+          alt="After"
+          class="prod-diff-img"
+          width="600"
+          height="auto"
+        >
+      {% endif %}
+    </div>
+
+    <div class="slider-container">
+      <div class="slider-divider">
+        <div class="slider-handle"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const sliderDivider = document.querySelector('.slider-divider');
+    const sliderHandle = document.querySelector('.slider-handle');
+    const container = document.querySelector('.prod-diff-container');
+    let isDragging = false;
+    const leftContainer = document.querySelector('.prod-diff-wrapper.prod-diff-left');
+    const rightContainer = document.querySelector('.prod-diff-wrapper.prod-diff-right');
+    const rightImg = document.querySelector('.prod-diff-wrapper.prod-diff-right .prod-diff-img');
+
+    function getOffsetX(e) {
+      if (e.touches) {
+        return e.touches[0].clientX;
+      } else {
+        return e.clientX;
+      }
+    }
+
+    function onDrag(e) {
+      if (!isDragging) return;
+      if (e.cancelable) e.preventDefault();
+      const rect = container.getBoundingClientRect();
+      let x = getOffsetX(e) - rect.left;
+      x = Math.max(0, Math.min(x, rect.width));
+      const percent = (x / rect.width) * 100;
+      sliderDivider.style.left = percent + '%';
+      leftContainer.style.width = percent + '%';
+      rightContainer.style.width = 100 - percent + '%';
+      rightImg.style.left = `-${leftContainer.offsetWidth}px`;
+    }
+
+    function stopDrag() {
+      isDragging = false;
+      container.removeEventListener('mousemove', onDrag);
+      container.removeEventListener('touchmove', onDrag);
+      window.removeEventListener('mouseup', stopDrag);
+      window.removeEventListener('touchend', stopDrag);
+      window.removeEventListener('touchcancel', stopDrag);
+    }
+
+    // Allow dragging from both divider and handle
+    [sliderDivider, sliderHandle].forEach(function (el) {
+      el.addEventListener('mousedown', function (e) {
+        e.preventDefault();
+        isDragging = true;
+        onDrag(e); // update position immediately
+        container.addEventListener('mousemove', onDrag);
+        window.addEventListener('mouseup', stopDrag);
+      });
+      el.addEventListener('touchstart', function (e) {
+        isDragging = true;
+        onDrag(e); // update position immediately
+        container.addEventListener('touchmove', onDrag, { passive: false });
+        window.addEventListener('touchend', stopDrag);
+        window.addEventListener('touchcancel', stopDrag);
+      });
+    });
+  });
+</script>
+
+{% schema %}
+{
+  "name": "Product Difference Slider",
+  "settings": [],
+  "presets": [
+    {
+      "name": "Product Difference Slider"
+    }
+  ]
+}
+{% endschema %}
