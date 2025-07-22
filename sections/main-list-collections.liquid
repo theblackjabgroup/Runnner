@@ -6,7 +6,7 @@
     &nbsp;{{ section.settings.title }}
   </h1>
 
-  <ul class="collection-list flex flex-wrap gap-6" role="list">
+  <ul class="collection-list flex flex-wrap " role="list">
     {%- for block in section.blocks -%}
       <li
         class="collection-list__item {% if block.type == 'media' and block.settings.span_two_columns %}md:col-span-2{% endif %} {% if settings.animations_reveal_on_scroll %} scroll-trigger animate--slide-in{% endif %}"
@@ -25,12 +25,13 @@
               {% endif %}
               <div class="video-container relative w-full h-full">
                 <iframe
-                  src="https://www.youtube.com/embed/{{ video_id }}?autoplay=1&mute=1&loop=1&playlist={{ video_id }}&controls=0"
-                  class="absolute inset-0 w-full h-full"
+                  data-src="https://www.youtube.com/embed/{{ video_id }}?autoplay=1&mute=1&loop=1&playlist={{ video_id }}&controls=0"
+                  class="absolute inset-0 w-full h-full lazy-iframe"
                   frameborder="0"
                   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                   allowfullscreen
                 ></iframe>
+                <div class="lazy-loader"></div>
               </div>
             {% elsif block.settings.video != blank %}
               <div class="video-container relative aspect-video w-full">
@@ -48,48 +49,52 @@
           {% elsif block.settings.image != blank %}
             <div class="image-container relative aspect-video w-full">
               <img
-                srcset="
+                data-srcset="
                   {%- if block.settings.image.width >= 165 -%}{{ block.settings.image | image_url: width: 165 }} 165w,{%- endif -%}
                   {%- if block.settings.image.width >= 360 -%}{{ block.settings.image | image_url: width: 360 }} 360w,{%- endif -%}
                   {%- if block.settings.image.width >= 535 -%}{{ block.settings.image | image_url: width: 535 }} 535w,{%- endif -%}
                   {%- if block.settings.image.width >= 750 -%}{{ block.settings.image | image_url: width: 750 }} 750w,{%- endif -%}
                 "
-                src="{{ block.settings.image | image_url: width: 750 }}"
-                class="w-full  object-cover"
+                data-src="{{ block.settings.image | image_url: width: 750 }}"
+                src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1 1'%3E%3C/svg%3E"
+                class="w-full object-cover lazy-image"
                 loading="lazy"
                 width="100"
                 height="100"
-                sizes="
+                data-sizes="
                   (min-width: 990px) {% if block.settings.span_two_columns %}66vw{% else %}33vw{% endif %},
                   (min-width: 750px) {% if block.settings.span_two_columns %}50vw{% else %}33vw{% endif %},
                   100vw
                 "
                 alt="{{ block.settings.image.alt | escape }}"
               >
+              <div class="lazy-loader"></div>
             </div>
           {% endif %}
         {% else %}
           {% if block.settings.image != blank %}
             <div class="image-container relative aspect-video w-full">
               <img
-                srcset="
+                data-srcset="
                   {%- if block.settings.image.width >= 165 -%}{{ block.settings.image | image_url: width: 165 }} 165w,{%- endif -%}
                   {%- if block.settings.image.width >= 360 -%}{{ block.settings.image | image_url: width: 360 }} 360w,{%- endif -%}
                   {%- if block.settings.image.width >= 535 -%}{{ block.settings.image | image_url: width: 535 }} 535w,{%- endif -%}
                   {%- if block.settings.image.width >= 750 -%}{{ block.settings.image | image_url: width: 750 }} 750w,{%- endif -%}
                 "
-                src="{{ block.settings.image | image_url: width: 750 }}"
-                class="w-full  object-cover"
+                data-src="{{ block.settings.image | image_url: width: 750 }}"
+                src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1 1'%3E%3C/svg%3E"
+                class="w-full object-cover lazy-image"
                 loading="lazy"
                 width="100"
                 height="100"
-                sizes="
+                data-sizes="
                   (min-width: 990px) {% if block.settings.span_two_columns %}66vw{% else %}33vw{% endif %},
                   (min-width: 750px) {% if block.settings.span_two_columns %}50vw{% else %}33vw{% endif %},
                   100vw
                 "
                 alt="{{ block.settings.image.alt | escape }}"
               >
+              <div class="lazy-loader"></div>
             </div>
           {% elsif block.settings.video_url != blank or block.settings.video != blank %}
             {% if block.settings.video_url contains 'youtube.com' or block.settings.video_url contains 'youtu.be' %}
@@ -100,12 +105,13 @@
               {% endif %}
               <div class="video-container relative w-full h-full">
                 <iframe
-                  src="https://www.youtube.com/embed/{{ video_id }}?autoplay=1&mute=1&loop=1&playlist={{ video_id }}&controls=0"
-                  class="absolute inset-0 w-full h-full"
+                  data-src="https://www.youtube.com/embed/{{ video_id }}?autoplay=1&mute=1&loop=1&playlist={{ video_id }}&controls=0"
+                  class="absolute inset-0 w-full h-full lazy-iframe"
                   frameborder="0"
                   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                   allowfullscreen
                 ></iframe>
+                <div class="lazy-loader"></div>
               </div>
             {% elsif block.settings.video != blank %}
               <div class="video-container relative aspect-video w-full">
@@ -161,9 +167,9 @@
     margin: 0 auto;
     display: grid;
     grid-template-columns: repeat({{ section.settings.columns_desktop }}, 1fr);
-    gap: 20px;
+    gap:6px 40px;
     padding: 0 1rem;
-    margin-bottom: 2rem;
+    margin-bottom: 5rem;
   }
 
   .collection-list__item {
@@ -302,7 +308,122 @@
 
     }
   }
+
+  .lazy-loader {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+    background-size: 200% 100%;
+    animation: shimmer 2s infinite;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1;
+  }
+
+  .lazy-loader::after {
+    content: '';
+    width: 40px;
+    height: 40px;
+    border: 3px solid #f3f3f3;
+    border-top: 3px solid #666;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+  }
+
+  @keyframes shimmer {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+  }
+
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+
+  .lazy-image, .lazy-iframe {
+    opacity: 0;
+    transition: opacity 0.3s ease-in-out;
+  }
+
+  .lazy-image.loaded, .lazy-iframe.loaded {
+    opacity: 1;
+  }
+
+  .lazy-loader.hidden {
+    opacity: 0;
+    pointer-events: none;
+  }
 </style>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    // Intersection Observer for lazy loading
+    const observerOptions = {
+      root: null,
+      rootMargin: '50px',
+      threshold: 0.1,
+    };
+
+    const imageObserver = new IntersectionObserver((entries, observer) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          const img = entry.target;
+          const loader = img.parentElement.querySelector('.lazy-loader');
+
+          // Load image
+          if (img.dataset.src) {
+            img.src = img.dataset.src;
+          }
+          if (img.dataset.srcset) {
+            img.srcset = img.dataset.srcset;
+          }
+          if (img.dataset.sizes) {
+            img.sizes = img.dataset.sizes;
+          }
+
+          img.onload = () => {
+            img.classList.add('loaded');
+            if (loader) loader.classList.add('hidden');
+          };
+
+          observer.unobserve(img);
+        }
+      });
+    }, observerOptions);
+
+    const iframeObserver = new IntersectionObserver((entries, observer) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          const iframe = entry.target;
+          const loader = iframe.parentElement.querySelector('.lazy-loader');
+
+          if (iframe.dataset.src) {
+            iframe.src = iframe.dataset.src;
+            iframe.onload = () => {
+              iframe.classList.add('loaded');
+              if (loader) loader.classList.add('hidden');
+            };
+          }
+
+          observer.unobserve(iframe);
+        }
+      });
+    }, observerOptions);
+
+    // Observe all lazy images and iframes
+    document.querySelectorAll('.lazy-image').forEach((img) => {
+      imageObserver.observe(img);
+    });
+
+    document.querySelectorAll('.lazy-iframe').forEach((iframe) => {
+      iframeObserver.observe(iframe);
+    });
+  });
+</script>
 
 {% schema %}
 {
