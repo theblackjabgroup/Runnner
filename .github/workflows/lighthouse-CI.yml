@@ -6,16 +6,71 @@ jobs:
   lhci:
     name: Lighthouse (PF_TESTING)
     runs-on: ubuntu-latest
+
     steps:
       - uses: actions/checkout@v2
 
-      - name: Lighthouse
-        uses: shopify/lighthouse-ci-action@v1
-        with:
-          access_token:  ${{ secrets.APIKEY }}
-          store: "delhi-dev-themetest.myshopify.com"
-          lhci_min_score_accessibility: 0.9
-          lhci_min_score_performance: 0.7
-          password: "thoolt"
+      - name: Install Lighthouse CI CLI
+        run: npm install -g @lhci/cli
 
- 
+      - name: Run Shopify Lighthouse CI and Parse Results
+        id: run_lhci
+        continue-on-error: true
+        run: |
+          set -o pipefail
+
+          bash -c '{
+            echo "Running Shopify Lighthouse CI..."
+            npx @shopify/lighthouse-ci-action@v1 \
+              --access_token=${{ secrets.APIKEY }} \
+              --store="delhi-dev-themetest.myshopify.com" \
+              --lhci_min_score_accessibility=0.9 \
+              --lhci_min_score_performance=0.7 \
+              --password="thoolt"
+          }' 2>&1 | tee lhci_output.txt
+
+          echo "LHCI_EXIT_CODE=$?" >> $GITHUB_ENV
+
+          # Determining the failure type
+          if grep -qi "maximum number of 100 development themes" lhci_output.txt; then
+            echo "FAILURE_TYPE=theme_limit" >> $GITHUB_ENV
+          elif grep -q "✘" lhci_output.txt; then
+            echo "FAILURE_TYPE=assertion" >> $GITHUB_ENV
+            grep "✘" lhci_output.txt > failed_assertions.txt
+          else
+            echo "FAILURE_TYPE=infra" >> $GITHUB_ENV
+          fi
+
+          # Extract report URLs (if any)
+          grep -o 'https://storage.googleapis.com[^ ]*\.report\.html' lhci_output.txt > report_urls.txt || echo "No report links found" > report_urls.txt
+
+      - name: Notify Slack on Failure
+        if: failure()
+        run: |
+          ACTOR=${{ github.actor }}
+          BRANCH=${{ github.ref_name }}
+          COMMIT=${{ github.sha }}
+          TYPE=${{ env.FAILURE_TYPE }}
+          REPO_URL="https://github.com/${{ github.repository }}"
+          COMMIT_URL="${REPO_URL}/commit/${COMMIT}"
+
+          MSG="*🚨 Shopify Lighthouse CI failed!*\n"
+          MSG+="*Triggered by:* \`@${ACTOR}\`\n"
+          MSG+="*Branch:* \`${BRANCH}\`\n"
+          MSG+="*Commit:* <${COMMIT_URL}|${COMMIT}>\n"
+          MSG+="*Workflow:* \`${{ github.workflow }}\`\n\n"
+
+          if [ "$TYPE" = "theme_limit" ]; then
+            MSG+="*Reason:* 🔺 Shopify theme limit (100) reached — cannot create a new development theme.\n"
+          elif [ "$TYPE" = "assertion" ]; then
+            MSG+="*Failing Constraints:*\n$(cat failed_assertions.txt)\n\n"
+          else
+            MSG+="*Reason:* CI process failed before assertions — possible infra/config/auth issue.\n"
+          fi
+
+          MSG+="*Report Links:*\n$(cat report_urls.txt)"
+
+          # Send to Slack
+          curl -X POST -H 'Content-type: application/json' \
+            --data "{\"text\":\"${MSG//\"/\\\"}\"}" \
+            ${{ secrets.SLACK_WEBHOOK_URL }}
