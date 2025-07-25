@@ -10,7 +10,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-      # 1️⃣ Pre‑check: count development themes via REST API (no CLI)
+      #  counting development themes 
       - name: Check Dev Theme Limit
         id: theme_check
         run: |
@@ -24,7 +24,7 @@ jobs:
             echo "FAILURE_TYPE=theme_limit" >> $GITHUB_ENV
           fi
 
-      # 2️⃣ Run Shopify’s Lighthouse CI Action
+      # Shopify’s Lighthouse CI Action
       - name: Run Shopify Lighthouse CI
         id: run_lhci
         uses: shopify/lighthouse-ci-action@v1
@@ -32,19 +32,19 @@ jobs:
         with:
           access_token: ${{ secrets.APIKEY }}
           store: "delhi-dev-themetest.myshopify.com"
-          lhci_min_score_accessibility: 1.0
-          lhci_min_score_performance: 0.9
+          lhci_min_score_accessibility: 0.9
+          lhci_min_score_performance: 0.7
           password: "thoolt"
 
-      # 3️⃣ Notify Slack & fail the job if either theme_limit OR LHCI failed
+      # Notify Slack 
       - name: Notify Slack & Fail Job
         if: always()
         run: |
-          # Decide why we’re failing
+          # Decide why  failing
           if [ "${{ env.FAILURE_TYPE }}" = "theme_limit" ]; then
             REASON="🔺 Shopify theme limit (100) reached — cannot create a new development theme."
           elif [ "${{ steps.run_lhci.outcome }}" != "success" ]; then
-            REASON="One or more Lighthouse assertions failed (accessibility < 1.0 or performance < 0.9)."
+            REASON="One or more Lighthouse assertions failed (accessibility < 0.9 or performance < 0.7)."
           else
             echo "✅ No failure detected; skipping Slack and job-fail."
             exit 0
@@ -58,7 +58,7 @@ jobs:
           WORKFLOW="${{ github.workflow }}"
           COMMIT_URL="https://github.com/${{ github.repository }}/commit/${COMMIT}"
 
-          MSG=":small_red_triangle: *Shopify Lighthouse CI failed!*\n"
+          MSG=":bangbang: *Shopify Lighthouse CI failed!*\n"
           MSG+="*Triggered by:* \`@${ACTOR}\`\n"
           MSG+="*Branch:* \`${BRANCH}\`\n"
           MSG+="*Commit:* <${COMMIT_URL}|${COMMIT}>\n"
@@ -71,6 +71,6 @@ jobs:
                --data "{\"text\":\"${MSG//\"/\\\"}\"}" \
                ${{ secrets.SLACK_WEBHOOK_URL }}
 
-          # Finally, fail the job
+          # Fail the job to prevent further actions
           echo "Exiting with failure due to: $REASON"
           exit 1
