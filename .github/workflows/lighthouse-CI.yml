@@ -10,6 +10,27 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
+      # 1️⃣ Install Shopify CLI + jq for JSON parsing
+      - name: Install Shopify CLI & jq
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y jq
+          npm install -g @shopify/cli
+
+      # 2️⃣ Pre‑check: count development themes
+      - name: Check Development Theme Limit
+        id: theme_check
+        run: |
+          COUNT=$(shopify theme list \
+            --store="${{ secrets.STORE_DOMAIN }}" \
+            --password="${{ secrets.APIKEY }}" \
+            --json | jq '[.[]|select(.role=="development")]|length')
+          echo "DEV_THEME_COUNT=$COUNT" >> $GITHUB_ENV
+          if [ "$COUNT" -ge 100 ]; then
+            echo "FAILURE_TYPE=theme_limit" >> $GITHUB_ENV
+          fi
+
+      # 3️⃣ Run Lighthouse CI (always run, even if theme_limit)
       - name: Run Shopify Lighthouse CI
         id: run_lhci
         continue-on-error: true
@@ -21,54 +42,30 @@ jobs:
           lhci_min_score_performance: 0.9
           password: "thoolt"
 
-      - name: Detect Failure Type from LHCI logs
-        if: steps.run_lhci.outcome == 'failure'
+      # 4️⃣ Notify Slack & fail job if *either* theme_limit OR CI step failed
+      - name: Notify Slack & Fail Job
+        if: always()
         run: |
-          LOG_DIR="${{ github.workspace }}/../_temp"
-          LOG_FILE=$(find "$LOG_DIR" -name '*.txt' | head -n1)
-          echo "Parsing LHCI logs at: $LOG_FILE"
-
-          FAILURE_TYPE="infra"
-          SCORES=""
-
-          if grep -qi "categories.accessibility failure" "$LOG_FILE"; then
-            SCORES+="Accessibility "
+          # Determine why we’re here
+          if [ "${{ env.FAILURE_TYPE }}" = "theme_limit" ]; then
+            REASON="🔺 Shopify theme limit (100) reached — cannot create a new development theme."
+          elif [ "${{ steps.run_lhci.outcome }}" != "success" ]; then
+            REASON="CI failed before assertions — possible infra/config issue or Lighthouse thresholds not met."
+          else
+            # No failure; exit cleanly
+            echo "No failure detected; skipping Slack and job-fail."
+            exit 0
           fi
 
-          if grep -qi "categories.performance failure" "$LOG_FILE"; then
-            SCORES+="Performance "
-          fi
-
-          if grep -qi "maximum number of 100 development themes" "$LOG_FILE"; then
-            FAILURE_TYPE="theme_limit"
-          elif [ -n "$SCORES" ]; then
-            FAILURE_TYPE="assertion"
-          fi
-
-          echo "FAILURE_TYPE=$FAILURE_TYPE" >> $GITHUB_ENV
-          echo "SCORE_FAILURES=$SCORES" >> $GITHUB_ENV
-
-      - name: Notify Slack
-        if: steps.run_lhci.outcome == 'failure'
-        run: |
+          # Build Slack message
           ACTOR=${{ github.actor }}
           BRANCH=${{ github.ref_name }}
           COMMIT=${{ github.sha }}
           COMMIT_MESSAGE=$(git log -1 --pretty=%s)
           COMMIT_URL="https://github.com/${{ github.repository }}/commit/${COMMIT}"
           WORKFLOW="${{ github.workflow }}"
-          FAILURE_TYPE=${{ env.FAILURE_TYPE }}
-          SCORES=${{ env.SCORE_FAILURES }}
 
-          if [ "$FAILURE_TYPE" = "assertion" ]; then
-            REASON="One or more Lighthouse assertions failed: $SCORES"
-          elif [ "$FAILURE_TYPE" = "theme_limit" ]; then
-            REASON="🔺 Shopify theme limit (100) reached — cannot create a new development theme."
-          else
-            REASON="CI failed before assertions — possible infra/config issue."
-          fi
-
-          MSG=":🔺 *Shopify Lighthouse CI failed!*\n"
+          MSG=":small_red_triangle: *Shopify Lighthouse CI failed!*\n"
           MSG+="*Triggered by:* \`@${ACTOR}\`\n"
           MSG+="*Branch:* \`${BRANCH}\`\n"
           MSG+="*Commit:* <${COMMIT_URL}|${COMMIT}>\n"
@@ -76,12 +73,11 @@ jobs:
           MSG+="*Workflow:* \`${WORKFLOW}\`\n"
           MSG+="*Reason:* ${REASON}"
 
+          # Send to Slack
           curl -X POST -H 'Content-type: application/json' \
-            --data "{\"text\":\"${MSG//\"/\\\"}\"}" \
-            ${{ secrets.SLACK_WEBHOOK_URL }}
+               --data "{\"text\":\"${MSG//\"/\\\"}\"}" \
+               ${{ secrets.SLACK_WEBHOOK_URL }}
 
-      - name: Manually Fail the Job
-        if: steps.run_lhci.outcome == 'failure'
-        run: |
-          echo "Failing job after notifying Slack."
+          # Finally, fail the job so downstream is blocked
+          echo "Exiting with failure due to: $REASON"
           exit 1
