@@ -10,68 +10,71 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-      - name: Install LHCI CLI
-        run: npm install -g @lhci/cli@0.11.x
-
-      - name: Run LHCI and capture logs
-        id: lhci
+      - name: Run Shopify Lighthouse CI
+        id: run_lhci
         continue-on-error: true
+        uses: shopify/lighthouse-ci-action@v1
+        with:
+          access_token: ${{ secrets.APIKEY }}
+          store: "delhi-dev-themetest.myshopify.com"
+          lhci_min_score_accessibility: 1.0
+          lhci_min_score_performance: 0.9
+          password: "thoolt"
+
+      - name: Detect Failure Type
+        if: failure()
         run: |
-          set -o pipefail
-          lhci autorun > lhci_output.txt 2>&1 || echo "LHCI failed"
+          set -e
 
-      - name: Detect failure type and failing scores
-        if: always()
-        run: |
-          set -o pipefail
-          echo "Parsing lhci_output.txt..."
-          SCORE_FAILURES=""
+          LOG_FILE="${{ runner.temp }}/lhci-log.txt"
 
-          grep -q "categories.accessibility failure" lhci_output.txt && SCORE_FAILURES+="Accessibility "
-          grep -q "categories.performance failure" lhci_output.txt && SCORE_FAILURES+="Performance "
+          # Pull GitHub Actions step log content (if accessible)
+          echo "Attempting to locate and parse logs..."
+          LOG_DIR="${{ github.workspace }}/../_temp"
+          cat $LOG_DIR/* || true > "$LOG_FILE" || true
 
-          if grep -qi "maximum number of 100 development themes" lhci_output.txt; then
+          # Default to infra failure
+          echo "FAILURE_TYPE=infra" >> $GITHUB_ENV
+
+          if grep -qi "maximum number of 100 development themes" "$LOG_FILE"; then
             echo "FAILURE_TYPE=theme_limit" >> $GITHUB_ENV
-          elif [ -n "$SCORE_FAILURES" ]; then
+          elif grep -qi "categories.accessibility failure" "$LOG_FILE" || grep -qi "categories.performance failure" "$LOG_FILE"; then
             echo "FAILURE_TYPE=assertion" >> $GITHUB_ENV
-            echo "SCORE_FAILURES=$SCORE_FAILURES" >> $GITHUB_ENV
-          else
-            echo "FAILURE_TYPE=infra" >> $GITHUB_ENV
           fi
 
       - name: Notify Slack
-        if: always()
+        if: failure()
         run: |
           ACTOR=${{ github.actor }}
           BRANCH=${{ github.ref_name }}
           COMMIT=${{ github.sha }}
-          TYPE=${{ env.FAILURE_TYPE }}
-          SCORES="${{ env.SCORE_FAILURES }}"
           COMMIT_MESSAGE=$(git log -1 --pretty=%s)
-          REPO_URL="https://github.com/${{ github.repository }}"
-          COMMIT_URL="${REPO_URL}/commit/${COMMIT}"
+          COMMIT_URL="https://github.com/${{ github.repository }}/commit/${COMMIT}"
+          WORKFLOW="${{ github.workflow }}"
+          FAILURE_TYPE=${{ env.FAILURE_TYPE }}
 
-          MSG="*🚨 Shopify Lighthouse CI failed!*\n"
+          if [ "$FAILURE_TYPE" == "assertion" ]; then
+            REASON="One or more Lighthouse assertions failed."
+          elif [ "$FAILURE_TYPE" == "theme_limit" ]; then
+            REASON="🔺 Shopify theme limit (100) reached — cannot create a new development theme."
+          else
+            REASON="CI failed before assertions — possible infra/config issue."
+          fi
+
+          MSG=":siren: *Shopify Lighthouse CI failed!*\n"
           MSG+="*Triggered by:* \`@${ACTOR}\`\n"
           MSG+="*Branch:* \`${BRANCH}\`\n"
           MSG+="*Commit:* <${COMMIT_URL}|${COMMIT}>\n"
           MSG+="*Message:* ${COMMIT_MESSAGE}\n"
-          MSG+="*Workflow:* \`${{ github.workflow }}\`\n\n"
-
-          if [ "$TYPE" = "theme_limit" ]; then
-            MSG+="*Reason:* 🔺 Shopify theme limit (100) reached.\n"
-          elif [ "$TYPE" = "assertion" ]; then
-            MSG+="*Failing Score(s):* ${SCORES}\n\n"
-          else
-            MSG+="*Reason:* CI failed before assertions — possible infra/config issue.\n"
-          fi
+          MSG+="*Workflow:* \`${WORKFLOW}\`\n"
+          MSG+="*Reason:* ${REASON}"
 
           curl -X POST -H 'Content-type: application/json' \
             --data "{\"text\":\"${MSG//\"/\\\"}\"}" \
             ${{ secrets.SLACK_WEBHOOK_URL }}
 
-      - name: Manually Fail if Needed
-        if: ${{ env.FAILURE_TYPE == 'assertion' || env.FAILURE_TYPE == 'theme_limit' }}
+      - name: Manually Fail the Job
+        if: failure()
         run: |
-          echo "CI failed due to: $FAILURE_TYPE"
+          echo "Failing the job after notifying Slack..."
           exit 1
