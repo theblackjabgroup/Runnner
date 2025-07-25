@@ -21,27 +21,31 @@ jobs:
           lhci_min_score_performance: 0.9
           password: "thoolt"
 
-      - name: Analyze LHCI Output
+      - name: Detect Failure Type from Summary Logs
         if: always()
         run: |
           set -o pipefail
+          # Parse GitHub Actions logs from previous step
+          # Try to pull logs for scoring info
+          SCORE_FAILURES=""
 
-          # Extract logs from GitHub Actions logs (or from CLI if local)
-          echo "Simulating log extraction for parsing..."
-          # Here you would extract actual logs if you had access.
-          # For now, simulate with fake test output
-          echo "✘ categories.accessibility failure for minScore assertion" > lhci_output.txt
-          echo "Open the report at https://storage.googleapis.com/lighthouse/report.html" >> lhci_output.txt
+          grep -q "categories.accessibility failure" $GITHUB_WORKSPACE/_temp/* || true
+          if [ $? -eq 0 ]; then
+            echo "ACCESSIBILITY_FAILED=true" >> $GITHUB_ENV
+            SCORE_FAILURES="${SCORE_FAILURES}Accessibility "
+          fi
 
-          grep "✘" lhci_output.txt > failed_assertions.txt || echo "No assertion failures" > failed_assertions.txt
-          grep -o 'https://storage.googleapis.com[^ ]*\.report\.html' lhci_output.txt > report_urls.txt || echo "No report links found" > report_urls.txt
+          grep -q "categories.performance failure" $GITHUB_WORKSPACE/_temp/* || true
+          if [ $? -eq 0 ]; then
+            echo "PERFORMANCE_FAILED=true" >> $GITHUB_ENV
+            SCORE_FAILURES="${SCORE_FAILURES}Performance "
+          fi
 
-          if grep -qi "maximum number of 100 development themes" lhci_output.txt; then
-            echo "FAILURE_TYPE=theme_limit" >> $GITHUB_ENV
-          elif grep -q "✘" failed_assertions.txt; then
+          grep -qi "maximum number of 100 development themes" $GITHUB_WORKSPACE/_temp/* && echo "FAILURE_TYPE=theme_limit" >> $GITHUB_ENV || true
+
+          if [[ "$SCORE_FAILURES" != "" ]]; then
             echo "FAILURE_TYPE=assertion" >> $GITHUB_ENV
-          else
-            echo "FAILURE_TYPE=infra" >> $GITHUB_ENV
+            echo "SCORE_FAILURES=$SCORE_FAILURES" >> $GITHUB_ENV
           fi
 
       - name: Notify Slack
@@ -51,25 +55,33 @@ jobs:
           BRANCH=${{ github.ref_name }}
           COMMIT=${{ github.sha }}
           TYPE=${{ env.FAILURE_TYPE }}
+          SCORES=${{ env.SCORE_FAILURES }}
           REPO_URL="https://github.com/${{ github.repository }}"
           COMMIT_URL="${REPO_URL}/commit/${COMMIT}"
+          COMMIT_MESSAGE=$(git log -1 --pretty=%s)
 
           MSG="*🚨 Shopify Lighthouse CI failed!*\n"
           MSG+="*Triggered by:* \`@${ACTOR}\`\n"
           MSG+="*Branch:* \`${BRANCH}\`\n"
           MSG+="*Commit:* <${COMMIT_URL}|${COMMIT}>\n"
+          MSG+="*Message:* ${COMMIT_MESSAGE}\n"
           MSG+="*Workflow:* \`${{ github.workflow }}\`\n\n"
 
           if [ "$TYPE" = "theme_limit" ]; then
-            MSG+="*Reason:* 🔺 Shopify theme limit (100) reached.\n"
+            MSG+="*Reason:* 🔺 Shopify theme limit (100) reached — cannot create a new development theme.\n"
           elif [ "$TYPE" = "assertion" ]; then
-            MSG+="*Failing Constraints:*\n$(cat failed_assertions.txt)\n\n"
+            MSG+="*Failing Score(s):* ${SCORES}\n\n"
           else
-            MSG+="*Reason:* CI failed before assertions — infra/config issue likely.\n"
+            MSG+="*Reason:* CI failed before assertions — possible infra/config issue.\n"
           fi
-
-          MSG+="*Report Links:*\n$(cat report_urls.txt)"
 
           curl -X POST -H 'Content-type: application/json' \
             --data "{\"text\":\"${MSG//\"/\\\"}\"}" \
             ${{ secrets.SLACK_WEBHOOK_URL }}
+
+
+      - name: Manually Fail Job if Needed
+        if: ${{ env.FAILURE_TYPE == 'assertion' || env.FAILURE_TYPE == 'theme_limit' }}
+        run: |
+          echo "Failing job due to $FAILURE_TYPE"
+          exit 1
