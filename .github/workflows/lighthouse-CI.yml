@@ -10,31 +10,25 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-      # 1️⃣ Install Shopify CLI + jq for JSON parsing
-      - name: Install Shopify CLI & jq
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y jq
-          npm install -g @shopify/cli
-
-      # 2️⃣ Pre‑check: count development themes
-      - name: Check Development Theme Limit
+      # 1️⃣ Pre‑check: count development themes via REST API (no CLI)
+      - name: Check Dev Theme Limit
         id: theme_check
         run: |
-          COUNT=$(shopify theme list \
-            --store="${{ secrets.STORE_DOMAIN }}" \
-            --password="${{ secrets.APIKEY }}" \
-            --json | jq '[.[]|select(.role=="development")]|length')
-          echo "DEV_THEME_COUNT=$COUNT" >> $GITHUB_ENV
-          if [ "$COUNT" -ge 100 ]; then
+          DEV_THEME_COUNT=$(curl -s -X GET "https://delhi-dev-themetest.myshopify.com/admin/api/2023-01/themes.json" \
+            -H "X-Shopify-Access-Token: ${{ secrets.APIKEY }}" \
+            -H "Content-Type: application/json" \
+          | jq '[.themes[] | select(.role=="development")] | length')
+          echo "Found $DEV_THEME_COUNT development themes"
+          echo "DEV_THEME_COUNT=$DEV_THEME_COUNT" >> $GITHUB_ENV
+          if [ "$DEV_THEME_COUNT" -ge 100 ]; then
             echo "FAILURE_TYPE=theme_limit" >> $GITHUB_ENV
           fi
 
-      # 3️⃣ Run Lighthouse CI (always run, even if theme_limit)
+      # 2️⃣ Run Shopify’s Lighthouse CI Action
       - name: Run Shopify Lighthouse CI
         id: run_lhci
-        continue-on-error: true
         uses: shopify/lighthouse-ci-action@v1
+        continue-on-error: true
         with:
           access_token: ${{ secrets.APIKEY }}
           store: "delhi-dev-themetest.myshopify.com"
@@ -42,18 +36,17 @@ jobs:
           lhci_min_score_performance: 0.9
           password: "thoolt"
 
-      # 4️⃣ Notify Slack & fail job if *either* theme_limit OR CI step failed
+      # 3️⃣ Notify Slack & fail the job if either theme_limit OR LHCI failed
       - name: Notify Slack & Fail Job
         if: always()
         run: |
-          # Determine why we’re here
+          # Decide why we’re failing
           if [ "${{ env.FAILURE_TYPE }}" = "theme_limit" ]; then
             REASON="🔺 Shopify theme limit (100) reached — cannot create a new development theme."
           elif [ "${{ steps.run_lhci.outcome }}" != "success" ]; then
-            REASON="CI failed before assertions — possible infra/config issue or Lighthouse thresholds not met."
+            REASON="One or more Lighthouse assertions failed (accessibility < 1.0 or performance < 0.9)."
           else
-            # No failure; exit cleanly
-            echo "No failure detected; skipping Slack and job-fail."
+            echo "✅ No failure detected; skipping Slack and job-fail."
             exit 0
           fi
 
@@ -62,8 +55,8 @@ jobs:
           BRANCH=${{ github.ref_name }}
           COMMIT=${{ github.sha }}
           COMMIT_MESSAGE=$(git log -1 --pretty=%s)
-          COMMIT_URL="https://github.com/${{ github.repository }}/commit/${COMMIT}"
           WORKFLOW="${{ github.workflow }}"
+          COMMIT_URL="https://github.com/${{ github.repository }}/commit/${COMMIT}"
 
           MSG=":small_red_triangle: *Shopify Lighthouse CI failed!*\n"
           MSG+="*Triggered by:* \`@${ACTOR}\`\n"
@@ -78,6 +71,6 @@ jobs:
                --data "{\"text\":\"${MSG//\"/\\\"}\"}" \
                ${{ secrets.SLACK_WEBHOOK_URL }}
 
-          # Finally, fail the job so downstream is blocked
+          # Finally, fail the job
           echo "Exiting with failure due to: $REASON"
           exit 1
