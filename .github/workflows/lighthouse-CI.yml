@@ -12,7 +12,7 @@ jobs:
 
       - name: Run Shopify Lighthouse CI
         id: run_lhci
-        continue-on-error: true
+        continue-on-error: true  # allows Slack to notify, but we will fail job manually later
         uses: shopify/lighthouse-ci-action@v1
         with:
           access_token: ${{ secrets.APIKEY }}
@@ -21,29 +21,8 @@ jobs:
           lhci_min_score_performance: 0.9
           password: "thoolt"
 
-      - name: Detect Failure Type
-        if: failure()
-        run: |
-          set -e
-
-          LOG_FILE="${{ runner.temp }}/lhci-log.txt"
-
-          # Pull GitHub Actions step log content (if accessible)
-          echo "Attempting to locate and parse logs..."
-          LOG_DIR="${{ github.workspace }}/../_temp"
-          cat $LOG_DIR/* || true > "$LOG_FILE" || true
-
-          # Default to infra failure
-          echo "FAILURE_TYPE=infra" >> $GITHUB_ENV
-
-          if grep -qi "maximum number of 100 development themes" "$LOG_FILE"; then
-            echo "FAILURE_TYPE=theme_limit" >> $GITHUB_ENV
-          elif grep -qi "categories.accessibility failure" "$LOG_FILE" || grep -qi "categories.performance failure" "$LOG_FILE"; then
-            echo "FAILURE_TYPE=assertion" >> $GITHUB_ENV
-          fi
-
       - name: Notify Slack
-        if: failure()
+        if: steps.run_lhci.outcome == 'failure'
         run: |
           ACTOR=${{ github.actor }}
           BRANCH=${{ github.ref_name }}
@@ -51,15 +30,6 @@ jobs:
           COMMIT_MESSAGE=$(git log -1 --pretty=%s)
           COMMIT_URL="https://github.com/${{ github.repository }}/commit/${COMMIT}"
           WORKFLOW="${{ github.workflow }}"
-          FAILURE_TYPE=${{ env.FAILURE_TYPE }}
-
-          if [ "$FAILURE_TYPE" == "assertion" ]; then
-            REASON="One or more Lighthouse assertions failed."
-          elif [ "$FAILURE_TYPE" == "theme_limit" ]; then
-            REASON="🔺 Shopify theme limit (100) reached — cannot create a new development theme."
-          else
-            REASON="CI failed before assertions — possible infra/config issue."
-          fi
 
           MSG=":siren: *Shopify Lighthouse CI failed!*\n"
           MSG+="*Triggered by:* \`@${ACTOR}\`\n"
@@ -67,14 +37,14 @@ jobs:
           MSG+="*Commit:* <${COMMIT_URL}|${COMMIT}>\n"
           MSG+="*Message:* ${COMMIT_MESSAGE}\n"
           MSG+="*Workflow:* \`${WORKFLOW}\`\n"
-          MSG+="*Reason:* ${REASON}"
+          MSG+="*Reason:* CI failed before assertions — possible infra/config issue or Lighthouse score threshold not met."
 
           curl -X POST -H 'Content-type: application/json' \
             --data "{\"text\":\"${MSG//\"/\\\"}\"}" \
             ${{ secrets.SLACK_WEBHOOK_URL }}
 
-      - name: Manually Fail the Job
-        if: failure()
+      - name: Manually fail the job if LHCI failed
+        if: steps.run_lhci.outcome == 'failure'
         run: |
-          echo "Failing the job after notifying Slack..."
+          echo "Manually failing the job due to Lighthouse assertion failure."
           exit 1
