@@ -4,18 +4,73 @@ on: [push]
 
 jobs:
   lhci:
-    name: Lighthouse (PF_TESTING)
+    name: Lighthouse CI with Slack
     runs-on: ubuntu-latest
+
     steps:
       - uses: actions/checkout@v2
 
-      - name: Lighthouse
+      #  counting development themes 
+      - name: Check Dev Theme Limit
+        id: theme_check
+        run: |
+          DEV_THEME_COUNT=$(curl -s -X GET "https://delhi-dev-themetest.myshopify.com/admin/api/2023-01/themes.json" \
+            -H "X-Shopify-Access-Token: ${{ secrets.APIKEY }}" \
+            -H "Content-Type: application/json" \
+          | jq '[.themes[] | select(.role=="development")] | length')
+          echo "Found $DEV_THEME_COUNT development themes"
+          echo "DEV_THEME_COUNT=$DEV_THEME_COUNT" >> $GITHUB_ENV
+          if [ "$DEV_THEME_COUNT" -ge 100 ]; then
+            echo "FAILURE_TYPE=theme_limit" >> $GITHUB_ENV
+          fi
+
+      # Shopify’s Lighthouse CI Action
+      - name: Run Shopify Lighthouse CI
+        id: run_lhci
         uses: shopify/lighthouse-ci-action@v1
+        continue-on-error: true
         with:
-          access_token:  ${{ secrets.APIKEY }}
+          access_token: ${{ secrets.APIKEY }}
           store: "delhi-dev-themetest.myshopify.com"
           lhci_min_score_accessibility: 0.9
           lhci_min_score_performance: 0.7
           password: "thoolt"
 
- 
+      # Notify Slack 
+      - name: Notify Slack & Fail Job
+        if: always()
+        run: |
+          # Decide why  failing
+          if [ "${{ env.FAILURE_TYPE }}" = "theme_limit" ]; then
+            REASON="🔺 Shopify theme limit (100) reached — cannot create a new development theme."
+          elif [ "${{ steps.run_lhci.outcome }}" != "success" ]; then
+            REASON="One or more Lighthouse assertions failed (accessibility < 0.9 or performance < 0.7)."
+          else
+            echo "✅ No failure detected; skipping Slack and job-fail."
+            exit 0
+          fi
+
+          # Build Slack message
+          ACTOR=${{ github.actor }}
+          BRANCH=${{ github.ref_name }}
+          COMMIT=${{ github.sha }}
+          COMMIT_MESSAGE=$(git log -1 --pretty=%s)
+          WORKFLOW="${{ github.workflow }}"
+          COMMIT_URL="https://github.com/${{ github.repository }}/commit/${COMMIT}"
+
+          MSG=":bangbang: *Shopify Lighthouse CI failed!*\n"
+          MSG+="*Triggered by:* \`@${ACTOR}\`\n"
+          MSG+="*Branch:* \`${BRANCH}\`\n"
+          MSG+="*Commit:* <${COMMIT_URL}|${COMMIT}>\n"
+          MSG+="*Message:* ${COMMIT_MESSAGE}\n"
+          MSG+="*Workflow:* \`${WORKFLOW}\`\n"
+          MSG+="*Reason:* ${REASON}"
+
+          # Send to Slack
+          curl -X POST -H 'Content-type: application/json' \
+               --data "{\"text\":\"${MSG//\"/\\\"}\"}" \
+               ${{ secrets.SLACK_WEBHOOK_URL }}
+
+          # Fail the job to prevent further actions
+          echo "Exiting with failure due to: $REASON"
+          exit 1
