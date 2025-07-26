@@ -190,7 +190,7 @@
                         <div class="product-image-wrapper relative group" aria-hidden="true">
                           {{ 'collection-1' | placeholder_svg_tag }}
                         </div>
-                        <div class="product-details" style="margin: 10px 0;">
+                        <div class="product-details">
                           <h3 class="uppercase font-medium leading-tight">No products found</h3>
                           <div class="flex gap-2 items-baseline fc-price" style="margin-top: -6px;">
                             <span class="!text-[1.6rem] uppercase font-medium">—</span>
@@ -298,7 +298,7 @@
                             </div>
                           </a>
 
-                          <div class="product-cart-container absolute bottom-4 left-1/2 transform -translate-x-1/2 w-full px-4">
+                          <div class="product-cart-container absolute bottom-4 w-full">
                             <div class="cart-options-wrapper relative">
                               {% assign has_size_variants = false %}
                               {% unless product.has_only_default_variant %}
@@ -314,7 +314,6 @@
                                   class="size-variants-container p-2 mb-0 opacity-0 invisible"
                                   role="group"
                                   aria-label="Size options for {{ product.title }}"
-                                  style="background-color: var(--text);"
                                 >
                                   {% for option in product.options_with_values %}
                                     {% if option.name == 'Size' or option.name == 'size' %}
@@ -323,9 +322,9 @@
                                         class="size-label-wrapper flex items-center w-full"
                                       >
                                         <span
-                                          class="size-label text-m px-2 mr-auto"
-                                          style="color: rgb(var(--color-background)); background-color: var(--text);"
-                                          >SIZE</span
+                                          class="size-label px-2 mr-auto"
+                                          style="color: var(--text); background-color: rgb(var(--color-background)); font-size: 14px;"
+                                          >SELECT SIZE</span
                                         >
                                         <div
                                           class="size-options-wrapper flex flex-wrap gap-4 justify-end"
@@ -342,7 +341,7 @@
                                             {% endfor %}
 
                                             <button
-                                              class="size-option-btn p-5 text-s rounded size-animate {% unless variant_available %}unavailable-size{% endunless %}"
+                                              class="size-option-btn p-5 rounded size-animate {% unless variant_available %}unavailable-size{% endunless %}"
                                               {% if variant_available %}
                                                 data-variant-id="{{ variant_id }}"
                                                 data-product-id="{{ product.id }}"
@@ -353,7 +352,7 @@
                                                 data-variant-size="{{ value }}"
                                                 aria-disabled="true"
                                               {% endif %}
-                                              style="--animation-order: {{ forloop.index }}; background-color: var(--text); color: rgb(var(--color-background));"
+                                              style="--animation-order: {{ forloop.index }}; color: var(--text); background-color: rgb(var(--color-background));"
                                               aria-label="Size {{ value }}{% unless variant_available %} - Sold Out{% endunless %}"
                                               {% unless variant_available %}
                                                 aria-disabled="true"
@@ -371,7 +370,7 @@
 
                               {% if product.available %}
                                 <button
-                                  class="add-to-cart-btn w-90 text-(--text) py-2 px-4 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                                  class="add-to-cart-btn w-90 text-(--text) rounded opacity-0 group-hover:opacity-100 transition-opacity duration-300"
                                   style="background-color: rgb(var(--color-background)); color: var(--text);"
                                   data-product-id="{{ product.id }}"
                                   {% if product.has_only_default_variant %}
@@ -389,7 +388,7 @@
                                 </button>
                               {% else %}
                                 <button
-                                  class="notify-me-btn w-90 text-(--text) py-2 px-4 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                                  class="notify-me-btn w-90 text-(--text) rounded opacity-0 group-hover:opacity-100 transition-opacity duration-300"
                                   data-product-id="{{ product.id }}"
                                   data-product-title="{{ product.title | escape }}"
                                   data-has-variants="{% if has_size_variants %}true{% else %}false{% endif %}"
@@ -404,11 +403,11 @@
                           </div>
                         </div>
 
-                        <div class="product-details" style="margin: 10px 0;">
+                        <div class="product-details" style="margin-top: 10px;">
                           <a href="{{ product.url }}" aria-label="{{ product.title }}">
                             <h3
                               class="uppercase leading-tight fc-product-title"
-                              style="color: var(--text); font-size: 15px; font-weight: 500;"
+                              style="color: var(--text); font-size: 14px; font-weight: 500;"
                             >
                               {{ product.title | escape }}
                             </h3>
@@ -417,12 +416,12 @@
                               class="flex gap-2 items-baseline fc-price"
                               style="color: var(--text); font-size: 14px; font-weight: 400;"
                             >
-                              <span class="uppercase" style="color: var(--text);">
+                              <span class="uppercase" style="color: var(--text); font-size: 14px;">
                                 {{ product.price | money }}
                               </span>
                               {%- if product.compare_at_price > product.price -%}
                                 <span id="fc-product-dash">|</span>
-                                <span class="uppercase text-red-600" style="font-size: 13px; font-weight: 400;">
+                                <span class="uppercase text-red-600" style="font-size: 14px; font-weight: 400;">
                                   {{- product.compare_at_price | money }} FOR MEMBERS</span
                                 >
                               {%- endif -%}
@@ -684,7 +683,7 @@
       }
 
       .product-details .fc-product-title{
-        padding-bottom: 5px;
+        /* padding-bottom: 5px; */
       }
 
     .image-nav-arrow {
@@ -739,8 +738,10 @@
     }
 
     .product-cart-container {
+      left: 50%;
+      transform: translateX(-50%);
       z-index: 10;
-      width: 90%;
+      width: 307px;
     }
 
     .cart-options-wrapper {
@@ -750,9 +751,10 @@
     .add-to-cart-btn,
     .notify-me-btn {
       transition: all 0.5s ease;
-      width: 110%;
-      left: -5%;
-      height: 50px;
+      width: 306px;
+      left: 50%;
+      transform: translateX(-50%);
+      height: 37px;
       border-radius: {{ settings.buttons_radius }}px;
       font-size: 20px;
       position: relative;
@@ -770,25 +772,23 @@
       border-radius: {{ settings.buttons_radius }}px;
       position: absolute;
       bottom: 0;
-      left: 0;
-      width: 110%;
-      left: -5%;
-      height: 100%;
+      /* left: 50%; */
+      /* transform: translateX(-50%); */
+      width: 306px;
+      height: 37px;
       z-index: 10;
       transition: all 0.5s ease;
-      transform: translateY(0);
       display: flex;
       justify-content: center;
       padding: 5px 10px;
       font-size: 20px;
-      background-color: var(--text);
-      color: rgb(var(--color-background));
+      color: var(--text);
+      background-color: rgb(var(--color-background));
     }
 
     .size-label-wrapper {
       display: flex;
-      width: 110%;
-      left: -5%;
+      width: 100%;
       align-items: center;
       border-radius: {{ settings.buttons_radius }}px;
     }
@@ -819,12 +819,12 @@
 
     .size-option-btn {
       transition: all 0.4s ease;
-      width: 30px;
-      height: 30px;
+      width: 23px;
+      height: 22px;
       border-radius: {{ settings.buttons_radius }}px;
       color: rgb(var(--color-background));
-      font-size: 18px;
-      border: {{ settings.buttons_border_thickness }}px solid rgb(var(--color-background));
+      font-size: 16px;
+      border: {{ settings.buttons_border_thickness }}px solid var(--disabled_text);
       padding: 2px;
       display: flex;
       align-items: center;
@@ -837,22 +837,25 @@
 
     .size-option-btn:hover {
       transform: translateY(-2px);
-      background-color: rgb(var(--color-background)) !important;
-      color: var(--text) !important;
+      color: rgb(var(--color-background)) !important;
+      background-color: var(--text) !important;
     }
 
     .unavailable-size {
       opacity: 1;
       position: relative;
       cursor: not-allowed;
+      /* border-color: var(--disabled_text) !important; */
+      /* color: var(--disabled_text) !important; */
+      color: var(--text) !important;
       border-color: var(--disabled_text) !important;
-      color: var(--disabled_text) !important;
+      background-color: var(--disabled_text) !important;
       overflow: hidden;
     }
 
     .unavailable-size:hover{
       background-color: var(--disabled_text) !important;
-      color: var(--text);
+      /* color: var(--text); */
     }
 
     .unavailable-size::after {
@@ -862,7 +865,7 @@
       left: -2px;
       right: -2px;
       height: 2px;
-      background-color: var(--disabled_text);
+      background-color: var(--text);
       transform: rotate(-45deg);
     }
 
@@ -1127,7 +1130,7 @@
   @media (max-width: 1025px){
     .product-image, .fc-product-image, .product-image-wrapper{
       width: 350px;
-      height: 420px;
+      height: 424px;
     }
   }
 
