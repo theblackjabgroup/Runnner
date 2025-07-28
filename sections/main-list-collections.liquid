@@ -128,37 +128,45 @@
             {% endif %}
           {% else %}
             {% if block.settings.collection != blank %}
-              {% render 'card-collection',
-                card_collection: block.settings.collection,
-                media_aspect_ratio: section.settings.image_ratio,
-                columns: section.settings.columns_desktop
-              %}
+              {% assign collection = block.settings.collection %}
+              <div class="card-collection__content flex flex-col justify-end h-full">
+                <div class="card-collection__media flex-1 relative">
+                  {% if collection.featured_image %}
+                    <img
+                      src="{{ collection.featured_image | image_url: width: 600 }}"
+                      alt="{{ collection.title | escape }}"
+                      class="w-full h-full object-contain"
+                      loading="lazy"
+                      width="100"
+                      height="100"
+                    >
+                  {% else %}
+                    <img
+                      src="{{ 'defaultproduct.svg' | asset_url }}"
+                      alt="Default Product"
+                      class="w-full h-full object-cover"
+                      loading="lazy"
+                      width="100"
+                      height="100"
+                    >
+                  {% endif %}
+                </div>
+                <div class="card-collection__heading p-2">
+                  <div class="collection-title-custom">{{ collection.title | upcase }}</div>
+                  <div class="collection-count-custom">number of products {{ collection.products_count }}</div>
+                </div>
+              </div>
             {% else %}
-              <div>
-                <div class="relative w-full bg-gray-100 flex flex-col items-center justify-center">
+              <div class="card-collection__content flex flex-col justify-end h-full">
+                <div class="card-collection__media flex-1 relative">
                   <img
                     src="{{ 'defaultproduct.svg' | asset_url }}"
                     alt="Default Product"
-                    class="default-product-img"
-                    width="430px"
-                    height="430px"
+                    class="w-full h-full object-cover"
+                    width="430"
+                    height="430"
                   >
                 </div>
-                {% if block.type == 'collection' %}
-                  <span class="collection-hover-target text-gray-400 mt-20 w-full text-center text-5xl absolute bottom-0 bg-white flex items-center justify-between gap-2">
-                    Collection
-                    <svg
-                      class="collection-hover-arrow"
-                      width="23"
-                      height="23"
-                      viewBox="0 0 9 9"
-                      fill="none"
-                      xmlns="http://www.w3.org/2000/svg"
-                    >
-                      <path d="M1.1875 7.7334H7.6599M7.6599 7.7334V1.261M7.6599 7.7334L1.1875 1.261" stroke="black" stroke-linejoin="round"/>
-                    </svg>
-                  </span>
-                {% endif %}
               </div>
             {% endif %}
           {% endif %}
@@ -235,11 +243,31 @@
 
   .card-collection__media img[data-span-two="true"] {
     height: 100%;
-    object-fit: cover;
+    object-fit: contain;
   }
+
 
   .card-collection__heading {
     margin-top: auto;
+    text-align: left;
+    padding-left: 2px;
+    padding-bottom: 2px;
+  }
+
+  .collection-title-custom {
+    font-weight: 600;
+    font-size: 15px;
+    text-transform: uppercase;
+    margin-bottom: 0px;
+    line-height: 1.2;
+    padding-top:10px;
+  }
+  .collection-count-custom {
+    font-weight: 600;
+    font-size: 15px;
+    text-transform: lowercase;
+    margin-top: 0px;
+    line-height: 1.2;
   }
 
   @media screen and (max-width: 749px) {
