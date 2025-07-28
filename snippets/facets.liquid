@@ -702,6 +702,57 @@
 </div>
 
 <script>
+  // Function to close all dropdowns except the one being opened
+  function closeOtherDropdowns(currentDropdown) {
+    // Get all filter dropdowns
+    const allDropdowns = document.querySelectorAll('.facets__disclosure, .disclosure-has-popup');
+
+    allDropdowns.forEach((dropdown) => {
+      if (dropdown !== currentDropdown && dropdown.hasAttribute('open')) {
+        dropdown.removeAttribute('open');
+        // Reset arrow rotation
+        const arrow = dropdown.querySelector('svg');
+        if (arrow) {
+          arrow.style.transform = '';
+        }
+      }
+    });
+  }
+
+  // Add event listeners to all filter summaries
+  document.addEventListener('DOMContentLoaded', function () {
+    const filterSummaries = document.querySelectorAll('.facets__summary');
+
+    filterSummaries.forEach((summary) => {
+      summary.addEventListener('click', function (e) {
+        const parentDetails = this.closest('details');
+
+        // Small delay to ensure the current dropdown state is updated
+        setTimeout(() => {
+          if (parentDetails.hasAttribute('open')) {
+            closeOtherDropdowns(parentDetails);
+          }
+        }, 10);
+      });
+    });
+
+    // Close dropdowns when clicking outside
+    document.addEventListener('click', function (e) {
+      if (!e.target.closest('.facets__disclosure') && !e.target.closest('.disclosure-has-popup')) {
+        const allDropdowns = document.querySelectorAll('.facets__disclosure[open], .disclosure-has-popup[open]');
+        allDropdowns.forEach((dropdown) => {
+          dropdown.removeAttribute('open');
+          // Reset arrow rotation
+          const arrow = dropdown.querySelector('svg');
+          if (arrow) {
+            arrow.style.transform = '';
+          }
+        });
+      }
+    });
+  });
+
+  // Your existing mobile functions
   document.querySelectorAll('.mobile-facets__summary').forEach((summary) => {
     summary.addEventListener('click', () => {
       const arrow = summary.closest('details')?.querySelector('.mobile-facets__arrow');
@@ -719,9 +770,18 @@
   function updateMobileSort(button) {
     const value = button.dataset.value;
     const form = document.getElementById('FacetFiltersFormMobile');
-    const input = form.querySelector('select[name="sort_by"]');
-    input.value = value;
+    let sortInput = form.querySelector('input[name="sort_by"]');
+    if (!sortInput) {
+      sortInput = document.createElement('input');
+      sortInput.type = 'hidden';
+      sortInput.name = 'sort_by';
+      form.appendChild(sortInput);
+    }
+    sortInput.value = value;
     form.submit();
+
+    // Close the dropdown
+    button.closest('.mobile-sort-options').classList.add('hidden');
   }
 
   // Close sort dropdown when clicking outside
@@ -851,13 +911,11 @@
     transform: translateY(-65px) !important;
   }
 
-  /* Add hover rotation for availability, price, and sort by arrows */
-  .facets__summary:hover svg {
-    transform: rotate(-90deg);
-    transition: transform 0.3s ease;
-  }
-
+  /* Only animate arrow rotation on click (rotated class), not on hover */
   .facets__summary svg {
     transition: transform 0.3s ease;
+  }
+  .facets__summary svg.rotated {
+    transform: rotate(-90deg);
   }
 </style>
