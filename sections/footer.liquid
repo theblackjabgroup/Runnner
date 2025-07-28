@@ -88,13 +88,13 @@
   }
   
   /* Solid black background when no image */
-  .animated-footer-background.no-image {
-    background: #000000 !important;
+   .animated-footer-background.no-image {
+    background: {{ section.settings.footer_bg_color | default: '#000000' }} !important;
     animation: none;
   }
   
   @keyframes backgroundMove {
-    0% {
+      0% {
       background-position: 0% 0%;
       background-size: 120% 120%;
     }
@@ -794,28 +794,27 @@
     }
     
   }
-   
 
+    
 </style>
 
 <footer
   class="color-{{ section.settings.color_scheme }}p-4 sm:px-6 md:px-8 md:py-8 relative overflow-hidden"
-
   style="
     padding-top: {{ section.settings.padding_top }}px;
     padding-bottom: {{ section.settings.padding_bottom }}px;
     margin-top: {{ section.settings.margin_top }}px;
     margin-bottom: {{ section.settings.margin_bottom }}px;
-    background: #000;
+    background: {{ section.settings.footer_bg_color | default: '#000000' }};
   "
   role="contentinfo"
 >
-  <!-- Animated Background Effect -->
-  <div class="animated-footer-background {% if section.settings.background_image == blank %}no-image{% endif %}"
-       {% if section.settings.background_image != blank %}
-         style="background-image: url('{{ section.settings.background_image | img_url: 'master' }}');"
-       {% endif %}>
-  </div>
+  <div class="animated-footer-background {% if section.settings.background_image == blank %}no-image{% elsif section.settings.enable_bg_animation == false %}paused{% endif %}"
+     {% if section.settings.background_image != blank %}
+       style="background-image: url('{{ section.settings.background_image | img_url: 'master' }}');"
+     {% endif %}>
+</div>
+
   <div class="animated-grain"></div>
   
   <!-- Footer Content -->
@@ -1344,11 +1343,18 @@ document.addEventListener('DOMContentLoaded', function() {
       "label": "Bottom Padding",
       "default": 40
     },
+  
     {
   "type": "color",
   "id": "email_input_color",
   "label": "Email Input Color",
   "default": "#FFFFFF"
+},
+    {
+  "type": "color",
+  "id": "footer_bg_color",
+  "label": "Footer Background Color",
+  "default": "#000000"
 },
     {
       "type": "color",
