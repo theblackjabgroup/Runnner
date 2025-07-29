@@ -8,321 +8,323 @@
         <!-- LEFT COLUMN: TECH SPECS -->
         <div class="tech-left-box relative z-20 p-8 mt-8 md:p-8 flex flex-col min-h-full w-full lg:w-[80%] lg:pr-24">
           <h2 class="text-[28px] lg:text-[32px] font-light mb-8 lg:mb-12 tracking-wide uppercase text-left">
-            {{ section.settings.tech_specs_heading | default: 'TECH SPECS' }}
+            {{ section.settings.tech_specs_heading }}
           </h2>
           <div>
-            <!-- Fit -->
-            <div class=" flex flex-row items-center border-b border-[#333] pb-2">
-              <span class="tech-specs-data text-[16px] text-gray-300 font-normal ">
-                {{ section.settings.fit_label | default: 'Fit' }}
-              </span>
-              <span class="text-[16px] font-medium flex items-center gap-2 pl-8">
-                {{ product.metafields.tech_specs.fit.value | default: section.settings.fit_value | default: 'Fitted' }}
-              </span>
-            </div>
-            <!-- Pocketing -->
-            <div class="flex flex-row items-center border-b border-[#333] pb-2">
-              <span class="tech-specs-data text-[16px] text-gray-300 font-normal">
-                {{ section.settings.pocketing_label | default: 'Pocketing' }}
-              </span>
-              <span class="text-[16px] font-medium pl-8">
-                {{-
-                  product.metafields.tech_specs.pocketing.value
-                  | default: section.settings.pocketing_value
-                  | default: '2 Gel, 1 Phone'
-                -}}
-              </span>
-            </div>
-            <!-- Effort & Temperature -->
-            <div class="flex flex-col gap-0 border-b border-[#333] pb-2">
-              <!-- Effort -->
-              <div class="flex flex-col lg:flex-row border-b border-[#333] lg:border-b-0 lg:border-r lg:border-[#f9f6f6] lg:pr-8 pb-4 lg:pb-0 w-full lg:items-start">
-                <!-- Text Column -->
-                <div class=" grid grid-cols-2 gap-4">
-                  <div class="tech-width">
-                    <div class="text-[16px] font-medium mb-1">
-                      {{ section.settings.effort_label | default: 'Effort' }}
+            {% for block in section.blocks %}
+              {% case block.type %}
+                {% when 'fit_pocketing' %}
+                  <div {{ block.shopify_attributes }}>
+                    <!-- Fit -->
+                    <div class="flex flex-row items-center border-b border-[#333] pb-2">
+                      <span class="tech-specs-data text-[16px] text-gray-300 font-normal">
+                        {{ block.settings.fit_label }}
+                      </span>
+                      <span class="text-[16px] font-medium flex items-center gap-2 pl-8">
+                        {{ product.metafields.tech_specs.fit.value | default: block.settings.fit_value }}
+                      </span>
                     </div>
-                    <div class="text-[14px] text-gray-300 font-normal mb-2 ">
-                      {{ section.settings.effort_desc | default: 'This product was designed for any and every run.' }}
+                    <!-- Pocketing -->
+                    <div class="flex flex-row items-center border-b border-[#333] pb-2">
+                      <span class="tech-specs-data text-[16px] text-gray-300 font-normal">
+                        {{ block.settings.pocketing_label }}
+                      </span>
+                      <span class="text-[16px] font-medium pl-8">
+                        {{- product.metafields.tech_specs.pocketing.value | default: block.settings.pocketing_value -}}
+                      </span>
                     </div>
                   </div>
-                  <div class="tech-specs-bars flex flex-col items-center justify-center pl-8 ">
-                    <!-- Effort Bar -->
-                    <div class="flex justify-between w-full max-w-full gap-2" id="effort-bar">
-                      {% for i in (1..52) %}
-                        <div class="box">|</div>
-                      {% endfor %}
-                    </div>
-                    <!-- Scale Labels -->
-                    <div class="flex justify-between text-[12px] text-gray-400 w-full mt-1">
-                      <span>{{ section.settings.effort_scale_0 | default: '0%' }}</span>
-                      <span>{{ section.settings.effort_scale_25 | default: '25%' }}</span>
-                      <span>{{ section.settings.effort_scale_50 | default: '50%' }}</span>
-                      <span>{{ section.settings.effort_scale_75 | default: '75%' }}</span>
-                      <span>{{ section.settings.effort_scale_100 | default: '100%' }}</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <!-- Temperature -->
-              <div class=" grid grid-cols-2">
-                <div class="tech-width">
-                  <div class="text-[16px] font-medium mb-1">
-                    {{ section.settings.temperature_label | default: 'Temperature' }}
-                  </div>
-                  <div class="text-[14px] text-gray-300 font-normal mb-2 ">
-                    {{ section.settings.temperature_desc | default: 'Designed for cool to hot temperatures.' }}
-                  </div>
-                </div>
-                <div class="tech-specs-bars">
-                  <div class="tech-specs-bars flex flex-col items-center justify-center w-full pl-8">
-                    <!-- Temperature Bar -->
-                    <div class="flex justify-between w-full max-w-full gap-2" id="temperature-bar">
-                      {% for i in (1..52) %}
-                        <div class="box">|</div>
-                      {% endfor %}
-                    </div>
-                    <!-- Scale Labels -->
-                    <div class="flex justify-between text-[14px] text-gray-400 w-full mt-1">
-                      <span>{{ section.settings.temp_scale_0 | default: '0°' }}</span>
-                      <span>{{ section.settings.temp_scale_32 | default: '32°' }}</span>
-                      <span>{{ section.settings.temp_scale_50 | default: '50°' }}</span>
-                      <span>{{ section.settings.temp_scale_70 | default: '70°' }}</span>
-                      <span>{{ section.settings.temp_scale_85 | default: '85°' }}</span>
-                      <span>{{ section.settings.temp_scale_95 | default: '95°' }}</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
 
-            <!-- CARE SECTION -->
-            <div class="flex flex-col lg:flex-row gap-2 mt-8">
-              <!-- Materials Column -->
-              <div class="w-full lg:w-1/3 mb-2 lg:mb-0">
-                <div class="font-medium text-[16px] mb-3 text-left">
-                  {{ section.settings.materials_label | default: 'Materials' }}
-                </div>
-                <div class="text-[14px] text-gray-300 font-normal leading-relaxed text-left">
-                  {{
-                    product.metafields.tech_specs.materials.value
-                    | default: section.settings.materials_value
-                    | default: '83% M.Poly FD, 17% Spandex'
-                  }}
-                </div>
-              </div>
-              <!-- Care Column -->
-              <div class="w-full lg:w-1/3 mb-2 lg:mb-0">
-                <div class="font-medium text-[16px] mb-3 text-left">
-                  {{ section.settings.care_label | default: 'Care' }}
-                </div>
-                <div class="text-[14px] text-gray-300 font-normal leading-relaxed text-left">
-                  {% assign care_lines = product.metafields.tech_specs.care.value
-                    | default: section.settings.care_value
-                    | default: 'Machine Wash Cold\nWash with Like Colors\nDo Not Bleach\nLay Flat to Dry\nDo Not Iron\nDo Not Dry Clean'
-                    | split: '\n'
-                  %}
-                  {% for line in care_lines %}
-                    <div class="flex items-start gap-2 mb-2">
-                      <span>{{ line }}</span>
+                {% when 'effort_temperature' %}
+                  <div {{ block.shopify_attributes }}>
+                    <div class="flex flex-col gap-0 border-b border-[#333] pb-2">
+                      <!-- Effort -->
+                      <div class="flex flex-col lg:flex-row border-b border-[#333] lg:border-b-0 lg:border-r lg:border-[#f9f6f6] lg:pr-8 pb-4 lg:pb-0 w-full lg:items-start">
+                        <!-- Text Column -->
+                        <div class="grid grid-cols-2 gap-4">
+                          <div class="tech-width">
+                            <div class="text-[16px] font-medium mb-1">
+                              {{ block.settings.effort_label }}
+                            </div>
+                            <div class="text-[14px] text-gray-300 font-normal mb-2">
+                              {{ block.settings.effort_desc }}
+                            </div>
+                          </div>
+                          <div class="tech-specs-bars flex flex-col items-center justify-center pl-8">
+                            <!-- Effort Bar -->
+                            <div class="flex justify-between w-full max-w-full gap-2" id="effort-bar">
+                              {% for i in (1..52) %}
+                                <div class="box">|</div>
+                              {% endfor %}
+                            </div>
+                            <!-- Scale Labels -->
+                            <div class="flex justify-between text-[12px] text-gray-400 w-full mt-1">
+                              <span>{{ block.settings.effort_scale_0 }}</span>
+                              <span>{{ block.settings.effort_scale_25 }}</span>
+                              <span>{{ block.settings.effort_scale_50 }}</span>
+                              <span>{{ block.settings.effort_scale_75 }}</span>
+                              <span>{{ block.settings.effort_scale_100 }}</span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      <!-- Temperature -->
+                      <div class="grid grid-cols-2">
+                        <div class="tech-width">
+                          <div class="text-[16px] font-medium mb-1">
+                            {{ block.settings.temperature_label }}
+                          </div>
+                          <div class="text-[14px] text-gray-300 font-normal mb-2">
+                            {{ block.settings.temperature_desc }}
+                          </div>
+                        </div>
+                        <div class="tech-specs-bars">
+                          <div class="tech-specs-bars flex flex-col items-center justify-center w-full pl-8">
+                            <!-- Temperature Bar -->
+                            <div class="flex justify-between w-full max-w-full gap-2" id="temperature-bar">
+                              {% for i in (1..52) %}
+                                <div class="box">|</div>
+                              {% endfor %}
+                            </div>
+                            <!-- Scale Labels -->
+                            <div class="flex justify-between text-[14px] text-gray-400 w-full mt-1">
+                              <span>{{ block.settings.temp_scale_0 }}</span>
+                              <span>{{ block.settings.temp_scale_32 }}</span>
+                              <span>{{ block.settings.temp_scale_50 }}</span>
+                              <span>{{ block.settings.temp_scale_70 }}</span>
+                              <span>{{ block.settings.temp_scale_85 }}</span>
+                              <span>{{ block.settings.temp_scale_95 }}</span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
                     </div>
-                  {% endfor %}
-                </div>
-              </div>
-              <!-- Additional Info Column -->
-              <div class="w-full lg:w-1/3">
-                <div class="font-medium text-[16px] mb-3 text-left">&nbsp;</div>
-                <div class="text-[13px] text-gray-400 font-normal leading-relaxed text-left">
-                  {{
-                    section.settings.additional_info
-                    | default: 'For best outcome, wash exclusively with active apparel.<br>Garment made in China'
-                  }}
-                </div>
-              </div>
+                  </div>
+              {% endcase %}
+            {% endfor %}
+
+            <div class="flex flex-col lg:flex-row gap-2 mt-8">
+              {% for block in section.blocks %}
+                {% if block.type == 'materials' or block.type == 'care' or block.type == 'additional_info' %}
+                  {% case block.type %}
+                    {% when 'materials' %}
+                      <div {{ block.shopify_attributes }} class="w-full lg:w-1/3 mb-2 lg:mb-0">
+                        <div class="font-medium text-[16px] mb-3 text-left">
+                          {{ block.settings.materials_label }}
+                        </div>
+                        <div class="text-[14px] text-gray-300 font-normal leading-relaxed text-left">
+                          {{ product.metafields.tech_specs.materials.value | default: block.settings.materials_value }}
+                        </div>
+                      </div>
+                    {% when 'care' %}
+                      <div {{ block.shopify_attributes }} class="w-full lg:w-1/3 mb-2 lg:mb-0">
+                        <div class="font-medium text-[16px] mb-3 text-left">
+                          {{ block.settings.care_label }}
+                        </div>
+                        <div class="text-[14px] text-gray-300 font-normal leading-relaxed text-left">
+                          {% assign care_lines = product.metafields.tech_specs.care.value
+                            | default: block.settings.care_value
+                            | split: '\n'
+                          %}
+                          {% for line in care_lines %}
+                            <div class="flex items-start gap-2 mb-2">
+                              <span>{{ line }}</span>
+                            </div>
+                          {% endfor %}
+                        </div>
+                      </div>
+                    {% when 'additional_info' %}
+                      <div {{ block.shopify_attributes }} class="w-full lg:w-1/3">
+                        <div class="font-medium text-[16px] mb-3 text-left">&nbsp;</div>
+                        <div class="text-[13px] text-gray-400 font-normal leading-relaxed text-left">
+                          {{ block.settings.additional_info }}
+                        </div>
+                      </div>
+                  {% endcase %}
+                {% endif %}
+              {% endfor %}
             </div>
           </div>
         </div>
 
         <!-- RIGHT COLUMN: FUNCTIONALITY -->
-        <div class="functionality-right-box relative flex flex-col lg:w-[20%] p-8 mt-8 lg:mt-0">
-          <h2 class="text-[28px] lg:text-[32px] font-light mb-12 tracking-wide uppercase">
-            {{ section.settings.features_heading | default: 'FUNCTIONALITY' }}
-          </h2>
-          <div class="py-6">
-            <!-- Feature 1 -->
-            <div class="flex items-start mb-10">
-              <span class="flex-shrink-0 w-14 h-14 rounded-full border border-[#333] bg-[#1a1a1a] flex items-center justify-center mt-5 mr-5">
-                {% if section.settings.feature_icon_1 != blank %}
-                  <img
-                    src="{{ section.settings.feature_icon_1 | image_url: width:50, height:50 }}"
-                    alt="Feature 1 Icon"
-                    style="width:50px;height:50px;opacity:0.4;"
-                    height="100%"
-                    width="100%"
-                  >
-                {% else %}
-                  <svg
-                    class="functionality-icons"
-                    width="50"
-                    height="50"
-                    fill="none"
-                    stroke="white"
-                    stroke-width="2"
-                    viewBox="0 0 24 24"
-                  >
-                    <rect x="3" y="7" width="18" height="12" rx="2"/><path d="M3 11h18"/>
-                  </svg>
-                {% endif %}
-              </span>
-              <div>
-                <div class="font-medium uppercase text-[14px] mb-2 tracking-wide">
-                  {{
-                    section.settings.feature1_title
-                    | default: product.metafields.functionality.feature_title1.value
-                    | default: 'POCKETING SYSTEM'
-                  }}
+        {% for block in section.blocks %}
+          {% if block.type == 'functionality' %}
+            <div
+              {{ block.shopify_attributes }}
+              class="functionality-right-box relative flex flex-col lg:w-[20%] p-8 mt-8 lg:mt-0"
+            >
+              <h2 class="text-[28px] lg:text-[32px] font-light mb-12 tracking-wide uppercase">
+                {{ block.settings.features_heading }}
+              </h2>
+              <div class="py-6">
+                <!-- Feature 1 -->
+                <div class="flex items-start mb-10">
+                  <span class="flex-shrink-0 w-14 h-14 rounded-full border border-[#333] bg-[#1a1a1a] flex items-center justify-center mt-5 mr-5">
+                    {% if block.settings.feature_icon_1 != blank %}
+                      <img
+                        src="{{ block.settings.feature_icon_1 | image_url: width:50, height:50 }}"
+                        alt="Feature 1 Icon"
+                        style="width:50px;height:50px;opacity:0.4;"
+                        height="100%"
+                        width="100%"
+                      >
+                    {% else %}
+                      <svg
+                        class="functionality-icons"
+                        width="50"
+                        height="50"
+                        fill="none"
+                        stroke="white"
+                        stroke-width="2"
+                        viewBox="0 0 24 24"
+                      >
+                        <rect x="3" y="7" width="18" height="12" rx="2"/><path d="M3 11h18"/>
+                      </svg>
+                    {% endif %}
+                  </span>
+                  <div>
+                    <div class="font-medium uppercase text-[14px] mb-2 tracking-wide">
+                      {{
+                        block.settings.feature1_title
+                        | default: product.metafields.functionality.feature_title1.value
+                      }}
+                    </div>
+                    <div class="text-[14px] font-normal text-gray-300 leading-relaxed">
+                      {{
+                        block.settings.feature1_desc
+                        | default: product.metafields.functionality.feature_description1.value
+                      }}
+                    </div>
+                  </div>
                 </div>
-                <div class="text-[14px] font-normal text-gray-300 leading-relaxed">
-                  {{
-                    section.settings.feature1_desc
-                    | default: product.metafields.functionality.feature_description1.value
-                    | default: 'Multiple pockets, zero telling. Sweat-proof phone and gel-sized pockets all designed to disappear when you run.'
-                  }}
-                </div>
-              </div>
-            </div>
 
-            <!-- Feature 2 -->
-            <div class="flex items-start mb-10">
-              <span class="flex-shrink-0 w-14 h-14 rounded-full border border-[#333] bg-[#1a1a1a] flex items-center justify-center mt-5 mr-5">
-                {% if section.settings.feature_icon_2 != blank %}
-                  <img
-                    src="{{ section.settings.feature_icon_2 | image_url: width:50, height:50 }}"
-                    alt="Feature 2 Icon"
-                    style="width:50px;height:50px;opacity:0.4;"
-                    height="100%"
-                    width="100%"
-                  >
-                {% else %}
-                  <svg
-                    class="functionality-icons"
-                    width="50"
-                    height="50"
-                    fill="none"
-                    stroke="white"
-                    stroke-width="2"
-                    viewBox="0 0 24 24"
-                  >
-                    <path d="M8 12c2-2 4-2 6 0"/><path d="M8 16c2-2 4-2 6 0"/><path d="M8 8c2-2 4-2 6 0"/>
-                  </svg>
-                {% endif %}
-              </span>
-              <div>
-                <div class="font-medium uppercase text-[14px] mb-2 tracking-wide">
-                  {{
-                    section.settings.feature2_title
-                    | default: product.metafields.functionality.feature_title2.value
-                    | default: 'ANTI-CHAFING'
-                  }}
+                <!-- Feature 2 -->
+                <div class="flex items-start mb-10">
+                  <span class="flex-shrink-0 w-14 h-14 rounded-full border border-[#333] bg-[#1a1a1a] flex items-center justify-center mt-5 mr-5">
+                    {% if block.settings.feature_icon_2 != blank %}
+                      <img
+                        src="{{ block.settings.feature_icon_2 | image_url: width:50, height:50 }}"
+                        alt="Feature 2 Icon"
+                        style="width:50px;height:50px;opacity:0.4;"
+                        height="100%"
+                        width="100%"
+                      >
+                    {% else %}
+                      <svg
+                        class="functionality-icons"
+                        width="50"
+                        height="50"
+                        fill="none"
+                        stroke="white"
+                        stroke-width="2"
+                        viewBox="0 0 24 24"
+                      >
+                        <path d="M8 12c2-2 4-2 6 0"/><path d="M8 16c2-2 4-2 6 0"/><path d="M8 8c2-2 4-2 6 0"/>
+                      </svg>
+                    {% endif %}
+                  </span>
+                  <div>
+                    <div class="font-medium uppercase text-[14px] mb-2 tracking-wide">
+                      {{
+                        block.settings.feature2_title
+                        | default: product.metafields.functionality.feature_title2.value
+                      }}
+                    </div>
+                    <div class="text-[14px] font-normal text-gray-300 leading-relaxed">
+                      {{
+                        block.settings.feature2_desc
+                        | default: product.metafields.functionality.feature_description2.value
+                      }}
+                    </div>
+                  </div>
                 </div>
-                <div class="text-[14px] font-normal text-gray-300 leading-relaxed">
-                  {{
-                    section.settings.feature2_desc
-                    | default: product.metafields.functionality.feature_description2.value
-                    | default: 'Smooth seams and strategic cuts mean zero rub, even on your longest runs. Built for comfort, tested at race pace on the biggest stages.'
-                  }}
-                </div>
-              </div>
-            </div>
 
-            <!-- Feature 3 -->
-            <div class="flex items-start mb-10">
-              <span class="flex-shrink-0 w-14 h-14 rounded-full border border-[#333] bg-[#1a1a1a] flex items-center justify-center mt-5 mr-5">
-                {% if section.settings.feature_icon_3 != blank %}
-                  <img
-                    src="{{ section.settings.feature_icon_3 | image_url: width:50, height:50 }}"
-                    alt="Feature 3 Icon"
-                    style="width:50px;height:50px;opacity:0.4;"
-                    height="100%"
-                    width="100%"
-                  >
-                {% else %}
-                  <svg
-                    class="functionality-icons"
-                    width="50"
-                    height="50"
-                    fill="none"
-                    stroke="white"
-                    stroke-width="2"
-                    viewBox="0 0 24 24"
-                  >
-                    <path d="M8 12h8"/><path d="M12 8v8"/><path d="M9 16c0 1 2 1 2 0"/><path d="M15 16c0 1-2 1-2 0"/>
-                  </svg>
-                {% endif %}
-              </span>
-              <div>
-                <div class="font-medium uppercase text-[14px] mb-2 tracking-wide">
-                  {{
-                    section.settings.feature3_title
-                    | default: product.metafields.functionality.feature_title3.value
-                    | default: 'SWEAT-WICKING'
-                  }}
+                <!-- Feature 3 -->
+                <div class="flex items-start mb-10">
+                  <span class="flex-shrink-0 w-14 h-14 rounded-full border border-[#333] bg-[#1a1a1a] flex items-center justify-center mt-5 mr-5">
+                    {% if block.settings.feature_icon_3 != blank %}
+                      <img
+                        src="{{ block.settings.feature_icon_3 | image_url: width:50, height:50 }}"
+                        alt="Feature 3 Icon"
+                        style="width:50px;height:50px;opacity:0.4;"
+                        height="100%"
+                        width="100%"
+                      >
+                    {% else %}
+                      <svg
+                        class="functionality-icons"
+                        width="50"
+                        height="50"
+                        fill="none"
+                        stroke="white"
+                        stroke-width="2"
+                        viewBox="0 0 24 24"
+                      >
+                        <path d="M8 12h8"/><path d="M12 8v8"/><path d="M9 16c0 1 2 1 2 0"/><path d="M15 16c0 1-2 1-2 0"/>
+                      </svg>
+                    {% endif %}
+                  </span>
+                  <div>
+                    <div class="font-medium uppercase text-[14px] mb-2 tracking-wide">
+                      {{
+                        block.settings.feature3_title
+                        | default: product.metafields.functionality.feature_title3.value
+                      }}
+                    </div>
+                    <div class="text-[14px] font-normal text-gray-300 leading-relaxed">
+                      {{
+                        block.settings.feature3_desc
+                        | default: product.metafields.functionality.feature_description3.value
+                      }}
+                    </div>
+                  </div>
                 </div>
-                <div class="text-[14px] font-normal text-gray-300 leading-relaxed">
-                  {{
-                    section.settings.feature3_desc
-                    | default: product.metafields.functionality.feature_description3.value
-                    | default: 'Advanced moisture management pulls sweat away instantly. Keeps you dry, cool, and composed mile after mile.'
-                  }}
-                </div>
-              </div>
-            </div>
 
-            <!-- Feature 4 -->
-            <div class="flex items-start">
-              <span class="flex-shrink-0 w-14 h-14 rounded-full border border-[#333] bg-[#1a1a1a] flex items-center justify-center mt-5 mr-5">
-                {% if section.settings.feature_icon_4 != blank %}
-                  <img
-                    src="{{ section.settings.feature_icon_4 | image_url: width:50, height:50 }}"
-                    alt="Feature 4 Icon"
-                    style="width:50px;height:50px;opacity:0.4;"
-                    height="100%"
-                    width="100%"
-                  >
-                {% else %}
-                  <svg
-                    class="functionality-icons"
-                    width="50"
-                    height="50"
-                    fill="none"
-                    stroke="white"
-                    stroke-width="2"
-                    viewBox="0 0 24 24"
-                  >
-                    <circle cx="12" cy="12" r="8"/><path d="M12 6v6l4 2"/>
-                  </svg>
-                {% endif %}
-              </span>
-              <div>
-                <div class="font-medium uppercase text-[14px] mb-2 tracking-wide">
-                  {{
-                    section.settings.feature4_title
-                    | default: product.metafields.ffeature_title4.value
-                    | default: 'FAST-DRYING'
-                  }}
-                </div>
-                <div class="text-[14px] font-normal text-gray-300 leading-relaxed">
-                  {{
-                    section.settings.feature4_desc
-                    | default: product.metafields.functionality.feature_description4.value
-                    | default: 'Begins drying the moment moisture arises. Returns the product back to its original form so you can continue to comfortably wear it.'
-                  }}
+                <!-- Feature 4 -->
+                <div class="flex items-start">
+                  <span class="flex-shrink-0 w-14 h-14 rounded-full border border-[#333] bg-[#1a1a1a] flex items-center justify-center mt-5 mr-5">
+                    {% if block.settings.feature_icon_4 != blank %}
+                      <img
+                        src="{{ block.settings.feature_icon_4 | image_url: width:50, height:50 }}"
+                        alt="Feature 4 Icon"
+                        style="width:50px;height:50px;opacity:0.4;"
+                        height="100%"
+                        width="100%"
+                      >
+                    {% else %}
+                      <svg
+                        class="functionality-icons"
+                        width="50"
+                        height="50"
+                        fill="none"
+                        stroke="white"
+                        stroke-width="2"
+                        viewBox="0 0 24 24"
+                      >
+                        <circle cx="12" cy="12" r="8"/><path d="M12 6v6l4 2"/>
+                      </svg>
+                    {% endif %}
+                  </span>
+                  <div>
+                    <div class="font-medium uppercase text-[14px] mb-2 tracking-wide">
+                      {{
+                        block.settings.feature4_title
+                        | default: product.metafields.functionality.feature_title4.value
+                      }}
+                    </div>
+                    <div class="text-[14px] font-normal text-gray-300 leading-relaxed">
+                      {{
+                        block.settings.feature4_desc
+                        | default: product.metafields.functionality.feature_description4.value
+                      }}
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
-        </div>
+          {% endif %}
+        {% endfor %}
       </div>
     </div>
   </section>
@@ -383,6 +385,7 @@
 {
   "name": "Tech Specs",
   "tag": "section",
+  "enabled_on": { "templates": ["product"] },
   "settings": [
     {
       "type": "text",
@@ -391,213 +394,291 @@
       "default": "TECH SPECS"
     },
     {
-      "type": "text",
-      "id": "fit_label",
-      "label": "Fit Label",
-      "default": "Fit"
-    },
-    {
-      "type": "text",
-      "id": "fit_value",
-      "label": "Fit Value (default)",
-      "default": "Fitted"
-    },
-    {
-      "type": "text",
-      "id": "pocketing_label",
-      "label": "Pocketing Label",
-      "default": "Pocketing"
-    },
-    {
-      "type": "text",
-      "id": "pocketing_value",
-      "label": "Pocketing Value (default)",
-      "default": "2 Gel, 1 Phone"
-    },
-    {
-      "type": "text",
-      "id": "effort_label",
-      "label": "Effort Label",
-      "default": "Effort"
-    },
-    {
-      "type": "text",
-      "id": "effort_desc",
-      "label": "Effort Description",
-      "default": "This product was designed for any and every run."
-    },
-    {
-      "type": "text",
-      "id": "temperature_label",
-      "label": "Temperature Label",
-      "default": "Temperature"
-    },
-    {
-      "type": "text",
-      "id": "temperature_desc",
-      "label": "Temperature Description",
-      "default": "Designed for cool to hot temperatures."
-    },
-    {
-      "type": "text",
-      "id": "materials_label",
-      "label": "Materials Label",
-      "default": "Materials"
-    },
-    {
-      "type": "text",
-      "id": "materials_value",
-      "label": "Materials Value (default)",
-      "default": "83% M.Poly FD, 17% Spandex"
-    },
-    {
-      "type": "text",
-      "id": "care_label",
-      "label": "Care Label",
-      "default": "Care"
-    },
-    {
-      "type": "textarea",
-      "id": "care_value",
-      "label": "Care Value (default, use \\n for new lines)",
-      "default": "Machine Wash Cold\\nWash with Like Colors\\nDo Not Bleach\\nLay Flat to Dry\\nDo Not Iron\\nDo Not Dry Clean"
-    },
-    {
-      "type": "textarea",
-      "id": "additional_info",
-      "label": "Additional Info (HTML allowed)",
-      "default": "For best outcome, wash exclusively with active apparel.<br>Garment made in China"
-    },
-    {
-      "type": "text",
-      "id": "features_heading",
-      "label": "Features Heading",
-      "default": "FUNCTIONALITY"
-    },
-    {
-      "type": "text",
-      "id": "feature1_title",
-      "label": "Feature 1 Title",
-      "default": "POCKETING SYSTEM"
-    },
-    {
-      "type": "textarea",
-      "id": "feature1_desc",
-      "label": "Feature 1 Description",
-      "default": "Multiple pockets, zero telling. Sweat-proof phone and gel-sized pockets all designed to disappear when you run."
-    },
-    {
-      "type": "text",
-      "id": "feature2_title",
-      "label": "Feature 2 Title",
-      "default": "ANTI-CHAFING"
-    },
-    {
-      "type": "textarea",
-      "id": "feature2_desc",
-      "label": "Feature 2 Description",
-      "default": "Smooth seams and strategic cuts mean zero rub, even on your longest runs. Built for comfort, tested at race pace on the biggest stages."
-    },
-    {
-      "type": "text",
-      "id": "feature3_title",
-      "label": "Feature 3 Title",
-      "default": "SWEAT-WICKING"
-    },
-    {
-      "type": "textarea",
-      "id": "feature3_desc",
-      "label": "Feature 3 Description",
-      "default": "Advanced moisture management pulls sweat away instantly. Keeps you dry, cool, and composed mile after mile."
-    },
-    {
-      "type": "text",
-      "id": "feature4_title",
-      "label": "Feature 4 Title",
-      "default": "FAST-DRYING"
-    },
-    {
-      "type": "textarea",
-      "id": "feature4_desc",
-      "label": "Feature 4 Description",
-      "default": "Begins drying the moment moisture arises. Returns the product back to its original form so you can continue to comfortably wear it."
-    },
-    {
-      "type": "text",
-      "id": "effort_scale_0",
-      "label": "Effort Scale: 1",
-      "default": "0%"
-    },
-    {
-      "type": "text",
-      "id": "effort_scale_25",
-      "label": "Effort Scale: 2",
-      "default": "25%"
-    },
-    {
-      "type": "text",
-      "id": "effort_scale_50",
-      "label": "Effort Scale: 3",
-      "default": "50%"
-    },
-    {
-      "type": "text",
-      "id": "effort_scale_75",
-      "label": "Effort Scale: 4",
-      "default": "75%"
-    },
-    {
-      "type": "text",
-      "id": "effort_scale_100",
-      "label": "Effort Scale: 5",
-      "default": "100%"
-    },
-    {
-      "type": "text",
-      "id": "temp_scale_0",
-      "label": "Temperature Scale: 1",
-      "default": "0°"
-    },
-    {
-      "type": "text",
-      "id": "temp_scale_32",
-      "label": "Temperature Scale: 2",
-      "default": "32°"
-    },
-    {
-      "type": "text",
-      "id": "temp_scale_50",
-      "label": "Temperature Scale: 3",
-      "default": "50°"
-    },
-    {
-      "type": "text",
-      "id": "temp_scale_70",
-      "label": "Temperature Scale: 4",
-      "default": "70°"
-    },
-    {
-      "type": "text",
-      "id": "temp_scale_85",
-      "label": "Temperature Scale: 5",
-      "default": "85°"
-    },
-    {
-      "type": "text",
-      "id": "temp_scale_95",
-      "label": "Temperature Scale: 6",
-      "default": "95°"
-    },
-    {
       "type": "color",
       "id": "bar_color",
       "label": "Bar Fill Color",
       "default": "#ff0000"
     }
   ],
+  "blocks": [
+    {
+      "type": "fit_pocketing",
+      "name": "Fit & Pocketing",
+      "settings": [
+        {
+          "type": "text",
+          "id": "fit_label",
+          "label": "Fit Label",
+          "default": "Fit"
+        },
+        {
+          "type": "text",
+          "id": "fit_value",
+          "label": "Fit Value (default)",
+          "default": "Fitted"
+        },
+        {
+          "type": "text",
+          "id": "pocketing_label",
+          "label": "Pocketing Label",
+          "default": "Pocketing"
+        },
+        {
+          "type": "text",
+          "id": "pocketing_value",
+          "label": "Pocketing Value (default)",
+          "default": "2 Gel, 1 Phone"
+        }
+      ]
+    },
+    {
+      "type": "functionality",
+      "name": "Functionality",
+      "settings": [
+        {
+          "type": "text",
+          "id": "features_heading",
+          "label": "Features Heading",
+          "default": "FUNCTIONALITY"
+        },
+        {
+          "type": "text",
+          "id": "feature1_title",
+          "label": "Feature 1 Title",
+          "default": "POCKETING SYSTEM"
+        },
+        {
+          "type": "textarea",
+          "id": "feature1_desc",
+          "label": "Feature 1 Description",
+          "default": "Multiple pockets, zero telling. Sweat-proof phone and gel-sized pockets all designed to disappear when you run."
+        },
+        {
+          "type": "image_picker",
+          "id": "feature_icon_1",
+          "label": "Feature 1 Icon"
+        },
+        {
+          "type": "text",
+          "id": "feature2_title",
+          "label": "Feature 2 Title",
+          "default": "ANTI-CHAFING"
+        },
+        {
+          "type": "textarea",
+          "id": "feature2_desc",
+          "label": "Feature 2 Description",
+          "default": "Smooth seams and strategic cuts mean zero rub, even on your longest runs. Built for comfort, tested at race pace on the biggest stages."
+        },
+        {
+          "type": "image_picker",
+          "id": "feature_icon_2",
+          "label": "Feature 2 Icon"
+        },
+        {
+          "type": "text",
+          "id": "feature3_title",
+          "label": "Feature 3 Title",
+          "default": "SWEAT-WICKING"
+        },
+        {
+          "type": "textarea",
+          "id": "feature3_desc",
+          "label": "Feature 3 Description",
+          "default": "Advanced moisture management pulls sweat away instantly. Keeps you dry, cool, and composed mile after mile."
+        },
+        {
+          "type": "image_picker",
+          "id": "feature_icon_3",
+          "label": "Feature 3 Icon"
+        },
+        {
+          "type": "text",
+          "id": "feature4_title",
+          "label": "Feature 4 Title",
+          "default": "FAST-DRYING"
+        },
+        {
+          "type": "textarea",
+          "id": "feature4_desc",
+          "label": "Feature 4 Description",
+          "default": "Begins drying the moment moisture arises. Returns the product back to its original form so you can continue to comfortably wear it."
+        },
+        {
+          "type": "image_picker",
+          "id": "feature_icon_4",
+          "label": "Feature 4 Icon"
+        }
+      ]
+    },
+    {
+      "type": "effort_temperature",
+      "name": "Effort & Temperature",
+      "settings": [
+        {
+          "type": "text",
+          "id": "effort_label",
+          "label": "Effort Label",
+          "default": "Effort"
+        },
+        {
+          "type": "text",
+          "id": "effort_desc",
+          "label": "Effort Description",
+          "default": "This product was designed for any and every run."
+        },
+        {
+          "type": "text",
+          "id": "temperature_label",
+          "label": "Temperature Label",
+          "default": "Temperature"
+        },
+        {
+          "type": "text",
+          "id": "temperature_desc",
+          "label": "Temperature Description",
+          "default": "Designed for cool to hot temperatures."
+        },
+        {
+          "type": "text",
+          "id": "effort_scale_0",
+          "label": "Effort Scale: 1",
+          "default": "0%"
+        },
+        {
+          "type": "text",
+          "id": "effort_scale_25",
+          "label": "Effort Scale: 2",
+          "default": "25%"
+        },
+        {
+          "type": "text",
+          "id": "effort_scale_50",
+          "label": "Effort Scale: 3",
+          "default": "50%"
+        },
+        {
+          "type": "text",
+          "id": "effort_scale_75",
+          "label": "Effort Scale: 4",
+          "default": "75%"
+        },
+        {
+          "type": "text",
+          "id": "effort_scale_100",
+          "label": "Effort Scale: 5",
+          "default": "100%"
+        },
+        {
+          "type": "text",
+          "id": "temp_scale_0",
+          "label": "Temperature Scale: 1",
+          "default": "0°"
+        },
+        {
+          "type": "text",
+          "id": "temp_scale_32",
+          "label": "Temperature Scale: 2",
+          "default": "32°"
+        },
+        {
+          "type": "text",
+          "id": "temp_scale_50",
+          "label": "Temperature Scale: 3",
+          "default": "50°"
+        },
+        {
+          "type": "text",
+          "id": "temp_scale_70",
+          "label": "Temperature Scale: 4",
+          "default": "70°"
+        },
+        {
+          "type": "text",
+          "id": "temp_scale_85",
+          "label": "Temperature Scale: 5",
+          "default": "85°"
+        },
+        {
+          "type": "text",
+          "id": "temp_scale_95",
+          "label": "Temperature Scale: 6",
+          "default": "95°"
+        }
+      ]
+    },
+    {
+      "type": "materials",
+      "name": "Materials",
+      "settings": [
+        {
+          "type": "text",
+          "id": "materials_label",
+          "label": "Materials Label",
+          "default": "Materials"
+        },
+        {
+          "type": "text",
+          "id": "materials_value",
+          "label": "Materials Value (default)",
+          "default": "83% M.Poly FD, 17% Spandex"
+        }
+      ]
+    },
+    {
+      "type": "care",
+      "name": "Care Instructions",
+      "settings": [
+        {
+          "type": "text",
+          "id": "care_label",
+          "label": "Care Label",
+          "default": "Care"
+        },
+        {
+          "type": "textarea",
+          "id": "care_value",
+          "label": "Care Value (default, use \\n for new lines)",
+          "default": "Machine Wash Cold\\nWash with Like Colors\\nDo Not Bleach\\nLay Flat to Dry\\nDo Not Iron\\nDo Not Dry Clean"
+        }
+      ]
+    },
+    {
+      "type": "additional_info",
+      "name": "Additional Info",
+      "settings": [
+        {
+          "type": "textarea",
+          "id": "additional_info",
+          "label": "Additional Info (HTML allowed)",
+          "default": "For best outcome, wash exclusively with active apparel.<br>Garment made in China"
+        }
+      ]
+    }
+  ],
   "presets": [
     {
-      "name": "Tech Specs"
+      "name": "Tech Specs",
+      "blocks": [
+        {
+          "type": "fit_pocketing"
+        },
+        {
+          "type": "functionality"
+        },
+        {
+          "type": "effort_temperature"
+        },
+        {
+          "type": "materials"
+        },
+        {
+          "type": "care"
+        },
+        {
+          "type": "additional_info"
+        }
+      ]
     }
   ]
 }
