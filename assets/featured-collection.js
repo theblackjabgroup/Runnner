@@ -208,7 +208,7 @@ document.addEventListener('DOMContentLoaded', function () {
       }
     });
 
-    const imageContainers = container.querySelectorAll('.product-image-wrapper');
+    const imageContainers = container.querySelectorAll('.featured-collection-product-image-wrapper');
 
     imageContainers.forEach((wrapper) => {
       const images = Array.from(wrapper.querySelectorAll('.product-image'));
@@ -276,7 +276,7 @@ document.addEventListener('DOMContentLoaded', function () {
       button._clickHandler = (e) => {
         e.preventDefault();
         const productId = button.getAttribute('data-product-id');
-        const wrapper = button.closest('.product-image-wrapper');
+        const wrapper = button.closest('.featured-collection-product-image-wrapper');
         const images = Array.from(wrapper.querySelectorAll('.product-image'));
         if (images.length <= 1) return;
         let currentIndex = images.findIndex((img) => img.classList.contains('active'));
@@ -292,7 +292,7 @@ document.addEventListener('DOMContentLoaded', function () {
       button._clickHandler = (e) => {
         e.preventDefault();
         const productId = button.getAttribute('data-product-id');
-        const wrapper = button.closest('.product-image-wrapper');
+        const wrapper = button.closest('.featured-collection-product-image-wrapper');
         const images = Array.from(wrapper.querySelectorAll('.product-image'));
         if (images.length <= 1) return;
         let currentIndex = images.findIndex((img) => img.classList.contains('active'));
