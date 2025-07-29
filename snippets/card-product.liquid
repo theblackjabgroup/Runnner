@@ -28,6 +28,10 @@
   .card-wrapper {
     margin-bottom: 30px;
   }
+  .add-to-cart-btn {
+    position: relative;
+    z-index: 1000 !important;
+  }
 </style>
 
 {%- unless skip_styles -%}
@@ -55,58 +59,117 @@
       <div class="relative bg-[#F8F8F8] w-full product-card-height group-hover:h-[380px] transition-all duration-300 overflow-hidden">
         {%- if card_product.featured_media -%}
           <div class="absolute inset-0 w-full h-full overflow-hidden product-images-slider ">
-            {% for media in card_product.media %}
-              <img
-                srcset="
-                  {%- if media.width >= 165 -%}{{ media | image_url: width: 165 }} 165w,{%- endif -%}
-                  {%- if media.width >= 360 -%}{{ media | image_url: width: 360 }} 360w,{%- endif -%}
-                  {%- if media.width >= 533 -%}{{ media | image_url: width: 533 }} 533w,{%- endif -%}
-                  {%- if media.width >= 720 -%}{{ media | image_url: width: 720 }} 720w,{%- endif -%}
-                  {%- if media.width >= 940 -%}{{ media | image_url: width: 940 }} 940w,{%- endif -%}
-                  {%- if media.width >= 1066 -%}{{ media | image_url: width: 1066 }} 1066w,{%- endif -%}
-                  {{ media | image_url }} {{ media.width }}w
-                "
-                class="w-full h-full object-cover p-0 transition-all duration-300 group-hover:scale-[90%] group-hover:-translate-y-10 absolute inset-0 opacity-0"
-                loading="lazy"
-                width="{{ media.width }}"
-                height="{{ media.height }}"
-                alt="product-image"
-                {% if forloop.first %}
-                  style="opacity: 1;"
-                {% endif %}
-              >
-            {% endfor %}
-
-            {% if card_product.media.size > 1 %}
-              <button
-                aria-label="prev-btn"
-                class="slider-arrow prev absolute left-2 top-1/2  -translate-y-1/2  cursor-pointer  opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center"
-              >
-                <svg
-                  width="40"
-                  height="40"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="#ccc"
+            {% if show_secondary_image and card_product.media.size > 1 %}
+              {% assign first_media = card_product.media[0] %}
+              {% assign second_media = card_product.media[1] %}
+              <div class="secondary-image-hover-wrapper">
+                <img
+                  srcset="
+                    {%- if first_media.width >= 165 -%}{{ first_media | image_url: width: 165 }} 165w,{%- endif -%}
+                    {%- if first_media.width >= 360 -%}{{ first_media | image_url: width: 360 }} 360w,{%- endif -%}
+                    {%- if first_media.width >= 533 -%}{{ first_media | image_url: width: 533 }} 533w,{%- endif -%}
+                    {%- if first_media.width >= 720 -%}{{ first_media | image_url: width: 720 }} 720w,{%- endif -%}
+                    {%- if first_media.width >= 940 -%}{{ first_media | image_url: width: 940 }} 940w,{%- endif -%}
+                    {%- if first_media.width >= 1066 -%}{{ first_media | image_url: width: 1066 }} 1066w,{%- endif -%}
+                    {{ first_media | image_url }} {{ first_media.width }}w
+                  "
+                  class="primary-image w-full h-full object-cover p-0 transition-all duration-300 group-hover:scale-[90%] group-hover:-translate-y-10 absolute inset-0 opacity-100 group-hover:opacity-0"
+                  loading="lazy"
+                  width="{{ first_media.width }}"
+                  height="{{ first_media.height }}"
+                  alt="product-image"
+                  style="z-index:0;"
                 >
-                  <path d="M15 18l-6-6 6-6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                </svg>
-              </button>
-              <button
-                aria-label="next-btn"
-                class="slider-arrow next absolute right-2 top-1/2  -translate-y-1/2  cursor-pointer  opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center"
-              >
-                <svg
-                  width="40"
-                  height="40"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="#ccc"
+                <img
+                  srcset="
+                    {%- if second_media.width >= 165 -%}{{ second_media | image_url: width: 165 }} 165w,{%- endif -%}
+                    {%- if second_media.width >= 360 -%}{{ second_media | image_url: width: 360 }} 360w,{%- endif -%}
+                    {%- if second_media.width >= 533 -%}{{ second_media | image_url: width: 533 }} 533w,{%- endif -%}
+                    {%- if second_media.width >= 720 -%}{{ second_media | image_url: width: 720 }} 720w,{%- endif -%}
+                    {%- if second_media.width >= 940 -%}{{ second_media | image_url: width: 940 }} 940w,{%- endif -%}
+                    {%- if second_media.width >= 1066 -%}{{ second_media | image_url: width: 1066 }} 1066w,{%- endif -%}
+                    {{ second_media | image_url }} {{ second_media.width }}w
+                  "
+                  class="secondary-image w-full h-full object-cover p-0 transition-all duration-300 group-hover:scale-[90%] group-hover:-translate-y-10 absolute inset-0 opacity-0 group-hover:opacity-100"
+                  loading="lazy"
+                  width="{{ second_media.width }}"
+                  height="{{ second_media.height }}"
+                  alt="product-image"
+                  style="z-index:0;"
                 >
-                  <path d="M9 18l6-6-6-6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                </svg>
-              </button>
+              </div>
+              {% comment %} Keep the slider for more than 2 images {% endcomment %}
+              {% if card_product.media.size > 2 %}
+                {% for media in card_product.media offset: 2 %}
+                  <img
+                    srcset="
+                      {%- if media.width >= 165 -%}{{ media | image_url: width: 165 }} 165w,{%- endif -%}
+                      {%- if media.width >= 360 -%}{{ media | image_url: width: 360 }} 360w,{%- endif -%}
+                      {%- if media.width >= 533 -%}{{ media | image_url: width: 533 }} 533w,{%- endif -%}
+                      {%- if media.width >= 720 -%}{{ media | image_url: width: 720 }} 720w,{%- endif -%}
+                      {%- if media.width >= 940 -%}{{ media | image_url: width: 940 }} 940w,{%- endif -%}
+                      {%- if media.width >= 1066 -%}{{ media | image_url: width: 1066 }} 1066w,{%- endif -%}
+                      {{ media | image_url }} {{ media.width }}w
+                    "
+                    class="w-full h-full object-cover p-0 transition-all duration-300 group-hover:scale-[90%] group-hover:-translate-y-10 absolute inset-0 opacity-0"
+                    loading="lazy"
+                    width="{{ media.width }}"
+                    height="{{ media.height }}"
+                    alt="product-image"
+                  >
+                {% endfor %}
+              {% endif %}
+            {% else %}
+              {% for media in card_product.media %}
+                <img
+                  srcset="
+                    {%- if media.width >= 165 -%}{{ media | image_url: width: 165 }} 165w,{%- endif -%}
+                    {%- if media.width >= 360 -%}{{ media | image_url: width: 360 }} 360w,{%- endif -%}
+                    {%- if media.width >= 533 -%}{{ media | image_url: width: 533 }} 533w,{%- endif -%}
+                    {%- if media.width >= 720 -%}{{ media | image_url: width: 720 }} 720w,{%- endif -%}
+                    {%- if media.width >= 940 -%}{{ media | image_url: width: 940 }} 940w,{%- endif -%}
+                    {%- if media.width >= 1066 -%}{{ media | image_url: width: 1066 }} 1066w,{%- endif -%}
+                    {{ media | image_url }} {{ media.width }}w
+                  "
+                  class="w-full h-full object-cover p-0 transition-all duration-300 group-hover:scale-[90%] group-hover:-translate-y-10 absolute inset-0 opacity-0"
+                  loading="lazy"
+                  width="{{ media.width }}"
+                  height="{{ media.height }}"
+                  alt="product-image"
+                  {% if forloop.first %}
+                    style="opacity: 1;"
+                  {% endif %}
+                >
+              {% endfor %}
             {% endif %}
+            <button
+              aria-label="prev-btn"
+              class="slider-arrow prev absolute left-2 top-1/2  -translate-y-1/2  cursor-pointer  opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center z-[101]"
+            >
+              <svg
+                width="40"
+                height="40"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="#ccc"
+              >
+                <path d="M15 18l-6-6 6-6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </button>
+            <button
+              aria-label="next-btn"
+              class="slider-arrow next absolute right-2 top-1/2  -translate-y-1/2  cursor-pointer  opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center z-[101]"
+            >
+              <svg
+                width="40"
+                height="40"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="#ccc"
+              >
+                <path d="M9 18l6-6-6-6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </button>
           </div>
         {%- endif -%}
 
@@ -145,7 +208,7 @@
 
               <button
                 type="button"
-                class="add-to-cart-btn w-full py-4  !text-[1.6rem] shadow-xl font-medium text-black hover:bg-black hover:text-white transition-colors duration-200 uppercase tracking-wider quick-add-button"
+                class="add-to-cart-btn  w-full py-4 z-[100]  !text-[1.6rem] shadow-xl font-medium text-black hover:bg-black hover:text-white transition-colors duration-200 uppercase tracking-wider quick-add-button"
                 {% if has_size_variant %}
                   data-has-sizes="true"
                 {% else %}
@@ -400,6 +463,18 @@
     cursor: pointer;
     font-size: 20px;
     line-height: 1;
+  }
+</style>
+
+<style>
+  .secondary-image-hover-wrapper {
+    position: relative;
+    width: 100%;
+    height: 100%;
+  }
+  .secondary-image-hover-wrapper .primary-image,
+  .secondary-image-hover-wrapper .secondary-image {
+    pointer-events: none;
   }
 </style>
 
