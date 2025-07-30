@@ -141,7 +141,7 @@
                     <summary
                       class="facets__summary caption-large focus-offset !p-0"
                       aria-label="{{ filter.label | escape }} ({{ 'products.facets.filters_selected.one' | t: count: filter.active_values.size }})"
-                      onclick="this.closest('details').querySelector('.svg-arrow-down').classList.toggle('rotated')"
+                      onclick="toggleArrow(this)"
                     >
                       <div class="flex items-center">
                         <span class="facets__summary-label mr-5 uppercase !text-[1.6rem]">
@@ -158,6 +158,7 @@
                           </span>
                         {%- endif -%}
                         <svg
+                          class="svg-arrow-down"
                           stroke-linecap="round"
                           width="15"
                           height="15"
@@ -302,6 +303,7 @@
                       <div class="flex items-center">
                         <span class="mr-3 uppercase !text-[1.6rem]">{{ filter.label | escape }}</span>
                         <svg
+                          class="svg-arrow-down"
                           stroke-linecap="round"
                           width="15"
                           height="15"
@@ -346,6 +348,7 @@
                   <div class="flex items-center">
                     <span class="uppercase !text-[16px] w-[75px]">Sort By</span>
                     <svg
+                      class="svg-arrow-down"
                       stroke-linecap="round"
                       width="15"
                       height="15"
@@ -720,22 +723,25 @@
   }
 
   // Add event listeners to all filter summaries
+  // Function to toggle arrow rotation
+  function toggleArrow(summaryElement) {
+    const arrow = summaryElement.querySelector('.svg-arrow-down');
+    if (arrow) {
+      // Small delay to check if details is opening or closing
+      setTimeout(() => {
+        const parentDetails = summaryElement.closest('details');
+        if (parentDetails.hasAttribute('open')) {
+          arrow.classList.add('rotated');
+          closeOtherDropdowns(parentDetails);
+        } else {
+          arrow.classList.remove('rotated');
+        }
+      }, 10);
+    }
+  }
+
+  // Add event listeners to all filter summaries
   document.addEventListener('DOMContentLoaded', function () {
-    const filterSummaries = document.querySelectorAll('.facets__summary');
-
-    filterSummaries.forEach((summary) => {
-      summary.addEventListener('click', function (e) {
-        const parentDetails = this.closest('details');
-
-        // Small delay to ensure the current dropdown state is updated
-        setTimeout(() => {
-          if (parentDetails.hasAttribute('open')) {
-            closeOtherDropdowns(parentDetails);
-          }
-        }, 10);
-      });
-    });
-
     // Close dropdowns when clicking outside
     document.addEventListener('click', function (e) {
       if (!e.target.closest('.facets__disclosure') && !e.target.closest('.disclosure-has-popup')) {
@@ -915,7 +921,12 @@
   .facets__summary svg {
     transition: transform 0.3s ease;
   }
-  .facets__summary svg.rotated {
+  .svg-arrow-down {
+    transition: transform 0.3s ease;
+    transform: rotate(0deg);
+  }
+
+  .svg-arrow-down.rotated {
     transform: rotate(-90deg);
   }
 </style>
