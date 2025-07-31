@@ -149,7 +149,7 @@
 
               <button
                 type="button"
-                class="add-to-cart-btn  w-full py-4 z-[100]  !text-[1.6rem] shadow-xl font-medium text-black hover:bg-black hover:text-white transition-colors duration-200 uppercase tracking-wider quick-add-button"
+                class="add-to-cart-btn w-full py-4 z-[100] !text-[1.6rem] shadow-xl font-medium text-black hover:bg-black hover:text-white transition-colors duration-200 uppercase tracking-wider quick-add-button"
                 {% if has_size_variant %}
                   data-has-sizes="true"
                 {% else %}
@@ -321,8 +321,12 @@
     height: 50px !important;
     visibility: visible;
     border-radius: 10px;
-    overflow: hidden; /* Add this */
-    clip-path: inset(0); /* Add this */
+    overflow: hidden;
+    clip-path: inset(0);
+  }
+
+  .product-sizes-container.variant-selector-active .add-to-cart-btn {
+    display: none !important;
   }
 
   .quick-add-modal__header {
@@ -482,18 +486,16 @@
       if (hasSizes && modal && form) {
         // For products with size variants
         addToCartBtn.addEventListener('mouseenter', () => {
-          modal.style.display = 'block';
-          requestAnimationFrame(() => {
-            modal.classList.add('visible');
-            modal.classList.remove('hidden');
-          });
+          container.classList.add('variant-selector-active');
+          modal.classList.add('visible');
+          modal.classList.remove('hidden');
         });
 
         container.addEventListener('mouseleave', () => {
           modal.classList.remove('visible');
           setTimeout(() => {
             modal.classList.add('hidden');
-            modal.style.display = '';
+            container.classList.remove('variant-selector-active');
           }, 300);
         });
 
@@ -502,7 +504,7 @@
           modal.classList.remove('visible');
           setTimeout(() => {
             modal.classList.add('hidden');
-            modal.style.display = '';
+            container.classList.remove('variant-selector-active');
           }, 300);
         });
 
@@ -517,6 +519,7 @@
               await addToCart(formData);
               updateButtonState(addToCartBtn, 'added');
               modal.classList.add('hidden');
+              container.classList.remove('variant-selector-active');
             } catch (error) {
               updateButtonState(addToCartBtn, 'default');
             }
