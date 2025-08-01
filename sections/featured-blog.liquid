@@ -1,10 +1,11 @@
 <style>
    .featured-blog-section {
-     padding: {{ settings.sections_spacing }}px {{ settings.side_space}}px;
-     margin: 0;
+     margin: {{ settings.sections_spacing }}px {{ settings.side_space}}px;
+     /* margin: 0; */
      background-color: rgb(var(--color-background)) !important;
      color: var(--text) !important;
      border-top: 1px solid var(--text);
+     padding: 20px 0px;
      /* margin-right: 0; */
    }
 
@@ -94,8 +95,8 @@
    }
 
    .featured-blog-grid.list-view .fb-arrow-svg {
-     width: 20px;
-     height: 20px;
+     width: 17.26px;
+     height: 16.8px;
      transition: all 0.3s ease;
    }
 
@@ -183,15 +184,19 @@
    .featured-blog-card-date {
      position: relative;
      line-height: 1;
-     padding: 25px 0 25px 0;
+     padding: 20px 0;
      color: var(--text);
      white-space: nowrap;
-     font-size: 16px;
+     font-size: 20px;
      margin: 0;
    }
 
    .featured-blog-card-title {
      line-height: 1;
+   }
+
+   .featured-blog-grid.grid-view .featured-blog-card-title{
+    padding-bottom: 20px;
    }
 
    /* Show/Hide title spans based on view */
@@ -201,6 +206,9 @@
 
    .featured-blog-grid.list-view .grid-view-title {
      display: none;
+   }
+   .grid-view-title{
+    font-size: 32px;
    }
 
    /* .featured-blog-card-title {
@@ -217,6 +225,7 @@
      margin: 0;
      color: var(--text);
      flex-grow: 1;
+     line-height: 1;
    }
 
    /* List view separators */
@@ -236,7 +245,7 @@
    .featured-blog-grid.list-view .featured-blog-card {
      flex-direction: row;
      align-items: center;
-     padding: 10px 0;
+     padding: 20px 0;
      border-top: none;
    }
    .featured-blog-grid.list-view .featured-blog-card:hover {
@@ -304,8 +313,8 @@
    }
 
    .featured-blog-grid.grid-view .fb-arrow-svg {
-     width: 20px;
-     height: 20px;
+     width: 23px;
+     height: 22px;
    }
 
    .featured-blog-grid.list-view .featured-blog-card-title {
@@ -336,6 +345,7 @@
    }
 
    .load-more-btn-fb {
+     position: relative;
      background-color: var(--text);
      color: rgb(var(--color-background));
      padding: 4px 10px;
@@ -344,12 +354,56 @@
      cursor: pointer;
      font-size: 20px;
      line-height: 1;
-     transition: background-color 0.3s;
+     overflow: hidden;
+     transition: background-color 0.3s, color 0.3s;
    }
    .load-more-btn-fb:hover {
      background-color: rgb(var(--color-background)); /* adjust if needed */
      color: var(--text);
      border: {{ settings.buttons_border_thickness }}px solid var(--text);
+   }
+
+   .load-more-btn-fb-text-container {
+     position: relative;
+     width: 100%;
+     overflow: hidden;
+   }
+
+   .load-more-btn-fb-text {
+     display: flex;
+     align-items: center;
+     line-height: 1;
+     text-transform: uppercase;
+     letter-spacing: 0.05em;
+     transition: transform 0.7s ease;
+   }
+
+   .load-more-btn-fb:hover .load-more-btn-fb-text,
+   .load-more-btn-fb:focus .load-more-btn-fb-text {
+     transform: translateX(-100%);
+   }
+
+   .load-more-btn-fb-text-hover {
+     position: absolute;
+     top: 0;
+     left: 0;
+     display: flex;
+     align-items: center;
+     line-height: 1;
+     text-transform: uppercase;
+     letter-spacing: 0.05em;
+     transform: translateX(100%);
+     transition: transform 0.7s ease;
+   }
+
+   .load-more-btn-fb:hover .load-more-btn-fb-text-hover,
+   .load-more-btn-fb:focus .load-more-btn-fb-text-hover {
+     transform: translateX(0);
+   }
+
+   .load-more-btn-fb:not(:hover):not(:focus) .load-more-btn-fb-text,
+   .load-more-btn-fb:not(:hover):not(:focus) .load-more-btn-fb-text-hover {
+     transition: none;
    }
 
    /* Removed fade-in animation and transitions */
@@ -438,6 +492,11 @@
        line-height: 1;
        padding: 1px 6px;
      }
+
+     .load-more-btn-fb-text,
+     .load-more-btn-fb-text-hover {
+       font-size: 16px;
+     }
    }
 
    @media (min-width: 1025px) {
@@ -452,6 +511,11 @@
      .load-more-btn-fb {
        font-size: 24px;
        line-height: 1;
+     }
+
+     .load-more-btn-fb-text,
+     .load-more-btn-fb-text-hover {
+       font-size: 24px;
      }
    }
 
@@ -622,7 +686,12 @@
     </div>
     {% if blogs[blog_handle].articles.size > section.settings.post_limit %}
       <div class="load-more-btn-fb-container">
-        <button class="load-more-btn-fb" data-increment="6">LOAD MORE</button>
+        <button class="load-more-btn-fb" data-increment="6">
+          <div class="load-more-btn-fb-text-container">
+            <span class="load-more-btn-fb-text">LOAD MORE</span>
+            <span class="load-more-btn-fb-text-hover">LOAD MORE</span>
+          </div>
+        </button>
       </div>
     {% endif %}
   </section>

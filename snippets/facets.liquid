@@ -141,7 +141,7 @@
                     <summary
                       class="facets__summary caption-large focus-offset !p-0"
                       aria-label="{{ filter.label | escape }} ({{ 'products.facets.filters_selected.one' | t: count: filter.active_values.size }})"
-                      onclick="this.closest('details').querySelector('.svg-arrow-down').classList.toggle('rotated')"
+                      onclick="toggleArrow(this)"
                     >
                       <div class="flex items-center">
                         <span class="facets__summary-label mr-5 uppercase !text-[1.6rem]">
@@ -157,7 +157,15 @@
                             {{ 'products.facets.filter_and_operator_subtitle' | t }}
                           </span>
                         {%- endif -%}
-                        <svg stroke-linecap="round" width="15" height="15" viewBox="0 0 35 35" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <svg
+                          class="svg-arrow-down"
+                          stroke-linecap="round"
+                          width="15"
+                          height="15"
+                          viewBox="0 0 35 35"
+                          fill="none"
+                          xmlns="http://www.w3.org/2000/svg"
+                        >
                           <path d="M3.16406 30.9824H30.9305M30.9305 30.9824V3.21602M30.9305 30.9824L3.16406 3.21602" stroke="black" stroke-width="6.38611" stroke-linejoin="round"/>
                         </svg>
                       </div>
@@ -294,7 +302,15 @@
                     >
                       <div class="flex items-center">
                         <span class="mr-3 uppercase !text-[1.6rem]">{{ filter.label | escape }}</span>
-                        <svg stroke-linecap="round" width="15" height="15" viewBox="0 0 35 35" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <svg
+                          class="svg-arrow-down"
+                          stroke-linecap="round"
+                          width="15"
+                          height="15"
+                          viewBox="0 0 35 35"
+                          fill="none"
+                          xmlns="http://www.w3.org/2000/svg"
+                        >
                           <path d="M3.16406 30.9824H30.9305M30.9305 30.9824V3.21602M30.9305 30.9824L3.16406 3.21602" stroke="black" stroke-width="6.38611" stroke-linejoin="round"/>
                         </svg>
                       </div>
@@ -331,7 +347,15 @@
                 >
                   <div class="flex items-center">
                     <span class="uppercase !text-[16px] w-[75px]">Sort By</span>
-                    <svg stroke-linecap="round" width="15" height="15" viewBox="0 0 35 35" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <svg
+                      class="svg-arrow-down"
+                      stroke-linecap="round"
+                      width="15"
+                      height="15"
+                      viewBox="0 0 35 35"
+                      fill="none"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
                       <path d="M3.16406 30.9824H30.9305M30.9305 30.9824V3.21602M30.9305 30.9824L3.16406 3.21602" stroke="black" stroke-width="6.38611" stroke-linejoin="round"/>
                     </svg>
                   </div>
@@ -681,6 +705,60 @@
 </div>
 
 <script>
+  // Function to close all dropdowns except the one being opened
+  function closeOtherDropdowns(currentDropdown) {
+    // Get all filter dropdowns
+    const allDropdowns = document.querySelectorAll('.facets__disclosure, .disclosure-has-popup');
+
+    allDropdowns.forEach((dropdown) => {
+      if (dropdown !== currentDropdown && dropdown.hasAttribute('open')) {
+        dropdown.removeAttribute('open');
+        // Reset arrow rotation
+        const arrow = dropdown.querySelector('svg');
+        if (arrow) {
+          arrow.style.transform = '';
+        }
+      }
+    });
+  }
+
+  // Add event listeners to all filter summaries
+  // Function to toggle arrow rotation
+  function toggleArrow(summaryElement) {
+    const arrow = summaryElement.querySelector('.svg-arrow-down');
+    if (arrow) {
+      // Small delay to check if details is opening or closing
+      setTimeout(() => {
+        const parentDetails = summaryElement.closest('details');
+        if (parentDetails.hasAttribute('open')) {
+          arrow.classList.add('rotated');
+          closeOtherDropdowns(parentDetails);
+        } else {
+          arrow.classList.remove('rotated');
+        }
+      }, 10);
+    }
+  }
+
+  // Add event listeners to all filter summaries
+  document.addEventListener('DOMContentLoaded', function () {
+    // Close dropdowns when clicking outside
+    document.addEventListener('click', function (e) {
+      if (!e.target.closest('.facets__disclosure') && !e.target.closest('.disclosure-has-popup')) {
+        const allDropdowns = document.querySelectorAll('.facets__disclosure[open], .disclosure-has-popup[open]');
+        allDropdowns.forEach((dropdown) => {
+          dropdown.removeAttribute('open');
+          // Reset arrow rotation
+          const arrow = dropdown.querySelector('svg');
+          if (arrow) {
+            arrow.style.transform = '';
+          }
+        });
+      }
+    });
+  });
+
+  // Your existing mobile functions
   document.querySelectorAll('.mobile-facets__summary').forEach((summary) => {
     summary.addEventListener('click', () => {
       const arrow = summary.closest('details')?.querySelector('.mobile-facets__arrow');
@@ -698,9 +776,18 @@
   function updateMobileSort(button) {
     const value = button.dataset.value;
     const form = document.getElementById('FacetFiltersFormMobile');
-    const input = form.querySelector('select[name="sort_by"]');
-    input.value = value;
+    let sortInput = form.querySelector('input[name="sort_by"]');
+    if (!sortInput) {
+      sortInput = document.createElement('input');
+      sortInput.type = 'hidden';
+      sortInput.name = 'sort_by';
+      form.appendChild(sortInput);
+    }
+    sortInput.value = value;
     form.submit();
+
+    // Close the dropdown
+    button.closest('.mobile-sort-options').classList.add('hidden');
   }
 
   // Close sort dropdown when clicking outside
@@ -830,13 +917,17 @@
     transform: translateY(-65px) !important;
   }
 
-  /* Add hover rotation for availability, price, and sort by arrows */
-  .facets__summary:hover svg {
-    transform: rotate(-90deg);
-    transition: transform 0.3s ease;
-  }
-
+  /* Only animate arrow rotation on click (rotated class), not on hover */
   .facets__summary svg {
     transition: transform 0.3s ease;
   }
+  .svg-arrow-down {
+    transition: transform 0.3s ease;
+    transform: rotate(0deg);
+  }
+
+  .svg-arrow-down.rotated {
+    transform: rotate(-90deg);
+  }
+
 </style>

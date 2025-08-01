@@ -37,14 +37,10 @@ document.addEventListener('DOMContentLoaded', function () {
         // Update cart count immediately
         updateCartCount();
 
-        // Open cart drawer if it exists
-        const cartDrawerTrigger =
-          document.querySelector('[data-cart-drawer-trigger]') ||
-          document.querySelector('.cart-drawer-trigger') ||
-          document.querySelector('#cart-icon-bubble');
-        if (cartDrawerTrigger) {
-          cartDrawerTrigger.click();
-        }
+        // Refresh cart drawer content and then open it
+        refreshCartDrawer().then(() => {
+          openCartDrawer();
+        });
       })
       .catch((error) => {
         console.error('Error:', error);
@@ -61,6 +57,85 @@ document.addEventListener('DOMContentLoaded', function () {
           setTimeout(() => notification.remove(), 300);
         }, 2000);
       });
+  }
+
+  // Function to refresh cart drawer content
+  function refreshCartDrawer() {
+    return fetch(`${window.location.pathname}?section_id=cart-drawer`)
+      .then((response) => response.text())
+      .then((responseText) => {
+        const html = new DOMParser().parseFromString(responseText, 'text/html');
+
+        // Update cart drawer content
+        const cartDrawerElement = document.querySelector('cart-drawer');
+        const newCartDrawerContent = html.querySelector('cart-drawer');
+
+        if (cartDrawerElement && newCartDrawerContent) {
+          cartDrawerElement.innerHTML = newCartDrawerContent.innerHTML;
+        }
+
+        // Also update cart icon bubble if it exists
+        const cartIconBubble = document.querySelector('#cart-icon-bubble');
+        const newCartIconBubble = html.querySelector('#cart-icon-bubble');
+
+        if (cartIconBubble && newCartIconBubble) {
+          cartIconBubble.innerHTML = newCartIconBubble.innerHTML;
+        }
+
+        // Dispatch cart update event
+        document.dispatchEvent(
+          new CustomEvent('cart:updated', {
+            detail: { refreshed: true },
+          })
+        );
+      })
+      .catch((error) => {
+        console.error('Error refreshing cart drawer:', error);
+      });
+  }
+
+  // Function to open cart drawer
+  function openCartDrawer() {
+    // Multiple attempts to find and trigger cart drawer
+    const cartDrawerTriggers = [
+      document.querySelector('[data-cart-drawer-trigger]'),
+      document.querySelector('.cart-drawer-trigger'),
+      document.querySelector('#cart-icon-bubble'),
+      document.querySelector('.cart-icon'),
+      document.querySelector('[href="/cart"]'),
+      document.querySelector('a[href*="cart"]'),
+    ];
+
+    let triggerFound = false;
+
+    // Try to click any available trigger
+    for (const trigger of cartDrawerTriggers) {
+      if (trigger) {
+        trigger.click();
+        triggerFound = true;
+        break;
+      }
+    }
+
+    // If no trigger found, try to open cart drawer directly
+    if (!triggerFound) {
+      const cartDrawer = document.querySelector('cart-drawer');
+      if (cartDrawer && typeof cartDrawer.open === 'function') {
+        cartDrawer.open();
+        triggerFound = true;
+      } else if (cartDrawer) {
+        // Manually add active class if open method doesn't exist
+        cartDrawer.classList.add('animate', 'active');
+        document.body.classList.add('overflow-hidden');
+        triggerFound = true;
+      }
+    }
+
+    // Fallback: redirect to cart page if drawer won't open
+    if (!triggerFound) {
+      console.warn('Cart drawer trigger not found, redirecting to cart page');
+      window.location.href = '/cart';
+    }
   }
 
   // Function to update cart count in all possible locations
@@ -133,7 +208,7 @@ document.addEventListener('DOMContentLoaded', function () {
       }
     });
 
-    const imageContainers = container.querySelectorAll('.product-image-wrapper');
+    const imageContainers = container.querySelectorAll('.featured-collection-product-image-wrapper');
 
     imageContainers.forEach((wrapper) => {
       const images = Array.from(wrapper.querySelectorAll('.product-image'));
@@ -201,7 +276,7 @@ document.addEventListener('DOMContentLoaded', function () {
       button._clickHandler = (e) => {
         e.preventDefault();
         const productId = button.getAttribute('data-product-id');
-        const wrapper = button.closest('.product-image-wrapper');
+        const wrapper = button.closest('.featured-collection-product-image-wrapper');
         const images = Array.from(wrapper.querySelectorAll('.product-image'));
         if (images.length <= 1) return;
         let currentIndex = images.findIndex((img) => img.classList.contains('active'));
@@ -217,7 +292,7 @@ document.addEventListener('DOMContentLoaded', function () {
       button._clickHandler = (e) => {
         e.preventDefault();
         const productId = button.getAttribute('data-product-id');
-        const wrapper = button.closest('.product-image-wrapper');
+        const wrapper = button.closest('.featured-collection-product-image-wrapper');
         const images = Array.from(wrapper.querySelectorAll('.product-image'));
         if (images.length <= 1) return;
         let currentIndex = images.findIndex((img) => img.classList.contains('active'));
