@@ -425,23 +425,116 @@ document.addEventListener('DOMContentLoaded', function () {
     // Initialize variant hover functionality
     const productCards = container.querySelectorAll('.featured-collection-product-card');
     productCards.forEach((card) => {
+      const imageWrapper = card.querySelector('.featured-collection-product-image-wrapper');
       const cartContainer = card.querySelector('.product-cart-container');
       const sizeContainer = card.querySelector('.size-variants-container');
+      const addToCartBtn = card.querySelector('.add-to-cart-btn');
+      const sizeButtons = card.querySelectorAll('.size-option-btn');
 
-      if (cartContainer && sizeContainer) {
-        cartContainer.addEventListener('mouseenter', () => {
-          sizeContainer.style.opacity = '1';
-          sizeContainer.style.visibility = 'visible';
-        });
+      if (imageWrapper && cartContainer) {
+        // Remove any existing event listeners
+        imageWrapper.removeEventListener('mouseenter', imageWrapper._mouseEnterHandler);
+        imageWrapper.removeEventListener('mouseleave', imageWrapper._mouseLeaveHandler);
+        imageWrapper.removeEventListener('touchstart', imageWrapper._touchStartHandler);
+        cartContainer.removeEventListener('mouseenter', cartContainer._mouseEnterHandler);
+        cartContainer.removeEventListener('mouseleave', cartContainer._mouseLeaveHandler);
+        cartContainer.removeEventListener('touchstart', cartContainer._touchStartHandler);
 
-        cartContainer.addEventListener('mouseleave', () => {
-          sizeContainer.style.opacity = '0';
-          sizeContainer.style.visibility = 'hidden';
-        });
+        // Stage 1: Image hover shows add to cart button
+        imageWrapper._mouseEnterHandler = () => {
+          // Just show the add to cart button, not the sizes yet
+          cartContainer.classList.add('show-button');
+        };
+
+        imageWrapper._mouseLeaveHandler = () => {
+          // Hide everything when leaving the image
+          cartContainer.classList.remove('show-button');
+          if (sizeContainer) {
+            sizeContainer.classList.remove('active');
+            sizeButtons.forEach((btn) => {
+              btn.classList.remove('size-animate');
+            });
+          }
+        };
+
+        // Stage 2: Add to cart button hover shows size options (if product has variants)
+        if (addToCartBtn && sizeContainer && addToCartBtn.dataset.hasVariants === 'true') {
+          // Ensure size buttons start hidden
+          sizeButtons.forEach((btn) => {
+            btn.classList.remove('size-animate');
+            btn.style.opacity = '0';
+            btn.style.visibility = 'hidden';
+            btn.style.transform = 'translateY(10px)';
+          });
+
+          addToCartBtn._mouseEnterHandler = (e) => {
+            e.stopPropagation();
+            sizeContainer.classList.add('active');
+
+            // Animate size buttons with staggered delay (slower)
+            sizeButtons.forEach((btn, index) => {
+              btn.style.setProperty('--animation-order', index);
+              setTimeout(() => {
+                btn.classList.add('size-animate');
+              }, index * 100); // 100ms delay between each button
+            });
+          };
+
+          addToCartBtn._mouseLeaveHandler = (e) => {
+            e.stopPropagation();
+            // Check if we're moving to the size container
+            const relatedTarget = e.relatedTarget;
+            if (!sizeContainer.contains(relatedTarget)) {
+              sizeContainer.classList.remove('active');
+              sizeButtons.forEach((btn) => {
+                btn.classList.remove('size-animate');
+                btn.style.opacity = '0';
+                btn.style.visibility = 'hidden';
+                btn.style.transform = 'translateY(10px)';
+              });
+            }
+          };
+
+          // Keep size container active when hovering over it
+          sizeContainer._mouseEnterHandler = () => {
+            sizeContainer.classList.add('active');
+          };
+
+          sizeContainer._mouseLeaveHandler = (e) => {
+            const relatedTarget = e.relatedTarget;
+            if (!addToCartBtn.contains(relatedTarget) && !sizeContainer.contains(relatedTarget)) {
+              sizeContainer.classList.remove('active');
+              sizeButtons.forEach((btn) => {
+                btn.classList.remove('size-animate');
+                btn.style.opacity = '0';
+                btn.style.visibility = 'hidden';
+                btn.style.transform = 'translateY(10px)';
+              });
+            }
+          };
+          addToCartBtn.addEventListener('mouseenter', addToCartBtn._mouseEnterHandler);
+          addToCartBtn.addEventListener('mouseleave', addToCartBtn._mouseLeaveHandler);
+          sizeContainer.addEventListener('mouseenter', sizeContainer._mouseEnterHandler);
+          sizeContainer.addEventListener('mouseleave', sizeContainer._mouseLeaveHandler);
+        }
+
+        // Touch handler for mobile devices
+        imageWrapper._touchStartHandler = (e) => {
+          e.preventDefault();
+          if (cartContainer.classList.contains('show-button')) {
+            imageWrapper._mouseLeaveHandler();
+          } else {
+            imageWrapper._mouseEnterHandler();
+          }
+        };
+
+        imageWrapper.addEventListener('mouseenter', imageWrapper._mouseEnterHandler);
+        imageWrapper.addEventListener('mouseleave', imageWrapper._mouseLeaveHandler);
+
+        // Add touch support for mobile
+        imageWrapper.addEventListener('touchstart', imageWrapper._touchStartHandler, { passive: false });
       }
-    });
-
-    // Initialize size buttons and waitlist functionality
+    }); // Initialize size buttons and waitlist functionality
     const sizeButtons = container.querySelectorAll('.size-option-btn');
     sizeButtons.forEach((button) => {
       button.addEventListener('click', (e) => {
