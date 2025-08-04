@@ -10,7 +10,6 @@
   >
     {% if section.settings.heading != blank %}
       <div
-        id="featured-collection-heading"
         style="font-weight:500; color: var(--text);"
         class="featured-collection-main-heading mb-[-10px]{% if section.settings.enable_letter_animation %} fc-letter-animation{% endif %}"
       >
@@ -22,12 +21,7 @@
       class="flex justify-between items-start w-full featured-collection-subheading"
       style="padding-top: 10px; color: var(--text); padding-bottom: 10px;"
     >
-      <div
-        class="flex-grow md:text-[24px] text-[16px] md:mt-[-20px]"
-        id="featured-collection-description"
-        style="line-height: 1;"
-        tabindex="-1"
-      >
+      <div class="flex-grow md:text-[24px] text-[16px] md:mt-[-20px]" style="line-height: 1;">
         {% if section.settings.description != blank %}
           {{ section.settings.description }}
         {% endif %}
@@ -250,15 +244,14 @@
                                     decoding="async"
                                     width="440"
                                     height="530"
-                                    style="object-fit: cover;"
+                                    style="object-fit: cover; width: min(441px, calc(255px + 0.1835 * (100vw - 425px))) !important; height: min(530px, calc(306px + 0.2207 * (100vw - 425px))) !important;"
                                   >
                                 {% endfor %}
 
-                                <div
+                                <button
                                   class="image-nav-arrow image-nav-prev"
                                   data-product-id="{{ product.id }}"
                                   aria-label="Previous image for {{ product.title }}"
-                                  style="display: inline-block;"
                                 >
                                   <svg
                                     xmlns="http://www.w3.org/2000/svg"
@@ -267,12 +260,11 @@
                                   >
                                     <path fill="currentColor" d="M1.1875 7.7334H7.6599M7.6599 7.7334V1.261M7.6599 7.7334L1.1875 1.261"></path>
                                   </svg>
-                                </div>
-                                <div
+                                </button>
+                                <button
                                   class="image-nav-arrow image-nav-next"
                                   data-product-id="{{ product.id }}"
                                   aria-label="Next image for {{ product.title }}"
-                                  style="display: inline-block;"
                                 >
                                   <svg
                                     xmlns="http://www.w3.org/2000/svg"
@@ -281,7 +273,7 @@
                                   >
                                     <path fill="currentColor" d="M1.1875 7.7334H7.6599M7.6599 7.7334V1.261M7.6599 7.7334L1.1875 1.261"></path>
                                   </svg>
-                                </div>
+                                </button>
                               {% else %}
                                 <img
                                   srcset="
@@ -300,7 +292,7 @@
                                   decoding="async"
                                   width="440"
                                   height="530"
-                                  style="object-fit: cover;"
+                                  style="object-fit: cover; width: min(441px, calc(255px + 0.1835 * (100vw - 425px))) !important; height: min(530px, calc(306px + 0.2207 * (100vw - 425px))) !important;"
                                 >
                               {% endif %}
                             </div>
@@ -319,7 +311,7 @@
 
                               {% if has_size_variants %}
                                 <div
-                                  class="size-variants-container p-2 mb-0 opacity-0 invisible"
+                                  class="size-variants-container p-2 m-0 opacity-0 invisible"
                                   role="group"
                                   aria-label="Size options for {{ product.title }}"
                                 >
@@ -348,8 +340,8 @@
                                               {% endif %}
                                             {% endfor %}
 
-                                            <div
-                                              class="size-option-btn rounded size-animate {% unless variant_available %}unavailable-size{% endunless %}"
+                                            <button
+                                              class="size-option-btn p-5 rounded size-animate {% unless variant_available %}unavailable-size{% endunless %}"
                                               {% if variant_available %}
                                                 data-variant-id="{{ variant_id }}"
                                                 data-product-id="{{ product.id }}"
@@ -367,7 +359,7 @@
                                               {% endunless %}
                                             >
                                               {{ value }}
-                                            </div>
+                                            </button>
                                           {% endfor %}
                                         </div>
                                       </div>
@@ -377,9 +369,9 @@
                               {% endif %}
 
                               {% if product.available %}
-                                <div
-                                  class="add-to-cart-btn w-90 text-(--text) rounded opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-                                  style="background-color: rgb(var(--color-background)); color: var(--text); display: inline-block;"
+                                <button
+                                  class="add-to-cart-btn text-(--text) rounded opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                                  style="background-color: rgb(var(--color-background)); color: var(--text);"
                                   data-product-id="{{ product.id }}"
                                   {% if product.has_only_default_variant %}
                                     data-variant-id="{{ product.variants.first.id }}"
@@ -393,19 +385,19 @@
                                   aria-label="Add {{ product.title }} to cart"
                                 >
                                   ADD TO CART
-                                </div>
+                                </button>
                               {% else %}
-                                <div
+                                <button
                                   class="notify-me-btn w-90 text-(--text) rounded opacity-0 group-hover:opacity-100 transition-opacity duration-300"
                                   data-product-id="{{ product.id }}"
                                   data-product-title="{{ product.title | escape }}"
                                   data-has-variants="{% if has_size_variants %}true{% else %}false{% endif %}"
                                   aria-label="Get notified when {{ product.title }} is back in stock"
                                   aria-haspopup="dialog"
-                                  style="background-color: rgb(var(--color-background)); color: var(--text); display: inline-block;"
+                                  style="background-color: rgb(var(--color-background)); color: var(--text);"
                                 >
                                   NOTIFY ME WHEN IN STOCK
-                                </div>
+                                </button>
                               {% endif %}
                             </div>
                           </div>
@@ -460,14 +452,13 @@
       style="background-color: rgb(var(--color-background));"
     >
       <div class="flex justify-end p-2 md:p-4">
-        <div
+        <button
           id="close-waitlist-modal"
           class="text-(--text) hover:text-gray-700 font-medium"
           aria-label="Close waitlist form"
-          style="display: inline-block;"
         >
           CLOSE
-        </div>
+        </button>
       </div>
 
       <h2 class="text-xl md:text-2xl font-bold mb-2" id="waitlist-product-title">PRODUCT TITLE</h2>
@@ -488,14 +479,14 @@
             placeholder="Your email"
             class="flex-grow border border-gray-300 p-2 md:p-3 rounded text-sm md:text-base"
           >
-          <div
+          <button
             id="get-notified-btn"
             class="bg-(--text) py-2 md:py-3 px-4 md:px-6 font-medium hover:bg-gray-800 rounded text-sm md:text-base"
             aria-label="Submit waitlist request"
-            style="color: rgb(var(--color-background)); display: inline-block;"
+            style="color: rgb(var(--color-background));"
           >
             GET NOTIFIED
-          </div>
+          </button>
         </div>
       </div>
     </div>
@@ -553,9 +544,6 @@
       }
       .sold-out{
         font-size: 11px !important;
-      }
-      .featured-collection-product-card{
-        width: 255px !important;
       }
     }
 
@@ -771,7 +759,7 @@
     .add-to-cart-btn,
     .notify-me-btn {
       transition: all 0.5s ease;
-      width: 306px;
+      width: min(381px, calc(255px + 0.1835 * (100vw - 425px) - 60px));
       left: 50%;
       transform: translateX(-50%);
       height: 37px;
@@ -780,10 +768,6 @@
       position: relative;
       z-index: 5;
       cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      text-align: center;
     }
 
     .add-to-cart-btn:hover,
@@ -796,12 +780,13 @@
       border-radius: {{ settings.buttons_radius }}px;
       position: absolute;
       bottom: 0;
-      /* left: 50%; */
-      /* transform: translateX(-50%); */
-      width: 306px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: min(381px, calc(255px + 0.1835 * (100vw - 425px) - 60px));
       height: 37px;
       z-index: 10;
       transition: all 0.5s ease;
+      transition: transform 0s ease;
       display: flex;
       justify-content: center;
       padding: 5px 10px;
@@ -827,7 +812,7 @@
     .size-variants-container.active {
       opacity: 1 !important;
       visibility: visible !important;
-      transform: translateY(0);
+      transform: translateX(-50%) translateY(0);
     }
 
     .product-cart-container:hover .add-to-cart-btn[data-has-variants='true'] {
@@ -849,19 +834,14 @@
       color: rgb(var(--color-background));
       font-size: 16px;
       border: {{ settings.buttons_border_thickness }}px solid var(--disabled_text);
-      padding: 0 !important;
-      margin: 0 !important;
-      display: flex !important;
-      align-items: center !important;
-      justify-content: center !important;
-      text-align: center !important;
-      line-height: 1 !important;
-      vertical-align: middle;
+      padding: 2px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       cursor: pointer;
       opacity: 1; /* Ensure buttons are visible */
       visibility: visible; /* Ensure buttons are visible */
       background-color: transparent;
-      box-sizing: border-box;
     }
 
     .size-option-btn:hover {
@@ -981,7 +961,7 @@
     }
 
     .featured-collection-product-card {
-      width: 350px;
+      width: min(441px, calc(255px + 0.1835 * (100vw - 425px))) !important;
       flex-shrink: 0;
       height: auto;
       display: flex;
@@ -1063,7 +1043,7 @@
     .product-cart-container:hover .size-variants-container {
       opacity: 1 !important;
       visibility: visible !important;
-      transform: translateY(0);
+      transform: translateX(-50%) translateY(0);
     }
 
     .featured-collection-custom-button {
@@ -1153,8 +1133,8 @@
   }
 
   .product-image, .fc-product-image, .featured-collection-product-image-wrapper{
-      width: 350px;
-      height: 424px;
+      width: min(441px, calc(255px + 0.1835 * (100vw - 425px))) !important;  /* 255px to 441px */
+      height: min(530px, calc(306px + 0.2207 * (100vw - 425px))) !important;
     }
 
   @media (max-width: 1025px){
@@ -1301,30 +1281,6 @@
       /* pointer-events: none; */
       opacity: 0;
       z-index: -1;
-    }
-
-    /* Focus styles for accessibility */
-    .featured-collection-custom-button:focus,
-    .collection-btn:focus {
-      outline: 2px solid #0066cc !important;
-      outline-offset: 2px !important;
-      box-shadow: 0 0 0 2px rgba(0, 102, 204, 0.2) !important;
-    }
-
-    /* Remove focus outline from non-interactive elements */
-    .featured-collection-product-card:focus,
-    .product-link:focus,
-    .featured-collection-product-image-wrapper:focus,
-    .product-image:focus,
-    .fc-product-image:focus {
-      outline: none !important;
-      box-shadow: none !important;
-    }
-
-    /* Ensure interactive elements are clearly focusable */
-    .featured-collection-custom-button,
-    .collection-btn {
-      cursor: pointer;
     }
 </style>
 
