@@ -32,6 +32,24 @@
     position: relative;
     z-index: 1000 !important;
   }
+
+  .slider-arrow {
+    background: transparent;
+    transition: background 0.2s;
+  }
+  .slider-arrow:hover {
+    background: #e5e5e5;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  }
+  .slider-arrow svg {
+    display: block;
+    margin: auto;
+  }
+  .slider-arrow {
+    width: 40px;
+    height: 40px;
+    padding: 0;
+  }
 </style>
 
 {%- unless skip_styles -%}
@@ -55,8 +73,11 @@
     endif
   -%}
   <div class="card-wrapper product-card-wrapper group">
-    <div class="block w-full">
-      <div class="relative bg-[#F8F8F8] w-full product-card-height group-hover:h-[380px] transition-all duration-300 overflow-hidden">
+    <div
+      class="block w-full group-hover:scale-y-90 transition-transform duration-300"
+      style="transform-origin: top center;"
+    >
+      <div class="relative bg-[#F8F8F8] w-full product-card-height transition-all duration-300 overflow-hidden">
         {%- if card_product.featured_media -%}
           <div class="absolute inset-0 w-full h-full overflow-hidden product-images-slider">
             {% assign first_media = card_product.media[0] %}
@@ -72,7 +93,7 @@
                   {%- if media.width >= 1066 -%}{{ media | image_url: width: 1066 }} 1066w,{%- endif -%}
                   {{ media | image_url }} {{ media.width }}w
                 "
-                class="w-full h-full object-cover p-0 transition-all duration-300 group-hover:scale-[90%] group-hover:-translate-y-10 absolute inset-0 opacity-0"
+                class="w-full h-full object-cover p-0 transition-all duration-300 absolute inset-0 opacity-0"
                 loading="lazy"
                 width="{{ media.width }}"
                 height="{{ media.height }}"
@@ -85,7 +106,7 @@
             {% endfor %}
             <button
               aria-label="prev-btn"
-              class="slider-arrow prev absolute left-2 top-1/2  -translate-y-1/2  cursor-pointer flex items-center justify-center z-[101]"
+              class="slider-arrow prev absolute left-0 top-1/2  -translate-y-1/2  cursor-pointer flex items-center justify-center z-[50] opacity-0 group-hover:opacity-100 transition-opacity duration-200"
             >
               <svg
                 width="40"
@@ -99,7 +120,7 @@
             </button>
             <button
               aria-label="next-btn"
-              class="slider-arrow next absolute right-2 top-1/2  -translate-y-1/2  cursor-pointer flex items-center justify-center z-[101]"
+              class="slider-arrow next absolute right-0 top-1/2  -translate-y-1/2  cursor-pointer flex items-center justify-center z-[50] opacity-0 group-hover:opacity-100 transition-opacity duration-200"
             >
               <svg
                 width="40"
@@ -116,7 +137,7 @@
 
         {% if card_product.available == false %}
           <div class="absolute top-3 left-3 ">
-            <span class="inline-block  text-[12px] font-medium bg-white text-black rounded px-1 border bg-white ">
+            <span class="inline-block  text-[14px] font-medium bg-white text-black rounded px-1 border bg-white ">
               SOLD OUT
             </span>
           </div>
@@ -124,7 +145,7 @@
             <div class="bg-white w-[93%] mx-auto text-center !text-black">
               <button
                 type="button"
-                class="notify-when-available-btn w-full py-4  !text-[1.6rem] shadow-xl font-medium text-black hover:text-white bg-gray-600 hover:bg-black cursor-pointer transition-colors duration-200 uppercase tracking-wider"
+                class="notify-when-available-btn w-full py-4  !text-[1.6rem]  font-medium text-black hover:text-white bg-gray-600 hover:bg-black cursor-pointer transition-colors duration-200 uppercase tracking-wider"
                 data-product-id="{{ card_product.id }}"
                 data-product-title="{{ card_product.title | escape }}"
               >
@@ -149,7 +170,7 @@
 
               <button
                 type="button"
-                class="add-to-cart-btn w-full py-4 z-[100] !text-[1.6rem] shadow-xl font-medium text-black hover:bg-black hover:text-white transition-colors duration-200 uppercase tracking-wider quick-add-button"
+                class="add-to-cart-btn w-full py-4 z-[100] !text-[1.6rem]  font-medium text-black hover:bg-black hover:text-white transition-colors duration-200 uppercase tracking-wider quick-add-button"
                 {% if has_size_variant %}
                   data-has-sizes="true"
                 {% else %}
@@ -223,16 +244,25 @@
 
       <div class="mt-3 space-y-1">
         <a href="{{ card_product.url }}" class="block hover:opacity-75 transition-opacity duration-200">
-          <h3 class="!text-[1.6rem] product-card-text uppercase font-medium leading-tight">
+          <h3
+            class="card-product-typegraphy !text-[14px] product-card-text uppercase font-medium leading-tight"
+            style="color: rgba(var(--color-foreground));"
+          >
             {{ card_product.title | escape }}
           </h3>
           <div class=" gap-2 items-baseline leading-tight">
-            <span class="!text-[1.6rem] product-card-text uppercase font-medium">
+            <span
+              class="card-product-typegraphy !text-[14px] product-card-text uppercase font-medium"
+              style="color: rgba(var(--color-foreground));"
+            >
               {{ card_product.price | money }}
             </span>
             {%- if card_product.compare_at_price > card_product.price -%}
               |
-              <span class="!text-[1.6rem] product-card-text uppercase text-red-600">
+              <span
+                class="card-product-typegraphy !text-[14px] product-card-text uppercase text-red-600"
+                style="color: #e53935;"
+              >
                 {{- card_product.compare_at_price | money }} FOR MEMBERS</span
               >
             {%- endif -%}
@@ -297,12 +327,23 @@
 {%- endif -%}
 
 <style>
+  .card-product-typegraphy {
+    font-size: 14px !important;
+  }
   .product-card-height {
     height: 420px;
+    transition: height 0.3s;
+  }
+  .group:hover .product-card-height {
+    height: 380px;
   }
   @media only screen and (max-width: 600px) {
     .product-card-height {
       height: 250px;
+      transition: height 0.3s;
+    }
+    .group:hover .product-card-height {
+      height: 210px;
     }
     .product-card-text {
       font-size: 12px;
@@ -320,7 +361,6 @@
     opacity: 1;
     height: 50px !important;
     visibility: visible;
-    border-radius: 10px;
     overflow: hidden;
     clip-path: inset(0);
   }
