@@ -3,6 +3,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
   // Add to cart functionality
   function addToCart(variantId, quantity) {
+    console.log('Adding to cart:', variantId, quantity); // Debug log
+
     const formData = {
       items: [
         {
@@ -12,20 +14,39 @@ document.addEventListener('DOMContentLoaded', function () {
       ],
     };
 
-    fetch('/cart/add.js', {
+    fetch(window.routes?.cart_add_url || '/cart/add.js', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify(formData),
     })
-      .then((response) => response.json())
+      .then((response) => {
+        console.log('Response status:', response.status); // Debug log
+        console.log('Response headers:', response.headers); // Debug log
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        // Check if response is actually JSON
+        const contentType = response.headers.get('content-type');
+        if (!contentType || !contentType.includes('application/json')) {
+          console.warn('Response is not JSON, treating as success');
+          // If it's not JSON but status is OK, treat as success
+          return { success: true };
+        }
+
+        return response.json();
+      })
       .then((data) => {
+        console.log('Cart add success:', data); // Debug log
+
         // Show success notification
         const notification = document.createElement('div');
         notification.className =
-          'fixed bottom-4 right-4 bg-black text-white px-6 py-3 rounded-lg z-50 opacity-0 transition-opacity duration-300';
-        notification.textContent = 'Added to cart';
+          'fixed bottom-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg z-50 opacity-0 transition-opacity duration-300';
+        notification.textContent = 'Added to cart successfully!';
         document.body.appendChild(notification);
 
         setTimeout(() => (notification.style.opacity = '1'), 10);
@@ -37,13 +58,60 @@ document.addEventListener('DOMContentLoaded', function () {
         // Update cart count immediately
         updateCartCount();
 
+        // Also update after a short delay to ensure backend is updated
+        setTimeout(() => {
+          updateCartCount();
+        }, 500);
+
         // Refresh cart drawer content and then open it
-        refreshCartDrawer().then(() => {
-          openCartDrawer();
-        });
+        refreshCartDrawer()
+          .then(() => {
+            openCartDrawer();
+          })
+          .catch((refreshError) => {
+            console.log('Cart drawer refresh failed, trying direct approach:', refreshError);
+            // If cart drawer refresh fails, just update count and try to open
+            updateCartCount();
+            setTimeout(() => {
+              openCartDrawer();
+            }, 200);
+          });
       })
       .catch((error) => {
-        console.error('Error:', error);
+        console.error('Error adding to cart:', error);
+        console.log('Error type:', error.name, 'Error message:', error.message);
+
+        // Check if the error is likely a parsing issue rather than an actual cart error
+        if (error.message.includes('Unexpected') || error.message.includes('JSON')) {
+          console.log('Likely JSON parsing error, but cart add may have succeeded');
+
+          // Still try to update cart count as the add might have worked
+          setTimeout(() => {
+            updateCartCount();
+          }, 500);
+
+          // Show a more appropriate message
+          const notification = document.createElement('div');
+          notification.className =
+            'fixed bottom-4 right-4 bg-yellow-500 text-white px-6 py-3 rounded-lg z-50 opacity-0 transition-opacity duration-300';
+          notification.textContent = 'Item may have been added - please check cart';
+          document.body.appendChild(notification);
+
+          setTimeout(() => (notification.style.opacity = '1'), 10);
+          setTimeout(() => {
+            notification.style.opacity = '0';
+            setTimeout(() => notification.remove(), 300);
+          }, 3000);
+
+          return;
+        }
+
+        // Still try to update cart count even if there was an error
+        // because the item might have been added successfully
+        setTimeout(() => {
+          updateCartCount();
+        }, 1000);
+
         // Show error notification
         const notification = document.createElement('div');
         notification.className =
@@ -62,8 +130,15 @@ document.addEventListener('DOMContentLoaded', function () {
   // Function to refresh cart drawer content
   function refreshCartDrawer() {
     return fetch(`${window.location.pathname}?section_id=cart-drawer`)
-      .then((response) => response.text())
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return response.text();
+      })
       .then((responseText) => {
+        console.log('Cart drawer refreshed'); // Debug log
+
         const html = new DOMParser().parseFromString(responseText, 'text/html');
 
         // Update cart drawer content
@@ -91,6 +166,8 @@ document.addEventListener('DOMContentLoaded', function () {
       })
       .catch((error) => {
         console.error('Error refreshing cart drawer:', error);
+        // Even if cart drawer refresh fails, we can still try to update the count
+        return updateCartCount();
       });
   }
 
@@ -140,9 +217,16 @@ document.addEventListener('DOMContentLoaded', function () {
 
   // Function to update cart count in all possible locations
   function updateCartCount() {
-    fetch('/cart.js')
-      .then((res) => res.json())
+    fetch(window.routes?.cart_url || '/cart.js')
+      .then((res) => {
+        if (!res.ok) {
+          throw new Error(`HTTP error! status: ${res.status}`);
+        }
+        return res.json();
+      })
       .then((cart) => {
+        console.log('Cart updated:', cart); // Debug log
+
         // Target all possible cart count elements using various common selectors
         const cartCountSelectors = [
           '.cart-count',
@@ -305,7 +389,7 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
     // Slider drag functionality
-    const slider = container.querySelector('.product-slider');
+    const slider = container.querySelector('.featured-collection-product-slider');
     if (!slider) return;
 
     let isDown = false;
@@ -315,19 +399,19 @@ document.addEventListener('DOMContentLoaded', function () {
     slider.addEventListener('mousedown', (e) => {
       if (e.target.closest('.image-nav-arrow') || e.target.closest('.size-option-btn')) return;
       isDown = true;
-      slider.classList.add('cursor-grabbing');
+      slider.classList.add('featured-collection-cursor-grabbing');
       startX = e.pageX - slider.offsetLeft;
       scrollLeft = slider.scrollLeft;
     });
 
     slider.addEventListener('mouseleave', () => {
       isDown = false;
-      slider.classList.remove('cursor-grabbing');
+      slider.classList.remove('featured-collection-cursor-grabbing');
     });
 
     slider.addEventListener('mouseup', () => {
       isDown = false;
-      slider.classList.remove('cursor-grabbing');
+      slider.classList.remove('featured-collection-cursor-grabbing');
     });
 
     slider.addEventListener('mousemove', (e) => {
@@ -339,25 +423,118 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
     // Initialize variant hover functionality
-    const productCards = container.querySelectorAll('.product-card');
+    const productCards = container.querySelectorAll('.featured-collection-product-card');
     productCards.forEach((card) => {
+      const imageWrapper = card.querySelector('.featured-collection-product-image-wrapper');
       const cartContainer = card.querySelector('.product-cart-container');
       const sizeContainer = card.querySelector('.size-variants-container');
+      const addToCartBtn = card.querySelector('.add-to-cart-btn');
+      const sizeButtons = card.querySelectorAll('.size-option-btn');
 
-      if (cartContainer && sizeContainer) {
-        cartContainer.addEventListener('mouseenter', () => {
-          sizeContainer.style.opacity = '1';
-          sizeContainer.style.visibility = 'visible';
-        });
+      if (imageWrapper && cartContainer) {
+        // Remove any existing event listeners
+        imageWrapper.removeEventListener('mouseenter', imageWrapper._mouseEnterHandler);
+        imageWrapper.removeEventListener('mouseleave', imageWrapper._mouseLeaveHandler);
+        imageWrapper.removeEventListener('touchstart', imageWrapper._touchStartHandler);
+        cartContainer.removeEventListener('mouseenter', cartContainer._mouseEnterHandler);
+        cartContainer.removeEventListener('mouseleave', cartContainer._mouseLeaveHandler);
+        cartContainer.removeEventListener('touchstart', cartContainer._touchStartHandler);
 
-        cartContainer.addEventListener('mouseleave', () => {
-          sizeContainer.style.opacity = '0';
-          sizeContainer.style.visibility = 'hidden';
-        });
+        // Stage 1: Image hover shows add to cart button
+        imageWrapper._mouseEnterHandler = () => {
+          // Just show the add to cart button, not the sizes yet
+          cartContainer.classList.add('show-button');
+        };
+
+        imageWrapper._mouseLeaveHandler = () => {
+          // Hide everything when leaving the image
+          cartContainer.classList.remove('show-button');
+          if (sizeContainer) {
+            sizeContainer.classList.remove('active');
+            sizeButtons.forEach((btn) => {
+              btn.classList.remove('size-animate');
+            });
+          }
+        };
+
+        // Stage 2: Add to cart button hover shows size options (if product has variants)
+        if (addToCartBtn && sizeContainer && addToCartBtn.dataset.hasVariants === 'true') {
+          // Ensure size buttons start hidden
+          sizeButtons.forEach((btn) => {
+            btn.classList.remove('size-animate');
+            btn.style.opacity = '0';
+            btn.style.visibility = 'hidden';
+            btn.style.transform = 'translateY(10px)';
+          });
+
+          addToCartBtn._mouseEnterHandler = (e) => {
+            e.stopPropagation();
+            sizeContainer.classList.add('active');
+
+            // Animate size buttons with staggered delay (slower)
+            sizeButtons.forEach((btn, index) => {
+              btn.style.setProperty('--animation-order', index);
+              setTimeout(() => {
+                btn.classList.add('size-animate');
+              }, index * 100); // 100ms delay between each button
+            });
+          };
+
+          addToCartBtn._mouseLeaveHandler = (e) => {
+            e.stopPropagation();
+            // Check if we're moving to the size container
+            const relatedTarget = e.relatedTarget;
+            if (!sizeContainer.contains(relatedTarget)) {
+              sizeContainer.classList.remove('active');
+              sizeButtons.forEach((btn) => {
+                btn.classList.remove('size-animate');
+                btn.style.opacity = '0';
+                btn.style.visibility = 'hidden';
+                btn.style.transform = 'translateY(10px)';
+              });
+            }
+          };
+
+          // Keep size container active when hovering over it
+          sizeContainer._mouseEnterHandler = () => {
+            sizeContainer.classList.add('active');
+          };
+
+          sizeContainer._mouseLeaveHandler = (e) => {
+            const relatedTarget = e.relatedTarget;
+            if (!addToCartBtn.contains(relatedTarget) && !sizeContainer.contains(relatedTarget)) {
+              sizeContainer.classList.remove('active');
+              sizeButtons.forEach((btn) => {
+                btn.classList.remove('size-animate');
+                btn.style.opacity = '0';
+                btn.style.visibility = 'hidden';
+                btn.style.transform = 'translateY(10px)';
+              });
+            }
+          };
+          addToCartBtn.addEventListener('mouseenter', addToCartBtn._mouseEnterHandler);
+          addToCartBtn.addEventListener('mouseleave', addToCartBtn._mouseLeaveHandler);
+          sizeContainer.addEventListener('mouseenter', sizeContainer._mouseEnterHandler);
+          sizeContainer.addEventListener('mouseleave', sizeContainer._mouseLeaveHandler);
+        }
+
+        // Touch handler for mobile devices
+        imageWrapper._touchStartHandler = (e) => {
+          e.preventDefault();
+          if (cartContainer.classList.contains('show-button')) {
+            imageWrapper._mouseLeaveHandler();
+          } else {
+            imageWrapper._mouseEnterHandler();
+          }
+        };
+
+        imageWrapper.addEventListener('mouseenter', imageWrapper._mouseEnterHandler);
+        imageWrapper.addEventListener('mouseleave', imageWrapper._mouseLeaveHandler);
+
+        // Add touch support for mobile
+        imageWrapper.addEventListener('touchstart', imageWrapper._touchStartHandler, { passive: false });
       }
-    });
-
-    // Initialize size buttons and waitlist functionality
+    }); // Initialize size buttons and waitlist functionality
     const sizeButtons = container.querySelectorAll('.size-option-btn');
     sizeButtons.forEach((button) => {
       button.addEventListener('click', (e) => {
