@@ -90,9 +90,9 @@
     left: 0;
   }
 
-  /* This will be dynamically set by JavaScript */
+  /* This will be dynamically set by JavaScript using percentages */
   .prod-diff-wrapper.prod-diff-right .prod-diff-img {
-    left: -35vw;
+    left: -50%;
   }
 </style>
 
@@ -217,6 +217,13 @@
       }
     }
 
+    function updateImagePositions() {
+      const containerWidth = container.offsetWidth;
+      const leftWidth = leftContainer.offsetWidth;
+      const rightImgLeftPosition = -leftWidth;
+      rightImg.style.left = rightImgLeftPosition + 'px';
+    }
+
     function onDrag(e) {
       if (!isDragging) return;
       if (e.cancelable) e.preventDefault();
@@ -227,7 +234,7 @@
       sliderDivider.style.left = percent + '%';
       leftContainer.style.width = percent + '%';
       rightContainer.style.width = 100 - percent + '%';
-      rightImg.style.left = `-${leftContainer.offsetWidth}px`;
+      updateImagePositions();
     }
 
     function stopDrag() {
@@ -256,6 +263,14 @@
         window.addEventListener('touchcancel', stopDrag);
       });
     });
+
+    // Handle window resize to update positions
+    window.addEventListener('resize', function () {
+      updateImagePositions();
+    });
+
+    // Initialize positions
+    updateImagePositions();
   });
 </script>
 
