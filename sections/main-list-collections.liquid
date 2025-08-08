@@ -1,8 +1,14 @@
 {{ 'component-card.css' | asset_url | stylesheet_tag }}
 {{ 'section-collection-list.css' | asset_url | stylesheet_tag }}
 
-<div class="!p-0 py-16">
-  <h1 class="title title--primary inline-richtext mb-12 {% if settings.animations_reveal_on_scroll %} scroll-trigger animate--fade-in{% endif %}">
+<div
+  class="!p-0 py-16"
+  style="background: {{ section.settings.bg_color }};"
+>
+  <h1
+    class="title title--primary inline-richtext mb-12 {% if settings.animations_reveal_on_scroll %} scroll-trigger animate--fade-in{% endif %}"
+    style="color: {{ section.settings.text_color }};"
+  >
     &nbsp;{{ section.settings.title }}
   </h1>
 
@@ -77,9 +83,10 @@
                 <img
                   src="{{ 'defaultproduct.svg' | asset_url }}"
                   alt="Default Product"
-                  class="w-full h-full object-cover"
-                  width="430"
-                  height="430"
+                  class="w-full h-full default-product-img {% if block.settings.span_two_columns %}object-contain{% else %}object-cover{% endif %}"
+                  loading="lazy"
+                  width="100"
+                  height="100"
                 >
               </div>
             {% endif %}
@@ -144,9 +151,10 @@
                 <img
                   src="{{ 'defaultproduct.svg' | asset_url }}"
                   alt="Default Product"
-                  class="w-full h-full object-cover"
-                  width="430"
-                  height="430"
+                  class="w-full h-full default-product-img {% if block.settings.span_two_columns %}object-contain{% else %}object-cover{% endif %}"
+                  loading="lazy"
+                  width="100"
+                  height="100"
                 >
               </div>
             {% endif %}
@@ -220,7 +228,7 @@
                       <img
                         src="{{ collection.featured_image | image_url: width: 600 }}"
                         alt="{{ collection.title | escape }}"
-                        class="w-full h-full object-contain"
+                        class="w-full h-full {% if block.settings.span_two_columns %}object-cover{% else %}object-contain{% endif %}"
                         loading="lazy"
                         width="100"
                         height="100"
@@ -229,7 +237,7 @@
                       <img
                         src="{{ 'defaultproduct.svg' | asset_url }}"
                         alt="Default Product"
-                        class="w-full h-full object-cover"
+                        class="w-full h-full default-product-img {% if block.settings.span_two_columns %}object-contain{% else %}object-cover{% endif %}"
                         loading="lazy"
                         width="100"
                         height="100"
@@ -237,8 +245,12 @@
                     {% endif %}
                   </div>
                   <div class="card-collection__heading p-2">
-                    <div class="collection-title-custom">{{ collection.title | upcase }}</div>
-                    <div class="collection-count-custom">number of products {{ collection.products_count }}</div>
+                    <div class="collection-title-custom" style="color: {{ section.settings.text_color }};">
+                      {{ collection.title | upcase }}
+                    </div>
+                    <div class="collection-count-custom" style="color: {{ section.settings.text_color }};">
+                      number of products {{ collection.products_count }}
+                    </div>
                   </div>
                 </div>
               </a>
@@ -248,14 +260,19 @@
                   <img
                     src="{{ 'defaultproduct.svg' | asset_url }}"
                     alt="Default Product"
-                    class="w-full h-full object-cover"
-                    width="430"
-                    height="430"
+                    class="w-full h-full default-product-img {% if block.settings.span_two_columns %}object-contain{% else %}object-cover{% endif %}"
+                    loading="lazy"
+                    width="100"
+                    height="100"
                   >
                 </div>
                 <div class="card-collection__heading p-2">
-                  <div class="collection-title-custom">Collection Name</div>
-                  <div class="collection-count-custom">number of products 0</div>
+                  <div class="collection-title-custom" style="color: {{ section.settings.text_color }};">
+                    Collection Name
+                  </div>
+                  <div class="collection-count-custom" style="color: {{ section.settings.text_color }};">
+                    number of products 0
+                  </div>
                 </div>
               </div>
             {%- endif -%}
@@ -303,7 +320,6 @@
     .collection-list__item[data-span-two="true"] .image-container img {
       height: 100%;
       width: 100%;
-      object-fit: cover;
     }
 
     .collection-list__item[data-span-two="true"] .video-container video,
@@ -362,6 +378,7 @@
       margin-bottom: 0px;
       line-height: 1.2;
       padding-top:10px;
+      color: {{ section.settings.text_color }};
     }
     .collection-count-custom {
       font-weight: 500;
@@ -369,6 +386,7 @@
       text-transform: lowercase;
       margin-top: 0px;
       line-height: 1.2;
+      color: {{ section.settings.text_color }};
     }
 
     @media screen and (max-width: 749px) {
@@ -402,7 +420,6 @@
       .collection-list__item[data-span-two="true"] .image-container img {
         height: 100%;
         width: 100%;
-        object-fit: cover;
       }
       .collection-list__item[data-span-two="true"] .video-container video,
       .collection-list__item[data-span-two="true"] .video-container iframe {
@@ -419,7 +436,6 @@
         .collection-list__item[data-span-two="true"] .image-container img {
         height: 100%;
         width: 100%;
-        object-fit: cover;
       }
 
     .video-container iframe {
@@ -512,6 +528,23 @@
     }
     .collection-list__item:hover .collection-hover-arrow {
       transform: rotate(-90deg);
+    }
+
+    .image-container {
+      position: relative;
+    }
+    .image-container .default-product-img {
+      display: block;
+      margin: auto;
+      object-fit: contain;
+      max-width: 100%;
+      max-height: 100%;
+    }
+    .image-container:has(.default-product-img) {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: transparent;
     }
 </style>
 
@@ -636,6 +669,18 @@
       ],
       "default": "2",
       "label": "Columns on mobile"
+    },
+    {
+      "type": "color",
+      "id": "bg_color",
+      "label": "Background Color",
+      "default": "#fff"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Text Color",
+      "default": "#222"
     }
   ],
   "blocks": [
