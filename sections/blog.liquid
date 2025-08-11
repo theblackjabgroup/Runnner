@@ -1,314 +1,128 @@
-<script src="{{ 'blog-edit.js' | asset_url }}" defer></script>
-<style>
-  @media (max-width: 767px) {
-  .card-excerpt {
-     margin-left:25px !important;
-  }
-  .overlay-content{
-    margin-top:20px !important; 
-  }
-  #animated-heading {
-    font-size: 2rem !important; 
-    width: 70vw !important; 
-  }
+<div class="c">
+  {% assign default_blog_handle = 'news' %}
+  {% assign blog_handle = section.settings.selected_blog | default: default_blog_handle %}
+  {% assign blog = blogs[blog_handle] %}
 
-  .hero-image {
-    height: 500px !important; 
-  }
-  .second_section{
-    margin-top:13px !important;
-  }
+  {% for article in blog.articles limit: 1 %}
+    {% assign article_class = 'blog-article block space-y-2 px-0 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 transition-shadow hover:shadow-lg' %}
 
-  .subclass-header svg {
-    width: 24px;
-    height: 24px;
-    margin-right: 8px;
-    margin-top:-10px;
-  }
-    .subclass-header{
-      margin-bottom: 8px !important;
-    }
-
-  .subclass-header span {
-    font-size: 1.25rem;
-  }
-   #arrow-svg1{
-     height: 38px !important;
-      width: 44px !important;
-    margin-left:0px !important;
-     margin-top:6px !important;
-  }
-  .subclass-subheader {
-    margin-left: 0 !important;
-    font-size: 1rem;
-    margin-top:10px !important;
-  }
-    .main_heading{
-      margin-left:-206px !important;
-    }
-}
-  ::selection {
-  color: #f97316;
-}
-
- :root {
-    --font-heading-family: {{ settings.type_heading_font.family }}, sans-serif;
-    --font-body-family: {{ settings.type_body_font.family }}, sans-serif;
-  }
-  .hero-image {
-    object-fit: cover;
-  }
-  #animated-heading {
-    font-family: var(--font-heading-family);
-  }
-  .letter {
-    display: inline-block;
-    opacity: 0;
-    transform: translateX(100vw);
-    animation: slideInLetter 0.8s forwards;
-  }
-  @keyframes slideInLetter {
-    0% {
-      opacity: 0;
-      transform: translateX(100vw);
-    }
-    100% {
-      opacity: 1;
-      transform: translateX(0);
-    }
-  }
-
-  .date-tag, .card-excerpt {
-    font-family: var(--font-body-family);
-    opacity: 0;
-    animation: fadeIn 1s ease-in-out forwards;
-  }
-  @keyframes fadeIn {
-    0% {
-      opacity: 0;
-      transform: translateY(10px);
-    }
-    100% {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
-  @keyframes fadeUp {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-.fade-up {
-  animation: fadeUp 2.0s ease-out forwards;
-}
-  .card-excerpt{
-     margin-left:150px;
-  }
-  .overlay-content {
-  color: var(--header_text);
-}
-  .text-new-this-week-color {
-  color: var(--text); 
-}
-
-.text-b-mail-color {
-  color: var(--text); 
-}
-.text-article-date-color {
-  color: var(--text);
-}
-.text-card-subtitle-color {
-  color: var(--text);
-}
-.text-card-title-color {
-  color: var(--text);
-}
-
-.arrow-svg1 {
-  fill: none;
-  margin-left: -38px;
-  flex-shrink: 0;
-  stroke: var(--header_text);
-}
-
-</style>
-
-<section class="color-{{ section.settings.color_scheme }} overflow-hidden flex relative">
-  {% if section.settings.image != blank %}
-    <img
-      class="hero-image absolute md:h-full w-full z-1 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
-      src="{{ section.settings.image | image_url: width: 2000 }}"
-      alt="Hero Background"
-      height="80%"
-      width="100%"
-      tabindex="0"
-    />
-  {% else %}
-    {{ 'image' | placeholder_svg_tag: 'hero-image absolute md:h-[500px] w-full' }}
-  {% endif %}
-  <div class="w-full max-w-7xl flex flex-col text-left" style='margin-left:13px;'>
-    <div class="overlay-content max-w-7xl relative z-2 flex flex-col" style="margin-top:55px;">
-      <div class="top-18 left-20 text-xl sm:text-2xl md:text-3xl date-tag">
-        {{ section.settings.date_text }}
-      </div>
-
-      <div class="flex flex-row">
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          class="arrow-svg1"
-          id="arrow-svg1"
-          viewBox="0 0 24 24"
-          stroke-width="2"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          style="fill:none;margin-top: 13px;margin-right: 187px;margin-left: 20px;height: 184px;"
-        >
-          <path d="M1.1875 7.7334H7.6599M7.6599 7.7334V1.261M7.6599 7.7334L1.1875 1.261"></path>
-        </svg>
-        <div class="main_heading top-11 left-3 md:left-25 z-10 flex flex-col items-start text-left" style="
-    margin-left: -253px;
-">
-          <div
-            class="text-4xl sm:text-6xl md:text-[10.5rem] font-medium uppercase leading-tight sm:leading-none break-words md:w-[40vw] sm:w-[100px] w-[50vw]"
-            style="width:730px; color: {{ section.settings.color_scheme | default: '#ffffff' }}"
-            id="animated-heading"
-          >
-            {{ section.settings.full_text }}
-          </div>
+    <a href="{{ article.url }}" class="group {{ article_class }} flex">
+      <div class="zoom-trigger1">
+        <div class="overflow-hidden">
+          <picture>
+            {% if article.image != blank %}
+                <img
+  src="{{ article.image | image_url: width: 600 }}"
+  alt="{{ article.title | default: 'Blog image' | escape }}"
+                    width="1120px"
+                    height="1400px"
+  loading="lazy"
+  class="img11 object-cover transition-transform duration-300 ease-in-out"
+  style="width: 1120px; height: 1400px; max-height: 1400px; transform-origin: center center;" />
+            {% else %}
+              {{ 'collection-1' | placeholder_svg_tag: 'w-full h-full bg-gray' }}
+            {% endif %}
+          </picture>
         </div>
       </div>
-      <p class="md:bottom-2 md:right-100 text-xl sm:text-2xl md:text-3xl uppercase top-60 card-excerpt md:top-180">
-        {{ section.settings.excerpt_text }}
-      </p>
-    </div>
-  </div>
-</section>
 
-<section class="p-6 fade-up color-{{ section.settings.color_scheme }}">
-  <div class="w-full uppercase">
-    <div class="flex flex-col md:flex-row md:items-start gap-10">
-
-      <div class="w-2/3 max-w-[300px]">
-        <p class="text-sm md:text-[20px] font-bold text-new-this-week-color">{{ section.settings.top_text }}</p>
-        <h2 class="text-sm md:text-[42px] font-bold mt-2 text-b-mail-color">{{ section.settings.main_heading }}</h2>
+      <div class="maindiv">
+        <p class="text-article-date-color1" style="margin-bottom:2.7vh; font-size:2.8vh;font-weight:500;">
+          {{ article.published_at | date: "%m.%d.%y" }}
+        </p>
+        <h3 class="subclass-header1" id="article-title-{{ forloop.index0 }}">
+          <svg xmlns="http://www.w3.org/2000/svg" width="1.65vw" height="1.55vw" viewBox="0 0 8.5 8.5"
+            class="arrow-svgsub1 inline-block" stroke="currentColor" stroke-linecap="round" stroke-width="1.4"
+            stroke-linejoin="round">
+            <path d="M1.1875 7.7334H7.6599M7.6599 7.7334V1.261M7.6599 7.7334L1.1875 1.261"
+              stroke-linejoin="round" />
+          </svg>
+          {{ article.title }}
+        </h3>
+        <span class="subclass-subheader1 font-medium tracking-tight" style="font-size:2.7vh;">
+          {% assign first_sentence = article.content | strip_html | split: '.' | first %}
+          {{ first_sentence }}.
+        </span>
       </div>
+    </a>
+  {% endfor %}
+</div>
 
-      <div class="flex flex-col md:flex-row md:flex-wrap gap-6 w-full">
-        {% if section.settings.selected_blog != blank %}
-          {% assign blog = blogs[section.settings.selected_blog] %}
-          {% for article in blog.articles limit: 6 %}
-            <a href="{{ article.url }}" class="block w-full md:w-1/3 space-y-2 px-2 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 transition-shadow hover:shadow-lg">
-              <div class="aspect-[5/3] overflow-hidden border">
-                {% if article.image != blank %}
-                  <img 
-                    src="{{ article.image | img_url: 'medium' }}"
-                    alt="{{ article.title | escape }}"
-                    loading="lazy"
-                    width="100%"
-                    height="auto"
-                    class="w-full h-full object-cover"
-                  />
-                {% else %}
-                  {{ 'collection-1' | placeholder_svg_tag: 'w-full h-full bg-gray' }}
-                {% endif %}
-              </div>
-
-              <p class="text-sm md:text-[20px] mt-2 text-article-date-color">{{ article.published_at | date: "%m.%d.%y" }}</p>
-
-             <h3 class="subclass-header flex text-sm md:text-[32px] font-bold leading-snug" style="
-    margin-bottom: 25px;
-">
-  <div class="second_section flex-shrink-0" style="margin-top: 7px;margin-left: 43px;">
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      class="arrow-svg1 mt-[2px]"
-      viewBox="0 0 14 14"
-      fill="none"
-      stroke-width="2"
-      stroke-linecap="round"
-      stroke-linejoin="round"
-      style="width: 24px; height: 24px;"
-    >
-      <path d="M1.1875 7.7334H7.6599M7.6599 7.7334V1.261M7.6599 7.7334L1.1875 1.261" />
-    </svg>
-  </div>
-
-  <span class="text-card-title-color ml-2">
-    {{ article.title }}
-  </span>
-</h3>
-              <span class="subclass-subheader text-sm md:text-[20px] tracking-tight text-card-subtitle-color">
-                {{ article.content | strip_html}}
-              </span>
-            </a>
-          {% endfor %}
-        {% else %}
-          {{ 'collection-1' | placeholder_svg_tag: 'w-full h-full' }}
-          {{ 'collection-1' | placeholder_svg_tag: 'w-full h-full' }}
-          {{ 'collection-1' | placeholder_svg_tag: 'w-full h-full' }}
-        {% endif %}
-      </div>
-    </div>
-
-    <hr class="w-screen max-w-none mx-auto my-8" style="border-top-width: 0px; border-style: solid;" />
-  </div>
-</section>
+<style>
+  .subclass-header1{
+  font-size:42px;
+}
+  .maindiv{
+  max-width:500px;
+  margin-right:2.65vw;
+} 
+.group:hover img,
+  .zoom-trigger1:hover img {
+    transform: scale(1.1);
+    transition: transform 0.3s;
+  }
+.zoom-trigger1{
+  flex:1;
+order:2; 
+height:1400px;
+width:1120px;
+} 
+.c{
+padding: {{ settings.sections_spacing }}px {{ settings.side_space}}px;
+}
+.subclass-subheader1{
+line-height:0.9;
+  display:block;
+margin-top:20px;
+}
+@media (max-width:768px){
+  .maindiv{
+    max-width:119px !important;
+  }
+  .text-article-date-color1{
+  font-size:14px !important;
+}
+.subclass-subheader1{
+  line-height:1 !important;
+margin-top:10px !important;
+font-size:14px !important;
+}
+ .subclass-header1{
+  font-size:24px !important;
+}
+  .zoom-trigger1 {
+    width: 100% !important;
+    height: auto !important;
+  }
+  .zoom-trigger1 img {
+    width: 100% !important;
+    height: auto !important;
+    display: block;
+  }
+  .arrow-svgsub1{
+    height:14px;
+    width:20px;
+  }
+}
+</style>      
 
 {% schema %}
 {
-  "name": "Blog",
-  "tag": "section",
+  "name": "Blog Grid Header",
+  "disabled_on": {
+    "groups": ["footer", "header"]
+  },
   "settings": [
     {
       "type": "blog",
       "id": "selected_blog",
       "label": "Select Blog"
     },
+  ],
+  "presets": [
     {
-      "type": "color_scheme",
-      "id": "color_scheme",
-      "default": "scheme-1",
-      "label": "Color Scheme"
-    },
-    {
-      "type": "text",
-      "id": "full_text",
-      "label": "Full Heading Text",
-      "default": "The Bandit x ASICS Novablast 5 Campaign"
-    },
-    {
-      "type": "text",
-      "id": "date_text",
-      "label": "Date",
-      "default": "04.01.25"
-    },
-    {
-      "type": "image_picker",
-      "id": "image",
-      "label": "Main Image"
-    },
-    {
-      "type": "text",
-      "id": "top_text",
-      "label": "Top Text",
-      "default": "New This Week"
-    },
-    {
-      "type": "text",
-      "id": "main_heading",
-      "label": "Main Heading",
-      "default": "The B-Mail"
-    },
-    {
-      "type": "text",
-      "id": "excerpt_text",
-      "label": "Excerpt Text",
-      "default": "Our first-ever footwear collaboration."
+      "name": "Blog Grid Header",
+      "category": "Blog"
     }
   ]
 }
