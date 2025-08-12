@@ -57,7 +57,25 @@
         {% endcomment %}
 
         <div class="fc-shop-all-outer">
-          <div class="fc-shop-all-inner-left">{{ section.settings.button_text }}</div>
+          <div class="fc-shop-all-inner-left">
+            <div class="fc-text-container">
+              <div class="fc-text-layer fc-text-visible">
+                {% assign button_letters = section.settings.button_text | split: '' %}
+                {% for letter in button_letters %}
+                  <span class="fc-letter" style="animation-delay: {{ forloop.index0 | times: 0.05 }}s;">
+                    {{- letter -}}
+                  </span>
+                {% endfor %}
+              </div>
+              <div class="fc-text-layer fc-text-hidden">
+                {% for letter in button_letters %}
+                  <span class="fc-letter" style="animation-delay: {{ forloop.index0 | times: 0.05 }}s;">
+                    {{- letter -}}
+                  </span>
+                {% endfor %}
+              </div>
+            </div>
+          </div>
           <div class="fc-shop-all-inner-right">
             <svg width="8" height="9" viewBox="0 0 8 9" fill="none" xmlns="http://www.w3.org/2000/svg">
               <path d="M4.36062 0.0174182L4.42262 7.73255L4.62388 7.73093L6.42475 4.74248L7.60549 4.73299L5.39386 8.3697L3.34099 8.3862L3.2738 0.0261527L4.36062 0.0174182Z" fill="black"/>
@@ -1381,7 +1399,7 @@
     align-items: center;
     justify-content: space-between;
     gap: 10px;
-    transition: width 0.6s cubic-bezier(.625,.05,0,1);;
+    transition: width 0.6s cubic-bezier(.625,.05,0,1);
     position: relative;
     transform: translateX(-50px); /* Move container 50px to the left */
   }
@@ -1390,6 +1408,100 @@
     color: white;
     white-space: nowrap;
     padding: 0px 0 0 18px;
+    position: relative;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    overflow: hidden;
+  }
+
+  .fc-text-container {
+    position: relative;
+    height: 16px;
+    display: flex;
+    align-items: center;
+  }
+
+  .fc-text-layer {
+    position: absolute;
+    top: 0;
+    left: 0;
+    display: flex;
+    transition: transform 0.3s ease;
+    height: 16px;
+    align-items: center;
+    line-height: 16px;
+  }
+
+  .fc-text-visible {
+    transform: translateY(0);
+    position: relative;
+  }
+
+  .fc-text-hidden {
+    transform: translateY(16px);
+    position: absolute;
+  }
+
+  .fc-letter {
+    display: inline-block;
+    transition: transform 0.3s ease;
+    font-size: 14px;
+    font-weight: 500;
+  }
+
+  /* Hover animations */
+  .fc-shop-all-wrapper:hover .fc-text-visible .fc-letter {
+    animation: letterMoveUp 0.6s cubic-bezier(.625,.05,0,1) forwards;
+  }
+
+  .fc-shop-all-wrapper:hover .fc-text-hidden .fc-letter {
+    animation: letterMoveFromBottom 0.6s cubic-bezier(.625,.05,0,1) forwards;
+  }
+
+  /* Mouse leave animations */
+  .fc-shop-all-wrapper:not(:hover) .fc-text-visible .fc-letter {
+    animation: letterMoveToTop 0.6s cubic-bezier(.625,.05,0,1) forwards;
+  }
+
+  .fc-shop-all-wrapper:not(:hover) .fc-text-hidden .fc-letter {
+    animation: letterMoveDown 0.6s cubic-bezier(.625,.05,0,1) forwards;
+  }
+
+  @keyframes letterMoveUp {
+    0% {
+      transform: translateY(0);
+    }
+    100% {
+      transform: translateY(-36px);
+    }
+  }
+
+  @keyframes letterMoveFromBottom {
+    0% {
+      transform: translateY(26px);
+    }
+    100% {
+      transform: translateY(-16px);
+    }
+  }
+
+  @keyframes letterMoveToTop {
+    0% {
+      transform: translateY(-36px);
+    }
+    100% {
+      transform: translateY(0px);
+    }
+  }
+
+  @keyframes letterMoveDown {
+    0% {
+      transform: translateY(-16px);
+    }
+    100% {
+      transform: translateY(26px);
+    }
   }
 
   .fc-shop-all-inner-right {
@@ -1402,7 +1514,7 @@
     width: 40px;
     border-radius: 20px;
     transform: translateX(40px); /* push it outside visually */
-    transition: all 0.6s cubic-bezier(.625,.05,0,1);;
+    transition: all 0.6s cubic-bezier(.625,.05,0,1);
     position: absolute;
     right: 0;
   }
