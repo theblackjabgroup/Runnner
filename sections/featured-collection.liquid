@@ -57,7 +57,25 @@
         {% endcomment %}
 
         <div class="fc-shop-all-outer">
-          <div class="fc-shop-all-inner-left">{{ section.settings.button_text }}</div>
+          <div class="fc-shop-all-inner-left">
+            <div class="fc-text-container">
+              <div class="fc-text-layer fc-text-visible">
+                {% assign button_letters = section.settings.button_text | split: '' %}
+                {% for letter in button_letters %}
+                  <span class="fc-letter" style="--letter-delay: {{ forloop.index0 | times: 0.01 }}s;">
+                    {{- letter -}}
+                  </span>
+                {% endfor %}
+              </div>
+              <div class="fc-text-layer fc-text-hidden">
+                {% for letter in button_letters %}
+                  <span class="fc-letter" style="--letter-delay: {{ forloop.index0 | times: 0.01 }}s;">
+                    {{- letter -}}
+                  </span>
+                {% endfor %}
+              </div>
+            </div>
+          </div>
           <div class="fc-shop-all-inner-right">
             <svg width="8" height="9" viewBox="0 0 8 9" fill="none" xmlns="http://www.w3.org/2000/svg">
               <path d="M4.36062 0.0174182L4.42262 7.73255L4.62388 7.73093L6.42475 4.74248L7.60549 4.73299L5.39386 8.3697L3.34099 8.3862L3.2738 0.0261527L4.36062 0.0174182Z" fill="black"/>
@@ -516,7 +534,7 @@
     }
 
     .fc-shop-all-wrapper{
-      height: 30px;
+      height: 40px;
       width: 120px;
     }
 
@@ -1373,7 +1391,7 @@
     }
 
   .fc-shop-all-outer {
-    width: 110px;
+    width: 100px;
     height: 40px;
     background-color: black;
     border-radius: 20px;
@@ -1381,7 +1399,7 @@
     align-items: center;
     justify-content: space-between;
     gap: 10px;
-    transition: width 0.6s cubic-bezier(.625,.05,0,1);;
+    transition: width 0.6s cubic-bezier(.625,.05,0,1);
     position: relative;
     transform: translateX(-50px); /* Move container 50px to the left */
   }
@@ -1390,6 +1408,65 @@
     color: white;
     white-space: nowrap;
     padding: 0px 0 0 18px;
+    position: relative;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    overflow: hidden;
+  }
+
+  .fc-text-container {
+    position: relative;
+    height: 16px;
+    display: flex;
+    align-items: center;
+    overflow: hidden;
+  }
+
+  .fc-text-layer {
+    position: absolute;
+    top: 0;
+    left: 0;
+    display: flex;
+    height: 16px;
+    align-items: center;
+    line-height: 16px;
+  }
+
+  .fc-text-visible {
+    position: relative;
+    z-index: 2;
+  }
+
+  .fc-text-hidden {
+    position: absolute;
+    z-index: 1;
+  }
+
+  .fc-letter {
+    display: inline-block;
+    font-size: 14px;
+    font-weight: 500;
+    transition: transform 0.6s cubic-bezier(.625,.05,0,1);
+    transition-delay: var(--letter-delay, 0s);
+  }
+
+  /* Initial state - only visible text shows */
+  .fc-text-visible .fc-letter {
+    transform: translateY(0);
+  }
+
+  .fc-text-hidden .fc-letter {
+    transform: translateY(20px);
+  }
+
+  /* Hover animations */
+  .fc-shop-all-wrapper:hover .fc-text-visible .fc-letter {
+    transform: translateY(-20px);
+  }
+
+  .fc-shop-all-wrapper:hover .fc-text-hidden .fc-letter {
+    transform: translateY(0);
   }
 
   .fc-shop-all-inner-right {
@@ -1402,22 +1479,22 @@
     width: 40px;
     border-radius: 20px;
     transform: translateX(40px); /* push it outside visually */
-    transition: all 0.6s cubic-bezier(.625,.05,0,1);;
+    transition: all 0.6s cubic-bezier(.625,.05,0,1);
     position: absolute;
     right: 0;
   }
 
   .fc-shop-all-inner-right svg{
-    height: 25px;
-    width: 25px;
+    height: 15px;
+    width: 15px;
   }
 
   /* Hover */
-  .fc-shop-all-outer:hover {
-    width: 130px; /* expand outer */
+  .fc-shop-all-wrapper:hover .fc-shop-all-outer {
+    width: 120px; /* expand outer */
   }
 
-  .fc-shop-all-outer:hover .fc-shop-all-inner-right {
+  .fc-shop-all-wrapper:hover .fc-shop-all-outer .fc-shop-all-inner-right {
     transform: translateX(-3px); /* slide it inside */
     width: 34px;
     height: 34px;
