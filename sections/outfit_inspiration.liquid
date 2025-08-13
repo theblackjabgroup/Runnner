@@ -2,7 +2,7 @@
   <div class="outfit-navigation-arrows desktop-arrows ">
     <button
       class="outfit-navigation z-1 bg-color:var(--background) transition-opacity duration-300"
-      id="outfit-slider-prev"
+      id="outfit-slider-prev-{{ section.id }}"
       aria-label="Previous"
       type="button"
       style="display: flex;"
@@ -72,7 +72,7 @@
           <!-- Paired Products Slider -->
           <div class="outfit-paired relative overflow-hidden" style="width: 390px; min-width: 390px; height: 580px;">
             <div class="flex flex-col justify-center overflow-hidden h-full">
-              <div class="transition-transform duration-300 ease-in-out w-full h-full" id="outfit-slider-track">
+              <div class="transition-transform duration-300 ease-in-out w-full h-full" id="outfit-slider-track-{{ section.id }}">
                 {% for block in section.blocks %}
                   {% assign product_count = 0 %}
                   {% for i in (1..3) %}
@@ -86,6 +86,7 @@
                     class="paired-product-slide flex flex-col h-full {% if product_count < 3 %}justify-center{% else %}justify-start{% endif %} gap-4"
                     data-slide-index="{{ forloop.index0 }}"
                     data-products="{{ product_count }}"
+                    data-section-id="{{ section.id }}"
                   >
                     {% for i in (1..3) %}
                       {% assign product_key = 'product_' | append: i %}
@@ -98,6 +99,7 @@
                           style="height: 180px; color: var(--header_text);"
                           data-product-id="{{ paired_product.id }}"
                           data-product-url="{{ paired_product.url }}"
+                          data-section-id="{{ section.id }}"
                         >
                           <div class=" paired-product-img w-[140px] h-[150px] flex items-center justify-center overflow-hidden flex-shrink-0">
                             {% if paired_product.featured_image %}
@@ -147,9 +149,10 @@
                                 {% endif %}
                               </div>
                               <button
-                                class="expand-product-btn flex-shrink-0 p-0 transition-transform duration-300 hover:scale-110"
+                                class="outfit-expand-product-btn-{{ section.id }} flex-shrink-0 p-0 transition-transform duration-300 hover:scale-110"
                                 aria-label="View Product"
                                 data-product-id="{{ paired_product.id }}"
+                                data-section-id="{{ section.id }}"
                               >
                                 <svg
                                   stroke-linecap="round"
@@ -167,6 +170,7 @@
                         <div
                           class="expanded-product-card border-2 transition-all duration-500 ease-in-out overflow-hidden opacity-0 pointer-events-none"
                           data-product-id="{{ paired_product.id }}"
+                          data-section-id="{{ section.id }}"
                           style="color: var(--header_text);"
                         >
                           <div class="expanded-content p-6 h-full">
@@ -195,9 +199,10 @@
                                     {{ paired_product.title }}
                                   </h4>
                                   <button
-                                    class="outfit-arrow close-expanded-btn transition-transform duration-300 hover:scale-110 ml-4"
+                                    class="outfit-arrow outfit-close-expanded-btn-{{ section.id }} transition-transform duration-300 hover:scale-110 ml-4"
                                     aria-label="Close"
                                     data-product-id="{{ paired_product.id }}"
+                                    data-section-id="{{ section.id }}"
                                   >
                                     <svg
                                       stroke-linecap="round"
@@ -246,13 +251,14 @@
                                           {% endif %}
                                         {% endfor %}
                                         <button
-                                          class="outfit-size-option border-2 flex items-center justify-center transition-colors duration-300 {% if variant_for_size.available %}bg-white hover:bg-black hover:text-white{% else %}bg-gray-200 text-gray-400 cursor-not-allowed{% endif %}{% if forloop.first %} selected{% endif %}"
+                                          class="outfit-size-option-{{ section.id }} border-2 flex items-center justify-center transition-colors duration-300 {% if variant_for_size.available %}bg-white hover:bg-black hover:text-white{% else %}bg-gray-200 text-gray-400 cursor-not-allowed{% endif %}{% if forloop.first %} selected{% endif %}"
                                           {% unless variant_for_size.available %}
                                             disabled
                                           {% endunless %}
                                           data-variant-id="{{ variant_for_size.id }}"
                                           data-product-id="{{ paired_product.id }}"
                                           data-option-value="{{ value | escape }}"
+                                          data-section-id="{{ section.id }}"
                                           type="button"
                                         >
                                           {{ value }}
@@ -284,12 +290,13 @@
                                           {% endif %}
                                         {% endfor %}
                                         <button
-                                          class="color-swatch  rounded-full border-2 {% if forloop.first %}selected{% endif %}"
+                                          class="outfit-color-swatch-{{ section.id }} rounded-full border-2 {% if forloop.first %}selected{% endif %}"
                                           title="{{ value }}"
                                           style="background-color:{{ variant_for_color.metafields.custom.color | default: value | downcase }}; width: 18px; height: 18px;"
                                           data-variant-id="{{ variant_for_color.id }}"
                                           data-product-id="{{ paired_product.id }}"
                                           data-option-value="{{ value | escape }}"
+                                          data-section-id="{{ section.id }}"
                                           type="button"
                                         ></button>
                                       {% endfor %}
@@ -300,7 +307,7 @@
                                 </div>
 
                                 <div class="mt-auto">
-                                  <form method="post" action="/cart/add" class="w-full">
+                                  <form method="post" action="/cart/add" class="w-full outfit-form-{{ section.id }}">
                                     <input
                                       type="hidden"
                                       name="id"
@@ -309,11 +316,12 @@
                                     <input type="hidden" name="quantity" value="1">
                                     <button
                                       type="submit"
-                                      class="outfit-add-to-cart-btn border-2 w-full py-4 px-6 mb-3 relative {% unless paired_product.available %}sold-out-btn{% endunless %}"
+                                      class="outfit-add-to-cart-btn-{{ section.id }} border-2 w-full py-4 px-6 mb-3 relative {% unless paired_product.available %}sold-out-btn{% endunless %}"
                                       {% unless paired_product.available %}
                                         disabled
                                       {% endunless %}
                                       data-product-id="{{ paired_product.id }}"
+                                      data-section-id="{{ section.id }}"
                                     >
                                       <span class="btn-text ">
                                         {% if paired_product.available %}ADD TO CART{% else %}SOLD OUT{% endif %}
@@ -362,7 +370,7 @@
       <div class="outfit-navigation-arrows mobile-arrows">
         <button
           class="outfit-navigation-mobile flex items-center justify-center bg-color:var(--background) transition-opacity duration-300"
-          id="outfit-slider-prev-mobile"
+          id="outfit-slider-prev-mobile-{{ section.id }}"
           aria-label="Previous"
           type="button"
         >
@@ -378,7 +386,7 @@
         </button>
         <button
           class="outfit-navigation-mobile flex items-center justify-center bg-color:var(--background) transition-opacity duration-300"
-          id="outfit-slider-next-mobile"
+          id="outfit-slider-next-mobile-{{ section.id }}"
           aria-label="Next"
           type="button"
         >
@@ -399,7 +407,7 @@
   <div class="outfit-navigation-arrows desktop-arrows ">
     <button
       class="outfit-navigation flex items-center justify-center z-1 bg-color:var(--background)  transition-opacity duration-300"
-      id="outfit-slider-next"
+      id="outfit-slider-next-{{ section.id }}"
       aria-label="Next"
       type="button"
       style="display: flex;"
@@ -449,7 +457,7 @@
     padding: 6px;
     border-radius: 8px;
   }
-  .outfit-add-to-cart-btn {
+  .outfit-add-to-cart-btn-{{ section.id }} {
     cursor: pointer;
     height: 37px;
     border-radius: {{ settings.buttons_radius }}px;
@@ -458,11 +466,11 @@
     justify-content: center;
     text-align: center;
   }
-    .outfit-add-to-cart-btn:hover {
+    .outfit-add-to-cart-btn-{{ section.id }}:hover {
       background: black;
       color: white;
     }
-  .expand-product-btn {
+  .outfit-expand-product-btn-{{ section.id }} {
     height: 15px;
     width: 15px;
     cursor: pointer;
@@ -486,18 +494,29 @@
     top: 63%;
     right: 14px;
   }
-  .outfit-size-option.selected {
+  .outfit-size-option-{{ section.id }}.selected {
     background: #000 !important;
     color: #fff !important;
     border: none !important;
   }
-  .outfit-size-option {
+  .outfit-size-option-{{ section.id }} {
     transition: background 0.2s, color 0.2s;
     height: 26px;
     width: 38px;
     border-radius: 4px;
     font-size: 16px;
     font-weight: 500;
+  }
+  .outfit-color-swatch-{{ section.id }} {
+    transition: all 0.2s ease;
+    cursor: pointer;
+  }
+  .outfit-color-swatch-{{ section.id }}.selected {
+    border: 2px solid {{ section.settings.border_color | default: '#000' }} !important;
+    box-shadow: 0 0 0 2px white, 0 0 0 4px {{ section.settings.border_color | default: '#000' }} !important;
+  }
+  .outfit-color-swatch-{{ section.id }}:hover {
+    transform: scale(1.1);
   }
   .main-product-card, .paired-product-card {
     border-radius: {{ section.settings.buttons_radius | default: 8 }}px ;
@@ -624,12 +643,12 @@
     .outfit-expanded-title {
       word-break: break-word;
     }
-    .expand-product-btn,
+    .outfit-expand-product-btn-{{ section.id }},
     .outfit-arrow {
       height: 10px !important;
       width: 10px !important;
     }
-    .expand-product-btn{
+    .outfit-expand-product-btn-{{ section.id }}{
         position: absolute;
     bottom: 5px;
     right: 5px;}
@@ -734,20 +753,26 @@
   .main-product-card,
   .paired-product-card,
   .expanded-product-card,
-  .outfit-add-to-cart-btn,
-  .outfit-size_option,
-  .color-swatch {
+  .outfit-add-to-cart-btn-{{ section.id }},
+  .outfit-size-option-{{ section.id }},
+  .outfit-color-swatch-{{ section.id }} {
     border-color: {{ section.settings.border_color | default: '#000' }} !important;
   }
 </style>
-
 <script>
+(function() {
+  'use strict';
+  
+  // Create namespaced scope for this section
+  const sectionId = '{{ section.id }}';
+  const sectionScope = `outfit-section-${sectionId}`;
+  
   document.addEventListener('DOMContentLoaded', function () {
-    const track = document.getElementById('outfit-slider-track');
-    const prev = document.getElementById('outfit-slider-prev');
-    const next = document.getElementById('outfit-slider-next');
-    const prevMobile = document.getElementById('outfit-slider-prev-mobile');
-    const nextMobile = document.getElementById('outfit-slider-next-mobile');
+    const track = document.getElementById(`outfit-slider-track-${sectionId}`);
+    const prev = document.getElementById(`outfit-slider-prev-${sectionId}`);
+    const next = document.getElementById(`outfit-slider-next-${sectionId}`);
+    const prevMobile = document.getElementById(`outfit-slider-prev-mobile-${sectionId}`);
+    const nextMobile = document.getElementById(`outfit-slider-next-mobile-${sectionId}`);
     const slides = track ? Array.from(track.getElementsByClassName('paired-product-slide')) : [];
     let currentSlide = 0;
     let expandedProductId = null;
@@ -800,11 +825,11 @@
 
     function expandProduct(productId) {
       const currentSlideElement = slides[currentSlide];
-      const compactCard = currentSlideElement.querySelector(`[data-product-id="${productId}"].paired-product-card`);
-      const expandedCard = currentSlideElement.querySelector(`[data-product-id="${productId}"].expanded-product-card`);
+      const compactCard = currentSlideElement.querySelector(`[data-product-id="${productId}"][data-section-id="${sectionId}"].paired-product-card`);
+      const expandedCard = currentSlideElement.querySelector(`[data-product-id="${productId}"][data-section-id="${sectionId}"].expanded-product-card`);
 
       if (compactCard && expandedCard) {
-        currentSlideElement.querySelectorAll('.paired-product-card').forEach((card) => {
+        currentSlideElement.querySelectorAll(`[data-section-id="${sectionId}"].paired-product-card`).forEach((card) => {
           card.classList.add('hidden-for-expand');
         });
         expandedCard.classList.add('active');
@@ -816,12 +841,12 @@
 
     function collapseProduct(productId) {
       const currentSlideElement = slides[currentSlide];
-      const expandedCard = currentSlideElement.querySelector(`[data-product-id="${productId}"].expanded-product-card`);
+      const expandedCard = currentSlideElement.querySelector(`[data-product-id="${productId}"][data-section-id="${sectionId}"].expanded-product-card`);
 
       if (expandedCard) {
         expandedCard.classList.remove('active');
 
-        currentSlideElement.querySelectorAll('.paired-product-card').forEach((card) => {
+        currentSlideElement.querySelectorAll(`[data-section-id="${sectionId}"].paired-product-card`).forEach((card) => {
           card.classList.remove('hidden-for-expand');
         });
 
@@ -833,10 +858,18 @@
     if (slides.length > 0) {
       showSlide(0);
       updateArrows();
+      
+      // Section-specific event delegation
       document.addEventListener('click', function (e) {
-        if (e.target.closest('.expand-product-btn')) {
+        // Check if click is within this section
+        const targetSection = e.target.closest('[data-section-id]');
+        if (!targetSection || targetSection.getAttribute('data-section-id') !== sectionId) {
+          return;
+        }
+
+        if (e.target.closest(`.outfit-expand-product-btn-${sectionId}`)) {
           e.preventDefault();
-          const btn = e.target.closest('.expand-product-btn');
+          const btn = e.target.closest(`.outfit-expand-product-btn-${sectionId}`);
           const productId = btn.getAttribute('data-product-id');
 
           if (window.innerWidth <= 767) {
@@ -851,9 +884,9 @@
           expandProduct(productId);
         }
 
-        if (e.target.closest('.close-expanded-btn')) {
+        if (e.target.closest(`.outfit-close-expanded-btn-${sectionId}`)) {
           e.preventDefault();
-          const btn = e.target.closest('.close-expanded-btn');
+          const btn = e.target.closest(`.outfit-close-expanded-btn-${sectionId}`);
           const productId = btn.getAttribute('data-product-id');
           collapseProduct(productId);
         }
@@ -897,36 +930,44 @@
       if (nextMobile) nextMobile.style.display = 'none';
     }
 
-    console.log('Total slides found:', slides.length);
+    console.log(`Outfit section ${sectionId} - Total slides found:`, slides.length);
   });
 
+  // Handle size and color option selections - section specific
   document.addEventListener('click', function (e) {
-    if (e.target.classList.contains('outfit-size-option') && !e.target.disabled) {
+    // Check if click is within this section
+    const targetSection = e.target.closest('[data-section-id]');
+    if (!targetSection || targetSection.getAttribute('data-section-id') !== sectionId) {
+      return;
+    }
+
+    if (e.target.classList.contains(`outfit-size-option-${sectionId}`) && !e.target.disabled) {
       const selectedBtn = e.target;
-      const expandedCard = selectedBtn.closest('.expanded-product-card');
+      const expandedCard = selectedBtn.closest(`[data-section-id="${sectionId}"].expanded-product-card`);
 
       if (expandedCard) {
-        expandedCard.querySelectorAll('.outfit-size-option').forEach((option) => {
+        expandedCard.querySelectorAll(`.outfit-size-option-${sectionId}`).forEach((option) => {
           option.classList.remove('selected');
         });
         selectedBtn.classList.add('selected');
-        const form = expandedCard.querySelector('form');
+        const form = expandedCard.querySelector(`.outfit-form-${sectionId}`);
         if (form) {
           const variantId = selectedBtn.getAttribute('data-variant-id');
           form.querySelector('input[name="id"]').value = variantId;
         }
       }
     }
-    if (e.target.classList.contains('color-swatch') && !e.target.disabled) {
+    
+    if (e.target.classList.contains(`outfit-color-swatch-${sectionId}`) && !e.target.disabled) {
       const selectedSwatch = e.target;
-      const expandedCard = selectedSwatch.closest('.expanded-product-card');
+      const expandedCard = selectedSwatch.closest(`[data-section-id="${sectionId}"].expanded-product-card`);
 
       if (expandedCard) {
-        expandedCard.querySelectorAll('.color-swatch').forEach((swatch) => {
+        expandedCard.querySelectorAll(`.outfit-color-swatch-${sectionId}`).forEach((swatch) => {
           swatch.classList.remove('selected');
         });
         selectedSwatch.classList.add('selected');
-        const form = expandedCard.querySelector('form');
+        const form = expandedCard.querySelector(`.outfit-form-${sectionId}`);
         if (form) {
           const variantId = selectedSwatch.getAttribute('data-variant-id');
           form.querySelector('input[name="id"]').value = variantId;
@@ -934,54 +975,158 @@
       }
     }
   });
+
+  // Handle add to cart - section specific
   document.addEventListener('click', function (e) {
-    if (!e.target.closest('.outfit-add-to-cart-btn')) return;
+    if (!e.target.closest(`.outfit-add-to-cart-btn-${sectionId}`)) return;
+    
+    // Check if click is within this section
+    const targetSection = e.target.closest('[data-section-id]');
+    if (!targetSection || targetSection.getAttribute('data-section-id') !== sectionId) {
+      return;
+    }
 
     e.preventDefault();
-    const form = e.target.closest('form');
-    const button = form.querySelector('.outfit-add-to-cart-btn');
+    const form = e.target.closest(`.outfit-form-${sectionId}`);
+    const button = form.querySelector(`.outfit-add-to-cart-btn-${sectionId}`);
     const btnText = button.querySelector('.btn-text');
     const spinner = button.querySelector('.loading-spinner');
 
+    // Show loading state
     button.disabled = true;
     btnText.classList.add('hidden');
     spinner.classList.remove('hidden');
 
-    fetch('/cart/add.js', {
+    // Check if theme has custom cart handling (like Dawn theme)
+    if (typeof window.theme !== 'undefined' && window.theme.cart) {
+      // Use theme's cart methods if available
+      handleThemeCartAdd(form, button, btnText, spinner, sectionId);
+    } else if (typeof CartJS !== 'undefined') {
+      // Use CartJS if available
+      handleCartJSAdd(form, button, btnText, spinner, sectionId);
+    } else {
+      // Fallback to regular form submission (respects theme settings)
+      handleRegularFormSubmission(form, button, btnText, spinner, sectionId);
+    }
+  });
+
+  // Handle theme-specific cart addition
+  function handleThemeCartAdd(form, button, btnText, spinner, sectionId) {
+    const formData = new FormData(form);
+    
+    fetch(window.Shopify.routes.root + 'cart/add.js', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        'X-Requested-With': 'XMLHttpRequest'
       },
       body: JSON.stringify({
-        items: [
-          {
-            id: form.querySelector('input[name="id"]').value,
-            quantity: parseInt(form.querySelector('input[name="quantity"]').value),
-          },
-        ],
-      }),
+        items: [{
+          id: formData.get('id'),
+          quantity: parseInt(formData.get('quantity'))
+        }]
+      })
     })
-      .then((response) => response.json())
-      .then((data) => {
-        if (data.status) {
-          throw new Error(data.description || 'Error adding product to cart');
-        }
+    .then(response => response.json())
+    .then(data => {
+      if (data.status) {
+        throw new Error(data.description || 'Error adding product to cart');
+      }
 
+      // Show success message
+      btnText.textContent = 'ADDED!';
+      setTimeout(() => {
+        btnText.textContent = 'ADD TO CART';
+      }, 2000);
+
+      // Trigger theme's cart update events
+      document.dispatchEvent(new CustomEvent('cart:updated', {
+        detail: { cart: data }
+      }));
+
+      // Try to trigger common theme events
+      if (window.theme && window.theme.cart && window.theme.cart.updateCartCount) {
+        window.theme.cart.updateCartCount();
+      }
+
+      // Trigger drawer opening if theme supports it
+      if (document.querySelector('[data-cart-drawer]')) {
+        document.querySelector('[data-cart-drawer]').classList.add('active');
+      }
+    })
+    .catch(error => {
+      console.error('Error:', error);
+      btnText.textContent = 'NOT AVAILABLE';
+      setTimeout(() => {
+        btnText.textContent = 'ADD TO CART';
+      }, 2000);
+    })
+    .finally(() => {
+      button.disabled = false;
+      btnText.classList.remove('hidden');
+      spinner.classList.add('hidden');
+    });
+  }
+
+  // Handle CartJS addition
+  function handleCartJSAdd(form, button, btnText, spinner, sectionId) {
+    const formData = new FormData(form);
+    
+    CartJS.addItem(formData.get('id'), parseInt(formData.get('quantity')), {}, {
+      success: function(data, textStatus, jqXHR) {
         btnText.textContent = 'ADDED!';
         setTimeout(() => {
           btnText.textContent = 'ADD TO CART';
         }, 2000);
-      })
-      .catch((error) => {
-        console.error('Error:', error);
+      },
+      error: function(jqXHR, textStatus, errorThrown) {
+        console.error('CartJS Error:', errorThrown);
         btnText.textContent = 'NOT AVAILABLE';
-      })
-      .finally(() => {
+        setTimeout(() => {
+          btnText.textContent = 'ADD TO CART';
+        }, 2000);
+      },
+      complete: function() {
         button.disabled = false;
         btnText.classList.remove('hidden');
         spinner.classList.add('hidden');
-      });
-  });
+      }
+    });
+  }
+
+  // Handle regular form submission 
+  function handleRegularFormSubmission(form, button, btnText, spinner, sectionId) {
+    // Create a temporary form for submission
+    const tempForm = form.cloneNode(true);
+    tempForm.style.display = 'none';
+    tempForm.action = '/cart/add';
+    tempForm.method = 'POST';
+    
+    // Remove the custom event handlers from the temp form
+    const tempButton = tempForm.querySelector(`.outfit-add-to-cart-btn-${sectionId}`);
+    if (tempButton) {
+      tempButton.type = 'submit';
+      tempButton.onclick = null;
+    }
+
+    document.body.appendChild(tempForm);
+    
+    btnText.textContent = 'ADDING...';
+    
+    // Submit the form 
+    setTimeout(() => {
+      tempForm.submit();
+    }, 500);
+
+    // Clean up
+    setTimeout(() => {
+      if (document.body.contains(tempForm)) {
+        document.body.removeChild(tempForm);
+      }
+    }, 1000);
+  }
+
+})();
 </script>
 
 {% schema %}
