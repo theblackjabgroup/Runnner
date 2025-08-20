@@ -144,7 +144,7 @@
                       onclick="toggleArrow(this)"
                     >
                       <div class="flex items-center">
-                        <span class="facets__summary-label mr-5 uppercase !text-[1.6rem]">
+                        <span class="facets__summary-label  uppercase !text-[1.6rem] !font-[500]">
                           {{- filter.label | escape }}
                           {%- if filter_type == 'vertical' -%}
                             <span class="facets__selected{% if filter.active_values.size == 0 %} hidden{% endif %}">
@@ -157,17 +157,7 @@
                             {{ 'products.facets.filter_and_operator_subtitle' | t }}
                           </span>
                         {%- endif -%}
-                        <svg
-                          class="svg-arrow-down"
-                          stroke-linecap="round"
-                          width="15"
-                          height="15"
-                          viewBox="0 0 35 35"
-                          fill="none"
-                          xmlns="http://www.w3.org/2000/svg"
-                        >
-                          <path d="M3.16406 30.9824H30.9305M30.9305 30.9824V3.21602M30.9305 30.9824L3.16406 3.21602" stroke="black" stroke-width="6.38611" stroke-linejoin="round"/>
-                        </svg>
+                        <span class="pmorph__icon" aria-hidden="true"></span>
                       </div>
                     </summary>
                     <div
@@ -298,21 +288,13 @@
                   >
                     <summary
                       class="facets__summary caption-large focus-offset"
-                      onclick="this.closest('details').querySelector('.svg-arrow-down').classList.toggle('rotated')"
+                      onclick="this.closest('details').querySelector('.pmorph__icon').classList.toggle('expanded')"
                     >
                       <div class="flex items-center">
-                        <span class="mr-3 uppercase !text-[1.6rem]">{{ filter.label | escape }}</span>
-                        <svg
-                          class="svg-arrow-down"
-                          stroke-linecap="round"
-                          width="15"
-                          height="15"
-                          viewBox="0 0 35 35"
-                          fill="none"
-                          xmlns="http://www.w3.org/2000/svg"
-                        >
-                          <path d="M3.16406 30.9824H30.9305M30.9305 30.9824V3.21602M30.9305 30.9824L3.16406 3.21602" stroke="black" stroke-width="6.38611" stroke-linejoin="round"/>
-                        </svg>
+                        <span class="facets__summary-label uppercase !text-[1.6rem] !font-[500]">
+                          {{- filter.label | escape -}}
+                        </span>
+                        <span class="pmorph__icon" aria-hidden="true"></span>
                       </div>
                     </summary>
                     <div
@@ -343,21 +325,11 @@
               >
                 <summary
                   class="facets__summary caption-large focus-offset -translate-y-[10px] !p-0"
-                  onclick="this.closest('details').querySelector('.svg-arrow-down').classList.toggle('rotated')"
+                  onclick="this.closest('details').querySelector('.pmorph__icon').classList.toggle('expanded')"
                 >
                   <div class="flex items-center">
-                    <span class="uppercase !text-[16px] w-[75px]">Sort By</span>
-                    <svg
-                      class="svg-arrow-down"
-                      stroke-linecap="round"
-                      width="15"
-                      height="15"
-                      viewBox="0 0 35 35"
-                      fill="none"
-                      xmlns="http://www.w3.org/2000/svg"
-                    >
-                      <path d="M3.16406 30.9824H30.9305M30.9305 30.9824V3.21602M30.9305 30.9824L3.16406 3.21602" stroke="black" stroke-width="6.38611" stroke-linejoin="round"/>
-                    </svg>
+                    <span class="uppercase !text-[16px] w-[75px] !font-[500] ">Sort By</span>
+                    <span class="pmorph__icon" aria-hidden="true"></span>
                   </div>
                 </summary>
                 <div
@@ -435,18 +407,7 @@
                     <details class="mobile-filter-section">
                       <summary class="mobile-filter-summary">
                         <span class="uppercase text-lg font-medium">{{ filter.label | escape }}</span>
-
-                        <svg
-                          class="mobile-filter-arrow"
-                          stroke-linecap="round"
-                          width="15"
-                          height="15"
-                          viewBox="0 0 35 35"
-                          fill="none"
-                          xmlns="http://www.w3.org/2000/svg"
-                        >
-                          <path d="M3.16406 30.9824H30.9305M30.9305 30.9824V3.21602M30.9305 30.9824L3.16406 3.21602" stroke="black" stroke-width="6.38611" stroke-linejoin="round"/>
-                        </svg>
+                        <span class="pmorph__icon mobile-pmorph__icon" aria-hidden="true"></span>
                       </summary>
 
                       <div class="mobile-filter-options">
@@ -491,17 +452,7 @@
                     <details class="mobile-filter-section">
                       <summary class="mobile-filter-summary">
                         <span class="uppercase text-lg font-medium">{{ filter.label | escape }}</span>
-                        <svg
-                          class="mobile-filter-arrow"
-                          stroke-linecap="round"
-                          width="15"
-                          height="15"
-                          viewBox="0 0 35 35"
-                          fill="none"
-                          xmlns="http://www.w3.org/2000/svg"
-                        >
-                          <path d="M3.16406 30.9824H30.9305M30.9305 30.9824V3.21602M30.9305 30.9824L3.16406 3.21602" stroke="black" stroke-width="6.38611" stroke-linejoin="round"/>
-                        </svg>
+                        <span class="pmorph__icon mobile-pmorph__icon" aria-hidden="true"></span>
                       </summary>
 
                       <div class="mobile-filter-options">
@@ -597,28 +548,27 @@
     allDropdowns.forEach((dropdown) => {
       if (dropdown !== currentDropdown && dropdown.hasAttribute('open')) {
         dropdown.removeAttribute('open');
-        // Reset arrow rotation
-        const arrow = dropdown.querySelector('svg');
-        if (arrow) {
-          arrow.style.transform = '';
+        // Reset icon animation
+        const icon = dropdown.querySelector('.pmorph__icon');
+        if (icon) {
+          icon.classList.remove('expanded');
         }
       }
     });
   }
 
-  // Add event listeners to all filter summaries
-  // Function to toggle arrow rotation
+  // Function to toggle icon animation
   function toggleArrow(summaryElement) {
-    const arrow = summaryElement.querySelector('.svg-arrow-down');
-    if (arrow) {
+    const icon = summaryElement.querySelector('.pmorph__icon');
+    if (icon) {
       // Small delay to check if details is opening or closing
       setTimeout(() => {
         const parentDetails = summaryElement.closest('details');
         if (parentDetails.hasAttribute('open')) {
-          arrow.classList.add('rotated');
+          icon.classList.add('expanded');
           closeOtherDropdowns(parentDetails);
         } else {
-          arrow.classList.remove('rotated');
+          icon.classList.remove('expanded');
         }
       }, 10);
     }
@@ -632,13 +582,28 @@
         const allDropdowns = document.querySelectorAll('.facets__disclosure[open], .disclosure-has-popup[open]');
         allDropdowns.forEach((dropdown) => {
           dropdown.removeAttribute('open');
-          // Reset arrow rotation
-          const arrow = dropdown.querySelector('svg');
-          if (arrow) {
-            arrow.style.transform = '';
+          // Reset icon animation
+          const icon = dropdown.querySelector('.pmorph__icon');
+          if (icon) {
+            icon.classList.remove('expanded');
           }
         });
       }
+    });
+
+    // Handle mobile filter icons
+    document.querySelectorAll('.mobile-filter-summary').forEach((summary) => {
+      summary.addEventListener('click', () => {
+        const icon = summary.querySelector('.pmorph__icon');
+        const details = summary.closest('details');
+        setTimeout(() => {
+          if (details.hasAttribute('open')) {
+            icon.classList.add('expanded');
+          } else {
+            icon.classList.remove('expanded');
+          }
+        }, 10);
+      });
     });
   });
 
@@ -685,6 +650,77 @@
 </script>
 
 <style>
+  /* Plus/Minus Morphing Icon Styles */
+  :root {
+    --dur: 220ms;
+    --ease-open: cubic-bezier(0.33, 0, 0.13, 1);
+    --ease-close: cubic-bezier(0.22, 0.61, 0.36, 1);
+    --fg: #111;
+    --size: 15px;
+    --thickness: 2px;
+  }
+
+  .pmorph__icon {
+    position: relative;
+    width: var(--size);
+    height: var(--size);
+    flex-shrink: 0;
+    margin-left: 6px;
+    font-weight: 500; /* Make icon font weight 500 */
+  }
+
+  /* horizontal bar (always visible) */
+  .pmorph__icon::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 0;
+    width: 100%;
+    height: var(--thickness);
+    background: currentColor;
+    border-radius: 2px;
+    transform: translateY(-50%);
+  }
+
+  /* vertical bar (morphs away) */
+  .pmorph__icon::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 0;
+    width: 100%;
+    height: var(--thickness);
+    background: currentColor;
+    border-radius: 2px;
+    transform: translateY(-50%) rotate(90deg) scale(1);
+    transform-origin: center;
+    opacity: 1;
+    transition: transform var(--dur) var(--ease-open), opacity var(--dur) var(--ease-open);
+  }
+
+  /* expanded: hide vertical bar smoothly */
+  .pmorph__icon.expanded::after {
+    opacity: 0;
+    transform: translateY(-50%) rotate(90deg) scale(0.5);
+    transition: transform var(--dur) var(--ease-open), opacity var(--dur) var(--ease-open);
+  }
+
+  /* collapsed: show vertical bar again with crisper ease */
+  details:not([open]) .pmorph__icon::after {
+    opacity: 1;
+    transform: translateY(-50%) rotate(90deg) scale(1);
+    transition: transform var(--dur) var(--ease-close), opacity var(--dur) var(--ease-close);
+  }
+
+  /* Mobile version */
+  .mobile-pmorph__icon {
+    width: 15px;
+    height: 15px;
+  }
+
+  .facets__summary-label {
+    margin-right: 6px !important;
+  }
   .filters-tabs {
     font-size: 12px;
   }
