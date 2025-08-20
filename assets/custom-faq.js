@@ -20,7 +20,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
     if (!container || !svg || !button) return;
 
-    svg.classList.add("arrow-svg1");
+    svg.classList.remove("arrow-svg1");
+    svg.classList.add("plus-minus-icon");
 
     let fullAnswerText = container.getAttribute('data-full-answer') || '';
 
@@ -76,6 +77,8 @@ document.addEventListener("DOMContentLoaded", () => {
           const wasExpanded = otherContainer.dataset.expanded === "true";
 
           if (wasExpanded) {
+            otherItem.classList.remove("expanded");
+            
             otherContainer.dataset.expanded = "false";
             otherWrapper.setAttribute("data-expanded", "false");
             const otherButton = otherItem.querySelector(".faq-row");
@@ -101,6 +104,12 @@ document.addEventListener("DOMContentLoaded", () => {
       currentContainer.dataset.expanded = newState.toString();
       currentWrapper.setAttribute("data-expanded", newState.toString());
       newButton.setAttribute("aria-expanded", newState.toString());
+
+      if (newState) {
+        currentItem.classList.add("expanded");
+      } else {
+        currentItem.classList.remove("expanded");
+      }
 
       if (newState) {
         currentPreviewSpan.innerHTML = currentContainer.dataset.fullHTML;
