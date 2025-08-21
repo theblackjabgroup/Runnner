@@ -10,8 +10,32 @@
       "type": "text",
       "id": "marquee_text",
       "label": "Marquee Text",
-      "default": "SUBSCRIBE FOR EMAILS→",
+      "default": "SUBSCRIBE FOR EMAILS",
       "info": "Enter the text that will scroll across the screen"
+    },
+    {
+      "type": "image_picker",
+      "id": "marquee_icon",
+      "label": "Upload Icon (SVG or Image)",
+      "info": "Upload an SVG or image from media"
+    },
+    {
+      "type": "range",
+      "id": "icon_width",
+      "label": "Icon Width (px)",
+      "min": 10,
+      "max": 200,
+      "step": 5,
+      "default": 20
+    },
+    {
+      "type": "range",
+      "id": "icon_height",
+      "label": "Icon Height (px)",
+      "min": 10,
+      "max": 200,
+      "step": 5,
+      "default": 20
     },
     {
       "type": "color_scheme",
@@ -46,20 +70,34 @@
 }
 {% endschema %}
 
-
 {%- liquid
-  assign marquee_text = section.settings.marquee_text | strip | default: 'SUBSCRIBE FOR EMAILS→'
+  assign marquee_text = section.settings.marquee_text | strip | default: 'SUBSCRIBE FOR EMAILS'
+  assign marquee_icon = section.settings.marquee_icon
+  assign icon_width = section.settings.icon_width | default: 20
+  assign icon_height = section.settings.icon_height | default: 20
   assign scroll_speed = section.settings.scroll_speed | default: 230
   assign color_scheme = section.settings.color_scheme | default: 'scheme-1'
   assign pause_on_hover = section.settings.pause_on_hover | default: false
-  
-  # Sanitize and validate scroll speed
+
   if scroll_speed < 10
     assign scroll_speed = 10
   elsif scroll_speed > 300
     assign scroll_speed = 300
   endif
 -%}
+
+{% capture icon_output %}
+  {% if marquee_icon != blank %}
+    <img 
+      src="{{ marquee_icon | image_url: width: icon_width }}" 
+      alt="Marquee icon" 
+      height="{{ icon_height }}"
+      width="{{ icon_width }}"
+      style="height: {{ icon_height }}px; width: {{ icon_width }}px;"
+      class="inline-block ml-1"
+    />
+  {% endif %}
+{% endcapture %}
 
 <section 
   class="marquee-wrapper w-full overflow-hidden color-{{ color_scheme }} border-t border-black" 
@@ -75,7 +113,10 @@
          role="text" 
          aria-label="{{ marquee_text | escape }}">
       {%- for i in (1..10) -%}
-        <span class="px-1.5" aria-hidden="true">{{ marquee_text }}</span>
+        <span class="px-1.5 flex items-center" aria-hidden="true">
+          {{ marquee_text }}
+          {{ icon_output }}
+        </span>
       {%- endfor -%}
     </div>
     
@@ -84,7 +125,10 @@
          role="text" 
          aria-hidden="true">
       {%- for i in (1..10) -%}
-        <span class="px-1.5">{{ marquee_text }}</span>
+        <span class="px-1.5 flex items-center">
+          {{ marquee_text }}
+          {{ icon_output }}
+        </span>
       {%- endfor -%}
     </div>
     
@@ -92,7 +136,6 @@
 </section>
 
 <style>
-  
   .marquee-wrapper {
     padding: 0.5rem 0; 
     display: flex;
@@ -155,10 +198,8 @@
     const marqueeContainers = document.querySelectorAll('.marquee-container');
     
     marqueeContainers.forEach(function(container) {
-      // Ensure animation starts smoothly
       container.style.animationDelay = '0s';
       
-      // Add focus management for accessibility
       container.addEventListener('focus', function() {
         if (this.hasAttribute('data-pause-on-hover')) {
           this.style.animationPlayState = 'paused';
