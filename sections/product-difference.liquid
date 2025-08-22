@@ -3,7 +3,6 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    height: 100vh;
     width: 100vw;
     overflow: hidden;
   }
@@ -11,13 +10,11 @@
   .prod-diff-container {
     position: relative;
     width: 70vw;
-    height: 100%;
   }
 
   .prod-diff-wrapper {
     position: absolute;
     top: 0;
-    height: 100%;
     overflow: hidden;
   }
 
@@ -37,73 +34,65 @@
 
   .prod-diff-img {
     position: absolute;
-    /* top: -20%; */
     left: 0;
     width: 70vw;
     height: auto;
     object-fit: cover;
     max-width: none;
+    display: block;
   }
 
   .prod-diff-slider-container {
     position: absolute;
     width: 100%;
-    height: 100%;
-    z-index: 10;
+    top: 0;
+    /* z-index: 10; */
   }
 
   .prod-diff-slider-divider {
     position: absolute;
     top: 0;
     bottom: 0;
-    width: 15px;
-    background-color: transparent;
+    width: 4px;
     left: 50%;
     transform: translateX(-50%);
-    z-index: 15;
-    cursor: ew-resize;
+    /* z-index: 15; */
+    opacity: 1;
   }
 
   .prod-diff-slider-handle {
     position: absolute;
-    height: 40px;
-    width: 40px;
-    background-color: white;
-    border-radius: 50%;
+    height: 50px;
+    width: 92px;
+    background-color: black;
+    border: 2px solid white;
+    border-radius: 25px;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    cursor: ew-resize;
-    box-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
-    display: flex;
-    justify-content: center;
+    cursor: grab;
+    display: flex !important;
+    justify-content: space-between;
     align-items: center;
+    /* z-index: 10; */
+    opacity: 1;
+    pointer-events: auto;
+    padding: 0 7px;
   }
 
-  .prod-diff-slider-handle::before,
-  .prod-diff-slider-handle::after {
-    content: '';
-    position: absolute;
-    height: 12px;
-    width: 2px;
-    background-color: #555;
-  }
-
-  .prod-diff-slider-handle::before {
-    transform: translateX(-4px);
-  }
-
-  .prod-diff-slider-handle::after {
-    transform: translateX(4px);
+  .prod-diff-slider-handle svg {
+    width: 27px;
+    height: 27px;
+    fill: white;
   }
 
   .prod-diff-wrapper.prod-diff-left .prod-diff-img {
     left: 0;
   }
 
-  /* This will be dynamically set by JavaScript */
+  /* This will be dynamically set by JavaScript using percentages */
   .prod-diff-wrapper.prod-diff-right .prod-diff-img {
-    left: -35vw;
+    left: -50%;
   }
 </style>
 
@@ -111,12 +100,48 @@
   {% if section.settings.color_scheme %}
     {% assign section_classes_fc = section_classes_fc | append: ' color-' | append: section.settings.color_scheme %}
   {% endif %}
-  <section class="prod-diff-section">
-    <div class="prod-diff-container">
-      <div class="prod-diff-wrapper prod-diff-left">
-        {% assign left_product = all_products[section.settings.left_product] %}
+
+  {% comment %} Calculate the maximum height from both product images {% endcomment %}
+  {% assign left_product = all_products[section.settings.left_product] %}
+  {% assign right_product = all_products[section.settings.right_product] %}
+
+  {% assign max_aspect_ratio = 0 %}
+
+  {% if left_product and left_product.featured_image %}
+    {% assign left_aspect_ratio = left_product.featured_image.aspect_ratio %}
+    {% if left_aspect_ratio < max_aspect_ratio or max_aspect_ratio == 0 %}
+      {% assign max_aspect_ratio = left_aspect_ratio %}
+    {% endif %}
+  {% endif %}
+
+  {% if right_product and right_product.featured_image %}
+    {% assign right_aspect_ratio = right_product.featured_image.aspect_ratio %}
+    {% if right_aspect_ratio < max_aspect_ratio or max_aspect_ratio == 0 %}
+      {% assign max_aspect_ratio = right_aspect_ratio %}
+    {% endif %}
+  {% endif %}
+
+  {% comment %} Convert aspect ratio to CSS calc for responsive height {% endcomment %}
+  {% if max_aspect_ratio > 0 %}
+    {% assign height_vw = 70.0 | divided_by: max_aspect_ratio %}
+  {% else %}
+    {% assign height_vw = 50 %}
+  {% endif %}
+
+  <section class="prod-diff-section" style="height: {{ height_vw }}vw;">
+    <div class="prod-diff-container" style="height: {{ height_vw }}vw;">
+      <div class="prod-diff-wrapper prod-diff-left" style="height: {{ height_vw }}vw;">
         {% if left_product and left_product.featured_image %}
           <img
+            srcset="
+              {% if left_product.featured_image.width >= 375 %}{{ left_product.featured_image | image_url: width: 375 }} 375w,{% endif %}
+              {% if left_product.featured_image.width >= 550 %}{{ left_product.featured_image | image_url: width: 550 }} 550w,{% endif %}
+              {% if left_product.featured_image.width >= 750 %}{{ left_product.featured_image | image_url: width: 750 }} 750w,{% endif %}
+              {% if left_product.featured_image.width >= 1100 %}{{ left_product.featured_image | image_url: width: 1100 }} 1100w,{% endif %}
+              {% if left_product.featured_image.width >= 1500 %}{{ left_product.featured_image | image_url: width: 1500 }} 1500w,{% endif %}
+              {% if left_product.featured_image.width >= 2200 %}{{ left_product.featured_image | image_url: width: 2200 }} 2200w,{% endif %}
+              {{ left_product.featured_image | image_url }} {{ left_product.featured_image.width }}w
+            "
             src="{{ left_product.featured_image | image_url: width: 1200 }}"
             alt="{{ left_product.title | escape }}"
             class="prod-diff-img"
@@ -131,10 +156,18 @@
         {% endif %}
       </div>
 
-      <div class="prod-diff-wrapper prod-diff-right">
-        {% assign right_product = all_products[section.settings.right_product] %}
+      <div class="prod-diff-wrapper prod-diff-right" style="height: {{ height_vw }}vw;">
         {% if right_product and right_product.featured_image %}
           <img
+            srcset="
+              {% if right_product.featured_image.width >= 375 %}{{ right_product.featured_image | image_url: width: 375 }} 375w,{% endif %}
+              {% if right_product.featured_image.width >= 550 %}{{ right_product.featured_image | image_url: width: 550 }} 550w,{% endif %}
+              {% if right_product.featured_image.width >= 750 %}{{ right_product.featured_image | image_url: width: 750 }} 750w,{% endif %}
+              {% if right_product.featured_image.width >= 1100 %}{{ right_product.featured_image | image_url: width: 1100 }} 1100w,{% endif %}
+              {% if right_product.featured_image.width >= 1500 %}{{ right_product.featured_image | image_url: width: 1500 }} 1500w,{% endif %}
+              {% if right_product.featured_image.width >= 2200 %}{{ right_product.featured_image | image_url: width: 2200 }} 2200w,{% endif %}
+              {{ right_product.featured_image | image_url }} {{ right_product.featured_image.width }}w
+            "
             src="{{ right_product.featured_image | image_url: width: 1200 }}"
             alt="{{ right_product.title | escape }}"
             class="prod-diff-img"
@@ -149,9 +182,17 @@
         {% endif %}
       </div>
 
-      <div class="prod-diff-slider-container">
+      <div class="prod-diff-slider-container" style="height: {{ height_vw }}vw;">
         <div class="prod-diff-slider-divider">
-          <div class="prod-diff-slider-handle"></div>
+          <div class="prod-diff-slider-handle">
+            <svg width="25" height="31" viewBox="0 0 25 31" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M15.4727 1.85254L1.62745 15.6977M1.62745 15.6977L15.4727 29.543M1.62745 15.6977L24.4498 15.6977" stroke="white" stroke-width="3" stroke-linejoin="round"/>
+            </svg>
+
+            <svg width="25" height="31" viewBox="0 0 25 31" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M9.58594 1.85254L23.4311 15.6977M23.4311 15.6977L9.58594 29.543M23.4311 15.6977L0.608765 15.6977" stroke="white" stroke-width="3" stroke-linejoin="round"/>
+            </svg>
+          </div>
         </div>
       </div>
     </div>
@@ -176,6 +217,13 @@
       }
     }
 
+    function updateImagePositions() {
+      const containerWidth = container.offsetWidth;
+      const leftWidth = leftContainer.offsetWidth;
+      const rightImgLeftPosition = -leftWidth;
+      rightImg.style.left = rightImgLeftPosition + 'px';
+    }
+
     function onDrag(e) {
       if (!isDragging) return;
       if (e.cancelable) e.preventDefault();
@@ -186,7 +234,7 @@
       sliderDivider.style.left = percent + '%';
       leftContainer.style.width = percent + '%';
       rightContainer.style.width = 100 - percent + '%';
-      rightImg.style.left = `-${leftContainer.offsetWidth}px`;
+      updateImagePositions();
     }
 
     function stopDrag() {
@@ -215,6 +263,14 @@
         window.addEventListener('touchcancel', stopDrag);
       });
     });
+
+    // Handle window resize to update positions
+    window.addEventListener('resize', function () {
+      updateImagePositions();
+    });
+
+    // Initialize positions
+    updateImagePositions();
   });
 </script>
 

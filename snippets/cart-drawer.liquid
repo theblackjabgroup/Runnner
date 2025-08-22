@@ -12,196 +12,199 @@
 <script src="{{ 'quantity-popover.js' | asset_url }}" defer="defer"></script>
 
 <style>
-    .drawer__close{
-        transform: translateY(-6px);
-    }
-    .cart-drawer .cart-item > td + td{
-        padding-left:0 !important;
-    }
-    .drawer {
-      visibility: hidden;
-    }
-    .drawer__close{
-      right:-20px !important;
-    }
-    .svg-wrapper {
-      font-weight: 600;
-  font-size:20px}
+      .empty-cart-number{
+      margin-top:20px;
+  }
+      .drawer__close{
+          transform: translateY(-6px);
+      }
+      .cart-drawer .cart-item > td + td{
+          padding-left:0 !important;
+      }
+      .drawer {
+        visibility: hidden;
+      }
+      .drawer__close{
+        right:-20px !important;
+      }
+      .svg-wrapper {
+        font-weight: 600;
+    font-size:20px}
 
-    @media only screen and (max-width: 600px) {
+      @media only screen and (max-width: 600px) {
+        .vertical-text-cart-drawer-container {
+          width: 25px !important;
+        }
+        .vertical-text-cart-drawer {
+          font-size: 15px !important;
+          padding: 0px 0 !important;
+        }
+      }
       .vertical-text-cart-drawer-container {
-        width: 25px !important;
+        position: fixed;
+        left: 0px;
+        top: 0;
+        bottom: 0;
+        line-height: 1.2;
+        width: 30px;
+        overflow: hidden;
+        display: flex;
+        align-items: center;
+        border: 1px solid black;
       }
+
       .vertical-text-cart-drawer {
-        font-size: 15px !important;
-        padding: 0px 0 !important;
+        position: absolute;
+        writing-mode: vertical-rl;
+        text-orientation: mixed;
+        transform: rotate(180deg);
+        animation: scrollText {{ settings.scroll_speed }}s linear infinite !important;
+        color: black !important;
+        font-size: 24px;
+        white-space: nowrap;
+        font-weight:500;
       }
-    }
-    .vertical-text-cart-drawer-container {
-      position: fixed;
-      left: 0px;
-      top: 0;
-      bottom: 0;
-      line-height: 1.2;
-      width: 30px;
-      overflow: hidden;
-      display: flex;
-      align-items: center;
-      border: 1px solid black;
-    }
 
-    .vertical-text-cart-drawer {
-      position: absolute;
-      writing-mode: vertical-rl;
-      text-orientation: mixed;
-      transform: rotate(180deg);
-      animation: scrollText {{ settings.scroll_speed }}s linear infinite !important;
-      color: black !important;
-      font-size: 24px;
-      white-space: nowrap;
-      font-weight:500;
-    }
+      .vertical-text-cart-drawer:nth-child(2) {
+        animation: scrollText2 {{ settings.scroll_speed }}s linear infinite !important;
+      }
 
-    .vertical-text-cart-drawer:nth-child(2) {
-      animation: scrollText2 {{ settings.scroll_speed }}s linear infinite !important;
-    }
-
-    .vertical-text-cart-drawer .separator-image {
-      width: 20px;
-      height: 20px;
-      object-fit: contain;
-      margin: 0 5px;
-      display: inline-block;
-      vertical-align: middle;
-    }
-
-    @media only screen and (max-width: 600px) {
       .vertical-text-cart-drawer .separator-image {
+        width: 20px;
+        height: 20px;
+        object-fit: contain;
+        margin: 0 5px;
+        display: inline-block;
+        vertical-align: middle;
+      }
+
+      @media only screen and (max-width: 600px) {
+        .vertical-text-cart-drawer .separator-image {
+          width: 15px;
+          height: 15px;
+        }
+      }
+
+      @keyframes scrollText {
+        0% {
+          transform: translateY(0) rotate(180deg);
+        }
+        100% {
+          transform: translateY(-100%) rotate(180deg);
+        }
+      }
+
+      @keyframes scrollText2 {
+        0% {
+          transform: translateY(100%) rotate(180deg);
+        }
+        100% {
+          transform: translateY(0) rotate(180deg);
+        }
+      }
+
+      /* Hide the default radio */
+      .pricing-option [type='radio'] {
+        -webkit-appearance: none;
+        background-color: #fff;
+        border: 2px solid #111;
         width: 15px;
         height: 15px;
+        border-radius: 50%;
+        position: relative;
+        outline: none;
+        cursor: pointer;
+        margin-right: 10px;
+        transition: border-color 0.2s;
+        vertical-align: middle;
+        box-sizing: border-box;
       }
-    }
 
-    @keyframes scrollText {
-      0% {
-        transform: translateY(0) rotate(180deg);
+      /* Only show the black dot when checked */
+      .pricing-option input[type='radio']:checked::before {
+        content: '';
+        display: block;
+        width: 9px;
+        height: 9px;
+        background: #111;
+        border-radius: 50%;
+        position: absolute;
+        top: 0.19rem; /* Center the dot vertically */
+        left: 0.147rem;
       }
-      100% {
-        transform: translateY(-100%) rotate(180deg);
+
+      /* Optional: focus state */
+      .pricing-option input[type='radio']:focus {
+        box-shadow: 0 0 0 2px #1112;
       }
-    }
 
-    @keyframes scrollText2 {
-      0% {
-        transform: translateY(100%) rotate(180deg);
+      /* Quantity button hover effects */
+      .quantity__button:hover {
+        background-color: #f5f5f5 !important;
       }
-      100% {
-        transform: translateY(0) rotate(180deg);
+
+      /* Checkout button hover effects */
+      #CartDrawer-Checkout {
+        position: relative;
+        overflow: hidden;
+        transition: background-color 0.3s ease, color 0.3s ease, border 0.3s ease;
+        border: 2px solid black;
+        background-color: black !important;
+        color: white !important;
+        height:35px !important;
+        min-width: 270px !important;
       }
-    }
 
-    /* Hide the default radio */
-    .pricing-option [type='radio'] {
-      -webkit-appearance: none;
-      background-color: #fff;
-      border: 2px solid #111;
-      width: 15px;
-      height: 15px;
-      border-radius: 50%;
-      position: relative;
-      outline: none;
-      cursor: pointer;
-      margin-right: 10px;
-      transition: border-color 0.2s;
-      vertical-align: middle;
-      box-sizing: border-box;
-    }
+      #CartDrawer-Checkout:hover {
+        background-color: white !important;
+        color: black !important;
+        border: 2px solid black !important;
+      }
 
-    /* Only show the black dot when checked */
-    .pricing-option input[type='radio']:checked::before {
-      content: '';
-      display: block;
-      width: 9px;
-      height: 9px;
-      background: #111;
-      border-radius: 50%;
-      position: absolute;
-      top: 0.19rem; /* Center the dot vertically */
-      left: 0.147rem;
-    }
+      #CartDrawer-Checkout:hover svg path {
+        stroke: black !important;
+      }
+      .button{
+      min-height:unset !important}
 
-    /* Optional: focus state */
-    .pricing-option input[type='radio']:focus {
-      box-shadow: 0 0 0 2px #1112;
-    }
+      .checkout-button-text-container {
+        position: relative;
+        width: 100%;
+        overflow: hidden;
+        display: flex;
+        align-items: center;
+      }
 
-    /* Quantity button hover effects */
-    .quantity__button:hover {
-      background-color: #f5f5f5 !important;
-    }
-
-    /* Checkout button hover effects */
-    #CartDrawer-Checkout {
-      position: relative;
-      overflow: hidden;
-      transition: background-color 0.3s ease, color 0.3s ease, border 0.3s ease;
-      border: 2px solid black;
-      background-color: black !important;
-      color: white !important;
-      height:35px !important;
-      min-width: 270px !important;
-    }
-
-    #CartDrawer-Checkout:hover {
-      background-color: white !important;
-      color: black !important;
-      border: 2px solid black !important;
-    }
-
-    #CartDrawer-Checkout:hover svg path {
-      stroke: black !important;
-    }
-    .button{
-    min-height:unset !important}
-
-    .checkout-button-text-container {
-      position: relative;
-      width: 100%;
-      overflow: hidden;
-      display: flex;
-      align-items: center;
-    }
-
-    .checkout-button-text {
-      display: flex;
-      align-items: center;
-      transition: transform 0.3s ease;
-      width:230px;
-      justify-content: space-between;
-    }
+      .checkout-button-text {
+        display: flex;
+        align-items: center;
+        transition: transform 0.3s ease;
+        width:230px;
+        justify-content: space-between;
+      }
 
 
-    #CartDrawer-Checkout:hover .checkout-button-text {
-      transform: translateX(-100%);
-    }
+      #CartDrawer-Checkout:hover .checkout-button-text {
+        transform: translateX(-100%);
+      }
 
-    .checkout-button-text-hover {
-              width:230px;
+      .checkout-button-text-hover {
+                width:230px;
 
-      position: absolute;
-      top: 0;
-      left: 0;
-      display: flex;
-      align-items: center;
-            justify-content: space-between;
+        position: absolute;
+        top: 0;
+        left: 0;
+        display: flex;
+        align-items: center;
+              justify-content: space-between;
 
-      transform: translateX(100%);
-      transition: transform 0.3s ease;
-    }
+        transform: translateX(100%);
+        transition: transform 0.3s ease;
+      }
 
-    #CartDrawer-Checkout:hover .checkout-button-text-hover {
-      transform: translateX(0);
-    }
+      #CartDrawer-Checkout:hover .checkout-button-text-hover {
+        transform: translateX(0);
+      }
 </style>
 
 <cart-drawer class="drawer {% if cart == empty %} is-empty{% endif %}">
@@ -257,6 +260,9 @@
 
       {%- if cart == empty -%}
         <div class="drawer__inner-empty">
+          <h2 class="empty-cart-number uppercase !text-[16px] !font-medium !mb-0">
+            {{ 'sections.cart.title' | t }} ({{ cart.item_count }})
+          </h2>
           <div class="cart-drawer__warnings center{% if settings.cart_drawer_collection != blank %} cart-drawer__warnings--has-collection{% endif %}">
             <div class="cart-drawer__empty-content">
               <h2 class="cart__empty-text ">{{ 'sections.cart.empty' | t }}</h2>

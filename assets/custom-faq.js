@@ -112,4 +112,3 @@ document.addEventListener("DOMContentLoaded", () => {
     newButton.setAttribute("aria-expanded", "false");
   });
 });
-

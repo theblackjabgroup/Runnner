@@ -1,10 +1,26 @@
 {{ 'component-card.css' | asset_url | stylesheet_tag }}
 {{ 'section-collection-list.css' | asset_url | stylesheet_tag }}
 
-<div class="!p-0 py-16">
-  <h1 class="title title--primary inline-richtext mb-12 {% if settings.animations_reveal_on_scroll %} scroll-trigger animate--fade-in{% endif %}">
-    &nbsp;{{ section.settings.title }}
-  </h1>
+<div
+  class="!p-0 py-16"
+  style="background: {{ section.settings.bg_color }};"
+>
+  <div class="breadcrumb " style="border-bottom: 2px solid #bbb; padding-bottom: 0.5rem;">
+    <span
+      class="px-[10px] py-[10px]"
+      style="font-size: 15px; font-weight: 500; letter-spacing: 0.01em; color: {{ section.settings.text_color }};"
+    >
+      SHOP / {{ section.settings.title | upcase }}
+    </span>
+  </div>
+  {%- comment -%}
+    <h1
+      class="title title--primary inline-richtext mb-12 {% if settings.animations_reveal_on_scroll %} scroll-trigger animate--fade-in{% endif %}"
+      style="color: {{ section.settings.text_color }};"
+    >
+      &nbsp;{{ section.settings.title }}
+    </h1>
+  {%- endcomment -%}
 
   <ul class="collection-list flex flex-wrap " role="list">
     {%- for block in section.blocks -%}
@@ -15,61 +31,133 @@
         {% endif %}
         {{ block.shopify_attributes }}
       >
-        {% if block.settings.media_display_type == 'video' %}
-          {% if block.settings.video_url != blank or block.settings.video != blank %}
-            {% if block.settings.video_url contains 'youtube.com' or block.settings.video_url contains 'youtu.be' %}
-              {% if block.settings.video_url contains 'watch?v=' %}
-                {% assign video_id = block.settings.video_url | split: 'watch?v=' | last | split: '&' | first %}
-              {% elsif block.settings.video_url contains 'youtu.be/' %}
-                {% assign video_id = block.settings.video_url | split: 'youtu.be/' | last %}
+        {% if block.type == 'media' %}
+          {% if block.settings.media_display_type == 'video' %}
+            {% if block.settings.video_url != blank or block.settings.video != blank %}
+              {% if block.settings.video_url contains 'youtube.com' or block.settings.video_url contains 'youtu.be' %}
+                {% if block.settings.video_url contains 'watch?v=' %}
+                  {% assign video_id = block.settings.video_url | split: 'watch?v=' | last | split: '&' | first %}
+                {% elsif block.settings.video_url contains 'youtu.be/' %}
+                  {% assign video_id = block.settings.video_url | split: 'youtu.be/' | last %}
+                {% endif %}
+                <div class="video-container relative w-full h-full">
+                  <iframe
+                    data-src="https://www.youtube.com/embed/{{ video_id }}?autoplay=1&mute=1&loop=1&playlist={{ video_id }}&controls=0"
+                    class="absolute inset-0 w-full h-full lazy-iframe"
+                    frameborder="0"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowfullscreen
+                  ></iframe>
+                  <div class="lazy-loader"></div>
+                </div>
+              {% elsif block.settings.video != blank %}
+                <div class="video-container relative aspect-video w-full">
+                  {{
+                    block.settings.video
+                    | video_tag: autoplay: true, loop: true, muted: true, controls: true, class: 'w-full h-full '
+                  }}
+                </div>
               {% endif %}
-              <div class="video-container relative w-full h-full">
-                <iframe
-                  data-src="https://www.youtube.com/embed/{{ video_id }}?autoplay=1&mute=1&loop=1&playlist={{ video_id }}&controls=0"
-                  class="absolute inset-0 w-full h-full lazy-iframe"
-                  frameborder="0"
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                  allowfullscreen
-                ></iframe>
+            {% elsif block.settings.image != blank %}
+              <div class="image-container relative aspect-video w-full">
+                <img
+                  data-srcset="
+                    {%- if block.settings.image.width >= 165 -%}{{ block.settings.image | image_url: width: 165 }} 165w,{%- endif -%}
+                    {%- if block.settings.image.width >= 360 -%}{{ block.settings.image | image_url: width: 360 }} 360w,{%- endif -%}
+                    {%- if block.settings.image.width >= 535 -%}{{ block.settings.image | image_url: width: 535 }} 535w,{%- endif -%}
+                    {%- if block.settings.image.width >= 750 -%}{{ block.settings.image | image_url: width: 750 }} 750w,{%- endif -%}
+                  "
+                  data-src="{{ block.settings.image | image_url: width: 750 }}"
+                  src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1 1'%3E%3C/svg%3E"
+                  class="w-full  lazy-image"
+                  loading="lazy"
+                  width="100"
+                  height="100"
+                  data-sizes="
+                    (min-width: 990px) {% if block.settings.span_two_columns %}66vw{% else %}33vw{% endif %},
+                    (min-width: 750px) {% if block.settings.span_two_columns %}50vw{% else %}33vw{% endif %},
+                    100vw
+                  "
+                  alt="{{ block.settings.image.alt | escape }}"
+                >
                 <div class="lazy-loader"></div>
               </div>
-            {% elsif block.settings.video != blank %}
-              <div class="video-container relative aspect-video w-full">
-                {{
-                  block.settings.video
-                  | video_tag:
-                    autoplay: true,
-                    loop: true,
-                    muted: true,
-                    controls: true,
-                    class: 'w-full h-full object-cover'
-                }}
+            {% else %}
+              <!-- Media block with no content - show placeholder image only -->
+              <div class="image-container relative aspect-video w-full">
+                <img
+                  src="{{ 'defaultproduct.svg' | asset_url }}"
+                  alt="Default Product"
+                  class="w-full h-full default-product-img {% if block.settings.span_two_columns %}{% else %}{% endif %}"
+                  loading="lazy"
+                  width="100"
+                  height="100"
+                >
               </div>
             {% endif %}
-          {% elsif block.settings.image != blank %}
-            <div class="image-container relative aspect-video w-full">
-              <img
-                data-srcset="
-                  {%- if block.settings.image.width >= 165 -%}{{ block.settings.image | image_url: width: 165 }} 165w,{%- endif -%}
-                  {%- if block.settings.image.width >= 360 -%}{{ block.settings.image | image_url: width: 360 }} 360w,{%- endif -%}
-                  {%- if block.settings.image.width >= 535 -%}{{ block.settings.image | image_url: width: 535 }} 535w,{%- endif -%}
-                  {%- if block.settings.image.width >= 750 -%}{{ block.settings.image | image_url: width: 750 }} 750w,{%- endif -%}
-                "
-                data-src="{{ block.settings.image | image_url: width: 750 }}"
-                src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1 1'%3E%3C/svg%3E"
-                class="w-full object-cover lazy-image"
-                loading="lazy"
-                width="100"
-                height="100"
-                data-sizes="
-                  (min-width: 990px) {% if block.settings.span_two_columns %}66vw{% else %}33vw{% endif %},
-                  (min-width: 750px) {% if block.settings.span_two_columns %}50vw{% else %}33vw{% endif %},
-                  100vw
-                "
-                alt="{{ block.settings.image.alt | escape }}"
-              >
-              <div class="lazy-loader"></div>
-            </div>
+          {% else %}
+            {% if block.settings.image != blank %}
+              <div class="image-container relative aspect-video w-full">
+                <img
+                  data-srcset="
+                    {%- if block.settings.image.width >= 165 -%}{{ block.settings.image | image_url: width: 165 }} 165w,{%- endif -%}
+                    {%- if block.settings.image.width >= 360 -%}{{ block.settings.image | image_url: width: 360 }} 360w,{%- endif -%}
+                    {%- if block.settings.image.width >= 535 -%}{{ block.settings.image | image_url: width: 535 }} 535w,{%- endif -%}
+                    {%- if block.settings.image.width >= 750 -%}{{ block.settings.image | image_url: width: 750 }} 750w,{%- endif -%}
+                  "
+                  data-src="{{ block.settings.image | image_url: width: 750 }}"
+                  src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1 1'%3E%3C/svg%3E"
+                  class="w-full  lazy-image"
+                  loading="lazy"
+                  width="100"
+                  height="100"
+                  data-sizes="
+                    (min-width: 990px) {% if block.settings.span_two_columns %}66vw{% else %}33vw{% endif %},
+                    (min-width: 750px) {% if block.settings.span_two_columns %}50vw{% else %}33vw{% endif %},
+                    100vw
+                  "
+                  alt="{{ block.settings.image.alt | escape }}"
+                >
+                <div class="lazy-loader"></div>
+              </div>
+            {% elsif block.settings.video_url != blank or block.settings.video != blank %}
+              {% if block.settings.video_url contains 'youtube.com' or block.settings.video_url contains 'youtu.be' %}
+                {% if block.settings.video_url contains 'watch?v=' %}
+                  {% assign video_id = block.settings.video_url | split: 'watch?v=' | last | split: '&' | first %}
+                {% elsif block.settings.video_url contains 'youtu.be/' %}
+                  {% assign video_id = block.settings.video_url | split: 'youtu.be/' | last %}
+                {% endif %}
+                <div class="video-container relative w-full h-full">
+                  <iframe
+                    data-src="https://www.youtube.com/embed/{{ video_id }}?autoplay=1&mute=1&loop=1&playlist={{ video_id }}&controls=0"
+                    class="absolute inset-0 w-full h-full lazy-iframe"
+                    frameborder="0"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowfullscreen
+                  ></iframe>
+                  <div class="lazy-loader"></div>
+                </div>
+              {% elsif block.settings.video != blank %}
+                <div class="video-container relative aspect-video w-full">
+                  {{
+                    block.settings.video
+                    | video_tag: autoplay: true, loop: true, muted: true, controls: true, class: 'w-full h-full '
+                  }}
+                </div>
+              {% endif %}
+            {% else %}
+              <!-- Media block with no content - show placeholder image only -->
+              <div class="image-container relative aspect-video w-full">
+                <img
+                  src="{{ 'defaultproduct.svg' | asset_url }}"
+                  alt="Default Product"
+                  class="w-full h-full default-product-img {% if block.settings.span_two_columns %}{% else %}{% endif %}"
+                  loading="lazy"
+                  width="100"
+                  height="100"
+                >
+              </div>
+            {% endif %}
           {% endif %}
         {% else %}
           {% if block.settings.image != blank %}
@@ -83,7 +171,7 @@
                 "
                 data-src="{{ block.settings.image | image_url: width: 750 }}"
                 src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1 1'%3E%3C/svg%3E"
-                class="w-full object-cover lazy-image"
+                class="w-full  lazy-image"
                 loading="lazy"
                 width="100"
                 height="100"
@@ -117,50 +205,72 @@
               <div class="video-container relative aspect-video w-full">
                 {{
                   block.settings.video
-                  | video_tag:
-                    autoplay: true,
-                    loop: true,
-                    muted: true,
-                    controls: true,
-                    class: 'w-full h-full object-cover'
+                  | video_tag: autoplay: true, loop: true, muted: true, controls: true, class: 'w-full h-full '
                 }}
               </div>
             {% endif %}
           {% else %}
-            {% if block.settings.collection != blank %}
-              {% render 'card-collection',
-                card_collection: block.settings.collection,
-                media_aspect_ratio: section.settings.image_ratio,
-                columns: section.settings.columns_desktop
-              %}
-            {% else %}
-              <div>
-                <div class="relative w-full bg-gray-100 flex flex-col items-center justify-center">
+            {%- if block.settings.collection != blank -%}
+              {% assign collection = block.settings.collection %}
+              <a
+                href="{{ collection.url }}"
+                class="block h-full w-full group"
+                style="text-decoration:none;color:inherit;display:block;"
+              >
+                <div class="card-collection__content flex flex-col justify-end h-full">
+                  <div class="card-collection__media flex-1 relative">
+                    {% if collection.featured_image %}
+                      <img
+                        src="{{ collection.featured_image | image_url: width: 600 }}"
+                        alt="{{ collection.title | escape }}"
+                        class="w-full  {% if block.settings.span_two_columns %}{% else %}{% endif %}"
+                        loading="lazy"
+                        width="100"
+                        height="100"
+                      >
+                    {% else %}
+                      <img
+                        src="{{ 'defaultproduct.svg' | asset_url }}"
+                        alt="Default Product"
+                        class="w-full h-full default-product-img {% if block.settings.span_two_columns %}{% else %}{% endif %}"
+                        loading="lazy"
+                        width="100"
+                        height="100"
+                      >
+                    {% endif %}
+                  </div>
+                  <div class="card-collection__heading p-2">
+                    <div class="collection-title-custom" style="color: {{ section.settings.text_color }};">
+                      {{ collection.title | upcase }}
+                    </div>
+                    <div class="collection-count-custom" style="color: {{ section.settings.text_color }};">
+                      number of products {{ collection.products_count }}
+                    </div>
+                  </div>
+                </div>
+              </a>
+            {%- else -%}
+              <div class="card-collection__content flex flex-col justify-end h-full">
+                <div class="card-collection__media flex-1 relative">
                   <img
                     src="{{ 'defaultproduct.svg' | asset_url }}"
                     alt="Default Product"
-                    class="default-product-img"
-                    width="430px"
-                    height="430px"
+                    class="w-full h-full default-product-img {% if block.settings.span_two_columns %}{% else %}{% endif %}"
+                    loading="lazy"
+                    width="100"
+                    height="100"
                   >
                 </div>
-                {% if block.type == 'collection' %}
-                  <span class="collection-hover-target text-gray-400 mt-20 w-full text-center text-5xl absolute bottom-0 bg-white flex items-center justify-between gap-2">
-                    Collection
-                    <svg
-                      class="collection-hover-arrow"
-                      width="23"
-                      height="23"
-                      viewBox="0 0 9 9"
-                      fill="none"
-                      xmlns="http://www.w3.org/2000/svg"
-                    >
-                      <path d="M1.1875 7.7334H7.6599M7.6599 7.7334V1.261M7.6599 7.7334L1.1875 1.261" stroke="black" stroke-linejoin="round"/>
-                    </svg>
-                  </span>
-                {% endif %}
+                <div class="card-collection__heading p-2">
+                  <div class="collection-title-custom" style="color: {{ section.settings.text_color }};">
+                    Collection Name
+                  </div>
+                  <div class="collection-count-custom" style="color: {{ section.settings.text_color }};">
+                    number of products 0
+                  </div>
+                </div>
               </div>
-            {% endif %}
+            {%- endif -%}
           {% endif %}
         {% endif %}
       </li>
@@ -169,18 +279,27 @@
 </div>
 
 <style>
+  .breadcrumb{
+    margin:10px 0 20px 0;
+  }
   .collection-list {
     width: 100%;
     margin: 0 auto;
     display: grid;
-    grid-template-columns: repeat({{ section.settings.columns_desktop }}, 1fr);
+    grid-template-columns: repeat(3, 1fr); /* Default: 3 columns */
     gap:40px 6px;
     padding: 0 1rem;
     margin-bottom: 5rem;
   }
 
   .collection-list__item {
-    height: 410px;
+    height: 540px;
+    max-width: 100%;
+    overflow: hidden;
+    position: relative;
+  }
+  .collection-list__item .image-container {
+    height: 540px;
     max-width: 100%;
     overflow: hidden;
     position: relative;
@@ -188,7 +307,7 @@
 
   .collection-list__item[data-span-two="true"] {
     grid-column: span 2;
-    height:410px;
+    height:540px;
   }
 
   .collection-list__item[data-span-two="true"] .video-container,
@@ -199,23 +318,36 @@
   .collection-list__item[data-span-two="true"] .image-container img {
     height: 100%;
     width: 100%;
-    object-fit: cover;
   }
 
   .collection-list__item[data-span-two="true"] .video-container video,
   .collection-list__item[data-span-two="true"] .video-container iframe {
     height: 100%;
     width: 100%;
-    object-fit: cover;
   }
 
-  .collection-list__item:not([data-span-two="true"]) .video-container,
   .collection-list__item:not([data-span-two="true"]) .image-container {
-    height: calc(100% - 80px);
+    height: 540px;
+  }
+  .collection-list__item:not([data-span-two="true"]) .video-container {
+    height: 540px;
+    min-height: 540px;
+    max-height: 540px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #000;
+  }
+  .collection-list__item:not([data-span-two="true"]) .video-container video {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover !important;
+    display: block;
+    background: #000;
   }
 
   .card-collection {
-    height: calc(100% - 80px);
+    height: 340px;
   }
 
   .collection-list__item[data-span-two="true"] .card-collection {
@@ -231,56 +363,47 @@
   .card-collection__media {
     flex: 1;
     position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+  }
+  .card-collection__media img {
+    object-fit: cover !important;
+    max-width: 100%;
+    max-height: 100%;
+    width: 100%;
+    height: 100%;
+    display: block;
   }
 
   .card-collection__media img[data-span-two="true"] {
     height: 100%;
-    object-fit: cover;
   }
 
   .card-collection__heading {
     margin-top: auto;
+    text-align: left;
+    padding-left: 2px;
+    padding-bottom: 2px;
   }
 
-  @media screen and (max-width: 749px) {
-    .collection-list {
-      grid-template-columns: repeat({{ section.settings.columns_mobile }}, 1fr);
-      gap: 10px;
-    }
-    .collection-list__item {
-      height: 182px;
-    }
-    .collection-list__item:not([data-span-two="true"]) .video-container,
-    .collection-list__item:not([data-span-two="true"]) .image-container {
-      height: calc(100% - 40px);
-    }
-    .collection-list__item span{
-      font-size: 12px;
-    }
-    .collection-list__item svg{
-      height: 10px;
-    }
-    .card__heading a{
-      font-size: 12px;
-    }
-    .card__heading svg{
-      height: 10px;
-    }
-    .collection-list__item[data-span-two="true"] {
-      grid-column: span {{ section.settings.columns_mobile }};
-      height: 240px;
-    }
-    .collection-list__item[data-span-two="true"] .image-container img {
-      height: 100%;
-      width: 100%;
-      object-fit: cover;
-    }
-    .collection-list__item[data-span-two="true"] .video-container video,
-    .collection-list__item[data-span-two="true"] .video-container iframe {
-      height: 100%;
-      width: 100%;
-      object-fit: cover;
-    }
+  .collection-title-custom {
+    font-weight: 500;
+    font-size: 13px;
+    text-transform: uppercase;
+    margin-bottom: 0px;
+    line-height: 1.2;
+    padding-top:5px;
+    color: {{ section.settings.text_color }};
+  }
+  .collection-count-custom {
+    font-weight: 400;
+    font-size: 12px;
+    text-transform: lowercase;
+    margin-top: 0px;
+    line-height: 1.2;
+    color: {{ section.settings.text_color }};
   }
 
   .video-container {
@@ -294,7 +417,6 @@
     left: 0;
     width: 100%;
     height: 100%;
-    object-fit: cover;
   }
 
   .default-product-img {
@@ -302,18 +424,6 @@
     max-width: 430px;
     height: auto;
     display: block;
-  }
-
-  @media screen and (max-width: 1300px) {
-    .default-product-img {
-      height: 430px;
-    }
-  }
-  @media screen and (max-width: 749px) {
-    .default-product-img {
-            height: 165px;
-
-    }
   }
 
   .lazy-loader {
@@ -365,7 +475,6 @@
     pointer-events: none;
   }
 
-  /* Hover effect for collection item */
   .collection-list__item:hover .collection-hover-target {
     color: red !important;
   }
@@ -378,6 +487,130 @@
   }
   .collection-list__item:hover .collection-hover-arrow {
     transform: rotate(-90deg);
+  }
+
+  .image-container {
+    position: relative;
+  }
+  .image-container .default-product-img {
+    display: block;
+    margin: auto;
+    max-width: 100%;
+    max-height: 100%;
+  }
+  .image-container:has(.default-product-img) {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+  }
+
+  @layer base {
+    img, video {
+      max-width: 100%;
+      height: 540px;
+    }
+  }
+
+  @media screen and (max-width: 1300px) {
+    .default-product-img {
+      height: 430px;
+    }
+  }
+
+  @media screen and (max-width: 749px) {
+    .collection-list {
+      padding:0 10px !important;
+      grid-template-columns: repeat(2, 1fr);
+      gap:20px 6px;
+    }
+    .collection-list__item {
+      height: 296px !important;
+    }
+    .collection-list__item .image-container {
+      height: 296px !important;
+    }
+    .collection-list__item[data-span-two="true"] {
+      height:296px !important;
+      grid-column: span {{ section.settings.columns_mobile }};
+      height: 240px;
+    }
+    .collection-list__item:not([data-span-two="true"]) .image-container {
+      height: 296px !important;
+    }
+    .collection-list__item:not([data-span-two="true"]) .video-container {
+      height: 296px !important;
+      min-height: 296px !important;
+      max-height: 296px !important;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #000;
+    }
+    .collection-list__item:not([data-span-two="true"]) .video-container video {
+      width: 100% !important;
+      height: 100% !important;
+      object-fit: cover !important;
+      display: block;
+      background: #000;
+    }
+    .collection-list__item span{
+      font-size: 12px;
+    }
+    .collection-list__item svg{
+      height: 10px;
+    }
+    .card__heading a{
+      font-size: 12px;
+    }
+    .card__heading svg{
+      height: 10px;
+    }
+    .collection-list__item[data-span-two="true"] .image-container img {
+      height: 100%;
+      width: 100%;
+    }
+    .collection-list__item[data-span-two="true"] .video-container video,
+    .collection-list__item[data-span-two="true"] .video-container iframe {
+      height: 100%;
+      width: 100%;
+    }
+    .default-product-img {
+      height: 165px;
+    }
+    @layer base {
+      img, video {
+        height: 296px;
+      }
+    }
+  }
+
+  @media screen and (min-width: 1500px) {
+    .collection-list {
+      grid-template-columns: repeat(4, 1fr);
+    }
+    .collection-list__item {
+      height: 491px !important;
+    }
+    .collection-list__item .image-container {
+      height: 491px !important;
+    }
+    .collection-list__item[data-span-two="true"] {
+      height: 491px !important;
+    }
+    .collection-list__item:not([data-span-two="true"]) .image-container {
+      height: 491px !important;
+    }
+    .collection-list__item:not([data-span-two="true"]) .video-container {
+      height: 491px !important;
+      min-height: 491px !important;
+      max-height: 491px !important;
+    }
+    @layer base {
+      img, video {
+        height: 491px !important;
+      }
+    }
   }
 </style>
 
@@ -502,6 +735,18 @@
       ],
       "default": "2",
       "label": "Columns on mobile"
+    },
+    {
+      "type": "color",
+      "id": "bg_color",
+      "label": "Background Color",
+      "default": "#fff"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Text Color",
+      "default": "#222"
     }
   ],
   "blocks": [

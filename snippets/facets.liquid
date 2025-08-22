@@ -141,10 +141,10 @@
                     <summary
                       class="facets__summary caption-large focus-offset !p-0"
                       aria-label="{{ filter.label | escape }} ({{ 'products.facets.filters_selected.one' | t: count: filter.active_values.size }})"
-                      onclick="this.closest('details').querySelector('.svg-arrow-down').classList.toggle('rotated')"
+                      onclick="toggleArrow(this)"
                     >
                       <div class="flex items-center">
-                        <span class="facets__summary-label mr-5 uppercase !text-[1.6rem]">
+                        <span class="facets__summary-label  uppercase !text-[1.6rem] !font-[500]">
                           {{- filter.label | escape }}
                           {%- if filter_type == 'vertical' -%}
                             <span class="facets__selected{% if filter.active_values.size == 0 %} hidden{% endif %}">
@@ -157,9 +157,7 @@
                             {{ 'products.facets.filter_and_operator_subtitle' | t }}
                           </span>
                         {%- endif -%}
-                        <svg stroke-linecap="round" width="15" height="15" viewBox="0 0 35 35" fill="none" xmlns="http://www.w3.org/2000/svg">
-                          <path d="M3.16406 30.9824H30.9305M30.9305 30.9824V3.21602M30.9305 30.9824L3.16406 3.21602" stroke="black" stroke-width="6.38611" stroke-linejoin="round"/>
-                        </svg>
+                        <span class="pmorph__icon" aria-hidden="true"></span>
                       </div>
                     </summary>
                     <div
@@ -290,13 +288,13 @@
                   >
                     <summary
                       class="facets__summary caption-large focus-offset"
-                      onclick="this.closest('details').querySelector('.svg-arrow-down').classList.toggle('rotated')"
+                      onclick="this.closest('details').querySelector('.pmorph__icon').classList.toggle('expanded')"
                     >
                       <div class="flex items-center">
-                        <span class="mr-3 uppercase !text-[1.6rem]">{{ filter.label | escape }}</span>
-                        <svg stroke-linecap="round" width="15" height="15" viewBox="0 0 35 35" fill="none" xmlns="http://www.w3.org/2000/svg">
-                          <path d="M3.16406 30.9824H30.9305M30.9305 30.9824V3.21602M30.9305 30.9824L3.16406 3.21602" stroke="black" stroke-width="6.38611" stroke-linejoin="round"/>
-                        </svg>
+                        <span class="facets__summary-label uppercase !text-[1.6rem] !font-[500]">
+                          {{- filter.label | escape -}}
+                        </span>
+                        <span class="pmorph__icon" aria-hidden="true"></span>
                       </div>
                     </summary>
                     <div
@@ -327,13 +325,11 @@
               >
                 <summary
                   class="facets__summary caption-large focus-offset -translate-y-[10px] !p-0"
-                  onclick="this.closest('details').querySelector('.svg-arrow-down').classList.toggle('rotated')"
+                  onclick="this.closest('details').querySelector('.pmorph__icon').classList.toggle('expanded')"
                 >
                   <div class="flex items-center">
-                    <span class="uppercase !text-[16px] w-[75px]">Sort By</span>
-                    <svg stroke-linecap="round" width="15" height="15" viewBox="0 0 35 35" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <path d="M3.16406 30.9824H30.9305M30.9305 30.9824V3.21602M30.9305 30.9824L3.16406 3.21602" stroke="black" stroke-width="6.38611" stroke-linejoin="round"/>
-                    </svg>
+                    <span class="uppercase !text-[16px] w-[75px] !font-[500] ">Sort By</span>
+                    <span class="pmorph__icon" aria-hidden="true"></span>
                   </div>
                 </summary>
                 <div
@@ -373,247 +369,110 @@
       </form>
     </facet-filters-form>
   {%- endif -%}
-  {% comment %}  Drawer and mobile filter {% endcomment %}
-  <menu-drawer
-    class=" mobile-facets__wrapper{% if filter_type == 'horizontal' or filter_type == 'vertical' %} medium-hide large-up-hide{% endif %}"
-    data-breakpoint="mobile"
+  {% comment %} New Mobile Filter Drawer {% endcomment %}
+  <!-- Mobile Filter Overlay -->
+  <div
+    id="mobile-filter-overlay"
+    class="mobile-filter-overlay{% if filter_type == 'horizontal' or filter_type == 'vertical' %} medium-hide large-up-hide{% endif %}"
   >
-    <details class="mobile-facets__disclosure disclosure-has-popup">
-      <summary class="mobile-facets__open-wrapper focus-offset">
-        <span tabindex="0" class="mobile-facets__close absolute top-4 right-4">
-          <span class="svg-wrapper"> Close </span>
-        </span>
-      </summary>
+    <div class="mobile-filter-drawer">
+      <div class="mobile-filter-header">
+        <h2 class="!text-[30px] uppercase">FILTERS</h2>
+        <div class="mobile-filter-apply">
+          <button type="button" class="mobile-filter-close" onclick="closeMobileFilters()">Close</button>
+        </div>
+      </div>
+
       <facet-filters-form>
-        <form id="FacetFiltersFormMobile" class="mobile-facets">
-          <div class="mobile-facets__inner">
-            <div class="mobile-facets__header border-b py-4 px-4">
-              <div class="mobile-facets__header-inner">
-                <h2 class="!text-2xl uppercase text-left">Filters</h2>
-              </div>
-            </div>
-            <div id="FacetsWrapperMobile" class="mobile-facets__main">
-              {%- if enable_filtering -%}
-                {%- for filter in results.filters -%}
-                  {% liquid
-                    assign presentation = filter.presentation | default: default_presentation
-                    if presentation == 'image'
-                      assign visual_layout_class = 'facets-layout facets-layout-grid facets-layout-grid--' | append: presentation
-                    else
-                      assign visual_layout_class = 'facets-layout facets-layout-list facets-layout-list--' | append: presentation
-                    endif
-                  %}
+        <form id="FacetFiltersFormMobile" class="mobile-filter-form">
+          {%- if results.terms -%}
+            <input type="hidden" name="q" value="{{ results.terms | escape }}">
+            <input name="options[prefix]" type="hidden" value="last">
+          {%- endif -%}
 
-                  {% case filter.type %}
-                    {% when 'boolean', 'list' %}
-                      <details
-                        id="Details-Mobile-{{ filter.param_name | escape }}-{{ section.id }}"
-                        class="mobile-facets__details js-filter border-b"
-                        data-index="mobile-{{ forloop.index }}"
-                      >
-                        <summary class="mobile-facets__summary focus-inset p-4">
-                          <div class="flex justify-between items-center !border-t">
-                            <span class="uppercase text-[16px]">{{ filter.label | escape }}</span>
-                            <span class="mobile-facets__arrow ">
-                              {{- 'icon-arrow.svg' | inline_asset_content -}}
-                            </span>
-                          </div>
-                        </summary>
-                        <div
-                          id="FacetMobile-{{ forloop.index }}-{{ section.id }}"
-                          class="mobile-facets__submenu gradient"
-                        >
-                          <button
-                            class="mobile-facets__close-button link link--text focus-inset"
-                            aria-expanded="true"
-                            type="button"
-                          >
-                            {{- 'icon-arrow.svg' | inline_asset_content -}}
-                            <span>{{ filter.label | escape }}</span>
-                            {%- if filter.operator == 'AND' -%}
-                              <span class="facets__and-helptext">
-                                {{ 'products.facets.filter_and_operator_subtitle' | t }}
-                              </span>
-                            {%- endif -%}
-                          </button>
-                          <ul class="{{ visual_layout_class }} mobile-facets__list list-unstyled" role="list">
-                            {%- liquid
-                              assign sorted_values = filter.values
-                              # Keep the selected values grouped together when operator is AND
-                              if filter.operator == 'AND'
-                                assign active_filter_values = filter.values | where: 'active', true
-                                assign inactive_filter_values = filter.values | where: 'active', false
-                                assign sorted_values = active_filter_values | concat: inactive_filter_values
-                              endif
-                            -%}
-                            {%- for value in sorted_values -%}
-                              {% liquid
-                                assign input_id = 'Filter-' | append: filter.param_name | escape | append: '-mobile-' | append: forloop.index
-                                assign is_disabled = false
-                                if value.count == 0 and value.active == false
-                                  assign is_disabled = true
-                                endif
-                              %}
+          <div class="mobile-filter-content">
+            {%- if enable_filtering -%}
+              {%- for filter in results.filters -%}
+                {% liquid
+                  assign presentation = filter.presentation | default: default_presentation
+                  if presentation == 'image'
+                    assign visual_layout_class = 'facets-layout facets-layout-grid facets-layout-grid--' | append: presentation
+                  else
+                    assign visual_layout_class = 'facets-layout facets-layout-list facets-layout-list--' | append: presentation
+                  endif
+                %}
 
-                              {%- capture label_class -%}
-                            facets__label mobile-facets__label{% if is_disabled %} disabled{% endif %}{% if value.active %} active{% endif %}
-                            {%- endcapture -%}
+                {% case filter.type %}
+                  {% when 'boolean', 'list' %}
+                    <details class="mobile-filter-section">
+                      <summary class="mobile-filter-summary">
+                        <span class="uppercase text-lg font-medium">{{ filter.label | escape }}</span>
+                        <span class="pmorph__icon mobile-pmorph__icon" aria-hidden="true"></span>
+                      </summary>
 
-                              {%- capture text_value -%}
-                              <span class="facet-checkbox__text" aria-hidden="true">
-                                <span class="facet-checkbox__text-label">{{- value.label | escape }}</span>
-                              </span>
-                              <span class="visually-hidden">
-                                {{- value.label | escape }}
-                              </span>
-                            {%- endcapture -%}
+                      <div class="mobile-filter-options">
+                        {%- liquid
+                          assign sorted_values = filter.values
+                          if filter.operator == 'AND'
+                            assign active_filter_values = filter.values | where: 'active', true
+                            assign inactive_filter_values = filter.values | where: 'active', false
+                            assign sorted_values = active_filter_values | concat: inactive_filter_values
+                          endif
+                        -%}
 
-                              <li class="mobile-facets__item list-menu__item">
-                                {% if presentation == 'swatch' %}
-                                  <div class="{{ label_class }}">
-                                    <div class="swatch-input-wrapper">
-                                      {% render 'swatch-input',
-                                        id: input_id,
-                                        type: 'checkbox',
-                                        name: value.param_name,
-                                        value: value.value,
-                                        product_form_id: 'FacetFiltersFormMobile',
-                                        swatch: value.swatch,
-                                        checked: value.active,
-                                        disabled: is_disabled
-                                      %}
-                                    </div>
+                        {%- for value in sorted_values -%}
+                          {% liquid
+                            assign input_id = 'Filter-' | append: filter.param_name | escape | append: '-mobile-' | append: forloop.index
+                            assign is_disabled = false
+                            if value.count == 0 and value.active == false
+                              assign is_disabled = true
+                            endif
+                          %}
 
-                                    {{ text_value }}
-                                  </div>
-                                {% else %}
-                                  <label for="{{ input_id }}" class="{{ label_class }}">
-                                    <input
-                                      class="mobile-facets__checkbox"
-                                      type="checkbox"
-                                      name="{{ value.param_name }}"
-                                      value="{{ value.value }}"
-                                      id="{{ input_id }}"
-                                      {% if value.active %}
-                                        checked
-                                      {% endif %}
-                                      {% if is_disabled %}
-                                        disabled
-                                      {% endif %}
-                                    >
-
-                                    {%- if presentation == 'image' -%}
-                                      <div class="facets__image-wrapper">
-                                        {%- if value.image -%}
-                                          {{
-                                            value.image
-                                            | image_url: width: 300
-                                            | image_tag: class: 'facets__image', alt: value.alt
-                                          }}
-                                        {%- endif -%}
-                                      </div>
-                                    {%- else -%}
-                                      <span class="mobile-facets__highlight"></span>
-                                      {{- 'square.svg' | inline_asset_content -}}
-                                      {{- 'icon-checkmark.svg' | inline_asset_content -}}
-                                    {%- endif -%}
-
-                                    {{ text_value }}
-                                  </label>
-                                {% endif %}
-                              </li>
-                            {%- endfor -%}
-                          </ul>
-
-                          <div class="mobile-facets__footer gradient">
-                            <facet-remove class="mobile-facets__clear-wrapper">
-                              <a href="{{ filter.url_to_remove }}" class="mobile-facets__clear underlined-link">
-                                {{- 'products.facets.clear' | t -}}
-                              </a>
-                            </facet-remove>
-                            <button
-                              type="button"
-                              class="button button--primary apply-button"
+                          <label class="mobile-filter-option {% if value.active %}active{% endif %}{% if is_disabled %} disabled{% endif %}">
+                            <input
+                              type="checkbox"
+                              name="{{ value.param_name }}"
+                              value="{{ value.value }}"
+                              id="{{ input_id }}"
+                              {% if value.active %}
+                                checked
+                              {% endif %}
+                              {% if is_disabled %}
+                                disabled
+                              {% endif %}
                             >
-                              {{ 'products.facets.apply' | t }}
-                            </button>
-                          </div>
-                        </div>
-                      </details>
-                    {% when 'price_range' %}
-                      <details
-                        id="Details-Mobile-{{ filter.param_name | escape }}-{{ section.id }}"
-                        class="mobile-facets__details js-filter"
-                        data-index="mobile-{{ forloop.index }}"
-                      >
-                        <summary class="mobile-facets__summary focus-inset">
-                          <div>
-                            <span>{{ filter.label | escape }}</span>
-                            <span class="mobile-facets__arrow">
-                              {{- 'icon-arrow.svg' | inline_asset_content -}}
-                            </span>
-                          </div>
-                        </summary>
-                        <div
-                          id="FacetMobile-{{ forloop.index }}-{{ section.id }}"
-                          class="mobile-facets__submenu gradient"
-                        >
-                          <button
-                            class="mobile-facets__close-button link link--text focus-inset"
-                            aria-expanded="true"
-                            type="button"
-                          >
-                            {{- 'icon-arrow.svg' | inline_asset_content -}}
-                            {{ filter.label | escape }}
-                          </button>
+                            <span class="mobile-filter-checkbox"></span>
+                            <span class="mobile-filter-label">{{ value.label | escape }}</span>
+                          </label>
+                        {%- endfor -%}
+                      </div>
+                    </details>
+                  {% when 'price_range' %}
+                    <details class="mobile-filter-section">
+                      <summary class="mobile-filter-summary">
+                        <span class="uppercase text-lg font-medium">{{ filter.label | escape }}</span>
+                        <span class="pmorph__icon mobile-pmorph__icon" aria-hidden="true"></span>
+                      </summary>
 
-                          {%- assign max_price_amount = filter.range_max | money | strip_html | escape -%}
-                          <p class="mobile-facets__info">
-                            {{ 'products.facets.max_price' | t: price: max_price_amount }}
-                          </p>
+                      <div class="mobile-filter-options">
+                        <price-range class="mobile-price-range">
+                          {% render 'price-facet', filter: filter, id_prefix: 'Filter-Mobile-', filter_type: 'mobile' %}
+                        </price-range>
+                      </div>
+                    </details>
+                {% endcase %}
+              {%- endfor -%}
+            {%- endif -%}
+          </div>
 
-                          <price-range class="facets__price">
-                            {% render 'price-facet', filter: filter, id_prefix: 'Mobile-Filter-' %}
-                          </price-range>
-                          <div class="mobile-facets__footer">
-                            <facet-remove class="mobile-facets__clear-wrapper">
-                              <a href="{{ filter.url_to_remove }}" class="mobile-facets__clear underlined-link">
-                                {{- 'products.facets.clear' | t }}
-                              </a>
-                            </facet-remove>
-                            <button
-                              type="button"
-                              class="button button--primary apply-button"
-                            >
-                              {{ 'products.facets.apply' | t }}
-                            </button>
-                          </div>
-                        </div>
-                      </details>
-                  {% endcase %}
-                {%- endfor -%}
-              {%- endif -%}
-            </div>
-
-            <div class="mobile-facets__footer border-t p-4">
-              <facet-remove class="mobile-facets__clear-wrapper">
-                <a href="{{ results_url }}" class="mobile-facets__clear underlined-link">
-                  {{- 'products.facets.clear_all' | t }}
-                </a>
-              </facet-remove>
-              <button
-                type="button"
-                class="button w-full bg-black text-white py-3 uppercase"
-                onclick="this.closest('.mobile-facets__wrapper').querySelector('summary').click()"
-              >
-                {{ 'products.facets.apply' | t }}
-              </button>
-            </div>
+          <div class="mobile-filter-footer">
+            <button type="button" class="mobile-apply-btn" onclick="closeMobileFilters()">CLOSE</button>
           </div>
         </form>
       </facet-filters-form>
-    </details>
-  </menu-drawer>
+    </div>
+  </div>
 
   <div class="active-facets active-facets-mobile medium-hide large-up-hide">
     {%- for filter in results.filters -%}
@@ -654,9 +513,9 @@
 <div class="filters-translate medium-hide large-up-hide flex border-y  divide-x-4">
   <button
     class="mobile-facets-trigger flex items-center gap-2 px-4 py-2 !border-r  w-1/2 justify-center"
-    onclick="document.querySelector('.mobile-facets__disclosure summary').click()"
+    onclick="openMobileFilters()"
   >
-    <span class="uppercase">Filters</span>
+    <span class="uppercase filters-tabs">Filters</span>
   </button>
 
   <div class="mobile-sort-dropdown relative w-1/2  ">
@@ -664,7 +523,7 @@
       class="mobile-sort-trigger flex items-center gap-2 px-4 py-2  w-full justify-center"
       onclick="this.nextElementSibling.classList.toggle('hidden')"
     >
-      <span class="uppercase">Sort</span>
+      <span class="uppercase filters-tabs">Sort</span>
     </button>
     <div class="mobile-sort-options hidden absolute top-full left-0 right-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-[100]">
       {%- for option in results.sort_options -%}
@@ -681,6 +540,74 @@
 </div>
 
 <script>
+  // Function to close all dropdowns except the one being opened
+  function closeOtherDropdowns(currentDropdown) {
+    // Get all filter dropdowns
+    const allDropdowns = document.querySelectorAll('.facets__disclosure, .disclosure-has-popup');
+
+    allDropdowns.forEach((dropdown) => {
+      if (dropdown !== currentDropdown && dropdown.hasAttribute('open')) {
+        dropdown.removeAttribute('open');
+        // Reset icon animation
+        const icon = dropdown.querySelector('.pmorph__icon');
+        if (icon) {
+          icon.classList.remove('expanded');
+        }
+      }
+    });
+  }
+
+  // Function to toggle icon animation
+  function toggleArrow(summaryElement) {
+    const icon = summaryElement.querySelector('.pmorph__icon');
+    if (icon) {
+      // Small delay to check if details is opening or closing
+      setTimeout(() => {
+        const parentDetails = summaryElement.closest('details');
+        if (parentDetails.hasAttribute('open')) {
+          icon.classList.add('expanded');
+          closeOtherDropdowns(parentDetails);
+        } else {
+          icon.classList.remove('expanded');
+        }
+      }, 10);
+    }
+  }
+
+  // Add event listeners to all filter summaries
+  document.addEventListener('DOMContentLoaded', function () {
+    // Close dropdowns when clicking outside
+    document.addEventListener('click', function (e) {
+      if (!e.target.closest('.facets__disclosure') && !e.target.closest('.disclosure-has-popup')) {
+        const allDropdowns = document.querySelectorAll('.facets__disclosure[open], .disclosure-has-popup[open]');
+        allDropdowns.forEach((dropdown) => {
+          dropdown.removeAttribute('open');
+          // Reset icon animation
+          const icon = dropdown.querySelector('.pmorph__icon');
+          if (icon) {
+            icon.classList.remove('expanded');
+          }
+        });
+      }
+    });
+
+    // Handle mobile filter icons
+    document.querySelectorAll('.mobile-filter-summary').forEach((summary) => {
+      summary.addEventListener('click', () => {
+        const icon = summary.querySelector('.pmorph__icon');
+        const details = summary.closest('details');
+        setTimeout(() => {
+          if (details.hasAttribute('open')) {
+            icon.classList.add('expanded');
+          } else {
+            icon.classList.remove('expanded');
+          }
+        }, 10);
+      });
+    });
+  });
+
+  // Your existing mobile functions
   document.querySelectorAll('.mobile-facets__summary').forEach((summary) => {
     summary.addEventListener('click', () => {
       const arrow = summary.closest('details')?.querySelector('.mobile-facets__arrow');
@@ -698,9 +625,18 @@
   function updateMobileSort(button) {
     const value = button.dataset.value;
     const form = document.getElementById('FacetFiltersFormMobile');
-    const input = form.querySelector('select[name="sort_by"]');
-    input.value = value;
+    let sortInput = form.querySelector('input[name="sort_by"]');
+    if (!sortInput) {
+      sortInput = document.createElement('input');
+      sortInput.type = 'hidden';
+      sortInput.name = 'sort_by';
+      form.appendChild(sortInput);
+    }
+    sortInput.value = value;
     form.submit();
+
+    // Close the dropdown
+    button.closest('.mobile-sort-options').classList.add('hidden');
   }
 
   // Close sort dropdown when clicking outside
@@ -714,6 +650,80 @@
 </script>
 
 <style>
+  /* Plus/Minus Morphing Icon Styles */
+  :root {
+    --dur: 220ms;
+    --ease-open: cubic-bezier(0.33, 0, 0.13, 1);
+    --ease-close: cubic-bezier(0.22, 0.61, 0.36, 1);
+    --fg: #111;
+    --size: 15px;
+    --thickness: 2px;
+  }
+
+  .pmorph__icon {
+    position: relative;
+    width: var(--size);
+    height: var(--size);
+    flex-shrink: 0;
+    margin-left: 6px;
+    font-weight: 500; /* Make icon font weight 500 */
+  }
+
+  /* horizontal bar (always visible) */
+  .pmorph__icon::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 0;
+    width: 100%;
+    height: var(--thickness);
+    background: currentColor;
+    border-radius: 2px;
+    transform: translateY(-50%);
+  }
+
+  /* vertical bar (morphs away) */
+  .pmorph__icon::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 0;
+    width: 100%;
+    height: var(--thickness);
+    background: currentColor;
+    border-radius: 2px;
+    transform: translateY(-50%) rotate(90deg) scale(1);
+    transform-origin: center;
+    opacity: 1;
+    transition: transform var(--dur) var(--ease-open), opacity var(--dur) var(--ease-open);
+  }
+
+  /* expanded: hide vertical bar smoothly */
+  .pmorph__icon.expanded::after {
+    opacity: 0;
+    transform: translateY(-50%) rotate(90deg) scale(0.5);
+    transition: transform var(--dur) var(--ease-open), opacity var(--dur) var(--ease-open);
+  }
+
+  /* collapsed: show vertical bar again with crisper ease */
+  details:not([open]) .pmorph__icon::after {
+    opacity: 1;
+    transform: translateY(-50%) rotate(90deg) scale(1);
+    transition: transform var(--dur) var(--ease-close), opacity var(--dur) var(--ease-close);
+  }
+
+  /* Mobile version */
+  .mobile-pmorph__icon {
+    width: 12px;
+    height: 12px;
+  }
+
+  .facets__summary-label {
+    margin-right: 6px !important;
+  }
+  .filters-tabs {
+    font-size: 12px;
+  }
   .rotate-icon {
     transform: rotate(0deg); /* Default state */
     transition: transform 0.3s ease; /* Ensure transition is applied */
@@ -763,7 +773,7 @@
   .facets__wrapper {
     width: fit-content;
     display: flex;
-    gap: 2rem;
+    gap: 20px;
   }
 
   /* Adjust disclosure width */
@@ -827,16 +837,266 @@
     padding: 0.5rem;
   }
   .filters-translate {
-    transform: translateY(-65px) !important;
+    transform: translateY(-55px) !important;
   }
 
-  /* Add hover rotation for availability, price, and sort by arrows */
-  .facets__summary:hover svg {
-    transform: rotate(-90deg);
-    transition: transform 0.3s ease;
-  }
-
+  /* Only animate arrow rotation on click (rotated class), not on hover */
   .facets__summary svg {
     transition: transform 0.3s ease;
   }
+  .svg-arrow-down {
+    transition: transform 0.3s ease;
+    transform: rotate(0deg);
+  }
+
+  .svg-arrow-down.rotated {
+    transform: rotate(-90deg);
+  }
+
+  /* New Mobile Filter Drawer Styles */
+  .mobile-filter-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.7);
+    z-index: 9999;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+    /* Add blur effect */
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    display: flex;
+    justify-content: flex-end; /* Ensure drawer is right-aligned */
+  }
+
+  .mobile-filter-overlay.active {
+    opacity: 1;
+    visibility: visible;
+  }
+
+  .mobile-filter-drawer {
+    position: absolute;
+    top: 0;
+    right: 0;
+    height: 100vh;
+    width: 90%;
+    max-width: 400px;
+    background: white;
+    transform: translateX(100%);
+    transition: transform 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    position: relative;
+  }
+
+  .mobile-filter-overlay.active .mobile-filter-drawer {
+    transform: translateX(0);
+  }
+
+  .mobile-filter-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    padding: 20px;
+    background: white;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+  }
+
+  .mobile-filter-header h2 {
+    font-size: 30px;
+    font-weight: 500;
+    line-height: 0.9;
+    margin: 0;
+  }
+
+  .mobile-filter-close {
+    background: none;
+    border: 10px;
+    font-size: 1.5rem;
+    cursor: pointer;
+    font-weight: 300;
+    position: relative;
+  }
+
+  .mobile-filter-content {
+    flex: 1;
+    overflow-y: auto;
+    padding: 20px;
+  }
+
+  .mobile-filter-section {
+    border-top: 1px solid #000;
+  }
+
+  .mobile-filter-summary {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0;
+    font-size: 12px;
+    cursor: pointer;
+    list-style: none;
+    background: white;
+    font-weight: 500;
+  }
+
+  .mobile-filter-summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .mobile-filter-arrow {
+    transition: transform 0.2s ease;
+  }
+
+  .mobile-filter-section[open] .mobile-filter-arrow {
+    transform: rotate(-90deg);
+  }
+
+  .mobile-filter-options {
+    padding: 0 1.5rem 1rem;
+    background: #f9f9f9;
+  }
+
+  .mobile-filter-option {
+    display: flex;
+    align-items: center;
+    padding: 0.75rem 0;
+    cursor: pointer;
+    border-bottom: 1px solid #f0f0f0;
+  }
+
+  .mobile-filter-option:last-child {
+    border-bottom: none;
+  }
+
+  .mobile-filter-option input[type='checkbox'] {
+    display: none;
+  }
+
+  .mobile-filter-checkbox {
+    width: 20px;
+    height: 20px;
+    border: 2px solid #ddd;
+    margin-right: 0.75rem;
+    position: relative;
+    flex-shrink: 0;
+  }
+
+  .mobile-filter-option.active .mobile-filter-checkbox {
+    background: black;
+    border-color: black;
+  }
+
+  .mobile-filter-option.active .mobile-filter-checkbox::after {
+    content: '✓';
+    color: white;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 12px;
+    font-weight: bold;
+  }
+
+  .mobile-filter-label {
+    font-size: 1rem;
+    text-transform: uppercase;
+  }
+
+  .mobile-filter-option.disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  .mobile-filter-footer {
+    padding: 1.5rem;
+    border-top: 1px solid #000 !important;
+    background: white;
+    display: flex;
+    gap: 1rem;
+    position: absolute !important;
+    left: 0;
+    right: 0;
+    bottom: 10px !important;
+    width: 100%;
+  }
+
+  .mobile-apply-btn {
+    flex: 1;
+    padding: 0.4rem !important;
+    background: black;
+    color: white;
+    border-radius: 3px !important;
+    text-transform: uppercase;
+    font-weight: 500;
+    cursor: pointer;
+    width: 100% !important;
+  }
+
+  .mobile-price-range {
+    padding: 1rem 0;
+  }
 </style>
+
+<script>
+  function openMobileFilters() {
+    const overlay = document.getElementById('mobile-filter-overlay');
+    if (overlay) {
+      overlay.classList.add('active');
+      document.body.style.overflow = 'hidden';
+    }
+  }
+
+  function closeMobileFilters() {
+    const overlay = document.getElementById('mobile-filter-overlay');
+    if (overlay) {
+      overlay.classList.remove('active');
+      document.body.style.overflow = '';
+    }
+  }
+
+  // Close on overlay click
+  document.addEventListener('DOMContentLoaded', function () {
+    const overlay = document.getElementById('mobile-filter-overlay');
+    if (overlay) {
+      overlay.addEventListener('click', function (e) {
+        if (e.target === overlay) {
+          closeMobileFilters();
+        }
+      });
+    }
+
+    // Handle checkbox changes
+    const filterOptions = document.querySelectorAll('.mobile-filter-option');
+    filterOptions.forEach((option) => {
+      option.addEventListener('click', function (e) {
+        if (this.classList.contains('disabled')) {
+          e.preventDefault();
+          return;
+        }
+
+        const checkbox = this.querySelector('input[type="checkbox"]');
+        if (checkbox && e.target !== checkbox) {
+          checkbox.checked = !checkbox.checked;
+          checkbox.dispatchEvent(new Event('change', { bubbles: true }));
+        }
+
+        this.classList.toggle('active', checkbox.checked);
+      });
+    });
+
+    // Update active state based on initial checked state
+    filterOptions.forEach((option) => {
+      const checkbox = option.querySelector('input[type="checkbox"]');
+      if (checkbox && checkbox.checked) {
+        option.classList.add('active');
+      }
+    });
+  });
+</script>

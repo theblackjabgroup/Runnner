@@ -22,19 +22,43 @@
 {% endcomment %}
 
 <style>
+  #product-grid {
+    column-gap: 6px !important;
+  }
   [x-cloak] {
     display: none !important;
   }
   .card-wrapper {
-    margin-bottom: 30px;
+    margin-bottom: 40px;
+    /* Remove transform-origin and transform for scaling */
+  }
+  .add-to-cart-btn {
+    position: relative;
+    z-index: 1000 !important;
+    border-radius: 5px !important; /* Add border radius */
+  }
+  .slider-arrow {
+    background: transparent;
+    transition: background 0.2s;
+  }
+  .slider-arrow:hover {
+    background: #e5e5e5;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  }
+  .slider-arrow svg {
+    display: block;
+    margin: auto;
+  }
+  .slider-arrow {
+    width: 40px;
+    height: 40px;
+    padding: 0;
   }
 </style>
-
 {%- unless skip_styles -%}
   {{ 'component-rating.css' | asset_url | stylesheet_tag }}
   {{ 'component-volume-pricing.css' | asset_url | stylesheet_tag }}
 
-  {{ 'component-price.css' | asset_url | stylesheet_tag }}
   {{ 'quick-order-list.css' | asset_url | stylesheet_tag }}
   {{ 'quantity-popover.css' | asset_url | stylesheet_tag }}
 {%- endunless -%}
@@ -51,10 +75,12 @@
     endif
   -%}
   <div class="card-wrapper product-card-wrapper group">
-    <div class="block w-full">
-      <div class="relative bg-[#F8F8F8] w-full product-card-height group-hover:h-[380px] transition-all duration-300 overflow-hidden">
+    <div class="block card-inner-wrapper w-full">
+      <div class="relative  bg-[#F8F8F8] w-full product-card-height transition-all duration-300 overflow-hidden">
         {%- if card_product.featured_media -%}
-          <div class="absolute inset-0 w-full h-full overflow-hidden product-images-slider ">
+          <div class="absolute card-inner-wrapper-product inset-0 w-full  overflow-hidden product-images-slider">
+            {% assign first_media = card_product.media[0] %}
+            {% assign second_media = card_product.media[1] %}
             {% for media in card_product.media %}
               <img
                 srcset="
@@ -66,7 +92,7 @@
                   {%- if media.width >= 1066 -%}{{ media | image_url: width: 1066 }} 1066w,{%- endif -%}
                   {{ media | image_url }} {{ media.width }}w
                 "
-                class="w-full h-full object-contain p-5 transition-all duration-300 group-hover:scale-[90%] group-hover:-translate-y-10 absolute inset-0 opacity-0"
+                class="w-full h-full card-inner-wrapper-product  p-0 transition-all duration-300 absolute inset-0 opacity-0 image-config"
                 loading="lazy"
                 width="{{ media.width }}"
                 height="{{ media.height }}"
@@ -74,53 +100,49 @@
                 {% if forloop.first %}
                   style="opacity: 1;"
                 {% endif %}
+                data-index="{{ forloop.index0 }}"
               >
             {% endfor %}
-
-            {% if card_product.media.size > 1 %}
-              <button
-                aria-label="prev-btn"
-                class="slider-arrow prev absolute left-2 top-1/2  -translate-y-1/2  cursor-pointer  opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center"
+            <button
+              aria-label="prev-btn"
+              class="slider-arrow prev absolute left-0 top-1/2  -translate-y-1/2  cursor-pointer flex items-center justify-center z-[50] opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+            >
+              <svg
+                width="40"
+                height="40"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="#ccc"
               >
-                <svg
-                  width="40"
-                  height="40"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="#ccc"
-                >
-                  <path d="M15 18l-6-6 6-6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                </svg>
-              </button>
-              <button
-                aria-label="next-btn"
-                class="slider-arrow next absolute right-2 top-1/2  -translate-y-1/2  cursor-pointer  opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center"
+                <path d="M15 18l-6-6 6-6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </button>
+            <button
+              aria-label="next-btn"
+              class="slider-arrow next absolute right-0 top-1/2  -translate-y-1/2  cursor-pointer flex items-center justify-center z-[50] opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+            >
+              <svg
+                width="40"
+                height="40"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="#ccc"
               >
-                <svg
-                  width="40"
-                  height="40"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="#ccc"
-                >
-                  <path d="M9 18l6-6-6-6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                </svg>
-              </button>
-            {% endif %}
+                <path d="M9 18l6-6-6-6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </button>
           </div>
         {%- endif -%}
 
         {% if card_product.available == false %}
-          <div class="absolute top-3 left-3 ">
-            <span class="inline-block  text-[12px] font-medium bg-white text-black rounded px-1 border bg-white ">
-              SOLD OUT
-            </span>
+          <div class="absolute top-1 left-1 ">
+            <span class="sold-out-tag  text-[14px] font-medium bg-white text-black rounded px-1  "> SOLD OUT </span>
           </div>
           <div class="absolute inset-x-0 bottom-0 p-4 opacity-0 translate-y-10 transition-all duration-300 group-hover:opacity-100 group-hover:-translate-y-0">
             <div class="bg-white w-[93%] mx-auto text-center !text-black">
               <button
                 type="button"
-                class="notify-when-available-btn w-full py-4  !text-[1.6rem] shadow-xl font-medium text-black hover:text-white bg-gray-600 hover:bg-black cursor-pointer transition-colors duration-200 uppercase tracking-wider"
+                class="notify-when-available-btn w-full py-4  !text-[1.6rem]  font-medium text-black hover:text-white bg-gray-600 hover:bg-black cursor-pointer transition-colors duration-200 uppercase tracking-wider"
                 data-product-id="{{ card_product.id }}"
                 data-product-title="{{ card_product.title | escape }}"
               >
@@ -132,7 +154,7 @@
           </div>
         {% else %}
           <div class="absolute inset-x-0 bottom-0 p-4 opacity-0 translate-y-10 transition-all duration-300 group-hover:opacity-100 group-hover:-translate-y-0">
-            <div class="bg-white w-[93%] mx-auto text-center product-sizes-container">
+            <div class="bg-white w-[93%] mx-auto text-center product-sizes-container ">
               {%- liquid
                 assign has_size_variant = false
                 for option in card_product.options_with_values
@@ -145,7 +167,7 @@
 
               <button
                 type="button"
-                class="add-to-cart-btn w-full py-4  !text-[1.6rem] shadow-xl font-medium text-black hover:bg-black hover:text-white transition-colors duration-200 uppercase tracking-wider quick-add-button"
+                class="add-to-cart-btn w-full py-4 z-[100] !text-[1.6rem]  font-medium text-black hover:bg-black hover:text-white transition-colors duration-200 uppercase tracking-wider quick-add-button"
                 {% if has_size_variant %}
                   data-has-sizes="true"
                 {% else %}
@@ -219,11 +241,25 @@
 
       <div class="mt-3 space-y-1">
         <a href="{{ card_product.url }}" class="block hover:opacity-75 transition-opacity duration-200">
-          <h3 class="!text-[1.6rem] uppercase font-medium leading-tight">{{ card_product.title | escape }}</h3>
-          <div class="flex gap-2 items-baseline">
-            <span class="!text-[1.6rem] uppercase font-medium"> {{ card_product.price | money }} </span>
+          <h3
+            class="card-product-typegraphy product-card-text uppercase font-medium leading-tight"
+            style="color: var(--header_text);"
+          >
+            {{ card_product.title | escape }}
+          </h3>
+          <div class=" gap-2 items-baseline leading-tight">
+            <span
+              class="card-product-typegraphy product-card-text uppercase font-medium"
+              style="color: var(--header_text);"
+            >
+              {{ card_product.price | money }}
+            </span>
             {%- if card_product.compare_at_price > card_product.price -%}
-              |<span class="!text-[1.6rem] uppercase text-red-600">
+              |
+              <span
+                class="card-product-typegraphy product-card-text uppercase text-red-600"
+                style="color: #e53935;"
+              >
                 {{- card_product.compare_at_price | money }} FOR MEMBERS</span
               >
             {%- endif -%}
@@ -288,13 +324,62 @@
 {%- endif -%}
 
 <style>
+  .image-config {
+    object-fit: cover;
+  }
+  .card-product-typegraphy {
+    font-size: 14px !important;
+  }
+  /* Responsive fixed height for image container */
   .product-card-height {
-    height: 420px;
+    height: 500px;
+    transition: height 0.3s ease;
+    width: 100%;
+    max-width: 100%;
+    background: #f8f8f8;
+    position: relative;
+    overflow: hidden;
+  }
+  /* On hover, decrease height (shrink from bottom only) */
+  .card-wrapper:hover .product-card-height {
+    height: 470px;
+  }
+  @media screen and (min-width: 1500px) {
+    .product-card-height {
+      height: 380px !important;
+    }
+    .card-wrapper:hover .product-card-height {
+      height: 350px !important;
+    }
   }
   @media only screen and (max-width: 600px) {
-    .product-card-height {
-      height: 250px;
+    .image-config {
+      object-fit: fill;
     }
+    .sold-out-tag {
+      font-size: 10px;
+    }
+    .card-product-typegraphy {
+      font-size: 12px !important;
+    }
+    .card-wrapper:hover .product-card-height {
+      height: 270px;
+    }
+    .product-card-text {
+      font-size: 12px;
+    }
+  }
+
+  /* Make images fill the card completely */
+  .product-card-height img {
+    width: 100%;
+    height: 100%;
+    /* Stretch image to fill container */
+    position: absolute;
+    top: 0;
+    left: 0;
+    transition: opacity 0.3s;
+    background: transparent;
   }
 
   .quick-add-modal {
@@ -308,9 +393,16 @@
     opacity: 1;
     height: 50px !important;
     visibility: visible;
-    border-radius: 10px;
-    overflow: hidden; /* Add this */
-    clip-path: inset(0); /* Add this */
+    overflow: hidden;
+    clip-path: inset(0);
+    border-radius: 5px; /* Add border radius */
+  }
+
+  .product-sizes-container.variant-selector-active .add-to-cart-btn {
+    display: none !important;
+  }
+  .product-sizes-container {
+    border-radius: 5px;
   }
 
   .quick-add-modal__header {
@@ -403,6 +495,21 @@
   }
 </style>
 
+<style>
+  .secondary-image-hover-wrapper {
+    position: relative;
+    width: 100%;
+    height: 100%;
+  }
+  .secondary-image-hover-wrapper .primary-image,
+  .secondary-image-hover-wrapper .secondary-image {
+    pointer-events: none;
+  }
+  .notify-when-available-btn {
+    border-radius: 5px;
+  }
+</style>
+
 <script>
   document.addEventListener('DOMContentLoaded', function () {
     const containers = document.querySelectorAll('.product-sizes-container');
@@ -458,18 +565,16 @@
       if (hasSizes && modal && form) {
         // For products with size variants
         addToCartBtn.addEventListener('mouseenter', () => {
-          modal.style.display = 'block';
-          requestAnimationFrame(() => {
-            modal.classList.add('visible');
-            modal.classList.remove('hidden');
-          });
+          container.classList.add('variant-selector-active');
+          modal.classList.add('visible');
+          modal.classList.remove('hidden');
         });
 
         container.addEventListener('mouseleave', () => {
           modal.classList.remove('visible');
           setTimeout(() => {
             modal.classList.add('hidden');
-            modal.style.display = '';
+            container.classList.remove('variant-selector-active');
           }, 300);
         });
 
@@ -478,7 +583,7 @@
           modal.classList.remove('visible');
           setTimeout(() => {
             modal.classList.add('hidden');
-            modal.style.display = '';
+            container.classList.remove('variant-selector-active');
           }, 300);
         });
 
@@ -493,6 +598,7 @@
               await addToCart(formData);
               updateButtonState(addToCartBtn, 'added');
               modal.classList.add('hidden');
+              container.classList.remove('variant-selector-active');
             } catch (error) {
               updateButtonState(addToCartBtn, 'default');
             }
@@ -599,8 +705,21 @@
       if (!prevBtn || !nextBtn) return;
 
       function showImage(index) {
-        images.forEach((img) => (img.style.opacity = '0'));
-        images[index].style.opacity = '1';
+        images.forEach((img, i) => {
+          img.style.opacity = i === index ? '1' : '0';
+        });
+      }
+
+      // Hover functionality for exactly 2 images
+      if (images.length === 2) {
+        slider.addEventListener('mouseenter', () => {
+          currentIndex = 1;
+          showImage(currentIndex);
+        });
+        slider.addEventListener('mouseleave', () => {
+          currentIndex = 0;
+          showImage(currentIndex);
+        });
       }
 
       prevBtn.addEventListener('click', (e) => {
