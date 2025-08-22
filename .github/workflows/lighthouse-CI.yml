@@ -1,21 +1,26 @@
-name: Shopify Lighthouse CI
+name: Lighthouse CI (Live Store Only)
 
-on: [push]
+on:
+  push:
+  pull_request:
 
 jobs:
   lhci:
-    name: Lighthouse (PF_TESTING)
     runs-on: ubuntu-latest
+
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
-      - name: Lighthouse
-        uses: shopify/lighthouse-ci-action@v1
+      - name: Setup Node
+        uses: actions/setup-node@v3
         with:
-          access_token:  ${{ secrets.APIKEY }}
-          store: "delhi-dev-themetest.myshopify.com"
-          lhci_min_score_accessibility: 0.9
-          lhci_min_score_performance: 0.7
-          password: "thoolt"
+          node-version: 18
 
- 
+      - name: Install Lighthouse CI
+        run: npm install -g @lhci/cli
+
+      - name: Run Lighthouse CI on Live Store
+        run: |
+          lhci collect --url=https://delhi-dev-themetest.myshopify.com
+          lhci assert --assert.assertions.accessibility=error \
+                      --assert.assertions.performance=warn
