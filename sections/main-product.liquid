@@ -179,7 +179,7 @@
         <div class="tab-content mt-6 overflow-y-auto">
           {% for block in section.blocks %}
             <div
-              class="tab-pane {% if forloop.first %}active{% else %}hidden{% endif %} tracking-normal leading-none text-[14px]"
+              class="tab-pane {% if forloop.first %}active{% else %}hidden{% endif %} tracking-normal leading-none text-[16px]"
               data-content="tab-{{ block.id }}"
             >
               {% case block.type %}
@@ -200,7 +200,7 @@
                     id="open-size-chart"
                     class="bg-black text-white px-4 py-2 rounded hover:bg-gray-900 transition-colors"
                   >
-                    Size Chart
+                    SIZE CHART
                   </button>
 
                   <div
@@ -261,7 +261,7 @@
                 </div>
                 <a
                   href="#"
-                  class="border border-black px-2 py-0 text-[14px] font-medium rounded-xl transition-colors duration-200 "
+                  class="border border-black px-2 py-0 text-[14px] font-medium rounded transition-colors duration-200 "
                   style="background-color: var(--secondary_button_label); color: var(--secondary_button_text_color); width: 8rem; text-align: center;"
                   onmouseenter="this.style.backgroundColor='var(--hover)'"
                   onmouseleave="this.style.backgroundColor='var(--secondary_button_label)'"
@@ -280,7 +280,7 @@
                 </div>
                 <a
                   href="#"
-                  class="border border-black px-2 py-0 text-[14px] font-medium rounded-xl transition-colors duration-200 "
+                  class="border border-black px-2 py-0 text-[14px] font-medium rounded transition-colors duration-200 "
                   style="background-color: var(--secondary_button_label); color: var(--secondary_button_text_color); width: 8rem; text-align: center;"
                   onmouseenter="this.style.backgroundColor='var(--hover)'"
                   onmouseleave="this.style.backgroundColor='var(--secondary_button_label)'"
@@ -335,41 +335,43 @@
           <span class="font-medium uppercase">SELECT SIZE</span>
           <div class="flex gap-2 flex-wrap">
             {%- assign size_options = product.options_with_values | where: 'name', 'Size' | first -%}
-            {%- for value in size_options.values -%}
-              {%- assign is_available = false -%}
-              {%- for variant in product.variants -%}
-                {% assign size_option = 'option' | append: size_index %}
-                {% if variant[size_option] == value and variant.available %}
-                  {%- assign is_available = true -%}
-                  {% break %}
-                {% endif %}
+            {%- if size_options -%}
+              {%- for value in size_options.values -%}
+                {%- assign is_available = false -%}
+                {%- for variant in product.variants -%}
+                  {% assign size_option = 'option' | append: size_index %}
+                  {% if variant[size_option] == value and variant.available %}
+                    {%- assign is_available = true -%}
+                    {% break %}
+                  {% endif %}
+                {%- endfor -%}
+
+                <button
+                  type="button"
+                  class="
+                    size-btn relative px-3 h-10 min-w-[2.5rem] flex items-center justify-center border-transparent rounded font-semibold bg-white
+                    {% if forloop.first and is_available %}bg-black text-white{% endif %}
+                    {% unless is_available %}opacity-50 cursor-not-allowed{% endunless %}
+                  "
+                  data-value="{{ value | escape }}"
+                  {% unless is_available %}
+                    disabled aria-disabled="true"
+                  {% endunless %}
+                  aria-label="Size {{ value }}{% unless is_available %} - Sold out{% endunless %}"
+                >
+                  <span class="label z-10">{{ value }}</span>
+
+                  {% unless is_available %}
+                    <span
+                      class="absolute inset-0 flex items-center justify-center pointer-events-none"
+                      aria-hidden="true"
+                    >
+                      <span class="block w-full  bg-black -rotate-45" style="height: 1px; rotate: -45deg"></span>
+                    </span>
+                  {% endunless %}
+                </button>
               {%- endfor -%}
-
-              <button
-                type="button"
-                class="
-                  size-btn relative px-3 h-10 min-w-[2.5rem] flex items-center justify-center border-transparent rounded font-semibold bg-white
-                  {% if forloop.first and is_available %}bg-black text-white{% endif %}
-                  {% unless is_available %}opacity-50 cursor-not-allowed{% endunless %}
-                "
-                data-value="{{ value | escape }}"
-                {% unless is_available %}
-                  disabled aria-disabled="true"
-                {% endunless %}
-                aria-label="Size {{ value }}{% unless is_available %} - Sold out{% endunless %}"
-              >
-                <span class="label z-10">{{ value }}</span>
-
-                {% unless is_available %}
-                  <span
-                    class="absolute inset-0 flex items-center justify-center pointer-events-none"
-                    aria-hidden="true"
-                  >
-                    <span class="block w-full  bg-black -rotate-45" style="height: 1px; rotate: -45deg"></span>
-                  </span>
-                {% endunless %}
-              </button>
-            {%- endfor -%}
+            {%- endif -%}
           </div>
         </div>
 
@@ -378,17 +380,17 @@
           <!-- Price + Compare at Price -->
           <div class="text-[18px]  flex flex-col">
             <div class="flex items-center gap-2">
-              <span style="font-weight: {{section.settings.product_price_font_weight}};">
+              <span id="current-price" style="font-weight: {{section.settings.product_price_font_weight}};">
                 {{- product.price | money -}}
               </span>
-              {% if product.compare_at_price > product.price %}
-                <span class="text-black text-[14px]">|</span>
-                <span class="line-through text-gray-500">{{ product.compare_at_price | money }}</span>
-              {% endif %}
+              <span id="compare-price-separator" class="text-black text-[14px] {% unless product.compare_at_price > product.price %}hidden{% endunless %}">|</span>
+              <span id="compare-price" class="line-through text-gray-500 {% unless product.compare_at_price > product.price %}hidden{% endunless %}">
+                {% if product.compare_at_price > product.price %}{{ product.compare_at_price | money }}{% endif %}
+              </span>
             </div>
 
-            {% if product.compare_at_price > product.price %}
-              <div class="text-[14px] text-red-600 font-medium">
+            <div id="savings-info" class="text-[14px] text-red-600 font-medium {% unless product.compare_at_price > product.price %}hidden{% endunless %}">
+              {% if product.compare_at_price > product.price %}
                 Save {{ product.compare_at_price | minus: product.price | money }} (
                 {{
                   product.compare_at_price
@@ -397,18 +399,19 @@
                   | divided_by: product.compare_at_price
                 -}}
                 % off)
-              </div>
-            {% endif %}
+              {% endif %}
+            </div>
           </div>
 
           <!-- Add to Cart -->
           <div class="flex gap-2">
             {% if product.available %}
-
               <!-- ADD TO CART form -->
-              <form method="post" action="/cart/add">
-                <input type="hidden" name="id" value="{{ product.variants.first.id }}">
+              <form method="post" action="/cart/add" id="add-to-cart-form">
+                <input type="hidden" name="id" id="variant-id" value="{{ product.selected_or_first_available_variant.id }}">
+                <input type="hidden" name="quantity" value="1">
                 <button
+                  id="add-to-cart-btn"
                   class="text-white text-4xl px-6 rounded group flex items-center justify-between gap-2"
                   style="background-color: var(--button); color: var(--button_label); height: 50px; width: 370px;"
                   onmouseenter="this.style.backgroundColor='var(--hover)'"
@@ -543,9 +546,7 @@
   </div>
 
   <!-- Mobile Product Details -->
-  <div
-    class="details-inner flex flex-col"
-  >
+  <div class="details-inner flex flex-col">
     {%- comment -%} Header {%- endcomment -%}
     <div class="product-header w-[80%] space-y-8">
       <div class="header-top flex flex-col gap-4">
@@ -559,31 +560,29 @@
         <h1 class="text-[42px] font-bold">{{ product.title }}</h1>
 
         {%- comment -%} Product Variant {%- endcomment -%}
-        <div class="product-variants my-4">
-          <div class="flex items-center gap-2">
-            <span class="inline-block text-[14px] font-medium">SELECT COLOR:</span>
-            {%- assign first_color = product.options_with_values | where: 'name', 'Color' | first -%}
-            <span class="active-color text-[14px]" data-active-color>
-              {{- first_color.values | first -}}
-            </span>
+        {%- assign color_option = product.options_with_values | where: 'name', 'Color' | first -%}
+        {%- if color_option and color_option.values.size > 0 -%}
+          <div class="product-variants my-4">
+            <div class="flex items-center gap-2">
+              <span class="inline-block text-[14px] font-medium">SELECT COLOR:</span>
+              <span class="active-color text-[14px]" data-active-color>
+                {{- color_option.values | first -}}
+              </span>
+            </div>
+            <div class="color-options flex gap-3 p-2">
+              {%- for value in color_option.values -%}
+                <button
+                  type="button"
+                  class="color-swatch w-8 h-8 rounded-full hover:scale-110 transition-transform focus:outline-none"
+                  style="background-color: {{ value | handleize }};"
+                  data-option-value="{{ value | escape }}"
+                >
+                  <span class="sr-only">{{ value }}</span>
+                </button>
+              {%- endfor -%}
+            </div>
           </div>
-          <div class="color-options flex gap-3 p-2">
-            {%- for option in product.options_with_values -%}
-              {%- if option.name == 'Color' -%}
-                {%- for value in option.values -%}
-                  <button
-                    type="button"
-                    class="color-swatch w-8 h-8 rounded-full hover:scale-110 transition-transform focus:outline-none"
-                    style="background-color: {{ value | handleize }};"
-                    data-option-value="{{ value | escape }}"
-                  >
-                    <span class="sr-only">{{ value }}</span>
-                  </button>
-                {%- endfor -%}
-              {%- endif -%}
-            {%- endfor -%}
-          </div>
-        </div>
+        {%- endif -%}
       </div>
     </div>
 
@@ -694,9 +693,7 @@
       {%- endif -%}
     {%- endfor -%}
 
-    <div
-      class="size-price-selector flex flex-col gap-6 text-[12px]"
-    >
+    <div class="size-price-selector flex flex-col gap-6 text-[12px]">
       <!-- DELIVERY SECTION -->
       {%- for block in section.blocks -%}
         {%- if block.type == 'delivery_address' -%}
@@ -749,23 +746,20 @@
             <div class="flex items-center justify-center h-10 border rounded" style="width: 8rem;">
               <button
                 type="button"
-                id="decreaseQty"
-                class="px-3 py-1 text-lg hover:bg-gray-100"
+                class="mobile-decrease-qty px-3 py-1 text-lg hover:bg-gray-100"
                 aria-label="Decrease quantity"
               >
                 -
               </button>
               <span
-                id="quantityDisplay"
-                class="px-4"
+                class="mobile-quantity-display px-4"
                 style="border-left: 1px solid black; border-right: 1px solid black;"
                 >1</span
               >
-              <input type="hidden" name="quantity" id="quantityInput" value="1">
+              <input type="hidden" name="quantity" class="mobile-quantity-input" value="1">
               <button
                 type="button"
-                id="increaseQty"
-                class="px-3 py-1 text-lg hover:bg-gray-100"
+                class="mobile-increase-qty px-3 py-1 text-lg hover:bg-gray-100"
                 aria-label="Increase quantity"
               >
                 +
@@ -780,41 +774,43 @@
         <span class="uppercase font-semibold">SELECT SIZE</span>
         <div class="flex gap-2 flex-wrap">
           {%- assign size_options = product.options_with_values | where: 'name', 'Size' | first -%}
-          {%- for value in size_options.values -%}
-            {%- assign is_available = false -%}
-            {%- for variant in product.variants -%}
-              {% assign size_option = 'option' | append: size_index %}
-              {% if variant[size_option] == value and variant.available %}
-                {%- assign is_available = true -%}
-                {% break %}
-              {% endif %}
+          {%- if size_options -%}
+            {%- for value in size_options.values -%}
+              {%- assign is_available = false -%}
+              {%- for variant in product.variants -%}
+                {% assign size_option = 'option' | append: size_index %}
+                {% if variant[size_option] == value and variant.available %}
+                  {%- assign is_available = true -%}
+                  {% break %}
+                {% endif %}
+              {%- endfor -%}
+
+              <button
+                type="button"
+                class="
+                  size-btn relative px-3 h-10 min-w-[2.5rem] flex items-center justify-center border-transparent rounded font-semibold
+                  {% if forloop.first and is_available %}bg-black text-white{% endif %}
+                  {% unless is_available %}opacity-50 cursor-not-allowed bg-gray-200{% endunless %}
+                "
+                data-value="{{ value | escape }}"
+                {% unless is_available %}
+                  disabled aria-disabled="true"
+                {% endunless %}
+                aria-label="Size {{ value }}{% unless is_available %} - Sold out{% endunless %}"
+              >
+                <span class="label z-10">{{ value }}</span>
+
+                {% unless is_available %}
+                  <span
+                    class="absolute inset-0 flex items-center justify-center pointer-events-none"
+                    aria-hidden="true"
+                  >
+                    <span class="block w-full  bg-black -rotate-45" style="height: 1px; rotate: -45deg"></span>
+                  </span>
+                {% endunless %}
+              </button>
             {%- endfor -%}
-
-            <button
-              type="button"
-              class="
-                size-btn relative px-3 h-10 min-w-[2.5rem] flex items-center justify-center border-transparent rounded font-semibold
-                {% if forloop.first and is_available %}bg-black text-white{% endif %}
-                {% unless is_available %}opacity-50 cursor-not-allowed bg-gray-200{% endunless %}
-              "
-              data-value="{{ value | escape }}"
-              {% unless is_available %}
-                disabled aria-disabled="true"
-              {% endunless %}
-              aria-label="Size {{ value }}{% unless is_available %} - Sold out{% endunless %}"
-            >
-              <span class="label z-10">{{ value }}</span>
-
-              {% unless is_available %}
-                <span
-                  class="absolute inset-0 flex items-center justify-center pointer-events-none"
-                  aria-hidden="true"
-                >
-                  <span class="block w-full  bg-black -rotate-45" style="height: 1px; rotate: -45deg"></span>
-                </span>
-              {% endunless %}
-            </button>
-          {%- endfor -%}
+          {%- endif -%}
         </div>
       </div>
 
@@ -823,31 +819,31 @@
         <!-- Price + Compare at Price -->
         <div class="text-[18px] flex flex-col justify-between">
           <div class="flex items-center gap-2">
-            <span>{{ product.price | money }}</span>
-            {% if product.compare_at_price > product.price %}
-              <span class="text-black text-[14px]">|</span>
-              <span class="line-through text-gray-500">{{ product.compare_at_price | money }}</span>
-            {% endif %}
+            <span class="mobile-current-price">{{ product.price | money }}</span>
+            <span class="mobile-compare-price-separator text-black text-[14px] {% unless product.compare_at_price > product.price %}hidden{% endunless %}">|</span>
+            <span class="mobile-compare-price line-through text-gray-500 {% unless product.compare_at_price > product.price %}hidden{% endunless %}">
+              {% if product.compare_at_price > product.price %}{{ product.compare_at_price | money }}{% endif %}
+            </span>
           </div>
 
-          {% if product.compare_at_price > product.price %}
-            <div class="text-[14px] text-red-600 font-medium">
+          <div class="mobile-savings-info text-[14px] text-red-600 font-medium {% unless product.compare_at_price > product.price %}hidden{% endunless %}">
+            {% if product.compare_at_price > product.price %}
               Save {{ product.compare_at_price | minus: product.price | money }} (
               {{ product.compare_at_price | minus: product.price | times: 100 | divided_by: product.compare_at_price -}}
               % off)
-            </div>
-          {% endif %}
+            {% endif %}
+          </div>
         </div>
 
         <!-- Add to Cart -->
         <div class="flex justify-evenly w-full gap-2">
           {% if product.available %}
-
             <!-- ADD TO CART form -->
-            <form method="post" action="/cart/add">
-              <input type="hidden" name="id" value="{{ product.variants.first.id }}">
+            <form method="post" action="/cart/add" class="mobile-add-to-cart-form">
+              <input type="hidden" name="id" class="mobile-variant-id" value="{{ product.selected_or_first_available_variant.id }}">
+              <input type="hidden" name="quantity" value="1">
               <button
-                class="text-white text-3xl px-4 py-2 rounded group flex items-center justify-between gap-2"
+                class="mobile-add-to-cart-btn text-white text-3xl px-4 py-2 rounded group flex items-center justify-between gap-2"
                 style="background-color: var(--button); color: var(--button_label); width: 95vw"
                 onmouseenter="this.style.backgroundColor='var(--hover)'"
                 onmouseleave="this.style.backgroundColor='var(--button)'"
@@ -1045,205 +1041,364 @@
     #mobile-size-chart-drawer {
       transition: transform 0.6s cubic-bezier(0.4,0,0.2,1);
     }
-
   }
 </style>
 
 <script>
   document.addEventListener('DOMContentLoaded', () => {
+    // Product data from Shopify
+    const productOptions = {{ product.options | json }};
+    const productVariants = {{ product.variants | json }};
+    
+    // Find option indices
+    const colorIndex = productOptions.findIndex(opt => opt.toLowerCase() === 'color');
+    const sizeIndex = productOptions.findIndex(opt => opt.toLowerCase() === 'size');
+    
+    // State management
+    let selectedColor = null;
+    let selectedSize = null;
+    
+    // Initialize with first available options
+    if (colorIndex >= 0) {
+      selectedColor = productVariants[0][`option${colorIndex + 1}`];
+    }
+    if (sizeIndex >= 0) {
+      selectedSize = productVariants[0][`option${sizeIndex + 1}`];
+    }
 
+    // Helper functions
     function lockBodyScroll() {
       document.body.style.overflow = 'hidden';
       document.body.style.touchAction = 'none';
     }
+    
     function unlockBodyScroll() {
       document.body.style.overflow = '';
       document.body.style.touchAction = '';
     }
 
-
-    // Mobile size chart button functionality
-    const mobileOpenBtn = document.getElementById('open-mobile-size-chart');
-const mobileCloseBtn = document.getElementById('close-mobile-size-chart');
-const mobileDrawer = document.getElementById('mobile-size-chart-drawer');
-
-if (mobileOpenBtn && mobileCloseBtn && mobileDrawer) {
-  mobileOpenBtn.addEventListener('click', function() {
-    mobileDrawer.classList.remove('hidden');
-    // Use requestAnimationFrame for reliable repaint before transition
-    requestAnimationFrame(() => {
-      mobileDrawer.classList.remove('translate-x-full');
-    });
-    document.body.style.overflow = 'hidden';
-  });
-
-  mobileCloseBtn.addEventListener('click', function() {
-    mobileDrawer.classList.add('translate-x-full');
-    document.body.style.overflow = '';
-    setTimeout(() => {
-      mobileDrawer.classList.add('hidden');
-    }, 600); // Match your CSS transition duration (0.6s)
-  });
-
-  document.addEventListener('keydown', function(e) {
-    if (e.key === 'Escape' && !mobileDrawer.classList.contains('hidden')) {
-      mobileCloseBtn.click();
+    function findMatchingVariant(color = selectedColor, size = selectedSize) {
+      return productVariants.find(variant => {
+        const colorMatch = colorIndex >= 0 ? variant[`option${colorIndex + 1}`] === color : true;
+        const sizeMatch = sizeIndex >= 0 ? variant[`option${sizeIndex + 1}`] === size : true;
+        return colorMatch && sizeMatch;
+      });
     }
-  });
-}
 
+    function updatePriceDisplay(variant, isMobile = false) {
+      const prefix = isMobile ? 'mobile-' : '';
+      const currentPriceEl = document.querySelector(isMobile ? '.mobile-current-price' : '#current-price');
+      const comparePriceEl = document.querySelector(isMobile ? '.mobile-compare-price' : '#compare-price');
+      const compareSeparatorEl = document.querySelector(isMobile ? '.mobile-compare-price-separator' : '#compare-price-separator');
+      const savingsInfoEl = document.querySelector(isMobile ? '.mobile-savings-info' : '#savings-info');
 
-      // size-chart button functionality
-      const openBtn = document.getElementById("open-size-chart");
-      const closeBtn = document.getElementById("close-size-chart");
-      const drawer = document.getElementById("size-chart-drawer");
-      const backdrop = document.getElementById("size-chart-backdrop");
+      if (!variant || !currentPriceEl) return;
+
+      currentPriceEl.textContent = (variant.price / 100).toLocaleString('en-US', {
+        style: 'currency',
+        currency: 'USD'
+      });
+
+      if (variant.compare_at_price && variant.compare_at_price > variant.price) {
+        if (comparePriceEl) {
+          comparePriceEl.textContent = (variant.compare_at_price / 100).toLocaleString('en-US', {
+            style: 'currency',
+            currency: 'USD'
+          });
+          comparePriceEl.classList.remove('hidden');
+        }
+        if (compareSeparatorEl) compareSeparatorEl.classList.remove('hidden');
+        
+        if (savingsInfoEl) {
+          const savings = variant.compare_at_price - variant.price;
+          const percentage = Math.round((savings / variant.compare_at_price) * 100);
+          savingsInfoEl.innerHTML = `Save ${(savings / 100).toLocaleString('en-US', {
+            style: 'currency',
+            currency: 'USD'
+          })} (${percentage}% off)`;
+          savingsInfoEl.classList.remove('hidden');
+        }
+      } else {
+        if (comparePriceEl) comparePriceEl.classList.add('hidden');
+        if (compareSeparatorEl) compareSeparatorEl.classList.add('hidden');
+        if (savingsInfoEl) savingsInfoEl.classList.add('hidden');
+      }
+    }
+
+    function updateAddToCartButton(variant, isMobile = false) {
+      const button = document.querySelector(isMobile ? '.mobile-add-to-cart-btn' : '#add-to-cart-btn');
+      const variantIdInput = document.querySelector(isMobile ? '.mobile-variant-id' : '#variant-id');
       
-      if (openBtn && drawer && backdrop && closeBtn) {
-        openBtn.addEventListener("click", () => {
-          drawer.classList.remove("hidden");
-          backdrop.classList.remove("hidden");
-          setTimeout(() => {
-            drawer.classList.add("open");
-          }, 20);
-          lockBodyScroll();
+      if (!button || !variantIdInput) return;
+
+      if (!variant || !variant.available) {
+        button.disabled = true;
+        button.innerHTML = variant ? 'SOLD OUT' : 'UNAVAILABLE';
+        button.style.backgroundColor = '#6b7280';
+        button.style.cursor = 'not-allowed';
+      } else {
+        button.disabled = false;
+        button.innerHTML = `
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            class="w-6 h-6 object-contain transition-transform duration-300 group-hover:-rotate-90 mx-1"
+            fill="none"
+            viewBox="0 0 9 9"
+            stroke-width="1.5"
+            stroke="currentColor"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            aria-hidden="true"
+          >
+            <path d="M1.1875 7.7334H7.6599M7.6599 7.7334V1.261M7.6599 7.7334L1.1875 1.261"/>
+          </svg>
+          ADD TO CART
+        `;
+        button.style.backgroundColor = 'var(--button)';
+        button.style.cursor = 'pointer';
+        variantIdInput.value = variant.id;
+      }
+    }
+
+    function updateSizeAvailability() {
+      const sizeBtns = document.querySelectorAll('.size-btn');
+      
+      sizeBtns.forEach(btn => {
+        const size = btn.getAttribute('data-value');
+        const variant = findMatchingVariant(selectedColor, size);
+        
+        // Remove existing unavailable styling
+        const existingSlash = btn.querySelector('.unavailable-slash');
+        if (existingSlash) existingSlash.remove();
+        
+        if (!variant || !variant.available) {
+          btn.classList.add('opacity-50', 'cursor-not-allowed');
+          btn.disabled = true;
+          btn.setAttribute('aria-disabled', 'true');
+          
+          // Add diagonal line for unavailable sizes
+          btn.insertAdjacentHTML('beforeend', `
+            <span class="absolute inset-0 flex items-center justify-center unavailable-slash pointer-events-none">
+              <span class="block w-full h-[2px] bg-neutral-900 rotate-[135deg] origin-center"></span>
+            </span>
+          `);
+        } else {
+          btn.classList.remove('opacity-50', 'cursor-not-allowed');
+          btn.disabled = false;
+          btn.removeAttribute('aria-disabled');
+        }
+      });
+    }
+
+    function updateVariant() {
+      const variant = findMatchingVariant();
+      
+      // Update desktop
+      updatePriceDisplay(variant, false);
+      updateAddToCartButton(variant, false);
+      
+      // Update mobile
+      updatePriceDisplay(variant, true);
+      updateAddToCartButton(variant, true);
+      
+      // Update size availability
+      updateSizeAvailability();
+    }
+
+    // Mobile size chart functionality
+    const mobileOpenBtn = document.getElementById('open-mobile-size-chart');
+    const mobileCloseBtn = document.getElementById('close-mobile-size-chart');
+    const mobileDrawer = document.getElementById('mobile-size-chart-drawer');
+
+    if (mobileOpenBtn && mobileCloseBtn && mobileDrawer) {
+      mobileOpenBtn.addEventListener('click', function() {
+        mobileDrawer.classList.remove('hidden');
+        requestAnimationFrame(() => {
+          mobileDrawer.classList.remove('translate-x-full');
+        });
+        lockBodyScroll();
+      });
+
+      mobileCloseBtn.addEventListener('click', function() {
+        mobileDrawer.classList.add('translate-x-full');
+        unlockBodyScroll();
+        setTimeout(() => {
+          mobileDrawer.classList.add('hidden');
+        }, 600);
+      });
+
+      document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape' && !mobileDrawer.classList.contains('hidden')) {
+          mobileCloseBtn.click();
+        }
+      });
+    }
+
+    // Desktop size chart functionality
+    const openBtn = document.getElementById("open-size-chart");
+    const closeBtn = document.getElementById("close-size-chart");
+    const drawer = document.getElementById("size-chart-drawer");
+    const backdrop = document.getElementById("size-chart-backdrop");
+    
+    if (openBtn && drawer && backdrop && closeBtn) {
+      openBtn.addEventListener("click", () => {
+        drawer.classList.remove("hidden");
+        backdrop.classList.remove("hidden");
+        setTimeout(() => {
+          drawer.classList.add("open");
+        }, 20);
+        lockBodyScroll();
+      });
+    
+      const closeDrawer = () => {
+        drawer.classList.remove("open");
+        backdrop.classList.add("hidden");
+        unlockBodyScroll();
+        setTimeout(() => {
+          drawer.classList.add("hidden");
+        }, 400);
+      };
+    
+      closeBtn.addEventListener("click", closeDrawer);
+      backdrop.addEventListener("click", closeDrawer);
+    
+      document.addEventListener("keydown", (e) => {
+        if (e.key === "Escape") {
+          closeDrawer();
+        }
+      });
+    }
+
+    // Quantity selector functionality - Desktop
+    const increaseBtn = document.getElementById("increaseQty");
+    const decreaseBtn = document.getElementById("decreaseQty");
+    const quantityDisplay = document.getElementById("quantityDisplay");
+    const quantityInput = document.getElementById("quantityInput");
+
+    if (increaseBtn && decreaseBtn && quantityDisplay && quantityInput) {
+      let quantity = 1;
+
+      increaseBtn.addEventListener("click", () => {
+        quantity++;
+        quantityDisplay.textContent = quantity;
+        quantityInput.value = quantity;
+      });
+
+      decreaseBtn.addEventListener("click", () => {
+        if (quantity > 1) {
+          quantity--;
+          quantityDisplay.textContent = quantity;
+          quantityInput.value = quantity;
+        }
+      });
+    }
+
+    // Quantity selector functionality - Mobile
+    const mobileIncreaseBtn = document.querySelector(".mobile-increase-qty");
+    const mobileDecreaseBtn = document.querySelector(".mobile-decrease-qty");
+    const mobileQuantityDisplay = document.querySelector(".mobile-quantity-display");
+    const mobileQuantityInput = document.querySelector(".mobile-quantity-input");
+
+    if (mobileIncreaseBtn && mobileDecreaseBtn && mobileQuantityDisplay && mobileQuantityInput) {
+      let mobileQuantity = 1;
+
+      mobileIncreaseBtn.addEventListener("click", () => {
+        mobileQuantity++;
+        mobileQuantityDisplay.textContent = mobileQuantity;
+        mobileQuantityInput.value = mobileQuantity;
+      });
+
+      mobileDecreaseBtn.addEventListener("click", () => {
+        if (mobileQuantity > 1) {
+          mobileQuantity--;
+          mobileQuantityDisplay.textContent = mobileQuantity;
+          mobileQuantityInput.value = mobileQuantity;
+        }
+      });
+    }
+
+    // Mobile Gallery Handling
+    if (window.innerWidth < 1024) {
+      const mobileImages = document.querySelectorAll('.mobile-gallery-item');
+      const thumbnails = document.querySelectorAll('.thumbnail-item');
+
+      thumbnails.forEach((thumb, i) => {
+        thumb.addEventListener('click', () => {
+          showImage(i);
+        });
+      });
+      
+      function showImage(index) {
+        mobileImages.forEach((img, i) => {
+          if (i === index) {
+            img.classList.add('active');
+            img.classList.add('relative');
+            img.classList.remove('absolute', 'top-0', 'left-0');
+            img.style.opacity = '1';
+            img.style.zIndex = '2';
+            img.style.pointerEvents = 'auto';
+          } else {
+            img.classList.remove('active');
+            img.classList.remove('relative');
+            img.classList.add('absolute', 'top-0', 'left-0');
+            img.style.opacity = '0';
+            img.style.zIndex = '1';
+            img.style.pointerEvents = 'none';
+          }
         });
       
-        const closeDrawer = () => {
-          drawer.classList.remove("open");
-          backdrop.classList.add("hidden");
-          unlockBodyScroll();
-          setTimeout(() => {
-            drawer.classList.add("hidden");
-          }, 400); // Match the CSS transition duration
-        };
-      
-        closeBtn.addEventListener("click", closeDrawer);
-        backdrop.addEventListener("click", closeDrawer);
-      
-        document.addEventListener("keydown", (e) => {
-          if (e.key === "Escape") {
-            closeDrawer();
+        thumbnails.forEach((thumb, i) => {
+          if (i === index) {
+            thumb.classList.add('active');
+            thumb.style.opacity = '1';
+          } else {
+            thumb.classList.remove('active');
+            thumb.style.opacity = '0.6';
           }
         });
       }
-      
 
-
-  // Quantity selector functionality
-  const increaseBtn = document.getElementById("increaseQty");
-  const decreaseBtn = document.getElementById("decreaseQty");
-  const quantityDisplay = document.getElementById("quantityDisplay");
-  const quantityInput = document.getElementById("quantityInput");
-
-
-  if (increaseBtn && decreaseBtn && quantityDisplay && quantityInput) {
-    let quantity = 1;
-
-    increaseBtn.addEventListener("click", () => {
-      quantity++;
-      quantityDisplay.textContent = quantity;
-      quantityInput.value = quantity;
-    });
-
-    decreaseBtn.addEventListener("click", () => {
-      if (quantity > 1) {
-        quantity--;
-        quantityDisplay.textContent = quantity;
-        quantityInput.value = quantity;
+      // Initialize with first image
+      if (mobileImages.length > 0) {
+        showImage(0);
       }
-    });
-  }
-
-  // Mobile Gallery Handling
-  if (window.innerWidth < 1024) {
-    const mobileImages = document.querySelectorAll('.mobile-gallery-item');
-    const thumbnails = document.querySelectorAll('.thumbnail-item');
-    let currentIndex = 0;
-
-    thumbnails.forEach((thumb, i) => {
-      thumb.addEventListener('click', () => {
-        console.log('Thumbnail clicked:', i);
-        showImage(i);
-      });
-    });
-    
-    function showImage(index) {
-      mobileImages.forEach((img, i) => {
-        if (i === index) {
-          img.classList.add('active');
-          img.classList.add('relative');
-          img.classList.remove('absolute', 'top-0', 'left-0');
-          img.style.opacity = '1';
-          img.style.zIndex = '2';
-          img.style.pointerEvents = 'auto';
-        } else {
-          img.classList.remove('active');
-          img.classList.remove('relative');
-          img.classList.add('absolute', 'top-0', 'left-0');
-          img.style.opacity = '0';
-          img.style.zIndex = '1';
-          img.style.pointerEvents = 'none';
-        }
-      });
-    
-      thumbnails.forEach((thumb, i) => {
-        if (i === index) {
-          thumb.classList.add('active');
-          thumb.style.opacity = '1';
-        } else {
-          thumb.classList.remove('active');
-          thumb.style.opacity = '0.6';
-        }
-      });
-    
-      currentIndex = index;
     }
 
+    // Desktop gallery handling
+    const gallery = document.querySelector('.product-gallery');
+    const items = document.querySelectorAll('.gallery-item');
+    const stripImages = document.querySelectorAll('.strip-image-wrapper');
+    const totalImages = items.length;
 
-    // Initialize with first image
-    showImage(0);
-  }
+    if (gallery && items.length && stripImages.length) {
+      let scrollLockUntil = 0;
 
-
-    // desktop gallery handling
- 
-      const gallery = document.querySelector('.product-gallery');
-      const items = document.querySelectorAll('.gallery-item');
-      const stripImages = document.querySelectorAll('.strip-image-wrapper');
-      const totalImages = items.length;
-    
-      if (!gallery || !items.length || !stripImages.length) return;
-    
-      let scrollLockUntil = 0; // time until scroll is locked out
-    
       function updateActiveImage() {
-
         if (totalImages === 1) {
           items[0].classList.add('is-active');
           stripImages[0].classList.add('active');
           return;
         }
-      // Skip scroll-based update if recently clicked
+
         if (Date.now() < scrollLockUntil) return;
-    
+
         const galleryTop = gallery.offsetTop;
         const scrollPosition = window.pageYOffset;
         const sectionHeight = gallery.offsetHeight;
         const windowHeight = window.innerHeight;
         const scrollableDistance = sectionHeight - windowHeight;
-    
+
         const scrollFraction = (scrollPosition - galleryTop) / scrollableDistance;
         const imageIndex = Math.min(Math.floor(scrollFraction * (totalImages - 0.1)), totalImages - 1);
         const targetIndex = Math.max(0, imageIndex);
-    
+
         items.forEach((item, index) => {
           item.classList.toggle('is-active', index === targetIndex);
           const video = item.querySelector('video');
           if (video) {
             if (index === targetIndex) {
               video.muted = true;
-              video.play().catch(() => {}); // Prevents errors if play is interrupted
+              video.play().catch(() => {});
             } else {
               video.pause();
               video.currentTime = 0;
@@ -1255,8 +1410,7 @@ if (mobileOpenBtn && mobileCloseBtn && mobileDrawer) {
           img.classList.toggle('active', index === targetIndex);
         });
       }
-    
-      // Throttle scroll handler using requestAnimationFrame
+
       let ticking = false;
       window.addEventListener('scroll', () => {
         if (!ticking) {
@@ -1267,282 +1421,213 @@ if (mobileOpenBtn && mobileCloseBtn && mobileDrawer) {
           ticking = true;
         }
       });
-    
-      // Manual image switching on click
+
       stripImages.forEach((stripImage, index) => {
         stripImage.addEventListener('click', () => {
-          scrollLocked = true;
-          setTimeout(() => {
-            scrollLocked = false;
-          }, 2000);
-          
-    
+          scrollLockUntil = Date.now() + 2000;
+
           items.forEach((item, i) => {
             item.classList.toggle('is-active', i === index);
             const video = item.querySelector('video');
             if (video) {
               if (i === index) {
-                video.muted = true; // Ensure muted for autoplay
+                video.muted = true;
                 video.play();
               } else {
                 video.pause();
                 video.currentTime = 0;
               }
             }
-            
-            
           });
-    
+
           stripImages.forEach((img, i) => {
             img.classList.toggle('active', i === index);
           });
         });
       });
-    
-      // Set initial active image
+
       updateActiveImage();
+    }
 
-    // tab-btn handling
-   const tabButtons = document.querySelectorAll(".tab-btn");
-   const tabPanes = document.querySelectorAll(".tab-pane");
+    // Tab functionality
+    const tabButtons = document.querySelectorAll(".tab-btn");
+    const tabPanes = document.querySelectorAll(".tab-pane");
 
-  tabButtons.forEach((button) => {
-    button.addEventListener("click", () => {
-      const targetTab = button.getAttribute("data-tab");
-      const borderDiv = button.querySelector(".tab-top-bar"); // Get the border div with specific class
+    tabButtons.forEach((button) => {
+      button.addEventListener("click", () => {
+        const targetTab = button.getAttribute("data-tab");
+        const borderDiv = button.querySelector(".tab-top-bar");
 
-      // Reset all tabs to inactive state
-      tabButtons.forEach((btn) => {
-        const btnBorderDiv = btn.querySelector(".tab-top-bar");
+        // Reset all tabs to inactive state
+        tabButtons.forEach((btn) => {
+          const btnBorderDiv = btn.querySelector(".tab-top-bar");
+          
+          btn.classList.remove("text-black", "active-tab");
+          btn.classList.add("text-gray-600");
+          
+          if (btnBorderDiv) {
+            btnBorderDiv.classList.remove("bg-black");
+            btnBorderDiv.classList.add("bg-gray-400");
+          }
+        });
+
+        // Set clicked tab to active state
+        button.classList.remove("text-gray-600");
+        button.classList.add("text-black", "active-tab");
         
-        // Remove active classes from button
-        btn.classList.remove("text-black", "active-tab");
-        btn.classList.add("text-gray-600");
-        
-        // Reset border div to inactive state
-        if (btnBorderDiv) {
-          btnBorderDiv.classList.remove("bg-black");
-          btnBorderDiv.classList.add("bg-gray-400");
+        if (borderDiv) {
+          borderDiv.classList.remove("bg-gray-400");
+          borderDiv.classList.add("bg-black");
         }
+
+        // Handle tab pane visibility
+        tabPanes.forEach((pane) => {
+          if (pane.getAttribute("data-content") === targetTab) {
+            pane.classList.remove("hidden");
+            pane.classList.add("block");
+          } else {
+            pane.classList.add("hidden");
+            pane.classList.remove("block");
+          }
+        });
       });
 
-      // Set clicked tab to active state
-      button.classList.remove("text-gray-600");
-      button.classList.add("text-black", "active-tab");
+      // Tab hover effects
+      const borderDiv = button.querySelector(".tab-top-bar");
       
-      // Set border div to active state
-      if (borderDiv) {
-        borderDiv.classList.remove("bg-gray-400");
-        borderDiv.classList.add("bg-black");
-      }
-
-      // Handle tab pane visibility
-      tabPanes.forEach((pane) => {
-        if (pane.getAttribute("data-content") === targetTab) {
-          pane.classList.remove("hidden");
-          pane.classList.add("block");
-        } else {
-          pane.classList.add("hidden");
-          pane.classList.remove("block");
+      button.addEventListener("mouseenter", () => {
+        if (!button.classList.contains("active-tab")) {
+          button.classList.add("text-black");
+          if (borderDiv) {
+            borderDiv.classList.remove("bg-gray-400");
+            borderDiv.classList.add("bg-black");
+          }
         }
       });
-  });
-});
+      
+      button.addEventListener("mouseleave", () => {
+        if (!button.classList.contains("active-tab")) {
+          button.classList.remove("text-black");
+          button.classList.add("text-gray-600");
+          if (borderDiv) {
+            borderDiv.classList.remove("bg-black");
+            borderDiv.classList.add("bg-gray-400");
+          }
+        }
+      });
+    });
 
-tabButtons.forEach((button) => {
-  const borderDiv = button.querySelector(".tab-top-bar");
-  
-  button.addEventListener("mouseenter", () => {
-    // Only apply hover if not active
-    if (!button.classList.contains("active-tab")) {
-      button.classList.add("text-black");
-      if (borderDiv) {
-        borderDiv.classList.remove("bg-gray-400");
-        borderDiv.classList.add("bg-black");
-      }
-    }
-  });
-  
-  button.addEventListener("mouseleave", () => {
-    // Only remove hover if not active
-    if (!button.classList.contains("active-tab")) {
-      button.classList.remove("text-black");
-      button.classList.add("text-gray-600");
-      if (borderDiv) {
-        borderDiv.classList.remove("bg-black");
-        borderDiv.classList.add("bg-gray-400");
-      }
-    }
-  });
-});
-    
-
-  // color swatch handling 
+    // Color swatch handling
     const colorSwatches = document.querySelectorAll('.color-swatch');
     const activeColorDisplays = document.querySelectorAll('[data-active-color]');
     let lastSelectedColor = '';
 
-    function updateDisplays(color) {
+    function updateColorDisplays(color) {
       activeColorDisplays.forEach(display => {
         display.textContent = color;
       });
     }
 
-  function setActiveSwatch(swatch) {
-    const selectedColor = swatch.getAttribute('data-option-value');
+    function setActiveSwatch(swatch) {
+      const newSelectedColor = swatch.getAttribute('data-option-value');
 
-    // Remove ring from all
-    colorSwatches.forEach((el) => {
-      el.classList.remove('ring-1', 'ring-offset-1', 'ring-black');
-    });
+      // Remove ring from all swatches
+      colorSwatches.forEach((el) => {
+        el.classList.remove('ring-1', 'ring-offset-1', 'ring-black');
+      });
 
-    // Force reflow then add ring
-    swatch.offsetWidth;
-    swatch.classList.add('ring-1', 'ring-offset-2', 'ring-black');
+      // Add ring to selected swatch
+      swatch.offsetWidth; // Force reflow
+      swatch.classList.add('ring-1', 'ring-offset-2', 'ring-black');
 
-    // Update visible color name
-    activeColorDisplays.forEach((el) => {
-      el.textContent = selectedColor;
-    });
+      // Update color displays
+      updateColorDisplays(newSelectedColor);
+      
+      // Update selected color and variant
+      selectedColor = newSelectedColor;
+      lastSelectedColor = newSelectedColor;
+      
+      swatch.blur();
+      updateVariant();
+    }
 
-    lastSelectedColor = selectedColor;
+    if (colorSwatches.length > 0) {
+      colorSwatches.forEach(swatch => {
+        const swatchColor = swatch.getAttribute('data-option-value');
 
-    swatch.blur();
+        swatch.addEventListener('click', () => setActiveSwatch(swatch));
 
-    updateVariant(); 
-  }
+        swatch.addEventListener('mouseenter', () => {
+          if (swatchColor) updateColorDisplays(swatchColor);
+        });
 
-  colorSwatches.forEach(swatch => {
-    const swatchColor = swatch.getAttribute('data-option-value');
+        swatch.addEventListener('mouseleave', () => {
+          if (lastSelectedColor) updateColorDisplays(lastSelectedColor);
+        });
+      });
 
-    swatch.addEventListener('click', () => setActiveSwatch(swatch));
+      // Initialize first swatch as selected
+      setActiveSwatch(colorSwatches[0]);
+    }
 
-    swatch.addEventListener('mouseenter', () => {
-      if (swatchColor) updateDisplays(swatchColor);
-    });
-
-    swatch.addEventListener('mouseleave', () => {
-      if (lastSelectedColor) updateDisplays(lastSelectedColor);
-    });
-  });
-
-  // Initialize first swatch as selected
-  if (colorSwatches.length > 0) {
-    setActiveSwatch(colorSwatches[0]);
-  }
-      // Size button handling
+    // Size button handling
     const sizeButtons = document.querySelectorAll('.size-btn');
 
-    // Set initial active state
-    const firstSizeBtn = document.querySelector('.size-btn');
-    if (firstSizeBtn) {
-      firstSizeBtn.classList.add('active', 'bg-black', 'text-white');
-    }
-
-    sizeButtons.forEach((btn) => {
-      btn.addEventListener('click', () => {
-        sizeButtons.forEach((b) => b.classList.remove('active', 'bg-black', 'text-white'));
-        btn.classList.add('active', 'bg-black', 'text-white');
-      });
-    });
-
-
-    // variant logic
-    const productOptions = {{ product.options | json }};
-    const productVariants = {{ product.variants | json }};
-
-    const colorIndex = productOptions.findIndex(opt => opt.toLowerCase() === 'color');
-    const sizeIndex = productOptions.findIndex(opt => opt.toLowerCase() === 'size');
-
-    let selectedColor = null;
-    let selectedSize = null;
-
-    const priceElement = document.querySelector('.price-selector span.text-5xl');
-    const addToCartButton = document.querySelector('.price-selector button');
-
-    function findMatchingVariant() {
-      return productVariants.find(variant => {
-        const colorMatch = colorIndex >= 0 ? variant[`option${colorIndex + 1}`] === selectedColor : true;
-        const sizeMatch = sizeIndex >= 0 ? variant[`option${sizeIndex + 1}`] === selectedSize : true;
-        return colorMatch && sizeMatch;
-      });
-    }
-
-    function updateUI(variant) {
-      if (!variant) {
-        addToCartButton.disabled = true;
-        addToCartButton.textContent = 'Unavailable';
-        priceElement.textContent = 'N/A';
-        return;
-      }
-
-      addToCartButton.disabled = !variant.available;
-      addToCartButton.textContent = variant.available ? 'Add to Cart' : 'Sold Out';
-      priceElement.textContent = `$${(variant.price / 100).toFixed(2)}`;
-    }
-
-    // Size button clicks
-    document.querySelectorAll('.size-btn').forEach(btn => {
-      btn.addEventListener('click', () => {
-        selectedSize = btn.getAttribute('data-value');
-
-        // highlight selected size
-        document.querySelectorAll('.size-btn').forEach(b => {
-          b.classList.remove('bg-black', 'text-white');
+    if (sizeButtons.length > 0) {
+      sizeButtons.forEach((btn) => {
+        btn.addEventListener('click', () => {
+          if (btn.disabled) return;
+          
+          const newSelectedSize = btn.getAttribute('data-value');
+          
+          // Remove active styling from all size buttons
+          sizeButtons.forEach((b) => {
+            b.classList.remove('active', 'bg-black', 'text-white');
+          });
+          
+          // Add active styling to clicked button
+          btn.classList.add('active', 'bg-black', 'text-white');
+          
+          // Update selected size and variant
+          selectedSize = newSelectedSize;
+          updateVariant();
         });
-        btn.classList.add('bg-black', 'text-white');
-
-        updateVariant();
       });
-    });
 
- 
-
-    const defaultSizeBtn = document.querySelector('.size-btn');
-    if (defaultSizeBtn) {
-      selectedSize = defaultSizeBtn.getAttribute('data-value');
-      defaultSizeBtn.classList.add('bg-black', 'text-white');
+      // Initialize first available size as selected
+      const firstAvailableSize = sizeButtons[0];
+      if (firstAvailableSize && !firstAvailableSize.disabled) {
+        selectedSize = firstAvailableSize.getAttribute('data-value');
+        firstAvailableSize.classList.add('active', 'bg-black', 'text-white');
+      }
     }
 
-    function updateSizeAvailability() {
-  const color = selectedColor;
-  const sizeBtns = document.querySelectorAll('.size-btn');
+    // Initial variant update
+    updateVariant();
 
-  sizeBtns.forEach(btn => {
-    const size = btn.getAttribute('data-value');
+    // Form submission handling to ensure quantity is updated
+    const desktopForm = document.getElementById('add-to-cart-form');
+    const mobileForm = document.querySelector('.mobile-add-to-cart-form');
 
-      // Find if there's any variant with this color + size
-      const existingSlash = btn.querySelector('.unavailable-slash');
-      if (!matchingVariant || !matchingVariant.available) {
-        btn.classList.add('opacity-50', 'cursor-not-allowed');
-        btn.disabled = true;
-        btn.setAttribute('aria-disabled', 'true');
-
-    if (!existingSlash) {
-      btn.insertAdjacentHTML('beforeend', `
-        <span class="absolute inset-0 flex items-center justify-center unavailable-slash">
-          <span class="block w-full h-[2px] bg-neutral-900 rotate-[135deg] origin-center"></span>
-        </span>
-      `);
+    if (desktopForm) {
+      desktopForm.addEventListener('submit', function(e) {
+        const quantityInput = this.querySelector('input[name="quantity"]');
+        const displayedQuantity = document.getElementById('quantityDisplay');
+        if (quantityInput && displayedQuantity) {
+          quantityInput.value = displayedQuantity.textContent;
+        }
+      });
     }
-      } else {
-        btn.classList.remove('opacity-50', 'cursor-not-allowed');
-          btn.disabled = false;
-      btn.removeAttribute('aria-disabled');
-    if (existingSlash) existingSlash.remove();
-  }
-    });
-  }
 
-
-  function updateVariant() {
-    const variant = findMatchingVariant();
-    updateUI(variant);
-    updateSizeAvailability();
-  }
-
-
-
+    if (mobileForm) {
+      mobileForm.addEventListener('submit', function(e) {
+        const quantityInput = this.querySelector('input[name="quantity"]');
+        const displayedQuantity = document.querySelector('.mobile-quantity-display');
+        if (quantityInput && displayedQuantity) {
+          quantityInput.value = displayedQuantity.textContent;
+        }
+      });
+    }
   });
 </script>
 
@@ -1661,7 +1746,6 @@ tabButtons.forEach((button) => {
           "label": "Tab Title",
           "default": "SIZING"
         },
-
         {
           "type": "page",
           "id": "size_chart_page",
@@ -1682,7 +1766,6 @@ tabButtons.forEach((button) => {
       "settings": []
     }
   ],
-
   "presets": [
     {
       "name": "Product Tabs",
