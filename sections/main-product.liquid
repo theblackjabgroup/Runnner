@@ -209,7 +209,10 @@
                     style="width: 40vw; z-index: 1001;"
                     aria-hidden="true"
                   >
-                    <div class="p-6" style="text-decoration-line: underline; margin-top: 12vh; padding: 0 10px; display: flex; flex-direction: row-reverse;">
+                    <div
+                      class="p-6"
+                      style="text-decoration-line: underline; margin-top: 12vh; padding: 0 10px; display: flex; flex-direction: row-reverse;"
+                    >
                       <button
                         id="close-size-chart"
                         class="text-gray-500 hover:text-black transition-colors "
@@ -330,50 +333,57 @@
           {%- endif -%}
         {%- endfor -%}
 
-        <!-- SIZE SELECTOR -->
-        <div class="flex justify-between  items-center gap-2">
-          <span class="font-medium uppercase">SELECT SIZE</span>
-          <div class="flex gap-2 flex-wrap">
-            {%- assign size_options = product.options_with_values | where: 'name', 'Size' | first -%}
-            {%- if size_options -%}
-              {%- for value in size_options.values -%}
+        <!-- SIZE/DENOMINATION SELECTOR (no color) -->
+        {% assign variant_option = null %}
+        {% assign variant_option_index = 0 %}
+        {% for option in product.options_with_values %}
+          {% unless option.name == 'Color' or option.name == 'Colour' %}
+            {% assign variant_option = option %}
+            {% assign variant_option_index = forloop.index0 %}
+            {% break %}
+          {% endunless %}
+        {% endfor %}
+        {% if variant_option %}
+          <div class="flex justify-between items-center gap-2">
+            <span class="font-medium uppercase"> SELECT {{ variant_option.name | upcase }} </span>
+            <div class="flex gap-2 flex-wrap">
+              {% for value in variant_option.values %}
                 {%- assign is_available = false -%}
                 {%- for variant in product.variants -%}
-                  {% assign size_option = 'option' | append: size_index %}
-                  {% if variant[size_option] == value and variant.available %}
+                  {% assign option_key = 'option' | append: variant_option_index | plus: 1 %}
+                  {% if variant[option_key] == value and variant.available %}
                     {%- assign is_available = true -%}
                     {% break %}
                   {% endif %}
                 {%- endfor -%}
-
                 <button
                   type="button"
                   class="
-                    size-btn relative px-3 h-10 min-w-[2.5rem] flex items-center justify-center border-transparent rounded font-semibold bg-white
+                    size-btn relative px-3 h-10 min-w-[2.5rem] flex items-center justify-center border-transparent rounded font-semibold bg-white border
                     {% if forloop.first and is_available %}bg-black text-white{% endif %}
-                    {% unless is_available %}opacity-50 cursor-not-allowed{% endunless %}
+                    {% unless is_available %}opacity-50 cursor-not-allowed bg-gray-200{% endunless %}
                   "
+                  data-option-index="{{ variant_option_index }}"
                   data-value="{{ value | escape }}"
                   {% unless is_available %}
                     disabled aria-disabled="true"
                   {% endunless %}
-                  aria-label="Size {{ value }}{% unless is_available %} - Sold out{% endunless %}"
+                  aria-label="{{ variant_option.name }} {{ value }}{% unless is_available %} - Sold out{% endunless %}"
                 >
                   <span class="label z-10">{{ value }}</span>
-
                   {% unless is_available %}
                     <span
-                      class="absolute inset-0 flex items-center justify-center pointer-events-none"
+                      class="absolute inset-0 flex items-center justify-center pointer-events-none unavailable-slash"
                       aria-hidden="true"
                     >
-                      <span class="block w-full  bg-black -rotate-45" style="height: 1px; rotate: -45deg"></span>
+                      <span class="block w-full bg-black -rotate-45" style="height: 1px;"></span>
                     </span>
                   {% endunless %}
                 </button>
-              {%- endfor -%}
-            {%- endif -%}
+              {% endfor %}
+            </div>
           </div>
-        </div>
+        {% endif %}
 
         <!-- PRICE + ACTIONS -->
         <div class="flex justify-between items-center border-t border-gray-400 pt-4" style="padding-top: 1rem;">
@@ -383,13 +393,23 @@
               <span id="current-price" style="font-weight: {{section.settings.product_price_font_weight}};">
                 {{- product.price | money -}}
               </span>
-              <span id="compare-price-separator" class="text-black text-[14px] {% unless product.compare_at_price > product.price %}hidden{% endunless %}">|</span>
-              <span id="compare-price" class="line-through text-gray-500 {% unless product.compare_at_price > product.price %}hidden{% endunless %}">
+              <span
+                id="compare-price-separator"
+                class="text-black text-[14px] {% unless product.compare_at_price > product.price %}hidden{% endunless %}"
+                >|</span
+              >
+              <span
+                id="compare-price"
+                class="line-through text-gray-500 {% unless product.compare_at_price > product.price %}hidden{% endunless %}"
+              >
                 {% if product.compare_at_price > product.price %}{{ product.compare_at_price | money }}{% endif %}
               </span>
             </div>
 
-            <div id="savings-info" class="text-[14px] text-red-600 font-medium {% unless product.compare_at_price > product.price %}hidden{% endunless %}">
+            <div
+              id="savings-info"
+              class="text-[14px] text-red-600 font-medium {% unless product.compare_at_price > product.price %}hidden{% endunless %}"
+            >
               {% if product.compare_at_price > product.price %}
                 Save {{ product.compare_at_price | minus: product.price | money }} (
                 {{
@@ -408,7 +428,12 @@
             {% if product.available %}
               <!-- ADD TO CART form -->
               <form method="post" action="/cart/add" id="add-to-cart-form">
-                <input type="hidden" name="id" id="variant-id" value="{{ product.selected_or_first_available_variant.id }}">
+                <input
+                  type="hidden"
+                  name="id"
+                  id="variant-id"
+                  value="{{ product.selected_or_first_available_variant.id }}"
+                >
                 <input type="hidden" name="quantity" value="1">
                 <button
                   id="add-to-cart-btn"
@@ -769,50 +794,57 @@
         {%- endif -%}
       {%- endfor -%}
 
-      <!-- SIZE SELECTOR -->
-      <div class="flex justify-between  items-center gap-2">
-        <span class="uppercase font-semibold">SELECT SIZE</span>
-        <div class="flex gap-2 flex-wrap">
-          {%- assign size_options = product.options_with_values | where: 'name', 'Size' | first -%}
-          {%- if size_options -%}
-            {%- for value in size_options.values -%}
+      <!-- SIZE/DENOMINATION SELECTOR (no color) -->
+      {% assign variant_option = null %}
+      {% assign variant_option_index = 0 %}
+      {% for option in product.options_with_values %}
+        {% unless option.name == 'Color' or option.name == 'Colour' %}
+          {% assign variant_option = option %}
+          {% assign variant_option_index = forloop.index0 %}
+          {% break %}
+        {% endunless %}
+      {% endfor %}
+      {% if variant_option %}
+        <div class="flex justify-between items-center gap-2">
+          <span class="font-medium uppercase"> SELECT {{ variant_option.name | upcase }} </span>
+          <div class="flex gap-2 flex-wrap">
+            {% for value in variant_option.values %}
               {%- assign is_available = false -%}
               {%- for variant in product.variants -%}
-                {% assign size_option = 'option' | append: size_index %}
-                {% if variant[size_option] == value and variant.available %}
+                {% assign option_key = 'option' | append: variant_option_index | plus: 1 %}
+                {% if variant[option_key] == value and variant.available %}
                   {%- assign is_available = true -%}
                   {% break %}
                 {% endif %}
               {%- endfor -%}
-
               <button
                 type="button"
                 class="
-                  size-btn relative px-3 h-10 min-w-[2.5rem] flex items-center justify-center border-transparent rounded font-semibold
+                  size-btn relative px-3 h-10 min-w-[2.5rem] flex items-center justify-center border-transparent rounded font-semibold bg-white border
                   {% if forloop.first and is_available %}bg-black text-white{% endif %}
                   {% unless is_available %}opacity-50 cursor-not-allowed bg-gray-200{% endunless %}
                 "
+                data-option-index="{{ variant_option_index }}"
                 data-value="{{ value | escape }}"
                 {% unless is_available %}
                   disabled aria-disabled="true"
                 {% endunless %}
-                aria-label="Size {{ value }}{% unless is_available %} - Sold out{% endunless %}"
+                aria-label="{{ variant_option.name }} {{ value }}{% unless is_available %} - Sold out{% endunless %}"
               >
                 <span class="label z-10">{{ value }}</span>
-
                 {% unless is_available %}
                   <span
-                    class="absolute inset-0 flex items-center justify-center pointer-events-none"
+                    class="absolute inset-0 flex items-center justify-center pointer-events-none unavailable-slash"
                     aria-hidden="true"
                   >
-                    <span class="block w-full  bg-black -rotate-45" style="height: 1px; rotate: -45deg"></span>
+                    <span class="block w-full bg-black -rotate-45" style="height: 1px;"></span>
                   </span>
                 {% endunless %}
               </button>
-            {%- endfor -%}
-          {%- endif -%}
+            {% endfor %}
+          </div>
         </div>
-      </div>
+      {% endif %}
 
       <!-- PRICE + ACTIONS -->
       <div class="flex flex-col justify-evenly  border-t border-gray-400 pt-4" style="padding-top: 1rem;">
@@ -820,7 +852,9 @@
         <div class="text-[18px] flex flex-col justify-between">
           <div class="flex items-center gap-2">
             <span class="mobile-current-price">{{ product.price | money }}</span>
-            <span class="mobile-compare-price-separator text-black text-[14px] {% unless product.compare_at_price > product.price %}hidden{% endunless %}">|</span>
+            <span class="mobile-compare-price-separator text-black text-[14px] {% unless product.compare_at_price > product.price %}hidden{% endunless %}"
+              >|</span
+            >
             <span class="mobile-compare-price line-through text-gray-500 {% unless product.compare_at_price > product.price %}hidden{% endunless %}">
               {% if product.compare_at_price > product.price %}{{ product.compare_at_price | money }}{% endif %}
             </span>
@@ -840,7 +874,12 @@
           {% if product.available %}
             <!-- ADD TO CART form -->
             <form method="post" action="/cart/add" class="mobile-add-to-cart-form">
-              <input type="hidden" name="id" class="mobile-variant-id" value="{{ product.selected_or_first_available_variant.id }}">
+              <input
+                type="hidden"
+                name="id"
+                class="mobile-variant-id"
+                value="{{ product.selected_or_first_available_variant.id }}"
+              >
               <input type="hidden" name="quantity" value="1">
               <button
                 class="mobile-add-to-cart-btn text-white text-3xl px-4 py-2 rounded group flex items-center justify-between gap-2"
@@ -1179,7 +1218,7 @@
           // Add diagonal line for unavailable sizes
           btn.insertAdjacentHTML('beforeend', `
             <span class="absolute inset-0 flex items-center justify-center unavailable-slash pointer-events-none">
-              <span class="block w-full h-[2px] bg-neutral-900 rotate-[135deg] origin-center"></span>
+              <span class="block w-full  bg-neutral-900 rotate-[135deg] origin-center"></span>
             </span>
           `);
         } else {
