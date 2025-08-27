@@ -8,22 +8,23 @@
     <div class="flex items-center justify-center  ">
       <a href="/">
         {% if section.settings.logo != blank %}
-          <img
-            src="{{ section.settings.logo | image_url }}"
-            class="mr-10"
-            width="auto"
-            height="auto"
-            alt="Logo"
-            style="max-height: 100px; max-width: 300px;"
-          >
-        {% else %}
-          <span
-            class="block font-semibold text-center mt-1 "
-            style="font-size: 44px; line-height: 1; color: var(--header_text); margin-right:50px;"
-          >
-            {{- shop.name -}}
-          </span>
-        {% endif %}
+  <img
+    src="{{ section.settings.logo | image_url }}"
+    class="mr-10 fade-in"
+    width="auto"
+    height="auto"
+    alt="Logo"
+    style="max-height: 100px; max-width: 300px;"
+  >
+{% else %}
+  <span
+    class="block font-semibold text-center mt-1 fade-in"
+    style="font-size: 44px; line-height: 1; color: var(--header_text); margin-right:50px;"
+  >
+    {{- shop.name -}}
+  </span>
+{% endif %}
+
       </a>
     </div>
     <!-- Right: Menu & Actions -->
@@ -504,16 +505,14 @@
             onmouseover="this.style.color='var(--hover)';"
             onmouseleave="this.style.color='var(--header_text)';"
           >
-            <span
-              class="flex  text-[16px]"
-              >CART</span
-            >
-            <span
-              class="m-2 p-1 bg-transparent text-md w-7 h-6 flex items-center justify-center ring-1 rounded-full"
-              aria-label="{{ cart.item_count }} items in cart"
-            >
-              {{ cart.item_count }}
-            </span>
+            <span class="flex text-[16px]" style="margin-right: 10px;">CART</span>
+
+    <span
+  class="cart-bracket"
+  aria-label="{{ cart.item_count }} items in cart"
+>
+  {{ cart.item_count }}
+</span>
           </a>
 
           <!-- Hamburger -->
@@ -1152,23 +1151,23 @@
       }
 
         .header-main {
-          position: relative;
-          width: 100%;
-          margin-top: var(--announcement-bar-height);
-          transform: translateY(-100%);
-          animation: slideDown 0.5s ease forwards;
-          background: var(--header_background);
-          padding: 5px {{ settings.side_space }}px;
-        }
+  position: relative;
+  width: 100%;
+  margin-top: var(--announcement-bar-height);
+  background: var(--header_background);
+  padding: 5px {{ settings.side_space }}px;
+}
 
-        @keyframes slideDown {
-          from {
-            transform: translateY(-100%);
-          }
-          to {
-            transform: translateY(0);
-          }
-        }
+.fade-in {
+  opacity: 0;
+  animation: fadeIn 2s ease forwards;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
 
         .header-main.is-sticky {
           position: fixed;
@@ -1286,6 +1285,39 @@
     gap: 1% !important;
   }
 }
+.cart-bracket {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;        /* smaller text */
+  font-weight: 400;
+  padding: 0 6px;         /* less vertical padding */
+  line-height: 1;         /* removes extra height from text */
+  position: relative;
+  height: 20px;           /* force small height */
+}
+
+.cart-bracket::before,
+.cart-bracket::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 5px;             /* thickness of bracket */
+  border-top: 1px solid black;
+  border-bottom: 1px solid black;
+}
+
+.cart-bracket::before {
+  left: 0;
+  border-left: 1px solid black;
+}
+
+.cart-bracket::after {
+  right: 0;
+  border-right: 1px solid black;
+}
+
 </style>
 
 <script>
