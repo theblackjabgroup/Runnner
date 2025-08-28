@@ -1,21 +1,39 @@
 name: Shopify Lighthouse CI
-
-on: [push]
+on: 
+  push:
+    branches: [main, develop]  
+  pull_request:
+    branches: [main]
 
 jobs:
   lhci:
-    name: Lighthouse (PF_TESTING)
+    name: Lighthouse Performance Testing
     runs-on: ubuntu-latest
+    
     steps:
-      - uses: actions/checkout@v2
-
-      - name: Lighthouse
+      - name: Checkout code
+        uses: actions/checkout@v4  
+        
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'  
+          
+      - name: Run Lighthouse CI
         uses: shopify/lighthouse-ci-action@v1
         with:
           access_token:  ${{ secrets.APIKEY }}
           store: "delhi-dev-themetest.myshopify.com"
-          lhci_min_score_accessibility: 0.9
+          password: "shptka_93e0696765c4ad0ad0461e721d53ca86"
           lhci_min_score_performance: 0.7
-          password: "thoolt"
+          lhci_min_score_accessibility: 0.9
 
- 
+          
+      - name: Upload Lighthouse results
+        uses: actions/upload-artifact@v3
+        if: always() 
+        with:
+          name: lighthouse-results
+          path: |
+            .lighthouseci/
+            lhci_reports/
