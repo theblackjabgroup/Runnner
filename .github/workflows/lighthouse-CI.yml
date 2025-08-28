@@ -1,75 +1,19 @@
-name: Debug Shopify Lighthouse CI
-on: 
-  workflow_dispatch: 
-  push:
+name: Shopify Lighthouse CI
+on: [push]
 
 jobs:
-  debug:
-    name: Debug Lighthouse Issues
+  lhci:
+    name: Lighthouse (PF_TESTING)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       
-      - name: Check Environment
-        run: |
-          echo "=== Environment Check ==="
-          echo "Node version: $(node --version)"
-          echo "NPM version: $(npm --version)"
-          echo "Current directory: $(pwd)"
-          echo "Repository: ${{ github.repository }}"
-          
-      - name: Check Secrets
-        run: |
-          echo "=== Secrets Check ==="
-          if [ -n "${{ secrets.APIKEY }}" ]; then
-            echo "✅ APIKEY secret is set (length: ${#APIKEY})"
-            echo "APIKEY starts with: ${APIKEY:0:10}..."
-          else
-            echo "❌ APIKEY secret is missing"
-          fi
-        env:
-          APIKEY: ${{ secrets.APIKEY }}
-          
-      - name: Test Store Connection
-        run: |
-          echo "=== Testing Store Connection ==="
-          echo "Store URL: delhi-dev-themetest.myshopify.com"
-          curl -I "https://delhi-dev-themetest.myshopify.com" || echo "Store connection failed"
-          
-      - name: Test Password Format
-        run: |
-          echo "=== Password Check ==="
-          PASSWORD="shptka_93e0696765c4ad0ad0461e721d53ca86"
-          echo "Password length: ${#PASSWORD}"
-          echo "Password starts with: ${PASSWORD:0:10}..."
-          if [[ $PASSWORD == shptka_* ]]; then
-            echo "✅ Password has correct Theme Access format"
-          else
-            echo "❌ Password doesn't match Theme Access format"
-          fi
-          
-      - name: Try Lighthouse CI with Debug
+      - name: Lighthouse
         uses: shopify/lighthouse-ci-action@v1
-        continue-on-error: true  
         with:
           access_token: ${{ secrets.APIKEY }}
           store: "delhi-dev-themetest.myshopify.com"
           password: "shptka_93e0696765c4ad0ad0461e721d53ca86"
-          lhci_min_score_accessibility: 0.1 
+          theme_id: "148830912741"
+          lhci_min_score_accessibility: 0.1
           lhci_min_score_performance: 0.1
-        env:
-          ACTIONS_STEP_DEBUG: true
-          
-      - name: Check Action Output
-        if: always()
-        run: |
-          echo "=== Checking for output files ==="
-          find . -name "*.json" -o -name "*.html" -o -name "lighthouse*" 2>/dev/null || echo "No lighthouse output files found"
-          
-      - name: Alternative Test - Manual Lighthouse
-        run: |
-          echo "=== Manual Lighthouse Test ==="
-          npm install -g @lhci/cli lighthouse
-          echo "Testing basic lighthouse on a simple page..."
-          lighthouse --version
-          lhci --version
