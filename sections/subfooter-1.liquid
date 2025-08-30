@@ -7,42 +7,13 @@
       "type": "header",
       "content": "Colors"
     },
-    {
-      "type": "color",
-      "id": "background_color",
-      "label": "Background Color",
-      "default": "#ffffff"
+     {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "t:sections.all.colors.label",
+      "default": "scheme-1"
     },
-    {
-      "type": "color",
-      "id": "text_color",
-      "label": "Text Color",
-      "default": "#000000"
-    },
-    {
-      "type": "color",
-      "id": "border_color",
-      "label": "Border Color",
-      "default": "#e0e0e0"
-    },
-    {
-      "type": "color",
-      "id": "hover_background",
-      "label": "Hover Background Color",
-      "default": "#f5f5f5"
-    },
-    {
-      "type": "color",
-      "id": "dropdown_background",
-      "label": "Dropdown Background Color",
-      "default": "#ffffff"
-    },
-    {
-      "type": "color",
-      "id": "dropdown_border",
-      "label": "Dropdown Border Color",
-      "default": "#e0e0e0"
-    },
+    
     {
       "type": "header",
       "content": "Layout"
@@ -65,7 +36,7 @@
   ]
 }
 {% endschema %}
-
+<div class="color-{{ section.settings.color_scheme }}">
 <section class="localization-section" {{ section.shopify_attributes }}>
   <div class="footer-localization">
     <!-- Country Selector -->
@@ -183,25 +154,30 @@
 
     <!-- Center: Copyright -->
     <div class="footer-center">
-      <div class="footer__copyright caption">
-        <small class="copyright__content copyright-line" style="font-size:13px; font-weight:400; color: rgba(var(--color-foreground));">
-          <span>&copy;</span>
-          <span>{{ 'now' | date: '%Y' }}</span>,
-          {{ shop.name | link_to: routes.root_url -}}
-          <span class="policies-inline">
-            {%- if section.settings.show_policy -%}
-              {%- for policy in shop.policies -%}
-                {%- if policy != blank -%}
-                  <span class="policy-separator"> | </span>
-                  <a href="{{ policy.url }}" style="font-size:13px; font-weight:400; color: rgba(var(--color-foreground));">{{ policy.title | escape }}</a>
-                {%- endif -%}
-              {%- endfor -%}
+  <div class="footer__copyright caption">
+    <small class="copyright__content copyright-line" 
+      style="font-size:13px; font-weight:400; color: var(--text);">
+      <span>&copy;</span>
+      <span>{{ 'now' | date: '%Y' }}</span>,
+      {{ shop.name | link_to: routes.root_url }}
+      <span class="policies-inline">
+        {%- if section.settings.show_policy -%}
+          {%- for policy in shop.policies -%}
+            {%- if policy != blank -%}
+              <span class="policy-separator"> | </span>
+              <a href="{{ policy.url }}" 
+                 style="font-size:13px; font-weight:400; color: var(--text);">
+                 {{ policy.title | escape }}
+              </a>
             {%- endif -%}
-          </span>
-          <span class="policy-separator"> | </span>{{ powered_by_link }}
-        </small>
-      </div>
-    </div>
+          {%- endfor -%}
+        {%- endif -%}
+      </span>
+      <span class="policy-separator"> | </span>{{ powered_by_link }}
+    </small>
+  </div>
+</div>
+
 
     <!-- Right: Payment Icons -->
     <div class="footer-right">
@@ -217,17 +193,8 @@
     </div>
   </div>
 </div>
-
+</div>
 <style>
-:root {
-  --localization-bg: {% if section.settings.background_color != blank %}{{ section.settings.background_color }}{% else %}rgb(var(--color-background)){% endif %};
-  --localization-text: {% if section.settings.text_color != blank %}{{ section.settings.text_color }}{% else %}rgb(var(--color-foreground)){% endif %};
-  --localization-border: {% if section.settings.border_color != blank %}{{ section.settings.border_color }}{% else %}rgb(var(--color-border)){% endif %};
-  --localization-hover-bg: {% if section.settings.hover_background != blank %}{{ section.settings.hover_background }}{% else %}rgba(var(--color-foreground), 0.05){% endif %};
-  --localization-dropdown-bg: {% if section.settings.dropdown_background != blank %}{{ section.settings.dropdown_background }}{% else %}rgb(var(--color-background)){% endif %};
-  --localization-dropdown-border: {% if section.settings.dropdown_border != blank %}{{ section.settings.dropdown_border }}{% else %}rgb(var(--color-border)){% endif %};
-  --section-height: {% if section.settings.section_height != blank %}{{ section.settings.section_height }}px{% else %}40px{% endif %};
-}
 
 /* Section Container */
 .localization-section {
@@ -242,7 +209,6 @@
 /* Footer Bottom Layout - REDUCED HEIGHT */
 .footer-bottom-section {
   width: 100%;
-  border-top: 1px solid var(--localization-border);
   margin: 0 !important;
   overflow: visible !important;
   min-height: var(--section-height);
@@ -317,7 +283,7 @@
   all: unset;
   cursor: pointer;
   font-size: 13px;
-  color: var(--localization-text);
+  color: var(--text);
   font-family: var(--font-body-family);
   display: inline-flex;
   align-items: center;
@@ -360,7 +326,7 @@
   left: 0;
   right: 0;
   z-index: 1000;
-  background-color: var(--localization-dropdown-bg);
+  background-color: white;
   border: 1px solid var(--localization-dropdown-border);
   border-radius: 4px;
   box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.15);
