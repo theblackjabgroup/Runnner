@@ -10,7 +10,7 @@
 
   .prod-diff-container {
     position: relative;
-    width: 70vw;
+    width: 100vw;
   }
 
   .prod-diff-wrapper {
@@ -36,7 +36,7 @@
   .prod-diff-img {
     position: absolute;
     left: 0;
-    width: 70vw;
+    width: 100vw;
     height: auto;
     object-fit: cover;
     max-width: none;
@@ -100,17 +100,17 @@
     position: absolute;
     bottom: 20px;
     padding: 10px 15px;
-    max-width: 250px;
+    max-width: 300px;
     width: auto;
   }
 
   .prod-diff-product-info.left {
-    left: -15vw;
+    left: 20px;
     text-align: left;
   }
 
   .prod-diff-product-info.right {
-    right: -15vw;
+    right: 20px;
     text-align: right;
   }
 
@@ -129,7 +129,7 @@
     font-style: var(--font-body-style);
     font-weight: var(--font-body-weight);
     font-size: 20px;
-    color: #ff0000;
+    color: var(--text);
     margin: 0;
   }
 
@@ -141,12 +141,12 @@
     }
 
     .prod-diff-product-info.left {
-      left: -13vw;
+      left: 10px;
       bottom: 0vw;
     }
 
     .prod-diff-product-info.right {
-      right: -13vw;
+      right: 10px;
       bottom: 0vw;
     }
 
@@ -161,6 +161,9 @@
 </style>
 
 {% if section.settings.enabled %}
+  {% if section.settings.color_scheme %}
+    {% assign section_classes_fc = section_classes_fc | append: ' color-' | append: section.settings.color_scheme %}
+  {% endif %}
   {% comment %} Calculate the maximum height from both product images {% endcomment %}
   {% assign left_product = all_products[section.settings.left_product] %}
   {% assign right_product = all_products[section.settings.right_product] %}
@@ -183,7 +186,7 @@
 
   {% comment %} Convert aspect ratio to CSS calc for responsive height {% endcomment %}
   {% if max_aspect_ratio > 0 %}
-    {% assign height_vw = 70.0 | divided_by: max_aspect_ratio %}
+    {% assign height_vw = 100.0 | divided_by: max_aspect_ratio %}
   {% else %}
     {% assign height_vw = 50 %}
   {% endif %}
@@ -207,7 +210,7 @@
             class="prod-diff-img"
             width="600"
             height="auto"
-            style="height: auto; width: 70vw;"
+            style="height: auto; width: 100vw;"
           >
         {% else %}
           <div style="width: 500px; height: 100%;">
@@ -233,7 +236,7 @@
             class="prod-diff-img"
             width="600"
             height="auto"
-            style="height: auto; width: 70vw;"
+            style="height: auto; width: 100vw;"
           >
         {% else %}
           <div style="width: 500px; height: 100%;">
@@ -275,10 +278,14 @@
 {% endif %}
 
 <script>
-  document.addEventListener('DOMContentLoaded', function () {
+  function initProductDifferenceSlider() {
     const sliderDivider = document.querySelector('.prod-diff-slider-divider');
     const sliderHandle = document.querySelector('.prod-diff-slider-handle');
     const container = document.querySelector('.prod-diff-container');
+
+    // Return early if elements don't exist
+    if (!sliderDivider || !sliderHandle || !container) return;
+
     let isDragging = false;
     const leftContainer = document.querySelector('.prod-diff-wrapper.prod-diff-left');
     const rightContainer = document.querySelector('.prod-diff-wrapper.prod-diff-right');
@@ -293,6 +300,7 @@
     }
 
     function updateImagePositions() {
+      if (!rightImg || !leftContainer) return;
       const containerWidth = container.offsetWidth;
       const leftWidth = leftContainer.offsetWidth;
       const rightImgLeftPosition = -leftWidth;
@@ -346,7 +354,53 @@
 
     // Initialize positions
     updateImagePositions();
+  }
+
+  // Make function globally available for theme editor
+  window.initProductDifferenceSlider = initProductDifferenceSlider;
+
+  document.addEventListener('DOMContentLoaded', function () {
+    initProductDifferenceSlider();
   });
+
+  // Theme Editor Event Handlers for proper reloading when products change
+  if (typeof Shopify !== 'undefined' && Shopify.designMode) {
+    document.addEventListener('shopify:section:load', function (event) {
+      if (event.target.querySelector('.prod-diff-section')) {
+        // Small delay to ensure DOM is fully updated
+        setTimeout(function () {
+          initProductDifferenceSlider();
+        }, 10);
+      }
+    });
+
+    document.addEventListener('shopify:section:select', function (event) {
+      if (event.target.querySelector('.prod-diff-section')) {
+        setTimeout(function () {
+          initProductDifferenceSlider();
+        }, 10);
+      }
+    });
+
+    document.addEventListener('shopify:block:select', function (event) {
+      const productDiffSection = event.target.closest('.shopify-section')?.querySelector('.prod-diff-section');
+      if (productDiffSection) {
+        setTimeout(function () {
+          initProductDifferenceSlider();
+        }, 10);
+      }
+    });
+
+    // Listen for setting changes that might affect product selection
+    document.addEventListener('shopify:section:reorder', function (event) {
+      const productDiffSection = document.querySelector('.prod-diff-section');
+      if (productDiffSection) {
+        setTimeout(function () {
+          initProductDifferenceSlider();
+        }, 10);
+      }
+    });
+  }
 </script>
 
 {% schema %}
