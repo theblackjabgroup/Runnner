@@ -716,144 +716,152 @@
 
   <div class="cart-content">
     <div class="cart-items">
-      {% for item in cart.items %}
-        <div class="cart-item">
-          <img
-            class="item-image"
-            src="{{ item.image | image_url: width: 200 }}"
-            alt="{{ item.product.title | escape }}"
-            width="100"
-            height="100"
-          >
+      <form action="{{ routes.cart_url }}" method="post" id="MainCartForm">
+        {% for item in cart.items %}
+          <div class="cart-item">
+            <img
+              class="item-image"
+              src="{{ item.image | image_url: width: 200 }}"
+              alt="{{ item.product.title | escape }}"
+              width="100"
+              height="100"
+            >
 
-          <div class="item-details">
-            <div class="item-info">
-              <div class="item-price">
-                {% if item.original_price != item.final_price %}
-                  {{ item.final_price | money }}
-                {% else %}
-                  {{ item.original_price | money }}
-                {% endif %}
+            <div class="item-details">
+              <div class="item-info">
+                <div class="item-price">
+                  {% if item.original_price != item.final_price %}
+                    {{ item.final_price | money }}
+                  {% else %}
+                    {{ item.original_price | money }}
+                  {% endif %}
+                </div>
+                <div class="item-title">{{ item.product.title }}</div>
               </div>
-              <div class="item-title">{{ item.product.title }}</div>
-            </div>
 
-            <div class="item-options">
-              {% assign size_option = null %}
-              {% assign color_option = null %}
+              <div class="item-options">
+                {% assign size_option = null %}
+                {% assign color_option = null %}
 
-              {% for option in item.options_with_values %}
-                {% assign option_name_lower = option.name | downcase %}
-                {% if option_name_lower contains 'size' %}
-                  {% assign size_option = option %}
-                {% elsif option_name_lower contains 'color' or option_name_lower contains 'colour' %}
-                  {% assign color_option = option %}
-                {% endif %}
-              {% endfor %}
+                {% for option in item.options_with_values %}
+                  {% assign option_name_lower = option.name | downcase %}
+                  {% if option_name_lower contains 'size' %}
+                    {% assign size_option = option %}
+                  {% elsif option_name_lower contains 'color' or option_name_lower contains 'colour' %}
+                    {% assign color_option = option %}
+                  {% endif %}
+                {% endfor %}
 
-              {% if size_option %}
-                <div class="option-row">
-                  <span class="option-label">{{ size_option.name }}:</span>
-                  <span class="option-value selected">{{ size_option.value }}</span>
-                </div>
-              {% endif %}
-
-              {% if color_option %}
-                <div class="option-row">
-                  <span class="option-label">{{ color_option.name }}:</span>
-                  <div class="color-options">
-                    {% assign displayed_colors = '' %}
-                    {% for variant in item.product.variants %}
-                      {% assign variant_color = null %}
-
-                      {% comment %} Check all three option positions for color {% endcomment %}
-                      {% if item.product.options[0] and item.product.options[0] != 'Title' %}
-                        {% assign option_name_lower = item.product.options[0] | downcase %}
-                        {% if option_name_lower contains 'color' or option_name_lower contains 'colour' %}
-                          {% assign variant_color = variant.option1 %}
-                        {% endif %}
-                      {% endif %}
-
-                      {% if variant_color == null and item.product.options[1] and item.product.options[1] != 'Title' %}
-                        {% assign option_name_lower = item.product.options[1] | downcase %}
-                        {% if option_name_lower contains 'color' or option_name_lower contains 'colour' %}
-                          {% assign variant_color = variant.option2 %}
-                        {% endif %}
-                      {% endif %}
-
-                      {% if variant_color == null and item.product.options[2] and item.product.options[2] != 'Title' %}
-                        {% assign option_name_lower = item.product.options[2] | downcase %}
-                        {% if option_name_lower contains 'color' or option_name_lower contains 'colour' %}
-                          {% assign variant_color = variant.option3 %}
-                        {% endif %}
-                      {% endif %}
-
-                      {% if variant_color and variant_color != blank and variant_color != 'Default Title' %}
-                        {% unless displayed_colors contains variant_color %}
-                          {% assign displayed_colors = displayed_colors | append: variant_color | append: ',' %}
-                          {% assign color_class = variant_color | downcase | replace: ' ', '' | replace: '-', '' %}
-                          {% assign is_selected = false %}
-                          {% if variant_color == color_option.value %}
-                            {% assign is_selected = true %}
-                          {% endif %}
-
-                          <div
-                            class="color-picker {{ color_class }}{% if is_selected %} selected{% endif %}"
-                            data-variant-id="{{ variant.id }}"
-                            data-color="{{ variant_color }}"
-                            title="{{ variant_color }}"
-                          ></div>
-                        {% endunless %}
-                      {% endif %}
-                    {% endfor %}
-                  </div>
-                </div>
-              {% endif %}
-
-              {% for option in item.options_with_values %}
-                {% assign option_name_lower = option.name | downcase %}
-                {% unless option_name_lower contains 'size'
-                  or option_name_lower contains 'color'
-                  or option_name_lower contains 'colour'
-                %}
+                {% if size_option %}
                   <div class="option-row">
-                    <span class="option-label">{{ option.name }}:</span>
-                    <span class="option-value selected">{{ option.value }}</span>
+                    <span class="option-label">{{ size_option.name }}:</span>
+                    <span class="option-value selected">{{ size_option.value }}</span>
                   </div>
-                {% endunless %}
-              {% endfor %}
-            </div>
-          </div>
-
-          <div class="item-controls">
-            <div class="quantity-controls">
-              <button
-                class="qty-btn decrease-qty"
-                data-item-key="{{ item.key }}"
-                {% if item.quantity <= 1 %}
-                  disabled
                 {% endif %}
-              >
-                -
-              </button>
-              <input
-                class="qty-input"
-                type="text"
-                value="{{ item.quantity }}"
-                readonly
-                data-item-key="{{ item.key }}"
-              >
-              <button
-                class="qty-btn increase-qty"
-                data-item-key="{{ item.key }}"
-              >
-                +
-              </button>
+
+                {% if color_option %}
+                  <div class="option-row">
+                    <span class="option-label">{{ color_option.name }}:</span>
+                    <div class="color-options">
+                      {% assign displayed_colors = '' %}
+                      {% for variant in item.product.variants %}
+                        {% assign variant_color = null %}
+
+                        {% comment %} Check all three option positions for color {% endcomment %}
+                        {% if item.product.options[0] and item.product.options[0] != 'Title' %}
+                          {% assign option_name_lower = item.product.options[0] | downcase %}
+                          {% if option_name_lower contains 'color' or option_name_lower contains 'colour' %}
+                            {% assign variant_color = variant.option1 %}
+                          {% endif %}
+                        {% endif %}
+
+                        {% if variant_color == null
+                          and item.product.options[1]
+                          and item.product.options[1] != 'Title'
+                        %}
+                          {% assign option_name_lower = item.product.options[1] | downcase %}
+                          {% if option_name_lower contains 'color' or option_name_lower contains 'colour' %}
+                            {% assign variant_color = variant.option2 %}
+                          {% endif %}
+                        {% endif %}
+
+                        {% if variant_color == null
+                          and item.product.options[2]
+                          and item.product.options[2] != 'Title'
+                        %}
+                          {% assign option_name_lower = item.product.options[2] | downcase %}
+                          {% if option_name_lower contains 'color' or option_name_lower contains 'colour' %}
+                            {% assign variant_color = variant.option3 %}
+                          {% endif %}
+                        {% endif %}
+
+                        {% if variant_color and variant_color != blank and variant_color != 'Default Title' %}
+                          {% unless displayed_colors contains variant_color %}
+                            {% assign displayed_colors = displayed_colors | append: variant_color | append: ',' %}
+                            {% assign color_class = variant_color | downcase | replace: ' ', '' | replace: '-', '' %}
+                            {% assign is_selected = false %}
+                            {% if variant_color == color_option.value %}
+                              {% assign is_selected = true %}
+                            {% endif %}
+
+                            <div
+                              class="color-picker {{ color_class }}{% if is_selected %} selected{% endif %}"
+                              data-variant-id="{{ variant.id }}"
+                              data-color="{{ variant_color }}"
+                              title="{{ variant_color }}"
+                            ></div>
+                          {% endunless %}
+                        {% endif %}
+                      {% endfor %}
+                    </div>
+                  </div>
+                {% endif %}
+
+                {% for option in item.options_with_values %}
+                  {% assign option_name_lower = option.name | downcase %}
+                  {% unless option_name_lower contains 'size'
+                    or option_name_lower contains 'color'
+                    or option_name_lower contains 'colour'
+                  %}
+                    <div class="option-row">
+                      <span class="option-label">{{ option.name }}:</span>
+                      <span class="option-value selected">{{ option.value }}</span>
+                    </div>
+                  {% endunless %}
+                {% endfor %}
+              </div>
             </div>
-            <button class="remove-btn" data-item-key="{{ item.key }}">[Remove]</button>
+
+            <div class="item-controls">
+              <div class="quantity-controls">
+                <button
+                  class="qty-btn decrease-qty"
+                  data-item-key="{{ item.key }}"
+                  {% if item.quantity <= 1 %}
+                    disabled
+                  {% endif %}
+                >
+                  -
+                </button>
+                <input
+                  class="qty-input"
+                  type="text"
+                  value="{{ item.quantity }}"
+                  readonly
+                  data-item-key="{{ item.key }}"
+                >
+                <button
+                  class="qty-btn increase-qty"
+                  data-item-key="{{ item.key }}"
+                >
+                  +
+                </button>
+              </div>
+              <button class="remove-btn" data-item-key="{{ item.key }}">[Remove]</button>
+            </div>
           </div>
-        </div>
-      {% endfor %}
+        {% endfor %}
+      </form>
     </div>
 
     <div class="cart-sidebar">
@@ -910,7 +918,15 @@
             {{ cart.total_price | money_without_trailing_zeros }}
           </span>
         </div>
-        <button class="checkout-btn" onclick="proceedToCheckout()">
+        <button
+          type="submit"
+          form="MainCartForm"
+          class="checkout-btn"
+          name="checkout"
+          {% if cart == empty %}
+            disabled
+          {% endif %}
+        >
           <span class="checkout-icon">▶</span>
           Checkout
         </button>
@@ -940,10 +956,6 @@
   function closeCart() {
     // Add your close cart logic here
     console.log('Close cart');
-  }
-
-  function proceedToCheckout() {
-    window.location.href = '{{ routes.checkout_url }}';
   }
 
   // Quantity controls
