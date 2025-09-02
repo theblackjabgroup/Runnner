@@ -58,23 +58,16 @@ document.addEventListener('DOMContentLoaded', function () {
         // Update cart count immediately
         updateCartCount();
 
-        // Also update after a short delay to ensure backend is updated
-        setTimeout(() => {
-          updateCartCount();
-        }, 500);
-
-        // Refresh cart drawer content and then open it
+        // Immediately refresh cart drawer and open it
         refreshCartDrawer()
           .then(() => {
             openCartDrawer();
           })
-          .catch((refreshError) => {
-            console.log('Cart drawer refresh failed, trying direct approach:', refreshError);
-            // If cart drawer refresh fails, just update count and try to open
+          .catch((error) => {
+            console.error('Cart drawer refresh failed:', error);
+            // Fallback: just update count and open
             updateCartCount();
-            setTimeout(() => {
-              openCartDrawer();
-            }, 200);
+            openCartDrawer();
           });
       })
       .catch((error) => {
@@ -137,7 +130,7 @@ document.addEventListener('DOMContentLoaded', function () {
         return response.text();
       })
       .then((responseText) => {
-        console.log('Cart drawer refreshed'); // Debug log
+        console.log('Cart drawer refreshed');
 
         const html = new DOMParser().parseFromString(responseText, 'text/html');
 
@@ -146,10 +139,24 @@ document.addEventListener('DOMContentLoaded', function () {
         const newCartDrawerContent = html.querySelector('cart-drawer');
 
         if (cartDrawerElement && newCartDrawerContent) {
+          // Store the current state
+          const isActive = cartDrawerElement.classList.contains('active');
+          const isAnimating = cartDrawerElement.classList.contains('animate');
+
+          // Replace the content
           cartDrawerElement.innerHTML = newCartDrawerContent.innerHTML;
+
+          // Restore necessary classes
+          if (isActive) cartDrawerElement.classList.add('active');
+          if (isAnimating) cartDrawerElement.classList.add('animate');
+
+          // Remove empty state if it has items
+          if (!newCartDrawerContent.classList.contains('is-empty')) {
+            cartDrawerElement.classList.remove('is-empty');
+          }
         }
 
-        // Also update cart icon bubble if it exists
+        // Also update cart icon bubble
         const cartIconBubble = document.querySelector('#cart-icon-bubble');
         const newCartIconBubble = html.querySelector('#cart-icon-bubble');
 
@@ -157,60 +164,146 @@ document.addEventListener('DOMContentLoaded', function () {
           cartIconBubble.innerHTML = newCartIconBubble.innerHTML;
         }
 
-        // Dispatch cart update event
-        document.dispatchEvent(
-          new CustomEvent('cart:updated', {
-            detail: { refreshed: true },
-          })
-        );
+        // Update cart count
+        updateCartCount();
       })
       .catch((error) => {
         console.error('Error refreshing cart drawer:', error);
-        // Even if cart drawer refresh fails, we can still try to update the count
         return updateCartCount();
       });
   }
 
+  // Function to re-initialize cart drawer event listeners after content refresh
+  function initializeCartDrawerEventListeners() {
+    console.log('Re-initializing cart drawer event listeners');
+
+    // Re-initialize subscription form functionality
+    const subscribeRadio = document.getElementById('subscribe-radio');
+    const regularRadio = document.querySelector('input[name="pricing"][value="regular"]');
+    const subscribeForm = document.getElementById('subscribe-form');
+    const subscribeBtn = document.getElementById('subscribe-btn');
+    const subscribeEmail = document.getElementById('subscribe-email');
+
+    function toggleSubscribeForm() {
+      if (subscribeRadio && subscribeRadio.checked) {
+        if (subscribeForm) subscribeForm.style.display = 'block';
+      } else {
+        if (subscribeForm) subscribeForm.style.display = 'none';
+      }
+    }
+
+    if (subscribeRadio && subscribeForm) {
+      subscribeRadio.addEventListener('change', toggleSubscribeForm);
+      if (regularRadio) {
+        regularRadio.addEventListener('change', toggleSubscribeForm);
+      }
+      // Set initial state
+      toggleSubscribeForm();
+    }
+
+    if (subscribeBtn && subscribeEmail) {
+      subscribeBtn.addEventListener('click', function () {
+        const email = subscribeEmail.value.trim();
+        if (!email) {
+          alert('Please enter a valid email address.');
+          return;
+        }
+        // Ajax POST to Shopify newsletter endpoint
+        fetch('/contact', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+          },
+          body: 'form_type=newsletter&contact[email]=' + encodeURIComponent(email) + '&utf8=✓',
+        })
+          .then(function (response) {
+            if (response.ok) {
+              alert('Thank you for subscribing!');
+              subscribeEmail.value = '';
+            } else {
+              alert('There was a problem subscribing. Please try again.');
+            }
+          })
+          .catch(function () {
+            alert('There was a problem subscribing. Please try again.');
+          });
+      });
+    }
+
+    // Re-initialize overlay click handler
+    const overlay = document.querySelector('#CartDrawer-Overlay');
+    if (overlay) {
+      overlay.addEventListener('click', function () {
+        const cartDrawer = document.querySelector('cart-drawer');
+        if (cartDrawer && typeof cartDrawer.close === 'function') {
+          cartDrawer.close();
+        }
+      });
+    }
+
+    // Re-initialize close button handlers
+    const closeButtons = document.querySelectorAll('.drawer__close, .drawer__close2');
+    closeButtons.forEach((button) => {
+      button.addEventListener('click', function () {
+        const cartDrawer = this.closest('cart-drawer');
+        if (cartDrawer && typeof cartDrawer.close === 'function') {
+          cartDrawer.close();
+        }
+      });
+    });
+
+    // Re-initialize quantity input handlers if they exist
+    const quantityInputs = document.querySelectorAll('.cart-quantity input[type="number"]');
+    quantityInputs.forEach((input) => {
+      // Remove any existing listeners first
+      input.removeEventListener('change', handleQuantityChange);
+      input.addEventListener('change', handleQuantityChange);
+    });
+
+    // Re-initialize remove buttons
+    const removeButtons = document.querySelectorAll('cart-remove-button button');
+    removeButtons.forEach((button) => {
+      if (!button.hasAttribute('data-listener-added')) {
+        button.setAttribute('data-listener-added', 'true');
+        button.addEventListener('click', function (e) {
+          e.preventDefault();
+          const cartItems = this.closest('cart-items') || this.closest('cart-drawer-items');
+          if (cartItems && cartItems.updateQuantity) {
+            const index = this.closest('cart-remove-button').dataset.index;
+            cartItems.updateQuantity(index, 0, e);
+          }
+        });
+      }
+    });
+  }
+
+  // Helper function for quantity change handling
+  function handleQuantityChange(event) {
+    const cartItems = event.target.closest('cart-items') || event.target.closest('cart-drawer-items');
+    if (cartItems && cartItems.validateQuantity) {
+      cartItems.validateQuantity(event);
+    }
+  }
+
   // Function to open cart drawer
   function openCartDrawer() {
-    // Multiple attempts to find and trigger cart drawer
-    const cartDrawerTriggers = [
-      document.querySelector('[data-cart-drawer-trigger]'),
-      document.querySelector('.cart-drawer-trigger'),
-      document.querySelector('#cart-icon-bubble'),
-      document.querySelector('.cart-icon'),
-      document.querySelector('[href="/cart"]'),
-      document.querySelector('a[href*="cart"]'),
-    ];
-
-    let triggerFound = false;
-
-    // Try to click any available trigger
-    for (const trigger of cartDrawerTriggers) {
-      if (trigger) {
-        trigger.click();
-        triggerFound = true;
-        break;
-      }
+    // Try to click cart icon to open drawer
+    const cartIcon = document.querySelector('#cart-icon-bubble');
+    if (cartIcon) {
+      cartIcon.click();
+      return;
     }
 
-    // If no trigger found, try to open cart drawer directly
-    if (!triggerFound) {
-      const cartDrawer = document.querySelector('cart-drawer');
-      if (cartDrawer && typeof cartDrawer.open === 'function') {
-        cartDrawer.open();
-        triggerFound = true;
-      } else if (cartDrawer) {
-        // Manually add active class if open method doesn't exist
-        cartDrawer.classList.add('animate', 'active');
-        document.body.classList.add('overflow-hidden');
-        triggerFound = true;
-      }
-    }
-
-    // Fallback: redirect to cart page if drawer won't open
-    if (!triggerFound) {
-      console.warn('Cart drawer trigger not found, redirecting to cart page');
+    // Fallback: try to open cart drawer directly
+    const cartDrawer = document.querySelector('cart-drawer');
+    if (cartDrawer && typeof cartDrawer.open === 'function') {
+      cartDrawer.open();
+    } else if (cartDrawer) {
+      // Manually add active class
+      cartDrawer.classList.add('animate', 'active');
+      document.body.classList.add('overflow-hidden');
+    } else {
+      // Final fallback: redirect to cart page
       window.location.href = '/cart';
     }
   }
