@@ -6,7 +6,7 @@
       {% assign section_classes = section_classes | append: ' invert-arrow' %}
     {% endunless %}
   {% endif %}
-  <section id="section-{{ section.id }}" class="{{ section_classes }}">
+  <section id="section-{{ section.id }}" class="{{ section_classes }} cb-fade-in">
     <div class="cb-left">
       <div class="cb-left-img" id="cb-left-img">
         {% if section.settings.image %}
@@ -119,6 +119,18 @@
     align-items: stretch;
     height: 100%;
     padding: {{ settings.sections_spacing }}px {{ settings.side_space}}px;
+  }
+
+  /* Fade-in animation styles */
+  section.cb-container-image-and-text.cb-fade-in {
+    opacity: 0;
+    transform: translateY(30px);
+    transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+  }
+
+  section.cb-container-image-and-text.cb-fade-in.cb-visible {
+    opacity: 1;
+    transform: translateY(0);
   }
 
   section.cb-container-image-and-text .cb-right {
@@ -454,6 +466,25 @@
 
     if (!sectionEl) return;
 
+    // Intersection Observer for fade-in animation
+    const observerOptions = {
+      threshold: 0.1,
+      rootMargin: '0px 0px -50px 0px'
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('cb-visible');
+          observer.unobserve(entry.target); // Stop observing once animated
+        }
+      });
+    }, observerOptions);
+
+    // Start observing the section
+    observer.observe(sectionEl);
+
+    // Accordion functionality
     sectionEl.querySelectorAll('.cb-accordion-header').forEach((header) => {
       header.addEventListener('click', () => {
         const content = header.nextElementSibling;

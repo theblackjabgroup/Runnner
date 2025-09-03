@@ -97,7 +97,15 @@
               type="button"
               data-collection="{{ button_collection_id }}"
             >
-              <span class="label-text">{{ block.settings.label }}</span>
+              <span class="label-text">
+                {{ block.settings.label }}
+                {% if block.settings.collection %}
+                  <!-- Desktop version with superscript -->
+                  <sup class="product-count-desktop">[{{ block.settings.collection.products_count }}]</sup>
+                  <!-- Mobile version with normal text -->
+                  <span class="product-count-mobile"> [{{ block.settings.collection.products_count }}]</span>
+                {% endif %}
+              </span>
               {% comment %}
                 <svg class="svg-arrow-right" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 37 36" width="18" height="18">
                   <path fill="currentColor" d="M26.79,9.21A35.06,35.06,0,0,0,37,16.2v3.66a35.34,35.34,0,0,0-10.21,7A12.84,12.84,0,0,0,23.21,36H17.56q0-6.22,3-10a15.4,15.4,0,0,1,8.06-5.2V20.6H0V15.43H28.63v-.3A15.16,15.16,0,0,1,20.57,10q-3-3.77-3-10h5.65a13,13,0,0,0,.87,5A12.79,12.79,0,0,0,26.79,9.21Z"/>
@@ -548,6 +556,16 @@
       overflow-y: hidden;
     }
 
+    /* Product count display control */
+    .product-count-desktop {
+      display: inline;
+      font-size: 14px;
+    }
+
+    .product-count-mobile {
+      display: none;
+    }
+
     @media (max-width: 749px) {
       /* .featured-collection-page-width {
         margin: 0 8px;
@@ -562,6 +580,15 @@
 
         .featured-collection-button-arrow{
           display: none;
+        }
+
+        /* Show normal text on mobile, hide superscript */
+        .product-count-desktop {
+          display: none;
+        }
+
+        .product-count-mobile {
+          display: inline;
         }
     }
 
@@ -1167,19 +1194,18 @@
       position: relative;
       display: inline-block;
       padding: 0px 5px;
-      background-color: rgb(var(--color-background));
-      color: var(--text);
+      background-color: var(--button);
+      color: var(--button_label);
       border-radius: {{ settings.buttons_radius |  minus: 1 }}px;
-      border: var(--text) {{ settings.buttons_border_thickness }}px solid !important;
+      border: var(--button_label) {{ settings.buttons_border_thickness }}px solid;
       overflow: hidden;
       transition: background-color 0.3s, color 0.3s;
     }
 
     .featured-collection-custom-button:hover {
-      background-color: var(--text);
-      border: rgb(var(--color-background)) {{ settings.buttons_border_thickness | plus: 1 }}px solid;
-      color: rgb(var(--color-background));
-      border: {{ settings.buttons_border_thickness | plus: 1 }}px solid rgb(var(--color-background));
+      background-color: var(--hovered_button_label);
+      color: var(--hovered_button_text_color);
+      border-color: var(--hovered_button_text_color);
     }
 
     .featured-collection-button-text-container {
