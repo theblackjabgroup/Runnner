@@ -48,7 +48,7 @@
           display: block;
           width: 8px;
           height: 9px;
-          background: #111;
+          background: var(--text);
           border-radius: 50%;
           position: absolute;
           top: 0.10rem !important; /* Center the dot vertically */
@@ -79,7 +79,7 @@
           overflow: hidden;
           display: flex;
           align-items: center;
-          border: 1px solid black;
+          border: 1px solid var(--text);
         }
 
         .vertical-text-cart-drawer {
@@ -88,7 +88,7 @@
           text-orientation: mixed;
           transform: rotate(180deg);
           animation: scrollText {{ settings.scroll_speed }}s linear infinite !important;
-          color: black !important;
+          color: var(--text) !important;
           font-size: 24px;
           white-space: nowrap;
           font-weight:500;
@@ -135,8 +135,8 @@
         /* Hide the default radio */
         .pricing-option [type='radio'] {
           -webkit-appearance: none;
-          background-color: #fff;
-          border: 2px solid #111;
+          background-color: var(--background);
+          border: 2px solid var(--text);
           width: 15px;
           height: 15px;
           border-radius: 50%;
@@ -155,7 +155,7 @@
           display: block;
           width: 8px;
           height: 9px;
-          background: #111;
+          background: var(--text);
           border-radius: 50%;
           position: absolute;
           top: 0.15rem; /* Center the dot vertically */
@@ -164,7 +164,7 @@
 
         /* Optional: focus state */
         .pricing-option input[type='radio']:focus {
-          box-shadow: 0 0 0 2px #1112;
+          box-shadow: 0 0 0 2px var(--text);
         }
 
         /* Quantity button hover effects */
@@ -177,21 +177,21 @@
           position: relative;
           overflow: hidden;
           transition: background-color 0.3s ease, color 0.3s ease, border 0.3s ease;
-          border: 2px solid black;
-          background-color: black !important;
-          color: white !important;
+          border: 2px solid var(--text);
+          background-color: var(--button) !important;
+          color: var(--button_label) !important;
           height:35px !important;
           min-width: 270px !important;
         }
 
         #CartDrawer-Checkout:hover {
-          background-color: white !important;
-          color: black !important;
-          border: 2px solid black !important;
+          background-color: var(--background) !important;
+          color: var(--text) !important;
+          border: 2px solid var(--text) !important;
         }
 
         #CartDrawer-Checkout:hover svg path {
-          stroke: black !important;
+          stroke: var(--text) !important;
         }
         .button{
         min-height:unset !important}
@@ -219,7 +219,7 @@
 
         .checkout-button-text-hover {
                   width:230px;
- 
+
           position: absolute;
           top: 0;
           left: 0;
@@ -289,19 +289,19 @@
 
       {%- if cart == empty -%}
         <div class="drawer__inner-empty">
-          <h2 class="empty-cart-number uppercase !text-[16px] !font-medium !mb-0">
+          <h2 class="empty-cart-number uppercase !text-[16px] !font-medium !mb-0" style="color: var(--text);">
             {{ 'sections.cart.title' | t }} ({{ cart.item_count }})
           </h2>
           <div class="cart-drawer__warnings center{% if settings.cart_drawer_collection != blank %} cart-drawer__warnings--has-collection{% endif %}">
             <div class="cart-drawer__empty-content">
-              <h2 class="cart__empty-text ">{{ 'sections.cart.empty' | t }}</h2>
+              <h2 class="cart__empty-text" style="color: var(--text);">{{ 'sections.cart.empty' | t }}</h2>
               <button
                 class="drawer__close2"
                 type="button"
                 onclick="this.closest('cart-drawer').close()"
                 aria-label="{{ 'accessibility.close' | t }}"
               >
-                <span class="svg-wrapper uppercase !translate-x-[-100px]"> close </span>
+                <span class="svg-wrapper uppercase !translate-x-[-100px]" style="color: var(--text);"> close </span>
               </button>
               <a href="{{ routes.all_products_collection_url }}" class="button">
                 {{ 'general.continue_shopping' | t }}
@@ -323,7 +323,7 @@
         </div>
       {%- endif -%}
       <div class="drawer__header border-b !py-[16px]">
-        <h2 class="drawer__heading uppercase !text-[16px] !font-medium !mb-0">
+        <h2 class="drawer__heading uppercase !text-[16px] !font-medium !mb-0" style="color: var(--text);">
           {{ 'sections.cart.title' | t }} ({{ cart.item_count }})
         </h2>
         <button
@@ -332,7 +332,9 @@
           onclick="this.closest('cart-drawer').close()"
           aria-label="{{ 'accessibility.close' | t }}"
         >
-          <span class=" uppercase !mr-[25px]  md:mb-3 mb-6 font-medium !text-[16px]"> close </span>
+          <span class=" uppercase !mr-[25px]  md:mb-3 mb-6 font-medium !text-[16px]" style="color: var(--text);">
+            close
+          </span>
         </button>
       </div>
       <cart-drawer-items
@@ -380,16 +382,22 @@
                           <!-- Top Row: Title and Price -->
                           <div class="!flex !justify-between !items-start !mb-[auto]">
                             <div class="!flex !flex-col">
-                              <div class="!text-base !text-[16px]  ">
+                              <div class="!text-base !text-[16px]" style="color: var(--text);">
                                 ${{ item.final_price | money_without_currency }}
                               </div>
                               <div class="!flex-col !gap-2">
-                                <a href="{{ item.url }}" class="item-price !uppercase  !font-medium !mb-2">
+                                <a
+                                  href="{{ item.url }}"
+                                  class="item-price !uppercase  !font-medium !mb-2"
+                                  style="color: var(--text);"
+                                >
                                   {{- item.product.title | escape -}}
                                 </a>
                                 {%- for option in item.options_with_values -%}
                                   {%- if option.name == 'Size' -%}
-                                    <div class="!text-[16px] !uppercase  ">SIZE: {{ option.value }}</div>
+                                    <div class="!text-[16px] !uppercase" style="color: var(--text);">
+                                      SIZE: {{ option.value }}
+                                    </div>
                                     <div class="size-selector !flex !gap-2">
                                       {%- for size in item.product.options.Size -%}
                                         <button
@@ -573,6 +581,7 @@
                               <button
                                 type="button"
                                 class="item-price -translate-x-[20px] mb-6"
+                                style="color: var(--text);"
                                 aria-label="{{ 'sections.cart.remove_title' | t: title: item.title }}"
                               >
                                 REMOVE
@@ -633,7 +642,7 @@
                           <!-- Top Row: Title and Price -->
                           <div class="!flex !justify-between !items-start !mb-[auto]">
                             <div class="!flex !flex-col">
-                              <div class="!text-base !text-[16px]  item-price">
+                              <div class="!text-base !text-[16px] item-price" style="color: var(--text);">
                                 ${{ item.final_price | money_without_currency }}
                               </div>
                             </div>
@@ -789,12 +798,18 @@
                           <!-- Bottom Row: Size Options, Color Picker, and Remove -->
                           <div class="!flex !justify-between !items-end ">
                             <div class="!flex-col !gap-2">
-                              <a href="{{ item.url }}" class="!text-[16px] !uppercase  !font-medium !mb-2 item-title">
+                              <a
+                                href="{{ item.url }}"
+                                class="!text-[16px] !uppercase  !font-medium !mb-2 item-title"
+                                style="color: var(--text);"
+                              >
                                 {{- item.product.title | escape -}}
                               </a>
                               {%- for option in item.options_with_values -%}
                                 {%- if option.name == 'Size' -%}
-                                  <div class=" !uppercase size-variant ">SIZE: {{ option.value }}</div>
+                                  <div class=" !uppercase size-variant" style="color: var(--text);">
+                                    SIZE: {{ option.value }}
+                                  </div>
                                   <div class="size-selector !flex !gap-2">
                                     {%- for size in item.product.options.Size -%}
                                       <button
@@ -826,6 +841,7 @@
                               <button
                                 type="button"
                                 class="!text-[16px] cursor-pointer"
+                                style="color: var(--text);"
                                 aria-label="{{ 'sections.cart.remove_title' | t: title: item.title }}"
                               >
                                 REMOVE
@@ -852,19 +868,25 @@
         <!-- Subtotals -->
 
         <div class="cart-drawer__footer" {{ block.shopify_attributes }}>
-          <div class="totals !text-[16px] border-y " role="status">
-            <h2 class="totals__total !text-normal">SUBTOTAL</h2>
+          <div class="totals !text-[16px] border-y" role="status" style="border-color: var(--border);">
+            <h2 class="totals__total !text-normal" style="color: var(--text);">SUBTOTAL</h2>
           </div>
 
           <div class="cart-drawer__pricing-options !flex !flex-col !mt-0">
-            <label class="pricing-option !text-[16px] border-b  flex items-center justify-center gap-3 ">
+            <label
+              class="pricing-option !text-[16px] border-b flex items-center justify-center gap-3"
+              style="border-color: var(--border); color: var(--text);"
+            >
               <input type="radio" name="pricing" value="regular" checked>
               <div class="flex justify-between w-full !font-medium">
                 <span class="!text-[16px]">REGULAR PRICE</span>
                 <span class="!text-[16px]">${{ cart.total_price | money_without_currency }}</span>
               </div>
             </label>
-            <label class="pricing-option !text-[16px] border-b  flex items-center justify-center gap-3 ">
+            <label
+              class="pricing-option !text-[16px] border-b flex items-center justify-center gap-3"
+              style="border-color: var(--border); color: var(--text);"
+            >
               <input id="subscribe-radio" type="radio" name="pricing" value="member">
               <div class="flex justify-between w-full !font-medium">
                 <span class="!text-[16px]">SUBSCRIBE AND SAVE 10%</span>
@@ -876,12 +898,12 @@
                 type="email"
                 id="subscribe-email"
                 placeholder="Enter your email"
-                style="padding: 8px; border: 1px solid #ccc; border-radius: 4px; "
+                style="padding: 8px; border: 1px solid var(--border); border-radius: 4px; background: var(--background); color: var(--text);"
               >
               <button
                 type="button"
                 id="subscribe-btn"
-                style="padding: 5px 10px; background: #000; color: #fff; border: none; margin-top:10px; border-radius: 4px; display:flex; align-items:center; text-transform: uppercase; font-weight: bold; font-size: 2rem;"
+                style="padding: 5px 10px; background: var(--button); color: var(--button_label); border: none; margin-top:10px; border-radius: 4px; display:flex; align-items:center; text-transform: uppercase; font-weight: bold; font-size: 2rem;"
               >
                 <svg
                   width="20"
@@ -920,7 +942,7 @@
                   fill="none"
                   xmlns="http://www.w3.org/2000/svg"
                 >
-                  <path d="M1.1875 7.7334H7.6599M7.6599 7.7334V1.261M7.6599 7.7334L1.1875 1.261" stroke="white" stroke-linejoin="round"/>
+                  <path d="M1.1875 7.7334H7.6599M7.6599 7.7334V1.261M7.6599 7.7334L1.1875 1.261" stroke="var(--button_label)" stroke-linejoin="round"/>
                 </svg>
                 &nbsp; CHECKOUT
               </div>
@@ -933,7 +955,7 @@
                   fill="none"
                   xmlns="http://www.w3.org/2000/svg"
                 >
-                  <path d="M1.1875 7.7334H7.6599M7.6599 7.7334V1.261M7.6599 7.7334L1.1875 1.261" stroke="black" stroke-linejoin="round"/>
+                  <path d="M1.1875 7.7334H7.6599M7.6599 7.7334V1.261M7.6599 7.7334L1.1875 1.261" stroke="var(--text)" stroke-linejoin="round"/>
                 </svg>
                 &nbsp; CHECKOUT
               </div>
