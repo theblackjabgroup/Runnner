@@ -264,10 +264,7 @@
                 </div>
                 <a
                   href="#"
-                  class="border border-black px-2 py-0 text-[14px] font-medium rounded transition-colors duration-200 "
-                  style="background-color: var(--secondary_button_label); color: var(--secondary_button_text_color); width: 8rem; text-align: center;"
-                  onmouseenter="this.style.backgroundColor='var(--hover)'"
-                  onmouseleave="this.style.backgroundColor='var(--secondary_button_label)'"
+                  class=" delivery-change-btn border px-2 py-0 text-[14px] font-medium rounded transition-colors duration-200 "
                   aria-label="Change delivery address"
                 >
                   CHANGE
@@ -283,10 +280,7 @@
                 </div>
                 <a
                   href="#"
-                  class="border border-black px-2 py-0 text-[14px] font-medium rounded transition-colors duration-200 "
-                  style="background-color: var(--secondary_button_label); color: var(--secondary_button_text_color); width: 8rem; text-align: center;"
-                  onmouseenter="this.style.backgroundColor='var(--hover)'"
-                  onmouseleave="this.style.backgroundColor='var(--secondary_button_label)'"
+                  class=" delivery-change-btn border px-2 py-0 text-[14px] font-medium rounded transition-colors duration-200 "
                   aria-label="Change delivery address"
                 >
                   CHANGE
@@ -302,8 +296,8 @@
             <div class="flex justify-between items-center border-b border-gray-400 pb-4" {{ block.shopify_attributes }}>
               <span class="font-medium uppercase ">QUANTITY SELECTOR</span>
               <div
-                class="flex items-center justify-center py-1 border rounded-xl overflow-hidden h-10"
-                style="width: 8rem;"
+                class="flex items-center justify-center py-1 border rounded overflow-hidden h-10"
+                style="width: 8rem; border-color: var(--border)"
               >
                 <button
                   type="button"
@@ -316,7 +310,7 @@
                 <span
                   id="quantityDisplay"
                   class="px-3 border-x-1 border-black text-[16px]  "
-                  style="border-left: 1px solid black; border-right: 1px solid black;"
+                  style="border-left: 1px solid var(--border); border-right: 1px solid var(--border);"
                   >1</span
                 >
                 <input type="hidden" name="quantity" id="quantityInput" value="1">
@@ -345,39 +339,38 @@
         {% endfor %}
         {% if variant_option %}
           <div class="flex justify-between items-center gap-2">
-            <span class="font-medium uppercase"> SELECT {{ variant_option.name | upcase }} </span>
+            <span class="font-medium uppercase">SELECT {{ variant_option.name | upcase }}</span>
             <div class="flex gap-2 flex-wrap">
               {% for value in variant_option.values %}
-                {%- assign is_available = false -%}
-                {%- for variant in product.variants -%}
+                {% assign variant_available = false %}
+                {% assign variant_id = null %}
+                {% for variant in product.variants %}
                   {% assign option_key = 'option' | append: variant_option_index | plus: 1 %}
-                  {% if variant[option_key] == value and variant.available %}
-                    {%- assign is_available = true -%}
-                    {% break %}
+                  {% if variant[option_key] == value %}
+                    {% if variant.available %}
+                      {% assign variant_available = true %}
+                      {% assign variant_id = variant.id %}
+                      {% break %}
+                    {% endif %}
                   {% endif %}
-                {%- endfor -%}
+                {% endfor %}
                 <button
                   type="button"
-                  class="
-                    size-btn relative px-3 h-10 min-w-[2.5rem] flex items-center justify-center border-transparent rounded font-semibold bg-white border
-                    {% if forloop.first and is_available %}bg-black text-white{% endif %}
-                    {% unless is_available %}opacity-50 cursor-not-allowed bg-gray-200{% endunless %}
-                  "
+                  class="size-btn relative px-3 h-10 min-w-[2.5rem] flex items-center justify-center border-transparent rounded font-semibold border
+                    {% if forloop.first and variant_available %}bg-black text-white{% endif %}
+                    {% unless variant_available %}cursor-not-allowed bg-gray-200 unavailable-size{% endunless %}"
                   data-option-index="{{ variant_option_index }}"
                   data-value="{{ value | escape }}"
-                  {% unless is_available %}
+                  {% if variant_available %}
+                    data-variant-id="{{ variant_id }}"
+                  {% else %}
                     disabled aria-disabled="true"
-                  {% endunless %}
-                  aria-label="{{ variant_option.name }} {{ value }}{% unless is_available %} - Sold out{% endunless %}"
+                  {% endif %}
+                  aria-label="{{ variant_option.name }} {{ value }}{% unless variant_available %} - Sold out{% endunless %}"
                 >
                   <span class="label z-10">{{ value }}</span>
-                  {% unless is_available %}
-                    <span
-                      class="absolute inset-0 flex items-center justify-center pointer-events-none unavailable-slash"
-                      aria-hidden="true"
-                    >
-                      <span class="block w-full bg-black -rotate-45" style="height: 1px;"></span>
-                    </span>
+                  {% unless variant_available %}
+                    <span class="slash-unavailable"></span>
                   {% endunless %}
                 </button>
               {% endfor %}
@@ -408,7 +401,8 @@
 
             <div
               id="savings-info"
-              class="text-[14px] text-red-600 font-medium {% unless product.compare_at_price > product.price %}hidden{% endunless %}"
+              class="text-[14px] font-medium {% unless product.compare_at_price > product.price %}hidden{% endunless %}"
+              style="color: var(--sale_badge); "
             >
               {% if product.compare_at_price > product.price %}
                 Save {{ product.compare_at_price | minus: product.price | money }} (
@@ -733,10 +727,7 @@
               </div>
               <a
                 href="#"
-                class="border border-black px-2 py-1 text-[14px] font-medium rounded transition-colors duration-200 "
-                style="background-color: var(--secondary_button_label); color: var(--secondary_button_text_color);"
-                onmouseenter="this.style.backgroundColor='var(--hover)'"
-                onmouseleave="this.style.backgroundColor='var(--secondary_button_label)'"
+                class=" delivery-change-btn border px-2 py-1 text-[14px] font-medium rounded transition-colors duration-200 "
                 aria-label="Change delivery address"
               >
                 CHANGE
@@ -752,8 +743,7 @@
               </div>
               <a
                 href="#"
-                class="border border-black  py-0 text-[14px] font-medium rounded transition-colors duration-200 "
-                style="background-color: var(--secondary_button_label); color: var(--secondary_button_text_color); width: 8rem; text-align: center;"
+                class="delivery-change-btn border  py-0 text-[14px] font-medium rounded transition-colors duration-200 "
                 aria-label="Change delivery address"
               >
                 CHANGE
@@ -806,39 +796,38 @@
       {% endfor %}
       {% if variant_option %}
         <div class="flex justify-between items-center gap-2">
-          <span class="font-medium uppercase"> SELECT {{ variant_option.name | upcase }} </span>
+          <span class="font-medium uppercase">SELECT {{ variant_option.name | upcase }}</span>
           <div class="flex gap-2 flex-wrap">
             {% for value in variant_option.values %}
-              {%- assign is_available = false -%}
-              {%- for variant in product.variants -%}
+              {% assign variant_available = false %}
+              {% assign variant_id = null %}
+              {% for variant in product.variants %}
                 {% assign option_key = 'option' | append: variant_option_index | plus: 1 %}
-                {% if variant[option_key] == value and variant.available %}
-                  {%- assign is_available = true -%}
-                  {% break %}
+                {% if variant[option_key] == value %}
+                  {% if variant.available %}
+                    {% assign variant_available = true %}
+                    {% assign variant_id = variant.id %}
+                    {% break %}
+                  {% endif %}
                 {% endif %}
-              {%- endfor -%}
+              {% endfor %}
               <button
                 type="button"
-                class="
-                  size-btn relative px-3 h-10 min-w-[2.5rem] flex items-center justify-center border-transparent rounded font-semibold bg-white border
-                  {% if forloop.first and is_available %}bg-black text-white{% endif %}
-                  {% unless is_available %}opacity-50 cursor-not-allowed bg-gray-200{% endunless %}
-                "
+                class="size-btn relative px-3 h-10 min-w-[2.5rem] flex items-center justify-center border-transparent rounded font-semibold border
+                  {% if forloop.first and variant_available %}bg-black text-white{% endif %}
+                  {% unless variant_available %} cursor-not-allowed bg-gray-200 unavailable-size{% endunless %}"
                 data-option-index="{{ variant_option_index }}"
                 data-value="{{ value | escape }}"
-                {% unless is_available %}
+                {% if variant_available %}
+                  data-variant-id="{{ variant_id }}"
+                {% else %}
                   disabled aria-disabled="true"
-                {% endunless %}
-                aria-label="{{ variant_option.name }} {{ value }}{% unless is_available %} - Sold out{% endunless %}"
+                {% endif %}
+                aria-label="{{ variant_option.name }} {{ value }}{% unless variant_available %} - Sold out{% endunless %}"
               >
                 <span class="label z-10">{{ value }}</span>
-                {% unless is_available %}
-                  <span
-                    class="absolute inset-0 flex items-center justify-center pointer-events-none unavailable-slash"
-                    aria-hidden="true"
-                  >
-                    <span class="block w-full bg-black -rotate-45" style="height: 1px;"></span>
-                  </span>
+                {% unless variant_available %}
+                  <span class="slash-unavailable"></span>
                 {% endunless %}
               </button>
             {% endfor %}
@@ -860,7 +849,10 @@
             </span>
           </div>
 
-          <div class="mobile-savings-info text-[14px] text-red-600 font-medium {% unless product.compare_at_price > product.price %}hidden{% endunless %}">
+          <div
+            class="mobile-savings-info text-[14px] font-medium {% unless product.compare_at_price > product.price %}hidden{% endunless %}"
+            style="color: var(--sale_badge);"
+          >
             {% if product.compare_at_price > product.price %}
               Save {{ product.compare_at_price | minus: product.price | money }} (
               {{ product.compare_at_price | minus: product.price | times: 100 | divided_by: product.compare_at_price -}}
@@ -922,165 +914,208 @@
 </section>
 
 <style>
-  .section-{{ section.id }}-padding {
-    padding-top: {{  settings.sections_spacing | times: 0.75 | round: 0 }}px;
-    padding-bottom: {{  settings.sections_spacing | times: 0.75 | round: 0 }}px;
-    padding-left: {{  settings.side_space | times: 0.75 | round: 0 }}px;
-    padding-right: {{  settings.side_space | times: 0.75 | round: 0 }}px;
-  }
-
-  @media screen and (min-width: 750px) {
-    .section-{{ section.id }}-padding {
-      padding-top: {{  settings.sections_spacing}}px;
-      padding-bottom: {{  settings.sections_spacing}}px;
-      padding-left: {{  settings.side_space  }}px;
-      padding-right: {{  settings.side_space }}px;
+      .delivery-change-btn{
+       background-color: var(--button);
+      color: var(--button_label);
+      border: 1px solid var(--border);
     }
-  }
-
-  #size-chart-drawer {
-    transition: transform 1s cubic-bezier(0.4,0,0.2,1);
-    transform: translateX(100%);
-    will-change: transform;
-  }
-  #size-chart-drawer.open {
-    transform: translateX(0);
-  }
-
-  .product-section {
-    display: flex;
-    height: calc(100vh * {{product.media.size}});
-    position: relative;
-  }
-
-  .gallery-wrapper {
-    position: sticky;
-    top: 0;
-    height: 100vh;
-    overflow: hidden;
-  }
-
-  .gallery-track {
-    height: 100%;
-  }
-
-  .gallery-item {
-    opacity: 0;
-    transition: opacity 0.3s ease-out;
-    will-change: opacity;
-  }
-
-  .gallery-item.is-active {
-    opacity: 1;
-    pointer-events: auto;
-    z-index: 1;
-  }
-
-  .image-strip-container {
-    position: absolute;
-    top: 50%;
-    left: 10px;
-    transform: translateY(-50%);
-    z-index: 100;
-    transition: opacity 0.3s ease;
-  }
-
-  .gallery-track:hover .image-strip-container {
-    opacity: 1;
-  }
-
-  .image-strip {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    padding: 10px;
-    border-radius: 8px;
-  }
-
-  .strip-image-wrapper {
-    width: 60px;
-    height: 60px;
-    cursor: pointer;
-    opacity: 0.7;
-    transition: all 0.3s ease;
-  }
-
-  .strip-image-wrapper:hover,
-  .strip-image-wrapper.active {
-    opacity: 1;
-    transform: scale(1.1);
-    border: 1px solid black;
-  }
-  .strip-image {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    border-radius: 4px;
-  }
-
-  .tab-content {
-    height: calc(100% - 50px);
-  }
-
-  .size-btn {
-    transition: all 0.3s ease;
-    border: 1px solid #ccc;
-  }
-
-  .size-btn:not(:disabled):hover,
-  .size-btn.bg-black {
-    background-color: black;
-    color: white;
-  }
-
-  .size-btn:disabled {
-    opacity: 0.8;
-    cursor: not-allowed;
-  }
-
-  /* Mobile-specific styles */
-  @media (max-width: 1024px) {
-    .mobile-gallery-item {
-      will-change: opacity, transform;
-      transition: opacity 0.3s ease;
-      position: absolute;
-      inset: 0;
-      max-height: 65vh !important;
-      object-fit: cover !important;
-      display: block;
+    .delivery-change-btn:hover {
+      background-color: var(--hovered_button_label);
+      color: var(--hovered_button_text_color);
     }
+      .section-{{ section.id }}-padding {
+        padding-top: {{  settings.sections_spacing | times: 0.75 | round: 0 }}px;
+        padding-bottom: {{  settings.sections_spacing | times: 0.75 | round: 0 }}px;
+        padding-left: {{  settings.side_space | times: 0.75 | round: 0 }}px;
+        padding-right: {{  settings.side_space | times: 0.75 | round: 0 }}px;
+      }
 
-    .mobile-gallery-item.active {
-      opacity: 1;
-      z-index: 2;
-      position: relative;
-    }
+      @media screen and (min-width: 750px) {
+        .section-{{ section.id }}-padding {
+          padding-top: {{  settings.sections_spacing}}px;
+          padding-bottom: {{  settings.sections_spacing}}px;
+          padding-left: {{  settings.side_space  }}px;
+          padding-right: {{  settings.side_space }}px;
+        }
+      }
 
-    .thumbnail-item {
-      transition: all 0.3s ease;
-      opacity: 0.6;
-      border: 2px solid transparent;
-    }
+      #size-chart-drawer {
+        transition: transform 1s cubic-bezier(0.4,0,0.2,1);
+        transform: translateX(100%);
+        will-change: transform;
+      }
+      #size-chart-drawer.open {
+        transform: translateX(0);
+      }
 
-    .thumbnail-item.active {
-      opacity: 1;
-      border-color: black;
-      transform: scale(1.05);
-    }
+      .product-section {
+        display: flex;
+        height: calc(100vh * {{product.media.size}});
+        position: relative;
+      }
 
-    .product-tabs {
-      height: auto;
-      min-height: 200px;
-    }
+      .gallery-wrapper {
+        position: sticky;
+        top: 0;
+        height: 100vh;
+        overflow: hidden;
+      }
 
-    .tab-content {
-      height: auto;
-    }
+      .gallery-track {
+        height: 100%;
+      }
 
-    #mobile-size-chart-drawer {
-      transition: transform 0.6s cubic-bezier(0.4,0,0.2,1);
-    }
-  }
+      .gallery-item {
+        opacity: 0;
+        transition: opacity 0.3s ease-out;
+        will-change: opacity;
+      }
+
+      .gallery-item.is-active {
+        opacity: 1;
+        pointer-events: auto;
+        z-index: 1;
+      }
+
+      .image-strip-container {
+        position: absolute;
+        top: 50%;
+        left: 10px;
+        transform: translateY(-50%);
+        z-index: 100;
+        transition: opacity 0.3s ease;
+      }
+
+      .gallery-track:hover .image-strip-container {
+        opacity: 1;
+      }
+
+      .image-strip {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        padding: 10px;
+        border-radius: 8px;
+      }
+
+      .strip-image-wrapper {
+        width: 60px;
+        height: 60px;
+        cursor: pointer;
+        opacity: 0.7;
+        transition: all 0.3s ease;
+      }
+
+      .strip-image-wrapper:hover,
+      .strip-image-wrapper.active {
+        opacity: 1;
+        transform: scale(1.1);
+        border: 1px solid black;
+      }
+      .strip-image {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        border-radius: 4px;
+      }
+
+      .tab-content {
+        height: calc(100% - 50px);
+      }
+
+      .size-btn {
+        transition: all 0.3s ease;
+         background-color: var(--button);
+      color: var(--button_label);
+      border: 1px solid var(--border);
+      }
+
+      .size-btn:not(:disabled):hover,
+      .size-btn.bg-black {
+      background-color: var(--hovered_button_label);
+      color: var(--hovered_button_text_color);
+      }
+
+      .size-btn:disabled {
+        opacity: 0.8;
+        cursor: not-allowed;
+         border: 1px solid var(--border);
+      }
+
+      /* Mobile-specific styles */
+      @media (max-width: 1024px) {
+        .mobile-gallery-item {
+          will-change: opacity, transform;
+          transition: opacity 0.3s ease;
+          position: absolute;
+          inset: 0;
+          max-height: 65vh !important;
+          object-fit: cover !important;
+          display: block;
+        }
+
+        .mobile-gallery-item.active {
+          opacity: 1;
+          z-index: 2;
+          position: relative;
+        }
+
+        .thumbnail-item {
+          transition: all 0.3s ease;
+          opacity: 0.6;
+          border: 2px solid transparent;
+        }
+
+        .thumbnail-item.active {
+          opacity: 1;
+          border-color: black;
+          transform: scale(1.05);
+        }
+
+        .product-tabs {
+          height: auto;
+          min-height: 200px;
+        }
+
+        .tab-content {
+          height: auto;
+        }
+
+        #mobile-size-chart-drawer {
+          transition: transform 0.6s cubic-bezier(0.4,0,0.2,1);
+        }
+      }
+.size-btn.unavailable-size {
+  opacity: 1;
+  visibility: visible;
+  position: relative;
+  cursor: not-allowed;
+  color: var(--text) !important;
+  border-color: var(--border) !important;
+  background-color: var(--disabled_text) !important;
+  overflow: hidden;
+  transform: translateY(0);
+}
+
+.size-btn.unavailable-size:hover {
+  background-color: var(--disabled_text) !important;
+  transform: translateY(0);
+}
+
+/* Slash line */
+.size-btn.unavailable-size::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: -2px;
+  right: -2px;
+  height: 2px;
+  background-color: var(--text);
+  transform: rotate(-45deg);
+  pointer-events: none;
+  z-index: 20;
+}
+
 </style>
 
 <script>
@@ -1088,21 +1123,47 @@
     // Product data from Shopify
     const productOptions = {{ product.options | json }};
     const productVariants = {{ product.variants | json }};
+   
+    const colorIndex = productOptions.findIndex(opt => 
+      opt.toLowerCase() === 'color' || opt.toLowerCase() === 'colour'
+    );
+    const sizeIndex = productOptions.findIndex(opt => 
+      opt.toLowerCase() === 'size'
+    );
     
-    // Find option indices
-    const colorIndex = productOptions.findIndex(opt => opt.toLowerCase() === 'color');
-    const sizeIndex = productOptions.findIndex(opt => opt.toLowerCase() === 'size');
+    const denominationIndex = productOptions.findIndex(opt => 
+      opt.toLowerCase().includes('denomination') || 
+      opt.toLowerCase().includes('value') || 
+      opt.toLowerCase().includes('amount') ||
+      opt.toLowerCase().includes('price')
+    );
+
+    let mainOptionIndex = -1;
+    if (denominationIndex >= 0) {
+      mainOptionIndex = denominationIndex;
+    } else if (sizeIndex >= 0) {
+      mainOptionIndex = sizeIndex;
+    } else {
+      // Find first option that's not color
+      mainOptionIndex = productOptions.findIndex((opt, index) => index !== colorIndex);
+    }
     
     // State management
     let selectedColor = null;
     let selectedSize = null;
-    
-    // Initialize with first available options
-    if (colorIndex >= 0) {
-      selectedColor = productVariants[0][`option${colorIndex + 1}`];
-    }
-    if (sizeIndex >= 0) {
-      selectedSize = productVariants[0][`option${sizeIndex + 1}`];
+    let selectedMainOption = null; 
+
+    const firstVariant = productVariants.find(v => v.available) || productVariants[0];
+    if (firstVariant) {
+      if (colorIndex >= 0) {
+        selectedColor = firstVariant[`option${colorIndex + 1}`];
+      }
+      if (sizeIndex >= 0) {
+        selectedSize = firstVariant[`option${sizeIndex + 1}`];
+      }
+      if (mainOptionIndex >= 0) {
+        selectedMainOption = firstVariant[`option${mainOptionIndex + 1}`];
+      }
     }
 
     // Helper functions
@@ -1116,12 +1177,16 @@
       document.body.style.touchAction = '';
     }
 
-    function findMatchingVariant(color = selectedColor, size = selectedSize) {
-      return productVariants.find(variant => {
+    function findMatchingVariant(color = selectedColor, size = selectedSize, mainOption = selectedMainOption) {
+      const variant = productVariants.find(variant => {
         const colorMatch = colorIndex >= 0 ? variant[`option${colorIndex + 1}`] === color : true;
         const sizeMatch = sizeIndex >= 0 ? variant[`option${sizeIndex + 1}`] === size : true;
-        return colorMatch && sizeMatch;
+        const mainOptionMatch = mainOptionIndex >= 0 ? variant[`option${mainOptionIndex + 1}`] === mainOption : true;
+        
+        return colorMatch && sizeMatch && mainOptionMatch;
       });
+      
+      return variant;
     }
 
     function updatePriceDisplay(variant, isMobile = false) {
@@ -1131,13 +1196,17 @@
       const compareSeparatorEl = document.querySelector(isMobile ? '.mobile-compare-price-separator' : '#compare-price-separator');
       const savingsInfoEl = document.querySelector(isMobile ? '.mobile-savings-info' : '#savings-info');
 
-      if (!variant || !currentPriceEl) return;
+      if (!variant || !currentPriceEl) {
+        return;
+      }
 
+      // Update current price
       currentPriceEl.textContent = (variant.price / 100).toLocaleString('en-US', {
         style: 'currency',
         currency: 'USD'
       });
 
+      // Handle compare at price
       if (variant.compare_at_price && variant.compare_at_price > variant.price) {
         if (comparePriceEl) {
           comparePriceEl.textContent = (variant.compare_at_price / 100).toLocaleString('en-US', {
@@ -1203,26 +1272,30 @@
       const sizeBtns = document.querySelectorAll('.size-btn');
       
       sizeBtns.forEach(btn => {
-        const size = btn.getAttribute('data-value');
-        const variant = findMatchingVariant(selectedColor, size);
+        const optionValue = btn.getAttribute('data-value');
+
+        let variant;
+        if (mainOptionIndex === sizeIndex) {
+          variant = findMatchingVariant(selectedColor, optionValue, optionValue);
+        } else {
+          variant = findMatchingVariant(selectedColor, selectedSize, optionValue);
+        }
         
-        // Remove existing unavailable styling
-        const existingSlash = btn.querySelector('.unavailable-slash');
+        // Remove existing unavailable styling and slash
+        const existingSlash = btn.querySelector('.slash-unavailable');
         if (existingSlash) existingSlash.remove();
         
         if (!variant || !variant.available) {
-          btn.classList.add('opacity-50', 'cursor-not-allowed');
+          btn.classList.add('cursor-not-allowed', 'unavailable-size');
+          btn.classList.remove('bg-black', 'text-white'); 
           btn.disabled = true;
           btn.setAttribute('aria-disabled', 'true');
           
-          // Add diagonal line for unavailable sizes
-          btn.insertAdjacentHTML('beforeend', `
-            <span class="absolute inset-0 flex items-center justify-center unavailable-slash pointer-events-none">
-              <span class="block w-full  bg-neutral-900 rotate-[135deg] origin-center"></span>
-            </span>
-          `);
+          const slash = document.createElement('span');
+          slash.className = 'slash-unavailable';
+          btn.appendChild(slash);
         } else {
-          btn.classList.remove('opacity-50', 'cursor-not-allowed');
+          btn.classList.remove('cursor-not-allowed', 'unavailable-size');
           btn.disabled = false;
           btn.removeAttribute('aria-disabled');
         }
@@ -1240,7 +1313,7 @@
       updatePriceDisplay(variant, true);
       updateAddToCartButton(variant, true);
       
-      // Update size availability
+      // Update size/denomination availability
       updateSizeAvailability();
     }
 
@@ -1576,7 +1649,7 @@
       });
 
       // Add ring to selected swatch
-      swatch.offsetWidth; // Force reflow
+      swatch.offsetWidth; 
       swatch.classList.add('ring-1', 'ring-offset-2', 'ring-black');
 
       // Update color displays
@@ -1609,7 +1682,6 @@
       setActiveSwatch(colorSwatches[0]);
     }
 
-    // Size button handling
     const sizeButtons = document.querySelectorAll('.size-btn');
 
     if (sizeButtons.length > 0) {
@@ -1617,7 +1689,7 @@
         btn.addEventListener('click', () => {
           if (btn.disabled) return;
           
-          const newSelectedSize = btn.getAttribute('data-value');
+          const newSelectedValue = btn.getAttribute('data-value');
           
           // Remove active styling from all size buttons
           sizeButtons.forEach((b) => {
@@ -1626,25 +1698,37 @@
           
           // Add active styling to clicked button
           btn.classList.add('active', 'bg-black', 'text-white');
+
+          if (mainOptionIndex === sizeIndex) {
+            selectedSize = newSelectedValue;
+            selectedMainOption = newSelectedValue;
+          } else {
+            // This is a denomination/value for gift cards
+            selectedMainOption = newSelectedValue;
+          }
           
-          // Update selected size and variant
-          selectedSize = newSelectedSize;
+          // Force variant update
           updateVariant();
         });
       });
 
-      // Initialize first available size as selected
-      const firstAvailableSize = sizeButtons[0];
-      if (firstAvailableSize && !firstAvailableSize.disabled) {
-        selectedSize = firstAvailableSize.getAttribute('data-value');
-        firstAvailableSize.classList.add('active', 'bg-black', 'text-white');
+      // Initialize first available option as selected
+      const firstAvailableBtn = Array.from(sizeButtons).find(btn => !btn.disabled);
+      if (firstAvailableBtn) {
+        const initialValue = firstAvailableBtn.getAttribute('data-value');
+        if (mainOptionIndex === sizeIndex) {
+          selectedSize = initialValue;
+          selectedMainOption = initialValue;
+        } else {
+          selectedMainOption = initialValue;
+        }
+        firstAvailableBtn.classList.add('active', 'bg-black', 'text-white');
       }
     }
 
     // Initial variant update
     updateVariant();
 
-    // Form submission handling to ensure quantity is updated
     const desktopForm = document.getElementById('add-to-cart-form');
     const mobileForm = document.querySelector('.mobile-add-to-cart-form');
 
