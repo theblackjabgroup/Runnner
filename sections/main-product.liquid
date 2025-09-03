@@ -138,42 +138,28 @@
       <div class="product-tabs w-[80%] flex-1 overflow-hidden">
         <!-- Tab Navigation -->
         <div class="tabs-nav flex justify-evenly space-x-3 h-auto mt-2 w-full">
-          {%- assign tab_index = 0 -%}
-          {%- for block in section.blocks -%}
-            {% if block.type == 'tab_description' or block.type == 'tab_details' or block.type == 'tab_sizing' %}
-              {%- assign tab_index = tab_index | plus: 1 -%}
-              <button
-                class="
-                  tab-btn group text-[16px] text-left pt-[5px] mr-3 w-full transition-colors duration-300 relative
-                  {% if tab_index == 1 %}
-                    active-tab text-black
-                  {% else %}
-                    text-gray-600 hover:text-black
-                  {% endif %}
-                "
-                data-tab="tab-{{ block.id }}"
-                {{ block.shopify_attributes }}
-              >
-                <!-- Div acting as top border -->
-                <div
-                  class="
-                    tab-top-bar absolute top-0 left-0 right-0 rounded transition-colors duration-300
-                    {% if tab_index == 1 %}
-                      bg-black
-                    {% else %}
-                      bg-gray-400 group-hover:bg-black
-                    {% endif %}
-                  "
-                  style="height: 3px; "
-                >
-                  &nbsp;
-                </div>
-
-                {{ block.settings.title }}
-              </button>
-            {% endif %}
-          {%- endfor -%}
+  {%- assign tab_index = 0 -%}
+  {%- for block in section.blocks -%}
+    {% if block.type == 'tab_description' or block.type == 'tab_details' or block.type == 'tab_sizing' %}
+      {%- assign tab_index = tab_index | plus: 1 -%}
+      <button
+        class="tab-btn group text-[16px] text-left pt-[5px] mr-3 w-full transition-colors duration-300 relative {% if tab_index == 1 %}active-tab{% endif %}"
+        style="color: {% if tab_index == 1 %}var(--text){% else %}var(--secondary_text){% endif %};"
+        data-tab="tab-{{ block.id }}"
+        {{ block.shopify_attributes }}
+      >
+        <!-- Div acting as top border -->
+        <div
+          class="tab-top-bar absolute top-0 left-0 right-0 rounded transition-colors duration-300"
+          style="height: 3px; background-color: {% if tab_index == 1 %}var(--text){% else %}var(--secondary_text){% endif %};"
+        >
+          &nbsp;
         </div>
+        {{ block.settings.title }}
+      </button>
+    {% endif %}
+  {%- endfor -%}
+</div>
 
         <!-- Tab Content -->
         <div class="tab-content mt-6 overflow-y-auto">
@@ -273,7 +259,7 @@
                 <!-- Guest: Show login prompt -->
                 <div>
                   <div class="font-medium uppercase">DELIVER TO</div>
-                  <div class="text-[14px] text-gray-600">
+                  <div class="text-[14px]" style="color: var(--secondary_text);">
                     Please <a href="/account/login" class="underline text-blue-600">log in</a> to set your delivery
                     address.
                   </div>
@@ -309,7 +295,7 @@
                 </button>
                 <span
                   id="quantityDisplay"
-                  class="px-3 border-x-1 border-black text-[16px]  "
+                  class="px-3 border-x-1 text-[16px]  "
                   style="border-left: 1px solid var(--border); border-right: 1px solid var(--border);"
                   >1</span
                 >
@@ -356,9 +342,11 @@
                 {% endfor %}
                 <button
                   type="button"
-                  class="size-btn relative px-3 h-10 min-w-[2.5rem] flex items-center justify-center border-transparent rounded font-semibold border
+                  class="
+                    size-btn relative px-3 h-10 min-w-[2.5rem] flex items-center justify-center border-transparent rounded font-semibold border
                     {% if forloop.first and variant_available %}bg-black text-white{% endif %}
-                    {% unless variant_available %}cursor-not-allowed bg-gray-200 unavailable-size{% endunless %}"
+                    {% unless variant_available %}cursor-not-allowed bg-gray-200 unavailable-size{% endunless %}
+                  "
                   data-option-index="{{ variant_option_index }}"
                   data-value="{{ value | escape }}"
                   {% if variant_available %}
@@ -393,7 +381,7 @@
               >
               <span
                 id="compare-price"
-                class="line-through text-gray-500 {% unless product.compare_at_price > product.price %}hidden{% endunless %}"
+                class="line-through{% unless product.compare_at_price > product.price %}hidden{% endunless %}" style="color: var(--secondary_text);"
               >
                 {% if product.compare_at_price > product.price %}{{ product.compare_at_price | money }}{% endif %}
               </span>
@@ -431,27 +419,21 @@
                 <input type="hidden" name="quantity" value="1">
                 <button
                   id="add-to-cart-btn"
-                  class="text-white text-4xl px-6 rounded group flex items-center justify-between gap-2"
-                  style="background-color: var(--button); color: var(--button_label); height: 50px; width: 370px;"
-                  onmouseenter="this.style.backgroundColor='var(--hover)'"
-                  onmouseleave="this.style.backgroundColor='var(--button)'"
+                  class="add-to-cart-btn-custom text-4xl rounded group flex items-center justify-between gap-2"
+                  style="height: 50px; width: 370px;"
                   aria-label="Add to cart"
                   type="submit"
                 >
                   <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    class="w-6 h-6 object-contain transition-transform duration-300 group-hover:-rotate-90 mx-1"
                     fill="none"
-                    viewBox="0 0 9 9"
-                    stroke-width="1.5"
-                    stroke="currentColor"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    aria-hidden="true"
+                    width="24"
+                    height="24"
+                    viewBox="0 0 24 24"
+                    style="transform: rotate(-90deg); transform-origin: center; transform-box: fill-box;"
                   >
-                    <path d="M1.1875 7.7334H7.6599M7.6599 7.7334V1.261M7.6599 7.7334L1.1875 1.261"/>
+                    <path d="M6 9L12 15L18 9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                   </svg>
-                  ADD TO CART
+                  <span id="add-to-cart-btn-text">ADD TO CART</span>
                 </button>
               </form>
             {% else %}
@@ -609,40 +591,27 @@
     <div class="product-tabs flex-1 overflow-hidden">
       <!-- Tab Navigation -->
       <div class="tabs-nav flex justify-evenly space-x-3 h-auto mt-2 w-full">
-        {%- assign tab_index = 0 -%}
-        {%- for block in section.blocks -%}
-          {% if block.type == 'tab_description' or block.type == 'tab_details' or block.type == 'tab_sizing' %}
-            {%- assign tab_index = tab_index | plus: 1 -%}
-            <button
-              class="
-                tab-btn group text-[12px] text-left mr-3 w-full transition-colors duration-300 relative
-                {% if tab_index == 1 %}
-                  active-tab text-black
-                {% else %}
-                  text-gray-600
-                {% endif %}
-              "
-              data-tab="tab-{{ block.id }}"
-              {{ block.shopify_attributes }}
-            >
-              <div
-                class="
-                  tab-top-bar absolute top-0 left-0 right-0 rounded transition-colors duration-300
-                  {% if tab_index == 1 %}
-                    bg-black
-                  {% else %}
-                    bg-gray-400 group-hover:bg-black
-                  {% endif %}
-                "
-                style="height: 2px;"
-              >
-                &nbsp;
-              </div>
-              {{ block.settings.title }}
-            </button>
-          {% endif %}
-        {%- endfor -%}
-      </div>
+  {%- assign tab_index = 0 -%}
+  {%- for block in section.blocks -%}
+    {% if block.type == 'tab_description' or block.type == 'tab_details' or block.type == 'tab_sizing' %}
+      {%- assign tab_index = tab_index | plus: 1 -%}
+      <button
+        class="tab-btn group text-[12px] text-left mr-3 w-full transition-colors duration-300 relative {% if tab_index == 1 %}active-tab{% endif %}"
+        style="color: {% if tab_index == 1 %}var(--text){% else %}var(--secondary_text){% endif %};"
+        data-tab="tab-{{ block.id }}"
+        {{ block.shopify_attributes }}
+      >
+        <div
+          class="tab-top-bar absolute top-0 left-0 right-0 rounded transition-colors duration-300"
+          style="height: 2px; background-color: {% if tab_index == 1 %}var(--text){% else %}var(--secondary_text){% endif %};"
+        >
+          &nbsp;
+        </div>
+        {{ block.settings.title }}
+      </button>
+    {% endif %}
+  {%- endfor -%}
+</div>
 
       <!-- Tab Content -->
       <div class="tab-content mt-6 overflow-y-auto max-h-[50vh]">
@@ -736,7 +705,7 @@
               <!-- Guest: Show login prompt -->
               <div>
                 <div class="font-semibold uppercase">DELIVER TO</div>
-                <div class="text-[10px] text-gray-600">
+                <div class="text-[10px]" style="color: var(--secondary_text);">
                   Please <a href="/account/login" class="underline !text-blue-900">log in</a> to set your delivery
                   address.
                 </div>
@@ -813,9 +782,11 @@
               {% endfor %}
               <button
                 type="button"
-                class="size-btn relative px-3 h-10 min-w-[2.5rem] flex items-center justify-center border-transparent rounded font-semibold border
+                class="
+                  size-btn relative px-3 h-10 min-w-[2.5rem] flex items-center justify-center border-transparent rounded font-semibold border
                   {% if forloop.first and variant_available %}bg-black text-white{% endif %}
-                  {% unless variant_available %} cursor-not-allowed bg-gray-200 unavailable-size{% endunless %}"
+                  {% unless variant_available %} cursor-not-allowed bg-gray-200 unavailable-size{% endunless %}
+                "
                 data-option-index="{{ variant_option_index }}"
                 data-value="{{ value | escape }}"
                 {% if variant_available %}
@@ -844,7 +815,7 @@
             <span class="mobile-compare-price-separator text-black text-[14px] {% unless product.compare_at_price > product.price %}hidden{% endunless %}"
               >|</span
             >
-            <span class="mobile-compare-price line-through text-gray-500 {% unless product.compare_at_price > product.price %}hidden{% endunless %}">
+            <span class="mobile-compare-price line-through {% unless product.compare_at_price > product.price %}hidden{% endunless %}" style="color: var(--secondary_text);">
               {% if product.compare_at_price > product.price %}{{ product.compare_at_price | money }}{% endif %}
             </span>
           </div>
@@ -874,27 +845,21 @@
               >
               <input type="hidden" name="quantity" value="1">
               <button
-                class="mobile-add-to-cart-btn text-white text-3xl px-4 py-2 rounded group flex items-center justify-between gap-2"
-                style="background-color: var(--button); color: var(--button_label); width: 95vw"
-                onmouseenter="this.style.backgroundColor='var(--hover)'"
-                onmouseleave="this.style.backgroundColor='var(--button)'"
+                class="add-to-cart-btn-custom mobile-add-to-cart-btn text-3xl rounded group flex items-center justify-between gap-2"
+                style="width: 95vw"
                 aria-label="Add to cart"
                 type="submit"
               >
                 <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  class="w-6 h-6 object-contain transition-transform duration-300 group-hover:-rotate-90 mx-1"
                   fill="none"
-                  viewBox="0 0 9 9"
-                  stroke-width="1.5"
-                  stroke="currentColor"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  aria-hidden="true"
+                  width="24"
+                  height="24"
+                  viewBox="5 8 14 8"
+                  style="transform: rotate(-90deg); transform-origin: center; transform-box: fill-box;"
                 >
-                  <path d="M1.1875 7.7334H7.6599M7.6599 7.7334V1.261M7.6599 7.7334L1.1875 1.261"/>
+                  <path d="M6 9L12 15L18 9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                 </svg>
-                ADD TO CART
+                <span id="add-to-cart-btn-text-mobile">ADD TO CART</span>
               </button>
             </form>
           {% else %}
@@ -914,210 +879,262 @@
 </section>
 
 <style>
-      .delivery-change-btn{
-       background-color: var(--button);
-      color: var(--button_label);
-      border: 1px solid var(--border);
+          .delivery-change-btn{
+           background-color: var(--button);
+          color: var(--button_label);
+          border: 1px solid var(--border);
+        }
+        .delivery-change-btn:hover {
+          background-color: var(--hovered_button_label);
+          color: var(--hovered_button_text_color);
+        }
+          .section-{{ section.id }}-padding {
+            padding-top: {{  settings.sections_spacing | times: 0.75 | round: 0 }}px;
+            padding-bottom: {{  settings.sections_spacing | times: 0.75 | round: 0 }}px;
+            padding-left: {{  settings.side_space | times: 0.75 | round: 0 }}px;
+            padding-right: {{  settings.side_space | times: 0.75 | round: 0 }}px;
+          }
+
+          @media screen and (min-width: 750px) {
+            .section-{{ section.id }}-padding {
+              padding-top: {{  settings.sections_spacing}}px;
+              padding-bottom: {{  settings.sections_spacing}}px;
+              padding-left: {{  settings.side_space  }}px;
+              padding-right: {{  settings.side_space }}px;
+            }
+          }
+
+          #size-chart-drawer {
+            transition: transform 1s cubic-bezier(0.4,0,0.2,1);
+            transform: translateX(100%);
+            will-change: transform;
+          }
+          #size-chart-drawer.open {
+            transform: translateX(0);
+          }
+
+          .product-section {
+            display: flex;
+            height: calc(100vh * {{product.media.size}});
+            position: relative;
+          }
+
+          .gallery-wrapper {
+            position: sticky;
+            top: 0;
+            height: 100vh;
+            overflow: hidden;
+          }
+
+          .gallery-track {
+            height: 100%;
+          }
+
+          .gallery-item {
+            opacity: 0;
+            transition: opacity 0.3s ease-out;
+            will-change: opacity;
+          }
+
+          .gallery-item.is-active {
+            opacity: 1;
+            pointer-events: auto;
+            z-index: 1;
+          }
+
+          .image-strip-container {
+            position: absolute;
+            top: 50%;
+            left: 10px;
+            transform: translateY(-50%);
+            z-index: 100;
+            transition: opacity 0.3s ease;
+          }
+
+          .gallery-track:hover .image-strip-container {
+            opacity: 1;
+          }
+
+          .image-strip {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            padding: 10px;
+            border-radius: 8px;
+          }
+
+          .strip-image-wrapper {
+            width: 60px;
+            height: 60px;
+            cursor: pointer;
+            opacity: 0.7;
+            transition: all 0.3s ease;
+          }
+
+          .strip-image-wrapper:hover,
+          .strip-image-wrapper.active {
+            opacity: 1;
+            transform: scale(1.1);
+            border: 1px solid black;
+          }
+          .strip-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 4px;
+          }
+
+          .tab-content {
+            height: calc(100% - 50px);
+          }
+
+          .size-btn {
+            transition: all 0.3s ease;
+             background-color: var(--button);
+          color: var(--button_label);
+          border: 1px solid var(--border);
+          }
+
+          .size-btn:not(:disabled):hover,
+          .size-btn.bg-black {
+          background-color: var(--hovered_button_label);
+          color: var(--hovered_button_text_color);
+          }
+
+          .size-btn:disabled {
+            opacity: 0.8;
+            cursor: not-allowed;
+             border: 1px solid var(--border);
+          }
+
+          /* Mobile-specific styles */
+          @media (max-width: 1024px) {
+            .mobile-gallery-item {
+              will-change: opacity, transform;
+              transition: opacity 0.3s ease;
+              position: absolute;
+              inset: 0;
+              max-height: 65vh !important;
+              object-fit: cover !important;
+              display: block;
+            }
+
+            .mobile-gallery-item.active {
+              opacity: 1;
+              z-index: 2;
+              position: relative;
+            }
+
+            .thumbnail-item {
+              transition: all 0.3s ease;
+              opacity: 0.6;
+              border: 2px solid transparent;
+            }
+
+            .thumbnail-item.active {
+              opacity: 1;
+              border-color: black;
+              transform: scale(1.05);
+            }
+
+            .product-tabs {
+              height: auto;
+              min-height: 200px;
+            }
+
+            .tab-content {
+              height: auto;
+            }
+
+            #mobile-size-chart-drawer {
+              transition: transform 0.6s cubic-bezier(0.4,0,0.2,1);
+            }
+          }
+    .size-btn.unavailable-size {
+      opacity: 1;
+      visibility: visible;
+      position: relative;
+      cursor: not-allowed;
+      color: var(--text) !important;
+      border-color: var(--border) !important;
+      background-color: var(--disabled_text) !important;
+      overflow: hidden;
+      transform: translateY(0);
     }
-    .delivery-change-btn:hover {
-      background-color: var(--hovered_button_label);
-      color: var(--hovered_button_text_color);
+
+    .size-btn.unavailable-size:hover {
+      background-color: var(--disabled_text) !important;
+      transform: translateY(0);
     }
-      .section-{{ section.id }}-padding {
-        padding-top: {{  settings.sections_spacing | times: 0.75 | round: 0 }}px;
-        padding-bottom: {{  settings.sections_spacing | times: 0.75 | round: 0 }}px;
-        padding-left: {{  settings.side_space | times: 0.75 | round: 0 }}px;
-        padding-right: {{  settings.side_space | times: 0.75 | round: 0 }}px;
-      }
 
-      @media screen and (min-width: 750px) {
-        .section-{{ section.id }}-padding {
-          padding-top: {{  settings.sections_spacing}}px;
-          padding-bottom: {{  settings.sections_spacing}}px;
-          padding-left: {{  settings.side_space  }}px;
-          padding-right: {{  settings.side_space }}px;
-        }
-      }
+    /* Slash line */
+    .size-btn.unavailable-size::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: -2px;
+      right: -2px;
+      height: 2px;
+      background-color: var(--text);
+      transform: rotate(-45deg);
+      pointer-events: none;
+      z-index: 20;
+    }
 
-      #size-chart-drawer {
-        transition: transform 1s cubic-bezier(0.4,0,0.2,1);
-        transform: translateX(100%);
-        will-change: transform;
-      }
-      #size-chart-drawer.open {
-        transform: translateX(0);
-      }
-
-      .product-section {
-        display: flex;
-        height: calc(100vh * {{product.media.size}});
-        position: relative;
-      }
-
-      .gallery-wrapper {
-        position: sticky;
-        top: 0;
-        height: 100vh;
-        overflow: hidden;
-      }
-
-      .gallery-track {
-        height: 100%;
-      }
-
-      .gallery-item {
-        opacity: 0;
-        transition: opacity 0.3s ease-out;
-        will-change: opacity;
-      }
-
-      .gallery-item.is-active {
-        opacity: 1;
-        pointer-events: auto;
-        z-index: 1;
-      }
-
-      .image-strip-container {
-        position: absolute;
-        top: 50%;
-        left: 10px;
-        transform: translateY(-50%);
-        z-index: 100;
-        transition: opacity 0.3s ease;
-      }
-
-      .gallery-track:hover .image-strip-container {
-        opacity: 1;
-      }
-
-      .image-strip {
-        display: flex;
-        flex-direction: column;
-        gap: 10px;
-        padding: 10px;
-        border-radius: 8px;
-      }
-
-      .strip-image-wrapper {
-        width: 60px;
-        height: 60px;
-        cursor: pointer;
-        opacity: 0.7;
-        transition: all 0.3s ease;
-      }
-
-      .strip-image-wrapper:hover,
-      .strip-image-wrapper.active {
-        opacity: 1;
-        transform: scale(1.1);
-        border: 1px solid black;
-      }
-      .strip-image {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-        border-radius: 4px;
-      }
-
-      .tab-content {
-        height: calc(100% - 50px);
-      }
-
-      .size-btn {
-        transition: all 0.3s ease;
-         background-color: var(--button);
-      color: var(--button_label);
-      border: 1px solid var(--border);
-      }
-
-      .size-btn:not(:disabled):hover,
-      .size-btn.bg-black {
-      background-color: var(--hovered_button_label);
-      color: var(--hovered_button_text_color);
-      }
-
-      .size-btn:disabled {
-        opacity: 0.8;
-        cursor: not-allowed;
-         border: 1px solid var(--border);
-      }
-
-      /* Mobile-specific styles */
-      @media (max-width: 1024px) {
-        .mobile-gallery-item {
-          will-change: opacity, transform;
-          transition: opacity 0.3s ease;
-          position: absolute;
-          inset: 0;
-          max-height: 65vh !important;
-          object-fit: cover !important;
-          display: block;
-        }
-
-        .mobile-gallery-item.active {
-          opacity: 1;
-          z-index: 2;
-          position: relative;
-        }
-
-        .thumbnail-item {
-          transition: all 0.3s ease;
-          opacity: 0.6;
-          border: 2px solid transparent;
-        }
-
-        .thumbnail-item.active {
-          opacity: 1;
-          border-color: black;
-          transform: scale(1.05);
-        }
-
-        .product-tabs {
-          height: auto;
-          min-height: 200px;
-        }
-
-        .tab-content {
-          height: auto;
-        }
-
-        #mobile-size-chart-drawer {
-          transition: transform 0.6s cubic-bezier(0.4,0,0.2,1);
-        }
-      }
-.size-btn.unavailable-size {
-  opacity: 1;
-  visibility: visible;
-  position: relative;
-  cursor: not-allowed;
-  color: var(--text) !important;
-  border-color: var(--border) !important;
-  background-color: var(--disabled_text) !important;
-  overflow: hidden;
-  transform: translateY(0);
-}
-
-.size-btn.unavailable-size:hover {
-  background-color: var(--disabled_text) !important;
-  transform: translateY(0);
-}
-
-/* Slash line */
-.size-btn.unavailable-size::after {
-  content: '';
-  position: absolute;
-  top: 50%;
-  left: -2px;
-  right: -2px;
-  height: 2px;
-  background-color: var(--text);
-  transform: rotate(-45deg);
-  pointer-events: none;
-  z-index: 20;
-}
-
+    .add-to-cart-btn-custom {
+      font-weight: var(--font-heading-weight);
+      font-size: 32px;
+      color: var(--secondary_button_text_color);
+      background-color: var(--secondary_button_label);
+      border-radius: 4px;
+      padding: 5px 10px;
+      line-height: 1;
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      gap: 20px;
+      border: var(--settings-buttons_border_thickness, 1px) solid var(--secondary_button_label);
+      transition: border 0.5s, background-color 0.5s, color 0.5s;
+      position: relative;
+      overflow: hidden;
+      cursor: pointer;
+    }
+    .add-to-cart-btn-custom::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: var(--hovered_secondary_button_label);
+      transition: left 0.5s;
+      z-index: 0;
+    }
+    .add-to-cart-btn-custom:hover::before,
+    .add-to-cart-btn-custom:focus::before {
+      left: 0;
+    }
+    .add-to-cart-btn-custom > * {
+      position: relative;
+      z-index: 1;
+    }
+    .add-to-cart-btn-custom:hover,
+    .add-to-cart-btn-custom:focus {
+      color: var(--hovered_secondary_button_text_color);
+      border-color: var(--hovered_secondary_button_text_color);
+      outline: none;
+    }
+    .add-to-cart-btn-custom svg {
+      stroke-linecap: round;
+      transition: transform 0.3s;
+      transform-origin: center;
+      color: inherit;
+    }
+    .add-to-cart-btn-custom:hover svg,
+    .add-to-cart-btn-custom:focus svg {
+      transform: rotate(-90deg) scale(1.1);
+    }
 </style>
-
 <script>
   document.addEventListener('DOMContentLoaded', () => {
     // Product data from Shopify
@@ -1236,34 +1253,25 @@
     function updateAddToCartButton(variant, isMobile = false) {
       const button = document.querySelector(isMobile ? '.mobile-add-to-cart-btn' : '#add-to-cart-btn');
       const variantIdInput = document.querySelector(isMobile ? '.mobile-variant-id' : '#variant-id');
-      
+      const btnText = button ? button.querySelector(isMobile ? '#add-to-cart-btn-text-mobile' : '#add-to-cart-btn-text') : null;
+      const svg = button ? button.querySelector('svg') : null;
+
       if (!button || !variantIdInput) return;
 
       if (!variant || !variant.available) {
         button.disabled = true;
-        button.innerHTML = variant ? 'SOLD OUT' : 'UNAVAILABLE';
-        button.style.backgroundColor = '#6b7280';
+        if (btnText) btnText.textContent = variant ? 'SOLD OUT' : 'UNAVAILABLE';
+        button.classList.add('bg-gray-400');
+        button.classList.remove('add-to-cart-btn-custom');
         button.style.cursor = 'not-allowed';
+        if (svg) svg.style.display = 'none';
       } else {
         button.disabled = false;
-        button.innerHTML = `
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            class="w-6 h-6 object-contain transition-transform duration-300 group-hover:-rotate-90 mx-1"
-            fill="none"
-            viewBox="0 0 9 9"
-            stroke-width="1.5"
-            stroke="currentColor"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            aria-hidden="true"
-          >
-            <path d="M1.1875 7.7334H7.6599M7.6599 7.7334V1.261M7.6599 7.7334L1.1875 1.261"/>
-          </svg>
-          ADD TO CART
-        `;
-        button.style.backgroundColor = 'var(--button)';
+        if (btnText) btnText.textContent = 'ADD TO CART';
+        button.classList.remove('bg-gray-400');
+        button.classList.add('add-to-cart-btn-custom');
         button.style.cursor = 'pointer';
+        if (svg) svg.style.display = '';
         variantIdInput.value = variant.id;
       }
     }
@@ -1562,72 +1570,67 @@
     }
 
     // Tab functionality
-    const tabButtons = document.querySelectorAll(".tab-btn");
-    const tabPanes = document.querySelectorAll(".tab-pane");
+const tabButtons = document.querySelectorAll(".tab-btn");
+const tabPanes = document.querySelectorAll(".tab-pane");
 
-    tabButtons.forEach((button) => {
-      button.addEventListener("click", () => {
-        const targetTab = button.getAttribute("data-tab");
-        const borderDiv = button.querySelector(".tab-top-bar");
+tabButtons.forEach((button) => {
+  button.addEventListener("click", () => {
+    const targetTab = button.getAttribute("data-tab");
+    const borderDiv = button.querySelector(".tab-top-bar");
 
-        // Reset all tabs to inactive state
-        tabButtons.forEach((btn) => {
-          const btnBorderDiv = btn.querySelector(".tab-top-bar");
-          
-          btn.classList.remove("text-black", "active-tab");
-          btn.classList.add("text-gray-600");
-          
-          if (btnBorderDiv) {
-            btnBorderDiv.classList.remove("bg-black");
-            btnBorderDiv.classList.add("bg-gray-400");
-          }
-        });
-
-        // Set clicked tab to active state
-        button.classList.remove("text-gray-600");
-        button.classList.add("text-black", "active-tab");
-        
-        if (borderDiv) {
-          borderDiv.classList.remove("bg-gray-400");
-          borderDiv.classList.add("bg-black");
-        }
-
-        // Handle tab pane visibility
-        tabPanes.forEach((pane) => {
-          if (pane.getAttribute("data-content") === targetTab) {
-            pane.classList.remove("hidden");
-            pane.classList.add("block");
-          } else {
-            pane.classList.add("hidden");
-            pane.classList.remove("block");
-          }
-        });
-      });
-
-      // Tab hover effects
-      const borderDiv = button.querySelector(".tab-top-bar");
+    // Reset all tabs to inactive state
+    tabButtons.forEach((btn) => {
+      const btnBorderDiv = btn.querySelector(".tab-top-bar");
       
-      button.addEventListener("mouseenter", () => {
-        if (!button.classList.contains("active-tab")) {
-          button.classList.add("text-black");
-          if (borderDiv) {
-            borderDiv.classList.remove("bg-gray-400");
-            borderDiv.classList.add("bg-black");
-          }
-        }
-      });
+      btn.classList.remove("active-tab");
+      btn.style.color = "var(--secondary_text)";
       
-      button.addEventListener("mouseleave", () => {
-        if (!button.classList.contains("active-tab")) {
-          button.classList.remove("text-black");
-          button.classList.add("text-gray-600");
-          if (borderDiv) {
-            borderDiv.classList.remove("bg-black");
-            borderDiv.classList.add("bg-gray-400");
-          }
-        }
-      });
+      if (btnBorderDiv) {
+        btnBorderDiv.style.backgroundColor = "var(--secondary_text)";
+      }
     });
+
+    // Set clicked tab to active state
+    button.classList.add("active-tab");
+    button.style.color = "var(--text)";
+    
+    if (borderDiv) {
+      borderDiv.style.backgroundColor = "var(--text)";
+    }
+
+    // Handle tab pane visibility
+    tabPanes.forEach((pane) => {
+      if (pane.getAttribute("data-content") === targetTab) {
+        pane.classList.remove("hidden");
+        pane.classList.add("block");
+      } else {
+        pane.classList.add("hidden");
+        pane.classList.remove("block");
+      }
+    });
+  });
+
+  // Tab hover effects
+  const borderDiv = button.querySelector(".tab-top-bar");
+  
+  button.addEventListener("mouseenter", () => {
+    if (!button.classList.contains("active-tab")) {
+      button.style.color = "var(--text)";
+      if (borderDiv) {
+        borderDiv.style.backgroundColor = "var(--text)";
+      }
+    }
+  });
+  
+  button.addEventListener("mouseleave", () => {
+    if (!button.classList.contains("active-tab")) {
+      button.style.color = "var(--secondary_text)";
+      if (borderDiv) {
+        borderDiv.style.backgroundColor = "var(--secondary_text)";
+      }
+    }
+  });
+});
 
     // Color swatch handling
     const colorSwatches = document.querySelectorAll('.color-swatch');
@@ -1729,26 +1732,69 @@
     // Initial variant update
     updateVariant();
 
+    // --- Add to Cart Button Fix ---
+    // Ensure the button is not replaced with innerHTML (which breaks SVG/animation)
+    function updateAddToCartButton(variant, isMobile = false) {
+      const button = document.querySelector(isMobile ? '.mobile-add-to-cart-btn' : '#add-to-cart-btn');
+      const variantIdInput = document.querySelector(isMobile ? '.mobile-variant-id' : '#variant-id');
+      const btnText = button ? button.querySelector(isMobile ? '#add-to-cart-btn-text-mobile' : '#add-to-cart-btn-text') : null;
+      const svg = button ? button.querySelector('svg') : null;
+
+      if (!button || !variantIdInput) return;
+
+      if (!variant || !variant.available) {
+        button.disabled = true;
+        if (btnText) btnText.textContent = variant ? 'SOLD OUT' : 'UNAVAILABLE';
+        button.classList.add('bg-gray-400');
+        button.classList.remove('add-to-cart-btn-custom');
+        button.style.cursor = 'not-allowed';
+        if (svg) svg.style.display = 'none';
+      } else {
+        button.disabled = false;
+        if (btnText) btnText.textContent = 'ADD TO CART';
+        button.classList.remove('bg-gray-400');
+        button.classList.add('add-to-cart-btn-custom');
+        button.style.cursor = 'pointer';
+        if (svg) svg.style.display = '';
+        variantIdInput.value = variant.id;
+      }
+    }
+
+    // --- Prevent double form submission and handle disabled state ---
     const desktopForm = document.getElementById('add-to-cart-form');
     const mobileForm = document.querySelector('.mobile-add-to-cart-form');
 
     if (desktopForm) {
       desktopForm.addEventListener('submit', function(e) {
+        const button = this.querySelector('#add-to-cart-btn');
+        if (button && button.disabled) {
+          e.preventDefault();
+          return false;
+        }
         const quantityInput = this.querySelector('input[name="quantity"]');
         const displayedQuantity = document.getElementById('quantityDisplay');
         if (quantityInput && displayedQuantity) {
           quantityInput.value = displayedQuantity.textContent;
         }
+        button.disabled = true;
+        setTimeout(() => { button.disabled = false; }, 1500);
       });
     }
 
     if (mobileForm) {
       mobileForm.addEventListener('submit', function(e) {
+        const button = this.querySelector('.mobile-add-to-cart-btn');
+        if (button && button.disabled) {
+          e.preventDefault();
+          return false;
+        }
         const quantityInput = this.querySelector('input[name="quantity"]');
         const displayedQuantity = document.querySelector('.mobile-quantity-display');
         if (quantityInput && displayedQuantity) {
           quantityInput.value = displayedQuantity.textContent;
         }
+        button.disabled = true;
+        setTimeout(() => { button.disabled = false; }, 1500);
       });
     }
   });
