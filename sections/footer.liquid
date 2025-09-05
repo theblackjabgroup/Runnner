@@ -64,7 +64,8 @@
       color: {{ section.settings.email_input_color | default: '#FFFFFF' }} !important;
     }
 
-    footer .signup-button {
+    footer 
+     {
       color: {{ section.settings.menu_item_color }} !important;
     }
 
@@ -222,19 +223,36 @@
       box-sizing: border-box;
     }
 
-    /* Text span inside signup button */
     .signup-button span {
-      line-height: 1;
-      display: flex;
-      align-items: center;
-      height: 100%;
-      color: {{ section.settings.menu_item_color }} !important;
-    }
-
-    /* Hover effect for signup button */
-    .signup-button:hover {
-  background-color: {{ section.settings.hover_color | default: '#808080' }};
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  height: 100%;
   color: {{ section.settings.menu_item_color }} !important;
+  position: relative; /* ADD this */
+  z-index: 1; /* ADD this */
+}
+
+.signup-button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: {{ section.settings.hover_color | default: '#808080' }};
+  transition: left 0.5s;
+  z-index: 0;
+}
+.signup-button:hover::before,
+.signup-button:focus::before {
+  left: 0;
+}
+
+    /* UPDATE your existing hover styles */
+.signup-button:hover {
+  color: {{ section.settings.menu_item_color }} !important;
+  border-color: {{ section.settings.hover_color | default: '#808080' }};
 }
 
 .signup-button:hover span {
@@ -258,30 +276,27 @@
 
 
     .arrow-wrapper svg path {
-      fill: {{ section.settings.menu_item_color }};
-      stroke: {{ section.settings.menu_item_color }};
-      transition: fill 0.3s ease, stroke 0.3s ease;
-    }
-
-    /* Fixed hover: Now triggers on entire button hover */
-    .signup-button:hover .arrow-wrapper {
-      transform: rotate(-45deg);
-    }
-
-    .signup-button:hover .arrow-wrapper svg path {
   fill: {{ section.settings.menu_item_color }};
   stroke: {{ section.settings.menu_item_color }};
+  transition: fill 0.3s ease, stroke 0.3s ease;
 }
 
+   
 
-    /* Make sure the arrow rotation works on the entire button hover */
-    .signup-button:hover .arrow-hover .arrow-wrapper {
-      transform: rotate(-90deg);
-    }
+   .signup-button:hover .arrow-wrapper svg path,
+.signup-button:focus .arrow-wrapper svg path {
+  fill: {{ section.settings.menu_item_color }} !important;
+  stroke: {{ section.settings.menu_item_color }} !important;
+}
 
-    .signup-button:hover .arrow-hover .arrow-wrapper svg path {
-  fill: {{ section.settings.menu_item_color }};
-  stroke: {{ section.settings.menu_item_color }};
+.signup-button:hover .arrow-wrapper,
+.signup-button:focus .arrow-wrapper {
+  transform: translateX(5px); /* Optional: adds a subtle slide effect */
+}
+.signup-button:hover .arrow-wrapper svg path,
+.signup-button:focus .arrow-wrapper svg path {
+  fill: {{ section.settings.hover_color | default: '#808080' }} !important;
+  stroke: {{ section.settings.hover_color | default: '#808080' }} !important;
 }
 
     /* Form success message styling */
@@ -1452,4 +1467,3 @@
   ]
 }
 {% endschema %}
-
