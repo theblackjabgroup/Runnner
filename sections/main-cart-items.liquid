@@ -1020,11 +1020,84 @@
     })
       .then((response) => response.json())
       .then((data) => {
-        location.reload(); // Simple reload, you can make this more sophisticated
+        // Update the cart without page reload
+        updateCartDisplay(data);
       })
       .catch((error) => {
         console.error('Error:', error);
       });
+  }
+
+  function updateCartDisplay(cartData) {
+    // Update cart item count in header
+    const cartTitle = document.querySelector('.cart-title');
+    if (cartTitle) {
+      cartTitle.textContent = `Cart [${cartData.item_count}]`;
+    }
+
+    // Update total price
+    const totalAmount = document.querySelector('.total-amount');
+    if (totalAmount && cartData.total_price) {
+      totalAmount.textContent = formatMoney(cartData.total_price);
+    }
+
+    // Update individual item quantities and remove items with 0 quantity
+    cartData.items.forEach(item => {
+      const itemElement = document.querySelector(`[data-item-key="${item.key}"]`);
+      if (itemElement) {
+        const qtyInput = itemElement.closest('.cart-item').querySelector('.qty-input');
+        if (qtyInput) {
+          qtyInput.value = item.quantity;
+        }
+
+        // Update item total price if it exists
+        const itemPrice = itemElement.closest('.cart-item').querySelector('.item-price');
+        if (itemPrice) {
+          itemPrice.textContent = formatMoney(item.final_line_price);
+        }
+      }
+    });
+
+    // Remove items that are no longer in cart
+    const currentItemKeys = cartData.items.map(item => item.key);
+    document.querySelectorAll('.cart-item').forEach(cartItem => {
+      const itemKey = cartItem.querySelector('[data-item-key]').dataset.itemKey;
+      if (!currentItemKeys.includes(itemKey)) {
+        cartItem.remove();
+      }
+    });
+
+    // Update button states
+    updateButtonStates(cartData);
+  }
+
+  function updateButtonStates(cartData) {
+    cartData.items.forEach(item => {
+      const decreaseBtn = document.querySelector(`[data-item-key="${item.key}"].decrease-qty`);
+      if (decreaseBtn) {
+        if (item.quantity <= 1 || cartData.item_count == 1) {
+          decreaseBtn.disabled = true;
+        } else {
+          decreaseBtn.disabled = false;
+        }
+      }
+    });
+
+    // Update checkout button
+    const checkoutBtn = document.querySelector('.checkout-btn');
+    if (checkoutBtn) {
+      if (cartData.item_count === 0) {
+        checkoutBtn.disabled = true;
+      } else {
+        checkoutBtn.disabled = false;
+      }
+    }
+  }
+
+  function formatMoney(cents) {
+    // Simple money formatting - adjust based on your currency settings
+    const dollars = (cents / 100).toFixed(2);
+    return `$${dollars}`;
   }
 
   // Form submissions
