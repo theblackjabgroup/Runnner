@@ -36,6 +36,7 @@
     position: relative;
     z-index: 1000 !important;
     border-radius: 5px !important; /* Add border radius */
+    cursor: pointer;
   }
   .slider-arrow {
     background: transparent;
@@ -143,7 +144,7 @@
           <div class="absolute top-[10px] left-[10px]">
             <span
               class="sold-out-tag text-[14px] font-medium rounded px-1"
-              style="background-color: var(--background); color: var(--text);"
+              style="background-color: transparent; color: var(--text); border: 1px solid var(--text);"
             >
               SOLD OUT
             </span>
@@ -153,9 +154,9 @@
               <button
                 type="button"
                 class="notify-when-available-btn w-full py-4 !text-[1.6rem] font-medium cursor-pointer transition-colors duration-200 uppercase tracking-wider"
-                style="color: var(--text); background-color: var(--disabled_text);"
-                onmouseover="this.style.backgroundColor='var(--button)'; this.style.color='var(--button_label)';"
-                onmouseout="this.style.backgroundColor='var(--disabled_text)'; this.style.color='var(--text)';"
+                style="color:var(--button_label); background-color: var(--button);"
+                onmouseout="this.style.backgroundColor='var(--button)'; this.style.color='var(--button_label)';"
+                onmouseover="this.style.backgroundColor='var(--hovered_button_label)'; this.style.color='var(--button_label)';"
                 data-product-id="{{ card_product.id }}"
                 data-product-title="{{ card_product.title | escape }}"
               >
@@ -184,9 +185,10 @@
               <button
                 type="button"
                 class="add-to-cart-btn w-full py-4 z-[100] !text-[1.6rem] font-medium transition-colors duration-200 uppercase tracking-wider quick-add-button"
-                style="color: var(--text);"
-                onmouseover="this.style.backgroundColor='var(--button)'; this.style.color='var(--button_label)';"
-                onmouseout="this.style.backgroundColor='transparent'; this.style.color='var(--text)';"
+                style="color:var(--button_label); background-color: var(--button);"
+
+                onmouseout="this.style.backgroundColor='var(--button)'; this.style.color='var(--button_label)';"
+                onmouseover="this.style.backgroundColor='var(--hovered_button_label)'; this.style.color='var(--button_label)';"
                 {% if has_size_variant %}
                   data-has-sizes="true"
                 {% else %}
@@ -269,16 +271,16 @@
           <div class=" gap-2 items-baseline leading-tight">
             {%- if card_product.compare_at_price > card_product.price -%}
               <span
-                class="card-product-typegraphy product-card-text uppercase line-through mr-2"
-                style="color: var(--disabled_text);"
-              >
-                {{ card_product.compare_at_price | money }}
-              </span>
-              <span
                 class="card-product-typegraphy product-card-text uppercase font-medium"
                 style="color: var(--text);"
               >
-                | {{ card_product.price | money }}
+                {{ card_product.price | money }} |
+              </span>
+              <span
+                class="card-product-typegraphy product-card-text uppercase line-through mr-2"
+                style="color: var(--sale_badge);"
+              >
+                {{ card_product.compare_at_price | money }}
               </span>
             {%- else -%}
               <span
@@ -466,9 +468,9 @@
     animation: sizeOptionFade 0.3s ease forwards;
     min-width: 35px;
     padding: 0px !important;
-    border: 1px solid var(--border);
-    background: var(--background);
-    color: var(--text);
+    border: 1px solid var(--button_label);
+    background: var(--button);
+    color: var(--button_label);
     cursor: pointer;
     transition: all 0.2s;
     font-size: 14px;
@@ -492,9 +494,7 @@
   }
 
   .quick-add__submit:hover:not([disabled]) {
-    background: var(--button);
-    color: var(--button_label);
-    border-color: var(--button);
+    background: var(--hovered_button_label);
   }
 
   .quick-add__submit[disabled] {
