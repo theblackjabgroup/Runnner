@@ -138,28 +138,28 @@
       <div class="product-tabs w-[80%] flex-1 overflow-hidden">
         <!-- Tab Navigation -->
         <div class="tabs-nav flex justify-evenly space-x-3 h-auto mt-2 w-full">
-  {%- assign tab_index = 0 -%}
-  {%- for block in section.blocks -%}
-    {% if block.type == 'tab_description' or block.type == 'tab_details' or block.type == 'tab_sizing' %}
-      {%- assign tab_index = tab_index | plus: 1 -%}
-      <button
-        class="tab-btn group text-[16px] text-left pt-[5px] mr-3 w-full transition-colors duration-300 relative {% if tab_index == 1 %}active-tab{% endif %}"
-        style="color: {% if tab_index == 1 %}var(--text){% else %}var(--secondary_text){% endif %};"
-        data-tab="tab-{{ block.id }}"
-        {{ block.shopify_attributes }}
-      >
-        <!-- Div acting as top border -->
-        <div
-          class="tab-top-bar absolute top-0 left-0 right-0 rounded transition-colors duration-300"
-          style="height: 3px; background-color: {% if tab_index == 1 %}var(--text){% else %}var(--secondary_text){% endif %};"
-        >
-          &nbsp;
+          {%- assign tab_index = 0 -%}
+          {%- for block in section.blocks -%}
+            {% if block.type == 'tab_description' or block.type == 'tab_details' or block.type == 'tab_sizing' %}
+              {%- assign tab_index = tab_index | plus: 1 -%}
+              <button
+                class="tab-btn group text-[16px] text-left pt-[5px] mr-3 w-full transition-colors duration-300 relative {% if tab_index == 1 %}active-tab{% endif %}"
+                style="color: {% if tab_index == 1 %}var(--text){% else %}var(--secondary_text){% endif %};"
+                data-tab="tab-{{ block.id }}"
+                {{ block.shopify_attributes }}
+              >
+                <!-- Div acting as top border -->
+                <div
+                  class="tab-top-bar absolute top-0 left-0 right-0 rounded transition-colors duration-300"
+                  style="height: 3px; background-color: {% if tab_index == 1 %}var(--text){% else %}var(--secondary_text){% endif %};"
+                >
+                  &nbsp;
+                </div>
+                {{ block.settings.title }}
+              </button>
+            {% endif %}
+          {%- endfor -%}
         </div>
-        {{ block.settings.title }}
-      </button>
-    {% endif %}
-  {%- endfor -%}
-</div>
 
         <!-- Tab Content -->
         <div class="tab-content mt-6 overflow-y-auto">
@@ -381,7 +381,8 @@
               >
               <span
                 id="compare-price"
-                class="line-through{% unless product.compare_at_price > product.price %}hidden{% endunless %}" style="color: var(--secondary_text);"
+                class="line-through{% unless product.compare_at_price > product.price %}hidden{% endunless %}"
+                style="color: var(--secondary_text);"
               >
                 {% if product.compare_at_price > product.price %}{{ product.compare_at_price | money }}{% endif %}
               </span>
@@ -448,6 +449,16 @@
             {% endif %}
           </div>
         </div>
+
+        {%- for block in section.blocks -%}
+          {%- if block.type == 'pickup_availability' -%}
+            <div class="pickup-availability-container mt-4" style="width:100%;">
+              {% render 'pickup-availability', product_variant: product.selected_or_first_available_variant %}
+              {{ 'component-pickup-availability.css' | asset_url | stylesheet_tag }}
+              <script src="{{ 'pickup-availability.js' | asset_url }}" defer="defer"></script>
+            </div>
+          {%- endif -%}
+        {%- endfor -%}
       </div>
     </div>
   </div>
@@ -591,27 +602,27 @@
     <div class="product-tabs flex-1 overflow-hidden">
       <!-- Tab Navigation -->
       <div class="tabs-nav flex justify-evenly space-x-3 h-auto mt-2 w-full">
-  {%- assign tab_index = 0 -%}
-  {%- for block in section.blocks -%}
-    {% if block.type == 'tab_description' or block.type == 'tab_details' or block.type == 'tab_sizing' %}
-      {%- assign tab_index = tab_index | plus: 1 -%}
-      <button
-        class="tab-btn group text-[12px] text-left mr-3 w-full transition-colors duration-300 relative {% if tab_index == 1 %}active-tab{% endif %}"
-        style="color: {% if tab_index == 1 %}var(--text){% else %}var(--secondary_text){% endif %};"
-        data-tab="tab-{{ block.id }}"
-        {{ block.shopify_attributes }}
-      >
-        <div
-          class="tab-top-bar absolute top-0 left-0 right-0 rounded transition-colors duration-300"
-          style="height: 2px; background-color: {% if tab_index == 1 %}var(--text){% else %}var(--secondary_text){% endif %};"
-        >
-          &nbsp;
-        </div>
-        {{ block.settings.title }}
-      </button>
-    {% endif %}
-  {%- endfor -%}
-</div>
+        {%- assign tab_index = 0 -%}
+        {%- for block in section.blocks -%}
+          {% if block.type == 'tab_description' or block.type == 'tab_details' or block.type == 'tab_sizing' %}
+            {%- assign tab_index = tab_index | plus: 1 -%}
+            <button
+              class="tab-btn group text-[12px] text-left mr-3 w-full transition-colors duration-300 relative {% if tab_index == 1 %}active-tab{% endif %}"
+              style="color: {% if tab_index == 1 %}var(--text){% else %}var(--secondary_text){% endif %};"
+              data-tab="tab-{{ block.id }}"
+              {{ block.shopify_attributes }}
+            >
+              <div
+                class="tab-top-bar absolute top-0 left-0 right-0 rounded transition-colors duration-300"
+                style="height: 2px; background-color: {% if tab_index == 1 %}var(--text){% else %}var(--secondary_text){% endif %};"
+              >
+                &nbsp;
+              </div>
+              {{ block.settings.title }}
+            </button>
+          {% endif %}
+        {%- endfor -%}
+      </div>
 
       <!-- Tab Content -->
       <div class="tab-content mt-6 overflow-y-auto max-h-[50vh]">
@@ -815,7 +826,10 @@
             <span class="mobile-compare-price-separator text-black text-[14px] {% unless product.compare_at_price > product.price %}hidden{% endunless %}"
               >|</span
             >
-            <span class="mobile-compare-price line-through {% unless product.compare_at_price > product.price %}hidden{% endunless %}" style="color: var(--secondary_text);">
+            <span
+              class="mobile-compare-price line-through {% unless product.compare_at_price > product.price %}hidden{% endunless %}"
+              style="color: var(--secondary_text);"
+            >
               {% if product.compare_at_price > product.price %}{{ product.compare_at_price | money }}{% endif %}
             </span>
           </div>
@@ -874,266 +888,275 @@
           {% endif %}
         </div>
       </div>
+      {%- for block in section.blocks -%}
+        {%- if block.type == 'pickup_availability' -%}
+          <div class="pickup-availability-container mt-4" style="width:100%;">
+            {% render 'pickup-availability', product_variant: product.selected_or_first_available_variant %}
+            {{ 'component-pickup-availability.css' | asset_url | stylesheet_tag }}
+            <script src="{{ 'pickup-availability.js' | asset_url }}" defer="defer"></script>
+          </div>
+        {%- endif -%}
+      {%- endfor -%}
     </div>
   </div>
 </section>
 
 <style>
-          .delivery-change-btn{
-           background-color: var(--button);
-          color: var(--button_label);
-          border: 1px solid var(--border);
+        .delivery-change-btn{
+         background-color: var(--button);
+        color: var(--button_label);
+        border: 1px solid var(--border);
+      }
+      .delivery-change-btn:hover {
+        background-color: var(--hovered_button_label);
+        color: var(--hovered_button_text_color);
+      }
+        .section-{{ section.id }}-padding {
+          padding-top: {{  settings.sections_spacing | times: 0.75 | round: 0 }}px;
+          padding-bottom: {{  settings.sections_spacing | times: 0.75 | round: 0 }}px;
+          padding-left: {{  settings.side_space | times: 0.75 | round: 0 }}px;
+          padding-right: {{  settings.side_space | times: 0.75 | round: 0 }}px;
         }
-        .delivery-change-btn:hover {
-          background-color: var(--hovered_button_label);
-          color: var(--hovered_button_text_color);
-        }
+
+        @media screen and (min-width: 750px) {
           .section-{{ section.id }}-padding {
-            padding-top: {{  settings.sections_spacing | times: 0.75 | round: 0 }}px;
-            padding-bottom: {{  settings.sections_spacing | times: 0.75 | round: 0 }}px;
-            padding-left: {{  settings.side_space | times: 0.75 | round: 0 }}px;
-            padding-right: {{  settings.side_space | times: 0.75 | round: 0 }}px;
+            padding-top: {{  settings.sections_spacing}}px;
+            padding-bottom: {{  settings.sections_spacing}}px;
+            padding-left: {{  settings.side_space  }}px;
+            padding-right: {{  settings.side_space }}px;
+          }
+        }
+
+        #size-chart-drawer {
+          transition: transform 1s cubic-bezier(0.4,0,0.2,1);
+          transform: translateX(100%);
+          will-change: transform;
+        }
+        #size-chart-drawer.open {
+          transform: translateX(0);
+        }
+
+        .product-section {
+          display: flex;
+          height: calc(100vh * {{product.media.size}});
+          position: relative;
+        }
+
+        .gallery-wrapper {
+          position: sticky;
+          top: 0;
+          height: 100vh;
+          overflow: hidden;
+        }
+
+        .gallery-track {
+          height: 100%;
+        }
+
+        .gallery-item {
+          opacity: 0;
+          transition: opacity 0.3s ease-out;
+          will-change: opacity;
+        }
+
+        .gallery-item.is-active {
+          opacity: 1;
+          pointer-events: auto;
+          z-index: 1;
+        }
+
+        .image-strip-container {
+          position: absolute;
+          top: 50%;
+          left: 10px;
+          transform: translateY(-50%);
+          z-index: 100;
+          transition: opacity 0.3s ease;
+        }
+
+        .gallery-track:hover .image-strip-container {
+          opacity: 1;
+        }
+
+        .image-strip {
+          display: flex;
+          flex-direction: column;
+          gap: 10px;
+          padding: 10px;
+          border-radius: 8px;
+        }
+
+        .strip-image-wrapper {
+          width: 60px;
+          height: 60px;
+          cursor: pointer;
+          opacity: 0.7;
+          transition: all 0.3s ease;
+        }
+
+        .strip-image-wrapper:hover,
+        .strip-image-wrapper.active {
+          opacity: 1;
+          transform: scale(1.1);
+          border: 1px solid black;
+        }
+        .strip-image {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+          border-radius: 4px;
+        }
+
+        .tab-content {
+          height: calc(100% - 50px);
+        }
+
+        .size-btn {
+          transition: all 0.3s ease;
+           background-color: var(--button);
+        color: var(--button_label);
+        border: 1px solid var(--border);
+        }
+
+        .size-btn:not(:disabled):hover,
+        .size-btn.bg-black {
+        background-color: var(--hovered_button_label);
+        color: var(--hovered_button_text_color);
+        }
+
+        .size-btn:disabled {
+          opacity: 0.8;
+          cursor: not-allowed;
+           border: 1px solid var(--border);
+        }
+
+        /* Mobile-specific styles */
+        @media (max-width: 1024px) {
+          .mobile-gallery-item {
+            will-change: opacity, transform;
+            transition: opacity 0.3s ease;
+            position: absolute;
+            inset: 0;
+            max-height: 65vh !important;
+            object-fit: cover !important;
+            display: block;
           }
 
-          @media screen and (min-width: 750px) {
-            .section-{{ section.id }}-padding {
-              padding-top: {{  settings.sections_spacing}}px;
-              padding-bottom: {{  settings.sections_spacing}}px;
-              padding-left: {{  settings.side_space  }}px;
-              padding-right: {{  settings.side_space }}px;
-            }
-          }
-
-          #size-chart-drawer {
-            transition: transform 1s cubic-bezier(0.4,0,0.2,1);
-            transform: translateX(100%);
-            will-change: transform;
-          }
-          #size-chart-drawer.open {
-            transform: translateX(0);
-          }
-
-          .product-section {
-            display: flex;
-            height: calc(100vh * {{product.media.size}});
+          .mobile-gallery-item.active {
+            opacity: 1;
+            z-index: 2;
             position: relative;
           }
 
-          .gallery-wrapper {
-            position: sticky;
-            top: 0;
-            height: 100vh;
-            overflow: hidden;
-          }
-
-          .gallery-track {
-            height: 100%;
-          }
-
-          .gallery-item {
-            opacity: 0;
-            transition: opacity 0.3s ease-out;
-            will-change: opacity;
-          }
-
-          .gallery-item.is-active {
-            opacity: 1;
-            pointer-events: auto;
-            z-index: 1;
-          }
-
-          .image-strip-container {
-            position: absolute;
-            top: 50%;
-            left: 10px;
-            transform: translateY(-50%);
-            z-index: 100;
-            transition: opacity 0.3s ease;
-          }
-
-          .gallery-track:hover .image-strip-container {
-            opacity: 1;
-          }
-
-          .image-strip {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            padding: 10px;
-            border-radius: 8px;
-          }
-
-          .strip-image-wrapper {
-            width: 60px;
-            height: 60px;
-            cursor: pointer;
-            opacity: 0.7;
+          .thumbnail-item {
             transition: all 0.3s ease;
+            opacity: 0.6;
+            border: 2px solid transparent;
           }
 
-          .strip-image-wrapper:hover,
-          .strip-image-wrapper.active {
+          .thumbnail-item.active {
             opacity: 1;
-            transform: scale(1.1);
-            border: 1px solid black;
+            border-color: black;
+            transform: scale(1.05);
           }
-          .strip-image {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            border-radius: 4px;
+
+          .product-tabs {
+            height: auto;
+            min-height: 200px;
           }
 
           .tab-content {
-            height: calc(100% - 50px);
+            height: auto;
           }
 
-          .size-btn {
-            transition: all 0.3s ease;
-             background-color: var(--button);
-          color: var(--button_label);
-          border: 1px solid var(--border);
+          #mobile-size-chart-drawer {
+            transition: transform 0.6s cubic-bezier(0.4,0,0.2,1);
           }
+        }
+  .size-btn.unavailable-size {
+    opacity: 1;
+    visibility: visible;
+    position: relative;
+    cursor: not-allowed;
+    color: var(--text) !important;
+    border-color: var(--border) !important;
+    background-color: var(--disabled_text) !important;
+    overflow: hidden;
+    transform: translateY(0);
+  }
 
-          .size-btn:not(:disabled):hover,
-          .size-btn.bg-black {
-          background-color: var(--hovered_button_label);
-          color: var(--hovered_button_text_color);
-          }
+  .size-btn.unavailable-size:hover {
+    background-color: var(--disabled_text) !important;
+    transform: translateY(0);
+  }
 
-          .size-btn:disabled {
-            opacity: 0.8;
-            cursor: not-allowed;
-             border: 1px solid var(--border);
-          }
+  /* Slash line */
+  .size-btn.unavailable-size::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: -2px;
+    right: -2px;
+    height: 2px;
+    background-color: var(--text);
+    transform: rotate(-45deg);
+    pointer-events: none;
+    z-index: 20;
+  }
 
-          /* Mobile-specific styles */
-          @media (max-width: 1024px) {
-            .mobile-gallery-item {
-              will-change: opacity, transform;
-              transition: opacity 0.3s ease;
-              position: absolute;
-              inset: 0;
-              max-height: 65vh !important;
-              object-fit: cover !important;
-              display: block;
-            }
-
-            .mobile-gallery-item.active {
-              opacity: 1;
-              z-index: 2;
-              position: relative;
-            }
-
-            .thumbnail-item {
-              transition: all 0.3s ease;
-              opacity: 0.6;
-              border: 2px solid transparent;
-            }
-
-            .thumbnail-item.active {
-              opacity: 1;
-              border-color: black;
-              transform: scale(1.05);
-            }
-
-            .product-tabs {
-              height: auto;
-              min-height: 200px;
-            }
-
-            .tab-content {
-              height: auto;
-            }
-
-            #mobile-size-chart-drawer {
-              transition: transform 0.6s cubic-bezier(0.4,0,0.2,1);
-            }
-          }
-    .size-btn.unavailable-size {
-      opacity: 1;
-      visibility: visible;
-      position: relative;
-      cursor: not-allowed;
-      color: var(--text) !important;
-      border-color: var(--border) !important;
-      background-color: var(--disabled_text) !important;
-      overflow: hidden;
-      transform: translateY(0);
-    }
-
-    .size-btn.unavailable-size:hover {
-      background-color: var(--disabled_text) !important;
-      transform: translateY(0);
-    }
-
-    /* Slash line */
-    .size-btn.unavailable-size::after {
-      content: '';
-      position: absolute;
-      top: 50%;
-      left: -2px;
-      right: -2px;
-      height: 2px;
-      background-color: var(--text);
-      transform: rotate(-45deg);
-      pointer-events: none;
-      z-index: 20;
-    }
-
-    .add-to-cart-btn-custom {
-      font-weight: var(--font-heading-weight);
-      font-size: 32px;
-      color: var(--secondary_button_text_color);
-      background-color: var(--secondary_button_label);
-      border-radius: 4px;
-      padding: 5px 10px;
-      line-height: 1;
-      display: flex;
-      flex-direction: row;
-      align-items: center;
-      gap: 20px;
-      border: var(--settings-buttons_border_thickness, 1px) solid var(--secondary_button_label);
-      transition: border 0.5s, background-color 0.5s, color 0.5s;
-      position: relative;
-      overflow: hidden;
-      cursor: pointer;
-    }
-    .add-to-cart-btn-custom::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: -100%;
-      width: 100%;
-      height: 100%;
-      background: var(--hovered_secondary_button_label);
-      transition: left 0.5s;
-      z-index: 0;
-    }
-    .add-to-cart-btn-custom:hover::before,
-    .add-to-cart-btn-custom:focus::before {
-      left: 0;
-    }
-    .add-to-cart-btn-custom > * {
-      position: relative;
-      z-index: 1;
-    }
-    .add-to-cart-btn-custom:hover,
-    .add-to-cart-btn-custom:focus {
-      color: var(--hovered_secondary_button_text_color);
-      border-color: var(--hovered_secondary_button_text_color);
-      outline: none;
-    }
-    .add-to-cart-btn-custom svg {
-      stroke-linecap: round;
-      transition: transform 0.3s;
-      transform-origin: center;
-      color: inherit;
-    }
-    .add-to-cart-btn-custom:hover svg,
-    .add-to-cart-btn-custom:focus svg {
-      transform: rotate(-90deg) scale(1.1);
-    }
+  .add-to-cart-btn-custom {
+    font-weight: var(--font-heading-weight);
+    font-size: 32px;
+    color: var(--secondary_button_text_color);
+    background-color: var(--secondary_button_label);
+    border-radius: 4px;
+    padding: 5px 10px;
+    line-height: 1;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 20px;
+    border: var(--settings-buttons_border_thickness, 1px) solid var(--secondary_button_label);
+    transition: border 0.5s, background-color 0.5s, color 0.5s;
+    position: relative;
+    overflow: hidden;
+    cursor: pointer;
+  }
+  .add-to-cart-btn-custom::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: var(--hovered_secondary_button_label);
+    transition: left 0.5s;
+    z-index: 0;
+  }
+  .add-to-cart-btn-custom:hover::before,
+  .add-to-cart-btn-custom:focus::before {
+    left: 0;
+  }
+  .add-to-cart-btn-custom > * {
+    position: relative;
+    z-index: 1;
+  }
+  .add-to-cart-btn-custom:hover,
+  .add-to-cart-btn-custom:focus {
+    color: var(--hovered_secondary_button_text_color);
+    border-color: var(--hovered_secondary_button_text_color);
+    outline: none;
+  }
+  .add-to-cart-btn-custom svg {
+    stroke-linecap: round;
+    transition: transform 0.3s;
+    transform-origin: center;
+    color: inherit;
+  }
+  .add-to-cart-btn-custom:hover svg,
+  .add-to-cart-btn-custom:focus svg {
+    transform: rotate(-90deg) scale(1.1);
+  }
 </style>
 <script>
   document.addEventListener('DOMContentLoaded', () => {
@@ -1931,6 +1954,12 @@ tabButtons.forEach((button) => {
     {
       "type": "quantity_selector",
       "name": "Quantity Selector",
+      "limit": 1,
+      "settings": []
+    },
+    {
+      "type": "pickup_availability",
+      "name": "Pickup Availability",
       "limit": 1,
       "settings": []
     }
