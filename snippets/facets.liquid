@@ -605,7 +605,11 @@
   document.addEventListener('DOMContentLoaded', function () {
     // Close dropdowns when clicking outside
     document.addEventListener('click', function (e) {
-      if (!e.target.closest('.facets__disclosure') && !e.target.closest('.disclosure-has-popup')) {
+      if (
+        !e.target.closest('.facets__disclosure') &&
+        !e.target.closest('.disclosure-has-popup') &&
+        !e.target.closest('.mobile-sort-dropdown')
+      ) {
         const allDropdowns = document.querySelectorAll('.facets__disclosure[open], .disclosure-has-popup[open]');
         allDropdowns.forEach((dropdown) => {
           dropdown.removeAttribute('open');
@@ -614,6 +618,11 @@
           if (icon) {
             icon.classList.remove('expanded');
           }
+        });
+
+        // Also close mobile sort dropdowns
+        document.querySelectorAll('.mobile-sort-options').forEach((dropdown) => {
+          dropdown.classList.add('hidden');
         });
       }
     });
@@ -628,6 +637,19 @@
             icon.classList.add('expanded');
           } else {
             icon.classList.remove('expanded');
+          }
+        }, 10);
+      });
+    });
+
+    // Add event listeners to sort by summary to close other dropdowns
+    document.querySelectorAll('.disclosure-has-popup summary').forEach((summary) => {
+      summary.addEventListener('click', () => {
+        const parentDetails = summary.closest('details');
+        // Close other dropdowns when sort dropdown is opened
+        setTimeout(() => {
+          if (parentDetails.hasAttribute('open')) {
+            closeOtherDropdowns(parentDetails);
           }
         }, 10);
       });
@@ -755,7 +777,21 @@
 
   .facets__summary-label {
     margin-right: 6px !important;
+    font-family: var(--font-body-family), var(--font-body-fallback);
   }
+
+  /* Apply body font to all facet text elements */
+  .facets__form,
+  .facets__disclosure,
+  .facet-checkbox,
+  .facet-checkbox span,
+  .mobile-filter-label,
+  .mobile-filter-summary span,
+  .mobile-sort-options button,
+  .filters-tabs {
+    font-family: var(--font-body-family), var(--font-body-fallback);
+  }
+
   .filters-tabs {
     font-size: 12px;
   }
