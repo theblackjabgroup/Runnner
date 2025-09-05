@@ -64,7 +64,8 @@
       color: {{ section.settings.email_input_color | default: '#FFFFFF' }} !important;
     }
 
-    footer .signup-button {
+    footer 
+     {
       color: {{ section.settings.menu_item_color }} !important;
     }
 
@@ -222,145 +223,81 @@
       box-sizing: border-box;
     }
 
-    /* Text span inside signup button */
-   
-.signup-button {
-  position: relative;
-  overflow: hidden;
-  display: inline-flex;
+    .signup-button span {
+  line-height: 1;
+  display: flex;
   align-items: center;
-  justify-content: space-between;
-  text-decoration: none;
-
-  /* Main color settings */
-  color: {{ section.settings.menu_item_color }} !important;
-  background-color: {{ section.settings.footer_bg_color | default: '#000000' }};
-  border: 1px solid {{ section.settings.menu_item_color }};
-  padding: 10px 20px;
-  border-radius: 5px;
-  cursor: pointer;
-  transition: all 0.5s ease;
-
-  /* GPU rendering hint to prevent flicker */
-  backface-visibility: hidden;
-  will-change: transform;
-  isolation: isolate;
-}
-
-/* Sliding hover background */
-.signup-button::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0; 
-  width: 100%;
   height: 100%;
-
-  background-color: {{ section.settings.footer_bg_color | default: '#000000' }}; 
-  z-index: 1;
+  color: {{ section.settings.menu_item_color }} !important;
+  position: relative; /* ADD this */
+  z-index: 1; /* ADD this */
 }
 
-/* Overlay slide */
-.signup-button::after {
+.signup-button::before {
   content: '';
   position: absolute;
   top: 0;
   left: -100%;
   width: 100%;
   height: 100%;
-
-  background-color: {{ section.settings.hover_color | default: '#FAA000' }}; 
-  z-index: 2;
-  transition: left 0.5s ease;
-  backface-visibility: hidden;
-  will-change: left;
+  background: {{ section.settings.hover_color | default: '#808080' }};
+  transition: left 0.5s;
+  z-index: 0;
 }
-
-.signup-button:hover::after {
+.signup-button:hover::before,
+.signup-button:focus::before {
   left: 0;
 }
 
-/* Content inside button stays on top */
-.signup-button span,
-.signup-button .arrow-wrapper {
-  position: relative;
-  z-index: 3; 
+    /* UPDATE your existing hover styles */
+.signup-button:hover {
+  color: {{ section.settings.menu_item_color }} !important;
+  border-color: {{ section.settings.hover_color | default: '#808080' }};
 }
 
-/* Stable text color */
 .signup-button:hover span {
   color: {{ section.settings.menu_item_color }} !important;
 }
 
-/* Arrow animations */
-.arrow-hover {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  margin-left: 10px;
-  transition: transform 0.3s ease;
-  z-index: 3;
-}
+    .arrow-hover {
+      display: inline-block;
+    }
 
-.arrow-wrapper {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  width: 80px;
-  height: 80px;
-  margin-left: 10px;
-  transition: transform 0.3s ease, stroke 0.3s ease, fill 0.3s ease;
-  transform: none;
-}
+   .arrow-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 80px;
+    height: 80px;
+    margin-left: 10px;
+    transition: transform 0.3s ease, stroke 0.3s ease, fill 0.3s ease;
+    transform: none;
+  }
 
-.arrow-wrapper svg path {
-  fill: {{ section.settings.menu_item_color }} !important;
-  stroke: {{ section.settings.menu_item_color }} !important;
+
+    .arrow-wrapper svg path {
+  fill: {{ section.settings.menu_item_color }};
+  stroke: {{ section.settings.menu_item_color }};
   transition: fill 0.3s ease, stroke 0.3s ease;
 }
 
-/* Hover arrow behavior */
-.signup-button:hover .arrow-hover {
-  transform: translateX(3px);
-}
-.signup-button:hover .arrow-wrapper {
-  transform: rotate(-45deg);
-}
-.signup-button:hover .arrow-hover .arrow-wrapper {
-  transform: none;
+   
+
+   .signup-button:hover .arrow-wrapper svg path,
+.signup-button:focus .arrow-wrapper svg path {
+  fill: {{ section.settings.menu_item_color }} !important;
+  stroke: {{ section.settings.menu_item_color }} !important;
 }
 
-/* Responsive adjustments */
-@media screen and (max-width: 375px) {
-  .signup-button {
-    font-size: 38px;
-    height: 50px;
-    line-height: 50px;
-    width: 110%;
-    margin-left: -20px;
-    justify-content: space-around !important;
-  }
-  .arrow-wrapper {
-    width: 30px;
-    height: 30px !important;
-    margin-bottom: -3px;
-  }
+.signup-button:hover .arrow-wrapper,
+.signup-button:focus .arrow-wrapper {
+  transform: translateX(5px); /* Optional: adds a subtle slide effect */
 }
-@media screen and (min-width: 376px) and (max-width: 480px) {
-  .signup-button {
-    font-size: 38px;
-    height: 55px;
-    line-height: 55px;
-    width: 115%;
-    margin-left: -25px;
-    justify-content: space-around !important;
-  }
-  .arrow-wrapper {
-    width: 32px;
-    height: 32px !important;
-  }
+.signup-button:hover .arrow-wrapper svg path,
+.signup-button:focus .arrow-wrapper svg path {
+  fill: {{ section.settings.hover_color | default: '#808080' }} !important;
+  stroke: {{ section.settings.hover_color | default: '#808080' }} !important;
 }
-
 
     /* Form success message styling */
     .newsletter-form__message--success {
@@ -893,18 +830,6 @@
       }
 
     }
-    .custom-gap {
-  gap: calc(var(--spacing) * 12); 
-}
-
-/* Mobile: Reduce gap for smaller screens */
-@media screen and (max-width: 768px) {
-  .custom-gap {
-    gap: calc(var(--spacing) * 5); 
-  }
-}
-
-    
 </style>
 
 <footer
@@ -1114,13 +1039,11 @@
                 aria-label="Footer Navigation"
               >
                 <div class="flex flex-wrap justify-start md:justify-end" style="margin-left:-10px;">
-                <div
-  style="padding-left: 10px;"
-  class="flex flex-row flex-wrap justify-start md:justify-end custom-gap w-full mr-[20px] md:ml-0"
-  {{ block.shopify_attributes }}
->
-
-
+                  <div
+                    style="padding-left: 10px;"
+                    class="flex flex-row flex-wrap justify-start md:justify-end gap-7 w-full mr-[20px] md:ml-0"
+                    {{ block.shopify_attributes }}
+                  >
                     {% for block in section.blocks %}
                       {% case block.type %}
                         {% when 'menu' %}
