@@ -1,5 +1,5 @@
 {%- comment -%}
-  Renders the country picker for the localization form
+  Renders the country picker for the localization form with flag icons
 
   Accepts:
     - localPosition: pass in the position in which the form is coming up to create specific IDs
@@ -33,10 +33,19 @@
     aria-controls="{{ localPosition }}-country-results"
     aria-describedby="{{ localPosition }}Label"
   >
-    <span>
-      {{- localization.country.name }} |
-      {{ localization.country.currency.iso_code }}
-      {{ localization.country.currency.symbol -}}
+    <span class="country-selector__current">
+      <span class="country-flag">
+        <img 
+          src="https://flagcdn.com/w20/{{ localization.country.iso_code | downcase }}.png" 
+          alt="{{ localization.country.name }} flag"
+          width="20"
+          height="15"
+          loading="lazy"
+        >
+      </span>
+      <span class="country-info">
+        {{- localization.country.name }}({{ localization.country.currency.iso_code }} {{ localization.country.currency.symbol -}})
+      </span>
     </span>
     {{ 'icon-caret.svg' | inline_asset_content }}
   </button>
@@ -111,10 +120,18 @@
                 >
                   {{- 'icon-checkmark.svg' | inline_asset_content -}}
                 </span>
+                <span class="country-flag">
+                  <img 
+                    src="https://flagcdn.com/w20/{{ country.iso_code | downcase }}.png" 
+                    alt="{{ country.name }} flag"
+                    width="20"
+                    height="15"
+                    loading="lazy"
+                  >
+                </span>
                 <span class="country">{{- country.name }}</span>
                 <span class="localization-form__currency motion-reduce{% unless show_currencies %} hidden{% endunless %}">
-                  {{ country.currency.iso_code }}
-                  {{ country.currency.symbol -}}
+                  ({{ country.currency.iso_code }} {{ country.currency.symbol -}})
                 </span>
               </a>
             </li>
@@ -140,10 +157,18 @@
               >
                 {{- 'icon-checkmark.svg' | inline_asset_content -}}
               </span>
+              <span class="country-flag">
+                <img 
+                  src="https://flagcdn.com/w20/{{ country.iso_code | downcase }}.png" 
+                  alt="{{ country.name }} flag"
+                  width="20"
+                  height="15"
+                  loading="lazy"
+                >
+              </span>
               <span class="country">{{- country.name }}</span>
               <span class="localization-form__currency motion-reduce{% unless show_currencies %} hidden{% endunless %}">
-                {{ country.currency.iso_code }}
-                {{ country.currency.symbol -}}
+                ({{ country.currency.iso_code }} {{ country.currency.symbol -}})
               </span>
             </a>
           </li>
@@ -154,3 +179,54 @@
   <div class="country-selector__overlay"></div>
 </div>
 <input type="hidden" name="country_code" value="{{ localization.country.iso_code }}">
+
+<style>
+  /* Country flag styling */
+.country-flag {
+  display: inline-flex;
+  align-items: center;
+  margin-right: 8px;
+  flex-shrink: 0;
+}
+
+.country-flag img {
+  border-radius: 2px;
+  object-fit: cover;
+}
+
+/* Current country selector styling */
+.country-selector__current {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.country-info {
+  display: flex;
+  align-items: center;
+}
+
+/* Disclosure link styling for proper alignment */
+.disclosure__link {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.disclosure__link .country {
+  flex: 1;
+}
+
+/* Ensure proper spacing in dropdown items */
+.disclosure__item .disclosure__link {
+  padding: 8px 12px;
+}
+
+/* Mobile responsive adjustments */
+@media screen and (max-width: 767px) {
+  .country-flag img {
+    width: 18px;
+    height: 13px;
+  }
+}
+</style>
