@@ -1,0 +1,118 @@
+{% comment %}
+  Renders a secondary button with hover effects and icon
+
+  Accepts:
+  - button_text: {String} Text to display in the button
+  - button_id: {String} Optional ID for the button text span
+  - button_type: {String} Button type (default: 'submit')
+  - button_classes: {String} Additional CSS classes for the button
+  - icon_rotation: {String} Initial rotation for the icon (default: '-90deg')
+  - button_width: {String} Custom width for the button (e.g., '300px', '50vh', '20rem', 'auto')
+  - button_width_mobile: {String} Custom width for the button on mobile (optional, falls back to button_width)
+
+  Usage:
+  {% render 'secondary-button', button_text: 'Subscribe', button_id: 'buttonText-password', button_width: '400px' %}
+  {% render 'secondary-button', button_text: 'Subscribe', button_width: '50vh', button_width_mobile: '80vw' %}
+{% endcomment %}
+
+{%- assign button_type = button_type | default: 'submit' -%}
+{%- assign icon_rotation = icon_rotation | default: '-90deg' -%}
+{%- assign button_classes = button_classes | default: '' -%}
+{%- assign default_width = '265px' -%}
+{%- assign default_width_mobile = '182px' -%}
+{%- assign custom_width = button_width | default: default_width -%}
+{%- assign custom_width_mobile = button_width_mobile | default: button_width | default: default_width_mobile -%}
+
+<button
+  type="{{ button_type }}"
+  class="secondary-button {{ button_classes }}"
+  style="{% if button_width %}--custom-width: {{ custom_width }};{% endif %}{% if button_width_mobile or button_width %}--custom-width-mobile: {{ custom_width_mobile }};{% endif %}"
+>
+  <svg
+    fill="none"
+    width="24"
+    height="24"
+    viewBox="5 8 14 8"
+    style="transform: rotate({{ icon_rotation }}); transform-origin: center; transform-box: fill-box;"
+    class="rotate-arrow"
+  >
+    <path d="M6 9L12 15L18 9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+  </svg>
+  <span
+    {% if button_id %}
+      id="{{ button_id }}"
+    {% endif %}
+  >
+    {{- button_text -}}
+  </span>
+</button>
+
+<style>
+  .secondary-button {
+    font-weight: var(--font-heading-weight);
+    font-size: 32px;
+    color: var(--secondary_button_text_color);
+    background-color: var(--secondary_button_label);
+    border-radius: 4px;
+    padding: 5px 10px;
+    line-height: 1;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    transition: color 0.5s ease;
+    gap: 20px;
+    border: {{ settings.buttons_border_thickness }}px solid var(--secondary_button_label);
+    transition: border 0.5s ease, background-color 0.5s ease, color 0.5s ease;
+    position: relative;
+    overflow: hidden;
+    width: var(--custom-width, 265px);
+    cursor: pointer;
+  }
+
+  .secondary-button::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: var(--hovered_secondary_button_label);
+    transition: left 0.5s ease;
+    z-index: 0;
+  }
+
+  .secondary-button:hover::before {
+    left: 0;
+  }
+
+  .secondary-button > * {
+    position: relative;
+    z-index: 1;
+  }
+
+  .secondary-button:hover {
+    color: var(--hovered_secondary_button_text_color);
+    border: {{ settings.buttons_border_thickness }}px solid var(--hovered_secondary_button_text_color);
+  }
+
+  .rotate-arrow {
+    stroke-linecap: round;
+    transition: transform 0.3s ease;
+    transform-origin: center;
+    color: inherit;
+  }
+
+  .secondary-button:hover .rotate-arrow {
+    transform: rotate(-90deg);
+  }
+
+  @media (max-width: 768px) {
+    .secondary-button {
+      font-size: 2.4rem;
+      width: var(--custom-width-mobile, 182px); /* Use custom mobile width or fallback to 182px */
+      height: 28px; /* Fixed height to 28px */
+      padding: 2px 5px;
+      letter-spacing: -0.02em; /* Reduced letter spacing */
+    }
+  }
+</style>
