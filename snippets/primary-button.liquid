@@ -2,30 +2,42 @@
   Primary Button with Sliding Text Animation
 
   Usage:
-  {% render 'primary-button-slide-text',
+  {% render 'primary-button',
     button_text: 'Click Me',
     button_url: '/collection/all',
     button_font_size: 24,
     font_weight: 500,
     show_arrow: true,
-    primary_class: 'my-primary-button'
+    primary_class: 'my-primary-button',
+    button_type: 'button',
+    data_attributes: 'data-increment="6"'
   %}
 
   Parameters:
   - button_text: String - The text to display on the button
-  - button_url: String - The URL the button should link to
+  - button_url: String - The URL the button should link to (if provided, renders as <a>, otherwise as <button>)
   - button_font_size: Number - Font size in pixels (default: 24)
   - font_weight: Number - Font weight (default: 500)
   - show_arrow: Boolean - Whether to show the arrow icon (default: false)
   - primary_class: String - Additional CSS class for styling
+  - button_type: String - Button type when rendered as button (default: 'button')
+  - data_attributes: String - Additional data attributes (e.g., 'data-increment="6" data-action="load-more"')
 {% endcomment %}
 
 {%- assign button_text = button_text | default: 'Button' -%}
-{%- assign button_url = button_url | default: '#' -%}
+{%- assign button_url = button_url | default: '' -%}
 {%- assign button_font_size = button_font_size | default: 24 -%}
 {%- assign font_weight = font_weight | default: 500 -%}
 {%- assign show_arrow = show_arrow | default: true -%}
 {%- assign primary_class = primary_class | default: '' -%}
+{%- assign button_type = button_type | default: 'button' -%}
+{%- assign data_attributes = data_attributes | default: '' -%}
+
+{%- comment -%} Check if we should render as anchor or button {%- endcomment -%}
+{%- assign render_as_anchor = false -%}
+{%- if button_url != blank and button_url != '#' and button_url != '' -%}
+  {%- assign render_as_anchor = true -%}
+{%- endif -%}
 
 <style>
   .primary-slide-button {
@@ -121,53 +133,105 @@
   }
 </style>
 
-<a
-  href="{{ button_url }}"
-  class="primary-slide-button {{ primary_class }}"
-  aria-label="{{ button_text | escape }}"
-  role="button"
-  tabindex="0"
->
-  <div class="primary-slide-button-text-container">
-    <div
-      class="primary-slide-button-text"
-      style="font-size: {{ button_font_size }}px; font-weight: {{ font_weight }}; font-style: var(--font-body-style); font-family: var(--font-body-family);"
-    >
-      {{ button_text | escape }}
-      {% if show_arrow %}
-        <span class="primary-slide-button-arrow" aria-hidden="true">
-          <svg
-            width="18"
-            height="16"
-            viewBox="4.5 1.5 8.5 13"
-            fill="currentColor"
-            xmlns="http://www.w3.org/2000/svg"
-            stroke="currentColor"
-          >
-            <path d="m12.14 8.753-5.482 4.796c-.646.566-1.658.106-1.658-.753V3.204a1 1 0 0 1 1.659-.753l5.48 4.796a1 1 0 0 1 0 1.506z"/>
-          </svg>
-        </span>
-      {% endif %}
+{% if render_as_anchor %}
+  <a
+    href="{{ button_url }}"
+    class="primary-slide-button {{ primary_class }}"
+    aria-label="{{ button_text | escape }}"
+    role="button"
+    tabindex="0"
+  >
+    <div class="primary-slide-button-text-container">
+      <div
+        class="primary-slide-button-text"
+        style="font-size: {{ button_font_size }}px; font-weight: {{ font_weight }}; font-style: var(--font-body-style); font-family: var(--font-body-family);"
+      >
+        {{ button_text | escape }}
+        {% if show_arrow %}
+          <span class="primary-slide-button-arrow" aria-hidden="true">
+            <svg
+              width="18"
+              height="16"
+              viewBox="4.5 1.5 8.5 13"
+              fill="currentColor"
+              xmlns="http://www.w3.org/2000/svg"
+              stroke="currentColor"
+            >
+              <path d="m12.14 8.753-5.482 4.796c-.646.566-1.658.106-1.658-.753V3.204a1 1 0 0 1 1.659-.753l5.48 4.796a1 1 0 0 1 0 1.506z"/>
+            </svg>
+          </span>
+        {% endif %}
+      </div>
+      <div
+        class="primary-slide-button-text-hover"
+        style="font-size: {{ button_font_size }}px; font-weight: {{ font_weight }}; font-style: var(--font-body-style); font-family: var(--font-body-family);"
+      >
+        {{ button_text | escape }}
+        {% if show_arrow %}
+          <span class="primary-slide-button-arrow" aria-hidden="true">
+            <svg
+              width="18"
+              height="16"
+              viewBox="4.5 1.5 8.5 13"
+              fill="currentColor"
+              xmlns="http://www.w3.org/2000/svg"
+              stroke="currentColor"
+            >
+              <path d="m12.14 8.753-5.482 4.796c-.646.566-1.658.106-1.658-.753V3.204a1 1 0 0 1 1.659-.753l5.48 4.796a1 1 0 0 1 0 1.506z"/>
+            </svg>
+          </span>
+        {% endif %}
+      </div>
     </div>
-    <div
-      class="primary-slide-button-text-hover"
-      style="font-size: {{ button_font_size }}px; font-weight: {{ font_weight }}; font-style: var(--font-body-style); font-family: var(--font-body-family);"
-    >
-      {{ button_text | escape }}
-      {% if show_arrow %}
-        <span class="primary-slide-button-arrow" aria-hidden="true">
-          <svg
-            width="18"
-            height="16"
-            viewBox="4.5 1.5 8.5 13"
-            fill="currentColor"
-            xmlns="http://www.w3.org/2000/svg"
-            stroke="currentColor"
-          >
-            <path d="m12.14 8.753-5.482 4.796c-.646.566-1.658.106-1.658-.753V3.204a1 1 0 0 1 1.659-.753l5.48 4.796a1 1 0 0 1 0 1.506z"/>
-          </svg>
-        </span>
-      {% endif %}
+  </a>
+{% else %}
+  <button
+    type="{{ button_type }}"
+    class="primary-slide-button {{ primary_class }}"
+    aria-label="{{ button_text | escape }}"
+    {{ data_attributes }}
+  >
+    <div class="primary-slide-button-text-container">
+      <div
+        class="primary-slide-button-text"
+        style="font-size: {{ button_font_size }}px; font-weight: {{ font_weight }}; font-style: var(--font-body-style); font-family: var(--font-body-family);"
+      >
+        {{ button_text | escape }}
+        {% if show_arrow %}
+          <span class="primary-slide-button-arrow" aria-hidden="true">
+            <svg
+              width="18"
+              height="16"
+              viewBox="4.5 1.5 8.5 13"
+              fill="currentColor"
+              xmlns="http://www.w3.org/2000/svg"
+              stroke="currentColor"
+            >
+              <path d="m12.14 8.753-5.482 4.796c-.646.566-1.658.106-1.658-.753V3.204a1 1 0 0 1 1.659-.753l5.48 4.796a1 1 0 0 1 0 1.506z"/>
+            </svg>
+          </span>
+        {% endif %}
+      </div>
+      <div
+        class="primary-slide-button-text-hover"
+        style="font-size: {{ button_font_size }}px; font-weight: {{ font_weight }}; font-style: var(--font-body-style); font-family: var(--font-body-family);"
+      >
+        {{ button_text | escape }}
+        {% if show_arrow %}
+          <span class="primary-slide-button-arrow" aria-hidden="true">
+            <svg
+              width="18"
+              height="16"
+              viewBox="4.5 1.5 8.5 13"
+              fill="currentColor"
+              xmlns="http://www.w3.org/2000/svg"
+              stroke="currentColor"
+            >
+              <path d="m12.14 8.753-5.482 4.796c-.646.566-1.658.106-1.658-.753V3.204a1 1 0 0 1 1.659-.753l5.48 4.796a1 1 0 0 1 0 1.506z"/>
+            </svg>
+          </span>
+        {% endif %}
+      </div>
     </div>
-  </div>
-</a>
+  </button>
+{% endif %}
