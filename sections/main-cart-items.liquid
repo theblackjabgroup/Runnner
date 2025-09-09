@@ -99,7 +99,7 @@
     flex-direction: column;
   }
   .item-info {
-    transform: translateY(-15px);
+    transform: translateY(-10px);
   }
 
   .item-price {
@@ -1041,6 +1041,7 @@
   // Quantity controls
   document.addEventListener('click', function (e) {
     if (e.target.classList.contains('decrease-qty')) {
+      e.preventDefault();
       const itemKey = e.target.dataset.itemKey;
       const input = document.querySelector(`input[data-item-key="${itemKey}"]`);
       const currentQty = parseInt(input.value);
@@ -1050,19 +1051,24 @@
     }
 
     if (e.target.classList.contains('increase-qty')) {
+      e.preventDefault();
       const itemKey = e.target.dataset.itemKey;
       const input = document.querySelector(`input[data-item-key="${itemKey}"]`);
       const currentQty = parseInt(input.value);
+      console.log('Increasing quantity from', currentQty, 'to', currentQty + 1);
       updateQuantity(itemKey, currentQty + 1);
     }
 
     if (e.target.classList.contains('remove-btn')) {
+      e.preventDefault();
       const itemKey = e.target.dataset.itemKey;
       updateQuantity(itemKey, 0);
     }
   });
 
   function updateQuantity(itemKey, quantity) {
+    console.log('Updating quantity:', itemKey, quantity); // Debug log
+
     fetch('/cart/change.js', {
       method: 'POST',
       headers: {
@@ -1074,13 +1080,22 @@
         quantity: quantity,
       }),
     })
-      .then((response) => response.json())
+      .then((response) => {
+        console.log('Response status:', response.status); // Debug log
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return response.json();
+      })
       .then((data) => {
+        console.log('Cart data received:', data); // Debug log
         // Update the cart without page reload
         updateCartDisplay(data);
       })
       .catch((error) => {
-        console.error('Error:', error);
+        console.error('Error updating cart:', error);
+        // Optionally reload the page if cart update fails
+        // window.location.reload();
       });
   }
 
@@ -1130,11 +1145,29 @@
   function updateButtonStates(cartData) {
     cartData.items.forEach((item) => {
       const decreaseBtn = document.querySelector(`[data-item-key="${item.key}"].decrease-qty`);
+      const increaseBtn = document.querySelector(`[data-item-key="${item.key}"].increase-qty`);
+
       if (decreaseBtn) {
-        if (item.quantity <= 1 || cartData.item_count == 1) {
+        // Only disable decrease if quantity is 1 or less
+        if (item.quantity <= 1) {
           decreaseBtn.disabled = true;
         } else {
           decreaseBtn.disabled = false;
+        }
+      }
+
+      if (increaseBtn) {
+        // Check if there's an inventory limit
+        const variant = item.variant;
+        if (variant && variant.inventory_management && variant.inventory_quantity) {
+          if (item.quantity >= variant.inventory_quantity) {
+            increaseBtn.disabled = true;
+          } else {
+            increaseBtn.disabled = false;
+          }
+        } else {
+          // No inventory limit, always allow increase
+          increaseBtn.disabled = false;
         }
       }
     });
