@@ -164,11 +164,36 @@
     margin-right: 4px;
     background: #eee; /* fallback for unknown colors */
     box-sizing: border-box;
+    transition: all 0.2s ease;
+  }
+
+  .color-picker:hover {
+    transform: scale(1.1);
+    border-width: 2px;
   }
 
   .color-picker.selected {
-    border-width: 2px;
+    border-width: 3px;
     border-color: var(--text);
+    transform: scale(1.05);
+  }
+
+  .color-picker.selected::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 6px;
+    height: 6px;
+    background: var(--text);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+  }
+
+  .color-picker.selected.white::after,
+  .color-picker.selected.beige::after,
+  .color-picker.selected.yellow::after {
+    background: #333;
   }
 
   .color-picker.black {
@@ -194,6 +219,9 @@
     background: #808080;
   }
   .color-picker.navy {
+    background: #000080;
+  }
+  .color-picker.nynavy {
     background: #000080;
   }
   .color-picker.beige {
@@ -820,7 +848,6 @@
                       {% assign color_option = option %}
                     {% endif %}
                   {% endfor %}
-
                   {% if size_option %}
                     <div class="option-row">
                       <span class="option-label">{{ size_option.name }}:</span>
@@ -832,11 +859,32 @@
                     <div class="option-row">
                       <span class="option-label">{{ color_option.name }}:</span>
                       <div class="color-options">
-                        {% assign displayed_colors = '' %}
+                        {% assign current_color = color_option.value %}
+                        {% assign color_class = current_color
+                          | downcase
+                          | replace: ' ', ''
+                          | replace: '-', ''
+                          | replace: '_', ''
+                        %}
+
+                        {% comment %} Show the current color swatch {% endcomment %}
+                        <div
+                          class="color-picker {{ color_class }} selected"
+                          data-variant-id="{{ item.variant.id }}"
+                          data-color="{{ current_color }}"
+                          data-item-key="{{ item.key }}"
+                          data-current-size="{{ size_option.value | default: '' }}"
+                          title="{{ current_color }}"
+                          onclick="changeItemColor(this)"
+                          style="width: 20px !important; height: 20px !important; border-radius: 50% !important; border: 2px solid #000 !important; cursor: pointer !important; display: inline-block !important; margin-right: 4px !important; background: {% if color_class == 'black' %}#000{% elsif color_class == 'white' %}#fff{% elsif color_class == 'red' %}#ff0000{% elsif color_class == 'blue' %}#0000ff{% elsif color_class == 'navy' or color_class == 'nynavy' %}#000080{% elsif color_class == 'gray' or color_class == 'grey' %}#808080{% elsif color_class == 'brown' %}#8b4513{% elsif color_class == 'green' %}#008000{% elsif color_class == 'yellow' %}#ffff00{% elsif color_class == 'orange' %}#ffa500{% elsif color_class == 'purple' %}#800080{% elsif color_class == 'pink' %}#ffc0cb{% elsif color_class == 'beige' %}#f5f5dc{% else %}#ccc{% endif %} !important;"
+                        ></div>
+
+                        {% comment %} Show other available colors if they exist {% endcomment %}
+                        {% assign displayed_colors = current_color | append: ',' %}
                         {% for variant in item.product.variants %}
                           {% assign variant_color = null %}
 
-                          {% comment %} Check all three option positions for color {% endcomment %}
+                          {% comment %} Check all option positions for color {% endcomment %}
                           {% if item.product.options[0] and item.product.options[0] != 'Title' %}
                             {% assign option_name_lower = item.product.options[0] | downcase %}
                             {% if option_name_lower contains 'color' or option_name_lower contains 'colour' %}
@@ -864,20 +912,29 @@
                             {% endif %}
                           {% endif %}
 
-                          {% if variant_color and variant_color != blank and variant_color != 'Default Title' %}
+                          {% if variant_color
+                            and variant_color != blank
+                            and variant_color != 'Default Title'
+                            and variant_color != current_color
+                          %}
                             {% unless displayed_colors contains variant_color %}
                               {% assign displayed_colors = displayed_colors | append: variant_color | append: ',' %}
-                              {% assign color_class = variant_color | downcase | replace: ' ', '' | replace: '-', '' %}
-                              {% assign is_selected = false %}
-                              {% if variant_color == color_option.value %}
-                                {% assign is_selected = true %}
-                              {% endif %}
+                              {% assign color_class = variant_color
+                                | downcase
+                                | replace: ' ', ''
+                                | replace: '-', ''
+                                | replace: '_', ''
+                              %}
 
                               <div
-                                class="color-picker {{ color_class }}{% if is_selected %} selected{% endif %}"
+                                class="color-picker {{ color_class }}"
                                 data-variant-id="{{ variant.id }}"
                                 data-color="{{ variant_color }}"
+                                data-item-key="{{ item.key }}"
+                                data-current-size="{{ size_option.value | default: '' }}"
                                 title="{{ variant_color }}"
+                                onclick="changeItemColor(this)"
+                                style="width: 20px !important; height: 20px !important; border-radius: 50% !important; border: 1px solid #000 !important; cursor: pointer !important; display: inline-block !important; margin-right: 4px !important; background: {% if color_class == 'black' %}#000{% elsif color_class == 'white' %}#fff{% elsif color_class == 'red' %}#ff0000{% elsif color_class == 'blue' %}#0000ff{% elsif color_class == 'navy' or color_class == 'nynavy' %}#000080{% elsif color_class == 'gray' or color_class == 'grey' %}#808080{% elsif color_class == 'brown' %}#8b4513{% elsif color_class == 'green' %}#008000{% elsif color_class == 'yellow' %}#ffff00{% elsif color_class == 'orange' %}#ffa500{% elsif color_class == 'purple' %}#800080{% elsif color_class == 'pink' %}#ffc0cb{% elsif color_class == 'beige' %}#f5f5dc{% else %}#ccc{% endif %} !important;"
                               ></div>
                             {% endunless %}
                           {% endif %}
@@ -1187,6 +1244,86 @@
     // Simple money formatting - adjust based on your currency settings
     const dollars = (cents / 100).toFixed(2);
     return `$${dollars}`;
+  }
+
+  function changeItemColor(colorPicker) {
+    const itemKey = colorPicker.dataset.itemKey;
+    const newColor = colorPicker.dataset.color;
+    const currentSize = colorPicker.dataset.currentSize;
+    const newVariantId = colorPicker.dataset.variantId;
+
+    console.log('Changing color:', { itemKey, newColor, currentSize, newVariantId });
+
+    // First, find the correct variant for the new color and current size
+    findVariantForOptions(itemKey, newColor, currentSize)
+      .then((targetVariantId) => {
+        if (targetVariantId) {
+          // Remove current item and add new variant
+          return changeCartItemVariant(itemKey, targetVariantId);
+        } else {
+          throw new Error('Variant not found for selected color and size combination');
+        }
+      })
+      .then(() => {
+        // Reload the page to refresh the cart display
+        window.location.reload();
+      })
+      .catch((error) => {
+        console.error('Error changing item color:', error);
+        alert('Unable to change color. Please try again.');
+      });
+  }
+
+  function findVariantForOptions(itemKey, newColor, currentSize) {
+    return new Promise((resolve, reject) => {
+      // Get the product handle from the current item
+      const cartItem = document.querySelector(`[data-item-key="${itemKey}"]`).closest('.cart-item');
+      const itemTitle = cartItem.querySelector('.item-title').textContent;
+
+      // We need to fetch product data to find the correct variant
+      // For now, we'll use the variant ID from the color picker
+      const colorPicker = cartItem.querySelector(`[data-color="${newColor}"]`);
+      if (colorPicker && colorPicker.dataset.variantId) {
+        resolve(colorPicker.dataset.variantId);
+      } else {
+        reject('Variant not found');
+      }
+    });
+  }
+
+  function changeCartItemVariant(itemKey, newVariantId) {
+    // Get current quantity
+    const qtyInput = document.querySelector(`[data-item-key="${itemKey}"]`);
+    const currentQty = parseInt(qtyInput.value);
+
+    // Remove the current item and add the new variant
+    return fetch('/cart/change.js', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Accept: 'application/json',
+      },
+      body: JSON.stringify({
+        id: itemKey,
+        quantity: 0,
+      }),
+    })
+      .then((response) => response.json())
+      .then(() => {
+        // Add the new variant
+        return fetch('/cart/add.js', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Accept: 'application/json',
+          },
+          body: JSON.stringify({
+            id: newVariantId,
+            quantity: currentQty,
+          }),
+        });
+      })
+      .then((response) => response.json());
   }
 
   // Form submissions
