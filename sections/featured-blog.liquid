@@ -17,7 +17,7 @@
 
    .featured-blog-section ::selection {
      /* background: none; */
-     color: var(--cr-yellow-2) !important;
+     color: var(--accent) !important;
    }
    .featured-blog-section-title {
      font-size: 32px;
@@ -719,42 +719,50 @@
     </div>
     {% if blogs[blog_handle].articles.size > section.settings.post_limit %}
       <div class="load-more-btn-fb-container">
-        <button class="load-more-btn-fb" data-increment="6">
-          <div class="load-more-btn-fb-text-container">
-            <span class="load-more-btn-fb-text"
-              >LOAD MORE
-              <svg
-                class="fb-arrow-svg w-5 h-5 object-contain transition-transform duration-200 ease-in-out group-hover:-rotate-90 mx-1"
-                viewBox="4.5 1.5 8.5 13"
-                fill="currentColor"
-                xmlns="http://www.w3.org/2000/svg"
-                stroke="currentColor"
-                aria-hidden="true"
-                width="18"
-                height="16"
-                style="width: 18px; height: 16px; margin-right: -2px;"
-              >
-                <path d="m12.14 8.753-5.482 4.796c-.646.566-1.658.106-1.658-.753V3.204a1 1 0 0 1 1.659-.753l5.48 4.796a1 1 0 0 1 0 1.506z"/>
-              </svg>
-            </span>
-            <span class="load-more-btn-fb-text-hover"
-              >LOAD MORE
-              <svg
-                class="fb-arrow-svg w-5 h-5 object-contain transition-transform duration-200 ease-in-out group-hover:-rotate-90 mx-1"
-                viewBox="4.5 1.5 8.5 13"
-                fill="currentColor"
-                xmlns="http://www.w3.org/2000/svg"
-                stroke="currentColor"
-                aria-hidden="true"
-                width="18"
-                height="16"
-                style="width: 18px; height: 16px; margin-right: -2px;"
-              >
-                <path d="m12.14 8.753-5.482 4.796c-.646.566-1.658.106-1.658-.753V3.204a1 1 0 0 1 1.659-.753l5.48 4.796a1 1 0 0 1 0 1.506z"/>
-              </svg>
-            </span>
-          </div>
-        </button>
+        {% render 'primary-button',
+          button_text: 'LOAD MORE',
+          button_url: '',
+          primary_class: 'load-more-btn-fb',
+          data_attributes: 'data-increment="6"'
+        %}
+        {% comment %}
+          <button class="load-more-btn-fb" data-increment="6">
+            <div class="load-more-btn-fb-text-container">
+              <span class="load-more-btn-fb-text"
+                >LOAD MORE
+                <svg
+                  class="fb-arrow-svg w-5 h-5 object-contain transition-transform duration-200 ease-in-out group-hover:-rotate-90 mx-1"
+                  viewBox="4.5 1.5 8.5 13"
+                  fill="currentColor"
+                  xmlns="http://www.w3.org/2000/svg"
+                  stroke="currentColor"
+                  aria-hidden="true"
+                  width="18"
+                  height="16"
+                  style="width: 18px; height: 16px; margin-right: -2px;"
+                >
+                  <path d="m12.14 8.753-5.482 4.796c-.646.566-1.658.106-1.658-.753V3.204a1 1 0 0 1 1.659-.753l5.48 4.796a1 1 0 0 1 0 1.506z"/>
+                </svg>
+              </span>
+              <span class="load-more-btn-fb-text-hover"
+                >LOAD MORE
+                <svg
+                  class="fb-arrow-svg w-5 h-5 object-contain transition-transform duration-200 ease-in-out group-hover:-rotate-90 mx-1"
+                  viewBox="4.5 1.5 8.5 13"
+                  fill="currentColor"
+                  xmlns="http://www.w3.org/2000/svg"
+                  stroke="currentColor"
+                  aria-hidden="true"
+                  width="18"
+                  height="16"
+                  style="width: 18px; height: 16px; margin-right: -2px;"
+                >
+                  <path d="m12.14 8.753-5.482 4.796c-.646.566-1.658.106-1.658-.753V3.204a1 1 0 0 1 1.659-.753l5.48 4.796a1 1 0 0 1 0 1.506z"/>
+                </svg>
+              </span>
+            </div>
+          </button>
+        {% endcomment %}
       </div>
     {% endif %}
   </section>
@@ -779,7 +787,8 @@
       const postLimit = parseInt(container.dataset.postLimit || '5', 10);
       let currentlyVisible = postLimit;
 
-      loadMoreBtn.addEventListener('click', function () {
+      loadMoreBtn.addEventListener('click', function (e) {
+        e.preventDefault(); // Prevent any default button behavior
         const blogArticles = document.querySelectorAll('#archiveContainer .blog-article-fb');
         const endIndex = Math.min(currentlyVisible + increment, blogArticles.length);
         for (let i = currentlyVisible; i < endIndex; i++) {
@@ -789,7 +798,7 @@
         }
         currentlyVisible = endIndex;
         if (currentlyVisible >= blogArticles.length) {
-          loadMoreBtn.style.display = 'none';
+          loadMoreBtn.parentElement.style.display = 'none';
         }
       });
 
