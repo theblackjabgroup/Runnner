@@ -12,9 +12,22 @@
 <script src="{{ 'quantity-popover.js' | asset_url }}" defer="defer"></script>
 
 <style>
+    .drawer__header2{
+        font-size:16px !important;}
+    .size-variant{
+        margin-top:10px !important;
+    }
+           .quantity__button:disabled {
+            cursor: not-allowed !important;
+            opacity: 0.5 !important;
+
+          }
+
+
     .cart__empty-text{
-        font-size:42px !important;
+        font-size:24px !important;
         text-transform: uppercase;
+        font-weight:500;
     }
     .svg-wrapper2{
         font-weight:500;
@@ -25,7 +38,7 @@
         padding-bottom:20px;
     }
         .item-image{
-        height:100%;
+        height:200px !important;
     width:100%;}
         .totals{
         padding:10px 0 13px 0;}
@@ -57,6 +70,12 @@
       padding-bottom:17px !important;
   }
           @media only screen and (max-width: 600px) {
+            .size-variant{
+        margin-top:0px !important;
+    }
+            .cart-item-padding{
+      padding-bottom:5px !important;
+  }
                   .pricing-option input[type='radio']:checked::before {
             content: '';
             display: block;
@@ -72,6 +91,8 @@
               text-align:right !important; }
               .item-price,.item-title{
               font-size:14px;}
+              .item-title {
+            line-height:0.8 !important; }
             .item-image{
             width:85px !important;
         height:102px}
@@ -121,15 +142,19 @@
             margin: 0 5px;
             display: inline-block;
             vertical-align: middle;
+            transform: rotate({{ settings.vertical_scroll_image_rotation | default: 0 }}deg);
           }
 
           @media only screen and (max-width: 600px) {
+               .drawer__header2{
+        font-size:12px !important;}
             .vertical-text-cart-drawer .separator-image {
               width: 15px;
               height: 15px;
+              transform: rotate({{ settings.vertical_scroll_image_rotation | default: 0 }}deg);
             }
             .vertical-text-cart-drawer-container {
-              width: 20px !important;
+              width: 25px !important;
             }
           }
 
@@ -177,7 +202,7 @@
             background: var(--text);
             border-radius: 50%;
             position: absolute;
-            top: 0.15rem; /* Center the dot vertically */
+            top: 0.13rem; /* Center the dot vertically */
             left: 0.147rem;
           }
 
@@ -188,7 +213,24 @@
 
           /* Quantity button hover effects */
           .quantity__button:hover {
-            background-color: #f5f5f5 !important;
+            background-color: var(--text) !important;
+            color: var(--background) !important;
+          }
+
+          .quantity__button {
+            color: var(--text) !important;
+            background-color: var(--background) !important;
+            border-color: var(--text) !important;
+          }
+
+          .quantity__input {
+            color: var(--text) !important;
+            background-color: var(--background) !important;
+            border-color: var(--text) !important;
+          }
+
+          .quantity {
+            border-color: var(--text) !important;
           }
 
           /* Checkout button hover effects */
@@ -196,28 +238,37 @@
             position: relative;
             overflow: hidden;
             transition: background-color 0.3s ease, color 0.3s ease, border 0.3s ease;
-            border: 2px solid var(--text);
-            background-color: var(--button) !important;
-            color: var(--button_label) !important;
+            border: 2px solid var(--secondary_button_text_color);
+            background-color: var(--secondary_button_label) !important;
+            color: var(--secondary_button_text_color) !important;
             height:35px !important;
             min-width: 270px !important;
           }
 
           #CartDrawer-Checkout:hover {
-            background-color: var(--background) !important;
-            color: var(--text) !important;
-            border: 2px solid var(--text) !important;
+            background-color: var(--hovered_secondary_button_label) !important;
+            color: var(--hovered_secondary_button_text_color) !important;
+            border: 2px solid var(--hovered_secondary_button_text_color) !important;
           }
 
           #CartDrawer-Checkout:hover svg path {
-            stroke: var(--text) !important;
+            stroke: var(--hovered_secondary_button_text_color) !important;
           }
+
+          #CartDrawer-Checkout svg path:first-of-type() {
+            stroke: var(--secondary_button_label) !important;
+            transition: stroke 0.3s ease;
+        }
+        #CartDrawer-Checkout svg path {
+          stroke: var(--secondary_button_text_color) !important;
+          transition: stroke 0.3s ease;
+        }
+
           .button{
           min-height:unset !important}
 
           .checkout-button-text-container {
             position: relative;
-            width: 100%;
             overflow: hidden;
             display: flex;
             align-items: center;
@@ -282,20 +333,25 @@
                   >
                 {% endunless %}
               {% endfor %}
-              {% unless forloop.last %}
-                <img
-                  src="{{ settings.vertical_scroll_image | image_url: width: 40 }}"
-                  alt="Separator"
-                  class="separator-image"
-                  width="100"
-                  height="100"
-                >
-              {% endunless %}
             {% endfor %}
           {% else %}
+            {% assign text_parts = settings.vertical_scroll_text | split: '→' %}
             {% for i in (1..10) %}
-              {{ settings.vertical_scroll_text }}
-              {% unless forloop.last %} • {% endunless %}
+              {% for part in text_parts %}
+                {{ part | strip }}
+                {% unless forloop.last %}
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="16"
+                    height="16"
+                    fill="var(--text)"
+                    viewBox="0 0 256 256"
+                    class="separator-image"
+                  >
+                    <path d="M240,128a15.74,15.74,0,0,1-7.6,13.51L88.32,229.65a16,16,0,0,1-16.2.3A15.86,15.86,0,0,1,64,216.13V39.87a15.86,15.86,0,0,1,8.12-13.82,16,16,0,0,1,16.2.3L232.4,114.49A15.74,15.74,0,0,1,240,128Z"></path>
+                  </svg>
+                {% endunless %}
+              {% endfor %}
             {% endfor %}
           {% endif %}
         </div>
@@ -315,20 +371,25 @@
                   >
                 {% endunless %}
               {% endfor %}
-              {% unless forloop.last %}
-                <img
-                  src="{{ settings.vertical_scroll_image | image_url: width: 40 }}"
-                  alt="Separator"
-                  class="separator-image"
-                  width="100"
-                  height="100"
-                >
-              {% endunless %}
             {% endfor %}
           {% else %}
+            {% assign text_parts = settings.vertical_scroll_text | split: '→' %}
             {% for i in (1..10) %}
-              {{ settings.vertical_scroll_text }}
-              {% unless forloop.last %} • {% endunless %}
+              {% for part in text_parts %}
+                {{ part | strip }}
+                {% unless forloop.last %}
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="16"
+                    height="16"
+                    fill="var(--text)"
+                    viewBox="0 0 256 256"
+                    class="separator-image"
+                  >
+                    <path d="M240,128a15.74,15.74,0,0,1-7.6,13.51L88.32,229.65a16,16,0,0,1-16.2.3A15.86,15.86,0,0,1,64,216.13V39.87a15.86,15.86,0,0,1,8.12-13.82,16,16,0,0,1,16.2.3L232.4,114.49A15.74,15.74,0,0,1,240,128Z"></path>
+                  </svg>
+                {% endunless %}
+              {% endfor %}
             {% endfor %}
           {% endif %}
         </div>
@@ -336,8 +397,11 @@
 
       {%- if cart == empty -%}
         <div class="drawer__inner-empty">
-          <h2 class="empty-cart-number uppercase !text-[16px] !font-medium !mb-0" style="color: var(--text);">
-            {{ 'sections.cart.title' | t }} ({{ cart.item_count }})
+          <h2
+            class="empty-cart-number drawer__header2 uppercase  !font-medium !mb-0"
+            style="color: var(--text);"
+          >
+            {{ 'sections.cart.title' | t }} [{{ cart.item_count }}]
           </h2>
           <div class="cart-drawer__warnings center{% if settings.cart_drawer_collection != blank %} cart-drawer__warnings--has-collection{% endif %}">
             <div class="cart-drawer__empty-content">
@@ -348,7 +412,9 @@
                 onclick="this.closest('cart-drawer').close()"
                 aria-label="{{ 'accessibility.close' | t }}"
               >
-                <span class="svg-wrapper2 uppercase !translate-x-[-100px]" style="color: var(--text);"> close </span>
+                <span class="svg-wrapper2 drawer__header2 uppercase !translate-x-[-100px]" style="color: var(--text);">
+                  close
+                </span>
               </button>
             </div>
           </div>
@@ -359,9 +425,9 @@
           {%- endif -%}
         </div>
       {%- endif -%}
-      <div class="drawer__header border-b !py-[16px]">
-        <h2 class="drawer__heading uppercase !text-[16px] !font-medium !mb-0" style="color: var(--text);">
-          {{ 'sections.cart.title' | t }} ({{ cart.item_count }})
+      <div class="drawer__header2 drawer__header border-b !py-[16px]">
+        <h2 class="drawer__header2  uppercase  !font-medium !mb-0" style="color: var(--text); ">
+          {{ 'sections.cart.title' | t }} [{{ cart.item_count }}]
         </h2>
         <button
           class="drawer__close  !text-[16px]"
@@ -369,7 +435,10 @@
           onclick="this.closest('cart-drawer').close()"
           aria-label="{{ 'accessibility.close' | t }}"
         >
-          <span class=" uppercase !mr-[25px]  md:mb-3 mb-6 font-medium !text-[16px]" style="color: var(--text);">
+          <span
+            class="drawer__header2 uppercase !mr-[25px]  md:mb-3 mb-6 font-medium "
+            style="color: var(--text);"
+          >
             close
           </span>
         </button>
@@ -419,21 +488,27 @@
                           <!-- Top Row: Title and Price -->
                           <div class="!flex !justify-between !items-start !mb-[auto]">
                             <div class="!flex !flex-col">
-                              <div class="!text-base !text-[16px]" style="color: var(--text);">
+                              <div
+                                class=" !text-[14px]"
+                                style="color: var(--text); padding:0 0 5px 0 !important;"
+                              >
                                 ${{ item.final_price | money_without_currency }}
                               </div>
-                              <div class="!flex-col !gap-2">
+                              <div class="!flex-col !gap-2 ">
                                 <a
                                   href="{{ item.url }}"
-                                  class="item-price !uppercase  !font-medium !mb-2"
+                                  class="item-title !uppercase  !font-medium !mb-2"
                                   style="color: var(--text);"
                                 >
                                   {{- item.product.title | escape -}}
                                 </a>
                                 {%- for option in item.options_with_values -%}
                                   {%- if option.name == 'Size' -%}
-                                    <div class="!text-[16px] !uppercase" style="color: var(--text);">
-                                      SIZE: {{ option.value }}
+                                    <div class="!text-[12px] !uppercase" style="color: var(--text); size-selector">
+                                      SIZE:
+                                      <span style="background-color: var(--button); padding:2px 5px; border-radius:3px;">
+                                        {{- option.value -}}
+                                      </span>
                                     </div>
                                     <div class="size-selector !flex !gap-2">
                                       {%- for size in item.product.options.Size -%}
@@ -448,16 +523,27 @@
                                     </div>
                                   {%- endif -%}
                                 {%- endfor -%}
-                                <div class="color-picker !flex !gap-2 !mt-2">
-                                  {%- for color in item.product.options.Color -%}
-                                    <button
-                                      class="color-option {% if color == item.options_with_values['Color'] %} active {% endif %}"
-                                      type="button"
-                                      style="background-color: {{ color | escape }};"
-                                      data-color="{{ color }}"
-                                    ></button>
-                                  {%- endfor -%}
-                                </div>
+
+                                {%- comment -%} Color Swatch Section {%- endcomment -%}
+                                {%- assign color_option_found = false -%}
+                                {%- assign current_color = '' -%}
+                                {%- for option in item.options_with_values -%}
+                                  {%- assign option_name_lower = option.name | downcase -%}
+                                  {%- if option_name_lower contains 'color' or option_name_lower contains 'colour' -%}
+                                    {%- assign color_option_found = true -%}
+                                    {%- assign current_color = option.value -%}
+                                    <div
+                                      class="!text-[12px] !uppercase !mt-2 !flex !items-center"
+                                      style="color: var(--text);"
+                                    >
+                                      COLOR:
+                                      <div
+                                        style="width: 20px !important; height: 20px !important; border-radius: 50% !important; border: 2px solid #000 !important; cursor: pointer !important; display: inline-block !important; margin-left: 4px !important; background: {{ current_color | downcase }} !important;"
+                                      ></div>
+                                    </div>
+                                    {%- break -%}
+                                  {%- endif -%}
+                                {%- endfor -%}
                               </div>
                             </div>
                           </div>
@@ -474,7 +560,14 @@
                                 <div class="cart-item__quantity-wrapper quantity-popover-wrapper ">
                                   <div class="quantity-popover-container{% if has_qty_rules or has_vol_pricing %} quantity-popover-container--hover{% endif %}">
                                     <quantity-input class="quantity cart-quantity !border !rounded-lg">
-                                      <button class="quantity__button " name="minus" type="button">
+                                      <button
+                                        class="quantity__button"
+                                        name="minus"
+                                        type="button"
+                                        {% if item.quantity <= 1 %}
+                                          disabled
+                                        {% endif %}
+                                      >
                                         <span class="visually-hidden">
                                           {{-
                                             'products.product.quantity.decrease'
@@ -617,7 +710,7 @@
                             >
                               <button
                                 type="button"
-                                class="item-price -translate-x-[20px] mb-6"
+                                class="item-price -translate-x-[10px] mb-6"
                                 style="color: var(--text);"
                                 aria-label="{{ 'sections.cart.remove_title' | t: title: item.title }}"
                               >
@@ -693,7 +786,14 @@
                                 <div class="cart-item__quantity-wrapper quantity-popover-wrapper ">
                                   <div class="quantity-popover-container{% if has_qty_rules or has_vol_pricing %} quantity-popover-container--hover{% endif %}">
                                     <quantity-input class="quantity cart-quantity !border !rounded-lg">
-                                      <button class="quantity__button " name="minus" type="button">
+                                      <button
+                                        class="quantity__button"
+                                        name="minus"
+                                        type="button"
+                                        {% if item.quantity <= 1 %}
+                                          disabled
+                                        {% endif %}
+                                      >
                                         <span class="visually-hidden">
                                           {{-
                                             'products.product.quantity.decrease'
@@ -860,16 +960,27 @@
                                   </div>
                                 {%- endif -%}
                               {%- endfor -%}
-                              <div class="color-picker !flex !gap-2 !mt-2">
-                                {%- for color in item.product.options.Color -%}
-                                  <button
-                                    class="color-option {% if color == item.options_with_values['Color'] %} active {% endif %}"
-                                    type="button"
-                                    style="background-color: {{ color | escape }};"
-                                    data-color="{{ color }}"
-                                  ></button>
-                                {%- endfor -%}
-                              </div>
+
+                              {%- comment -%} Color Swatch Section {%- endcomment -%}
+                              {%- assign color_option_found = false -%}
+                              {%- assign current_color = '' -%}
+                              {%- for option in item.options_with_values -%}
+                                {%- assign option_name_lower = option.name | downcase -%}
+                                {%- if option_name_lower contains 'color' or option_name_lower contains 'colour' -%}
+                                  {%- assign color_option_found = true -%}
+                                  {%- assign current_color = option.value -%}
+                                  <div
+                                    class="!uppercase size-variant !mt-2 !flex !items-center"
+                                    style="color: var(--text);"
+                                  >
+                                    COLOR:
+                                    <div
+                                      style="width: 20px !important; height: 20px !important; border-radius: 50% !important; border: 2px solid #000 !important; cursor: pointer !important; display: inline-block !important; margin-left: 4px !important; background: {{ current_color | downcase }} !important;"
+                                    ></div>
+                                  </div>
+                                  {%- break -%}
+                                {%- endif -%}
+                              {%- endfor -%}
                             </div>
                             <cart-remove-button
                               id="CartDrawer-Remove-{{ item.index | plus: 1 }}"
@@ -972,27 +1083,25 @@
             <div class="checkout-button-text-container">
               <div class="checkout-button-text">
                 <svg
-                  width="20"
-                  height="20"
-                  class="!mr-2"
-                  viewBox="0 0 9 9"
-                  fill="none"
                   xmlns="http://www.w3.org/2000/svg"
+                  width="32"
+                  height="32"
+                  fill="var(--secondary_button_text_color)"
+                  viewBox="0 0 256 256"
                 >
-                  <path d="M1.1875 7.7334H7.6599M7.6599 7.7334V1.261M7.6599 7.7334L1.1875 1.261" stroke="var(--button_label)" stroke-linejoin="round"/>
+                  <path d="M181.66,133.66l-80,80a8,8,0,0,1-11.32-11.32L164.69,128,90.34,53.66a8,8,0,0,1,11.32-11.32l80,80A8,8,0,0,1,181.66,133.66Z"></path>
                 </svg>
                 &nbsp; CHECKOUT
               </div>
               <div class="checkout-button-text-hover">
                 <svg
-                  width="20"
-                  height="20"
-                  class="!mr-2"
-                  viewBox="0 0 9 9"
-                  fill="none"
                   xmlns="http://www.w3.org/2000/svg"
+                  width="32"
+                  height="32"
+                  fill="var(--secondary_button_text_color)"
+                  viewBox="0 0 256 256"
                 >
-                  <path d="M1.1875 7.7334H7.6599M7.6599 7.7334V1.261M7.6599 7.7334L1.1875 1.261" stroke="var(--text)" stroke-linejoin="round"/>
+                  <path d="M181.66,133.66l-80,80a8,8,0,0,1-11.32-11.32L164.69,128,90.34,53.66a8,8,0,0,1,11.32-11.32l80,80A8,8,0,0,1,181.66,133.66Z"></path>
                 </svg>
                 &nbsp; CHECKOUT
               </div>
@@ -1057,4 +1166,79 @@
       });
     }
   });
+
+  // Color changing functionality for cart drawer
+  function changeItemColor(element, itemKey, newColor) {
+    // Find the cart item data
+    const cartItems = {{ cart.items | json }};
+    const currentItem = cartItems.find(item => item.key === itemKey);
+
+    if (!currentItem) {
+      console.error('Item not found in cart');
+      return;
+    }
+
+    // Find the variant that matches the new color and other current options
+    const targetVariant = findVariantForOptions(currentItem.product, currentItem.options_with_values, 'color', newColor);
+
+    if (!targetVariant) {
+      console.error('No variant found for color:', newColor);
+      return;
+    }
+
+    // Change the cart item to the new variant
+    changeCartItemVariant(currentItem, targetVariant);
+  }
+
+  function findVariantForOptions(product, currentOptions, changingOptionType, newValue) {
+    return product.variants.find(variant => {
+      return variant.options.every((option, index) => {
+        const optionName = product.options[index].toLowerCase();
+
+        if (optionName.includes(changingOptionType)) {
+          return option.toLowerCase() === newValue.toLowerCase();
+        } else {
+          // For other options, keep the current value
+          const currentOptionValue = Object.values(currentOptions)[index];
+          return option === currentOptionValue;
+        }
+      });
+    });
+  }
+
+  function changeCartItemVariant(currentItem, newVariant) {
+    // First remove the current item
+    fetch('/cart/change.js', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        quantity: 0,
+        id: currentItem.variant.id
+      })
+    })
+    .then(response => response.json())
+    .then(() => {
+      // Then add the new variant with the same quantity
+      return fetch('/cart/add.js', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          id: newVariant.id,
+          quantity: currentItem.quantity
+        })
+      });
+    })
+    .then(response => response.json())
+    .then(() => {
+      // Reload the page to reflect changes
+      window.location.reload();
+    })
+    .catch(error => {
+      console.error('Error changing item variant:', error);
+    });
+  }
 </script>

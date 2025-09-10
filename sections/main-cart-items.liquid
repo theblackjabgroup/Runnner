@@ -59,6 +59,20 @@
     flex: 2;
     overflow-y: auto;
     max-height: 100%;
+    width: 100%;
+  }
+
+  .empty-cart-message {
+    text-align: center;
+    font-size: 3.5rem;
+    font-weight: bold;
+    text-transform: uppercase;
+    color: var(--text);
+    padding: var(--spacing-xl) 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
   }
 
   .cart-item {
@@ -85,7 +99,7 @@
     flex-direction: column;
   }
   .item-info {
-    transform: translateY(-15px);
+    transform: translateY(-10px);
   }
 
   .item-price {
@@ -121,7 +135,7 @@
     font-weight: 400;
     border-radius: 5px;
     color: var(--button_label);
-    background-color: var(--text);
+    background-color: var(--button);
     padding: 0 9px !important;
     line-height: 1.5 !important;
     text-transform: uppercase;
@@ -150,11 +164,36 @@
     margin-right: 4px;
     background: #eee; /* fallback for unknown colors */
     box-sizing: border-box;
+    transition: all 0.2s ease;
+  }
+
+  .color-picker:hover {
+    transform: scale(1.1);
+    border-width: 2px;
   }
 
   .color-picker.selected {
-    border-width: 2px;
+    border-width: 3px;
     border-color: var(--text);
+    transform: scale(1.05);
+  }
+
+  .color-picker.selected::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 6px;
+    height: 6px;
+    background: var(--text);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+  }
+
+  .color-picker.selected.white::after,
+  .color-picker.selected.beige::after,
+  .color-picker.selected.yellow::after {
+    background: #333;
   }
 
   .color-picker.black {
@@ -180,6 +219,9 @@
     background: #808080;
   }
   .color-picker.navy {
+    background: #000080;
+  }
+  .color-picker.nynavy {
     background: #000080;
   }
   .color-picker.beige {
@@ -440,7 +482,6 @@
     background: var(--background);
     font-family: inherit;
     color: var(--text);
-    border: 1px solid var(--border);
   }
 
   .sidebar-btn {
@@ -555,8 +596,8 @@
   .checkout-btn {
     width: 100%;
     padding: 0 var(--spacing-sm);
-    background: var(--button);
-    color: var(--button_label);
+    background: var(--secondary_button_label) !important;
+    color: var(--secondary_button_text_color) !important;
     border: none;
     border-radius: 5px;
     font-size: 4rem;
@@ -569,9 +610,35 @@
     justify-content: space-between;
     gap: var(--spacing-xs);
     letter-spacing: 1px;
+    position: relative;
+    overflow: hidden;
+    transition: color 0.3s ease;
   }
-  .checkout-icon {
-    font-size: 2.9rem;
+
+  .checkout-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: var(--hovered_secondary_button_label);
+    transition: left 0.3s ease;
+    z-index: 0;
+  }
+
+  .checkout-btn:hover::before {
+    left: 0;
+  }
+
+  .checkout-btn:hover {
+    color: var(--hovered_secondary_button_text_color) !important;
+  }
+
+  .checkout-btn span,
+  .checkout-btn svg {
+    position: relative;
+    z-index: 1;
   }
 
   /* Mobile Styles */
@@ -730,162 +797,200 @@
     .cart-header {
       margin-bottom: 0;
     }
+
+    .empty-cart-message {
+      font-size: 2rem;
+      padding: var(--spacing-lg) 0;
+    }
   }
 </style>
 
 <div class="cart-container">
   <div class="cart-header">
-    <h2 class="cart-title">Cart ({{ cart.item_count }})</h2>
+    <h2 class="cart-title">Cart [{{ cart.item_count }}]</h2>
   </div>
 
   <div class="cart-content">
     <div class="cart-items">
-      <form action="{{ routes.cart_url }}" method="post" id="MainCartForm">
-        {% for item in cart.items %}
-          <div class="cart-item">
-            <img
-              class="item-image"
-              src="{{ item.image | image_url: width: 200 }}"
-              alt="{{ item.product.title | escape }}"
-              width="100"
-              height="100"
-            >
+      {% if cart.item_count > 0 %}
+        <form action="{{ routes.cart_url }}" method="post" id="MainCartForm">
+          {% for item in cart.items %}
+            <div class="cart-item">
+              <img
+                class="item-image"
+                src="{{ item.image | image_url: width: 200 }}"
+                alt="{{ item.product.title | escape }}"
+                width="100"
+                height="100"
+              >
 
-            <div class="item-details">
-              <div class="item-info">
-                <div class="item-price">
-                  {% if item.original_price != item.final_price %}
-                    {{ item.final_price | money }}
-                  {% else %}
-                    {{ item.original_price | money }}
-                  {% endif %}
+              <div class="item-details">
+                <div class="item-info">
+                  <div class="item-price">
+                    {% if item.original_price != item.final_price %}
+                      {{ item.final_price | money }}
+                    {% else %}
+                      {{ item.original_price | money }}
+                    {% endif %}
+                  </div>
+                  <div class="item-title">{{ item.product.title }}</div>
                 </div>
-                <div class="item-title">{{ item.product.title }}</div>
-              </div>
 
-              <div class="item-options">
-                {% assign size_option = null %}
-                {% assign color_option = null %}
+                <div class="item-options">
+                  {% assign size_option = null %}
+                  {% assign color_option = null %}
 
-                {% for option in item.options_with_values %}
-                  {% assign option_name_lower = option.name | downcase %}
-                  {% if option_name_lower contains 'size' %}
-                    {% assign size_option = option %}
-                  {% elsif option_name_lower contains 'color' or option_name_lower contains 'colour' %}
-                    {% assign color_option = option %}
-                  {% endif %}
-                {% endfor %}
-
-                {% if size_option %}
-                  <div class="option-row">
-                    <span class="option-label">{{ size_option.name }}:</span>
-                    <span class="option-value selected">{{ size_option.value }}</span>
-                  </div>
-                {% endif %}
-
-                {% if color_option %}
-                  <div class="option-row">
-                    <span class="option-label">{{ color_option.name }}:</span>
-                    <div class="color-options">
-                      {% assign displayed_colors = '' %}
-                      {% for variant in item.product.variants %}
-                        {% assign variant_color = null %}
-
-                        {% comment %} Check all three option positions for color {% endcomment %}
-                        {% if item.product.options[0] and item.product.options[0] != 'Title' %}
-                          {% assign option_name_lower = item.product.options[0] | downcase %}
-                          {% if option_name_lower contains 'color' or option_name_lower contains 'colour' %}
-                            {% assign variant_color = variant.option1 %}
-                          {% endif %}
-                        {% endif %}
-
-                        {% if variant_color == null
-                          and item.product.options[1]
-                          and item.product.options[1] != 'Title'
-                        %}
-                          {% assign option_name_lower = item.product.options[1] | downcase %}
-                          {% if option_name_lower contains 'color' or option_name_lower contains 'colour' %}
-                            {% assign variant_color = variant.option2 %}
-                          {% endif %}
-                        {% endif %}
-
-                        {% if variant_color == null
-                          and item.product.options[2]
-                          and item.product.options[2] != 'Title'
-                        %}
-                          {% assign option_name_lower = item.product.options[2] | downcase %}
-                          {% if option_name_lower contains 'color' or option_name_lower contains 'colour' %}
-                            {% assign variant_color = variant.option3 %}
-                          {% endif %}
-                        {% endif %}
-
-                        {% if variant_color and variant_color != blank and variant_color != 'Default Title' %}
-                          {% unless displayed_colors contains variant_color %}
-                            {% assign displayed_colors = displayed_colors | append: variant_color | append: ',' %}
-                            {% assign color_class = variant_color | downcase | replace: ' ', '' | replace: '-', '' %}
-                            {% assign is_selected = false %}
-                            {% if variant_color == color_option.value %}
-                              {% assign is_selected = true %}
-                            {% endif %}
-
-                            <div
-                              class="color-picker {{ color_class }}{% if is_selected %} selected{% endif %}"
-                              data-variant-id="{{ variant.id }}"
-                              data-color="{{ variant_color }}"
-                              title="{{ variant_color }}"
-                            ></div>
-                          {% endunless %}
-                        {% endif %}
-                      {% endfor %}
-                    </div>
-                  </div>
-                {% endif %}
-
-                {% for option in item.options_with_values %}
-                  {% assign option_name_lower = option.name | downcase %}
-                  {% unless option_name_lower contains 'size'
-                    or option_name_lower contains 'color'
-                    or option_name_lower contains 'colour'
-                  %}
+                  {% for option in item.options_with_values %}
+                    {% assign option_name_lower = option.name | downcase %}
+                    {% if option_name_lower contains 'size' %}
+                      {% assign size_option = option %}
+                    {% elsif option_name_lower contains 'color' or option_name_lower contains 'colour' %}
+                      {% assign color_option = option %}
+                    {% endif %}
+                  {% endfor %}
+                  {% if size_option %}
                     <div class="option-row">
-                      <span class="option-label">{{ option.name }}:</span>
-                      <span class="option-value selected">{{ option.value }}</span>
+                      <span class="option-label">{{ size_option.name }}:</span>
+                      <span class="option-value selected">{{ size_option.value }}</span>
                     </div>
-                  {% endunless %}
-                {% endfor %}
-              </div>
-            </div>
-
-            <div class="item-controls">
-              <div class="quantity-controls">
-                <button
-                  class="qty-btn decrease-qty"
-                  data-item-key="{{ item.key }}"
-                  {% if item.quantity <= 1 or cart.item_count == 1 %}
-                    disabled
                   {% endif %}
-                >
-                  -
-                </button>
-                <input
-                  class="qty-input"
-                  type="text"
-                  value="{{ item.quantity }}"
-                  readonly
-                  data-item-key="{{ item.key }}"
-                >
-                <button
-                  class="qty-btn increase-qty"
-                  data-item-key="{{ item.key }}"
-                >
-                  +
-                </button>
+
+                  {% if color_option %}
+                    <div class="option-row">
+                      <span class="option-label">{{ color_option.name }}:</span>
+                      <div class="color-options">
+                        {% assign current_color = color_option.value %}
+                        {% assign color_class = current_color
+                          | downcase
+                          | replace: ' ', ''
+                          | replace: '-', ''
+                          | replace: '_', ''
+                        %}
+
+                        {% comment %} Show the current color swatch {% endcomment %}
+                        <div
+                          class="color-picker {{ color_class }} selected"
+                          data-variant-id="{{ item.variant.id }}"
+                          data-color="{{ current_color }}"
+                          data-item-key="{{ item.key }}"
+                          data-current-size="{{ size_option.value | default: '' }}"
+                          title="{{ current_color }}"
+                          onclick="changeItemColor(this)"
+                          style="width: 20px !important; height: 20px !important; border-radius: 50% !important; border: 2px solid #000 !important; cursor: pointer !important; display: inline-block !important; margin-right: 4px !important; background: {% if color_class == 'black' %}#000{% elsif color_class == 'white' %}#fff{% elsif color_class == 'red' %}#ff0000{% elsif color_class == 'blue' %}#0000ff{% elsif color_class == 'navy' or color_class == 'nynavy' %}#000080{% elsif color_class == 'gray' or color_class == 'grey' %}#808080{% elsif color_class == 'brown' %}#8b4513{% elsif color_class == 'green' %}#008000{% elsif color_class == 'yellow' %}#ffff00{% elsif color_class == 'orange' %}#ffa500{% elsif color_class == 'purple' %}#800080{% elsif color_class == 'pink' %}#ffc0cb{% elsif color_class == 'beige' %}#f5f5dc{% else %}#ccc{% endif %} !important;"
+                        ></div>
+
+                        {% comment %} Show other available colors if they exist {% endcomment %}
+                        {% assign displayed_colors = current_color | append: ',' %}
+                        {% for variant in item.product.variants %}
+                          {% assign variant_color = null %}
+
+                          {% comment %} Check all option positions for color {% endcomment %}
+                          {% if item.product.options[0] and item.product.options[0] != 'Title' %}
+                            {% assign option_name_lower = item.product.options[0] | downcase %}
+                            {% if option_name_lower contains 'color' or option_name_lower contains 'colour' %}
+                              {% assign variant_color = variant.option1 %}
+                            {% endif %}
+                          {% endif %}
+
+                          {% if variant_color == null
+                            and item.product.options[1]
+                            and item.product.options[1] != 'Title'
+                          %}
+                            {% assign option_name_lower = item.product.options[1] | downcase %}
+                            {% if option_name_lower contains 'color' or option_name_lower contains 'colour' %}
+                              {% assign variant_color = variant.option2 %}
+                            {% endif %}
+                          {% endif %}
+
+                          {% if variant_color == null
+                            and item.product.options[2]
+                            and item.product.options[2] != 'Title'
+                          %}
+                            {% assign option_name_lower = item.product.options[2] | downcase %}
+                            {% if option_name_lower contains 'color' or option_name_lower contains 'colour' %}
+                              {% assign variant_color = variant.option3 %}
+                            {% endif %}
+                          {% endif %}
+
+                          {% if variant_color
+                            and variant_color != blank
+                            and variant_color != 'Default Title'
+                            and variant_color != current_color
+                          %}
+                            {% unless displayed_colors contains variant_color %}
+                              {% assign displayed_colors = displayed_colors | append: variant_color | append: ',' %}
+                              {% assign color_class = variant_color
+                                | downcase
+                                | replace: ' ', ''
+                                | replace: '-', ''
+                                | replace: '_', ''
+                              %}
+
+                              <div
+                                class="color-picker {{ color_class }}"
+                                data-variant-id="{{ variant.id }}"
+                                data-color="{{ variant_color }}"
+                                data-item-key="{{ item.key }}"
+                                data-current-size="{{ size_option.value | default: '' }}"
+                                title="{{ variant_color }}"
+                                onclick="changeItemColor(this)"
+                                style="width: 20px !important; height: 20px !important; border-radius: 50% !important; border: 1px solid #000 !important; cursor: pointer !important; display: inline-block !important; margin-right: 4px !important; background: {% if color_class == 'black' %}#000{% elsif color_class == 'white' %}#fff{% elsif color_class == 'red' %}#ff0000{% elsif color_class == 'blue' %}#0000ff{% elsif color_class == 'navy' or color_class == 'nynavy' %}#000080{% elsif color_class == 'gray' or color_class == 'grey' %}#808080{% elsif color_class == 'brown' %}#8b4513{% elsif color_class == 'green' %}#008000{% elsif color_class == 'yellow' %}#ffff00{% elsif color_class == 'orange' %}#ffa500{% elsif color_class == 'purple' %}#800080{% elsif color_class == 'pink' %}#ffc0cb{% elsif color_class == 'beige' %}#f5f5dc{% else %}#ccc{% endif %} !important;"
+                              ></div>
+                            {% endunless %}
+                          {% endif %}
+                        {% endfor %}
+                      </div>
+                    </div>
+                  {% endif %}
+
+                  {% for option in item.options_with_values %}
+                    {% assign option_name_lower = option.name | downcase %}
+                    {% unless option_name_lower contains 'size'
+                      or option_name_lower contains 'color'
+                      or option_name_lower contains 'colour'
+                    %}
+                      <div class="option-row">
+                        <span class="option-label">{{ option.name }}:</span>
+                        <span class="option-value selected">{{ option.value }}</span>
+                      </div>
+                    {% endunless %}
+                  {% endfor %}
+                </div>
               </div>
-              <button class="remove-btn" data-item-key="{{ item.key }}">[Remove]</button>
+
+              <div class="item-controls">
+                <div class="quantity-controls">
+                  <button
+                    class="qty-btn decrease-qty"
+                    data-item-key="{{ item.key }}"
+                    {% if item.quantity <= 1 or cart.item_count == 1 %}
+                      disabled
+                    {% endif %}
+                  >
+                    -
+                  </button>
+                  <input
+                    class="qty-input"
+                    type="text"
+                    value="{{ item.quantity }}"
+                    readonly
+                    data-item-key="{{ item.key }}"
+                  >
+                  <button
+                    class="qty-btn increase-qty"
+                    data-item-key="{{ item.key }}"
+                  >
+                    +
+                  </button>
+                </div>
+                <button class="remove-btn" data-item-key="{{ item.key }}">[Remove]</button>
+              </div>
             </div>
-          </div>
-        {% endfor %}
-      </form>
+          {% endfor %}
+        </form>
+      {% else %}
+        <div class="empty-cart-message">Your cart is sad :(</div>
+      {% endif %}
     </div>
 
     <div class="cart-sidebar">
@@ -951,8 +1056,16 @@
             disabled
           {% endif %}
         >
-          <span class="checkout-icon">▶</span>
-          Checkout
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="32"
+            height="32"
+            fill="var(--secondary_button_text_color)"
+            viewBox="0 0 256 256"
+          >
+            <path d="M181.66,133.66l-80,80a8,8,0,0,1-11.32-11.32L164.69,128,90.34,53.66a8,8,0,0,1,11.32-11.32l80,80A8,8,0,0,1,181.66,133.66Z"></path>
+          </svg>
+          <span>Checkout</span>
         </button>
       </div>
     </div>
@@ -985,6 +1098,7 @@
   // Quantity controls
   document.addEventListener('click', function (e) {
     if (e.target.classList.contains('decrease-qty')) {
+      e.preventDefault();
       const itemKey = e.target.dataset.itemKey;
       const input = document.querySelector(`input[data-item-key="${itemKey}"]`);
       const currentQty = parseInt(input.value);
@@ -994,19 +1108,24 @@
     }
 
     if (e.target.classList.contains('increase-qty')) {
+      e.preventDefault();
       const itemKey = e.target.dataset.itemKey;
       const input = document.querySelector(`input[data-item-key="${itemKey}"]`);
       const currentQty = parseInt(input.value);
+      console.log('Increasing quantity from', currentQty, 'to', currentQty + 1);
       updateQuantity(itemKey, currentQty + 1);
     }
 
     if (e.target.classList.contains('remove-btn')) {
+      e.preventDefault();
       const itemKey = e.target.dataset.itemKey;
       updateQuantity(itemKey, 0);
     }
   });
 
   function updateQuantity(itemKey, quantity) {
+    console.log('Updating quantity:', itemKey, quantity); // Debug log
+
     fetch('/cart/change.js', {
       method: 'POST',
       headers: {
@@ -1018,13 +1137,193 @@
         quantity: quantity,
       }),
     })
-      .then((response) => response.json())
+      .then((response) => {
+        console.log('Response status:', response.status); // Debug log
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return response.json();
+      })
       .then((data) => {
-        location.reload(); // Simple reload, you can make this more sophisticated
+        console.log('Cart data received:', data); // Debug log
+        // Update the cart without page reload
+        updateCartDisplay(data);
       })
       .catch((error) => {
-        console.error('Error:', error);
+        console.error('Error updating cart:', error);
+        // Optionally reload the page if cart update fails
+        // window.location.reload();
       });
+  }
+
+  function updateCartDisplay(cartData) {
+    // Update cart item count in header
+    const cartTitle = document.querySelector('.cart-title');
+    if (cartTitle) {
+      cartTitle.textContent = `Cart [${cartData.item_count}]`;
+    }
+
+    // Update total price
+    const totalAmount = document.querySelector('.total-amount');
+    if (totalAmount && cartData.total_price) {
+      totalAmount.textContent = formatMoney(cartData.total_price);
+    }
+
+    // Update individual item quantities and remove items with 0 quantity
+    cartData.items.forEach((item) => {
+      const itemElement = document.querySelector(`[data-item-key="${item.key}"]`);
+      if (itemElement) {
+        const qtyInput = itemElement.closest('.cart-item').querySelector('.qty-input');
+        if (qtyInput) {
+          qtyInput.value = item.quantity;
+        }
+
+        // Update item total price if it exists
+        const itemPrice = itemElement.closest('.cart-item').querySelector('.item-price');
+        if (itemPrice) {
+          itemPrice.textContent = formatMoney(item.final_line_price);
+        }
+      }
+    });
+
+    // Remove items that are no longer in cart
+    const currentItemKeys = cartData.items.map((item) => item.key);
+    document.querySelectorAll('.cart-item').forEach((cartItem) => {
+      const itemKey = cartItem.querySelector('[data-item-key]').dataset.itemKey;
+      if (!currentItemKeys.includes(itemKey)) {
+        cartItem.remove();
+      }
+    });
+
+    // Update button states
+    updateButtonStates(cartData);
+  }
+
+  function updateButtonStates(cartData) {
+    cartData.items.forEach((item) => {
+      const decreaseBtn = document.querySelector(`[data-item-key="${item.key}"].decrease-qty`);
+      const increaseBtn = document.querySelector(`[data-item-key="${item.key}"].increase-qty`);
+
+      if (decreaseBtn) {
+        // Only disable decrease if quantity is 1 or less
+        if (item.quantity <= 1) {
+          decreaseBtn.disabled = true;
+        } else {
+          decreaseBtn.disabled = false;
+        }
+      }
+
+      if (increaseBtn) {
+        // Check if there's an inventory limit
+        const variant = item.variant;
+        if (variant && variant.inventory_management && variant.inventory_quantity) {
+          if (item.quantity >= variant.inventory_quantity) {
+            increaseBtn.disabled = true;
+          } else {
+            increaseBtn.disabled = false;
+          }
+        } else {
+          // No inventory limit, always allow increase
+          increaseBtn.disabled = false;
+        }
+      }
+    });
+
+    // Update checkout button
+    const checkoutBtn = document.querySelector('.checkout-btn');
+    if (checkoutBtn) {
+      if (cartData.item_count === 0) {
+        checkoutBtn.disabled = true;
+      } else {
+        checkoutBtn.disabled = false;
+      }
+    }
+  }
+
+  function formatMoney(cents) {
+    // Simple money formatting - adjust based on your currency settings
+    const dollars = (cents / 100).toFixed(2);
+    return `$${dollars}`;
+  }
+
+  function changeItemColor(colorPicker) {
+    const itemKey = colorPicker.dataset.itemKey;
+    const newColor = colorPicker.dataset.color;
+    const currentSize = colorPicker.dataset.currentSize;
+    const newVariantId = colorPicker.dataset.variantId;
+
+    console.log('Changing color:', { itemKey, newColor, currentSize, newVariantId });
+
+    // First, find the correct variant for the new color and current size
+    findVariantForOptions(itemKey, newColor, currentSize)
+      .then((targetVariantId) => {
+        if (targetVariantId) {
+          // Remove current item and add new variant
+          return changeCartItemVariant(itemKey, targetVariantId);
+        } else {
+          throw new Error('Variant not found for selected color and size combination');
+        }
+      })
+      .then(() => {
+        // Reload the page to refresh the cart display
+        window.location.reload();
+      })
+      .catch((error) => {
+        console.error('Error changing item color:', error);
+        alert('Unable to change color. Please try again.');
+      });
+  }
+
+  function findVariantForOptions(itemKey, newColor, currentSize) {
+    return new Promise((resolve, reject) => {
+      // Get the product handle from the current item
+      const cartItem = document.querySelector(`[data-item-key="${itemKey}"]`).closest('.cart-item');
+      const itemTitle = cartItem.querySelector('.item-title').textContent;
+
+      // We need to fetch product data to find the correct variant
+      // For now, we'll use the variant ID from the color picker
+      const colorPicker = cartItem.querySelector(`[data-color="${newColor}"]`);
+      if (colorPicker && colorPicker.dataset.variantId) {
+        resolve(colorPicker.dataset.variantId);
+      } else {
+        reject('Variant not found');
+      }
+    });
+  }
+
+  function changeCartItemVariant(itemKey, newVariantId) {
+    // Get current quantity
+    const qtyInput = document.querySelector(`[data-item-key="${itemKey}"]`);
+    const currentQty = parseInt(qtyInput.value);
+
+    // Remove the current item and add the new variant
+    return fetch('/cart/change.js', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Accept: 'application/json',
+      },
+      body: JSON.stringify({
+        id: itemKey,
+        quantity: 0,
+      }),
+    })
+      .then((response) => response.json())
+      .then(() => {
+        // Add the new variant
+        return fetch('/cart/add.js', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Accept: 'application/json',
+          },
+          body: JSON.stringify({
+            id: newVariantId,
+            quantity: currentQty,
+          }),
+        });
+      })
+      .then((response) => response.json());
   }
 
   // Form submissions
