@@ -38,7 +38,7 @@
         padding-bottom:20px;
     }
         .item-image{
-        height:100%;
+        height:200px !important;
     width:100%;}
         .totals{
         padding:10px 0 13px 0;}
@@ -523,16 +523,27 @@
                                     </div>
                                   {%- endif -%}
                                 {%- endfor -%}
-                                <div class="color-picker !flex !gap-2 !mt-2">
-                                  {%- for color in item.product.options.Color -%}
-                                    <button
-                                      class="color-option {% if color == item.options_with_values['Color'] %} active {% endif %}"
-                                      type="button"
-                                      style="background-color: {{ color | escape }};"
-                                      data-color="{{ color }}"
-                                    ></button>
-                                  {%- endfor -%}
-                                </div>
+
+                                {%- comment -%} Color Swatch Section {%- endcomment -%}
+                                {%- assign color_option_found = false -%}
+                                {%- assign current_color = '' -%}
+                                {%- for option in item.options_with_values -%}
+                                  {%- assign option_name_lower = option.name | downcase -%}
+                                  {%- if option_name_lower contains 'color' or option_name_lower contains 'colour' -%}
+                                    {%- assign color_option_found = true -%}
+                                    {%- assign current_color = option.value -%}
+                                    <div
+                                      class="!text-[12px] !uppercase !mt-2 !flex !items-center"
+                                      style="color: var(--text);"
+                                    >
+                                      COLOR:
+                                      <div
+                                        style="width: 20px !important; height: 20px !important; border-radius: 50% !important; border: 2px solid #000 !important; cursor: pointer !important; display: inline-block !important; margin-left: 4px !important; background: {{ current_color | downcase }} !important;"
+                                      ></div>
+                                    </div>
+                                    {%- break -%}
+                                  {%- endif -%}
+                                {%- endfor -%}
                               </div>
                             </div>
                           </div>
@@ -949,16 +960,27 @@
                                   </div>
                                 {%- endif -%}
                               {%- endfor -%}
-                              <div class="color-picker !flex !gap-2 !mt-2">
-                                {%- for color in item.product.options.Color -%}
-                                  <button
-                                    class="color-option {% if color == item.options_with_values['Color'] %} active {% endif %}"
-                                    type="button"
-                                    style="background-color: {{ color | escape }};"
-                                    data-color="{{ color }}"
-                                  ></button>
-                                {%- endfor -%}
-                              </div>
+
+                              {%- comment -%} Color Swatch Section {%- endcomment -%}
+                              {%- assign color_option_found = false -%}
+                              {%- assign current_color = '' -%}
+                              {%- for option in item.options_with_values -%}
+                                {%- assign option_name_lower = option.name | downcase -%}
+                                {%- if option_name_lower contains 'color' or option_name_lower contains 'colour' -%}
+                                  {%- assign color_option_found = true -%}
+                                  {%- assign current_color = option.value -%}
+                                  <div
+                                    class="!uppercase size-variant !mt-2 !flex !items-center"
+                                    style="color: var(--text);"
+                                  >
+                                    COLOR:
+                                    <div
+                                      style="width: 20px !important; height: 20px !important; border-radius: 50% !important; border: 2px solid #000 !important; cursor: pointer !important; display: inline-block !important; margin-left: 4px !important; background: {{ current_color | downcase }} !important;"
+                                    ></div>
+                                  </div>
+                                  {%- break -%}
+                                {%- endif -%}
+                              {%- endfor -%}
                             </div>
                             <cart-remove-button
                               id="CartDrawer-Remove-{{ item.index | plus: 1 }}"
@@ -1144,4 +1166,79 @@
       });
     }
   });
+
+  // Color changing functionality for cart drawer
+  function changeItemColor(element, itemKey, newColor) {
+    // Find the cart item data
+    const cartItems = {{ cart.items | json }};
+    const currentItem = cartItems.find(item => item.key === itemKey);
+
+    if (!currentItem) {
+      console.error('Item not found in cart');
+      return;
+    }
+
+    // Find the variant that matches the new color and other current options
+    const targetVariant = findVariantForOptions(currentItem.product, currentItem.options_with_values, 'color', newColor);
+
+    if (!targetVariant) {
+      console.error('No variant found for color:', newColor);
+      return;
+    }
+
+    // Change the cart item to the new variant
+    changeCartItemVariant(currentItem, targetVariant);
+  }
+
+  function findVariantForOptions(product, currentOptions, changingOptionType, newValue) {
+    return product.variants.find(variant => {
+      return variant.options.every((option, index) => {
+        const optionName = product.options[index].toLowerCase();
+
+        if (optionName.includes(changingOptionType)) {
+          return option.toLowerCase() === newValue.toLowerCase();
+        } else {
+          // For other options, keep the current value
+          const currentOptionValue = Object.values(currentOptions)[index];
+          return option === currentOptionValue;
+        }
+      });
+    });
+  }
+
+  function changeCartItemVariant(currentItem, newVariant) {
+    // First remove the current item
+    fetch('/cart/change.js', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        quantity: 0,
+        id: currentItem.variant.id
+      })
+    })
+    .then(response => response.json())
+    .then(() => {
+      // Then add the new variant with the same quantity
+      return fetch('/cart/add.js', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          id: newVariant.id,
+          quantity: currentItem.quantity
+        })
+      });
+    })
+    .then(response => response.json())
+    .then(() => {
+      // Reload the page to reflect changes
+      window.location.reload();
+    })
+    .catch(error => {
+      console.error('Error changing item variant:', error);
+    });
+  }
 </script>
