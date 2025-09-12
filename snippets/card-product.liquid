@@ -37,6 +37,7 @@
     z-index: 1000 !important;
     border-radius: 5px !important; /* Add border radius */
     cursor: pointer;
+    font-size: 20px;
   }
   .slider-arrow {
     background: transparent;
@@ -44,7 +45,7 @@
   }
   .slider-arrow:hover {
     background: #e5e5e5;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+    box-shadow: 0 2px 8px rgba(68, 68, 68, 0.1);
   }
   .slider-arrow svg {
     display: block;
@@ -153,10 +154,10 @@
             <div class="w-[93%] mx-auto text-center" style="background-color: var(--background);">
               <button
                 type="button"
-                class="notify-when-available-btn w-full py-4 !text-[1.6rem] font-medium cursor-pointer transition-colors duration-200 uppercase tracking-wider"
+                class="notify-when-available-btn w-full py-4  font-medium cursor-pointer transition-colors duration-200 uppercase tracking-wider"
                 style="color:var(--button_label); background-color: var(--button);"
                 onmouseout="this.style.backgroundColor='var(--button)'; this.style.color='var(--button_label)';"
-                onmouseover="this.style.backgroundColor='var(--hovered_button_label)'; this.style.color='var(--button_label)';"
+                onmouseover="this.style.backgroundColor='var(--hovered_button_label)'; this.style.color='var(--hovered_button_text_color)';"
                 data-product-id="{{ card_product.id }}"
                 data-product-title="{{ card_product.title | escape }}"
               >
@@ -188,7 +189,7 @@
                 style="color:var(--button_label); background-color: var(--button);"
 
                 onmouseout="this.style.backgroundColor='var(--button)'; this.style.color='var(--button_label)';"
-                onmouseover="this.style.backgroundColor='var(--hovered_button_label)'; this.style.color='var(--button_label)';"
+                onmouseover="this.style.backgroundColor='var(--hovered_button_label)'; this.style.color='var(--hovered_button_text_color)';"
                 {% if has_size_variant %}
                   data-has-sizes="true"
                 {% else %}
@@ -204,7 +205,7 @@
                 <div class="quick-add-modal hidden">
                   <div class="quick-add-modal__content">
                     <div class="quick-add-modal__header">
-                      <h3 class="!text-[1.4rem] !font-medium !uppercase">Select Size</h3>
+                      <h3 class="select-size-option !font-medium !uppercase">Select Size</h3>
                       <div class="quick-add-modal__options">
                         {% for option in card_product.options_with_values %}
                           {% if option.name contains 'Size' or option.name contains 'size' %}
@@ -221,7 +222,10 @@
                               {% endfor %}
 
                               <span
-                                class="quick-add__submit  !text-[1.5rem]  text-black{% unless variant_exists %} opacity-50{% endunless %}"
+                                style="color: var(--button_label); background-color: var(--button);"
+                                onmouseover="this.style.backgroundColor='var(--hovered_button_label)'; this.style.color='var(--hovered_button_text_color)';"
+                                onmouseout="this.style.backgroundColor='var(--button)'; this.style.color='var(--button_label)';"
+                                class="quick-add__submit  !text-[1.5rem]  {% unless variant_exists %} opacity-50{% endunless %}"
                                 {% if variant_exists %}
                                   data-variant-id="{{ variant_id }}"
                                   form="quick-add-{{ card_product.id }}"
@@ -353,6 +357,8 @@
 <style>
   .sold-out-tag {
     margin: 0 0 0 5px;
+    padding: 0 8px;
+    font-size: 16px;
   }
   .image-config {
     object-fit: cover;
@@ -392,11 +398,36 @@
     .card-product-typegraphy {
       font-size: 12px !important;
     }
+    /* Disable hover effect on mobile - keep original height */
     .card-wrapper:hover .product-card-height {
       height: 270px;
     }
     .product-card-text {
       font-size: 12px;
+    }
+
+    /* Disable all hover effects on mobile */
+    .group:hover .opacity-0 {
+      opacity: 0 !important;
+    }
+
+    .group:hover .translate-y-10 {
+      transform: translateY(2.5rem) !important;
+    }
+
+    /* Keep add to cart button hidden on mobile hover */
+    .group:hover .group-hover\:opacity-100 {
+      opacity: 0 !important;
+    }
+
+    .group:hover .group-hover\:-translate-y-0 {
+      transform: translateY(2.5rem) !important;
+    }
+
+    /* Disable slider arrow hover effects on mobile */
+    .slider-arrow:hover {
+      background: transparent !important;
+      box-shadow: none !important;
     }
   }
 
@@ -469,7 +500,7 @@
     transform: translateY(100px);
 
     animation: sizeOptionFade 0.3s ease forwards;
-    min-width: 35px;
+    min-width: 26px;
     padding: 0px !important;
     border: 1px solid var(--button_label);
     background: var(--button);
@@ -478,6 +509,7 @@
     transition: all 0.2s;
     font-size: 14px;
     font-weight: 800;
+    border-radius: 5px !important;
   }
 
   .quick-add-modal.visible .quick-add__submit:nth-child(1) {
@@ -538,12 +570,27 @@
   }
   .notify-when-available-btn {
     border-radius: 5px;
+    font-size: 20px;
+  }
+
+  .add-to-cart-text,
+  .adding-to-cart-text,
+  .added-to-cart-text {
+    font-size: 20px !important;
+  }
+  .select-size-option {
+    font-size: 14px !important;
   }
 </style>
 
 <script>
   document.addEventListener('DOMContentLoaded', function () {
     const containers = document.querySelectorAll('.product-sizes-container');
+
+    // Check if device is mobile
+    function isMobile() {
+      return window.innerWidth <= 600;
+    }
 
     function updateButtonState(button, state) {
       const addText = button.querySelector('.add-to-cart-text');
@@ -594,20 +641,22 @@
       const hasSizes = addToCartBtn?.dataset.hasSizes === 'true';
 
       if (hasSizes && modal && form) {
-        // For products with size variants
-        addToCartBtn.addEventListener('mouseenter', () => {
-          container.classList.add('variant-selector-active');
-          modal.classList.add('visible');
-          modal.classList.remove('hidden');
-        });
+        // For products with size variants - disable hover on mobile
+        if (!isMobile()) {
+          addToCartBtn.addEventListener('mouseenter', () => {
+            container.classList.add('variant-selector-active');
+            modal.classList.add('visible');
+            modal.classList.remove('hidden');
+          });
 
-        container.addEventListener('mouseleave', () => {
-          modal.classList.remove('visible');
-          setTimeout(() => {
-            modal.classList.add('hidden');
-            container.classList.remove('variant-selector-active');
-          }, 300);
-        });
+          container.addEventListener('mouseleave', () => {
+            modal.classList.remove('visible');
+            setTimeout(() => {
+              modal.classList.add('hidden');
+              container.classList.remove('variant-selector-active');
+            }, 300);
+          });
+        }
 
         modal.querySelector('.quick-add-modal__close')?.addEventListener('click', (e) => {
           e.preventDefault();
@@ -741,8 +790,8 @@
         });
       }
 
-      // Hover functionality for exactly 2 images
-      if (images.length === 2) {
+      // Hover functionality for exactly 2 images - disable on mobile
+      if (images.length === 2 && !isMobile()) {
         slider.addEventListener('mouseenter', () => {
           currentIndex = 1;
           showImage(currentIndex);
