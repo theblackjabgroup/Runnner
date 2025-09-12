@@ -27,7 +27,6 @@
 <div
   class="new-product-card"
   data-product-id="{{ product_id }}"
-  role="region"
   aria-labelledby="product-title-{{ product_id }}"
 >
   <div class="new-product-image-wrapper" aria-label="Product images for {{ product_title }}">
@@ -36,8 +35,7 @@
         <span
           class="tracking-wide font-medium sold-out"
           style="background-color: transparent; color: var(--text);"
-          role="status"
-          aria-label="Product sold out"
+          aria-live="polite"
         >
           SOLD OUT
         </span>
@@ -71,14 +69,7 @@
         data-product-id="{{ product_id }}"
         type="button"
       >
-        <svg
-          width="25"
-          height="25"
-          viewBox="0 0 24 24"
-          fill="none"
-          xmlns="http://www.w3.org/2000/svg"
-          aria-hidden="true"
-        >
+        <svg width="25" height="25" viewBox="0 0 24 24" aria-hidden="true">
           <path d="M15 18L9 12L15 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
         </svg>
       </button>
@@ -88,20 +79,13 @@
         data-product-id="{{ product_id }}"
         type="button"
       >
-        <svg
-          width="25"
-          height="25"
-          viewBox="0 0 24 24"
-          fill="none"
-          xmlns="http://www.w3.org/2000/svg"
-          aria-hidden="true"
-        >
+        <svg width="25" height="25" viewBox="0 0 24 24" aria-hidden="true">
           <path d="M9 18L15 12L9 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
         </svg>
       </button>
     {% endif %}
 
-    <div class="new-product-cart-container" role="region" aria-label="Product purchase options">
+    <div class="new-product-cart-container" aria-label="Product purchase options">
       <div class="new-cart-options-wrapper">
         {% if product_available %}
           {% if has_size_variants %}
@@ -115,54 +99,50 @@
             >
               ADD TO CART
             </button>
-            <div class="new-size-variants-container" aria-label="Size options for {{ product_title }}">
-              <div class="new-size-label-wrapper">
-                <span class="new-size-label" id="size-label-{{ product_id }}">SELECT SIZE</span>
-                <div
-                  class="new-size-options-wrapper"
-                  style="display: flex; gap: 5px;"
-                  role="group"
-                  aria-labelledby="size-label-{{ product_id }}"
-                >
-                  {% for option in product.options_with_values %}
-                    {% if option.name == 'Size' or option.name == 'size' %}
-                      {% for value in option.values %}
-                        {% assign variant_available = false %}
-                        {% assign variant_id = '' %}
-                        {% for variant in product_variants %}
-                          {% if variant.options[size_option_index] == value and variant.available %}
-                            {% assign variant_available = true %}
-                            {% assign variant_id = variant.id %}
-                            {% break %}
-                          {% endif %}
-                        {% endfor %}
 
-                        <button
-                          class="new-size-option-btn{% unless variant_available %} unavailable-size{% endunless %}"
-                          {% if variant_available %}
-                            data-variant-id="{{ variant_id }}"
-                            data-variant-size="{{ value }}"
-                            aria-label="Size {{ value }} - available"
-                            type="button"
-                          {% else %}
-                            data-waitlist="true"
-                            data-product-title="{{ product_title }}"
-                            data-variant-size="{{ value }}"
-                            aria-label="Size {{ value }} - unavailable, join waitlist"
-                            aria-disabled="true"
-                            type="button"
-                          {% endif %}
-                          style="--animation-order: {{ forloop.index0 }};"
-                        >
-                          {{ value }}
-                        </button>
+            <!-- Using fieldset/legend instead of role=group -->
+            <fieldset class="new-size-variants-container">
+              <legend id="size-label-{{ product_id }}">Size options for {{ product_title }}</legend>
+              <div class="new-size-options-wrapper" style="display: flex; gap: 5px;">
+                {% for option in product.options_with_values %}
+                  {% if option.name == 'Size' or option.name == 'size' %}
+                    {% for value in option.values %}
+                      {% assign variant_available = false %}
+                      {% assign variant_id = '' %}
+                      {% for variant in product_variants %}
+                        {% if variant.options[size_option_index] == value and variant.available %}
+                          {% assign variant_available = true %}
+                          {% assign variant_id = variant.id %}
+                          {% break %}
+                        {% endif %}
                       {% endfor %}
-                      {% break %}
-                    {% endif %}
-                  {% endfor %}
-                </div>
+
+                      <button
+                        class="new-size-option-btn{% unless variant_available %} unavailable-size{% endunless %}"
+                        {% if variant_available %}
+                          data-variant-id="{{ variant_id }}"
+                          data-variant-size="{{ value }}"
+                          aria-label="Size {{ value }} available"
+                          type="button"
+                        {% else %}
+                          data-waitlist="true"
+                          data-product-title="{{ product_title }}"
+                          data-variant-size="{{ value }}"
+                          aria-label="Size {{ value }} unavailable, join waitlist"
+                          aria-disabled="true"
+                          type="button"
+                        {% endif %}
+                        style="--animation-order: {{ forloop.index0 }};"
+                      >
+                        {{ value }}
+                      </button>
+                    {% endfor %}
+                    {% break %}
+                  {% endif %}
+                {% endfor %}
               </div>
-            </div>
+            </fieldset>
+
           {% else %}
             <button
               class="new-add-to-cart-btn"
@@ -177,29 +157,15 @@
             </button>
           {% endif %}
         {% else %}
-          {% if has_size_variants %}
-            <button
-              class="new-notify-me-btn"
-              data-product-title="{{ product_title }}"
-              data-has-variants="true"
-              style="background-color: rgb(var(--color-background)); color: var(--text);"
-              aria-label="Get notified when {{ product_title }} is available"
-              type="button"
-            >
-              NOTIFY ME WHEN AVAILABLE
-            </button>
-          {% else %}
-            <button
-              class="new-notify-me-btn"
-              data-product-title="{{ product_title }}"
-              data-has-variants="false"
-              style="background-color: rgb(var(--color-background)); color: var(--text);"
-              aria-label="Get notified when {{ product_title }} is available"
-              type="button"
-            >
-              NOTIFY ME WHEN AVAILABLE
-            </button>
-          {% endif %}
+          <button
+            class="new-notify-me-btn"
+            data-product-title="{{ product_title }}"
+            style="background-color: rgb(var(--color-background)); color: var(--text);"
+            aria-label="Get notified when {{ product_title }} is available"
+            type="button"
+          >
+            NOTIFY ME WHEN AVAILABLE
+          </button>
         {% endif %}
       </div>
     </div>
@@ -208,8 +174,8 @@
   <div class="new-product-details" style="padding-top: 10px;">
     <h3
       class="new-product-title"
-      style="text-decoration: none; color: var(--text); display: block; margin: 0; font-size: inherit; font-weight: inherit;"
       id="product-title-{{ product_id }}"
+      style="margin: 0; font-size: inherit; font-weight: inherit;"
     >
       <a href="{{ product_url }}" style="text-decoration: none; color: inherit;">
         {{ product_title }}
@@ -218,6 +184,7 @@
     <div
       class="new-product-price"
       style="color: var(--text); padding-top: 5px;"
+      aria-live="polite"
       aria-label="Price: {% if product_compare_at_price > product_price %}Sale price {{ product_price | money }}, was {{ product_compare_at_price | money }}{% else %}{{ product_price | money }}{% endif %}"
     >
       {% if product_compare_at_price > product_price %}
