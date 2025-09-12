@@ -1,5 +1,4 @@
 {% if section.settings.enabled %}
-
   {% assign section_classes_rp = 'related-products-section' %}
   {% if section.settings.color_scheme %}
     {% assign section_classes_rp = section_classes_rp | append: ' color-' | append: section.settings.color_scheme %}
@@ -20,8 +19,8 @@
     role="region"
     aria-labelledby="related-products-heading"
     aria-describedby="related-products-description"
-    style="padding: {{ top_padding }}px {{ side_padding }}px;">
-
+    style="padding: {{ top_padding }}px {{ side_padding }}px;"
+  >
     {% if section.settings.heading != blank %}
       <h2
         id="related-products-heading"
@@ -31,8 +30,6 @@
         {{ section.settings.heading }}
       </h2>
     {% endif %}
-
-    
 
     <main class="related-products-container w-full mt-10" style="margin-top:18px;">
       <div class="slider-container relative">
@@ -44,184 +41,38 @@
         >
           {% if collections.all.products.size == 0 %}
             {% for i in (1..5) %}
-              <article
-                class="product-card flex-none w-[444px] h-[588px]"
-                role="listitem"
-                aria-label="No products found"
-              >
-                <div class="product-image-wrapper relative group w-[444px] h-[588px]" aria-hidden="true">
-                  {{ 'collection-1' | placeholder_svg_tag }}
-                </div>
-                <div class="product-details mt-3 h-[38px]" style="margin-top:10px; margin-bottom:8px;">
-                 <h3 class="!text-[15px] uppercase font-medium leading-tight" style="margin-bottom: 5px; color: var(--text); font-size: 15px !important;">No products found</h3>
-                  {% if section.settings.show_vendor %}
-                    <div class="product-vendor custom-vendor-style">—</div>
-                  {% endif %}
-                  <div class="flex gap-2 items-baseline rp-price white-text">
-                    <span class="!text-[1.6rem] uppercase font-medium">—</span>
+              <div class="flex-none">
+                <div class="new-product-card" style="width: min(441px, calc(255px + 0.1835 * (100vw - 425px)));">
+                  <div class="new-product-image-wrapper">
+                    <div class="new-product-images-container">
+                      <div style="width: min(441px, calc(255px + 0.1835 * (100vw - 425px))); height: min(530px, calc(306px + 0.2207 * (100vw - 425px))); display: flex; align-items: center; justify-content: center; background-color: #f5f5f5; color: #999;">
+                        {{ 'collection-1' | placeholder_svg_tag }}
+                      </div>
+                    </div>
+                  </div>
+                  <div class="new-product-details" style="padding-top: 10px;">
+                    <div
+                      class="new-product-title"
+                      style="text-decoration: none; color: var(--text); display: block; font-size: 15px;"
+                    >
+                      No products found
+                    </div>
+                    <div class="new-product-price" style="color: var(--text); padding-top: 5px; font-size: 15px;">
+                      —
+                    </div>
                   </div>
                 </div>
-              </article>
+              </div>
             {% endfor %}
           {% else %}
             {% for product in collections.all.products limit: section.settings.products_to_show %}
-              <article
-                class="product-card flex-none w-[444px] h-[588px]"
-                role="listitem"
-                aria-label="{{ product.title }}"
-              >
-                <div class="product-image-wrapper relative group w-[444px] h-[588px]">
-                  {% unless product.available %}
-                   <div class="absolute top-3 right-4 z-2">
-                      <div class="sold-out-badge">
-                        SOLD OUT
-                      </div>
-                    </div>
-                  {% endunless %}
-
-                  <a
-                    href="{{ product.url }}"
-                    class="product-image-link block relative"
-                    aria-label="View {{ product.title }} product details"
-                  >
-                    <div class="product-images-container relative">
-                      {% if product.images.size > 1 %}
-                        {% for image in product.images %}
-                          <img
-                            src="{{ image | img_url: '888x1176' }}"
-                            srcset="{{ image | img_url: '444x588' }} 1x, {{ image | img_url: '888x1176' }} 2x, {{ image | img_url: '1332x1764' }} 3x"
-                            alt="{{ product.title }}{% if forloop.index > 1 %} image {{ forloop.index }}{% endif %}"
-                            class="product-image {% if forloop.first %}active{% else %}inactive{% endif %} rp-product-image"
-                            data-index="{{ forloop.index0 }}"
-                            data-product-id="{{ product.id }}"
-                            loading="lazy"
-                            decoding="async"
-                            width="444"
-                            height="588"
-                            style="object-fit: cover; width: 444px; height: 588px;"
-                          >
-                        {% endfor %}
-
-                        <button
-                          class="image-nav-arrow image-nav-prev"
-                          data-product-id="{{ product.id }}"
-                          aria-label="Previous image for {{ product.title }}"
-                        >
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            viewBox="0 0 24 24"
-                            width="32"
-                            height="32"
-                            style="opacity: 0.6;"
-                            aria-hidden="true"
-                          >
-                            <path fill="currentColor" d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/>
-                          </svg>
-                        </button>
-                        <button
-                          class="image-nav-arrow image-nav-next"
-                          data-product-id="{{ product.id }}"
-                          aria-label="Next image for {{ product.title }}"
-                        >
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            viewBox="0 0 24 24"
-                            width="32"
-                            height="32"
-                            style="opacity: 0.6;"
-                            aria-hidden="true"
-                          >
-                            <path fill="currentColor" d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/>
-                          </svg>
-                        </button>
-                      {% else %}
-                        <img
-                          src="{{ product.featured_image | img_url: '888x1176' }}"
-                          srcset="{{ product.featured_image | img_url: '444x588' }} 1x, {{ product.featured_image | img_url: '888x1176' }} 2x, {{ product.featured_image | img_url: '1332x1764' }} 3x"
-                          alt="{{ product.title }}"
-                          class="rp-product-image"
-                          loading="lazy"
-                          decoding="async"
-                          width="444"
-                          height="588"
-                          style="object-fit: cover; width: 444px; height: 588px;"
-                        >
-                      {% endif %}
-                    </div>
-                  </a>
-
-                  <div class="product-cart-container absolute bottom-4 left-1/2 transform -translate-x-1/2 w-full px-4">
-                    <div class="cart-options-wrapper relative">
-                      {% assign has_size_variants = false %}
-                      {% unless product.has_only_default_variant %}
-                        {% for option in product.options_with_values %}
-                          {% if option.name == 'Size' or option.name == 'size' %}
-                            {% assign has_size_variants = true %}
-                          {% endif %}
-                        {% endfor %}
-                      {% endunless %}
-
-                      {% if product.available %}
-                        <button
-                          class="add-to-cart-btn w-90 text-(--text) py-2 px-4 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-                          style="background-color: rgb(var(--color-background)); color: var(--text);"
-                          data-product-id="{{ product.id }}"
-                          {% if product.has_only_default_variant %}
-                            data-variant-id="{{ product.variants.first.id }}"
-                            data-has-variants="false"
-                          {% elsif has_size_variants %}
-                            data-has-variants="true"
-                          {% else %}
-                            data-variant-id="{{ product.variants.first.id }}"
-                            data-has-variants="false"
-                          {% endif %}
-                          aria-label="Add {{ product.title }} to cart"
-                        >
-                          Add to Cart
-                        </button>
-                      {% else %}
-                        <button
-                          class="notify-me-btn w-90 text-(--text) py-2 px-4 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-                          data-product-id="{{ product.id }}"
-                          data-product-title="{{ product.title | escape }}"
-                          data-has-variants="{% if has_size_variants %}true{% else %}false{% endif %}"
-                          aria-label="Get notified when {{ product.title }} is back in stock"
-                          aria-haspopup="dialog"
-                          style="background-color: rgb(var(--color-background)); color: var(--text);"
-                        >
-                          Notify Me When In Stock
-                        </button>
-                      {% endif %}
-                    </div>
-                  </div>
-                </div>
-
-                <div class="product-details mt-3 h-[38px]" style="margin-bottom:8px;">
-                  <a href="{{ product.url }}" aria-label="View {{ product.title }} product details">
-                    <h3 class="!text-[1.6rem] uppercase font-medium leading-tight" style="margin-bottom: 3px; margin-top:5px; color: var(--text); font-size: 15px !important;">
-                      {{ product.title | escape }}
-                    </h3>
-                    {% if section.settings.show_vendor and product.vendor != blank %}
-                      <div class="product-vendor text-sm text-gray-600 uppercase" style="margin-top: 2px;">
-                        {{ product.vendor | escape }}
-                      </div>
-                    {% endif %}
-            <div class="rp-price custom-rp-style">
-  <span class="!text-[14px] uppercase font-normal" style="font-size: 14px !important;"> {{ product.price | money }} </span>
-  {%- if product.compare_at_price > product.price -%}
-    <span style="margin: 0 4px; color: #dc2626; font-size: 14px;" aria-hidden="true">|</span>
-    <span class="!text-[12px] uppercase text-red-600 font-normal" style="font-size: 12px !important; text-decoration: line-through;">
-      {{- product.compare_at_price | money }}
-    </span>
-  {%- endif -%}
-</div>
-                  </a>
-                </div>
-              </article>
+              <div class="flex-none">
+                {% render 'new-product-card', product: product, collection: collections.all %}
+              </div>
             {% endfor %}
           {% endif %}
         </div>
-        
+
         <!-- Separate centered scrollbar -->
         <div class="custom-scrollbar-container" aria-hidden="true">
           <div id="custom-scrollbar" class="custom-scrollbar-track">
@@ -287,24 +138,10 @@
 {% endif %}
 
 <style>
-  .sold-out-badge {
-    padding: 0px 4px;
-    border-radius: 3px;
-    line-height: 20px;
-    display: inline-block;
-    font-size: 14px;
-    border: 1px solid black;
-    color: black;
-    background-color: rgb(var(--color-foreground));
-    font-weight: medium;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-  }
-
   .related-products-page-width ::selection {
     color: var(--cr-yellow-2) !important;
   }
-  
+
   .related-products-page-width {
     margin: 0;
     overflow-y: hidden;
@@ -322,15 +159,7 @@
     left: -3px;
     padding-top: 20px;
   }
-  
-  .custom-rp-style {
-    display: flex;
-    gap: 1px;
-    align-items: baseline;
-    margin-top: -6px;
-    color: var(--text);
-  }
- 
+
   @media (min-width: 500px) {
     div.related-products-main-heading {
       font-size: 5rem;
@@ -343,11 +172,7 @@
       padding-top: 10px !important;
       padding-bottom: 10px !important;
     }
-    .product-card {
-      width: 258px;
-      height: 380px !important;
-    }
-    
+
     #related-products-heading {
       margin: 0 7.5px 20px !important;
     }
@@ -375,130 +200,10 @@
     .product-slider {
       padding-right: 1.5rem;
     }
-    
+
     #related-products-heading {
       margin: 0 7.5px 20px !important;
     }
-  }
-
-  .product-image-wrapper {
-    position: relative;
-    overflow: hidden;
-  }
-
-  .product-images-container {
-    position: relative;
-  }
-
-  .product-image {
-    position: absolute;
-    top: 0;
-    left: 0;
-    opacity: 0;
-    transition: opacity 0.5s ease;
-    /* Enhanced image quality settings */
-    image-rendering: -webkit-optimize-contrast;
-    image-rendering: crisp-edges;
-    image-rendering: pixelated;
-    image-rendering: auto;
-    backface-visibility: hidden;
-    -webkit-backface-visibility: hidden;
-    transform: translateZ(0);
-    -webkit-transform: translateZ(0);
-  }
-
-  .product-image.active {
-    opacity: 1;
-    position: relative;
-  }
-
-  .rp-product-image {
-    /* Additional image quality enhancements */
-    image-rendering: -webkit-optimize-contrast;
-    image-rendering: crisp-edges;
-    image-rendering: auto;
-    backface-visibility: hidden;
-    -webkit-backface-visibility: hidden;
-    transform: translateZ(0);
-    -webkit-transform: translateZ(0);
-    filter: contrast(1.02) brightness(1.01);
-  }
-
-  .rp-price {
-    margin-top: -6px !important;
-  }
-
-  .product-vendor {
-    font-size: 13px;
-    color: var(--text);
-    text-transform: uppercase;
-    margin-top: 2px;
-    margin-bottom: 2px;
-    font-weight: 500;
-  }
-
-  .image-nav-arrow {
-    position: absolute;
-    top: 50%;
-    transform: translateY(-50%);
-    z-index: 15;
-    width: 44px;
-    height: 44px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    opacity: 0;
-    transition: opacity 0.3s ease, background-color 0.3s ease;
-    cursor: pointer;
-    border: none;
-  }
-
-  .product-image-wrapper:hover .image-nav-arrow {
-    opacity: 0.6;
-  }
-
-  .image-nav-arrow:hover {
-    background-color: rgba(68, 68, 68, 0.15);
-  }
-
-  .image-nav-prev {
-    left: 0px;
-  }
-
-  .image-nav-next {
-    right: 0px;
-  }
-
-  .product-cart-container {
-    z-index: 10;
-    width: 90%;
-  }
-
-  .cart-options-wrapper {
-    position: relative;
-  }
-
-  .add-to-cart-btn,
-  .notify-me-btn {
-    transition: all 0.3s ease;
-    width: 110%;
-    left: -5%;
-    height: 40px;
-    position: relative;
-    z-index: 5;
-    cursor: pointer;
-  }
-
-  .add-to-cart-btn:hover,
-  .notify-me-btn:hover {
-    background-color: var(--text);
-    color: rgb(var(--color-background));
-  }
-
-  hr {
-    border: 0;
-    background: #000;
-    margin: 0 !important;
   }
 
   .slider-container {
@@ -515,17 +220,8 @@
     display: flex;
     gap: 18px;
     overflow-y: hidden;
-    width: calc(4 * 350px + 3 * 18px);
+    width: 100%;
     max-width: 100%;
-  }
-
-  .product-card {
-    flex-shrink: 0;
-    height: 588px;
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-start;
-    overflow: hidden;
   }
 
   .product-slider::-webkit-scrollbar:vertical {
@@ -603,40 +299,20 @@
     text-transform: uppercase;
   }
 
-  .product-image-wrapper {
-    position: relative;
-    overflow: hidden;
-  }
-  
-  .product-image {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    transition: opacity 0.5s ease-in-out;
-    opacity: 0;
-  }
-  
-  .product-image.active {
-    opacity: 1;
-  }
-
   @media (max-width: 1440px) {
     .product-slider {
       width: 100%;
       overflow-x: auto;
       justify-content: flex-start;
     }
-    
+
     .custom-scrollbar-container {
       display: flex;
       justify-content: center;
       width: 100%;
       margin-top: 16px;
     }
-    
+
     .slider-container {
       overflow-x: auto;
     }
@@ -649,7 +325,7 @@
       -webkit-overflow-scrolling: touch;
       scrollbar-width: none;
     }
-    
+
     .product-slider::-webkit-scrollbar {
       display: none;
     }
@@ -662,37 +338,20 @@
       padding-top: 15px;
     }
 
-    .rp-product-image {
-      width: 350px !important;
-      height: 420px !important;
-    }
-
-    .rp-price {
-      margin-top: -6px;
-    }
-
     .cursor-grab {
       padding-bottom: 0px;
-    }
-
-    .size-variants-container,
-    .product-cart-container,
-    .cart-options-wrapper {
-      display: none !important;
-      opacity: 0 !important;
-      visibility: hidden !important;
     }
 
     .custom-scrollbar-container {
       display: flex;
       margin-top: 12px;
     }
-    
+
     .custom-scrollbar-track {
       width: 100%;
       height: 6px;
     }
-    
+
     .custom-scrollbar-thumb {
       height: 6px;
       width: 35px !important;
@@ -709,14 +368,14 @@
       opacity: 1;
     }
   }
-  
+
   .letter-animation-container {
     display: inline-block;
     width: 100%;
     overflow: visible;
     position: relative;
   }
-  
+
   .animated-letter {
     display: inline-block;
     opacity: 0;
@@ -730,89 +389,90 @@
 </style>
 
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-  const slider = document.getElementById('related-product-slider');
-  const scrollbarThumb = document.getElementById('custom-scrollbar-thumb');
-  const scrollbarTrack = document.querySelector('.custom-scrollbar-track');
-  
-  if (!slider || !scrollbarThumb || !scrollbarTrack) {
-    console.log('Scrollbar elements not found');
-    return;
-  }
+  document.addEventListener('DOMContentLoaded', function () {
+    const slider = document.getElementById('related-product-slider');
+    const scrollbarThumb = document.getElementById('custom-scrollbar-thumb');
+    const scrollbarTrack = document.querySelector('.custom-scrollbar-track');
 
-  function updateScrollbar() {
-    if (slider.scrollWidth <= slider.clientWidth) {
-      scrollbarThumb.style.display = 'none';
+    if (!slider || !scrollbarThumb || !scrollbarTrack) {
+      console.log('Scrollbar elements not found');
       return;
     }
-    
-    scrollbarThumb.style.display = 'block';
-    
-    const scrollPercent = slider.scrollLeft / (slider.scrollWidth - slider.clientWidth);
-    const trackWidth = scrollbarTrack.clientWidth;
-    const thumbWidth = Math.max(20, (slider.clientWidth / slider.scrollWidth) * trackWidth);
-    const thumbLeft = scrollPercent * (trackWidth - thumbWidth);
-    
-    scrollbarThumb.style.width = thumbWidth + 'px';
-    scrollbarThumb.style.left = thumbLeft + 'px';
-  }
 
-  slider.addEventListener('scroll', updateScrollbar);
+    function updateScrollbar() {
+      if (slider.scrollWidth <= slider.clientWidth) {
+        scrollbarThumb.style.display = 'none';
+        return;
+      }
 
-  scrollbarTrack.addEventListener('click', function(e) {
-    const trackRect = scrollbarTrack.getBoundingClientRect();
-    const clickX = e.clientX - trackRect.left;
-    const clickPercent = clickX / trackRect.width;
-    const scrollTo = clickPercent * (slider.scrollWidth - slider.clientWidth);
-    
-    slider.scrollTo({
-      left: scrollTo,
-      behavior: 'smooth'
+      scrollbarThumb.style.display = 'block';
+
+      const scrollPercent = slider.scrollLeft / (slider.scrollWidth - slider.clientWidth);
+      const trackWidth = scrollbarTrack.clientWidth;
+      const thumbWidth = Math.max(20, (slider.clientWidth / slider.scrollWidth) * trackWidth);
+      const thumbLeft = scrollPercent * (trackWidth - thumbWidth);
+
+      scrollbarThumb.style.width = thumbWidth + 'px';
+      scrollbarThumb.style.left = thumbLeft + 'px';
+    }
+
+    slider.addEventListener('scroll', updateScrollbar);
+
+    scrollbarTrack.addEventListener('click', function (e) {
+      const trackRect = scrollbarTrack.getBoundingClientRect();
+      const clickX = e.clientX - trackRect.left;
+      const clickPercent = clickX / trackRect.width;
+      const scrollTo = clickPercent * (slider.scrollWidth - slider.clientWidth);
+
+      slider.scrollTo({
+        left: scrollTo,
+        behavior: 'smooth',
+      });
+    });
+
+    let isDragging = false;
+    let startX = 0;
+    let startScrollLeft = 0;
+
+    scrollbarThumb.addEventListener('mousedown', function (e) {
+      isDragging = true;
+      startX = e.clientX;
+      startScrollLeft = slider.scrollLeft;
+      e.preventDefault();
+    });
+
+    document.addEventListener('mousemove', function (e) {
+      if (!isDragging) return;
+
+      const deltaX = e.clientX - startX;
+      const trackWidth = scrollbarTrack.clientWidth;
+      const thumbWidth = scrollbarThumb.clientWidth;
+      const maxThumbLeft = trackWidth - thumbWidth;
+      const scrollRatio = (slider.scrollWidth - slider.clientWidth) / maxThumbLeft;
+      const newScrollLeft = startScrollLeft + deltaX * scrollRatio;
+
+      slider.scrollLeft = Math.max(0, Math.min(newScrollLeft, slider.scrollWidth - slider.clientWidth));
+    });
+
+    document.addEventListener('mouseup', function () {
+      isDragging = false;
+    });
+
+    setTimeout(updateScrollbar, 100);
+
+    window.addEventListener('resize', function () {
+      setTimeout(updateScrollbar, 100);
+    });
+
+    const images = slider.querySelectorAll('img');
+    images.forEach((img) => {
+      img.addEventListener('load', updateScrollbar);
     });
   });
-
-  let isDragging = false;
-  let startX = 0;
-  let startScrollLeft = 0;
-
-  scrollbarThumb.addEventListener('mousedown', function(e) {
-    isDragging = true;
-    startX = e.clientX;
-    startScrollLeft = slider.scrollLeft;
-    e.preventDefault();
-  });
-
-  document.addEventListener('mousemove', function(e) {
-    if (!isDragging) return;
-    
-    const deltaX = e.clientX - startX;
-    const trackWidth = scrollbarTrack.clientWidth;
-    const thumbWidth = scrollbarThumb.clientWidth;
-    const maxThumbLeft = trackWidth - thumbWidth;
-    const scrollRatio = (slider.scrollWidth - slider.clientWidth) / maxThumbLeft;
-    const newScrollLeft = startScrollLeft + (deltaX * scrollRatio);
-    
-    slider.scrollLeft = Math.max(0, Math.min(newScrollLeft, slider.scrollWidth - slider.clientWidth));
-  });
-
-  document.addEventListener('mouseup', function() {
-    isDragging = false;
-  });
-
-  setTimeout(updateScrollbar, 100);
-  
-  window.addEventListener('resize', function() {
-    setTimeout(updateScrollbar, 100);
-  });
-  
-  const images = slider.querySelectorAll('img');
-  images.forEach(img => {
-    img.addEventListener('load', updateScrollbar);
-  });
-});
 </script>
 
 <script src="{{ 'featured-collection.js' | asset_url }}" defer></script>
+<script src="{{ 'new-product-card.js' | asset_url }}" defer></script>
 
 {% schema %}
 {
