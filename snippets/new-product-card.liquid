@@ -27,10 +27,10 @@
 <div
   class="new-product-card"
   data-product-id="{{ product_id }}"
-  role="article"
+  role="region"
   aria-labelledby="product-title-{{ product_id }}"
 >
-  <div class="new-product-image-wrapper" role="img" aria-label="Product images for {{ product_title }}">
+  <div class="new-product-image-wrapper" aria-label="Product images for {{ product_title }}">
     {% unless product_available %}
       <div class="absolute top-3 z-2" style="left: 10px;">
         <span
@@ -48,9 +48,8 @@
       href="{{ product_url }}"
       class="new-product-image-link block relative"
       aria-label="View {{ product_title }} product details"
-      role="link"
     >
-      <div class="new-product-images-container" role="presentation">
+      <div class="new-product-images-container">
         {% for image in product_images limit: 2 %}
           <img
             class="new-product-image new-product-card-image{% if forloop.first %} active{% endif %}"
@@ -60,7 +59,6 @@
             data-product-id="{{ product_id }}"
             width="441"
             height="530"
-            role="img"
           >
         {% endfor %}
       </div>
@@ -71,8 +69,7 @@
         class="new-image-nav-arrow new-image-nav-prev"
         aria-label="Previous image for {{ product_title }}"
         data-product-id="{{ product_id }}"
-        role="button"
-        tabindex="0"
+        type="button"
       >
         <svg
           width="25"
@@ -80,7 +77,6 @@
           viewBox="0 0 24 24"
           fill="none"
           xmlns="http://www.w3.org/2000/svg"
-          role="img"
           aria-hidden="true"
         >
           <path d="M15 18L9 12L15 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
@@ -90,8 +86,7 @@
         class="new-image-nav-arrow new-image-nav-next"
         aria-label="Next image for {{ product_title }}"
         data-product-id="{{ product_id }}"
-        role="button"
-        tabindex="0"
+        type="button"
       >
         <svg
           width="25"
@@ -99,7 +94,6 @@
           viewBox="0 0 24 24"
           fill="none"
           xmlns="http://www.w3.org/2000/svg"
-          role="img"
           aria-hidden="true"
         >
           <path d="M9 18L15 12L9 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
@@ -107,7 +101,7 @@
       </button>
     {% endif %}
 
-    <div class="new-product-cart-container" role="group" aria-label="Product purchase options">
+    <div class="new-product-cart-container" role="region" aria-label="Product purchase options">
       <div class="new-cart-options-wrapper">
         {% if product_available %}
           {% if has_size_variants %}
@@ -116,20 +110,19 @@
               data-product-id="{{ product_id }}"
               data-has-variants="true"
               style="background-color: rgb(var(--color-background)); color: var(--text);"
-              role="button"
               aria-label="Add {{ product_title }} to cart"
-              tabindex="0"
+              type="button"
             >
               ADD TO CART
             </button>
-            <div class="new-size-variants-container" role="group" aria-label="Size options for {{ product_title }}">
+            <div class="new-size-variants-container" aria-label="Size options for {{ product_title }}">
               <div class="new-size-label-wrapper">
-                <span class="new-size-label" role="text">SELECT SIZE</span>
+                <span class="new-size-label" id="size-label-{{ product_id }}">SELECT SIZE</span>
                 <div
                   class="new-size-options-wrapper"
                   style="display: flex; gap: 5px;"
-                  role="radiogroup"
-                  aria-label="Available sizes"
+                  role="group"
+                  aria-labelledby="size-label-{{ product_id }}"
                 >
                   {% for option in product.options_with_values %}
                     {% if option.name == 'Size' or option.name == 'size' %}
@@ -149,19 +142,15 @@
                           {% if variant_available %}
                             data-variant-id="{{ variant_id }}"
                             data-variant-size="{{ value }}"
-                            role="radio"
-                            aria-checked="false"
                             aria-label="Size {{ value }} - available"
-                            tabindex="0"
+                            type="button"
                           {% else %}
                             data-waitlist="true"
                             data-product-title="{{ product_title }}"
                             data-variant-size="{{ value }}"
-                            role="radio"
-                            aria-checked="false"
                             aria-label="Size {{ value }} - unavailable, join waitlist"
                             aria-disabled="true"
-                            tabindex="-1"
+                            type="button"
                           {% endif %}
                           style="--animation-order: {{ forloop.index0 }};"
                         >
@@ -181,9 +170,8 @@
               data-variant-id="{{ product.selected_or_first_available_variant.id }}"
               data-has-variants="false"
               style="background-color: rgb(var(--color-background)); color: var(--text);"
-              role="button"
               aria-label="Add {{ product_title }} to cart"
-              tabindex="0"
+              type="button"
             >
               ADD TO CART
             </button>
@@ -195,9 +183,8 @@
               data-product-title="{{ product_title }}"
               data-has-variants="true"
               style="background-color: rgb(var(--color-background)); color: var(--text);"
-              role="button"
               aria-label="Get notified when {{ product_title }} is available"
-              tabindex="0"
+              type="button"
             >
               NOTIFY ME WHEN AVAILABLE
             </button>
@@ -207,9 +194,8 @@
               data-product-title="{{ product_title }}"
               data-has-variants="false"
               style="background-color: rgb(var(--color-background)); color: var(--text);"
-              role="button"
               aria-label="Get notified when {{ product_title }} is available"
-              tabindex="0"
+              type="button"
             >
               NOTIFY ME WHEN AVAILABLE
             </button>
@@ -219,17 +205,16 @@
     </div>
   </div>
 
-  <div class="new-product-details" style="padding-top: 10px;" role="contentinfo">
-    <a
-      href="{{ product_url }}"
+  <div class="new-product-details" style="padding-top: 10px;">
+    <h3
       class="new-product-title"
-      style="text-decoration: none; color: var(--text); display: block;"
+      style="text-decoration: none; color: var(--text); display: block; margin: 0; font-size: inherit; font-weight: inherit;"
       id="product-title-{{ product_id }}"
-      role="heading"
-      aria-level="3"
     >
-      {{ product_title }}
-    </a>
+      <a href="{{ product_url }}" style="text-decoration: none; color: inherit;">
+        {{ product_title }}
+      </a>
+    </h3>
     <div
       class="new-product-price"
       style="color: var(--text); padding-top: 5px;"
