@@ -1,0 +1,843 @@
+{% comment %}
+  Renders a product card
+
+  Accepts:
+  - card_product: {Object} Product Liquid object (optional)
+  - media_aspect_ratio: {String} Size of the product image card. Values are "square" and "portrait". Default is "square" (optional)
+  - image_shape: {String} Image mask to apply to the product image card. Values are "arch", "blob", "chevronleft", "chevronright", "diamond", "parallelogram", and "round". (optional)
+  - show_secondary_image: {Boolean} Show the secondary image on hover. Default: false (optional)
+  - show_vendor: {Boolean} Show the product vendor. Default: false
+  - show_rating: {Boolean} Show the product rating. Default: false
+  - extend_height: {Boolean} Card height extends to available container space. Default: true (optional)
+  - lazy_load: {Boolean} Image should be lazy loaded. Default: true (optional)
+  - skip_styles: {Boolean} Don't include component styles. Useful when rendering multiple product cards in a loop. Default: false (optional)
+  - quick_add: {Boolean} Show the quick add button.
+  - section_id: {String} The ID of the section that contains this card.
+  - horizontal_class: {Boolean} Add a card--horizontal class if set to true. Default: false (optional)
+  - horizontal_quick_add: {Boolean} Changes the quick add button styles when set to true. Default: false (optional)
+  - placeholder_image: {String} The placeholder image to use when no product exists. Default: 'product-apparel-2' (optional)
+
+  Usage:
+  {% render 'card-product', show_vendor: section.settings.show_vendor %}
+{% endcomment %}
+
+<style>
+  #product-grid {
+    column-gap: 6px !important;
+  }
+  [x-cloak] {
+    display: none !important;
+  }
+  .card-wrapper {
+    margin-bottom: 40px;
+    /* Remove transform-origin and transform for scaling */
+  }
+  .add-to-cart-btn {
+    position: relative;
+    z-index: 1000 !important;
+    border-radius: 5px !important; /* Add border radius */
+    cursor: pointer;
+    font-size: 20px;
+  }
+  .slider-arrow {
+    background: transparent;
+    transition: background 0.2s;
+  }
+  .slider-arrow:hover {
+    background: #e5e5e5;
+    box-shadow: 0 2px 8px rgba(68, 68, 68, 0.1);
+  }
+  .slider-arrow svg {
+    display: block;
+    margin: auto;
+  }
+  .slider-arrow {
+    width: 40px;
+    height: 40px;
+    padding: 0;
+  }
+</style>
+{%- unless skip_styles -%}
+  {{ 'component-rating.css' | asset_url | stylesheet_tag }}
+  {{ 'component-volume-pricing.css' | asset_url | stylesheet_tag }}
+
+  {{ 'quick-order-list.css' | asset_url | stylesheet_tag }}
+  {{ 'quantity-popover.css' | asset_url | stylesheet_tag }}
+{%- endunless -%}
+{%- if card_product and card_product != empty -%}
+  {%- liquid
+    assign ratio = 1
+    if card_product.featured_media and media_aspect_ratio == 'portrait'
+      assign ratio = 0.8
+    elsif card_product.featured_media and media_aspect_ratio == 'adapt'
+      assign ratio = card_product.featured_media.aspect_ratio
+    endif
+    if ratio == 0 or ratio == null
+      assign ratio = 1
+    endif
+  -%}
+  <div class="card-wrapper product-card-wrapper group">
+    <div class="block card-inner-wrapper w-full">
+      <div
+        class="relative w-full product-card-height transition-all duration-300 overflow-hidden"
+        style="background-color: var(--background);"
+      >
+        {%- if card_product.featured_media -%}
+          <div class="absolute card-inner-wrapper-product inset-0 w-full  overflow-hidden product-images-slider">
+            {% assign first_media = card_product.media[0] %}
+            {% assign second_media = card_product.media[1] %}
+            {% for media in card_product.media %}
+              <img
+                srcset="
+                  {%- if media.width >= 165 -%}{{ media | image_url: width: 165 }} 165w,{%- endif -%}
+                  {%- if media.width >= 360 -%}{{ media | image_url: width: 360 }} 360w,{%- endif -%}
+                  {%- if media.width >= 533 -%}{{ media | image_url: width: 533 }} 533w,{%- endif -%}
+                  {%- if media.width >= 720 -%}{{ media | image_url: width: 720 }} 720w,{%- endif -%}
+                  {%- if media.width >= 940 -%}{{ media | image_url: width: 940 }} 940w,{%- endif -%}
+                  {%- if media.width >= 1066 -%}{{ media | image_url: width: 1066 }} 1066w,{%- endif -%}
+                  {{ media | image_url }} {{ media.width }}w
+                "
+                class="w-full h-full card-inner-wrapper-product  p-0 transition-all duration-300 absolute inset-0 opacity-0 image-config"
+                {% if forloop.first %}
+                  loading="eager"
+                  style="opacity: 1;"
+                {% else %}
+                  loading="lazy"
+                {% endif %}
+                width="{{ media.width }}"
+                height="{{ media.height }}"
+                alt="product-image"
+                data-index="{{ forloop.index0 }}"
+              >
+            {% endfor %}
+            <button
+              aria-label="prev-btn"
+              class="slider-arrow prev absolute left-0 top-1/2  -translate-y-1/2  cursor-pointer flex items-center justify-center z-[50] opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+            >
+              <svg
+                width="40"
+                height="40"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="#ccc"
+              >
+                <path d="M15 18l-6-6 6-6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </button>
+            <button
+              aria-label="next-btn"
+              class="slider-arrow next absolute right-0 top-1/2  -translate-y-1/2  cursor-pointer flex items-center justify-center z-[50] opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+            >
+              <svg
+                width="40"
+                height="40"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="#ccc"
+              >
+                <path d="M9 18l6-6-6-6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </button>
+          </div>
+        {%- endif -%}
+
+        {% if card_product.available == false %}
+          <div class="absolute top-[10px] left-[10px]">
+            <span
+              class="sold-out-tag text-[14px] font-medium rounded px-1"
+              style="background-color: transparent; color: var(--text); border: 1px solid var(--text);"
+            >
+              SOLD OUT
+            </span>
+          </div>
+          <div class="absolute inset-x-0 bottom-0 p-4 opacity-0 translate-y-10 transition-all duration-300 group-hover:opacity-100 group-hover:-translate-y-0">
+            <div class="w-[93%] mx-auto text-center" style="background-color: var(--background);">
+              <button
+                type="button"
+                class="notify-when-available-btn w-full py-4  font-medium cursor-pointer transition-colors duration-200 uppercase tracking-wider"
+                style="color:var(--button_label); background-color: var(--button);"
+                onmouseout="this.style.backgroundColor='var(--button)'; this.style.color='var(--button_label)';"
+                onmouseover="this.style.backgroundColor='var(--hovered_button_label)'; this.style.color='var(--hovered_button_text_color)';"
+                data-product-id="{{ card_product.id }}"
+                data-product-title="{{ card_product.title | escape }}"
+              >
+                <span class="notify-text">Notify Me When Available</span>
+                <span class="notifying-text hidden">Submitting...</span>
+                <span class="notified-text hidden">We'll Notify You!</span>
+              </button>
+            </div>
+          </div>
+        {% else %}
+          <div class="absolute inset-x-0 bottom-0 p-4 opacity-0 translate-y-10 transition-all duration-300 group-hover:opacity-100 group-hover:-translate-y-0">
+            <div
+              class="w-[93%] mx-auto text-center product-sizes-container"
+              style="background-color: var(--background);"
+            >
+              {%- liquid
+                assign has_size_variant = false
+                for option in card_product.options_with_values
+                  if option.name contains 'Size' or option.name contains 'size'
+                    assign has_size_variant = true
+                    break
+                  endif
+                endfor
+              -%}
+
+              <button
+                type="button"
+                class="add-to-cart-btn w-full py-4 z-[100] !text-[1.6rem] font-medium transition-colors duration-200 uppercase tracking-wider quick-add-button"
+                style="color:var(--button_label); background-color: var(--button);"
+
+                onmouseout="this.style.backgroundColor='var(--button)'; this.style.color='var(--button_label)';"
+                onmouseover="this.style.backgroundColor='var(--hovered_button_label)'; this.style.color='var(--hovered_button_text_color)';"
+                {% if has_size_variant %}
+                  data-has-sizes="true"
+                {% else %}
+                  data-single-variant="{{ card_product.first_available_variant.id }}"
+                {% endif %}
+              >
+                <span class="add-to-cart-text">{{ 'products.product.add_to_cart' | t }}</span>
+                <span class="adding-to-cart-text hidden">Adding...</span>
+                <span class="added-to-cart-text hidden">Added!</span>
+              </button>
+
+              {% if has_size_variant %}
+                <div class="quick-add-modal hidden">
+                  <div class="quick-add-modal__content">
+                    <div class="quick-add-modal__header">
+                      <h3 class="select-size-option !font-medium !uppercase">Select Size</h3>
+                      <div class="quick-add-modal__options">
+                        {% for option in card_product.options_with_values %}
+                          {% if option.name contains 'Size' or option.name contains 'size' %}
+                            {% for value in option.values %}
+                              {% assign variant_exists = false %}
+                              {% assign variant_id = null %}
+                              {% for variant in card_product.variants %}
+                                {% comment %} Changed to check only if variant option contains the size value {% endcomment %}
+                                {% if variant.available and variant.title contains value %}
+                                  {% assign variant_exists = true %}
+                                  {% assign variant_id = variant.id %}
+                                  {% break %}
+                                {% endif %}
+                              {% endfor %}
+
+                              <span
+                                style="color: var(--button_label); background-color: var(--button);"
+                                onmouseover="this.style.backgroundColor='var(--hovered_button_label)'; this.style.color='var(--hovered_button_text_color)';"
+                                onmouseout="this.style.backgroundColor='var(--button)'; this.style.color='var(--button_label)';"
+                                class="quick-add__submit  !text-[1.5rem]  {% unless variant_exists %} opacity-50{% endunless %}"
+                                {% if variant_exists %}
+                                  data-variant-id="{{ variant_id }}"
+                                  form="quick-add-{{ card_product.id }}"
+                                {% else %}
+                                  disabled
+                                {% endif %}
+                              >
+                                {{ value }}
+                              </span>
+                            {% endfor %}
+                          {% endif %}
+                        {% endfor %}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              {% endif %}
+
+              <form
+                method="post"
+                action="{{ routes.cart_add_url }}"
+                id="quick-add-{{ card_product.id }}"
+                accept-charset="UTF-8"
+                class="form quick-add__form"
+              >
+                <input
+                  type="hidden"
+                  name="id"
+                  value="{{ card_product.selected_or_first_available_variant.id }}"
+                  class="!text-black"
+                >
+                <input type="hidden" name="quantity" value="1">
+              </form>
+            </div>
+          </div>
+        {% endif %}
+      </div>
+
+      <div class="mt-3 space-y-1">
+        <a href="{{ card_product.url }}" class="block hover:opacity-75 transition-opacity duration-200">
+          <h3
+            class="card-product-typegraphy product-card-text uppercase font-medium leading-tight"
+            style="color: var(--text);"
+          >
+            {{ card_product.title | escape }}
+          </h3>
+          <div class=" gap-2 items-baseline leading-tight">
+            {%- if card_product.compare_at_price > card_product.price -%}
+              <span
+                class="card-product-typegraphy product-card-text uppercase font-medium"
+                style="color: var(--sale_badge);"
+              >
+                {{ card_product.price | money }} |
+              </span>
+              <span
+                class="card-product-typegraphy product-card-text uppercase line-through mr-2"
+                style="color: var(--text);"
+              >
+                {{ card_product.compare_at_price | money }}
+              </span>
+            {%- else -%}
+              <span
+                class="card-product-typegraphy product-card-text uppercase font-medium"
+                style="color: var(--sale_badge);"
+              >
+                {{ card_product.price | money }}
+              </span>
+            {%- endif -%}
+          </div>
+        </a>
+      </div>
+    </div>
+  </div>
+{%- else -%}
+  {%- liquid
+    assign ratio = 1
+    assign placeholder = true
+    if media_aspect_ratio == 'portrait'
+      assign ratio = 0.8
+    endif
+  -%}
+  <div class="card-wrapper product-card-wrapper underline-links-hover">
+    <div
+      class="
+        card card--{{ settings.card_style }}
+        {% if extend_height %} card--extend-height{% endif %}
+        {% if image_shape and image_shape != 'default' %} card--shape{% endif %}
+        {% if settings.card_style == 'card' %} color-{{ settings.card_color_scheme }} gradient{% endif %}
+      "
+      style="--ratio-percent: {{ 1 | divided_by: ratio | times: 100 }}%;"
+    >
+      <div
+        class="card__inner{% if settings.card_style == 'standard' %} color-{{ settings.card_color_scheme }} gradient{% endif %} ratio"
+      >
+        <div
+          class="card__media {% if image_shape and image_shape != 'default' %} shape--{{ image_shape }} color-{{ settings.card_color_scheme }} gradient{% endif %}"
+        >
+          <div
+            class="media media--transparent"
+          >
+            {%- if placeholder_image -%}
+              {{ placeholder_image | placeholder_svg_tag: 'placeholder-svg' }}
+            {%- else -%}
+              {{ 'product-apparel-2' | placeholder_svg_tag: 'placeholder-svg' }}
+            {% endif %}
+          </div>
+        </div>
+      </div>
+      <div class="card__content">
+        <div class="card__information">
+          <h3 class="card__heading card__heading--placeholder{% if settings.card_style == 'standard' %} h5{% endif %}">
+            <a role="link" aria-disabled="true" class="full-unstyled-link">
+              {{ 'onboarding.product_title' | t }}
+            </a>
+          </h3>
+          <div class="card-information">
+            {%- if show_vendor -%}
+              <span class="visually-hidden">{{ 'accessibility.vendor' | t }}</span>
+              <div class="caption-with-letter-spacing light">{{ 'products.product.vendor' | t }}</div>
+            {%- endif -%}
+            {% render 'price', placeholder: placeholder, show_compare_at_price: true %}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+{%- endif -%}
+
+<style>
+  .sold-out-tag {
+    margin: 0 0 0 5px;
+    padding: 0 8px;
+    font-size: 16px;
+  }
+  .image-config {
+    object-fit: cover;
+  }
+  .card-product-typegraphy {
+    font-size: 14px !important;
+  }
+  /* Responsive fixed height for image container */
+  .product-card-height {
+    height: 500px;
+    transition: height 0.3s ease;
+    width: 100%;
+    max-width: 100%;
+    background: var(--background);
+    position: relative;
+    overflow: hidden;
+  }
+  /* On hover, decrease height (shrink from bottom only) */
+  .card-wrapper:hover .product-card-height {
+    height: 470px;
+  }
+  @media screen and (min-width: 1500px) {
+    .product-card-height {
+      height: 380px !important;
+    }
+    .card-wrapper:hover .product-card-height {
+      height: 350px !important;
+    }
+  }
+  @media only screen and (max-width: 600px) {
+    .image-config {
+      object-fit: fill;
+    }
+    .sold-out-tag {
+      font-size: 10px;
+    }
+    .card-product-typegraphy {
+      font-size: 12px !important;
+    }
+    /* Disable hover effect on mobile - keep original height */
+    .card-wrapper:hover .product-card-height {
+      height: 270px;
+    }
+    .product-card-text {
+      font-size: 12px;
+    }
+
+    /* Disable all hover effects on mobile */
+    .group:hover .opacity-0 {
+      opacity: 0 !important;
+    }
+
+    .group:hover .translate-y-10 {
+      transform: translateY(2.5rem) !important;
+    }
+
+    /* Keep add to cart button hidden on mobile hover */
+    .group:hover .group-hover\:opacity-100 {
+      opacity: 0 !important;
+    }
+
+    .group:hover .group-hover\:-translate-y-0 {
+      transform: translateY(2.5rem) !important;
+    }
+
+    /* Disable slider arrow hover effects on mobile */
+    .slider-arrow:hover {
+      background: transparent !important;
+      box-shadow: none !important;
+    }
+  }
+
+  /* Make images fill the card completely */
+  .product-card-height img {
+    width: 100%;
+    height: 100%;
+    /* Stretch image to fill container */
+    position: absolute;
+    top: 0;
+    left: 0;
+    transition: opacity 0.3s;
+    background: transparent;
+  }
+
+  .quick-add-modal {
+    position: absolute;
+    bottom: 10px;
+    right: 21px;
+    left: 21px;
+    background: var(--button);
+    padding: 0 10px;
+    z-index: 20;
+    opacity: 1;
+    height: 50px !important;
+    visibility: visible;
+    overflow: hidden;
+    clip-path: inset(0);
+    border-radius: 5px; /* Add border radius */
+  }
+
+  .product-sizes-container.variant-selector-active .add-to-cart-btn {
+    display: none !important;
+  }
+  .product-sizes-container {
+    border-radius: 5px;
+  }
+
+  .quick-add-modal__header {
+    display: flex;
+    justify-content: space-between;
+    height: 50px;
+    align-items: center;
+  }
+  .quick-add-modal__header h3 {
+    color: var(--text);
+  }
+
+  .quick-add-modal__options {
+    margin-left: auto;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    justify-content: center;
+  }
+
+  @keyframes sizeOptionFade {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .quick-add__submit {
+    opacity: 0;
+    transform: translateY(100px);
+
+    animation: sizeOptionFade 0.3s ease forwards;
+    min-width: 26px;
+    padding: 0px !important;
+    border: 1px solid var(--button_label);
+    background: var(--button);
+    color: var(--button_label);
+    cursor: pointer;
+    transition: all 0.2s;
+    font-size: 14px;
+    font-weight: 800;
+    border-radius: 5px !important;
+  }
+
+  .quick-add-modal.visible .quick-add__submit:nth-child(1) {
+    animation-delay: 0s;
+  }
+  .quick-add-modal.visible .quick-add__submit:nth-child(2) {
+    animation-delay: 0.1s;
+  }
+  .quick-add-modal.visible .quick-add__submit:nth-child(3) {
+    animation-delay: 0.2s;
+  }
+  .quick-add-modal.visible .quick-add__submit:nth-child(4) {
+    animation-delay: 0.3s;
+  }
+  .quick-add-modal.visible .quick-add__submit:nth-child(5) {
+    animation-delay: 0.4s;
+  }
+
+  .quick-add__submit:hover:not([disabled]) {
+    background: var(--hovered_button_label);
+  }
+
+  .quick-add__submit[disabled] {
+    opacity: 0.5;
+    cursor: not-allowed;
+    background: var(--disabled_text);
+    position: relative;
+    text-decoration: none; /* Remove default line-through */
+  }
+
+  .quick-add__submit[disabled]::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 50%;
+    border-top: 1px solid #999;
+    transform: rotate(-45deg);
+  }
+
+  .quick-add-modal__close {
+    padding: 5px;
+    cursor: pointer;
+    font-size: 20px;
+    line-height: 1;
+  }
+</style>
+
+<style>
+  .secondary-image-hover-wrapper {
+    position: relative;
+    width: 100%;
+    height: 100%;
+  }
+  .secondary-image-hover-wrapper .primary-image,
+  .secondary-image-hover-wrapper .secondary-image {
+    pointer-events: none;
+  }
+  .notify-when-available-btn {
+    border-radius: 5px;
+    font-size: 20px;
+  }
+
+  .add-to-cart-text,
+  .adding-to-cart-text,
+  .added-to-cart-text {
+    font-size: 20px !important;
+  }
+  .select-size-option {
+    font-size: 14px !important;
+  }
+</style>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const containers = document.querySelectorAll('.product-sizes-container');
+
+    // Check if device is mobile
+    function isMobile() {
+      return window.innerWidth <= 600;
+    }
+
+    function updateButtonState(button, state) {
+      const addText = button.querySelector('.add-to-cart-text');
+      const addingText = button.querySelector('.adding-to-cart-text');
+      const addedText = button.querySelector('.added-to-cart-text');
+
+      [addText, addingText, addedText].forEach((el) => el.classList.add('hidden'));
+
+      switch (state) {
+        case 'adding':
+          addingText.classList.remove('hidden');
+          button.disabled = true;
+          break;
+        case 'added':
+          addedText.classList.remove('hidden');
+          button.disabled = true;
+          setTimeout(() => {
+            addText.classList.remove('hidden');
+            addedText.classList.add('hidden');
+            button.disabled = false;
+          }, 2000);
+          break;
+        default:
+          addText.classList.remove('hidden');
+          button.disabled = false;
+      }
+    }
+
+    async function addToCart(formData) {
+      try {
+        const response = await fetch(window.routes.cart_add_url, {
+          method: 'POST',
+          body: formData,
+        });
+        if (!response.ok) throw new Error('Network response was not ok');
+        return await response.json();
+      } catch (error) {
+        console.error('Error:', error);
+        throw error;
+      }
+    }
+
+    containers.forEach((container) => {
+      const addToCartBtn = container.querySelector('.add-to-cart-btn');
+      const modal = container.querySelector('.quick-add-modal');
+      const form = container.querySelector('.quick-add__form');
+      const singleVariantId = addToCartBtn?.dataset.singleVariant;
+      const hasSizes = addToCartBtn?.dataset.hasSizes === 'true';
+
+      if (hasSizes && modal && form) {
+        // For products with size variants - disable hover on mobile
+        if (!isMobile()) {
+          addToCartBtn.addEventListener('mouseenter', () => {
+            container.classList.add('variant-selector-active');
+            modal.classList.add('visible');
+            modal.classList.remove('hidden');
+          });
+
+          container.addEventListener('mouseleave', () => {
+            modal.classList.remove('visible');
+            setTimeout(() => {
+              modal.classList.add('hidden');
+              container.classList.remove('variant-selector-active');
+            }, 300);
+          });
+        }
+
+        modal.querySelector('.quick-add-modal__close')?.addEventListener('click', (e) => {
+          e.preventDefault();
+          modal.classList.remove('visible');
+          setTimeout(() => {
+            modal.classList.add('hidden');
+            container.classList.remove('variant-selector-active');
+          }, 300);
+        });
+
+        modal.querySelectorAll('.quick-add__submit').forEach((submitBtn) => {
+          submitBtn.addEventListener('click', async () => {
+            updateButtonState(addToCartBtn, 'adding');
+            const variantId = submitBtn.dataset.variantId;
+            const formData = new FormData(form);
+            formData.set('id', variantId);
+
+            try {
+              await addToCart(formData);
+              updateButtonState(addToCartBtn, 'added');
+              modal.classList.add('hidden');
+              container.classList.remove('variant-selector-active');
+            } catch (error) {
+              updateButtonState(addToCartBtn, 'default');
+            }
+          });
+        });
+      } else if (singleVariantId) {
+        // For products without size variants
+        addToCartBtn.addEventListener('click', async () => {
+          updateButtonState(addToCartBtn, 'adding');
+          const formData = new FormData();
+          formData.append('id', singleVariantId);
+          formData.append('quantity', '1');
+
+          try {
+            await addToCart(formData);
+            updateButtonState(addToCartBtn, 'added');
+          } catch (error) {
+            updateButtonState(addToCartBtn, 'default');
+          }
+        });
+      }
+    });
+
+    // Handle notify me when available buttons
+    const notifyButtons = document.querySelectorAll('.notify-when-available-btn');
+
+    function updateNotifyButtonState(button, state) {
+      const notifyText = button.querySelector('.notify-text');
+      const notifyingText = button.querySelector('.notifying-text');
+      const notifiedText = button.querySelector('.notified-text');
+
+      [notifyText, notifyingText, notifiedText].forEach((el) => el.classList.add('hidden'));
+
+      switch (state) {
+        case 'submitting':
+          notifyingText.classList.remove('hidden');
+          button.disabled = true;
+          break;
+        case 'submitted':
+          notifiedText.classList.remove('hidden');
+          button.disabled = true;
+          setTimeout(() => {
+            notifyText.classList.remove('hidden');
+            notifiedText.classList.add('hidden');
+            button.disabled = false;
+          }, 3000);
+          break;
+        default:
+          notifyText.classList.remove('hidden');
+          button.disabled = false;
+      }
+    }
+
+    async function submitNotifyRequest(productId, productTitle, email) {
+      // This would typically send data to your backend
+      // For now, we'll simulate an API call
+      return new Promise((resolve) => {
+        setTimeout(() => {
+          console.log(
+            `Notification request submitted for product: ${productTitle} (ID: ${productId}) for email: ${email}`
+          );
+          resolve({ success: true });
+        }, 1000);
+      });
+    }
+
+    notifyButtons.forEach((button) => {
+      button.addEventListener('click', async () => {
+        const productId = button.dataset.productId;
+        const productTitle = button.dataset.productTitle;
+
+        // For now, we'll use a simple prompt for email
+        // In a real implementation, you'd want a proper modal or form
+        const email = prompt('Enter your email to be notified when this product is back in stock:');
+
+        if (!email) return;
+
+        if (!email.includes('@')) {
+          alert('Please enter a valid email address');
+          return;
+        }
+
+        updateNotifyButtonState(button, 'submitting');
+
+        try {
+          await submitNotifyRequest(productId, productTitle, email);
+          updateNotifyButtonState(button, 'submitted');
+        } catch (error) {
+          console.error('Error submitting notification request:', error);
+          updateNotifyButtonState(button, 'default');
+          alert('Sorry, there was an error. Please try again later.');
+        }
+      });
+    });
+
+    const sliders = document.querySelectorAll('.product-images-slider');
+
+    sliders.forEach((slider) => {
+      const images = slider.querySelectorAll('img');
+      const prevBtn = slider.querySelector('.prev');
+      const nextBtn = slider.querySelector('.next');
+      let currentIndex = 0;
+
+      if (!prevBtn || !nextBtn) return;
+
+      function showImage(index) {
+        images.forEach((img, i) => {
+          img.style.opacity = i === index ? '1' : '0';
+        });
+      }
+
+      // Hover functionality for exactly 2 images - disable on mobile
+      if (images.length === 2 && !isMobile()) {
+        slider.addEventListener('mouseenter', () => {
+          currentIndex = 1;
+          showImage(currentIndex);
+        });
+        slider.addEventListener('mouseleave', () => {
+          currentIndex = 0;
+          showImage(currentIndex);
+        });
+      }
+
+      prevBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        currentIndex = (currentIndex - 1 + images.length) % images.length;
+        showImage(currentIndex);
+      });
+
+      nextBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        currentIndex = (currentIndex + 1) % images.length;
+        showImage(currentIndex);
+      });
+    });
+
+    // Add quick add functionality
+    document.querySelectorAll('.quick-add-button').forEach((button) => {
+      const container = button.closest('.product-sizes-container');
+      const modal = container?.querySelector('.quick-add-modal');
+      const form = container?.querySelector('.quick-add__form');
+
+      if (!container || !modal || !form) return;
+
+      button.addEventListener('click', () => {
+        modal.classList.remove('hidden');
+      });
+
+      modal.querySelector('.quick-add-modal__close')?.addEventListener('click', () => {
+        modal.classList.add('hidden');
+      });
+
+      modal.querySelectorAll('.quick-add__submit').forEach((submitBtn) => {
+        submitBtn.addEventListener('click', () => {
+          const variantId = submitBtn.dataset.variantId;
+          form.querySelector('input[name="id"]').value = variantId;
+          form.submit();
+        });
+      });
+    });
+  });
+</script>

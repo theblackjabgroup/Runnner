@@ -1,0 +1,849 @@
+{{ 'section-footer.css' | asset_url | stylesheet_tag }}
+{{ 'component-newsletters.css' | asset_url | stylesheet_tag }}
+
+<style>
+    /* Accessibility */
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      margin: -1px;
+      padding: 0;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      border: 0;
+    }
+
+    a:focus, button:focus, input:focus {
+      outline: 2px solid #4d90fe;
+      outline-offset: 2px;
+    }
+
+    /* Typography */
+    footer .heading-font {
+      font-family: var(--font-heading-family);
+      font-style: var(--font-heading-style);
+      color: {{ section.settings.menu_item_color }};
+    }
+
+    footer .body-font {
+      font-family: var(--font-body-family);
+      font-style: var(--font-body-style);
+      color: {{ section.settings.menu_item_color }};
+    }
+
+    footer p, footer a, footer span, footer div {
+      color: {{ section.settings.menu_item_color }} !important;
+    }
+
+    /* Form Elements */
+    footer .email-input12 {
+      color: {{ section.settings.email_input_color | default: '#FFFFFF' }} !important;
+      border-color: {{ section.settings.email_input_color | default: '#FFFFFF' }};
+    }
+
+    footer .email-input12::placeholder {
+      color: {{ section.settings.email_input_color | default: '#FFFFFF' }} !important;
+    }
+
+    .email-input.error {
+      border-color: red !important;
+    }
+
+    /* Background Animation */
+    .animated-footer-background {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-size: 120% 120%;
+      background-position: center;
+      background-repeat: no-repeat;
+      animation: backgroundMove 10s linear infinite;
+      z-index: 1;
+    }
+
+    .animated-footer-background.no-image {
+      background: {{ section.settings.footer_bg_color | default: '#000000' }} !important;
+      animation: none;
+    }
+
+    @keyframes backgroundMove {
+      0% { background-position: 0% 0%; background-size: 120% 120%; }
+      25% { background-position: 100% 0%; background-size: 125% 125%; }
+      50% { background-position: 100% 100%; background-size: 120% 120%; }
+      75% { background-position: 0% 100%; background-size: 115% 115%; }
+      100% { background-position: 0% 0%; background-size: 120% 120%; }
+    }
+
+    .animated-grain {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      opacity: var(--inputs-border-opacity);
+      background: rgba(0, 0, 0, 0.3);
+      pointer-events: none;
+      animation: grainMove 0.5s linear infinite;
+      z-index: 2;
+    }
+
+    @keyframes grainMove {
+      0%, 100% { transform: translate(0, 0); }
+      10% { transform: translate(-1px, -1px); }
+      20% { transform: translate(1px, -1px); }
+      30% { transform: translate(-1px, 1px); }
+      40% { transform: translate(1px, 1px); }
+      50% { transform: translate(-1px, -1px); }
+      60% { transform: translate(1px, -1px); }
+      70% { transform: translate(-1px, 1px); }
+      80% { transform: translate(1px, 1px); }
+      90% { transform: translate(-1px, -1px); }
+    }
+
+    .footer-content {
+      position: relative;
+      z-index: 3;
+    }
+
+    /* Messages */
+    .message-container {
+      padding: 10px;
+      margin-bottom: 15px;
+      text-align: center;
+    }
+
+    .newsletter-form__message--success,
+    .newsletter-form__message--error {
+      color: {{ section.settings.menu_item_color }};
+      padding: 15px;
+      margin: 10px 0;
+      border-radius: var(--inputs-radius);
+      background-color: inherit;
+    }
+
+    /* Social Icons */
+    .support-social-icons {
+      display: flex;
+      margin-top: 70px;
+      gap: 10px 15px;
+      align-items: center;
+    }
+
+    .mobile-social-icons {
+      display: none;
+      flex-wrap: wrap;
+      gap: 15px;
+      margin-top: 20px;
+    }
+
+    .support-social-icons .social-icon,
+    .mobile-social-icons .social-icon {
+      transition: all 0.3s ease;
+    }
+
+    .support-social-icons .social-icon:hover svg,
+    .mobile-social-icons .social-icon:hover svg {
+      fill: {{ section.settings.hover_color | default: '#808080' }} !important;
+    }
+
+    .support-social-icons .social-icon svg,
+    .mobile-social-icons .social-icon svg {
+      fill: {{ section.settings.menu_item_color }};
+      transition: fill 0.3s ease;
+    }
+
+    /* Email Signup */
+    .email-signup-section {
+      padding: 20px;
+      text-align: center;
+      width: 100%;
+      box-sizing: border-box;
+    }
+
+    .signup-button {
+      position: relative;
+      overflow: hidden;
+      border-color: {{ section.settings.menu_item_color }} !important;
+    }
+
+    .signup-button span {
+      line-height: 1;
+      display: flex;
+      align-items: center;
+      height: 100%;
+      color: {{ section.settings.menu_item_color }} !important;
+      position: relative;
+      z-index: 1;
+      padding: 10px 8px;
+      
+    }
+
+    .signup-button::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: {{ section.settings.hover_color | default: '#808080' }};
+      transition: left 0.5s;
+      z-index: 0;
+    }
+
+    .signup-button:hover::before,
+    .signup-button:focus::before {
+      left: 0;
+    }
+
+    .signup-button:hover span {
+      color: {{ section.settings.email_signup_hover_text_color | default: '#FFFFFF' }} !important;
+    }
+
+    .arrow-wrapper {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      width: 28px;
+      height: 28px;
+      margin-left: 8px;
+      transition: transform 0.3s ease, stroke 0.3s ease, fill 0.3s ease;
+    }
+
+    .arrow-wrapper svg {
+      width: 200%;
+      height: 200%;
+    }
+
+    .arrow-wrapper svg path {
+  fill: none;
+  stroke: {{ section.settings.menu_item_color }};
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  transition: stroke 0.2s ease;
+
+
+}.signup-button:hover .arrow-wrapper svg path,
+.signup-button:focus .arrow-wrapper svg path {
+  stroke: {{ section.settings.email_signup_hover_text_color | default: '#FFFFFF' }};
+}
+
+    /* Layout Components */
+    .logo-container {
+      width: 100%;
+      margin-top: 20px;
+      padding-left: 30px;
+      padding-bottom: 20px;
+      order: 2;
+      display: flex;
+      align-items: flex-start;
+      overflow: visible;
+    }
+
+    .logo-container img {
+      width: 100%;
+      max-width: 570px;
+      height: auto;
+      min-height: 75px;
+      object-fit: contain;
+      object-position: center top;
+      transform: scale(1.12);
+      margin-bottom: 15px;
+    }
+
+    .logo-container .text-logo {
+      margin-left: 0;
+      font-size: 50px;
+      transform: scale(1.5);
+      line-height: 1.2;
+      margin-top: 0;
+      color: {{ section.settings.menu_item_color }} !important;
+    }
+
+    .email-icon {
+      width: 30px;
+      height: 30px;
+      margin-bottom: 4px;
+      display: inline-block;
+      vertical-align: middle;
+    }
+
+    .custom-gap {
+      gap: calc(var(--spacing) * 19);
+    }
+
+    /* Mobile Responsive */
+    @media (max-width: 375px) {
+      .support-social-icons { display: none; }
+      .mobile-social-icons { display: flex; align-items: center; }
+      .custom-gap { gap: calc(var(--spacing) * 5); }
+      
+      .email-signup-section { padding: 15px; }
+      .email-input12 { font-size: 28px; height: 50px; line-height: 50px; width: 110%; margin-left: -20px; }
+      .signup-button { font-size: 38px; height: 50px; line-height: 50px; width: 110%; margin-left: -20px; justify-content: space-around !important; }
+      .arrow-wrapper { width: 60px; height: 40px !important;  }
+      
+      .logo-container { padding-left: 20px; padding-bottom: 15px; margin-top: 15px; }
+      .logo-container img { margin-left: -29px !important; margin-bottom: 8px !important; width: 370px !important; transform: scale(1.0); }
+      .logo-container .text-logo { font-size: 35px; transform: scale(1.2); }
+      
+      .email-icon { width: 22px; height: 22px; }
+    }
+
+    @media (min-width: 376px) and (max-width: 640px) {
+      .support-social-icons { display: none; }
+      .mobile-social-icons { display: flex; align-items: center; }
+      .custom-gap { gap: calc(var(--spacing) * 5); }
+      
+      .email-signup-section { padding: 18px; }
+      .email-input12 { font-size: 30px; height: 55px; line-height: 55px; width: 115%; margin-left: -25px; padding-left: 10px; }
+      .signup-button { font-size: 38px; height: 55px; line-height: 55px; width: 115%; margin-left: -25px; justify-content: space-around !important; }
+      .arrow-wrapper { width: 60px; height: 40px !important; }
+      
+      .logo-container { padding-left: 25px; padding-bottom: 18px; margin-top: 18px; }
+      .logo-container img { margin-left: -22px !important; margin-bottom: 10px !important; width: 400px !important; transform: scale(1.05); }
+      .logo-container .text-logo { font-size: 40px; transform: scale(1.3); }
+    }
+
+    @media (min-width: 641px) and (max-width: 767px) {
+      .email-input12 { font-size: 34px; height: 65px; line-height: 65px; width: 120%; margin-left: -30px; }
+      .signup-button { font-size: 38px; height: 65px; line-height: 65px; width: 120%; margin-left: -30px; justify-content: space-around !important; }
+      .arrow-wrapper { width: 40px; height: 40px !important; }
+      .logo-container img { margin-left: -18px !important; margin-bottom: 15px !important; width: 500px !important; transform: scale(1.10); }
+    }
+
+    @media (min-width: 768px) {
+      .custom-mr-25 { margin-right: 25px; }
+      .custom-nav-mr-25 { margin-right: 15px; margin-left: 0; padding-bottom: 10px; }
+      
+      .logo-container { width: 60%; margin-top: 0; margin-left: 10px; order: 1; padding-top: 0; }
+      .logo-container img { max-width: 570px; height: auto; max-height: 120px; transform: scale(1.12); }
+      .logo-container .text-logo { transform: scale(1.5); margin-top: 0; }
+    }
+
+    @media (min-width: 768px) and (max-width: 1023px) {
+      .support-social-icons { display: none; }
+      .mobile-social-icons { display: flex; align-items: center; }
+      
+      .email-signup-section { padding: 25px; }
+      .email-input12 { font-size: 36px; height: 70px; line-height: 70px; }
+      .signup-button { font-size: 80px; height: 100px; line-height: 70px; }
+      .arrow-wrapper { width: 50px; height: 50px !important; }
+    }
+
+    @media (min-width: 1024px) {
+      .desktop-ml-15 { margin-left: 15px; }
+      .custom-mr-25 { margin-right: 30px; }
+      .custom-nav-mr-25 { margin-right: 20px; padding-bottom: 12px; }
+      
+      .email-input12 { font-size: 110px; height: 120px; line-height: 120px; letter-spacing: -5px; }
+      .signup-button { font-size: 100px; height: 120px; line-height: 120px; letter-spacing: -5px; }
+      .arrow-wrapper { width: 130px; height: 100px !important; margin-top: 2px;}
+      
+      .logo-container { width: 65%; margin-left: 15px; }
+      .logo-container img { max-height: 140px; margin-top: 0; transform: scale(1.45); margin-left: 60px; margin-top: 2px; }
+      .logo-container .text-logo { font-size: 55px; transform: scale(1.6); }
+      
+      .heading-font { margin-bottom: 15px !important; margin-top: -5px !important; }
+    }
+
+    @media (min-width: 1200px) {
+      .desktop-ml-15 { margin-left: 18px; }
+      .custom-mr-25 { margin-right: 35px; }
+      .custom-nav-mr-25 { margin-right: 25px; padding-bottom: 15px; }
+      
+      .logo-container { width: 70%; margin-left: 20px; }
+      .logo-container img { max-height: 150px; transform: scale(1.50); margin-left: 70px; }
+      .logo-container .text-logo { font-size: 60px; transform: scale(1.7); }
+    }
+
+    @media (min-width: 1400px) {
+      .desktop-ml-15 { margin-left: 20px; }
+      .logo-container img { max-height: 160px; transform: scale(1.55); margin-left: 100px; }
+    }
+
+    @media (max-width: 1295px) {
+      .arrow-wrapper { height: 69px; }
+      .logo-container img { width: 450px; margin-left: 45px; margin-top: 35px; }
+    }
+
+    @media (min-width: 1296px) and (max-width: 1399px) {
+      .arrow-wrapper { height: 72px; }
+      .logo-container img { width: 580px; margin-left: 100px; }
+    }
+
+    @media (min-width: 1400px) and (max-width: 2000px) {
+      .arrow-wrapper { height: 75px; }
+      .logo-container img { width: 580px; margin-left: 100px; }
+    }
+</style>
+
+<footer
+  class="color-{{ section.settings.color_scheme }}p-4 sm:px-6 md:px-8 md:py-8 relative overflow-hidden"
+  style="
+    padding-top: {{ section.settings.padding_top }}px;
+    padding-bottom: {{ section.settings.padding_bottom }}px;
+    margin-top: {{ section.settings.margin_top }}px;
+    margin-bottom: {{ section.settings.margin_bottom }}px;
+    background: {{ section.settings.footer_bg_color | default: '#000000' }};
+  "
+  role="contentinfo"
+>
+  <div
+    class="animated-footer-background {% if section.settings.background_image == blank %}no-image{% elsif section.settings.enable_bg_animation == false %}paused{% endif %}"
+    {% if section.settings.background_image != blank %}
+      style="background-image: url('{{ section.settings.background_image | img_url: 'master' }}');"
+    {% endif %}
+  ></div>
+
+  <div class="animated-grain"></div>
+
+  <!-- Footer Content -->
+  <div class="footer-content">
+    {% for block in section.blocks %}
+      <div class="w-full">
+        {% case block.type %}
+          {% when 'email_signup' %}
+            <div class="email-signup-section" {{ block.shopify_attributes }}>
+              {% form 'customer', id: 'email-signup-form', class: 'email-signup-container newsletter-form' %}
+                <input type="hidden" name="contact[tags]" value="newsletter">
+                <input type="hidden" name="form_type" value="customer">
+
+                <div id="message-container" class="message-container" style="display: none;" aria-live="polite" role="status">
+                  <div class="newsletter-form__message--success">
+                    {{ 'newsletter.success' | t | default: 'Thanks for signing up!' }}
+                  </div>
+                </div>
+
+                <div id="form-fields-container12" class="form-fields-container12">
+                  <label for="email-input12" class="sr-only">
+                    {{- block.settings.email_placeholder | default: 'EMAIL' -}}
+                  </label>
+                  <input
+                    type="email"
+                    id="email-input12"
+                    name="contact[email]"
+                    class="email-input12 body-font"
+                    placeholder="{{ block.settings.email_placeholder | default: 'EMAIL' }}"
+                    required
+                    autocomplete="email"
+                    aria-required="true"
+                  >
+                  <button
+                    type="submit"
+                    class="signup-button body-font newsletter-form__button hover-icon-button"
+                    aria-label="{{ block.settings.button_text | default: 'SIGN ME UP' }}"
+                    name="commit"
+                  >
+                    <div class="arrow-hover">
+                      <div class="arrow-wrapper">
+                        <span class="arrow-wrapper">
+  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+    <path d="M9 6l6 6-6 6" />
+  </svg>
+</span>
+                      </div>
+                    </div>
+                    <span>{{ block.settings.button_text | default: 'SIGN ME UP' }}</span>
+                  </button>
+                </div>
+              {% endform %}
+            </div>
+
+          {% when 'support' %}
+            <div class="w-1/2 md:w-full flex pr-1 md:pr-2 mt-[0px] md:mt-[1%] justify-end desktop-ml-15">
+              <div style="margin-left: 10px;" class="mb-6 w-[350px] md:max-w-[50%] custom-mr-25 md:ml-0" {{ block.shopify_attributes }}>
+                <p class="uppercase md:normal-case font-medium text-[14px] md:text-[24px] break-words text-left heading-font"
+                   style="word-wrap: break-word; overflow-wrap: break-word; margin-bottom: 5px; margin-top: 2px; color: {{ section.settings.menu_item_color }}; line-height: normal;">
+                  {{ block.settings.support_heading }}
+                </p>
+
+                <p class="md:normal-case mt-1 text-[14px] md:text-[24px] break-words text-left leading-tight body-font"
+                   style="word-wrap: break-word; overflow-wrap: break-word; line-height: 1.2; width: auto; color: {{ section.settings.menu_item_color }};">
+                  {{ block.settings.support_text }}
+                </p>
+
+               <a href="mailto:{{ block.settings.email_address }}"
+   class="relative mt-2 inline-block text-[16px] md:text-[24px] uppercase md:normal-case animated-underline break-words group body-font"
+   style="word-wrap: break-word; overflow-wrap: break-word; margin-top: 15px; color: {{ section.settings.menu_item_color }};">
+  
+  {{ block.settings.email_link_text }}
+
+  {{ 'icon-email.svg' 
+     | inline_asset_content 
+     | replace: '<svg', '<svg class="email-icon" role="img" aria-hidden="true" style="height: 20px; fill: ' 
+     | remove: "'" }}
+</a>
+
+
+                <div class="support-social-icons social-icons-hover" aria-labelledby="social-heading-support">
+                  <h4 id="social-heading-support" class="sr-only">Follow Us</h4>
+                  {%- if settings.social_instagram_link != blank -%}
+                    <a href="{{ settings.social_instagram_link }}" class="social-icon" aria-label="Instagram">
+                      {{ 'icon-instagram1.svg' | inline_asset_content | replace: '<svg', '<svg role="img" aria-hidden="true" style="height: 25px; fill: ' | append: settings.social_icon_color | remove: "'" }}
+                    </a>
+                  {%- endif -%}
+                  {%- if settings.social_youtube_link != blank -%}
+                    <a href="{{ settings.social_youtube_link }}" class="social-icon" aria-label="YouTube">
+                      {{ 'icon-youtube1.svg' | inline_asset_content | replace: '<svg', '<svg role="img" aria-hidden="true" style="height: 25px; fill: ' | append: settings.social_icon_color | remove: "'" }}
+                    </a>
+                  {%- endif -%}
+                  {%- if settings.social_twitter_link != blank -%}
+                    <a href="{{ settings.social_twitter_link }}" class="social-icon" aria-label="Twitter">
+                      {{ 'icon-twitter1.svg' | inline_asset_content | replace: '<svg', '<svg role="img" aria-hidden="true" style="height: 25px; fill: ' | append: settings.social_icon_color | remove: "'" }}
+                    </a>
+                  {%- endif -%}
+                  {%- if settings.social_facebook_link != blank -%}
+                    <a href="{{ settings.social_facebook_link }}" class="social-icon" aria-label="Facebook">
+                      {{ 'icon-facebook1.svg' | inline_asset_content | replace: '<svg', '<svg role="img" aria-hidden="true" style="height: 30px; fill: ' | append: settings.social_icon_color | remove: "'" }}
+                    </a>
+                  {%- endif -%}
+                  {%- if settings.social_snapchat_link != blank -%}
+                    <a href="{{ settings.social_snapchat_link }}" class="social-icon" aria-label="Snapchat">
+                      {{ 'icon-snapchat1.svg' | inline_asset_content | replace: '<svg', '<svg role="img" aria-hidden="true" style="height: 25px; fill: ' | append: settings.social_icon_color | remove: "'" }}
+                    </a>
+                  {%- endif -%}
+                </div>
+              </div>
+            </div>
+            <div class="hidden" {{ block.shopify_attributes }}></div>
+
+            <div class="flex flex-col md:flex-row justify-between items-start w-full" style="margin-left:15px">
+              <!-- Menu Section -->
+              <nav class="menu-section w-full md:w-2/5 order-1 md:order-2 custom-nav-mr-25" aria-label="Footer Navigation">
+                <div class="flex flex-wrap justify-start md:justify-end" style="margin-left:-10px;">
+                  <div style="padding-left: 10px;" class="flex flex-row flex-wrap justify-start md:justify-end custom-gap w-full mr-[20px] md:ml-0" {{ block.shopify_attributes }}>
+                    {% for block in section.blocks %}
+                      {% case block.type %}
+                        {% when 'menu' %}
+                          <div class="menu-block" {{ block.shopify_attributes }}>
+                            <div class="flex flex-col w-auto">
+                              <div class="flex flex-col space-y-1">
+                                {% for link in linklists[block.settings.menu_links].links %}
+                                  <a href="{{ link.url }}" class="text-[16px] body-font" style="color: {{ section.settings.menu_item_color }}; line-height: 20px;">
+                                    {{- link.title -}}
+                                  </a>
+                                {% endfor %}
+                              </div>
+                            </div>
+                          </div>
+                      {% endcase %}
+                    {% endfor %}
+                  </div>
+                </div>
+                
+                <div class="mobile-social-icons" aria-labelledby="mobile-social-heading">
+                  <h4 id="mobile-social-heading" class="sr-only">Follow Us</h4>
+                  {%- if settings.social_instagram_link != blank -%}
+                    <a href="{{ settings.social_instagram_link }}" class="social-icon" aria-label="Instagram">
+                      {{ 'icon-instagram.svg' | inline_asset_content | replace: '<svg', '<svg role="img" aria-hidden="true" style="height: 30px; fill: ' | append: settings.social_icon_color | remove: "'" }}
+                    </a>
+                  {%- endif -%}
+                  {%- if settings.social_youtube_link != blank -%}
+                    <a href="{{ settings.social_youtube_link }}" class="social-icon" aria-label="YouTube">
+                      {{ 'icon-youtube.svg' | inline_asset_content | replace: '<svg', '<svg role="img" aria-hidden="true" style="height: 25px; fill: ' | append: settings.social_icon_color | remove: "'" }}
+                    </a>
+                  {%- endif -%}
+                  {%- if settings.social_twitter_link != blank -%}
+                    <a href="{{ settings.social_twitter_link }}" class="social-icon" aria-label="Twitter">
+                      {{ 'icon-twitter.svg' | inline_asset_content | replace: '<svg', '<svg role="img" aria-hidden="true" style="height: 25px; fill: ' | append: settings.social_icon_color | remove: "'" }}
+                    </a>
+                  {%- endif -%}
+                  {%- if settings.social_facebook_link != blank -%}
+                    <a href="{{ settings.social_facebook_link }}" class="social-icon" aria-label="Facebook">
+                      {{ 'icon-facebook.svg' | inline_asset_content | replace: '<svg', '<svg role="img" aria-hidden="true" style="height: 30px; fill: ' | append: settings.social_icon_color | remove: "'" }}
+                    </a>
+                  {%- endif -%}
+                  {%- if settings.social_tiktok_link != blank -%}
+                    <a href="{{ settings.social_tiktok_link }}" class="social-icon" aria-label="TikTok">
+                      {{ 'icon-tiktok.svg' | inline_asset_content | replace: '<svg', '<svg role="img" aria-hidden="true" style="height: 25px; fill: ' | append: settings.social_icon_color | remove: "'" }}
+                    </a>
+                  {%- endif -%}
+                  {%- if settings.social_snapchat_link != blank -%}
+                    <a href="{{ settings.social_snapchat_link }}" class="social-icon" aria-label="Snapchat">
+                      {{ 'icon-snapchat.svg' | inline_asset_content | replace: '<svg', '<svg role="img" aria-hidden="true" style="height: 25px; fill: ' | append: settings.social_icon_color | remove: "'" }}
+                    </a>
+                  {%- endif -%}
+                </div>
+              </nav>
+
+              <!-- Logo Section -->
+              <div class="logo-container">
+                {% if section.settings.logo != blank %}
+                  <img src="{{ section.settings.logo | img_url: 'master' }}" alt="{{ shop.name }}" width="760" height="150" loading="lazy">
+                {% else %}
+                  <div class="text-logo font-bold heading-font">{{ shop.name }}</div>
+                {% endif %}
+              </div>
+            </div>
+        {% endcase %}
+      </div>
+    {% endfor %}
+  </div>
+</footer>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const newsletterForm = document.getElementById('email-signup-form');
+
+    if (newsletterForm) {
+      const messageContainer = document.getElementById('message-container');
+      const formFieldsContainer = document.getElementById('form-fields-container12');
+
+      if (messageContainer) {
+        messageContainer.style.padding = '10px';
+        messageContainer.style.margin = '15px 0';
+        messageContainer.style.textAlign = 'center';
+      }
+
+      newsletterForm.addEventListener('submit', function (e) {
+        e.preventDefault();
+
+        const emailInput = document.getElementById('email-input12');
+        if (!emailInput) return;
+
+        const email = emailInput.value;
+
+        if (!email || !isValidEmail(email)) {
+          showErrorMessage('Please enter a valid email address.');
+          return;
+        }
+
+        const formData = new FormData(newsletterForm);
+
+        fetch('/contact#contact_form', {
+          method: 'POST',
+          body: formData,
+          headers: { Accept: 'application/json' },
+        })
+          .then(() => handleSuccessfulSubmission(emailInput))
+          .catch(() => handleSuccessfulSubmission(emailInput));
+
+        return false;
+      });
+
+      function handleSuccessfulSubmission(emailInput) {
+        if (emailInput) emailInput.value = '';
+        if (formFieldsContainer) formFieldsContainer.style.display = 'none';
+
+        if (messageContainer) {
+          messageContainer.innerHTML = '';
+          const successElement = document.createElement('div');
+          successElement.className = 'newsletter-form__message--success';
+          successElement.textContent = 'Thank you for subscribing!';
+          successElement.style.cssText = 'font-size: 20px; font-weight: bold; color: #FFFFFF;';
+          messageContainer.appendChild(successElement);
+          messageContainer.style.display = 'block';
+        }
+      }
+
+      function isValidEmail(email) {
+        return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+      }
+
+      function showErrorMessage(message) {
+        if (!messageContainer) return;
+        messageContainer.innerHTML = '';
+        const errorMessage = document.createElement('div');
+        errorMessage.className = 'newsletter-form__message--error';
+        errorMessage.textContent = message;
+        errorMessage.style.cssText = 'color: #FFFFFF; font-weight: bold;';
+        messageContainer.appendChild(errorMessage);
+        messageContainer.style.display = 'block';
+        setTimeout(() => {
+          messageContainer.style.display = 'none';
+          messageContainer.innerHTML = '';
+        }, 7000);
+      }
+    }
+  });
+</script>
+
+{% schema %}
+{
+  "name": "Footer",
+  "disabled_on": {
+    "groups": ["header"],
+    "templates": ["*"]
+  },
+  "settings": [
+    {
+      "type": "image_picker",
+      "id": "logo",
+      "label": "Logo Image"
+    },
+    {
+      "type": "image_picker",
+      "id": "background_image",
+      "label": "Background Image",
+      "info": "Select an image from your files for the animated background effect. Leave empty to use the default pattern."
+    },
+    {
+      "type": "header",
+      "content": "Spacing"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "Top Padding",
+      "default": 40
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "Bottom Padding",
+      "default": 40
+    },
+    {
+      "type": "color",
+      "id": "email_input_color",
+      "label": "Email Input Color",
+      "default": "#FFFFFF"
+    },
+    {
+      "type": "color",
+      "id": "footer_bg_color",
+      "label": "Footer Background Color",
+      "default": "#000000"
+    },
+    {
+      "type": "color",
+      "id": "menu_item_color",
+      "label": "Footer Text Color",
+      "default": "#FFFFFF"
+    },
+    {
+      "type": "color",
+      "id": "email_signup_hover_text_color",
+      "label": "Email Signup Hover Text Color",
+      "default": "#FFFFFF"
+    },
+    {
+      "type": "color",
+      "id": "hover_color",
+      "label": "Hover Color",
+      "default": "#808080"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "email_signup",
+      "name": "Email Signup",
+      "limit": 1,
+      "settings": [
+        {
+          "type": "text",
+          "id": "email_placeholder",
+          "label": "Email Placeholder",
+          "default": "EMAIL"
+        },
+        {
+          "type": "text",
+          "id": "button_text",
+          "label": "Button Text",
+          "default": "SIGN ME UP"
+        },
+        {
+          "type": "text",
+          "id": "success_message",
+          "label": "Success Message",
+          "default": "Thank you for subscribing!"
+        },
+        {
+          "type": "checkbox",
+          "id": "show_form_again_after_success",
+          "label": "Show form again after successful submission",
+          "default": true
+        }
+      ]
+    },
+    {
+      "type": "menu",
+      "name": "Menu",
+      "settings": [
+        {
+          "type": "link_list",
+          "id": "menu_links",
+          "label": "Menu",
+          "default": "footer"
+        }
+      ]
+    },
+    {
+      "type": "support",
+      "name": "Support Section",
+      "limit": 1,
+      "settings": [
+        {
+          "type": "text",
+          "id": "support_heading",
+          "label": "Support Heading",
+          "default": "NEED SUPPORT?"
+        },
+        {
+          "type": "textarea",
+          "id": "support_text",
+          "label": "Support Text",
+          "default": "We're just an email away. Drop us a line and we'll get back to you within 48 hours for order related inquires."
+        },
+        {
+          "type": "text",
+          "id": "email_address",
+          "label": "Email Address",
+          "default": "support@bandit.com"
+        },
+        {
+          "type": "text",
+          "id": "email_link_text",
+          "label": "Email Link Text",
+          "default": "OPEN EMAIL"
+        }
+      ]
+    },
+    {
+      "type": "social_icons",
+      "name": "Social Icons",
+      "limit": 1,
+      "settings": [
+        {
+          "type": "text",
+          "id": "social_title",
+          "label": "Social Media Title",
+          "default": "Follow Us"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Footer",
+      "category": "Footer",
+      "blocks": [
+        {
+          "type": "email_signup"
+        },
+        {
+          "type": "support"
+        },
+        {
+          "type": "menu"
+        },
+        {
+          "type": "social_icons"
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

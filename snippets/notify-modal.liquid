@@ -1,0 +1,150 @@
+<!-- Waitlist Modal Overlay -->
+<div
+  id="waitlist-modal-overlay"
+  class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex items-center justify-center"
+>
+  <!-- Modal Container -->
+  <div class="bg-white w-full max-w-lg p-6 rounded">
+    <!-- Close Button -->
+    <div class="flex justify-end">
+      <button id="close-waitlist-modal" class="text-black hover:text-gray-700 font-medium">CLOSE</button>
+    </div>
+
+    <!-- Product Title -->
+    <h2 class="text-2xl font-bold my-4" id="waitlist-product-title">
+      STRIPED CADENCE™ 5" WOMEN'S COMPRESSION SHORTS - PORT
+    </h2>
+
+    <!-- Product Variant -->
+    <div class="text-gray-600 mb-6" id="waitlist-product-variant">XS / PORT</div>
+
+    <hr class="border-gray-300 my-4">
+
+    <!-- Waitlist Form -->
+    <div class="mt-4">
+      <p class="font-bold mb-3">
+        Waitlist: Enter your email to get notified when this product becomes available again.
+      </p>
+
+      <div class="flex flex-col sm:flex-row gap-3">
+        <input
+          type="email"
+          id="waitlist-email"
+          placeholder="Your email"
+          class="flex-grow border border-gray-300 rounded px-4 py-2"
+        >
+        <button
+          id="get-notified-btn"
+          class="bg-black text-white py-2 px-6 rounded font-medium hover:bg-gray-800"
+        >
+          GET NOTIFIED
+        </button>
+      </div>
+
+      <p id="waitlist-message" class="text-green-600 mt-3 hidden">
+        Thank you! We'll notify you when this product is back in stock.
+      </p>
+    </div>
+  </div>
+</div>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function() {
+    // Get modal elements
+    const modal = document.getElementById('waitlist-modal-overlay');
+    const closeBtn = document.getElementById('close-waitlist-modal');
+    const getNotifiedBtn = document.getElementById('get-notified-btn');
+    const waitlistMessage = document.getElementById('waitlist-message');
+    const waitlistEmail = document.getElementById('waitlist-email');
+
+    // Function to open modal
+    function openWaitlistModal(productTitle, variant) {
+      // Set product information
+      document.getElementById('waitlist-product-title').textContent = productTitle;
+      document.getElementById('waitlist-product-variant').textContent = variant;
+
+      // Show modal
+      modal.classList.remove('hidden');
+      document.body.style.overflow = 'hidden'; // Prevent scrolling
+    }
+
+    // Function to close modal
+    function closeWaitlistModal() {
+      modal.classList.add('hidden');
+      document.body.style.overflow = 'auto'; // Re-enable scrolling
+      waitlistMessage.classList.add('hidden'); // Hide success message
+      waitlistEmail.value = ''; // Clear email field
+    }
+
+    // Close modal when clicking close button
+    closeBtn.addEventListener('click', closeWaitlistModal);
+
+    // Close modal when clicking outside the modal
+    modal.addEventListener('click', function(e) {
+      if (e.target === modal) {
+        closeWaitlistModal();
+      }
+    });
+
+    // Get Notified button click handler
+    getNotifiedBtn.addEventListener('click', function() {
+      const email = waitlistEmail.value.trim();
+
+      if (!email) {
+        alert('Please enter your email address');
+        return;
+      }
+
+      if (!isValidEmail(email)) {
+        alert('Please enter a valid email address');
+        return;
+      }
+
+      // Here you would normally send the email to your backend
+      // For demonstration purposes, we'll just show a success message
+      waitlistMessage.classList.remove('hidden');
+
+      // In a real implementation, you would submit to your waitlist API
+      console.log('Waitlist subscription for:', {
+        email: email,
+        product: document.getElementById('waitlist-product-title').textContent,
+        variant: document.getElementById('waitlist-product-variant').textContent
+      });
+
+      // Optional: close after delay
+      // setTimeout(closeWaitlistModal, 3000);
+    });
+
+    // Helper function to validate email
+    function isValidEmail(email) {
+      const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      return re.test(email);
+    }
+
+    // For demonstration - connect to notify me buttons on product cards
+    document.querySelectorAll('.notify-me-btn').forEach(button => {
+      button.addEventListener('click', function() {
+        const productId = this.getAttribute('data-product-id');
+        // Get product data from the card
+        const productCard = this.closest('.product-card');
+        const productTitle = productCard.querySelector('h3').textContent.trim();
+
+        // You would normally lookup the selected variant here
+        // For demo purposes we'll use a fixed variant
+        const variant = 'XS / PORT';
+
+        openWaitlistModal(productTitle, variant);
+      });
+    });
+
+    // Optional: Add a global function that can be called from anywhere
+    window.openProductWaitlist = function(productTitle, variant) {
+      openWaitlistModal(productTitle, variant);
+    };
+
+    // For demonstration purposes only - show the modal immediately
+    // Remove this in production and use the buttons instead
+    // Uncomment the line below to show modal on page load
+    // setTimeout(() => openWaitlistModal('STRIPED CADENCE™ 5" WOMEN\'S COMPRESSION SHORTS - PORT', 'XS / PORT'), 1000);
+  });
+</script>

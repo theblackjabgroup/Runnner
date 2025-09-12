@@ -1,0 +1,2111 @@
+{{ 'header.css' | asset_url | stylesheet_tag }}
+
+<header
+  class="header-main relative bg-[var(--header_background)] {% unless section.settings.enable_sticky %}sticky-disabled{% endunless %}"
+  data-header-sticky
+  style="z-index: 999;"
+>
+  <div class=" w-full flex items-center justify-between ">
+    <!-- Left: Logo -->
+    <div class="flex items-center justify-center  ">
+      <a href="/">
+      {% if section.settings.logo != blank %}
+  <img
+    src="{{ section.settings.logo | image_url }}"
+    class="mr-10 fade-in"
+    width="auto"
+    height="auto"
+    alt="Logo"
+    style="max-height: 100px; max-width: 300px;"
+  >
+{% else %}
+  <span
+    class="block font-semibold text-center mt-1 fade-in"
+    style="font-size: 44px; line-height: 1; color: var(--header_text); margin-right:50px;"
+  >
+    {{- shop.name -}}
+  </span>
+{% endif %}
+
+      </a>
+    </div>
+    <!-- Right: Menu & Actions -->
+    <div class="flex flex-wrap items-center justify-end w-full tracking-tight">
+      <!-- Desktop Menu -->
+      <nav
+        class="flex justify-end lg:justify-between items-center w-full text-[var(--header_text)]"
+      >
+        <!-- Left: Menu Items -->
+        <div class="menu-items hidden lg:!flex  flex-wrap w-2/3 ">
+          <ul class="flex-1 flex flex-wrap" style="column-gap: calc(var(--spacing) * 7);">
+            {%- for link in section.settings.menu.links -%}
+              <li class="group dropdown-group flex items-center justify-center ">
+                {% if link.links.size > 0 %}
+                  <a
+                    href="{{ link.url }}"
+                    class="cursor-pointer text-[16px] flex items-center group"
+                    style="gap: 2px;"
+                    aria-expanded="false"
+                    aria-controls="mega-menu-{{ forloop.index }}"
+                    aria-haspopup="true"
+                  >
+                    {{ link.title }}
+                    {% if section.settings.dropdown_icon != blank %}
+                      <img
+                        src="{{ section.settings.dropdown_icon | image_url }}"
+                        alt="Dropdown Icon"
+                        class="w-12 h-6 object-contain transition-transform duration-300 group-hover:-rotate-90"
+                        width="100%"
+                        height="auto"
+                        aria-hidden="true"
+                      >
+                    {% else %}
+                      <svg
+                        width="41"
+                        height="20"
+                        viewBox="0 0 41 20"
+                        fill="none"
+                        xmlns="http://www.w3.org/2000/svg"
+                        class="w-5 h-5 object-contain transition-transform duration-300 group-hover:rotate-180 mx-1"
+                        style="color: var(--header_text);"
+                        stroke="currentColor"
+                      >
+                        <path d="M20.3119 19.7659C20.7254 19.7298 21.1168 19.5625 21.4298 19.2881L39.5626 3.50455C39.7667 3.3376 39.9354 3.131 40.0586 2.89707C40.1818 2.66313 40.2569 2.40663 40.2795 2.14286C40.3022 1.87909 40.2718 1.61342 40.1903 1.3617C40.1088 1.10998 39.9778 0.877357 39.805 0.677661C39.6323 0.477966 39.4215 0.315286 39.185 0.199328C38.9485 0.0833695 38.6912 0.0164912 38.4285 0.0026841C38.1658 -0.011123 37.9031 0.0284416 37.6559 0.118979C37.4087 0.209515 37.1821 0.349193 36.9897 0.529697L20.1434 15.1881L3.29712 0.529697C3.10468 0.349193 2.87811 0.209515 2.63091 0.118979C2.38372 0.0284416 2.12095 -0.011123 1.85825 0.0026841C1.59555 0.0164912 1.3383 0.0833695 1.10182 0.199328C0.865337 0.315286 0.654461 0.477966 0.481748 0.677661C0.309036 0.877357 0.17802 1.10998 0.0965041 1.3617C0.0149883 1.61342 -0.0153602 1.87909 0.00726535 2.14286C0.0298909 2.40663 0.105028 2.66313 0.228202 2.89707C0.351376 3.131 0.520068 3.3376 0.72423 3.50455L18.8569 19.2881C19.0552 19.4619 19.2862 19.5937 19.5362 19.6758C19.7861 19.7579 20.0499 19.7885 20.3119 19.7659Z" fill="currentColor"/>
+                      </svg>
+                    {% endif %}
+                  </a>
+
+                  <!-- sub-menu dropdown -->
+                  <div
+                    id="mega-menu-{{ forloop.index }}"
+                    class="mega-menu-dropdown"
+                    role="region"
+                    aria-label="{{ link.title }} submenu"
+                    style="display: none; "
+                  >
+                    <div class="mx-auto p-2  flex">
+                      <ul
+                        class="flex justify-start m-2  flex-wrap"
+                        style="width:60%; gap: calc(var(--spacing) * 15)"
+                      >
+                        {% for childlink in link.links %}
+                          <li class="min-w-[100px] relative">
+                            <a
+                              href="{{ childlink.url }}"
+                              class="block text-gray-500 hover:text-[var(--hover)] font-medium text-[13px] lg:text-[14px] my-4"
+                            >
+                              {{ childlink.title }}
+                            </a>
+                            {% if childlink.links.size > 0 %}
+                              <ul class=" flex flex-col space-y-2">
+                                {% for grandchildlink in childlink.links %}
+                                  <li>
+                                    <a
+                                      href="{{ grandchildlink.url }}"
+                                      class="block text-[15px] lg:text-[16px] hover:text-[var(--hover)] font-normal text-[var(--header_text)] leading-none pb-2"
+                                    >
+                                      {{ grandchildlink.title }}
+                                    </a>
+                                  </li>
+                                {% endfor %}
+                              </ul>
+                            {% endif %}
+
+                            <a href="#" class="underline-link text-[13px] lg:text-[14px] leading-0">
+                              SHOP ALL {{ childlink.title }}
+                            </a>
+                          </li>
+                        {% endfor %}
+                      </ul>
+                      <!-- Mega Menu Images -->
+                      <div
+                        class="mega-menu-img flex items-center justify-end gap-x-8 py-4 px-4"
+                        style="column-gap: calc(var(--spacing) * 10); width: 40%;"
+                      >
+                        {% for block in section.blocks %}
+                          {% if block.type == 'mega_menu_images' and block.settings.menu_item_name == link.title %}
+                            <!-- First Image -->
+                            {% if block.settings.image_1 != blank %}
+                              <div class="group/card w-[350px] cursor-pointer">
+                                <a href="{{ block.settings.button_link_1 }}">
+                                  <div class="relative block overflow-hidden">
+                                    <div class="aspect-[4/3] overflow-hidden bg-gray-100">
+                                      <img
+                                        src="{{ block.settings.image_1 | image_url }}"
+                                        alt="Shop now image 1"
+                                        class="w-full h-full object-cover group-hover/card:scale-110 transition-transform duration-700"
+                                        loading="lazy"
+                                        width="100%"
+                                        height="auto"
+                                      >
+                                      <div class="absolute inset-0 bg-black/60 flex items-center justify-center translate-y-full group-hover/card:translate-y-0 transition-transform duration-300">
+                                        <span class="text-white text-2xl font-bold tracking-tight">SHOP NOW</span>
+                                      </div>
+                                    </div>
+                                  </div>
+
+                                  {% if block.settings.button_text_1 != blank %}
+                                    <div class="mt-4 flex items-center justify-between">
+                                      <p
+                                        class="card-text text-2xl font-medium uppercase group-hover/card:font-bold transition-colors duration-300"
+                                         style="color: {{ section.settings.btn_text_color }};">
+                                      
+                                        {{ block.settings.button_text_1 }}
+                                      </p>
+                                     {{
+  'icon-custom.svg'
+  | inline_asset_content
+  | replace: '<svg', '<svg role="img" aria-hidden="true" style="height: 20px; width: 20px; fill: '
+  | append: settings.social_icon_color
+  | remove: "'"
+}}
+                                    </div>
+                                  {% endif %}
+                                </a>
+                              </div>
+
+                              <style>
+                                .group\/card:hover .card-text {
+                                  color: {{ block.settings.btn_text_hover_color | default: '#ff0000' }} !important;
+                                }
+                              </style>
+                            {% endif %}
+
+                            <!-- Second Image -->
+                            {% if block.settings.image_2 != blank %}
+                              <div class="group/card w-[350px] cursor-pointer">
+                                <a href="{{ block.settings.button_link_2 }}">
+                                  <div class="relative block overflow-hidden">
+                                    <div class="aspect-[4/3] overflow-hidden bg-gray-100">
+                                      <img
+                                        src="{{ block.settings.image_2 | image_url }}"
+                                        alt="Shop now image 2"
+                                        class="w-full h-full object-cover group-hover/card:scale-110 transition-transform duration-700"
+                                        loading="lazy"
+                                        width="100%"
+                                        height="auto"
+                                      >
+                                      <div class="absolute inset-0 bg-black/60 flex items-center justify-center translate-y-full group-hover/card:translate-y-0 transition-transform duration-300">
+                                        <span class="text-white text-2xl font-bold tracking-tight">SHOP NOW</span>
+                                      </div>
+                                    </div>
+                                  </div>
+
+                                  {% if block.settings.button_text_2 != blank %}
+                                    <div class="mt-4 flex items-center justify-between">
+                                      <p
+                                        class="card-text text-2xl font-medium uppercase group-hover/card:font-bold transition-colors duration-300"
+                                        style="color: {{ block.settings.btn_text_color }};"
+                                      >
+                                        {{ block.settings.button_text_2 }}
+                                      </p>
+                                                                           {{
+  'icon-custom.svg'
+  | inline_asset_content
+  | replace: '<svg', '<svg role="img" aria-hidden="true" style="height: 20px; width: 20px; fill: '
+  | append: settings.social_icon_color
+  | remove: "'"
+}}
+                                    </div>
+                                  {% endif %}
+                                </a>
+                              </div>
+
+                              <style>
+                                .group\/card:hover .card-text {
+                                  color: {{ block.settings.btn_text_hover_color | default: '#ff0000' }} !important;
+                                }
+                              </style>
+                            {% endif %}
+                          {% endif %}
+                        {% endfor %}
+                      </div>
+                    </div>
+
+                    {% comment %} scrolling text start{% endcomment %}
+
+                    <div
+                      class="scrolling-text-section"
+                      id="scrolling-text-{{ section.id }}"
+                      style="border-top: 1px solid black; border-bottom: 1px solid black; margin-top: 25px;"
+                    >
+                      <div
+                        class="scrolling-text-container"
+                        data-direction="{{ section.settings.direction }}"
+                      >
+                        <!-- First set of content -->
+                        {% for i in (1..section.settings.repeat_count) %}
+                          <span class="scrolling-text-item">{{ section.settings.scrolling_text }}</span>
+                          {% if section.settings.separator_image != blank %}
+                            <img
+                              class="scrolling-separator"
+                              src="{{ section.settings.separator_image | image_url }}"
+                              alt="separator"
+                              height="100%"
+                              width="100%"
+                            >
+                          {% else %}
+                            <span class=" text-[var(--header_text)] px-2">–</span>
+                          {% endif %}
+                        {% endfor %}
+                        <!-- Duplicate set for seamless infinite scrolling -->
+                        {% for i in (1..section.settings.repeat_count) %}
+                          <span class="scrolling-text-item">{{ section.settings.scrolling_text }}</span>
+                          {% unless forloop.last %}
+                            {% if section.settings.separator_image != blank %}
+                              <img
+                                class="scrolling-separator"
+                                src="{{ section.settings.separator_image | image_url }}"
+                                alt="separator"
+                                height="100%"
+                                width="100%"
+                              >
+                            {% else %}
+                              <span class="scrolling-separator text-[var(--header_text)] px-2">–</span>
+                            {% endif %}
+                          {% endunless %}
+                        {% endfor %}
+                      </div>
+                    </div>
+
+                    {% comment %} scrolling text end {% endcomment %}
+                  </div>
+                {% else %}
+                  <a href="{{ link.url }}" class="py-2 px-2 block">
+                    {{ link.title }}
+                  </a>
+                {% endif %}
+              </li>
+            {%- endfor -%}
+          </ul>
+        </div>
+
+        <!-- Right: Actions -->
+        <div class="flex lg:!w-1/3 gap-6 items-center justify-end ">
+          <!-- Top Row: Action Utilities -->
+
+          <!-- Search -->
+          <div class="relative ">
+               <button
+  id="search-toggle"
+  class="flex items-center justify-center text-[var(--header_text)] hover:text-[var(--hover)] pr-2"
+  aria-label="Toggle search"
+  aria-expanded="false"
+>
+  {{
+    'icon-search1.svg'
+    | inline_asset_content
+    | replace: '<svg', '<svg role="img" aria-hidden="true" style="width: 20px; height: 20px; transition: transform 0.2s ease; fill: var(--header_text);" onmouseover="this.style.transform=&quot;scale(1.25)&quot;" onmouseout="this.style.transform=&quot;none&quot;" class="w-8 h-8"'
+  }}
+</button>
+
+            <!-- Search Container -->
+           <div
+            id="search-container"
+            class="fixed left-0 right-0 hidden opacity-0 shadow-lg py-8"
+            style="background: var(--header_background); top: var(--header-height); padding: 12px {{ settings.side_space }}px; z-index: 999;"
+            aria-hidden="true"
+            >
+              <div
+                class="searchbox-container w-full"
+              >
+                <form
+                  action="{{ routes.search_url }}"
+                  method="get"
+                  class="flex items-center gap-4 w-full"
+                  role="search"
+                >
+                  <div class="relative flex-1">
+                    <input
+                      type="search"
+                      name="q"
+                      placeholder="Search"
+                      class="search-input w-full py-3 text-[26px] lg:text-4xl focus:outline-none bg-transparent placeholder-black"
+                    >
+                  </div>
+                  <button
+                    type="submit"
+                    class="text-white bg-black text-[24px] px-3 hover:text-black hover:bg-white hover:border-1 rounded-md transition-colors duration-200 "
+                    style="padding-top: 1px; padding-bottom: 1px; line-height: 1;"
+                  >
+                    SEARCH
+                  </button>
+                  <button
+                    id="close-search"
+                    class=" hover:text-gray-700 transition-colors duration-200"
+                    style="color: var(--header_text);"
+                    aria-label="Close search"
+                  >
+                    <svg class="size-10" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                </form>
+
+                <div
+                  class="
+                    block
+                    search-bottom-bar
+                    w-full h-[2px]
+                  "
+                  style="background: var(--header_text);"
+                >
+                  &nbsp
+                </div>
+
+                <!-- Quick Links -->
+                <div
+                  class=" flex flex-col lg:flex-row items-center"
+                  style="padding: 20px 0;"
+                >
+                  <span
+                    class="inline-block lg:!block text-[14px] lg:text-[16px] uppercase m-4"
+                    style="color:var(--header_text);"
+                    >Top Searches</span
+                  >
+                  <div class="flex flex-wrap gap-6">
+                    <a
+                      href="{{ routes.search_url }}?q=new"
+                      class="px-1  hover:bg-black  hover:text-white transition-colors duration-200 rounded-md text-[16px] lg:text-[20px] font-medium "
+                      style="background-color: #DDDDDD;"
+                      onmouseover="this.style.backgroundColor='black';"
+                      onmouseleave="this.style.backgroundColor='#DDDDDD';"
+                      >New Arrivals</a
+                    >
+                    <a
+                      href="{{ routes.search_url }}?q=sale"
+                      class="px-1 hover:bg-black hover:text-white transition-colors duration-200 rounded-md text-[16px] lg:text-[20px] font-medium"
+                      style="background-color: #DDDDDD;"
+                      onmouseover="this.style.backgroundColor='black';"
+                      onmouseleave="this.style.backgroundColor='#DDDDDD';"
+                      >Sale</a
+                    >
+                    <a
+                      href="{{ routes.search_url }}?q=bestsellers"
+                      class="px-1  hover:bg-black hover:text-white transition-colors duration-200 rounded-md text-[16px] lg:text-[20px] font-medium"
+                      style="background-color: #DDDDDD;"
+                      onmouseover="this.style.backgroundColor='black';"
+                      onmouseleave="this.style.backgroundColor='#DDDDDD';"
+                      >Bestsellers</a
+                    >
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Search Overlay -->
+            <div
+            id="search-overlay"
+            class="fixed left-0 right-0 w-full bg-black opacity-0 pointer-events-none"
+            style="height: 100vh; transition: opacity 0.2s ease-in-out; top: 0; z-index: 998;"
+          >
+              &nbsp;
+            </div>
+          </div>
+
+          <!-- Country Selector -->
+          {% render 'currency-dropdown' , position: "header" %}
+
+          <!-- Login -->
+          <a
+            href="{{routes.account_login_url }}"
+            class="hidden lg:!inline-flex items-center gap-2 rounded-xl px-2  text-[16px] text-[var(--header_text)]"
+            onmouseover="this.style.color='var(--hover)';"
+            onmouseleave="this.style.color='var(--header_text)';"
+            aria-label="Login"
+          >
+            LOGIN
+          </a>
+
+          <!-- Cart -->
+          <a
+            href="{{ routes.cart_url }}"
+            class="  focus-inset !flex items-center justify-center text-[var(--header_text)]"
+            id="cart-icon-bubble"
+            aria-label="Cart"
+            onmouseover="this.style.color='var(--hover)';"
+            onmouseleave="this.style.color='var(--header_text)';"
+          >
+            <span
+              <span class="flex text-[16px]" style="margin-right: 10px;">CART</span>
+            <span
+  class="cart-bracket"
+  aria-label="{{ cart.item_count }} items in cart"
+>
+  {{ cart.item_count }}
+</span>
+          </a>
+
+          <!-- Hamburger -->
+          <button
+            id="hamburger-menu"
+            class="md:hidden text-[var(--header_text)] hover:text-gray-700"
+            style="color: var(--header_text);"
+            aria-label="Menu"
+            aria-expanded="false"
+            aria-controls="mobile-menu"
+          >
+            <svg class="size-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
+            </svg>
+          </button>
+        </div>
+      </nav>
+      <div
+        class="hidden lg:!block bottom-bar bg-transparent w-full relative overflow-visible"
+      >
+        <span
+          id="bottom-bar-indicator"
+          class=" absolute bottom-0 left-0 transition-all duration-300 ease-out"
+          style="width: 0; height: 1px; background: var(--header_text);"
+        ></span>
+      </div>
+    </div>
+  </div>
+  <div
+    class="
+          mobile-bottom-bar
+      lg:hidden
+      w-full bg-black
+    "
+    style="height: 1px;"
+  >
+    &nbsp
+  </div>
+</header>
+
+<!-- Sub Menu Overlay -->
+<div
+  id="mega-menu-overlay"
+  class="fixed top-1/5 w-full bg-black opacity-0 pointer-events-none"
+  style="height: 100vh; transition: opacity 0.2s ease-in-out; z-index: 997;"
+>
+  &nbsp;
+</div>
+
+<!-- Mobile Menu Overlay -->
+<div
+  id="menu-overlay"
+  class="fixed inset-0 bg-black opacity-0 pointer-events-none transition-opacity duration-300"
+  style="z-index: 990; "
+>
+  &nbsp;
+</div>
+
+<!-- Mobile Menu -->
+<div
+  id="mobile-menu"
+  class=" lg:hidden w-[90vw] h-[100vh] fixed top-0 right-0  bg-[var(--header_background)] flex"
+  style="transform: translateX(100%); transition: transform 0.3s ease-in-out; background: var(--header_background); z-index: 1000"
+>
+  <!-- Vertical Scrolling Text -->
+  <div
+    class="scrolling-text-section"
+    id="scrolling-text-{{ section.id }}"
+    style="border-top: 1px solid black; border-bottom: 1px solid black; "
+  >
+    <div
+      class="scrolling-text-container"
+      data-direction="{{ section.settings.direction }}"
+    >
+      <!-- First set of content -->
+      {% for i in (1..section.settings.repeat_count) %}
+        <span class="scrolling-text-item">{{ section.settings.scrolling_text }}</span>
+        <img
+          class="scrolling-separator"
+          src="{{ section.settings.separator_image | image_url }}"
+          alt="separator"
+          height="100%"
+          width="100%"
+        >
+      {% endfor %}
+      <!-- Duplicate set for seamless infinite scrolling -->
+      {% for i in (1..section.settings.repeat_count) %}
+        <span class="scrolling-text-item">{{ section.settings.scrolling_text }}</span>
+        {% unless forloop.last %}
+          <img
+            class="scrolling-separator"
+            src="{{ section.settings.separator_image | image_url }}"
+            alt="separator"
+            height="100%"
+            width="100%"
+          >
+        {% endunless %}
+      {% endfor %}
+    </div>
+  </div>
+
+  <div class="  flex flex-1 flex-col justify-between overflow-y-auto" style="padding-left: 10px; padding-right: 12px;">
+    <nav
+      class="flex flex-col space-y-4 pt-10 w-full justify-between"
+      style="padding-top: 22px;"
+    >
+      <div class="upper-section">
+        <div class="flex items-center justify-end">
+          <button
+            type="button"
+            class="text-[14px] pb-2 leading-none tracking-tight uppercase"
+            style="color: var(--header_text)"
+            aria-label="Close Menu"
+          >
+            Close
+          </button>
+        </div>
+        {% if section.settings.menu.links != blank %}
+          {% for link in section.settings.menu.links %}
+            <div class="mobile-menu-item">
+              <div class="horizontal-line w-full h-0.5 my-2" style="background: var(--header_text)">&nbsp;</div>
+              <div class="!flex items-center justify-between">
+                <a href="{{ link.url }}" class="block text-[24px] text-[var(--header_text)] font-medium py-2">
+                  {{ link.title }}
+                </a>
+                {% if link.links.size > 0 %}
+                  <button
+                    type="button"
+                    class="toggle-submenu focus:outline-none flex-1 flex justify-end mr-2"
+                    aria-expanded="false"
+                    aria-controls="mobile-submenu-{{ forloop.index }}"
+                    aria-label="Toggle {{ link.title }} submenu"
+                  >
+                    {% if section.settings.dropdown_icon != blank %}
+                      <img
+                        src="{{ section.settings.dropdown_icon | image_url }}"
+                        alt="Dropdown Icon"
+                        width="100%"
+                        height="auto"
+                        class="w-8 h-8 object-contain transition-transform duration-300"
+                        aria-hidden="true"
+                      >
+                    {% else %}
+                      <svg
+                        width="41"
+                        height="20"
+                        viewBox="0 0 41 20"
+                        fill="none"
+                        xmlns="http://www.w3.org/2000/svg"
+                        class="w-5 h-5 object-contain transition-transform duration-300 group-hover:-rotate-90 mx-1"
+                        style="color: var(--header_text);"
+                        stroke="currentColor"
+                      >
+                        <path d="M20.3119 19.7659C20.7254 19.7298 21.1168 19.5625 21.4298 19.2881L39.5626 3.50455C39.7667 3.3376 39.9354 3.131 40.0586 2.89707C40.1818 2.66313 40.2569 2.40663 40.2795 2.14286C40.3022 1.87909 40.2718 1.61342 40.1903 1.3617C40.1088 1.10998 39.9778 0.877357 39.805 0.677661C39.6323 0.477966 39.4215 0.315286 39.185 0.199328C38.9485 0.0833695 38.6912 0.0164912 38.4285 0.0026841C38.1658 -0.011123 37.9031 0.0284416 37.6559 0.118979C37.4087 0.209515 37.1821 0.349193 36.9897 0.529697L20.1434 15.1881L3.29712 0.529697C3.10468 0.349193 2.87811 0.209515 2.63091 0.118979C2.38372 0.0284416 2.12095 -0.011123 1.85825 0.0026841C1.59555 0.0164912 1.3383 0.0833695 1.10182 0.199328C0.865337 0.315286 0.654461 0.477966 0.481748 0.677661C0.309036 0.877357 0.17802 1.10998 0.0965041 1.3617C0.0149883 1.61342 -0.0153602 1.87909 0.00726535 2.14286C0.0298909 2.40663 0.105028 2.66313 0.228202 2.89707C0.351376 3.131 0.520068 3.3376 0.72423 3.50455L18.8569 19.2881C19.0552 19.4619 19.2862 19.5937 19.5362 19.6758C19.7861 19.7579 20.0499 19.7885 20.3119 19.7659Z" fill="currentColor"/>
+                      </svg>
+                    {% endif %}
+                  </button>
+                {% endif %}
+              </div>
+              {% if link.links.size > 0 %}
+                <div
+                  id="mobile-submenu-{{ forloop.index }}"
+                  role="region"
+                  aria-label="{{ link.title }} submenu"
+                  class="ml-1 hidden space-y-2 submenu max-h-[0] overflow-y-auto overscroll-contain styled-scrollbar transition-all duration-300"
+                >
+                  <div class="pr-4">
+                    {% for childlink in link.links %}
+                      <a
+                        href="{{ childlink.url }}"
+                        class="block text-[14px] text-gray-700 mt-5 mb-2 tracking-tight"
+                      >
+                        {{ childlink.title }}
+                      </a>
+                      {% if childlink.links.size > 0 %}
+                        <ul class="space-y-0">
+                          {% for grandchildlink in childlink.links %}
+                            <li>
+                              <a
+                                href="{{ grandchildlink.url }}"
+                                class="block text-[14px] font-medium text-[var(--header_text)] tracking-normal"
+                              >
+                                {{ grandchildlink.title }}
+                              </a>
+                            </li>
+                          {% endfor %}
+                          <a
+                            href="{{childlink.url}}"
+                            class="text-[12px] text-gray-500 underline tracking-tight  leading-none "
+                          >
+                            SHOP ALL {{ childlink.title -}}
+                          </a>
+                        </ul>
+                      {% endif %}
+                    {% endfor %}
+
+                    <!-- Mobile Mega Menu Images -->
+                    {% for block in section.blocks %}
+                      {% if block.type == 'mega_menu_images' and block.settings.menu_item_name == link.title %}
+                        <div class="flex flex-col gap-4 mt-4">
+                          {% if block.settings.image_1 != blank %}
+                            <div class="flex flex-col">
+                              <a href="{{ block.settings.button_link_1 }}">
+                                <div class="relative block overflow-hidden">
+                                  <img
+                                    src="{{ block.settings.image_1 | image_url }}"
+                                    alt="Shop now image 1"
+                                    class="w-full h-full object-cover"
+                                    loading="lazy"
+                                    width="100%"
+                                    height="auto"
+                                  >
+                                </div>
+                              </a>
+                              <a
+                                href="{{ block.settings.button_link_1 }}"
+                                class="block mt-4 transition-all duration-300"
+                              >
+                                <div class="flex items-center justify-between">
+                                  <p
+                                    class="text-[12px] uppercase font-medium"
+                                    style="color: {{ block.settings.btn_text_color }};"
+                                  >
+                                    {{ block.settings.button_text_1 }}
+                                  </p>
+                                  <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    class="w-5 h-5 object-contain transition-transform duration-300 group-hover:-rotate-90 mx-1"
+                                    fill="none"
+                                    viewBox="0 0 9 9"
+                                    stroke-width="1.5"
+                                    stroke="currentColor"
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    aria-hidden="true"
+                                  >
+                                    <path d="M1.1875 7.7334H7.6599M7.6599 7.7334V1.261M7.6599 7.7334L1.1875 1.261"/>
+                                  </svg>
+                                </div>
+                              </a>
+                            </div>
+                          {% endif %}
+
+                          {% if block.settings.image_2 != blank %}
+                            <div class="group/card cursor-pointer mt-4">
+                              <a href="{{ block.settings.button_link_2 }}">
+                                <div class="relative block overflow-hidden">
+                                  <div class="aspect-[4/3] overflow-hidden bg-gray-100">
+                                    <img
+                                      src="{{ block.settings.image_2 | image_url }}"
+                                      alt="Shop now image 2"
+                                      class="w-full h-full object-cover group-hover/card:scale-110 transition-transform duration-700"
+                                      loading="lazy"
+                                      width="100%"
+                                      height="auto"
+                                    >
+                                    <div class="absolute inset-0 bg-black/60 flex items-center justify-center translate-y-full group-hover/card:translate-y-0 transition-transform duration-300">
+                                      <span class="text-white text-xl font-bold tracking-tight">SHOP NOW</span>
+                                    </div>
+                                  </div>
+                                </div>
+                              </a>
+                              <a
+                                href="{{ block.settings.button_link_2 }}"
+                                class="block mt-4 transition-all duration-300"
+                              >
+                                <div class="flex items-center justify-between  group-hover/card:font-bold">
+                                  <p
+                                    class="text-lg font-medium"
+                                    style="color: {{ block.settings.btn_text_color }};"
+                                    onmouseover="this.style.color='var(--hover)';"
+                                  >
+                                    {{ block.settings.button_text_2 }}
+                                  </p>
+                                  <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    class="w-5 h-5 object-contain transition-transform duration-300 group-hover:-rotate-90 mx-1"
+                                    fill="none"
+                                    viewBox="0 0 9 9"
+                                    stroke-width="1.5"
+                                    stroke="currentColor"
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    aria-hidden="true"
+                                  >
+                                    <path d="M1.1875 7.7334H7.6599M7.6599 7.7334V1.261M7.6599 7.7334L1.1875 1.261"/>
+                                  </svg>
+                                </div>
+                              </a>
+                            </div>
+                          {% endif %}
+                        </div>
+                      {% endif %}
+                    {% endfor %}
+                  </div>
+                </div>
+              {% endif %}
+            </div>
+          {% endfor %}
+        {% endif %}
+      </div>
+      <div class="horizontal-line w-full h-0.5  my-2 -mt-1" style="background: var(--header_text)">&nbsp;</div>
+    </nav>
+
+    <div class="flex flex-col w-full">
+      <div class="flex flex-col gap-1 mb-4 font-semibold ">
+        <div class="country-selector relative inline-block">
+          <!-- Trigger: Current country -->
+          <button
+            type="button"
+            class="country-selector-button inline-flex items-center cursor-pointer px-1 gap-2 hover:bg-gray-100"
+            aria-expanded="false"
+          >
+            {% assign current_country = localization.country %}
+            <span class="" style="color: var(--header_text);">
+              {{ current_country.name }}
+            </span>
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              class="w-5 h-5 object-contain transition-transform duration-300 group-hover:-rotate-90 mx-1"
+              style="color: var(--header_text);"
+              fill="none"
+              viewBox="0 0 9 9"
+              stroke-width="1.5"
+              stroke="currentColor"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              aria-hidden="true"
+            >
+              <path d="M1.1875 7.7334H7.6599M7.6599 7.7334V1.261M7.6599 7.7334L1.1875 1.261"/>
+            </svg>
+          </button>
+
+          <!-- Dropdown -->
+          <div
+            class="country-selector-dropdown absolute bottom-16 w-100 bg-[var(--header_background)] border border-gray-200 rounded-md shadow-lg opacity-0 invisible transition-all duration-300 z-[9999]"
+            style="background: var(--header_background); "
+          >
+            <ul class="max-h-100 overflow-y-auto divide-y divide-gray-100 text-xl">
+              {% for country in localization.available_countries %}
+                <li>
+                  <a
+                    href="{{ country.url }}"
+                    class="w-full flex items-center justify-between px-4 py-2 text-2xl  hover:bg-gray-100"
+                    style="color: var(--header_text);"
+                  >
+                    <span class="mx-2">{{ country.name }}</span>
+                    <span class=" font-medium">
+                      {{ country.currency.iso_code }}
+                      {{ country.currency.symbol }}
+                    </span>
+                  </a>
+                </li>
+              {% endfor %}
+            </ul>
+            ss
+          </div>
+        </div>
+
+        <a
+          href="{{ routes.account_login_url }}"
+          class="inline-flex items-center rounded-xl px-2 "
+          style="width: min-content;  background: var(--header_text); color: var(--header_background);"
+          aria-label="Login"
+        >
+          LOGIN
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            class="w-5 h-5 object-contain transition-transform duration-300 mx-1"
+            fill="none"
+            viewBox="0 0 9 9"
+            stroke-width="1.5"
+            stroke="currentColor"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            aria-hidden="true"
+          >
+            <path d="M1.1875 7.7334H7.6599M7.6599 7.7334V1.261M7.6599 7.7334L1.1875 1.261"/>
+          </svg>
+        </a>
+      </div>
+      <div class="horizontal-line w-full h-0.5" style="background: var(--header_text)">&nbsp;</div>
+      <div id="social-link-container" class="flex flex-wrap items-center justify-between gap-4 m-4">
+        {% if settings.social_facebook_link != blank %}
+          <a href="{{ settings.social_facebook_link }}" aria-label="Facebook" target="_blank" rel="noopener">
+            {{
+              'icon-facebook.svg'
+              | inline_asset_content
+              | replace: '<svg', '<svg role="img" aria-hidden="true" style="height: 30px; fill: '
+              | append: settings.social_icon_color
+              | remove: '_'
+            }}
+          </a>
+        {% endif %}
+
+        {% if settings.social_instagram_link != blank %}
+          <a href="{{ settings.social_instagram_link }}" aria-label="Instagram" target="_blank" rel="noopener">
+            {{
+              'icon-instagram.svg'
+              | inline_asset_content
+              | replace: '<svg', '<svg role="img" aria-hidden="true" style="height: 30px; fill: '
+              | append: settings.social_icon_color
+              | remove: '_'
+            }}
+          </a>
+        {% endif %}
+
+        {% if settings.social_youtube_link != blank %}
+          <a href="{{ settings.social_youtube_link }}" aria-label="YouTube" target="_blank" rel="noopener">
+            {{
+              'icon-youtube.svg'
+              | inline_asset_content
+              | replace: '<svg', '<svg role="img" aria-hidden="true" style="height: 25px; fill: '
+              | append: settings.social_icon_color
+              | remove: '_'
+            }}
+          </a>
+        {% endif %}
+        {% if settings.social_twitter_link != blank %}
+          <a href="{{ settings.social_twitter_link }}" aria-label="Twitter" target="_blank" rel="noopener">
+            {{
+              'icon-twitter.svg'
+              | inline_asset_content
+              | replace: '<svg', '<svg role="img" aria-hidden="true" style="height: 25px; fill: '
+              | append: settings.social_icon_color
+              | remove: "'"
+            }}
+          </a>
+        {% endif %}
+        {% if settings.social_snapchat_link != blank %}
+          <a href="{{ settings.social_snapchat_link }}" aria-label="Snapchat" target="_blank" rel="noopener">
+            {{
+              'icon-snapchat.svg'
+              | inline_asset_content
+              | replace: '<svg', '<svg role="img" aria-hidden="true" style="height: 25px; fill: '
+              | append: settings.social_icon_color
+              | remove: "'"
+            }}
+          </a>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="header-offset" data-header-offset></div>
+
+<style>
+    {% comment %} Styles for the scrolling text section starts {% endcomment %}
+
+    
+    .scrolling-text-section {
+      overflow: hidden;
+      white-space: nowrap;
+      background: {{ section.settings.background_color }};
+      padding: {{ section.settings.vertical_padding }}px 0;
+      position: relative;
+      line-height: 0;
+    }
+
+    .scrolling-text-container {
+      display: flex;
+      align-items: center;
+      animation: scroll-{{ section.settings.direction }} {{ section.settings.speed }}s linear infinite;
+      color: {{ section.settings.text_color }};
+      font-size: {{ section.settings.font_size }}px;
+      font-weight: {{ section.settings.font_weight }};
+      text-transform: {{ section.settings.text_transform }};
+      letter-spacing: {{ section.settings.letter_spacing }}px;
+      min-width: 200%;
+    }
+
+    .scrolling-text-item {
+      flex-shrink: 0;
+      white-space: nowrap;
+    }
+
+    .scrolling-separator {
+      flex-shrink: 0;
+      margin: 0 {{ section.settings.separator_spacing }}px;
+      opacity: 0.7;
+      height: {{ section.settings.font_size }}px;
+      width: auto;
+      max-width: {{ section.settings.font_size | times: 1.5 }}px;
+      object-fit: contain;
+      vertical-align: middle;
+    }
+
+    @keyframes scroll-left {
+      0% {
+        transform: translateX(0%);
+      }
+      100% {
+        transform: translateX(-50%);
+      }
+    }
+
+    @keyframes scroll-right {
+      0% {
+        transform: translateX(-50%);
+      }
+      100% {
+        transform: translateX(0%);
+      }
+    }
+
+    /* Mobile vertical scrolling animations */
+    @keyframes scroll-bottom-to-top {
+      0% {
+        transform: translateY(0%);
+      }
+      100% {
+        transform: translateY(-50%);
+      }
+    }
+
+    @keyframes scroll-top-to-bottom {
+      0% {
+        transform: translateY(-50%);
+      }
+      100% {
+        transform: translateY(0%);
+      }
+    }
+
+    .scrolling-text-container[data-direction="right"] {
+      transform: translateX(-50%);
+    }
+
+    .scrolling-text-container[data-direction="left"] {
+      transform: translateX(0%);
+    }
+
+    /* Mobile styles - vertical scrolling */
+    @media screen and (max-width: 768px) {
+      .scrolling-text-section {
+        display: flex;
+        height: 100vh;
+        width: 28px;
+        padding:15px;
+        overflow-x: hidden;
+        overflow-y: hidden;
+        border-top: none;
+        border-bottom: none;
+        border-left: 1px solid black;
+        border-right: 1px solid black;
+      }
+
+      .scrolling-text-container {
+        writing-mode: sideways-lr;
+        text-orientation: mixed;
+        min-height: 200%;
+        min-width: auto;
+        width: 100%;
+        align-items: center;
+        justify-content: flex-start;
+        font-size: 12px;
+      }
+
+      .scrolling-text-item {
+        white-space: normal;
+        text-align: center;
+        width: 100%;
+        padding: 10px 0;
+      }
+
+      .scrolling-separator {
+        margin: 0 {{ section.settings.separator_spacing }}px ;
+        height: 14px;
+        max-width: {{ section.settings.font_size | times: 0.8 | times: 1.5 }}px;
+        transform: rotate(-90deg); /* Keep images upright */
+      }
+
+      /* Override animations for mobile vertical scrolling */
+      .scrolling-text-container[data-direction="left"] {
+        animation: scroll-bottom-to-top {{ section.settings.speed }}s linear infinite;
+        transform: translateY(0%);
+      }
+
+      .scrolling-text-container[data-direction="right"] {
+        animation: scroll-top-to-bottom {{ section.settings.speed }}s linear infinite;
+        transform: translateY(-50%);
+      }
+    }
+
+    @media screen and (max-width: 480px) {
+      .scrolling-text-section {
+        height: 100vh; /* Smaller height for very small screens */
+      }
+
+      .scrolling-text-container {
+        font-size: 17px;
+        font-weight: {{section.settings.font_weight  }};
+      }
+
+      .scrolling-separator {
+        height: 16px;
+        max-width: {{ section.settings.font_size | times: 0.6 | times: 1.5 }}px;
+      }
+    }
+
+        .search-input:focus {
+          outline: none;
+        }
+
+        .underline-link {
+          position: relative;
+          display: inline;
+          color: gray;
+          margin-top: 0.5rem;
+          line-height: 1.2%;
+          transition: color 0.3s ease;
+        }
+
+        .underline-link::after {
+          content: '';
+          position: absolute;
+          bottom: -2px;
+          left: 0;
+          width: 100%;
+          height: 1px;
+          background-color: gray;
+          transform: scaleX(1);
+          transform-origin: left;
+          transition: transform 0.5s ease;
+        }
+
+        .underline-link:hover {
+          color: var(--hover);
+        }
+
+        .underline-link:hover::after {
+          transform: scaleX(0);
+          transform-origin: right;
+        }
+
+          .header-main {
+            position: relative;
+    width: 100%;
+    margin-top: var(--announcement-bar-height);
+    background: var(--header_background);
+    padding: 5px {{ settings.side_space }}px;
+   
+  }
+          }
+
+          .fade-in {
+  opacity: 0;
+  animation: fadeIn 2s ease forwards;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+
+          .header-main.is-sticky {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    transform: translateY(0);
+
+  }
+
+          .header-main.is-sticky.is-hidden {
+            transform: translateY(-100%);
+          }
+
+          .header-offset {
+            height: 0;
+            transition: height 0.3s ease;
+          }
+
+          .header-offset.is-active {
+            height: var(--header-height, 0px);
+          }
+
+          .sticky-disabled {
+            position: relative !important;
+            transform: none !important;
+          }
+
+          .sticky-disabled + .header-offset {
+            display: none !important;
+          }
+
+          .mega-menu-dropdown {
+    position: absolute;
+    top: 85%;
+    left: 0;
+    right: 0;
+    z-index: 999; /* Just below header */
+    background: var(--header_background);
+    overflow: hidden;
+    pointer-events: none;
+    max-height: 0;
+    transition: max-height 800ms cubic-bezier(0.4,0,0.2,1);
+  }
+
+          .mega-menu-dropdown.open {
+            pointer-events: auto;
+            max-height: 60vh;
+          }
+
+
+
+          /* Mobile submenu scrollbar styling */
+          .submenu.styled-scrollbar {
+            scrollbar-width: thin;
+            scrollbar-color: rgba(0, 0, 0, 0.3) transparent;
+          }
+
+          .submenu.styled-scrollbar::-webkit-scrollbar {
+            width: 4px;
+          }
+
+          .submenu.styled-scrollbar::-webkit-scrollbar-track {
+            background: transparent;
+          }
+
+          .submenu.styled-scrollbar::-webkit-scrollbar-thumb {
+            background-color: rgba(0, 0, 0, 0.3);
+            border-radius: 20px;
+          }
+
+          /* Mobile submenu animations */
+          .submenu {
+            transition: all 400ms cubic-bezier(0.4, 0, 0.2, 1);
+            will-change: opacity, height;
+            height: auto;
+            max-height: 0;
+          }
+
+          .submenu.show {
+            opacity: 1;
+            max-height: 30vh;
+          }
+
+          .submenu:not(.show) {
+            opacity: 0;
+            max-height: 0;
+          }
+
+          .submenu.hidden {
+            display: none;
+          }
+
+          .submenu:not(.hidden) {
+            display: block;
+          }
+
+          /* Add overlay transition */
+          #menu-overlay {
+            transition: opacity 0.3s ease;
+            will-change: opacity;
+          }
+
+          /* Mobile menu transitions */
+          #mobile-menu {
+            will-change: transform;
+            backface-visibility: hidden;
+          }
+
+          #mobile-menu.active {
+            transform: translateX(0) !important;
+          }
+          @media (max-width: 1100px) {
+    .mx-auto.p-2.flex ul.flex.justify-start.m-2.flex-wrap {
+      width: 60% !important;
+      gap: 1% !important;
+    }
+  }
+ .cart-bracket {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;        /* smaller text */
+  font-weight: inherit;   /* automatically inherit font weight from parent */
+  padding: 0 6px;         /* less vertical padding */
+  line-height: 1;         /* removes extra height from text */
+  position: relative;
+  height: 20px;  
+  margin-bottom: 5px;         /* force small height */
+}
+
+.cart-bracket::before,
+.cart-bracket::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 5px;             /* thickness of bracket */
+  border-top: 1.2px solid var(--header_text);
+  border-bottom: 1.2px solid var(--header_text);
+}
+
+.cart-bracket::before {
+  left: 0;
+  border-left: 1.2px solid var(--header_text);
+}
+
+.cart-bracket::after {
+  right: 0;
+  border-right: 1.2px solid var(--header_text);
+}
+}
+
+</style>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    
+    /* -- Mobile menu toggle - FIXED VERSION -- */
+    const hamburgerMenu = document.getElementById('hamburger-menu');
+    const mobileMenu = document.getElementById('mobile-menu');
+    const overlay = document.getElementById('menu-overlay');
+    const body = document.body;
+
+    let isMobileMenuOpen = false;
+
+    function openMobileMenu() {
+      if (isMobileMenuOpen) return;
+      
+      isMobileMenuOpen = true;
+      
+      // Update hamburger state
+      hamburgerMenu.setAttribute('aria-expanded', 'true');
+      hamburgerMenu.setAttribute('aria-label', 'Close Menu');
+      
+      // Show elements
+      mobileMenu.style.display = 'flex';
+      overlay.style.display = 'block';
+      
+      // Prevent body scroll
+      body.classList.add('mobile-menu-active');
+      body.style.overflow = 'hidden';
+      
+      // Force reflow
+      mobileMenu.offsetHeight;
+      overlay.offsetHeight;
+      
+      // Animate in
+      requestAnimationFrame(() => {
+        mobileMenu.classList.add('active');
+        overlay.classList.add('active');
+        overlay.style.opacity = '0.5';
+        overlay.style.pointerEvents = 'auto';
+      });
+    }
+
+    function closeMobileMenu() {
+      if (!isMobileMenuOpen) return;
+      
+      isMobileMenuOpen = false;
+      
+      // Update hamburger state
+      hamburgerMenu.setAttribute('aria-expanded', 'false');
+      hamburgerMenu.setAttribute('aria-label', 'Menu');
+      
+      // Animate out
+      mobileMenu.classList.remove('active');
+      overlay.classList.remove('active');
+      overlay.style.opacity = '0';
+      overlay.style.pointerEvents = 'none';
+      
+      // Re-enable body scroll
+      body.classList.remove('mobile-menu-active');
+      body.style.overflow = '';
+      
+      // Hide elements after transition
+      setTimeout(() => {
+        if (!isMobileMenuOpen) {
+          mobileMenu.style.display = 'none';
+          overlay.style.display = 'none';
+        }
+      }, 300);
+    }
+
+    function toggleMobileMenu(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      
+      if (isMobileMenuOpen) {
+        closeMobileMenu();
+      } else {
+        openMobileMenu();
+      }
+    }
+
+    // Event listeners with better error handling
+    if (hamburgerMenu) {
+      // Make sure the button is focusable and has proper attributes
+      hamburgerMenu.setAttribute('tabindex', '0');
+      hamburgerMenu.setAttribute('role', 'button');
+      hamburgerMenu.setAttribute('aria-expanded', 'false');
+      hamburgerMenu.setAttribute('aria-controls', 'mobile-menu');
+      
+      // Add click listener
+      hamburgerMenu.addEventListener('click', toggleMobileMenu, { passive: false });
+      
+      // Add touch handling for mobile
+      let touchStartY = 0;
+      
+      hamburgerMenu.addEventListener('touchstart', function(e) {
+        touchStartY = e.touches[0].clientY;
+      }, { passive: true });
+      
+      hamburgerMenu.addEventListener('touchend', function(e) {
+        const touchEndY = e.changedTouches[0].clientY;
+        const touchDiff = Math.abs(touchEndY - touchStartY);
+        
+        // Only trigger if it's a tap, not a scroll
+        if (touchDiff < 10) {
+          e.preventDefault();
+          toggleMobileMenu(e);
+        }
+      }, { passive: false });
+    }
+
+    // Close menu when overlay is clicked
+    if (overlay) {
+      overlay.addEventListener('click', closeMobileMenu);
+      overlay.addEventListener('touchstart', closeMobileMenu, { passive: true });
+    }
+
+    // Close menu when clicking close button inside menu
+    const closeButton = mobileMenu?.querySelector('button[aria-label="Close Menu"]');
+    if (closeButton) {
+      closeButton.addEventListener('click', closeMobileMenu);
+      closeButton.addEventListener('touchstart', closeMobileMenu, { passive: true });
+    }
+
+    // Close menu on escape key
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape' && isMobileMenuOpen) {
+        closeMobileMenu();
+      }
+    });
+
+    // Handle window resize - close menu if opened and window becomes large
+    let resizeTimer;
+    window.addEventListener('resize', function() {
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(() => {
+        if (window.innerWidth > 1024 && isMobileMenuOpen) {
+          closeMobileMenu();
+        }
+      }, 100);
+    });
+
+    // Initialize menu state
+    if (mobileMenu) {
+      mobileMenu.style.display = 'none';
+      mobileMenu.classList.remove('active');
+    }
+    
+    if (overlay) {
+      overlay.style.display = 'none';
+      overlay.classList.remove('active');
+    }
+
+    /* -- Submenu Toggle for Mobile -- */
+    const submenuToggles = mobileMenu?.querySelectorAll('.toggle-submenu') || [];
+    let activeSubmenu = null;
+    let isAnimating = false;
+
+    const closeSubmenu = (submenu, icon) => {
+      return new Promise((resolve) => {
+        submenu.classList.remove('show');
+        icon.style.transform = 'rotate(0)';
+
+        const handleTransitionEnd = () => {
+          submenu.classList.add('hidden');
+          submenu.removeEventListener('transitionend', handleTransitionEnd);
+          resolve();
+        };
+
+        submenu.addEventListener('transitionend', handleTransitionEnd);
+      });
+    };
+
+    const openSubmenu = (submenu, icon) => {
+      return new Promise((resolve) => {
+        submenu.classList.remove('hidden');
+        submenu.offsetHeight;
+
+        requestAnimationFrame(() => {
+          submenu.classList.add('show');
+          icon.style.transform = 'rotate(-90deg)';
+
+          submenu.addEventListener(
+            'transitionend',
+            () => {
+              resolve();
+            },
+            { once: true }
+          );
+        });
+      });
+    };
+
+    submenuToggles.forEach((toggle) => {
+      toggle.addEventListener('click', async function () {
+        if (isAnimating) return;
+        isAnimating = true;
+
+        const submenu = this.closest('.mobile-menu-item').querySelector('.submenu');
+        const icon = this.querySelector('img, svg');
+
+        try {
+          if (activeSubmenu === submenu) {
+            await closeSubmenu(submenu, icon);
+            activeSubmenu = null;
+          } else {
+            const closePromise = activeSubmenu
+              ? closeSubmenu(
+                  activeSubmenu,
+                  activeSubmenu.closest('.mobile-menu-item').querySelector('.toggle-submenu img, .toggle-submenu svg')
+                )
+              : Promise.resolve();
+
+            await closePromise;
+            await openSubmenu(submenu, icon);
+            activeSubmenu = submenu;
+          }
+        } finally {
+          isAnimating = false;
+        }
+      });
+    });
+
+    /* -- sub menu logic -- */
+    document.querySelectorAll('.dropdown-group').forEach(group => {
+      const trigger = group.querySelector('a');
+      const menu    = group.querySelector('.mega-menu-dropdown');
+      if (!menu) return;
+
+      // track currently open menu
+      if (typeof window._currentOpenMenu === 'undefined') {
+        window._currentOpenMenu = null;
+      }
+
+      let closeTimer = null;
+
+      // when the max-height transition finishes and we're closed, actually hide & disable interactions
+      menu.addEventListener('transitionend', function onEnd(e) {
+        if (e.propertyName === 'max-height' && !menu.classList.contains('open')) {
+          menu.style.display        = 'none';
+          menu.style.pointerEvents  = 'none';
+          window._currentOpenMenu   = null;
+        }
+      });
+
+      function doOpen(m) {
+        // make sure it's in the layout
+        m.style.display        = 'block';
+        m.style.pointerEvents  = 'auto';
+        m.offsetHeight; // force reflow
+        m.classList.add('open');
+        window._currentOpenMenu = m;
+      }
+
+      function openMenu() {
+        clearTimeout(closeTimer);
+
+        const old = window._currentOpenMenu;
+        if (old && old !== menu) {
+          // close the old one first, then open ours
+          old.classList.remove('open');
+          old.addEventListener('transitionend', function handler(e) {
+            if (e.propertyName === 'max-height' && !old.classList.contains('open')) {
+              old.removeEventListener('transitionend', handler);
+              doOpen(menu);
+            }
+          });
+        } else if (old !== menu) {
+          doOpen(menu);
+        }
+      }
+
+      function closeMenu() {
+        menu.classList.remove('open');
+        // pointer-events will get turned off in the transitionend above
+      }
+
+      // when you leave trigger or submenu start a 150 ms timer to close
+      trigger.addEventListener('mouseleave', () => {
+        clearTimeout(closeTimer);
+        closeTimer = setTimeout(closeMenu, 150);
+      });
+      menu.addEventListener('mouseleave', () => {
+        clearTimeout(closeTimer);
+        closeTimer = setTimeout(closeMenu, 150);
+      });
+
+      // as soon as you re-enter either area cancel that close
+      trigger.addEventListener('mouseenter', openMenu);
+      menu.addEventListener('mouseenter', openMenu);
+    });
+
+    /* -- bottom bar indicator logic -- */
+    const bottomBarIndicator = document.getElementById('bottom-bar-indicator');
+    const menuItems = document.querySelectorAll('.menu-items ul > li.dropdown-group');
+    let indicatorTimeout = null;
+
+    if (bottomBarIndicator) {
+      bottomBarIndicator.style.width = '100%';
+      bottomBarIndicator.style.transform = 'translateX(0)';
+    }
+
+    menuItems.forEach((item) => {
+      const link = item.querySelector('a');
+
+      item.addEventListener('mouseenter', () => {
+        if (indicatorTimeout) clearTimeout(indicatorTimeout);
+        const rect = link.getBoundingClientRect();
+        const containerRect = item.closest('.menu-items').getBoundingClientRect();
+        const left = rect.left - containerRect.left;
+        const width = rect.width;
+
+        bottomBarIndicator.style.transform = `translateX(${left}px) translateY(-2px)`;
+        bottomBarIndicator.style.width = `${width}px`;
+      });
+
+      item.addEventListener('mouseleave', (e) => {
+        const related = e.relatedTarget;
+        if (!item.contains(related)) {
+          indicatorTimeout = setTimeout(() => {
+            bottomBarIndicator.style.width = '100%';
+            bottomBarIndicator.style.transform = 'translateX(0) translateY(0px)';
+          }, 100);
+        }
+      });
+    });
+
+    // horizontal Scrolling Text Section
+    const scrollingSection = document.getElementById('scrolling-text-{{ section.id }}');
+    if (scrollingSection) {
+      const scrollingContainer = scrollingSection.querySelector('.scrolling-text-container');
+
+      // Check if we're on mobile
+      function isMobile() {
+        return window.innerWidth <= 768;
+      }
+
+      // Set initial position based on direction and device type
+      function setInitialPosition() {
+        const direction = scrollingContainer.getAttribute('data-direction');
+        const mobile = isMobile();
+        
+        if (mobile) {
+          // Mobile vertical scrolling
+          if (direction === 'right') {
+            scrollingContainer.style.transform = 'translateY(-50%)';
+          } else {
+            scrollingContainer.style.transform = 'translateY(0%)';
+          }
+        } else {
+          // Desktop horizontal scrolling
+          if (direction === 'right') {
+            scrollingContainer.style.transform = 'translateX(-50%)';
+          } else {
+            scrollingContainer.style.transform = 'translateX(0%)';
+          }
+        }
+
+        // Force a reflow and restart animation
+        scrollingContainer.style.animation = 'none';
+        scrollingContainer.offsetHeight; // Trigger reflow
+        
+        if (mobile) {
+          const animationName = direction === 'left' ? 'scroll-bottom-to-top' : 'scroll-top-to-bottom';
+          scrollingContainer.style.animation = `${animationName} {{ section.settings.speed }}s linear infinite`;
+        } else {
+          scrollingContainer.style.animation = `scroll-${direction} {{ section.settings.speed }}s linear infinite`;
+        }
+      }
+
+      // Initialize on load
+      setInitialPosition();
+
+      // Handle window resize to switch between mobile and desktop
+      function handleResize() {
+        setInitialPosition();
+      }
+
+      // Add resize listener with debounce
+      let resizeScrollTimeout;
+      window.addEventListener('resize', function() {
+        clearTimeout(resizeScrollTimeout);
+        resizeScrollTimeout = setTimeout(handleResize, 150);
+      });
+
+      // Calculate optimal repeat count based on text length and device type
+      function calculateOptimalRepeats() {
+        const textLength = '{{ section.settings.scrolling_text }}'.length;
+        const estimatedImageWidth = {{ section.settings.font_size }} * 1.5;
+        const separatorSpacing = {{ section.settings.separator_spacing }} * 2;
+        
+        let totalLength;
+        if (isMobile()) {
+          // For mobile vertical, consider height rather than width
+          totalLength = textLength + (estimatedImageWidth + separatorSpacing) / 15;
+        } else {
+          totalLength = textLength + (estimatedImageWidth + separatorSpacing) / 10;
+        }
+
+        const minRepeats = Math.max(8, Math.ceil(200 / totalLength));
+        return Math.min(minRepeats, 20);
+      }
+
+      // Dynamic speed control
+      function updateScrollSpeed(speed) {
+        scrollingContainer.style.animationDuration = speed + 's';
+      }
+
+      // Dynamic direction control
+      function updateScrollDirection(direction) {
+        scrollingContainer.setAttribute('data-direction', direction);
+        const mobile = isMobile();
+        
+        if (mobile) {
+          const animationName = direction === 'left' ? 'scroll-bottom-to-top' : 'scroll-top-to-bottom';
+          scrollingContainer.style.animationName = animationName;
+        } else {
+          scrollingContainer.style.animationName = 'scroll-' + direction;
+        }
+        
+        setInitialPosition();
+      }
+
+      // Pause/resume functionality
+      function pauseScroll() {
+        scrollingContainer.style.animationPlayState = 'paused';
+      }
+
+      function resumeScroll() {
+        scrollingContainer.style.animationPlayState = 'running';
+      }
+
+      // Image loading optimization
+      function optimizeImageLoading() {
+        const separatorImages = scrollingContainer.querySelectorAll('.scrolling-separator');
+        separatorImages.forEach(img => {
+          if (!img.hasAttribute('loading')) {
+            img.setAttribute('loading', 'lazy');
+          }
+          
+          img.addEventListener('error', function() {
+            console.warn('Scrolling separator image failed to load:', this.src);
+            this.style.display = 'none';
+          });
+        });
+      }
+
+      // Initialize image optimization
+      optimizeImageLoading();
+
+      // Add methods to global scope for external control
+      window.ScrollingText = window.ScrollingText || {};
+      window.ScrollingText['section-{{ section.id }}'] = {
+        updateSpeed: updateScrollSpeed,
+        updateDirection: updateScrollDirection,
+        pause: pauseScroll,
+        resume: resumeScroll,
+        element: scrollingSection,
+        calculateOptimalRepeats: calculateOptimalRepeats,
+        resetPosition: setInitialPosition,
+        optimizeImages: optimizeImageLoading,
+        isMobile: isMobile
+      };
+    }
+
+    /* -- Sticky Header -- */
+    const header = document.querySelector('[data-header-sticky]');
+    const headerOffset = document.querySelector('[data-header-offset]');
+
+    if (header && headerOffset && !header.classList.contains('sticky-disabled')) {
+      let lastScroll = 0;
+      let initialHeaderTop = header.offsetTop;
+      let isFixed = false;
+      let stickyEnabled = !header.classList.contains('sticky-disabled');
+
+      const setHeaderHeight = () => {
+        const height = header.offsetHeight;
+        document.documentElement.style.setProperty('--header-height', `${height}px`);
+        initialHeaderTop = header.offsetTop;
+      };
+
+      const handleScroll = () => {
+        if (!stickyEnabled) return;
+
+        const currentScroll = window.pageYOffset;
+
+        if (currentScroll <= initialHeaderTop) {
+          header.classList.remove('is-sticky', 'is-hidden');
+          headerOffset.classList.remove('is-active');
+          isFixed = false;
+          return;
+        }
+
+        if (!isFixed && currentScroll > initialHeaderTop) {
+          header.classList.add('is-sticky');
+          headerOffset.classList.add('is-active');
+          isFixed = true;
+        }
+
+        lastScroll = currentScroll;
+      };
+
+      setHeaderHeight();
+      window.addEventListener('resize', setHeaderHeight, { passive: true });
+      window.addEventListener('scroll', () => requestAnimationFrame(handleScroll), { passive: true });
+    }
+
+    /* -- Country Selector for Mobile -- */
+    const countrySelector = document.querySelector('.country-selector');
+    const countrySelectorBtn = document.querySelector('.country-selector-button');
+    const countrySelectorDropdown = document.querySelector('.country-selector-dropdown');
+
+    if (countrySelector && countrySelectorBtn && countrySelectorDropdown) {
+      countrySelectorBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const isExpanded = countrySelectorBtn.getAttribute('aria-expanded') === 'true';
+
+        countrySelectorBtn.setAttribute('aria-expanded', !isExpanded);
+        const icon = countrySelectorBtn.querySelector('img, svg');
+        if (icon) {
+          icon.style.transform = isExpanded ? 'rotate(0)' : 'rotate(-90deg)';
+        }
+        countrySelectorDropdown.classList.toggle('opacity-0');
+        countrySelectorDropdown.classList.toggle('invisible');
+      });
+
+      document.addEventListener('click', (e) => {
+        if (!countrySelector.contains(e.target)) {
+          countrySelectorBtn.setAttribute('aria-expanded', 'false');
+          const icon2 = countrySelectorBtn.querySelector('img, svg');
+          if (icon2) {
+            icon2.style.transform = 'rotate(0)';
+          }
+          countrySelectorDropdown.classList.add('opacity-0', 'invisible');
+        }
+      });
+    }
+
+    /* -- Search bar -- */
+    const searchToggle = document.getElementById('search-toggle');
+    const searchContainer = document.getElementById('search-container');
+    const searchOverlay = document.getElementById('search-overlay');
+    const closeSearch = document.getElementById('close-search');
+    const searchInput = searchContainer?.querySelector('input[type="search"]');
+
+    if (searchToggle && searchContainer && searchOverlay && closeSearch && searchInput) {
+      let isSearchOpen = false;
+
+      searchContainer.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+      searchOverlay.style.transition = 'opacity 0.3s ease';
+      searchContainer.style.transform = 'translateY(0px)';
+      searchOverlay.classList.add('pointer-events-none');
+
+      function toggleSearch(show) {
+        if (show === isSearchOpen) return;
+
+        isSearchOpen = show;
+        searchToggle.setAttribute('aria-expanded', show);
+
+        const headerEl = document.querySelector('[data-header-sticky]');
+        if (headerEl) {
+          const headerHeight = headerEl.offsetHeight;
+          searchContainer.style.top = `${headerHeight}px`;
+        }
+
+        if (show) {
+          searchContainer.classList.remove('hidden');
+          searchOverlay.style.opacity = '0.5';
+          searchOverlay.classList.remove('pointer-events-none');
+
+          requestAnimationFrame(() => {
+            searchContainer.style.opacity = '1';
+            searchContainer.style.transform = 'translateY(0)';
+
+            setTimeout(() => searchInput.focus(), 400);
+          });
+        } else {
+          searchContainer.style.opacity = '0';
+          searchContainer.style.transform = 'translateY(-20px)';
+
+          searchOverlay.style.opacity = '0';
+          searchOverlay.classList.add('pointer-events-none');
+
+          searchContainer.addEventListener('transitionend', function handler(e) {
+            if (e.propertyName === 'opacity' && !isSearchOpen) {
+              searchContainer.classList.add('hidden');
+              searchContainer.removeEventListener('transitionend', handler);
+            }
+          });
+        }
+      }
+
+      searchToggle.addEventListener('click', () => toggleSearch(!isSearchOpen));
+      closeSearch.addEventListener('click', () => toggleSearch(false));
+      searchOverlay.addEventListener('click', () => toggleSearch(false));
+
+      document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape' && isSearchOpen) {
+          toggleSearch(false);
+        }
+      });
+    }
+  });
+</script>
+
+{% schema %}
+{
+  "name": "Header",
+  "settings": [
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "Color scheme",
+      "default": "background-1"
+    },
+    {
+      "type": "image_picker",
+      "id": "logo",
+      "label": "Logo"
+    },
+    {
+      "type": "color",
+      "id": "btn_text_color",
+      "label": "Button Text Color",
+      "default": "#222222"
+    },
+    {
+      "type": "link_list",
+      "id": "menu",
+      "label": "Main Menu"
+    },
+    {
+      "type": "image_picker",
+      "id": "dropdown_icon",
+      "label": "Dropdown Icon"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_sticky",
+      "label": "Enable sticky header",
+      "default": true
+    },
+    {
+      "type": "header",
+      "content": "Text Content"
+    },
+    {
+      "type": "textarea",
+      "id": "scrolling_text",
+      "label": "Scrolling Text",
+      "default": " STAY TRUE → KEEP GOING → FIND THE BALANCE → LIVE YOUR BEST LIFE ",
+      "info": "Enter any length of text that you want to scroll"
+    },
+    {
+      "type": "range",
+      "id": "repeat_count",
+      "label": "Text Repetitions",
+      "min": 2,
+      "max": 20,
+      "step": 1,
+      "default": 10,
+      "info": "How many times to repeat the text for seamless scrolling"
+    },
+    {
+      "type": "header",
+      "content": "Animation Settings"
+    },
+    {
+      "type": "select",
+      "id": "direction",
+      "label": "Scroll Direction",
+      "options": [
+        {
+          "value": "left",
+          "label": "Right to Left"
+        },
+        {
+          "value": "right",
+          "label": "Left to Right"
+        }
+      ],
+      "default": "right"
+    },
+    {
+      "type": "range",
+      "id": "speed",
+      "label": "Scroll Speed (seconds)",
+      "min": 5,
+      "max": 60,
+      "step": 1,
+      "default": 60,
+      "info": "Lower numbers = faster scrolling"
+    },
+    {
+      "type": "checkbox",
+      "id": "pause_on_hover",
+      "label": "Pause on Hover",
+      "default": true
+    },
+    {
+      "type": "header",
+      "content": "Scrolling text Styling"
+    },
+    {
+      "type": "image_picker",
+      "id": "separator_image",
+      "label": "Separator Image"
+    },
+    {
+      "type": "range",
+      "id": "font_size",
+      "label": "Font Size (px)",
+      "min": 12,
+      "max": 48,
+      "step": 1,
+      "default": 24
+    },
+    {
+      "type": "select",
+      "id": "font_weight",
+      "label": "Font Weight",
+      "options": [
+        {
+          "value": "300",
+          "label": "Light"
+        },
+        {
+          "value": "400",
+          "label": "Normal"
+        },
+        {
+          "value": "500",
+          "label": "Medium"
+        },
+        {
+          "value": "600",
+          "label": "Semi Bold"
+        },
+        {
+          "value": "700",
+          "label": "Bold"
+        }
+      ],
+      "default": "500"
+    },
+    {
+      "type": "select",
+      "id": "text_transform",
+      "label": "Text Transform",
+      "options": [
+        {
+          "value": "none",
+          "label": "None"
+        },
+        {
+          "value": "uppercase",
+          "label": "UPPERCASE"
+        },
+        {
+          "value": "lowercase",
+          "label": "lowercase"
+        },
+        {
+          "value": "capitalize",
+          "label": "Capitalize"
+        }
+      ],
+      "default": "uppercase"
+    },
+    {
+      "type": "range",
+      "id": "letter_spacing",
+      "label": "Letter Spacing (px)",
+      "min": 0,
+      "max": 5,
+      "step": 0.1,
+      "default": 0.6
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Text Color",
+      "default": "#000000"
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Background Color",
+      "default": "#ffffff"
+    },
+    {
+      "type": "range",
+      "id": "vertical_padding",
+      "label": "Vertical Padding (px)",
+      "min": 0,
+      "max": 50,
+      "step": 1,
+      "default": 2
+    },
+    {
+      "type": "range",
+      "id": "separator_spacing",
+      "label": "Separator Spacing (px)",
+      "min": 10,
+      "max": 50,
+      "step": 1,
+      "default": 20,
+      "info": "Space around the separator character"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "mega_menu_images",
+      "name": "Mega Menu Images",
+      "settings": [
+        {
+          "type": "text",
+          "id": "menu_item_name",
+          "label": "Menu Item Name",
+          "info": "Enter the exact name of the menu item"
+        },
+        {
+          "type": "image_picker",
+          "id": "image_1",
+          "label": "First Image"
+        },
+        {
+          "type": "url",
+          "id": "button_link_1",
+          "label": "First Button Link"
+        },
+        {
+          "type": "text",
+          "id": "button_text_1",
+          "label": "First Button Text",
+          "default": "Shop Now"
+        },
+        {
+          "type": "image_picker",
+          "id": "image_2",
+          "label": "Second Image"
+        },
+        {
+          "type": "url",
+          "id": "button_link_2",
+          "label": "Second Button Link"
+        },
+        {
+          "type": "text",
+          "id": "button_text_2",
+          "label": "Second Button Text",
+          "default": "Learn More"
+        },
+       
+        {
+          "type": "color",
+          "id": "btn_text_hover_color",
+          "label": "Button Text Hover Color",
+          "default": "#000000"
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

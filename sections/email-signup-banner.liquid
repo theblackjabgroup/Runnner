@@ -1,0 +1,313 @@
+{{ 'email-signup-banner.css' | asset_url | stylesheet_tag }}
+
+<style>
+  :root {
+    {% assign color_scheme = section.settings.color_scheme %}
+    --button: {{ color_scheme.settings.button }};
+    --button_label: {{ color_scheme.settings.button_label }};
+    --background: {{ color_scheme.settings.background }};
+    --text: {{ color_scheme.settings.text }};
+    --subscribe-hover-bg: {{ section.settings.subscribe_hover_background | default: color_scheme.settings.background }};
+    --subscribe-hover-text: {{ section.settings.subscribe_hover_text_color | default: color_scheme.settings.text }};
+    --slide-duration: {{ section.settings.slide_animation_duration | default: 0.4 }}s;
+  }
+
+  .pass-subscribe::before {
+    background-color: var(--subscribe-hover-bg);
+    transition: left var(--slide-duration) ease;
+  }
+
+  .pass-subscribe {
+    transition: color var(--slide-duration) ease;
+  }
+
+  .pass-subscribe:hover {
+    color: var(--subscribe-hover-text);
+  }
+</style>
+
+<div
+  class="color-{{ section.settings.color_scheme }} px-10 flex items-center justify-between h-screen"
+  style="padding: {{ section.settings.padding }}px 0; margin-bottom: {{ section.settings.margin_bottom }}px;"
+  id="password-section"
+  role="main"
+  aria-label="Password protected store"
+>
+  <div
+    class="flex flex-col md:flex-row items-center justify-between gap-6 md:gap-20 w-full max-w-[800px]"
+    id="mainContainer-password"
+    role="region"
+    aria-labelledby="email-signup-subheading"
+  >
+    <!-- Text content with fixed width to prevent affecting layout -->
+    <div
+      class="pass-container ml-10 md:w-[30%] lg:ml-0 flex-shrink-0 space-y-0 text-left px-4 md:pl-20"
+      role="complementary"
+      aria-label="Email signup information"
+    >
+      <p
+        class="pass-heading1 m-0 leading-none break-words w-full flex justify-center md:block md:justify-start whitespace-nowrap truncate"
+        role="heading"
+        aria-level="1"
+      >
+        {{ section.settings.heading_1 }}
+      </p>
+      <p
+        class="pass-heading2 m-0 leading-none break-words w-full flex justify-center md:block md:justify-start whitespace-nowrap truncate"
+        role="heading"
+        aria-level="2"
+      >
+        {{ section.settings.heading_2 }}
+      </p>
+      <p
+        class="pass-subheading font-light m-0 uppercase mt-6 tracking-tight leading-none break-words block justify-center md:block md:justify-start text-wrap"
+        id="email-signup-subheading"
+      >
+        {{ section.settings.subheading }}
+      </p>
+    </div>
+
+    <!-- Form Container with fixed width -->
+    <div
+      id="formContainer-password"
+      class="w-full md:w-[60%] flex flex-col items-end lg:mr-0 px-4 md:pr-20"
+      role="form"
+      style="font-size: 12px;"
+      aria-label="Email signup form"
+    >
+      {% render 'email-signup-form',
+        button_text: section.settings.button_text,
+        placeholder: section.settings.modal_placeholder
+      %}
+
+      <div
+        class="flex flex-col items-center justify-center w-full mt-6 md:flex-row md:justify-end md:w-[40%]"
+        role="navigation"
+        aria-label="Password access"
+      >
+        <span
+          class="pass-text1 text-[20px] sm:text-[16px] mr-4 mb-0 md:mt-0 cursor-pointer"
+          role="text"
+          aria-label="{{ section.settings.password_text_1 }}"
+        >
+          {{ section.settings.password_text_1 }}
+        </span>
+        <button
+          type="button"
+          onclick="loadPasswordSection()"
+          class="pass-text2 inline-flex items-center cursor-pointer text-[16px] tracking-tight px-6 py-0 md:ml-6 rounded-md transition-colors focus:outline-none focus:ring-1"
+          id="enterPasswordBtn"
+          aria-label="Enter password to access the store"
+          aria-expanded="false"
+          aria-controls="password-modal"
+          aria-haspopup="dialog"
+        >
+          <div class="pass-text-container">
+            <div class="pass-text">
+              <svg
+                class="w-8 h-8 mr-4"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="currentColor"
+                viewBox="0 0 254 254"
+                stroke="currentColor"
+                aria-hidden="true"
+                role="img"
+                aria-label="Password icon"
+              >
+               <path stroke-linecap="round" d="M208,80H176V56a48,48,0,0,0-96,0V80H48A16,16,0,0,0,32,96V208a16,16,0,0,0,16,16H208a16,16,0,0,0,16-16V96A16,16,0,0,0,208,80ZM96,56a32,32,0,0,1,64,0V80H96ZM208,208H48V96H208V208Zm-68-56a12,12,0,1,1-12-12A12,12,0,0,1,140,152Z"/>
+              </svg>
+              <span class="sr-only">Click to </span>{{ section.settings.password_text_2 }}
+            </div>
+            <div class="pass-text-hover">
+               <svg
+                class="w-8 h-8 mr-4"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="currentColor"
+                viewBox="0 0 254 254"
+                stroke="currentColor"
+                aria-hidden="true"
+                role="img"
+                aria-label="Password icon"
+              >
+               <path stroke-linecap="round" d="M208,80H176V56a48,48,0,0,0-96,0V80H48A16,16,0,0,0,32,96V208a16,16,0,0,0,16,16H208a16,16,0,0,0,16-16V96A16,16,0,0,0,208,80ZM96,56a32,32,0,0,1,64,0V80H96ZM208,208H48V96H208V208Zm-68-56a12,12,0,1,1-12-12A12,12,0,0,1,140,152Z"/>
+              </svg>
+              <span class="sr-only">Click to </span>{{ section.settings.password_text_2 }}
+            </div>
+          </div>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% render 'password-modal',
+  modal_title: section.settings.modal_title,
+  modal_subtitle: section.settings.modal_subtitle,
+  modal_placeholder: section.settings.modal_placeholder,
+  modal_button: section.settings.modal_button
+%}
+
+<script src="{{ 'email-signup.js' | asset_url }}" defer="defer"></script>
+
+{% schema %}
+{
+  "name": "t:sections.password_page.name",
+  "settings": [
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "default": "scheme-1",
+      "label": "Color Scheme"
+    },
+    {
+      "type": "header",
+      "content": "Content Settings"
+    },
+    {
+      "type": "text",
+      "id": "heading_1",
+      "label": "t:sections.password_page.settings.heading_1",
+      "default": "GOOD THINGS"
+    },
+    {
+      "type": "text",
+      "id": "heading_2",
+      "label": "t:sections.password_page.settings.heading_2",
+      "default": "TAKE TIME"
+    },
+    {
+      "type": "text",
+      "id": "subheading",
+      "label": "t:sections.password_page.settings.subheading",
+      "default": "Opening soon"
+    },
+    {
+      "type": "text",
+      "id": "button_text",
+      "label": "t:sections.password_page.settings.button_text",
+      "default": "SUBSCRIBE"
+    },
+    {
+      "type": "text",
+      "id": "password_text_1",
+      "label": "t:sections.password_page.settings.password_text_1",
+      "default": "Got a password?"
+    },
+    {
+      "type": "text",
+      "id": "password_text_2",
+      "label": "t:sections.password_page.settings.password_text_2",
+      "default": "ENTER PASSWORD"
+    },
+    {
+      "type": "header",
+      "content": "Subscribe Button Hover Effects"
+    },
+    {
+      "type": "color",
+      "id": "subscribe_hover_background",
+      "label": "Subscribe Button Hover Background",
+      "info": "Color that slides from left to right on hover"
+    },
+    {
+      "type": "color",
+      "id": "subscribe_hover_text_color",
+      "label": "Subscribe Button Hover Text Color",
+      "info": "Text color when button is hovered"
+    },
+    {
+      "type": "range",
+      "id": "slide_animation_duration",
+      "label": "Slide Animation Speed",
+      "info": "How fast the color slides (in seconds)",
+      "min": 0.1,
+      "max": 2.0,
+      "step": 0.1,
+      "unit": "s",
+      "default": 0.4
+    },
+    {
+      "type": "header",
+      "content": "Modal Settings"
+    },
+    {
+      "type": "text",
+      "id": "modal_title",
+      "label": "t:sections.password_page.settings.modal_title",
+      "default": "ENTER YOUR PASSWORD"
+    },
+    {
+      "type": "text",
+      "id": "modal_subtitle",
+      "label": "t:sections.password_page.settings.modal_subtitle",
+      "default": "THIS STORE REQUIRES A PASSWORD TO ENTER."
+    },
+    {
+      "type": "text",
+      "id": "modal_placeholder",
+      "label": "t:sections.password_page.settings.modal_placeholder",
+      "default": "PASSWORD"
+    },
+    {
+      "type": "text",
+      "id": "modal_button",
+      "label": "t:sections.password_page.settings.modal_button",
+      "default": "Submit"
+    },
+    {
+      "type": "header",
+      "content": "Layout Settings"
+    },
+    {
+      "type": "range",
+      "id": "padding",
+      "label": "t:sections.password_page.settings.padding",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "default": 32
+    },
+    {
+      "type": "range",
+      "id": "margin_bottom",
+      "label": "t:sections.password_page.settings.margin_bottom",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "default": 0
+    }
+  ],
+  "blocks": [
+    {
+      "type": "heading",
+      "name": "Heading",
+      "settings": [
+        {
+          "type": "text",
+          "id": "heading-1",
+          "label": "t:sections.password_page.blocks.heading.settings.heading-1.label",
+          "default": "Good things"
+        }
+      ]
+    },
+    {
+      "type": "text",
+      "name": "Text",
+      "settings": [
+        {
+          "type": "text",
+          "id": "subheading-1",
+          "label": "t:sections.password_page.blocks.text.settings.subheading-1.label",
+          "default": "Opening Soon"
+        }
+      ]
+    },
+    {
+      "type": "email_form",
+      "name": "Email Form"
+    }
+  ]
+}
+{% endschema %}

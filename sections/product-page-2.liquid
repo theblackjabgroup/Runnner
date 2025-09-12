@@ -1,0 +1,285 @@
+<style>
+  .product-section {
+    position: relative;
+    width: 100vw;
+    height: 100vh;
+    margin-top: 80px; /* adjust for header height */
+    padding: 0;
+    display: block;
+    overflow: hidden;
+  }
+  .product-images {
+    width: 100vw;
+    height: 100vh;
+    margin: 0;
+    padding: 0;
+    position: relative;
+  }
+  .product-main-img {
+    width: 100vw;
+    height: 100vh;
+    object-fit: cover;
+    border-radius: 0;
+    display: block;
+  }
+  .product-thumbs {
+    position: absolute;
+    bottom: 32px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 8px;
+    z-index: 2;
+  }
+  .product-thumb {
+    width: 48px;
+    height: 48px;
+    object-fit: cover;
+    cursor: pointer;
+    border: 1px solid #eee;
+    background: #fff;
+    border-radius: 4px;
+  }
+  .product-info {
+    position: absolute;
+    top: 10%;
+    left: 5%;
+    background: rgba(255, 255, 255, 0.92);
+    padding: 32px 32px 24px 32px;
+    border-radius: 12px;
+    max-width: 420px;
+    min-width: 320px;
+    z-index: 3;
+    box-shadow: 0 4px 32px rgba(0, 0, 0, 0.08);
+  }
+  .variant-selector {
+    margin: 12px 0;
+  }
+  .variant-option {
+    margin-right: 8px;
+  }
+  .add-to-cart-btn {
+    margin-top: 16px;
+    padding: 12px 24px;
+    background: #111;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  .mobile {
+    display: none;
+  }
+  @media (max-width: 768px) {
+    .product-section {
+      position: static;
+      width: 100%;
+      height: auto;
+      margin-top: 0;
+      display: block;
+    }
+    .desktop {
+      display: none;
+    }
+    .mobile {
+      display: block;
+    }
+    .product-images,
+    .product-info {
+      position: static;
+      width: 100%;
+      max-width: 100%;
+      height: auto;
+      background: none;
+      box-shadow: none;
+      padding: 0;
+      border-radius: 0;
+    }
+    .product-main-img {
+      width: 100%;
+      max-width: 400px;
+      height: auto;
+      border-radius: 8px;
+      object-fit: cover;
+    }
+    .product-thumbs {
+      position: static;
+      transform: none;
+      margin-top: 8px;
+      margin-bottom: 8px;
+    }
+  }
+</style>
+
+<div class="product-section desktop">
+  <div class="product-images">
+    {% if product.images.size > 1 %}
+      <img
+        id="main-img"
+        class="product-main-img"
+        src="{{ product.images.first | img_url: '1600x' }}"
+        alt="{{ product.title }}"
+      >
+      <div class="product-thumbs">
+        {% for image in product.images %}
+          <img
+            class="product-thumb"
+            src="{{ image | img_url: '100x' }}"
+            alt=""
+            onclick="document.getElementById('main-img').src='{{ image | img_url: '1600x' }}'"
+          >
+        {% endfor %}
+      </div>
+    {% else %}
+      <img class="product-main-img" src="{{ product.featured_image | img_url: '1600x' }}" alt="{{ product.title }}">
+    {% endif %}
+    <div class="product-info">
+      <div style="font-size: 12px; color: #888;">{{ product.vendor }}</div>
+      <h1 style="margin: 0 0 8px 0;">{{ product.title }}</h1>
+      <div style="font-size: 18px; font-weight: bold; margin-bottom: 8px;">
+        {{ product.price | money }}
+        {% if product.compare_at_price > product.price %}
+          <span style="text-decoration: line-through; color: #888; font-size: 14px;">
+            {{- product.compare_at_price | money -}}
+          </span>
+        {% endif %}
+      </div>
+      <form method="post" action="/cart/add">
+        <input type="hidden" name="id" value="{{ product.selected_or_first_available_variant.id }}">
+        {% if product.options.size > 0 %}
+          {% for option in product.options_with_values %}
+            <div class="variant-selector">
+              <div style="font-weight: 500;">{{ option.name }}:</div>
+              {% for value in option.values %}
+                <label class="variant-option">
+                  <input
+                    type="radio"
+                    name="options[{{ option.name }}]"
+                    value="{{ value }}"
+                    {% if forloop.first %}
+                      checked
+                    {% endif %}
+                  >
+                  {{ value }}
+                </label>
+              {% endfor %}
+            </div>
+          {% endfor %}
+        {% endif %}
+        <button
+          type="submit"
+          class="add-to-cart-btn"
+          {% unless product.available %}
+            disabled
+          {% endunless %}
+        >
+          {% if product.available %}Add to Cart{% else %}Sold Out{% endif %}
+        </button>
+      </form>
+      <div style="margin-top: 16px;">
+        {{ product.description }}
+      </div>
+      {% comment %} Example: List product features if using metafields or tags {% endcomment %}
+      {% if product.metafields.custom.features %}
+        <ul style="margin-top: 12px;">
+          {% for feature in product.metafields.custom.features.value %}
+            <li>{{ feature }}</li>
+          {% endfor %}
+        </ul>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+<div class="mobile">
+  <div class="product-images">
+    {% if product.images.size > 1 %}
+      <div style="overflow-x: auto; white-space: nowrap;">
+        {% for image in product.images %}
+          <img
+            class="product-main-img"
+            src="{{ image | img_url: '800x' }}"
+            alt="{{ product.title }}"
+            style="display: inline-block; width: 90vw; max-width: 400px; margin-right: 8px;"
+          >
+        {% endfor %}
+      </div>
+    {% else %}
+      <img class="product-main-img" src="{{ product.featured_image | img_url: '800x' }}" alt="{{ product.title }}">
+    {% endif %}
+  </div>
+  <div class="product-info">
+    <div style="font-size: 12px; color: #888;">{{ product.vendor }}</div>
+    <h1 style="margin: 0 0 8px 0;">{{ product.title }}</h1>
+    <div style="font-size: 18px; font-weight: bold; margin-bottom: 8px;">
+      {{ product.price | money }}
+      {% if product.compare_at_price > product.price %}
+        <span style="text-decoration: line-through; color: #888; font-size: 14px;">
+          {{- product.compare_at_price | money -}}
+        </span>
+      {% endif %}
+    </div>
+    <form method="post" action="/cart/add">
+      <input type="hidden" name="id" value="{{ product.selected_or_first_available_variant.id }}">
+      {% if product.options.size > 0 %}
+        {% for option in product.options_with_values %}
+          <div class="variant-selector">
+            <div style="font-weight: 500;">{{ option.name }}:</div>
+            {% for value in option.values %}
+              <label class="variant-option">
+                <input
+                  type="radio"
+                  name="options[{{ option.name }}]"
+                  value="{{ value }}"
+                  {% if forloop.first %}
+                    checked
+                  {% endif %}
+                >
+                {{ value }}
+              </label>
+            {% endfor %}
+          </div>
+        {% endfor %}
+      {% endif %}
+      <button
+        type="submit"
+        class="add-to-cart-btn"
+        {% unless product.available %}
+          disabled
+        {% endunless %}
+      >
+        {% if product.available %}Add to Cart{% else %}Sold Out{% endif %}
+      </button>
+    </form>
+    <div style="margin-top: 16px;">
+      {{ product.description }}
+    </div>
+    {% if product.metafields.custom.features %}
+      <ul style="margin-top: 12px;">
+        {% for feature in product.metafields.custom.features.value %}
+          <li>{{ feature }}</li>
+        {% endfor %}
+      </ul>
+    {% endif %}
+  </div>
+</div>
+
+{% schema %}
+{
+  "name": "Main Product 2",
+  "tag": "section",
+  "settings": [
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Product"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Main Product 2"
+    }
+  ]
+}
+{% endschema %}

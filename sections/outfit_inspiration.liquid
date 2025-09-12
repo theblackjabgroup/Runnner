@@ -1,0 +1,1221 @@
+<div class="outfit-inspiration-section color-{{ section.settings.color_scheme }} bg-color:var(--background) p-8  px-0 flex justify-center items-center md:py-16">
+  <div class="outfit-navigation-arrows desktop-arrows ">
+    <button
+      class="outfit-navigation z-1 bg-color:var(--background) transition-opacity duration-300"
+      id="outfit-slider-prev-{{ section.id }}"
+      aria-label="Previous"
+      type="button"
+      style="display: flex;"
+    >
+      <svg
+        class="w-[22px] h-[22px]"
+        fill="none"
+        stroke="{{ section.settings.border_color | default: '#000' }}"
+        stroke-width="1"
+        viewBox="0 0 24 24"
+      >
+        <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/>
+      </svg>
+    </button>
+  </div>
+
+  <div class="relative bg-color:var(--background)">
+    <div class="flex flex-col color-{{ section.settings.color_scheme }} lg:flex-row gap-4 justify-center ">
+      <div class="outfit-contianer flex flex-col">
+        <h2
+          class="outfit-section-title"
+          style="text-align: {{ section.settings.title_align | default: 'center' }}; color: var(--header_text, var(--color-foreground)); margin-bottom: 45px;"
+        >
+          {{ section.settings.title }}
+        </h2>
+
+        <div class="outfit-wrapper flex relative ">
+          <!-- Main Product -->
+          <div class="  max-w-[409px] mx-10 lg:mx-0 flex flex-col items-center">
+            <div
+              class="main-product-card border-2"
+            >
+              <div
+                class="outfit-main-img flex items-center justify-center w-full"
+                style="height: 512px; width: 408px; padding: 10px 0;"
+              >
+                <img
+                  src="{{ product.featured_image | img_url: '409x512', crop: 'center' }}"
+                  alt="{{ product.title }}"
+                  class="outfit-main-img"
+                  style="aspect-ratio: 409/512; object-fit: contain;"
+                  height="512"
+                  width="409"
+                >
+              </div>
+              <div class="px-6" style="color: var(--header_text);">
+                <h4
+                  class="main-product-title"
+                  style="color: var(--header_text);"
+                >
+                  {{ product.title }}
+                </h4>
+                {% if product.compare_at_price > product.price %}
+                  <span class="line-through outfit-price text-gray-500" style="color: var(--disabled_text, #6b7280);">
+                    {{ product.compare_at_price | money }}
+                  </span>
+                  <span class="text-red-600 outfit-price " style="color: var(--accent, #dc2626);">
+                    {{ product.price | money }}
+                  </span>
+                {% else %}
+                  <span class="outfit-price" style="color: var(--header_text);">
+                    {{ product.price | money }}
+                  </span>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+          <!-- Paired Products Slider -->
+          <div class="outfit-paired relative overflow-hidden" style="width: 390px; min-width: 390px; height: 580px;">
+            <div class="flex flex-col justify-center overflow-hidden h-full">
+              <div class="transition-transform duration-300 ease-in-out w-full h-full" id="outfit-slider-track-{{ section.id }}">
+                {% for block in section.blocks %}
+                  {% assign product_count = 0 %}
+                  {% for i in (1..3) %}
+                    {% assign product_key = 'product_' | append: i %}
+                    {% if block.settings[product_key] != blank %}
+                      {% assign product_count = product_count | plus: 1 %}
+                    {% endif %}
+                  {% endfor %}
+
+                  <div
+                    class="paired-product-slide flex flex-col h-full {% if product_count < 3 %}justify-center{% else %}justify-start{% endif %} gap-4"
+                    data-slide-index="{{ forloop.index0 }}"
+                    data-products="{{ product_count }}"
+                    data-section-id="{{ section.id }}"
+                  >
+                    {% for i in (1..3) %}
+                      {% assign product_key = 'product_' | append: i %}
+                      {% if block.settings[product_key] != blank %}
+                        {% assign paired_product = all_products[block.settings[product_key]] %}
+
+                        <!-- Product Card -->
+                        <div
+                          class="paired-product-card flex items-center border-2  p-6 gap-6 transition-all duration-500 ease-in-out relative"
+                          style="height: 180px; color: var(--header_text);"
+                          data-product-id="{{ paired_product.id }}"
+                          data-product-url="{{ paired_product.url }}"
+                          data-section-id="{{ section.id }}"
+                        >
+                          <div class=" paired-product-img w-[140px] h-[150px] flex items-center justify-center overflow-hidden flex-shrink-0">
+                            {% if paired_product.featured_image %}
+                              <img
+                                src="{{ paired_product.featured_image | img_url: '140x150', crop: 'center' }}"
+                                alt="{{ paired_product.title }}"
+                                class="paired-product-img"
+                                style="aspect-ratio: 140/150; object-fit: contain;"
+                                height="150"
+                                width="140"
+                              >
+                            {% else %}
+                              <div class="w-full h-full bg-gray-300"></div>
+                            {% endif %}
+                          </div>
+                          <div class="flex-1 min-w-0 flex flex-col justify-between h-full">
+                            <div class="outfit-paired-title">
+                              <h4
+                                class="paired-product-title"
+                                style="color: var(--header_text); font-size: 14px;"
+                              >
+                                {{ paired_product.title }}
+                              </h4>
+                              {% if paired_product.compare_at_price > paired_product.price %}
+                                <span
+                                  class="paired-product-price line-through text-gray-500 ml-2"
+                                  style="color: var(--disabled_text, #6b7280);"
+                                >
+                                  {{ paired_product.compare_at_price | money }}
+                                </span>
+                                <span class="paired-product-price text-red-600 font-semibold" style="color: var(--accent, #dc2626);">
+                                  {{ paired_product.price | money }}
+                                </span>
+                              {% else %}
+                                <span class="paired-product-price" style="color: var(--header_text);">
+                                  {{ paired_product.price | money }}
+                                </span>
+                              {% endif %}
+                            </div>
+                            <div class="flex items-center justify-between gap-2 mt-auto">
+                              <div>
+                                {% if paired_product.available == false %}
+                                  <span
+                                    class="outfit-sold-out bg-gray-200 text-gray-700 p-0"
+                                  >
+                                    SOLD OUT
+                                  </span>
+                                {% endif %}
+                              </div>
+                              <button
+                                class="outfit-expand-product-btn-{{ section.id }} flex-shrink-0 p-0 transition-transform duration-300 hover:scale-110"
+                                aria-label="View Product"
+                                data-product-id="{{ paired_product.id }}"
+                                data-section-id="{{ section.id }}"
+                              >
+                                <svg
+                                  stroke-linecap="round"
+                                  viewBox="0 0 9 9"
+                                  fill="none"
+                                  xmlns="http://www.w3.org/2000/svg"
+                                >
+                                  <path d="M1.1875 7.7334H7.6599M7.6599 7.7334V1.261M7.6599 7.7334L1.1875 1.261" stroke="currentcolor" stroke-width="1.5" stroke-linejoin="round"></path>
+                                </svg>
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div
+                          class="expanded-product-card border-2 transition-all duration-500 ease-in-out overflow-hidden opacity-0 pointer-events-none"
+                          data-product-id="{{ paired_product.id }}"
+                          data-section-id="{{ section.id }}"
+                          style="color: var(--header_text);"
+                        >
+                          <div class="expanded-content p-6 h-full">
+                            <div class="gap-4">
+                              <div class="h-1/2">
+                                <div class=" flex items-center justify-center overflow-hidden mb-6">
+                                  {% if paired_product.featured_image %}
+                                    <img
+                                      src="{{ paired_product.featured_image | img_url: '200x250', crop: 'center' }}"
+                                      alt="{{ paired_product.title }}"
+                                      height="250"
+                                      width="200"
+                                      class="exapnded-product-img"
+                                      style="aspect-ratio: 200/250; object-fit: contain;"
+                                    >
+                                  {% else %}
+                                    <div class=" bg-gray-300"></div>
+                                  {% endif %}
+                                </div>
+                              </div>
+
+                              <div class="flex-1 flex flex-col">
+                                <div class="outfit-expanded-title flex justify-between items-center">
+                                  <h4
+                                    style="color: var(--header_text); font-size: 20px; "
+                                  >
+                                    {{ paired_product.title }}
+                                  </h4>
+                                  <button
+                                    class="outfit-arrow outfit-close-expanded-btn-{{ section.id }} transition-transform duration-300 hover:scale-110 ml-4"
+                                    aria-label="Close"
+                                    data-product-id="{{ paired_product.id }}"
+                                    data-section-id="{{ section.id }}"
+                                  >
+                                    <svg
+                                      stroke-linecap="round"
+                                      viewBox="0 0 9 9"
+                                      fill="none"
+                                      xmlns="http://www.w3.org/2000/svg"
+                                    >
+                                      <path d="M1.1875 7.7334H7.6599M7.6599 7.7334V1.261M7.6599 7.7334L1.1875 1.261" stroke="currentcolor" stroke-width="1.5" stroke-linejoin="round"></path>
+                                    </svg>
+                                  </button>
+                                </div>
+
+                                <div class="outfit-expanded-price">
+                                  {% if paired_product.compare_at_price > paired_product.price %}
+                                    <span
+                                      class="line-through text-gray-500"
+                                      style="color: var(--disabled_text, #6b7280);"
+                                    >
+                                      {{ paired_product.compare_at_price | money }}
+                                    </span>
+                                    <span class="text-red-600 font-semibold" style="color: var(--accent, #dc2626);">
+                                      {{ paired_product.price | money }}
+                                    </span>
+                                  {% else %}
+                                    <span style="color: var(--header_text);">
+                                      {{ paired_product.price | money }}
+                                    </span>
+                                  {% endif %}
+                                </div>
+
+                                <div class=" outfit-size flex justify-between items-center">
+                                  {% assign size_option = null %}
+                                  {% for option in paired_product.options_with_values %}
+                                    {% if option.name == 'Size' or option.name == 'size' %}
+                                      {% assign size_option = option %}
+                                    {% endif %}
+                                  {% endfor %}
+                                  {% if size_option %}
+                                    <div class="flex gap-2">
+                                      {% for value in size_option.values %}
+                                        {% assign variant_for_size = null %}
+                                        {% for variant in paired_product.variants %}
+                                          {% if variant.options contains value %}
+                                            {% assign variant_for_size = variant %}
+                                            {% break %}
+                                          {% endif %}
+                                        {% endfor %}
+                                        <button
+                                          class="outfit-size-option-{{ section.id }} border-2 flex items-center justify-center transition-colors duration-300 {% if variant_for_size.available %}bg-white hover:bg-black hover:text-white{% else %}bg-gray-200 text-gray-400 cursor-not-allowed{% endif %}{% if forloop.first %} selected{% endif %}"
+                                          {% unless variant_for_size.available %}
+                                            disabled
+                                          {% endunless %}
+                                          data-variant-id="{{ variant_for_size.id }}"
+                                          data-product-id="{{ paired_product.id }}"
+                                          data-option-value="{{ value | escape }}"
+                                          data-section-id="{{ section.id }}"
+                                          type="button"
+                                        >
+                                          {{ value }}
+                                        </button>
+                                      {% endfor %}
+                                    </div>
+                                  {% else %}
+                                    <div></div>
+                                  {% endif %}
+
+                                  {% assign color_option = null %}
+                                  {% for option in paired_product.options_with_values %}
+                                    {% if option.name == 'Color'
+                                      or option.name == 'Colour'
+                                      or option.name == 'color'
+                                      or option.name == 'colour'
+                                    %}
+                                      {% assign color_option = option %}
+                                    {% endif %}
+                                  {% endfor %}
+                                  {% if color_option %}
+                                    <div class="flex gap-2">
+                                      {% for value in color_option.values %}
+                                        {% assign variant_for_color = null %}
+                                        {% for variant in paired_product.variants %}
+                                          {% if variant.options contains value %}
+                                            {% assign variant_for_color = variant %}
+                                            {% break %}
+                                          {% endif %}
+                                        {% endfor %}
+                                        <button
+                                          class="outfit-color-swatch-{{ section.id }} rounded-full border-2 {% if forloop.first %}selected{% endif %}"
+                                          title="{{ value }}"
+                                          style="background-color:{{ variant_for_color.metafields.custom.color | default: value | downcase }}; width: 18px; height: 18px;"
+                                          data-variant-id="{{ variant_for_color.id }}"
+                                          data-product-id="{{ paired_product.id }}"
+                                          data-option-value="{{ value | escape }}"
+                                          data-section-id="{{ section.id }}"
+                                          type="button"
+                                        ></button>
+                                      {% endfor %}
+                                    </div>
+                                  {% else %}
+                                    <div></div>
+                                  {% endif %}
+                                </div>
+
+                                <div class="mt-auto">
+                                  <form method="post" action="/cart/add" class="w-full outfit-form-{{ section.id }}">
+                                    <input
+                                      type="hidden"
+                                      name="id"
+                                      value="{{ paired_product.first_available_variant.id }}"
+                                    >
+                                    <input type="hidden" name="quantity" value="1">
+                                    <button
+                                      type="submit"
+                                      class="outfit-add-to-cart-btn-{{ section.id }} border-2 w-full py-4 px-6 mb-3 relative {% unless paired_product.available %}sold-out-btn{% endunless %}"
+                                      {% unless paired_product.available %}
+                                        disabled
+                                      {% endunless %}
+                                      data-product-id="{{ paired_product.id }}"
+                                      data-section-id="{{ section.id }}"
+                                    >
+                                      <span class="btn-text ">
+                                        {% if paired_product.available %}ADD TO CART{% else %}SOLD OUT{% endif %}
+                                      </span>
+                                      <span class="notify-in-stock absolute left-0 top-0 w-full h-full flex items-center justify-center text-white bg-black bg-opacity-90 transition-opacity duration-200 pointer-events-none opacity-0">
+                                        NOTIFY ME WHEN IN STOCK
+                                      </span>
+                                      <span class="loading-spinner hidden">
+                                        <svg
+                                          class="animate-spin h-5 w-5"
+                                          xmlns="http://www.w3.org/2000/svg"
+                                          fill="none"
+                                          viewBox="0 0 24 24"
+                                        >
+                                          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                        </svg>
+                                      </span>
+                                    </button>
+                                  </form>
+                                  {% if section.settings.show_full_details_link %}
+                                    <div  class="outfit-inspiration-details block text-center">
+                                    <a
+                                      href="{{ paired_product.url }}"
+                                     
+                                    >
+                                      {{ section.settings.redirect_link }}
+                                    </a>
+                                    </div>
+                                  {% endif %}
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      {% endif %}
+                    {% endfor %}
+                  </div>
+                {% endfor %}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="outfit-navigation-arrows mobile-arrows">
+        <button
+          class="outfit-navigation-mobile flex items-center justify-center bg-color:var(--background) transition-opacity duration-300"
+          id="outfit-slider-prev-mobile-{{ section.id }}"
+          aria-label="Previous"
+          type="button"
+        >
+          <svg
+            class="w-[22px] h-[22px]"
+            fill="none"
+            stroke="{{ section.settings.border_color | default: '#000' }}"
+            stroke-width="1"
+            viewBox="0 0 24 24"
+          >
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/>
+          </svg>
+        </button>
+        <button
+          class="outfit-navigation-mobile flex items-center justify-center bg-color:var(--background) transition-opacity duration-300"
+          id="outfit-slider-next-mobile-{{ section.id }}"
+          aria-label="Next"
+          type="button"
+        >
+          <svg
+            class="w-[22px] h-[22px]"
+            fill="none"
+            stroke="{{ section.settings.border_color | default: '#000' }}"
+            stroke-width="1"
+            viewBox="0 0 24 24"
+          >
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="outfit-navigation-arrows desktop-arrows ">
+    <button
+      class="outfit-navigation flex items-center justify-center z-1 bg-color:var(--background)  transition-opacity duration-300"
+      id="outfit-slider-next-{{ section.id }}"
+      aria-label="Next"
+      type="button"
+      style="display: flex;"
+    >
+      <svg
+        class="w-[22px] h-[22px]"
+        fill="none"
+        stroke="{{ section.settings.border_color | default: '#000' }}"
+        stroke-width="1"
+        viewBox="0 0 24 24"
+      >
+        <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
+      </svg>
+    </button>
+  </div>
+</div>
+<style>
+  .outfit-size{
+    padding-bottom: 20px;
+  }
+  .main-product-title, .outfit-price{
+    font-size: 17px;
+    font-weight: 700;
+    line-height: 2rem;
+  }
+  .outfit-expanded-price{
+    padding-bottom: 15px;
+  }
+  .outfit-wrapper{
+    gap: 20px;
+  }
+  .outfit-section-title {
+    font-size: 74px !important;
+  }
+  .btn-text {
+    font-size: 20px;
+    font-weight: 500;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+  }
+  .outfit-sold-out {
+    font-size: 12px;
+    font-weight: 700;
+    padding: 6px;
+    border-radius: 8px;
+  }
+  .outfit-add-to-cart-btn-{{ section.id }} {
+    cursor: pointer;
+    height: 37px;
+    border-radius: {{ settings.buttons_radius }}px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+  }
+    .outfit-add-to-cart-btn-{{ section.id }}:hover {
+      background: black;
+      color: white;
+    }
+  .outfit-expand-product-btn-{{ section.id }} {
+    height: 15px;
+    width: 15px;
+    cursor: pointer;
+  }
+  .exapnded-product-img {
+    height: 316px !important;
+    width: 360px !important;
+  }
+  .outfit-navigation {
+    width: 78px !important;
+    height: 75px !important;
+    cursor: pointer;
+    position: static !important;
+  }
+  .outfit-arrow {
+    transform: rotateX(180deg);
+    height: 15px;
+    width: 15px;
+    cursor: pointer;
+    position: absolute;
+    top: 63%;
+    right: 14px;
+  }
+  .outfit-size-option-{{ section.id }}.selected {
+    background: #000 !important;
+    color: #fff !important;
+    border: none !important;
+  }
+  .outfit-size-option-{{ section.id }} {
+    transition: background 0.2s, color 0.2s;
+    height: 26px;
+    width: 38px;
+    border-radius: 4px;
+    font-size: 16px;
+    font-weight: 500;
+  }
+  .outfit-color-swatch-{{ section.id }} {
+    transition: all 0.2s ease;
+    cursor: pointer;
+  }
+  .outfit-color-swatch-{{ section.id }}.selected {
+    border: 2px solid {{ section.settings.border_color | default: '#000' }} !important;
+    box-shadow: 0 0 0 2px white, 0 0 0 4px {{ section.settings.border_color | default: '#000' }} !important;
+  }
+  .outfit-color-swatch-{{ section.id }}:hover {
+    transform: scale(1.1);
+  }
+  .main-product-card, .paired-product-card {
+    border-radius: {{ section.settings.buttons_radius | default: 8 }}px ;
+  }
+
+  .paired-product-img {
+    width: 140px !important;
+    height: 150px !important;
+  }
+
+  .paired-product-card.hidden-for-expand {
+    display: none !important;
+  }
+
+  .expanded-product-card {
+    border-radius: {{ section.settings.buttons_radius | default: 8 }}px;
+    position: absolute;
+    left: 0;
+    right: 0;
+    margin-left: auto;
+    margin-right: auto;
+    transform-origin: top center;
+    transform: scaleY(0);
+    opacity: 0;
+    pointer-events: none;
+    overflow: hidden;
+    transition: transform 0.75s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.65s cubic-bezier(0.4, 0, 0.2, 1);
+    width: 100%;
+    max-width: 440px;
+    height: 564px !important;
+    z-index: 2;
+  }
+
+  .expanded-product-card.active {
+    opacity: 1 !important;
+    pointer-events: auto;
+    transform: scaleY(1);
+    margin: 0 !important;
+    top: 0;
+    left: 0;
+    right: 0;
+  }
+  .outfit-main-img {
+    height: 512px;
+    width: 408px !important;
+    padding: 14px 14px 9px 14px;
+  }
+
+  .paired-product-slide {
+    min-height: 100%;
+  }
+
+  .paired-product-slide[data-products='1'] {
+    justify-content: center !important;
+  }
+
+  .paired-product-slide[data-products='2'] {
+    justify-content: center !important;
+  }
+
+  .mobile-arrows {
+    display: none;
+    justify-content: center;
+    gap: 16px;
+  }
+
+  .outfit-navigation-mobile {
+    width: 50px !important;
+    height: 50px !important;
+    cursor: pointer;
+  }
+
+  .desktop-arrows {
+    background: none;
+    height: auto;
+    position: static !important;
+    margin: 18px;
+  }
+  .notify-in-stock {
+   border-radius: {{ settings.buttons_radius }}px;
+    font-size: 20px;
+    font-weight: 500;
+  }
+  .outfit-inspiration-details {
+      font-size: 10px !important;
+          padding: 5px;
+    }
+
+  @media (max-width: 767px) {
+     .main-product-title{
+    font-size: 8px !important;
+    line-height: 1.2em !important;
+  }
+  .outfit-price{
+     font-size: 8px !important;
+  }
+    .paired-product-price{
+    display: none;
+  }
+     .outfit-wrapper{
+    gap: 20px;
+  }
+    .outfit-section-title {
+      font-size: 36px !important;
+    }
+    .outfit-sold-out {
+      font-size: 5px !important;
+      padding: 4px !important;
+    }
+    .desktop-arrows {
+      display: none !important;
+    }
+
+    .mobile-arrows {
+      display: flex !important;
+    }
+    .paired-product-title,
+    .outfit-expanded-title {
+      font-size: 8px !important;
+      max-height: 4.5em;
+    }
+    .main-product-card h4,
+    .paired-product-title,
+    .outfit-expanded-title {
+      word-break: break-word;
+    }
+    .outfit-expand-product-btn-{{ section.id }},
+    .outfit-arrow {
+      height: 10px !important;
+      width: 10px !important;
+    }
+    .outfit-expand-product-btn-{{ section.id }}{
+        position: absolute;
+    bottom: 5px;
+    right: 5px;}
+    .outfit-inspiration-section {
+      padding: 10px 0 !important;
+    }
+    .max-w-5xl {
+      max-width: 100vw !important;
+      padding: 0 !important;
+    }
+    .flex-row.lg\:flex-row {
+      flex-direction: row !important;
+      align-items: center !important;
+      gap: 12px !important;
+    }
+    .main-product-card {
+      width: 184px !important;
+      min-width: 0 !important;
+    }
+    .outfit-main-img {
+      height: 200px !important;
+      width: 180px !important;
+    }
+    .max-w-\[409px\] {
+      max-width: 172px !important;
+      margin-left: 8px !important;
+      margin-right: 0 !important;
+    }
+    .paired-product-card,
+    .expanded-product-card {
+      max-width: 165px !important;
+    }
+    .paired-product-card {
+      height: 75px !important;
+      width: 160px !important;
+      padding: 8px !important;
+      gap: 4px !important;
+    }
+    .paired-product-img {
+      width: 60px !important;
+      height: 60px !important;
+    }
+    .expanded-product-card {
+      max-width: 172px !important;
+      height: 250px !important;
+      left: 0;
+      right: 0;
+      margin-left: auto;
+      margin-right: auto;
+      transform-origin: top center;
+      transform: scaleY(0);
+      opacity: 0;
+      pointer-events: none;
+      overflow: hidden;
+      transition: transform 0.75s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.65s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .w-\[140px\],
+    .h-\[150px\] {
+      width: 60px !important;
+      height: 60px !important;
+    }
+    .w-\[200px\] {
+      width: 80px !important;
+    }
+    .h-\[250px\] {
+      height: 90px !important;
+    }
+    .p-6 {
+      padding: 8px !important;
+    }
+    .mb-4 {
+      margin-bottom: 6px !important;
+    }
+
+   .outfit-paired {
+      width: 165px !important;
+      min-width: 0 !important;
+      height: 250px !important;
+    }
+  }
+  .sold-out-btn:hover .btn-text {
+    opacity: 0;
+    transition: opacity 0.15s;
+  }
+  .sold-out-btn:hover .notify-in-stock {
+    opacity: 1;
+    pointer-events: auto;
+    transition: opacity 0.2s;
+  }
+  .sold-out-btn .notify-in-stock {
+    cursor: pointer;
+  }
+  .text-red-600 {
+    color: #dc2626 !important;
+  }
+  .line-through {
+    text-decoration: line-through !important;
+  }
+  .outfit-navigation,
+  .outfit-navigation-mobile,
+  .main-product-card,
+  .paired-product-card,
+  .expanded-product-card,
+  .outfit-add-to-cart-btn-{{ section.id }},
+  .outfit-size-option-{{ section.id }},
+  .outfit-color-swatch-{{ section.id }} {
+    border-color: {{ section.settings.border_color | default: '#000' }} !important;
+  }
+</style>
+<script>
+(function() {
+  'use strict';
+  
+  // Create namespaced scope for this section
+  const sectionId = '{{ section.id }}';
+  const sectionScope = `outfit-section-${sectionId}`;
+  
+  document.addEventListener('DOMContentLoaded', function () {
+    const track = document.getElementById(`outfit-slider-track-${sectionId}`);
+    const prev = document.getElementById(`outfit-slider-prev-${sectionId}`);
+    const next = document.getElementById(`outfit-slider-next-${sectionId}`);
+    const prevMobile = document.getElementById(`outfit-slider-prev-mobile-${sectionId}`);
+    const nextMobile = document.getElementById(`outfit-slider-next-mobile-${sectionId}`);
+    const slides = track ? Array.from(track.getElementsByClassName('paired-product-slide')) : [];
+    let currentSlide = 0;
+    let expandedProductId = null;
+
+    function showSlide(index) {
+      slides.forEach((slide, idx) => {
+        if (idx === index) {
+          slide.style.display = 'flex';
+          slide.style.opacity = '1';
+        } else {
+          slide.style.display = 'none';
+          slide.style.opacity = '0';
+        }
+      });
+    }
+
+    function updateArrows() {
+      if (prev && next) {
+        if (slides.length <= 1 || expandedProductId) {
+          prev.style.opacity = '0.3';
+          next.style.opacity = '0.3';
+          prev.style.pointerEvents = 'none';
+          next.style.pointerEvents = 'none';
+        } else {
+          prev.style.pointerEvents = 'auto';
+          next.style.pointerEvents = 'auto';
+          prev.style.opacity = currentSlide === 0 ? '0.3' : '1';
+          next.style.opacity = currentSlide >= slides.length - 1 ? '0.3' : '1';
+        }
+      }
+      if (prevMobile && nextMobile) {
+        if (slides.length <= 1 || expandedProductId) {
+          prevMobile.style.opacity = '0.3';
+          nextMobile.style.opacity = '0.3';
+          prevMobile.style.pointerEvents = 'none';
+          nextMobile.style.pointerEvents = 'none';
+        } else {
+          prevMobile.style.pointerEvents = 'auto';
+          nextMobile.style.pointerEvents = 'auto';
+          prevMobile.style.opacity = currentSlide === 0 ? '0.3' : '1';
+          nextMobile.style.opacity = currentSlide >= slides.length - 1 ? '0.3' : '1';
+        }
+      }
+    }
+
+    function updateSlider() {
+      showSlide(currentSlide);
+      updateArrows();
+    }
+
+    function expandProduct(productId) {
+      const currentSlideElement = slides[currentSlide];
+      const compactCard = currentSlideElement.querySelector(`[data-product-id="${productId}"][data-section-id="${sectionId}"].paired-product-card`);
+      const expandedCard = currentSlideElement.querySelector(`[data-product-id="${productId}"][data-section-id="${sectionId}"].expanded-product-card`);
+
+      if (compactCard && expandedCard) {
+        currentSlideElement.querySelectorAll(`[data-section-id="${sectionId}"].paired-product-card`).forEach((card) => {
+          card.classList.add('hidden-for-expand');
+        });
+        expandedCard.classList.add('active');
+
+        expandedProductId = productId;
+        updateArrows();
+      }
+    }
+
+    function collapseProduct(productId) {
+      const currentSlideElement = slides[currentSlide];
+      const expandedCard = currentSlideElement.querySelector(`[data-product-id="${productId}"][data-section-id="${sectionId}"].expanded-product-card`);
+
+      if (expandedCard) {
+        expandedCard.classList.remove('active');
+
+        currentSlideElement.querySelectorAll(`[data-section-id="${sectionId}"].paired-product-card`).forEach((card) => {
+          card.classList.remove('hidden-for-expand');
+        });
+
+        expandedProductId = null;
+        updateArrows();
+      }
+    }
+
+    if (slides.length > 0) {
+      showSlide(0);
+      updateArrows();
+      
+      // Section-specific event delegation
+      document.addEventListener('click', function (e) {
+        // Check if click is within this section
+        const targetSection = e.target.closest('[data-section-id]');
+        if (!targetSection || targetSection.getAttribute('data-section-id') !== sectionId) {
+          return;
+        }
+
+        if (e.target.closest(`.outfit-expand-product-btn-${sectionId}`)) {
+          e.preventDefault();
+          const btn = e.target.closest(`.outfit-expand-product-btn-${sectionId}`);
+          const productId = btn.getAttribute('data-product-id');
+
+          if (window.innerWidth <= 767) {
+            const productCard = btn.closest('.paired-product-card');
+            const productUrl = productCard.getAttribute('data-product-url');
+            if (productUrl) {
+              window.location.href = productUrl;
+              return;
+            }
+          }
+
+          expandProduct(productId);
+        }
+
+        if (e.target.closest(`.outfit-close-expanded-btn-${sectionId}`)) {
+          e.preventDefault();
+          const btn = e.target.closest(`.outfit-close-expanded-btn-${sectionId}`);
+          const productId = btn.getAttribute('data-product-id');
+          collapseProduct(productId);
+        }
+      });
+
+      prev?.addEventListener('click', (e) => {
+        e.preventDefault();
+        if (currentSlide > 0 && !expandedProductId) {
+          currentSlide--;
+          updateSlider();
+        }
+      });
+
+      next?.addEventListener('click', (e) => {
+        e.preventDefault();
+        if (currentSlide < slides.length - 1 && !expandedProductId) {
+          currentSlide++;
+          updateSlider();
+        }
+      });
+
+      prevMobile?.addEventListener('click', (e) => {
+        e.preventDefault();
+        if (currentSlide > 0 && !expandedProductId) {
+          currentSlide--;
+          updateSlider();
+        }
+      });
+
+      nextMobile?.addEventListener('click', (e) => {
+        e.preventDefault();
+        if (currentSlide < slides.length - 1 && !expandedProductId) {
+          currentSlide++;
+          updateSlider();
+        }
+      });
+    } else {
+      if (prev) prev.style.display = 'none';
+      if (next) next.style.display = 'none';
+      if (prevMobile) prevMobile.style.display = 'none';
+      if (nextMobile) nextMobile.style.display = 'none';
+    }
+
+    console.log(`Outfit section ${sectionId} - Total slides found:`, slides.length);
+  });
+
+  // Handle size and color option selections - section specific
+  document.addEventListener('click', function (e) {
+    // Check if click is within this section
+    const targetSection = e.target.closest('[data-section-id]');
+    if (!targetSection || targetSection.getAttribute('data-section-id') !== sectionId) {
+      return;
+    }
+
+    if (e.target.classList.contains(`outfit-size-option-${sectionId}`) && !e.target.disabled) {
+      const selectedBtn = e.target;
+      const expandedCard = selectedBtn.closest(`[data-section-id="${sectionId}"].expanded-product-card`);
+
+      if (expandedCard) {
+        expandedCard.querySelectorAll(`.outfit-size-option-${sectionId}`).forEach((option) => {
+          option.classList.remove('selected');
+        });
+        selectedBtn.classList.add('selected');
+        const form = expandedCard.querySelector(`.outfit-form-${sectionId}`);
+        if (form) {
+          const variantId = selectedBtn.getAttribute('data-variant-id');
+          form.querySelector('input[name="id"]').value = variantId;
+        }
+      }
+    }
+    
+    if (e.target.classList.contains(`outfit-color-swatch-${sectionId}`) && !e.target.disabled) {
+      const selectedSwatch = e.target;
+      const expandedCard = selectedSwatch.closest(`[data-section-id="${sectionId}"].expanded-product-card`);
+
+      if (expandedCard) {
+        expandedCard.querySelectorAll(`.outfit-color-swatch-${sectionId}`).forEach((swatch) => {
+          swatch.classList.remove('selected');
+        });
+        selectedSwatch.classList.add('selected');
+        const form = expandedCard.querySelector(`.outfit-form-${sectionId}`);
+        if (form) {
+          const variantId = selectedSwatch.getAttribute('data-variant-id');
+          form.querySelector('input[name="id"]').value = variantId;
+        }
+      }
+    }
+  });
+
+  // Handle add to cart - section specific
+  document.addEventListener('click', function (e) {
+    if (!e.target.closest(`.outfit-add-to-cart-btn-${sectionId}`)) return;
+    
+    // Check if click is within this section
+    const targetSection = e.target.closest('[data-section-id]');
+    if (!targetSection || targetSection.getAttribute('data-section-id') !== sectionId) {
+      return;
+    }
+
+    e.preventDefault();
+    const form = e.target.closest(`.outfit-form-${sectionId}`);
+    const button = form.querySelector(`.outfit-add-to-cart-btn-${sectionId}`);
+    const btnText = button.querySelector('.btn-text');
+    const spinner = button.querySelector('.loading-spinner');
+
+    // Show loading state
+    button.disabled = true;
+    btnText.classList.add('hidden');
+    spinner.classList.remove('hidden');
+
+    // Check if theme has custom cart handling (like Dawn theme)
+    if (typeof window.theme !== 'undefined' && window.theme.cart) {
+      // Use theme's cart methods if available
+      handleThemeCartAdd(form, button, btnText, spinner, sectionId);
+    } else if (typeof CartJS !== 'undefined') {
+      // Use CartJS if available
+      handleCartJSAdd(form, button, btnText, spinner, sectionId);
+    } else {
+      // Fallback to regular form submission (respects theme settings)
+      handleRegularFormSubmission(form, button, btnText, spinner, sectionId);
+    }
+  });
+
+  // Handle theme-specific cart addition
+  function handleThemeCartAdd(form, button, btnText, spinner, sectionId) {
+    const formData = new FormData(form);
+    
+    fetch(window.Shopify.routes.root + 'cart/add.js', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Requested-With': 'XMLHttpRequest'
+      },
+      body: JSON.stringify({
+        items: [{
+          id: formData.get('id'),
+          quantity: parseInt(formData.get('quantity'))
+        }]
+      })
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.status) {
+        throw new Error(data.description || 'Error adding product to cart');
+      }
+
+      // Show success message
+      btnText.textContent = 'ADDED!';
+      setTimeout(() => {
+        btnText.textContent = 'ADD TO CART';
+      }, 2000);
+
+      // Trigger theme's cart update events
+      document.dispatchEvent(new CustomEvent('cart:updated', {
+        detail: { cart: data }
+      }));
+
+      // Try to trigger common theme events
+      if (window.theme && window.theme.cart && window.theme.cart.updateCartCount) {
+        window.theme.cart.updateCartCount();
+      }
+
+      // Trigger drawer opening if theme supports it
+      if (document.querySelector('[data-cart-drawer]')) {
+        document.querySelector('[data-cart-drawer]').classList.add('active');
+      }
+    })
+    .catch(error => {
+      console.error('Error:', error);
+      btnText.textContent = 'NOT AVAILABLE';
+      setTimeout(() => {
+        btnText.textContent = 'ADD TO CART';
+      }, 2000);
+    })
+    .finally(() => {
+      button.disabled = false;
+      btnText.classList.remove('hidden');
+      spinner.classList.add('hidden');
+    });
+  }
+
+  // Handle CartJS addition
+  function handleCartJSAdd(form, button, btnText, spinner, sectionId) {
+    const formData = new FormData(form);
+    
+    CartJS.addItem(formData.get('id'), parseInt(formData.get('quantity')), {}, {
+      success: function(data, textStatus, jqXHR) {
+        btnText.textContent = 'ADDED!';
+        setTimeout(() => {
+          btnText.textContent = 'ADD TO CART';
+        }, 2000);
+      },
+      error: function(jqXHR, textStatus, errorThrown) {
+        console.error('CartJS Error:', errorThrown);
+        btnText.textContent = 'NOT AVAILABLE';
+        setTimeout(() => {
+          btnText.textContent = 'ADD TO CART';
+        }, 2000);
+      },
+      complete: function() {
+        button.disabled = false;
+        btnText.classList.remove('hidden');
+        spinner.classList.add('hidden');
+      }
+    });
+  }
+
+  // Handle regular form submission 
+  function handleRegularFormSubmission(form, button, btnText, spinner, sectionId) {
+    // Create a temporary form for submission
+    const tempForm = form.cloneNode(true);
+    tempForm.style.display = 'none';
+    tempForm.action = '/cart/add';
+    tempForm.method = 'POST';
+    
+    // Remove the custom event handlers from the temp form
+    const tempButton = tempForm.querySelector(`.outfit-add-to-cart-btn-${sectionId}`);
+    if (tempButton) {
+      tempButton.type = 'submit';
+      tempButton.onclick = null;
+    }
+
+    document.body.appendChild(tempForm);
+    
+    btnText.textContent = 'ADDING...';
+    
+    // Submit the form 
+    setTimeout(() => {
+      tempForm.submit();
+    }, 500);
+
+    // Clean up
+    setTimeout(() => {
+      if (document.body.contains(tempForm)) {
+        document.body.removeChild(tempForm);
+      }
+    }, 1000);
+  }
+
+})();
+</script>
+
+{% schema %}
+{
+  "name": "Outfit Inspiration",
+  "tag": "section",
+  "enabled_on": { "templates": ["product"] },
+  "settings": [
+    {
+      "type": "text",
+      "id": "title",
+      "label": "Section Title",
+      "default": "Outfit Inspiration"
+    },
+    {
+      "type": "select",
+      "id": "title_align",
+      "label": "Section Title Alignment",
+      "options": [
+        { "value": "left", "label": "Left" },
+        { "value": "center", "label": "Center" },
+        { "value": "right", "label": "Right" }
+      ],
+      "default": "left"
+    },
+    {
+      "type": "text",
+      "id": "redirect_link",
+      "label": "Redirect Link",
+      "default": "Show Full Details"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_full_details_link",
+      "label": "Show 'Show full details' link below Add to Cart",
+      "default": true
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "t:sections.all.colors.label",
+      "default": "scheme-1"
+    },
+    {
+      "type": "color",
+      "id": "border_color",
+      "label": "Border Color",
+      "default": "#000000"
+    },
+    {
+      "type": "range",
+      "id": "buttons_radius",
+      "label": "Border Radius (px)",
+      "min": 0,
+      "max": 25,
+      "step": 1,
+      "default": 8
+    }
+  ],
+  "blocks": [
+    {
+      "type": "product_group",
+      "name": "Paired Products",
+      "settings": [
+        {
+          "type": "product",
+          "id": "product_1",
+          "label": "Product 1"
+        },
+        {
+          "type": "product",
+          "id": "product_2",
+          "label": "Product 2"
+        },
+        {
+          "type": "product",
+          "id": "product_3",
+          "label": "Product 3"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Outfit Inspiration"
+    }
+  ]
+}
+{% endschema %}

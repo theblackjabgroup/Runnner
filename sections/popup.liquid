@@ -1,0 +1,505 @@
+<div id="promo-overlay" class="fixed inset-0 bg-black/50 hidden z-[1000] overflow-y-auto">
+  <div class="absolute inset-0 flex items-center justify-center p-4">
+    <div class="divisionpopup relative" style="height:64.8vh; width:51.1vw;">
+     <button
+  id="promo-close"
+  class="absolute top-2 right-2 md:top-4 md:right-4 z-10 cursor-pointer"
+  aria-label="Close popup"
+>
+  <svg role="img" width="35" height="35" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" class="needsclick kl-private-reset-css-Xuajs1">
+    <title id="title-Close-dialog">Close dialog</title>
+    <path d="M6 6L14 14M6 14L14 6L6 14Z" stroke="var(--text)" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" style="cursor: pointer;"></path>
+  </svg>
+</button>
+
+      <div id="popup-content" class="popup-container color-{{ section.settings.color_scheme }} overflow-hidden shadow-xl h-full md:h-[450px]" style="height:64.8vh; width:51.1vw;">
+        <div id="popup-inner" class="flex flex-col-reverse md:flex-row w-full h-full">
+          <!-- Text Section -->
+          <div class="w-full md:w-1/2 flex items-center justify-center p-4 md:p-6 color-{{ section.settings.color_scheme }}" style="padding:20px;">
+            <div class="md:w-[350px]">
+            <h2
+  class="popup-header text-header-color mb-2 !tracking-tight uppercase text-center md:p-3"
+  style="font-size:var(--t-h-5-size); font-weight:var(--t-h-5-weight); line-height:var(--t-h-5-line-height); width:270px; margin-left:3.75vw;"
+>
+  {% assign words = section.settings.header | split: ' ' %}
+  {% for word in words %}
+    {{ word }}
+    {% assign index = forloop.index0 %}
+    {% assign mod = index | modulo: 3 %}
+    {% if index != 0 and mod == 2 %}
+      <br>
+    {% else %}
+      {% unless forloop.last %} {% endunless %}
+    {% endif %}
+  {% endfor %}
+</h2>
+
+              <p class="popup-sub-header text-sub-header-color leading-none mb-2 text-base tracking-tighter text-center" style="width:310px; margin-left:2.2vw; word-spacing:1px; margin-top:0.7vh; font-size:var(--t-b-3-size); font-weight:var(--t-b-3-weight); line-height:var(--t-b-3-line-height);">
+  {{ section.settings.sub_header }}
+</p>
+
+              <p class="popup-bracket-header text-bracket-header-color text-sm tracking-tighter py-2 text-center" style="font-style:italic; font-size:var(--t-b-4-size); font-weight:var(--t-b-4-weight); line-height:var(--t-b-4-line-height); padding-bottom:20px;">
+  {% if section.settings.bracket_header != blank %}
+    ({{ section.settings.bracket_header }})
+  {% endif %}
+</p>
+
+              <!-- Shopify Customer Form for Email Signup -->
+              {% form 'customer', id: 'email-signup-form1', class: 'email-signup-container newsletter-form', style: 'padding-left: 1.05vw; padding-right: 1.05vw;'  %}
+                {% if form.posted_successfully? %}
+                  <script>
+                    // Auto-trigger thank you popup on successful submission
+                    document.addEventListener('DOMContentLoaded', function() {
+                      setTimeout(function() {
+                        updatePopupToThankYou();
+                      }, 100);
+                    });
+                  </script>
+                {% endif %}
+
+                {% if form.errors %}
+                  <div class="form-errors mb-4">
+                    {% for error in form.errors %}
+                      <p class="text-red-500 text-sm">{{ error }}</p>
+                    {% endfor %}
+                  </div>
+                {% endif %}
+
+                <div class="email-holder">
+                  <input
+                    type="email"
+                    name="customer[email]"
+                    placeholder="Email address"
+                    class="emailaddr w-full focus:outline-none focus:ring-2 focus:ring-black border-input-color placeholder:text-[var(--t-b-3-size)]"
+                    style="font-family: var(--font-primary); border-radius: 4px; height: 50px; width:22.9vw; border-width:1px; padding-left:16px;"
+                    required
+                  />
+                  
+                  <!-- Hidden fields for customer creation -->
+                  <input type="hidden" name="customer[tags]" value="newsletter-signup">
+                  <input type="hidden" name="customer[accepts_marketing]" value="true">
+                </div>
+
+                <button
+                  type="submit"
+                  id="get-access"
+                  class="transition duration-200 cursor-pointer !font-[600]"
+                  style="font-family: var(--font-primary); border-radius: 4px; font-size:var(--t-b-3-size); font-weight:var(--t-b-3-weight); line-height:var(--t-b-3-line-height);height: 7.4vh; margin-top: 10px; margin-left:2px; width:22.9vw;">
+                  {{ section.settings.btn }}
+                </button>
+              {% endform %}
+
+            </div>
+          </div>
+          <!-- Image Section -->
+          
+          <div class="imgdiv w-full md:w-1/2 aspect-[4/3] md:aspect-auto">
+
+            {% if section.settings.image != blank %}
+              <div class="h-full w-full">
+                {{ section.settings.image | image_url: width: 1200 | image_tag:
+                  class: 'imgdiv-img w-full h-full object-cover',
+                  alt: 'Offer Promo',
+                  loading: 'lazy' }}
+              </div>
+           {% else %}
+              <div class="w-full h-6/5 md:h-9/5 bg-black-200 flex items-center justify-center">
+                {% if section.settings.image %}
+  {{ section.settings.image | image_url: width: 1200 | image_tag: class: "w-full h-full object-cover", alt: "Custom Image" }}
+{% else %}
+  <div 
+    aria-label="Default Placeholder Image"
+    role="img"
+    class="w-full h-full object-cover"
+  >
+    {{ 'collection-1' | placeholder_svg_tag }}
+  </div>
+{% endif %}
+
+              </div>
+          {% endif %}
+
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+  #get-access::placeholder{
+    margin-top:1.45vh;
+  }
+  #get-access{
+     background-color: var(--secondary_button_label);
+    color: var(--secondary_button_text_color);
+  }
+  input::placeholder {
+  font-size:var(--t-b-3-size); font-weight:var(--t-b-3-weight); line-height:var(--t-b-3-line-height);
+  color: var(--text);
+    letter-spacing:0.1px;
+}
+
+  #submit-contact{
+     background-color: var(--secondary_button_label);
+    color: var(--secondary_button_text_color);
+  }
+  #submit-contact:hover {
+  background-color:var(--hovered_secondary_button_label);
+  color: var(--hovered_secondary_button_text_color);
+}
+
+  input:focus {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+#promo-overlay ::selection {
+  background-color: white;
+  color: var(--accent);
+}
+.text-sub-header-color {
+  color: var(--text); 
+}
+
+.text-bracket-header-color {
+  color: var(--text); 
+}
+
+.text-header-color {
+  color: var(--text); 
+}
+
+ .border-input-color {
+  border: 1px solid var(--text); 
+}
+   #get-access:hover {
+     background-color:var(--hovered_secondary_button_label);
+  color: var(--hovered_secondary_button_text_color);
+  }
+
+  .form-errors {
+    color: #ef4444;
+    font-size:var(--t-b-3-size); font-weight:var(--t-b-3-weight); line-height:var(--t-b-3-line-height);
+    margin-bottom: 1rem;
+  }
+
+  @media(max-width:1296px){
+    #popup-content{
+      width:59vw !important;
+    }
+    .divisionpopup{
+      height:32vw !important;
+      width:59.4vw !important;
+    }
+    .popup-header{
+      margin-left:2.75vw !important;
+    }
+    .popup-sub-header{
+      margin-left:0.4vw !important;
+    }
+    .emailaddr, #get-access{
+      width:26vw !important;
+    }
+  }
+  @media (max-width: 767px) {
+    .imgdiv {
+  margin-left: 0px !important;
+  height: 50vh !important;
+  overflow: hidden !important;
+}
+
+.imgdiv-img {
+          height: 145% !important;
+        width: 100% !important;
+        object-fit: cover !important;
+        object-position: center center !important;
+        display: block !important;
+        max-height: 60vh;
+}
+    .emailaddr{
+      width:325px !important;
+      margin-left:0px !important;
+    }
+    #get-access{
+      width:325px !important;
+      margin-left:0px !important;
+    }
+    .popup-header{
+      margin-left:27px !important;
+    }
+    .popup-sub-header{
+      margin-left:6px !important;
+    }
+    #popup-content {
+    width: 93vw !important;
+    height: 85vh !important;
+  }
+
+  .divisionpopup {
+    height: 85vh !important;
+    width: 93vw !important;
+  }
+    .promo-close{
+      width:16vw !important;
+      height:12vh !important;
+    }
+  }
+    
+</style>
+
+<script>
+  function showPromo() {
+    document.getElementById('promo-overlay').classList.remove('hidden');
+    console.log('Popup shown');
+  }
+
+  function hidePromo() {
+    document.getElementById('promo-overlay').classList.add('hidden');
+    console.log('Popup hidden');
+  }
+
+  function attachEventListeners() {
+    const closeButton = document.getElementById('promo-close');
+
+    if (closeButton) {
+      closeButton.addEventListener('click', hidePromo);
+    }
+
+    // Handle form submission with AJAX for better user experience
+    const form = document.getElementById('email-signup-form1');
+    if (form) {
+      form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const formData = new FormData(form);
+        const email = formData.get('customer[email]');
+        
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!email || !emailRegex.test(email)) {
+          alert('Please enter a valid email address.');
+          return;
+        }
+        fetch(form.action, {
+          method: 'POST',
+          body: formData,
+          headers: {
+            'X-Requested-With': 'XMLHttpRequest'
+          }
+        })
+        .then(response => response.text())
+        .then(data => {
+          // Clear the form
+          form.reset();
+          
+          // Show thank you popup
+          updatePopupToThankYou();
+          console.log('Email submitted successfully:', email);
+        })
+        .catch(error => {
+          console.error('Error submitting form:', error);
+          alert('There was an error submitting your email. Please try again.');
+        });
+      });
+    }
+  }
+
+  function updatePopupToThankYou() {
+    const textSection = document.querySelector('#popup-inner .w-full.md\\:w-1\\/2');
+
+    if (textSection) {
+      textSection.innerHTML = `
+        <div class="w-full max-w-md text-center px-0">
+          <h3 class="popup-header !font-[500] mb-4 !tracking-tighter uppercase text-base md:text-lg">
+            {{ section.settings.popupheader }}
+          </h3>
+          <p class="popup-bracket-header text-sm md:text-xl text-black-200 mb-6 md:mb-8 font-[400] tracking-tighter py-2">
+            ({{ section.settings.bracket }})
+          </p>
+
+          {% form 'customer', id: 'contact-signup-form', class: 'contact-signup-container' %}
+            <div class="email-holder my-2">
+              <input
+                type="tel"
+                name="customer[phone]"
+                placeholder="Contact number"
+                class="w-full px-4 py-2 border-[2.5px] border-black rounded-md focus:outline-none focus:ring-2 focus:ring-black"
+                style="font-family: var(--font-primary); height:48px;"
+              />
+              <input type="hidden" name="customer[tags]" value="newsletter-signup,phone-collected">
+            </div>
+            <button
+              type="submit"
+              id="submit-contact"
+              class="w-full bg-black text-white hover:bg-orange-500 transition duration-200 cursor-pointer !font-[500] rounded-lg"
+              style="font-family: var(--font-primary); margin-top:10px; height:48px;">
+              {{ section.settings.secondbtn }}
+            </button>
+          {% endform %}
+
+          <div id="accept-offer" class="mt-6 text-xl text-black-700 underline cursor-pointer hover:text-black font-sans hover:text-orange-500 mb-6 font-medium">
+            {{ section.settings.offertext }}
+          </div>
+
+          <div class="text-sm md:text-lg mt-4 font-sans text-black-500 break-words leading-none">
+            {{ section.settings.declaration }}
+          </div>
+        </div>
+      `;
+
+      attachContactSubmitListener();
+      attachAcceptOfferListener();
+    }
+  }
+
+  function attachContactSubmitListener() {
+    const contactForm = document.getElementById('contact-signup-form');
+
+    if (contactForm) {
+      contactForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const formData = new FormData(contactForm);
+        const contactNumber = formData.get('customer[phone]');
+        
+        if (!contactNumber) {
+          alert('Please enter your contact number.');
+          return;
+        }
+        if (!/^[0-9+\-\s()]{10,15}$/.test(contactNumber)) {
+          alert('Please enter a valid contact number.');
+          return;
+        }
+
+        // Submit contact form via AJAX
+        fetch(contactForm.action, {
+          method: 'POST',
+          body: formData,
+          headers: {
+            'X-Requested-With': 'XMLHttpRequest'
+          }
+        })
+        .then(response => response.text())
+        .then(data => {
+          contactForm.reset();
+          hidePromo();
+          console.log('Contact submitted successfully:', contactNumber);
+        })
+        .catch(error => {
+          console.error('Error submitting contact:', error);
+          alert('There was an error submitting your contact. Please try again.');
+        });
+      });
+    }
+  }
+
+  function attachAcceptOfferListener() {
+    const acceptOffer = document.getElementById('accept-offer');
+
+    if (acceptOffer) {
+      acceptOffer.addEventListener('click', function () {
+        hidePromo(); 
+      });
+    }
+  }
+
+  document.addEventListener('DOMContentLoaded', function () {
+    attachEventListeners();
+    setTimeout(showPromo, {{ section.settings.initial_delay | default: 1 }} * 1000);
+  });
+
+  document.addEventListener('shopify:section:load', function(event) {
+    if (event.detail.sectionId.includes('popup')) {
+      setTimeout(showPromo, 500);
+      attachEventListeners();
+    }
+  });
+</script>
+
+{% schema %}
+{
+  "name": "Popup",
+  "disabled_on": {
+      "groups": ["footer", "header"]
+    },
+  "settings": [
+     {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "default": "scheme-1",
+      "label": "Color Scheme"
+    },
+    { 
+      "type": "text", 
+      "id": "header", 
+      "default": "RECIEVE 10% OFFER & FREE SHIPPING", 
+      "label": "Heading for first line" 
+    },
+    { 
+      "type": "text", 
+      "id": "sub_header", 
+      "default": "On your first order. And stay updated on new releases, events, stories and more.",
+      "label": "Heading for second line" 
+    },
+    { 
+      "type": "text",
+      "id": "bracket_header",
+      "default": "Your code will be emailed",
+      "label": "Heading for mail line"
+    },
+    {
+      "type": "text",
+      "id": "btn",
+      "default": "SUBMIT",
+      "label": "Text for access button" 
+    },
+    {
+      "type": "image_picker",
+      "id": "image",
+      "label": "Image to be displayed"
+    },
+    {
+      "type": "range",
+      "id": "initial_delay",
+      "min": 0,
+      "max": 10,
+      "step": 1,
+      "default": 1,
+      "label": "Initial delay before popup appears (seconds)"
+    },
+    {
+      "type": "text",
+      "id": "popupheader",
+      "default": "Thank you for Subscribing!",
+      "label": "Thank you popup heading"
+    },
+    {
+      "type": "text",
+      "id": "bracket",
+      "default": "Your code has been sent to your email",
+      "label": "Bracket heading in Thank You popup"
+    },
+    {
+      "type": "text",
+      "id": "secondbtn",
+      "default": "Submit Contact",
+      "label": "Text for submit contact button"
+    },
+    {
+      "type": "text",
+      "id": "offertext",
+      "default": "I am good with 10% offer",
+      "label": "Offer accept text"
+    },
+    {
+      "type": "text",
+      "id": "declaration",
+      "default": "By clicking submit, you agree to our terms and conditions.",
+      "label": "Declaration text below offer accept"
+    }
+  ],
+  "presets": [
+    { "name": "Pop Up" }
+  ]
+}
+{% endschema %}

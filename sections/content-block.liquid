@@ -1,0 +1,606 @@
+{% if section.settings.enabled %}
+  {% assign section_classes = 'cb-container-image-and-text' %}
+  {% if section.settings.color_scheme %}
+    {% assign section_classes = section_classes | append: ' color-' | append: section.settings.color_scheme %}
+    {% unless section.settings.color_scheme == '1' %}
+      {% assign section_classes = section_classes | append: ' invert-arrow' %}
+    {% endunless %}
+  {% endif %}
+  <section id="section-{{ section.id }}" class="{{ section_classes }} cb-fade-in">
+    <div class="cb-left">
+      <div class="cb-left-img" id="cb-left-img">
+        {% if section.settings.image %}
+          <img
+            srcset="
+              {%- if section.settings.image.width >= 165 -%}{{ section.settings.image | image_url: width: 165 }} 165w,{%- endif -%}
+              {%- if section.settings.image.width >= 360 -%}{{ section.settings.image | image_url: width: 360 }} 360w,{%- endif -%}
+              {%- if section.settings.image.width >= 535 -%}{{ section.settings.image | image_url: width: 535 }} 535w,{%- endif -%}
+              {%- if section.settings.image.width >= 750 -%}{{ section.settings.image | image_url: width: 750 }} 750w,{%- endif -%}
+              {%- if section.settings.image.width >= 1070 -%}{{ section.settings.image | image_url: width: 1070 }} 1070w,{%- endif -%}
+              {%- if section.settings.image.width >= 1500 -%}{{ section.settings.image | image_url: width: 1500 }} 1500w,{%- endif -%}
+              {{ section.settings.image | image_url }} {{ section.settings.image.width }}w
+            "
+            src="{{ section.settings.image | image_url: width: 750 }}"
+            alt="Image"
+            width="auto"
+            height="100%"
+            loading="lazy"
+          >
+        {% else %}
+          <div style="width: 500px; height: 100%;">
+            {{ 'collection-1' | placeholder_svg_tag }}
+          </div>
+        {% endif %}
+      </div>
+    </div>
+    <div class="cb-right" id="cb-right">
+      <div class="cb-right-data">
+        <h2>{{ section.settings.main_heading }}</h2>
+        {% for block in section.blocks %}
+          {% if block.type == 'paragraph' %}
+            <p>{{ block.settings.paragraph_text }}</p>
+          {% endif %}
+        {% endfor %}
+      </div>
+      <div class="cb-accordion">
+        {% for block in section.blocks %}
+          {% if block.type == 'accordion_item' %}
+            <div class="cb-accordion-item">
+              <div class="cb-accordion-header">
+                <h3>{{ block.settings.heading }}</h3>
+                {% comment %}
+                  <svg class="cb-svg-arrow-down" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M13.3964 13.0312C12.1408 14.1889 10.9749 15.8451 9.89865 18L8.07175 18C6.99552 15.8504 5.8296 14.1941 4.57399 13.0312C3.96693 12.4629 3.25037 12.0168 2.46544 11.7183C1.68051 11.4199 0.842667 11.2751 1.90735e-06 11.2922V8.54366C2.07534 8.54366 3.73901 9.03094 4.99103 10.0055C6.26318 11.0123 7.17333 12.386 7.59013 13.9282L7.70045 13.9282L7.70045 -2.57632e-09L10.2834 -1.93022e-09L10.2834 13.9282L10.4368 13.9282C10.8363 12.3852 11.7386 11.0091 13.009 10.0055C14.2646 9.02919 15.9283 8.54192 18 8.54366V11.2922C17.1526 11.2725 16.3095 11.4161 15.5194 11.7146C14.7293 12.013 14.0078 12.4605 13.3964 13.0312Z" fill="currentColor"></path>
+                  </svg>
+                {% endcomment %}
+                {% comment %}
+                  <img
+                    src="{{ "arrow-down.png" | asset_url }}"
+                    alt="Dropdown Icon"
+                    class="w-12 h-6 object-contain transition-transform duration-300 group-hover:-rotate-90 cb-arrow-img"
+                    width="100%"
+                    height="auto"
+                    aria-hidden="true"
+                  >
+                {% endcomment %}
+                <div
+                  class="cb-arrow-img"
+                  alt="Dropdown Icon"
+                >
+                  <svg class="cb-plus-minus-icon" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <line x1="5" y1="10" x2="15" y2="10" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                    <line class="cb-vertical-line" x1="10" y1="5" x2="10" y2="15" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                  </svg>
+                  {% comment %}
+                    <svg
+                      class="cb-arrow-svg transition-transform duration-200 ease-in-out"
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="100%"
+                      height="auto"
+                      stroke-width="5"
+                      viewBox="0 0 20 20"
+                      style="transform: scale(1.5);"
+                    >
+                      <g transform="rotate(270 12 12)">
+                        <path stroke-width="5" d="M12 4c.552 0 1 .448 1 1v10.586l3.293-3.293a1 1 0 1 1 1.414 1.414l-5 5a1 1 0 0 1-1.414 0l-5-5a1 1 0 0 1 1.414-1.414L11 15.586V5c0-.552.448-1 1-1z"/>
+                      </g>
+                    </svg>
+                  {% endcomment %}
+                </div>
+              </div>
+              <div class="cb-accordion-content">
+                <h4>{{ block.settings.subheading }}</h4>
+                {% assign paragraphs = block.settings.content | split: '||' %}
+                {% comment %} <p>{{ block.settings.content }}</p> {% endcomment %}
+                {% for paragraph in paragraphs %}
+                  <p style="padding-bottom: 10px;">{{ paragraph }}</p>
+                {% endfor %}
+              </div>
+            </div>
+          {% endif %}
+        {% endfor %}
+      </div>
+    </div>
+  </section>
+{% endif %}
+
+<style>
+  /* Use Shopify color scheme variables, scoped to section */
+  section.cb-container-image-and-text {
+    margin-bottom: 50px 0px;
+    display: flex;
+    gap: 20px;
+    position: relative;
+    flex-direction: row;
+    /* padding: 2.5rem; */
+    color: var(--text);
+    background-color: rgb(var(--color-background));
+    overflow: visible;
+    align-items: stretch;
+    height: 100%;
+    padding: {{ settings.sections_spacing }}px {{ settings.side_space}}px;
+  }
+
+  /* Fade-in animation styles */
+  section.cb-container-image-and-text.cb-fade-in {
+    opacity: 0;
+    transform: translateY(30px);
+    transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+  }
+
+  section.cb-container-image-and-text.cb-fade-in.cb-visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  section.cb-container-image-and-text .cb-right {
+    width: 50%;
+    box-sizing: border-box;
+    align-items: flex-start;
+    overflow-y: auto;
+    overflow-x: hidden; /* Prevent horizontal scroll */
+    /* padding: 0 20px; */
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    /* gap: 24px; */
+    /* height: 100vh; Take full viewport height */
+  }
+
+  section.cb-container-image-and-text #cb-right {
+    width: 50%;
+  }
+
+  section.cb-container-image-and-text a{
+    text-decoration: underline;
+  }
+
+  section.cb-container-image-and-text ul{
+    list-style-type: disc;
+    margin-left: 20px;
+    padding-bottom: 10px;
+  }
+
+  section.cb-container-image-and-text li{
+    line-height: 1;
+    padding-bottom: 10px;
+    font-size: 19px;
+  }
+
+  section.cb-container-image-and-text .cb-left {
+    position: sticky;
+    top: 55px;
+    max-width: 50vw; /* Subtract top and bottom padding */
+    width: 50%;
+    display: flex;
+    align-items: start;
+    justify-content: center;
+    /* pointer-events: none; */
+    box-sizing: border-box;
+    /* height: 50vw; */
+  }
+
+  section.cb-container-image-and-text .cb-left img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+    width: auto;
+    /* pointer-events:  none; */
+  }
+
+  section.cb-container-image-and-text #cb-left-img {
+    /* pointer-events: none; */
+    position: sticky;
+    top: 55px;
+  }
+
+  section.cb-container-image-and-text ::selection {
+    /* background: none; */
+    color: var(--accent) !important;
+  }
+
+  section.cb-container-image-and-text .cb-right-data {
+    flex: 1 1 auto;
+    width: 100%;
+    align-items: flex-start;
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 50px;
+  }
+
+  section.cb-container-image-and-text .cb-right-data h2{
+    font-family: var(--font-heading-family);
+    font-style: var(--font-heading-style);
+    font-weight: var(--font-heading-weight);
+  }
+
+  section.cb-container-image-and-text .cb-right-data p{
+    font-family: var(--font-body-family);
+    font-style: var(--font-body-style);
+    font-weight: var(--font-body-weight);
+  }
+
+  section.cb-container_image_and_text .cb-right h2,
+  section.cb-container_image_and_text .cb-right p {
+    text-align: left;
+    width: 100%;
+  }
+
+  section.cb-container-image-and-text .cb-right h2 {
+    font-size: 20px;
+    font-weight: 500;
+    /* line-height: 5rem; */
+    color: rgb(var(--text));
+    text-align: left;
+    padding-bottom: 0;
+    margin-bottom: 40px;
+    /* padding-top: 1.2rem; */
+    /* font-family: "Space Grotesk", sans-serif; */
+    margin-top: 0;
+    margin-left: 0;
+    margin-right: 0;
+  }
+
+  section.cb-container-image-and-text .cb-right p {
+    letter-spacing: 0.02em;
+    text-align: left;
+    font-size: 16px;
+    line-height: 2.25rem;
+    /* font-family: "Space Grotesk", sans-serif; */
+    margin: 0;
+    padding-bottom: 20px;
+  }
+
+  section.cb-container-image-and-text .cb-accordion {
+    margin-top: auto;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    border-bottom: 1px solid var(--text);
+  }
+
+  section.cb-container-image-and-text .cb-accordion-item {
+    /* margin-bottom: 10px; */
+    border-top: 1px solid var(--text);
+    /* border-bottom: 1px solid rgb(var(--color-foreground, 255 255 255)); */
+  }
+
+  section.cb-container-image-and-text .cb-accordion-header {
+    background-color: rgb(var(--color-background));
+    border: none;
+    /* padding-top: 10px; */
+    margin: 10px 0;
+    /* padding-right: 10px; */
+    text-align: left;
+    cursor: pointer;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    padding-bottom: 0;
+    transition: color 0.15s ease-in-out;
+  }
+
+  section.cb-container-image-and-text .cb-accordion-header h3 {
+    margin: 0;
+    font-size: 24px;
+    font-weight: var(--font-subheading-weight);
+    font-family: var(--font-subheading-family);
+    font-style: var(--font-subheading-style);
+    color: rgb(var(--text));
+    padding-bottom: 0;
+    line-height: 1;
+  }
+
+  section.cb-container-image-and-text .cb-svg-arrow-down {
+    width: 1.5rem;
+    height: 1.5rem;
+    margin-left: 10px;
+    transition: transform 0.3s ease-in-out;
+  }
+
+  section.cb-container-image-and-text .cb-accordion-content {
+    overflow: hidden;
+    max-height: 0;
+    background-color: rgb(var(--color-background));
+    font-weight: 200;
+    text-align: left;
+    transition: max-height 0.3s ease, opacity 0.3s ease;
+    opacity: 0;
+    padding-top: 0;
+    margin-top: 0;
+  }
+
+  section.cb-container-image-and-text .cb-accordion-content h4 {
+    margin: 0;
+    font-size: 20px;
+    font-weight: var(--font-subheading-weight);
+    font-family: var(--font-subheading-family);
+    font-style: var(--font-subheading-style);
+    padding-bottom: 40px;
+    color: rgb(var(--text));
+    line-height: 20px;
+  }
+
+  section.cb-container-image-and-text .cb-accordion-content p{
+    font-weight: var(--font-body-weight);
+    font-family: var(--font-body-family);
+    font-style: var(--font-body-style);
+  }
+
+  section.cb-container-image-and-text .cb-accordion-header.active + .cb-accordion-content {
+    max-height: 500px; /* Adjust this value based on your content */
+    opacity: 1;
+    padding-top: 0;
+  }
+
+  section.cb-container-image-and-text .cb-accordion-header:hover {
+    color: var(--sale_badge);
+  }
+
+  section.cb-container-image-and-text .cb-accordion-header.active {
+    color: var(--sale_badge);
+  }
+
+  section.cb-container_image_and_text .cb-accordion-header.active h3 {
+    color: var(--sale_badge);
+  }
+
+  section.cb-container-image-and-text .cb-accordion-header .cb-plus-minus-icon {
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+    transition: all 0.3s ease;
+    stroke: rgb(var(--text));
+  }
+
+  section.cb-container-image-and-text .cb-accordion-header .cb-vertical-line {
+    transition: opacity 0.3s ease;
+  }
+
+  section.cb-container-image-and-text .cb-accordion-header.active .cb-vertical-line {
+    opacity: 0;
+  }
+
+  section.cb-container-image-and-text .cb-accordion-header.active .cb-plus-minus-icon {
+    stroke: var(--sale_badge);
+  }
+
+  section.cb-container-image-and-text .cb-accordion-header:hover .cb-plus-minus-icon {
+    stroke: var(--sale_badge);
+  }
+
+  section.cb-container-image-and-text .cb-accordion-header .cb-arrow-img {
+    position: relative;
+    margin-left: 30px;
+    width: 20px;
+    height: 20px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  section.cb-container_image_and_text .cb-accordion-header .cb-arrow-img {
+    /* Placeholder for any future styles */
+  }
+
+  /* Arrow color styles - removed invert filter as we're using direct fill colors */
+
+  @media screen and (max-width: 900px) {
+    section.cb-container-image-and-text {
+      flex-direction: column;
+      min-height: auto;
+    }
+
+    section.cb-container-image-and-text .cb-left {
+      display: none;
+    }
+
+    section.cb-container-image-and-text #cb-right {
+      width: 100%;
+      padding: 10px;
+    }
+
+    section.cb-container_image_and_text #cb-right {
+      height: auto;
+    }
+
+    section.cb-container-image-and-text .cb-right p {
+      font-size: 1.6rem;
+      line-height: 1.8rem;
+    }
+
+    section.cb-container-image-and-text .cb-accordion-header h3 {
+      font-size: 2.4rem;
+    }
+
+    section.cb-container-image-and-text .cb-accordion-content h4 {
+      font-size: 2rem;
+    }
+
+    section.cb-container-image-and-text .cb-accordion-content {
+      font-size: 1.6rem;
+      line-height: 2.2rem;
+    }
+  }
+
+  @media screen and (max-width: 625px) {
+    section.cb-container-image-and-text #cb-right {
+      padding-left: 0;
+      padding-right: 0;
+    }
+
+    section.cb-container-image-and-text .cb-right h2{
+      font-size: 16px;
+    }
+
+    section.cb-container-image-and-text .cb-right-data{
+      margin-bottom: 20px;
+    }
+  }
+
+  @media screen and (min-width: 1025px) {
+    section.cb-container-image-and-text .cb-right h2 {
+      font-size: 24px !important;
+    }
+
+    section.cb-container-image-and-text .cb-right p {
+      font-size: 19px !important;
+    }
+
+    section.cb-container-image-and-text .cb-accordion-header h3 {
+      font-size: 32px !important;
+    }
+
+    section.cb-container-image-and-text .cb-accordion-content h4 {
+      font-size: 24px !important;
+    }
+  }
+</style>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const sectionId = '{{ section.id }}';
+    const sectionEl = document.getElementById('section-{{ section.id }}');
+
+    if (!sectionEl) return;
+
+    // Intersection Observer for fade-in animation
+    const observerOptions = {
+      threshold: 0.1,
+      rootMargin: '0px 0px -50px 0px',
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('cb-visible');
+          observer.unobserve(entry.target); // Stop observing once animated
+        }
+      });
+    }, observerOptions);
+
+    // Start observing the section
+    observer.observe(sectionEl);
+
+    // Accordion functionality
+    sectionEl.querySelectorAll('.cb-accordion-header').forEach((header) => {
+      header.addEventListener('click', () => {
+        const content = header.nextElementSibling;
+
+        // Close all other accordion items in this section only
+        sectionEl.querySelectorAll('.cb-accordion-header').forEach((otherHeader) => {
+          if (otherHeader !== header) {
+            otherHeader.classList.remove('active');
+            const otherContent = otherHeader.nextElementSibling;
+            otherContent.style.maxHeight = '0';
+            otherContent.style.opacity = '0';
+            otherContent.style.padding = '0 10px';
+          }
+        });
+
+        // Toggle current accordion item
+        header.classList.toggle('active');
+
+        if (header.classList.contains('active')) {
+          content.style.maxHeight = `${content.scrollHeight + 40}px`; // Adding padding to height
+          content.style.opacity = '1';
+          content.style.paddingTop = '0';
+          content.style.paddingLeft = '0';
+        } else {
+          content.style.maxHeight = '0';
+          content.style.opacity = '0';
+          content.style.paddingTop = '0';
+        }
+      });
+    });
+  });
+</script>
+
+{% schema %}
+{
+  "name": "Content Block",
+  "tag": "section",
+  "disabled_on": {
+    "groups": ["header", "footer"]
+  },
+  "settings": [
+    {
+      "type": "checkbox",
+      "id": "enabled",
+      "label": "Enable section",
+      "default": true
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "Color scheme"
+    },
+    {
+      "type": "image_picker",
+      "id": "image",
+      "label": "Image"
+    },
+    {
+      "type": "text",
+      "id": "main_heading",
+      "label": "Main Heading",
+      "default": "Main Heading Text Here"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "paragraph",
+      "name": "Paragraph",
+      "settings": [
+        {
+          "type": "textarea",
+          "id": "paragraph_text",
+          "label": "Paragraph Text",
+          "info": "Separate paragraphs using ||",
+          "default": "Enter your paragraph text here."
+        }
+      ]
+    },
+    {
+      "type": "accordion_item",
+      "name": "Accordion Item",
+      "settings": [
+        {
+          "type": "text",
+          "id": "heading",
+          "label": "Heading",
+          "default": "Accordion Heading"
+        },
+        {
+          "type": "text",
+          "id": "subheading",
+          "label": "Subheading",
+          "default": "Accordion Subheading"
+        },
+        {
+          "type": "textarea",
+          "id": "content",
+          "label": "Content",
+          "info": "Separate paragraphs using ||",
+          "default": "Accordion content goes here."
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Content Block",
+      "blocks": [
+        {
+          "type": "paragraph"
+        },
+        {
+          "type": "accordion_item"
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

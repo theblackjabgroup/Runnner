@@ -1,0 +1,93 @@
+{{ 'section-main-page.css' | asset_url | stylesheet_tag }}
+
+{%- style -%}
+  .section-{{ section.id }}-padding {
+    padding-top: {{ section.settings.padding_top | times: 0.75 | round: 0 }}px;
+    padding-bottom: {{ section.settings.padding_bottom | times: 0.75 | round: 0 }}px;
+  }
+  .main-contact ::selection {
+      text-shadow: none;
+      color: var(--cr-yellow-2);
+      background-color: transparent;
+    }
+
+  @media screen and (min-width: 750px) {
+    .section-{{ section.id }}-padding {
+      padding-top: {{ section.settings.padding_top }}px;
+      padding-bottom: {{ section.settings.padding_bottom }}px;
+    }
+  }
+
+  .section-{{ section.id }} .main-page-title {
+    font-size: 36px;
+    font-weight: 400;
+    margin-bottom: 0rem;
+  }
+
+  .section-{{ section.id }} .subheading {
+    font-size: 24px;
+    font-weight: 400;
+  }
+{%- endstyle -%}
+
+<div class="main-contact page-width page-width--narrow section-{{ section.id }}-padding section-{{ section.id }}">
+  {% if section.settings.heading != blank %}
+    <h1 class="main-page-title text-center{% if settings.animations_reveal_on_scroll %} scroll-trigger animate--fade-in{% endif %}">
+      {{ section.settings.heading | escape }}
+    </h1>
+  {% endif %}
+  {% if section.settings.subheading != blank %}
+    <div class="subheading text-center{% if settings.animations_reveal_on_scroll %} scroll-trigger animate--fade-in{% endif %}">
+      {{ section.settings.subheading | escape }}
+    </div>
+  {% endif %}
+  <div class="rte{% if settings.animations_reveal_on_scroll %} scroll-trigger animate--slide-in{% endif %}">
+    {{ page.content }}
+  </div>
+</div>
+
+{% schema %}
+{
+  "name": "t:sections.main-page.name",
+  "tag": "section",
+  "class": "section",
+  "settings": [
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "t:sections.main-page.settings.heading.label",
+      "default": "t:sections.main-page.settings.heading.default"
+    },
+    {
+      "type": "text",
+      "id": "subheading",
+      "label": "t:sections.main-page.settings.subheading.label",
+      "default": "t:sections.main-page.settings.subheading.default"
+    },
+    {
+      "type": "header",
+      "content": "t:sections.all.padding.section_padding_heading"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "t:sections.all.padding.padding_top",
+      "default": 36
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "t:sections.all.padding.padding_bottom",
+      "default": 36
+    }
+  ]
+}
+{% endschema %}

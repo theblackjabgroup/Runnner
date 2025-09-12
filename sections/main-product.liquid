@@ -1,0 +1,2117 @@
+<!-- Desktop view -->
+<section
+  class="product-section section-{{ section.id }}-padding hidden lg:!flex lg:flex-row gap-4 lg:gap-8 px-4 py-8"
+  style="background-color: var(--background); color: var(--text);"
+>
+  {%- comment -%} Left: Image Gallery {%- endcomment -%}
+  <div class="product-gallery w-1/2">
+    <div
+      class="gallery-wrapper sticky top-[80px] h-[calc(100vh-80px)]"
+      style="max-height: calc(100vh - 70px); overflow-y: auto; position: sticky; top: 70px;"
+    >
+      <div class="gallery-track w-full h-full relative" data-gallery-track>
+        {%- if product.media.size >= 0 -%}
+          {%- for media in product.media -%}
+            <div
+              class="gallery-item absolute inset-0 w-full h-full {% if forloop.first %}is-active{% endif %}"
+              data-index="{{ forloop.index0 }}"
+            >
+              {% if media.media_type == 'image' %}
+                <img
+                  src="{{ media | image_url: width: 1200 }}"
+                  alt="{{ media.alt | escape }}"
+                  class="w-full h-full object-cover"
+                  loading="{% if forloop.first %}lazy{% else %}lazy{% endif %}"
+                  width="full"
+                  height="full"
+                >
+              {% elsif media.media_type == 'video' %}
+                {{
+                  media
+                  | video_tag:
+                    autoplay: true,
+                    loop: true,
+                    muted: true,
+                    playsinline: true,
+                    controls: true,
+                    class: 'w-full h-full object-cover'
+                }}
+              {% endif %}
+            </div>
+          {%- endfor -%}
+        {%- endif -%}
+
+        <!-- Add vertical image strip -->
+        <div class="image-strip-container opacity-0">
+          <div class="image-strip">
+            {%- for media in product.media -%}
+              <div
+                class="strip-image-wrapper {% if forloop.first %}active{% endif %}"
+                data-strip-index="{{ forloop.index0 }}"
+              >
+                {% if media.media_type == 'video' %}
+                  <div class="relative w-full h-full">
+                    <img
+                      src="{{ media.preview_image | image_url: width: 150 }}"
+                      alt="{{ media.alt | escape }}"
+                      class="strip-image"
+                      loading="lazy"
+                      width="150"
+                      height="full"
+                    >
+                    <span class="video-play-icon absolute inset-0 flex items-center justify-center pointer-events-none">
+                      <svg width="32" height="32" fill="none" viewBox="0 0 32 32">
+                        <circle cx="16" cy="16" r="16" fill="rgba(0,0,0,0.5)"/>
+                        <polygon points="13,10 24,16 13,22" fill="white"/>
+                      </svg>
+                    </span>
+                  </div>
+                {% else %}
+                  <img
+                    src="{{ media | image_url: width: 150 }}"
+                    alt="{{ media.alt | escape }}"
+                    class="strip-image"
+                    loading="lazy"
+                    width="150"
+                    height="full"
+                  >
+                {% endif %}
+              </div>
+            {%- endfor -%}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  {%- comment -%} Right: Product Details {%- endcomment -%}
+  <div class="product-details w-1/2 mx-2">
+    <div
+      class="details-inner sticky top-[80px] flex flex-col"
+      style="height: calc(100vh - 70px); overflow-y: auto; position: sticky; top: 70px;"
+    >
+      {%- comment -%} Header {%- endcomment -%}
+      <div class="product-header w-[80%] space-y-8">
+        <div class="header-top flex flex-col gap-4">
+          <div class="product-status flex items-center gap-4">
+            {% if product.available != true %}
+              <span class="inline-flex items-center px-3 py-1 text-[14px] tracking-wider bg-black text-white uppercase rounded"
+                >Sold Out</span
+              >
+            {% endif %}
+          </div>
+          <h1
+            class="text-[42px] pb-10"
+            style="font-weight: {{section.settings.product_name_font_weight}};  padding-bottom: 10px;"
+          >
+            {{ product.title }}
+          </h1>
+
+          {%- comment -%} Product Variant {%- endcomment -%}
+          {%- assign color_option = product.options_with_values | where: 'name', 'Color' | first -%}
+          {%- if color_option and color_option.values.size > 0 -%}
+            <div class="product-variants my-4">
+              <div class="flex items-center gap-2">
+                <span class="inline-block text-[14px] font-medium">SELECT COLOR:</span>
+                <span class="active-color text-[14px] font-medium uppercase" data-active-color>
+                  {{- color_option.values | first -}}
+                </span>
+              </div>
+              <div class="color-options flex gap-4 p-2">
+                {%- for value in color_option.values -%}
+                  <button
+                    type="button"
+                    class="color-swatch rounded-full hover:scale-110 transition-transform focus:outline-none"
+                    style="background-color: {{ value | handleize }}; width: 20px; height: 20px;"
+                    data-option-value="{{ value | escape }}"
+                  >
+                    <span class="sr-only">{{ value }}</span>
+                  </button>
+                {%- endfor -%}
+              </div>
+            </div>
+          {%- endif -%}
+        </div>
+      </div>
+
+      {% comment %} tabs  {% endcomment %}
+      <div class="product-tabs w-[80%] flex-1 overflow-hidden">
+        <!-- Tab Navigation -->
+        <div class="tabs-nav flex justify-evenly space-x-3 h-auto mt-2 w-full">
+          {%- assign tab_index = 0 -%}
+          {%- for block in section.blocks -%}
+            {% if block.type == 'tab_description' or block.type == 'tab_details' or block.type == 'tab_sizing' %}
+              {%- assign tab_index = tab_index | plus: 1 -%}
+              <button
+                class="tab-btn group text-[16px] text-left pt-[5px] mr-3 w-full transition-colors duration-300 relative {% if tab_index == 1 %}active-tab{% endif %}"
+                style="color: {% if tab_index == 1 %}var(--text){% else %}var(--secondary_text){% endif %};"
+                data-tab="tab-{{ block.id }}"
+                {{ block.shopify_attributes }}
+              >
+                <!-- Div acting as top border -->
+                <div
+                  class="tab-top-bar absolute top-0 left-0 right-0 rounded transition-colors duration-300"
+                  style="height: 3px; background-color: {% if tab_index == 1 %}var(--text){% else %}var(--secondary_text){% endif %};"
+                >
+                  &nbsp;
+                </div>
+                {{ block.settings.title }}
+              </button>
+            {% endif %}
+          {%- endfor -%}
+        </div>
+
+        <!-- Tab Content -->
+        <div class="tab-content mt-6 overflow-y-auto">
+          {% for block in section.blocks %}
+            <div
+              class="tab-pane {% if forloop.first %}active{% else %}hidden{% endif %} tracking-normal leading-none text-[16px]"
+              data-content="tab-{{ block.id }}"
+            >
+              {% case block.type %}
+                {% when 'tab_description' %}
+                  {{ product.description }}
+
+                {% when 'tab_details' %}
+                  {% if block.settings.metafield_namespace_key != blank %}
+                    <div class="prose prose-lg max-w-none">
+                      {{ block.settings.metafield_namespace_key }}
+                    </div>
+                  {% else %}
+                    <p class="text-gray-500">No details available for this product.</p>
+                  {% endif %}
+
+                {% when 'tab_sizing' %}
+                  <button
+                    id="open-size-chart"
+                    class="bg-black text-white px-4 py-2 rounded hover:bg-gray-900 transition-colors"
+                  >
+                    SIZE CHART
+                  </button>
+
+                  <div
+                    id="size-chart-drawer"
+                    class="fixed top-0 right-0 h-full bg-white shadow-lg transform translate-x-full hidden transition-transform duration-300 ease-in-out overflow-y-auto"
+                    style="width: 40vw; z-index: 1001;"
+                    aria-hidden="true"
+                  >
+                    <div
+                      class="p-6"
+                      style="text-decoration-line: underline; margin-top: 12vh; padding: 0 10px; display: flex; flex-direction: row-reverse;"
+                    >
+                      <button
+                        id="close-size-chart"
+                        class="text-gray-500 hover:text-black transition-colors "
+                        aria-label="Close size chart"
+                      >
+                        CLOSE
+                      </button>
+                    </div>
+                    <div class="p-4">
+                      {% if block.settings.size_chart_page != blank %}
+                        <div class="prose max-w-none">
+                          {{ block.settings.size_chart_page.content }}
+                        </div>
+                      {% else %}
+                        <p class="text-gray-500">No size guide page selected.</p>
+                      {% endif %}
+                    </div>
+                  </div>
+                  <div id="size-chart-backdrop" class="fixed inset-0 bg-black/60 hidden z-[999]">&nbsp;</div>
+              {% endcase %}
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+
+      {%- comment -%} bottom utility {%- endcomment -%}
+      {%- assign option_names = product.options_with_values | map: 'name' -%}
+      {%- assign size_index = 0 -%}
+      {%- for name in option_names -%}
+        {%- if name == 'Size' -%}
+          {%- assign size_index = forloop.index -%}
+        {%- endif -%}
+      {%- endfor -%}
+
+      <div
+        class="size-price-selector flex flex-col gap-6 text-[14px] font-medium"
+      >
+        <!-- DELIVERY SECTION -->
+        {%- for block in section.blocks -%}
+          {%- if block.type == 'delivery_address' -%}
+            <div class="flex justify-between items-start border-b border-gray-400 py-4" {{ block.shopify_attributes }}>
+              {% if customer and customer.default_address %}
+                <!-- Logged-in: Show saved address -->
+                <div>
+                  <div class="font-medium uppercase">DELIVER TO</div>
+                  <div class="text-sm leading-relaxed">
+                    {{ customer.default_address | format_address }}
+                  </div>
+                </div>
+                <a
+                  href="#"
+                  class=" delivery-change-btn border px-2 py-0 text-[14px] font-medium rounded transition-colors duration-200 "
+                  aria-label="Change delivery address"
+                >
+                  CHANGE
+                </a>
+              {% else %}
+                <!-- Guest: Show login prompt -->
+                <div>
+                  <div class="font-medium uppercase">DELIVER TO</div>
+                  <div class="text-[14px]" style="color: var(--secondary_text);">
+                    Please <a href="/account/login" class="underline text-blue-600">log in</a> to set your delivery
+                    address.
+                  </div>
+                </div>
+                <a
+                  href="#"
+                  class=" delivery-change-btn border px-2 py-0 text-[14px] font-medium rounded transition-colors duration-200 "
+                  aria-label="Change delivery address"
+                >
+                  CHANGE
+                </a>
+              {% endif %}
+            </div>
+          {%- endif -%}
+        {%- endfor -%}
+
+        <!-- QUANTITY SELECTOR -->
+        {%- for block in section.blocks -%}
+          {%- if block.type == 'quantity_selector' -%}
+            <div class="flex justify-between items-center border-b border-gray-400 pb-4" {{ block.shopify_attributes }}>
+              <span class="font-medium uppercase ">QUANTITY SELECTOR</span>
+              <div
+                class="flex items-center justify-center py-1 border rounded overflow-hidden h-10"
+                style="width: 8rem; border-color: var(--border)"
+              >
+                <button
+                  type="button"
+                  id="decreaseQty"
+                  class="px-3 text-[16px]   hover:bg-gray-100"
+                  aria-label="Decrease quantity"
+                >
+                  -
+                </button>
+                <span
+                  id="quantityDisplay"
+                  class="px-3 border-x-1 text-[16px]  "
+                  style="border-left: 1px solid var(--border); border-right: 1px solid var(--border);"
+                  >1</span
+                >
+                <input type="hidden" name="quantity" id="quantityInput" value="1">
+                <button
+                  type="button"
+                  id="increaseQty"
+                  class="px-3 text-[16px]  hover:bg-gray-100"
+                  aria-label="Increase quantity"
+                >
+                  +
+                </button>
+              </div>
+            </div>
+          {%- endif -%}
+        {%- endfor -%}
+
+        <!-- SIZE/DENOMINATION SELECTOR (no color) -->
+        {% assign variant_option = null %}
+        {% assign variant_option_index = 0 %}
+        {% for option in product.options_with_values %}
+          {% unless option.name == 'Color' or option.name == 'Colour' %}
+            {% assign variant_option = option %}
+            {% assign variant_option_index = forloop.index0 %}
+            {% break %}
+          {% endunless %}
+        {% endfor %}
+        {% if variant_option %}
+          <div class="flex justify-between items-center gap-2">
+            <span class="font-medium uppercase">SELECT {{ variant_option.name | upcase }}</span>
+            <div class="flex gap-2 flex-wrap">
+              {% for value in variant_option.values %}
+                {% assign variant_available = false %}
+                {% assign variant_id = null %}
+                {% for variant in product.variants %}
+                  {% assign option_key = 'option' | append: variant_option_index | plus: 1 %}
+                  {% if variant[option_key] == value %}
+                    {% if variant.available %}
+                      {% assign variant_available = true %}
+                      {% assign variant_id = variant.id %}
+                      {% break %}
+                    {% endif %}
+                  {% endif %}
+                {% endfor %}
+                <button
+                  type="button"
+                  class="
+                    size-btn relative px-3 h-10 min-w-[2.5rem] flex items-center justify-center border-transparent rounded font-semibold border
+                    {% if forloop.first and variant_available %}bg-black text-white{% endif %}
+                    {% unless variant_available %}cursor-not-allowed bg-gray-200 unavailable-size{% endunless %}
+                  "
+                  data-option-index="{{ variant_option_index }}"
+                  data-value="{{ value | escape }}"
+                  {% if variant_available %}
+                    data-variant-id="{{ variant_id }}"
+                  {% else %}
+                    disabled aria-disabled="true"
+                  {% endif %}
+                  aria-label="{{ variant_option.name }} {{ value }}{% unless variant_available %} - Sold out{% endunless %}"
+                >
+                  <span class="label z-10">{{ value }}</span>
+                  {% unless variant_available %}
+                    <span class="slash-unavailable"></span>
+                  {% endunless %}
+                </button>
+              {% endfor %}
+            </div>
+          </div>
+        {% endif %}
+
+        <!-- PRICE + ACTIONS -->
+        <div class="flex justify-between items-center border-t border-gray-400 pt-4" style="padding-top: 1rem;">
+          <!-- Price + Compare at Price -->
+          <div class="text-[18px]  flex flex-col">
+            <div class="flex items-center gap-2">
+              <span id="current-price" style="font-weight: {{section.settings.product_price_font_weight}};">
+                {{- product.price | money -}}
+              </span>
+              <span
+                id="compare-price-separator"
+                class="text-black text-[14px] {% unless product.compare_at_price > product.price %}hidden{% endunless %}"
+                >|</span
+              >
+              <span
+                id="compare-price"
+                class="line-through{% unless product.compare_at_price > product.price %}hidden{% endunless %}"
+                style="color: var(--secondary_text);"
+              >
+                {% if product.compare_at_price > product.price %}{{ product.compare_at_price | money }}{% endif %}
+              </span>
+            </div>
+
+            <div
+              id="savings-info"
+              class="text-[14px] font-medium {% unless product.compare_at_price > product.price %}hidden{% endunless %}"
+              style="color: var(--sale_badge); "
+            >
+              {% if product.compare_at_price > product.price %}
+                Save {{ product.compare_at_price | minus: product.price | money }} (
+                {{
+                  product.compare_at_price
+                  | minus: product.price
+                  | times: 100
+                  | divided_by: product.compare_at_price
+                -}}
+                % off)
+              {% endif %}
+            </div>
+          </div>
+
+          <!-- Add to Cart -->
+          <div class="flex gap-2 flex-col">
+            <div class="flex gap-2">
+              {% if product.available %}
+                <!-- ADD TO CART form -->
+                <form method="post" action="{{ routes.cart_add_url }}" id="add-to-cart-form">
+                  <input
+                    type="hidden"
+                    name="id"
+                    id="variant-id"
+                    value="{{ product.selected_or_first_available_variant.id }}"
+                  >
+                  <input type="hidden" name="quantity" value="1">
+                  <button
+                    id="add-to-cart-btn"
+                    class="add-to-cart-btn-custom text-4xl rounded group flex items-center justify-between gap-2"
+                    style="height: 50px; width: 370px;"
+                    aria-label="Add to cart"
+                    type="button"
+                  >
+                    <svg
+                      fill="none"
+                      width="24"
+                      height="24"
+                      viewBox="0 0 24 24"
+                      style="transform: rotate(-90deg); transform-origin: center; transform-box: fill-box;"
+                    >
+                      <path d="M6 9L12 15L18 9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                    <span id="add-to-cart-btn-text">ADD TO CART</span>
+                  </button>
+                </form>
+              {% else %}
+                <!-- SOLD OUT button -->
+                <button
+                  class="bg-gray-400 text-white text-4xl px-6 py-3 rounded cursor-not-allowed"
+                  type="button"
+                  disabled
+                >
+                  SOLD OUT
+                </button>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+        {% if product.gift_card? %}
+          {% render 'gift-card-recipient-form', product: product, form: form, section: section %}
+        {% endif %}
+        {%- for block in section.blocks -%}
+          {%- if block.type == 'pickup_availability' -%}
+            <div class="pickup-availability-container mt-4" style="width:100%;">
+              {% render 'pickup-availability', product_variant: product.selected_or_first_available_variant %}
+              {{ 'component-pickup-availability.css' | asset_url | stylesheet_tag }}
+              <script src="{{ 'pickup-availability.js' | asset_url }}" defer="defer"></script>
+            </div>
+          {%- endif -%}
+        {%- endfor -%}
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Mobile view -->
+<section
+  class="lg:hidden flex flex-col gap-6 px-4 py-4"
+  style="background-color: var(--background); color: var(--text);"
+>
+  <!-- Mobile Image Gallery -->
+  <div class="mobile-gallery">
+    <!-- Main Image Stack -->
+    <div class="main-images relative h-[60vh] overflow-hidden">
+      {%- if product.media.size > 0 -%}
+        {%- for media in product.media -%}
+          <div
+            class="mobile-gallery-item w-full h-full {% unless forloop.first %}absolute top-0 left-0{% endunless %} {% if forloop.first %}relative active{% endif %}"
+            data-mobile-index="{{ forloop.index0 }}"
+            style="opacity: {% if forloop.first %}1{% else %}0{% endif %}; transition: opacity 0.3s ease;"
+          >
+            {% if media.media_type == 'image' %}
+              <img
+                srcset="
+                  {%- if media.width >= 165 -%}{{ media | image_url: width: 165 }} 165w,{%- endif -%}
+                  {%- if media.width >= 360 -%}{{ media | image_url: width: 360 }} 360w,{%- endif -%}
+                  {%- if media.width >= 535 -%}{{ media | image_url: width: 535 }} 535w,{%- endif -%}
+                  {%- if media.width >= 750 -%}{{ media | image_url: width: 750 }} 750w,{%- endif -%}
+                  {%- if media.width >= 1070 -%}{{ media | image_url: width: 1070 }} 1070w,{%- endif -%}
+                  {%- if media.width >= 1500 -%}{{ media | image_url: width: 1500 }} 1500w,{%- endif -%}
+                  {{ media | image_url }} {{ media.width }}w
+                "
+                src="{{ media | image_url: width: 1200 }}"
+                alt="{{ media.alt | escape }}"
+                class="w-full h-full object-cover"
+                loading="{% if forloop.first %}lazy{% else %}lazy{% endif %}"
+                width="full"
+                height="full"
+              >
+            {% elsif media.media_type == 'video' %}
+              {{
+                media
+                | video_tag:
+                  autoplay: true,
+                  loop: true,
+                  muted: true,
+                  playsinline: true,
+                  controls: true,
+                  class: 'w-full h-full object-cover'
+              }}
+            {% endif %}
+          </div>
+        {%- endfor -%}
+      {%- endif -%}
+    </div>
+
+    <!-- Mobile Thumbnail Strip -->
+    <div class="thumbnail-strip mt-2 pb-2 overflow-x-auto mx-auto w-fit">
+      <div class="flex gap-2 snap-x p-4">
+        {%- for media in product.media -%}
+          <button
+            class="thumbnail-item flex-shrink-0 w-20 h-20 p-2 {% if forloop.first %} active{% endif %}"
+            data-thumb-index="{{ forloop.index0 }}"
+            aria-label="product image thumbnail"
+          >
+            {% if media.media_type == 'video' %}
+              <div class="relative w-full h-full">
+                <img
+                  src="{{ media.preview_image | image_url: width: 150 }}"
+                  alt="Product video thumbnail"
+                  class="w-full h-full object-cover rounded"
+                  loading="lazy"
+                  width="full"
+                  height="full"
+                >
+                <span class="video-play-icon absolute inset-0 flex items-center justify-center pointer-events-none">
+                  <svg width="32" height="32" fill="none" viewBox="0 0 32 32">
+                    <circle cx="16" cy="16" r="16" fill="rgba(0,0,0,0.5)"/>
+                    <polygon points="13,10 24,16 13,22" fill="white"/>
+                  </svg>
+                </span>
+              </div>
+            {% else %}
+              <img
+                src="{{ media | image_url: width: 150 }}"
+                alt="{% if media.alt != blank %}{{ media.alt | escape }}{% else %}Product image thumbnail{% endif %}"
+                class="w-full h-full object-cover rounded"
+                loading="lazy"
+                width="full"
+                height="full"
+              >
+            {% endif %}
+          </button>
+        {%- endfor -%}
+      </div>
+    </div>
+  </div>
+
+  <!-- Mobile Product Details -->
+  <div class="details-inner flex flex-col">
+    {%- comment -%} Header {%- endcomment -%}
+    <div class="product-header w-[80%] space-y-8">
+      <div class="header-top flex flex-col gap-4">
+        <div class="product-status flex items-center gap-4">
+          {% if product.available != true %}
+            <span class="inline-flex items-center px-3 py-1 text-[14px] tracking-wider bg-black text-white uppercase rounded"
+              >Sold Out</span
+            >
+          {% endif %}
+        </div>
+        <h1 class="text-[42px] font-bold">{{ product.title }}</h1>
+
+        {%- comment -%} Product Variant {%- endcomment -%}
+        {%- assign color_option = product.options_with_values | where: 'name', 'Color' | first -%}
+        {%- if color_option and color_option.values.size > 0 -%}
+          <div class="product-variants my-4">
+            <div class="flex items-center gap-2">
+              <span class="inline-block text-[14px] font-medium">SELECT COLOR:</span>
+              <span class="active-color text-[14px]" data-active-color>
+                {{- color_option.values | first -}}
+              </span>
+            </div>
+            <div class="color-options flex gap-3 p-2">
+              {%- for value in color_option.values -%}
+                <button
+                  type="button"
+                  class="color-swatch w-8 h-8 rounded-full hover:scale-110 transition-transform focus:outline-none"
+                  style="background-color: {{ value | handleize }};"
+                  data-option-value="{{ value | escape }}"
+                >
+                  <span class="sr-only">{{ value }}</span>
+                </button>
+              {%- endfor -%}
+            </div>
+          </div>
+        {%- endif -%}
+      </div>
+    </div>
+
+    {% comment %} tabs  {% endcomment %}
+    <div class="product-tabs flex-1 overflow-hidden">
+      <!-- Tab Navigation -->
+      <div class="tabs-nav flex justify-evenly space-x-3 h-auto mt-2 w-full">
+        {%- assign tab_index = 0 -%}
+        {%- for block in section.blocks -%}
+          {% if block.type == 'tab_description' or block.type == 'tab_details' or block.type == 'tab_sizing' %}
+            {%- assign tab_index = tab_index | plus: 1 -%}
+            <button
+              class="tab-btn group text-[12px] text-left mr-3 w-full transition-colors duration-300 relative {% if tab_index == 1 %}active-tab{% endif %}"
+              style="color: {% if tab_index == 1 %}var(--text){% else %}var(--secondary_text){% endif %};"
+              data-tab="tab-{{ block.id }}"
+              {{ block.shopify_attributes }}
+            >
+              <div
+                class="tab-top-bar absolute top-0 left-0 right-0 rounded transition-colors duration-300"
+                style="height: 2px; background-color: {% if tab_index == 1 %}var(--text){% else %}var(--secondary_text){% endif %};"
+              >
+                &nbsp;
+              </div>
+              {{ block.settings.title }}
+            </button>
+          {% endif %}
+        {%- endfor -%}
+      </div>
+
+      <!-- Tab Content -->
+      <div class="tab-content mt-6 overflow-y-auto max-h-[50vh]">
+        {% for block in section.blocks %}
+          <div
+            class="tab-pane {% if forloop.first %}active{% else %}hidden{% endif %} tracking-normal leading-1 text-[12px]"
+            data-content="tab-{{ block.id }}"
+          >
+            {% case block.type %}
+              {% when 'tab_description' %}
+                {{ product.description }}
+
+              {% when 'tab_details' %}
+                {% if block.settings.metafield_namespace_key != blank %}
+                  <div class="prose prose-lg max-w-none">
+                    {{ block.settings.metafield_namespace_key }}
+                  </div>
+                {% else %}
+                  <p class="text-gray-500">No details available for this product.</p>
+                {% endif %}
+
+              {% when 'tab_sizing' %}
+                <button
+                  id="open-mobile-size-chart"
+                  class="bg-black text-white px-4 py-2 rounded hover:bg-gray-900 transition-colors"
+                >
+                  Size Chart
+                </button>
+
+                <div
+                  id="mobile-size-chart-drawer"
+                  class="fixed top-0 right-0 w-full h-full bg-white shadow-lg transform translate-x-full hidden transition-transform duration-300 overflow-y-auto"
+                  style="z-index: 1000;"
+                  aria-hidden="true"
+                >
+                  <div class="p-6" style="text-decoration-line: underline; display: flex; flex-direction: row-reverse;">
+                    <button
+                      id="close-mobile-size-chart"
+                      class="text-gray-500 hover:text-black transition-colors"
+                      aria-label="Close size chart"
+                    >
+                      CLOSE
+                    </button>
+                  </div>
+                  <div class="p-4">
+                    {% if block.settings.size_chart_page != blank %}
+                      <div class="prose max-w-none">
+                        {{ block.settings.size_chart_page.content }}
+                      </div>
+                    {% else %}
+                      <p class="text-gray-500">No size guide page selected.</p>
+                    {% endif %}
+                  </div>
+                </div>
+            {% endcase %}
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+
+    {%- comment -%} bottom utility {%- endcomment -%}
+    {%- assign option_names = product.options_with_values | map: 'name' -%}
+    {%- assign size_index = 0 -%}
+    {%- for name in option_names -%}
+      {%- if name == 'Size' -%}
+        {%- assign size_index = forloop.index -%}
+      {%- endif -%}
+    {%- endfor -%}
+
+    <div class="size-price-selector flex flex-col gap-6 text-[12px]">
+      <!-- DELIVERY SECTION -->
+      {%- for block in section.blocks -%}
+        {%- if block.type == 'delivery_address' -%}
+          <div class="flex justify-between items-start border-b border-gray-400 py-4" {{ block.shopify_attributes }}>
+            {% if customer and customer.default_address %}
+              <!-- Logged-in: Show saved address -->
+              <div>
+                <div class="font-semibold uppercase">DELIVER TO</div>
+                <div class="text-sm leading-relaxed">
+                  {{ customer.default_address | format_address }}
+                </div>
+              </div>
+              <a
+                href="#"
+                class=" delivery-change-btn border px-2 py-1 text-[14px] font-medium rounded transition-colors duration-200 "
+                aria-label="Change delivery address"
+              >
+                CHANGE
+              </a>
+            {% else %}
+              <!-- Guest: Show login prompt -->
+              <div>
+                <div class="font-semibold uppercase">DELIVER TO</div>
+                <div class="text-[10px]" style="color: var(--secondary_text);">
+                  Please <a href="/account/login" class="underline !text-blue-900">log in</a> to set your delivery
+                  address.
+                </div>
+              </div>
+              <a
+                href="#"
+                class="delivery-change-btn border  py-0 text-[14px] font-medium rounded transition-colors duration-200 "
+                aria-label="Change delivery address"
+              >
+                CHANGE
+              </a>
+            {% endif %}
+          </div>
+        {%- endif -%}
+      {%- endfor -%}
+
+      <!-- QUANTITY SELECTOR -->
+      {%- for block in section.blocks -%}
+        {%- if block.type == 'quantity_selector' -%}
+          <div class="flex justify-between items-center border-b border-gray-400 pb-4" {{ block.shopify_attributes }}>
+            <span class="uppercase font-semibold">QUANTITY SELECTOR</span>
+            <div class="flex items-center justify-center h-10 border rounded" style="width: 8rem;">
+              <button
+                type="button"
+                class="mobile-decrease-qty px-3 py-1 text-lg hover:bg-gray-100"
+                aria-label="Decrease quantity"
+              >
+                -
+              </button>
+              <span
+                class="mobile-quantity-display px-4"
+                style="border-left: 1px solid black; border-right: 1px solid black;"
+                >1</span
+              >
+              <input type="hidden" name="quantity" class="mobile-quantity-input" value="1">
+              <button
+                type="button"
+                class="mobile-increase-qty px-3 py-1 text-lg hover:bg-gray-100"
+                aria-label="Increase quantity"
+              >
+                +
+              </button>
+            </div>
+          </div>
+        {%- endif -%}
+      {%- endfor -%}
+
+      <!-- SIZE/DENOMINATION SELECTOR (no color) -->
+      {% assign variant_option = null %}
+      {% assign variant_option_index = 0 %}
+      {% for option in product.options_with_values %}
+        {% unless option.name == 'Color' or option.name == 'Colour' %}
+          {% assign variant_option = option %}
+          {% assign variant_option_index = forloop.index0 %}
+          {% break %}
+        {% endunless %}
+      {% endfor %}
+      {% if variant_option %}
+        <div class="flex justify-between items-center gap-2">
+          <span class="font-medium uppercase">SELECT {{ variant_option.name | upcase }}</span>
+          <div class="flex gap-2 flex-wrap">
+            {% for value in variant_option.values %}
+              {% assign variant_available = false %}
+              {% assign variant_id = null %}
+              {% for variant in product.variants %}
+                {% assign option_key = 'option' | append: variant_option_index | plus: 1 %}
+                {% if variant[option_key] == value %}
+                  {% if variant.available %}
+                    {% assign variant_available = true %}
+                    {% assign variant_id = variant.id %}
+                    {% break %}
+                  {% endif %}
+                {% endif %}
+              {% endfor %}
+              <button
+                type="button"
+                class="
+                  size-btn relative px-3 h-10 min-w-[2.5rem] flex items-center justify-center border-transparent rounded font-semibold border
+                  {% if forloop.first and variant_available %}bg-black text-white{% endif %}
+                  {% unless variant_available %} cursor-not-allowed bg-gray-200 unavailable-size{% endunless %}
+                "
+                data-option-index="{{ variant_option_index }}"
+                data-value="{{ value | escape }}"
+                {% if variant_available %}
+                  data-variant-id="{{ variant_id }}"
+                {% else %}
+                  disabled aria-disabled="true"
+                {% endif %}
+                aria-label="{{ variant_option.name }} {{ value }}{% unless variant_available %} - Sold out{% endunless %}"
+              >
+                <span class="label z-10">{{ value }}</span>
+                {% unless variant_available %}
+                  <span class="slash-unavailable"></span>
+                {% endunless %}
+              </button>
+            {% endfor %}
+          </div>
+        </div>
+      {% endif %}
+
+      <!-- PRICE + ACTIONS -->
+      <div class="flex flex-col justify-evenly  border-t border-gray-400 pt-4" style="padding-top: 1rem;">
+        <!-- Price + Compare at Price -->
+        <div class="text-[18px] flex flex-col justify-between">
+          <div class="flex items-center gap-2">
+            <span class="mobile-current-price">{{ product.price | money }}</span>
+            <span class="mobile-compare-price-separator text-black text-[14px] {% unless product.compare_at_price > product.price %}hidden{% endunless %}"
+              >|</span
+            >
+            <span
+              class="mobile-compare-price line-through {% unless product.compare_at_price > product.price %}hidden{% endunless %}"
+              style="color: var(--secondary_text);"
+            >
+              {% if product.compare_at_price > product.price %}{{ product.compare_at_price | money }}{% endif %}
+            </span>
+          </div>
+
+          <div
+            class="mobile-savings-info text-[14px] font-medium {% unless product.compare_at_price > product.price %}hidden{% endunless %}"
+            style="color: var(--sale_badge);"
+          >
+            {% if product.compare_at_price > product.price %}
+              Save {{ product.compare_at_price | minus: product.price | money }} (
+              {{ product.compare_at_price | minus: product.price | times: 100 | divided_by: product.compare_at_price -}}
+              % off)
+            {% endif %}
+          </div>
+        </div>
+
+        <!-- Add to Cart -->
+        <div class="flex justify-evenly w-full gap-2">
+          {% if product.available %}
+            <!-- ADD TO CART form -->
+            <form method="post" action="/cart/add" class="mobile-add-to-cart-form">
+              <input
+                type="hidden"
+                name="id"
+                class="mobile-variant-id"
+                value="{{ product.selected_or_first_available_variant.id }}"
+              >
+              <input type="hidden" name="quantity" value="1">
+              <button
+                class="add-to-cart-btn-custom mobile-add-to-cart-btn text-3xl rounded group flex items-center justify-between gap-2"
+                style="width: 95vw"
+                aria-label="Add to cart"
+                type="submit"
+              >
+                <svg
+                  fill="none"
+                  width="24"
+                  height="24"
+                  viewBox="5 8 14 8"
+                  style="transform: rotate(-90deg); transform-origin: center; transform-box: fill-box;"
+                >
+                  <path d="M6 9L12 15L18 9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                <span id="add-to-cart-btn-text-mobile">ADD TO CART</span>
+              </button>
+            </form>
+          {% else %}
+            <!-- SOLD OUT button -->
+            <button
+              class="bg-gray-400 text-white text-4xl px-4 py-2 rounded cursor-not-allowed"
+              type="button"
+              disabled
+            >
+              SOLD OUT
+            </button>
+          {% endif %}
+        </div>
+      </div>
+      {% if product.gift_card? %}
+        {% render 'gift-card-recipient-form', product: product, form: form, section: section %}
+      {% endif %}
+      {%- for block in section.blocks -%}
+        {%- if block.type == 'pickup_availability' -%}
+          <div class="pickup-availability-container mt-4" style="width:100%;">
+            {% render 'pickup-availability', product_variant: product.selected_or_first_available_variant %}
+            {{ 'component-pickup-availability.css' | asset_url | stylesheet_tag }}
+            <script src="{{ 'pickup-availability.js' | asset_url }}" defer="defer"></script>
+          </div>
+        {%- endif -%}
+      {%- endfor -%}
+    </div>
+  </div>
+</section>
+
+<style>
+        .delivery-change-btn{
+         background-color: var(--button);
+        color: var(--button_label);
+        border: 1px solid var(--border);
+      }
+      .delivery-change-btn:hover {
+        background-color: var(--hovered_button_label);
+        color: var(--hovered_button_text_color);
+      }
+        .section-{{ section.id }}-padding {
+          padding-top: {{  settings.sections_spacing | times: 0.75 | round: 0 }}px;
+          padding-bottom: {{  settings.sections_spacing | times: 0.75 | round: 0 }}px;
+          padding-left: {{  settings.side_space | times: 0.75 | round: 0 }}px;
+          padding-right: {{  settings.side_space | times: 0.75 | round: 0 }}px;
+        }
+
+        @media screen and (min-width: 750px) {
+          .section-{{ section.id }}-padding {
+            padding-top: {{  settings.sections_spacing}}px;
+            padding-bottom: {{  settings.sections_spacing}}px;
+            padding-left: {{  settings.side_space  }}px;
+            padding-right: {{  settings.side_space }}px;
+          }
+        }
+
+        #size-chart-drawer {
+          transition: transform 1s cubic-bezier(0.4,0,0.2,1);
+          transform: translateX(100%);
+          will-change: transform;
+        }
+        #size-chart-drawer.open {
+          transform: translateX(0);
+        }
+
+        .product-section {
+          display: flex;
+          height: calc(100vh * {{product.media.size}});
+          position: relative;
+        }
+
+        .gallery-wrapper {
+          position: sticky;
+          top: 0;
+          height: 100vh;
+          overflow: hidden;
+        }
+
+        .gallery-track {
+          height: 100%;
+        }
+
+        .gallery-item {
+          opacity: 0;
+          transition: opacity 0.3s ease-out;
+          will-change: opacity;
+        }
+
+        .gallery-item.is-active {
+          opacity: 1;
+          pointer-events: auto;
+          z-index: 1;
+        }
+
+        .image-strip-container {
+          position: absolute;
+          top: 50%;
+          left: 10px;
+          transform: translateY(-50%);
+          z-index: 100;
+          transition: opacity 0.3s ease;
+        }
+
+        .gallery-track:hover .image-strip-container {
+          opacity: 1;
+        }
+
+        .image-strip {
+          display: flex;
+          flex-direction: column;
+          gap: 10px;
+          padding: 10px;
+          border-radius: 8px;
+        }
+
+        .strip-image-wrapper {
+          width: 60px;
+          height: 60px;
+          cursor: pointer;
+          opacity: 0.7;
+          transition: all 0.3s ease;
+        }
+
+        .strip-image-wrapper:hover,
+        .strip-image-wrapper.active {
+          opacity: 1;
+          transform: scale(1.1);
+          border: 1px solid black;
+        }
+        .strip-image {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+          border-radius: 4px;
+        }
+
+        .tab-content {
+          height: calc(100% - 50px);
+        }
+
+        .size-btn {
+          transition: all 0.3s ease;
+           background-color: var(--button);
+        color: var(--button_label);
+        border: 1px solid var(--border);
+        }
+
+        .size-btn:not(:disabled):hover,
+        .size-btn.bg-black {
+        background-color: var(--hovered_button_label);
+        color: var(--hovered_button_text_color);
+        }
+
+        .size-btn:disabled {
+          opacity: 0.8;
+          cursor: not-allowed;
+           border: 1px solid var(--border);
+        }
+
+        /* Mobile-specific styles */
+        @media (max-width: 1024px) {
+          .mobile-gallery-item {
+            will-change: opacity, transform;
+            transition: opacity 0.3s ease;
+            position: absolute;
+            inset: 0;
+            max-height: 65vh !important;
+            object-fit: cover !important;
+            display: block;
+          }
+
+          .mobile-gallery-item.active {
+            opacity: 1;
+            z-index: 2;
+            position: relative;
+          }
+
+          .thumbnail-item {
+            transition: all 0.3s ease;
+            opacity: 0.6;
+            border: 2px solid transparent;
+          }
+
+          .thumbnail-item.active {
+            opacity: 1;
+            border-color: black;
+            transform: scale(1.05);
+          }
+
+          .product-tabs {
+            height: auto;
+            min-height: 200px;
+          }
+
+          .tab-content {
+            height: auto;
+          }
+
+          #mobile-size-chart-drawer {
+            transition: transform 0.6s cubic-bezier(0.4,0,0.2,1);
+          }
+        }
+  .size-btn.unavailable-size {
+    opacity: 1;
+    visibility: visible;
+    position: relative;
+    cursor: not-allowed;
+    color: var(--text) !important;
+    border-color: var(--border) !important;
+    background-color: var(--disabled_text) !important;
+    overflow: hidden;
+    transform: translateY(0);
+  }
+
+  .size-btn.unavailable-size:hover {
+    background-color: var(--disabled_text) !important;
+    transform: translateY(0);
+  }
+
+  /* Slash line */
+  .size-btn.unavailable-size::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: -2px;
+    right: -2px;
+    height: 2px;
+    background-color: var(--text);
+    transform: rotate(-45deg);
+    pointer-events: none;
+  }
+
+  .add-to-cart-btn-custom {
+    font-weight: var(--font-heading-weight);
+    font-size: 32px;
+    color: var(--secondary_button_text_color);
+    background-color: var(--secondary_button_label);
+    border-radius: 4px;
+    padding: 5px 10px;
+    line-height: 1;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 20px;
+    border: var(--settings-buttons_border_thickness, 1px) solid var(--secondary_button_label);
+    transition: border 0.5s, background-color 0.5s, color 0.5s;
+    position: relative;
+    overflow: hidden;
+    cursor: pointer;
+  }
+  .add-to-cart-btn-custom::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: var(--hovered_secondary_button_label);
+    transition: left 0.5s;
+    z-index: 0;
+  }
+  .add-to-cart-btn-custom:hover::before,
+  .add-to-cart-btn-custom:focus::before {
+    left: 0;
+  }
+  .add-to-cart-btn-custom > * {
+    position: relative;
+    z-index: 1;
+  }
+  .add-to-cart-btn-custom:hover,
+  .add-to-cart-btn-custom:focus {
+    color: var(--hovered_secondary_button_text_color);
+    border-color: var(--hovered_secondary_button_text_color);
+    outline: none;
+  }
+  .add-to-cart-btn-custom svg {
+    stroke-linecap: round;
+    transition: transform 0.3s;
+    transform-origin: center;
+    color: inherit;
+  }
+  .add-to-cart-btn-custom:hover svg,
+  .add-to-cart-btn-custom:focus svg {
+    transform: rotate(-90deg) scale(1.1);
+  }
+</style>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  // Product data from Shopify
+  const productOptions = {{ product.options | json }};
+  const productVariants = {{ product.variants | json }};
+  const cartType = {{ settings.cart_type | default: "page" | json }};
+  
+  const colorIndex = productOptions.findIndex(opt => 
+    opt.toLowerCase() === 'color' || opt.toLowerCase() === 'colour'
+  );
+  const sizeIndex = productOptions.findIndex(opt => 
+    opt.toLowerCase() === 'size'
+  );
+  
+  const denominationIndex = productOptions.findIndex(opt => 
+    opt.toLowerCase().includes('denomination') || 
+    opt.toLowerCase().includes('value') || 
+    opt.toLowerCase().includes('amount') ||
+    opt.toLowerCase().includes('price')
+  );
+
+  let mainOptionIndex = -1;
+  if (denominationIndex >= 0) {
+    mainOptionIndex = denominationIndex;
+  } else if (sizeIndex >= 0) {
+    mainOptionIndex = sizeIndex;
+  } else {
+    mainOptionIndex = productOptions.findIndex((opt, index) => index !== colorIndex);
+  }
+  
+  // State management
+  let selectedColor = null;
+  let selectedSize = null;
+  let selectedMainOption = null; 
+
+  const firstVariant = productVariants.find(v => v.available) || productVariants[0];
+  if (firstVariant) {
+    if (colorIndex >= 0) {
+      selectedColor = firstVariant[`option${colorIndex + 1}`];
+    }
+    if (sizeIndex >= 0) {
+      selectedSize = firstVariant[`option${sizeIndex + 1}`];
+    }
+    if (mainOptionIndex >= 0) {
+      selectedMainOption = firstVariant[`option${mainOptionIndex + 1}`];
+    }
+  }
+
+  // Helper functions
+  function lockBodyScroll() {
+    document.body.style.overflow = 'hidden';
+    document.body.style.touchAction = 'none';
+  }
+  
+  function unlockBodyScroll() {
+    document.body.style.overflow = '';
+    document.body.style.touchAction = '';
+  }
+
+  function findMatchingVariant(color = selectedColor, size = selectedSize, mainOption = selectedMainOption) {
+    const variant = productVariants.find(variant => {
+      const colorMatch = colorIndex >= 0 ? variant[`option${colorIndex + 1}`] === color : true;
+      const sizeMatch = sizeIndex >= 0 ? variant[`option${sizeIndex + 1}`] === size : true;
+      const mainOptionMatch = mainOptionIndex >= 0 ? variant[`option${mainOptionIndex + 1}`] === mainOption : true;
+      
+      return colorMatch && sizeMatch && mainOptionMatch;
+    });
+    
+    return variant;
+  }
+
+  function updatePriceDisplay(variant, isMobile = false) {
+    const currentPriceEl = document.querySelector(isMobile ? '.mobile-current-price' : '#current-price');
+    const comparePriceEl = document.querySelector(isMobile ? '.mobile-compare-price' : '#compare-price');
+    const compareSeparatorEl = document.querySelector(isMobile ? '.mobile-compare-price-separator' : '#compare-price-separator');
+    const savingsInfoEl = document.querySelector(isMobile ? '.mobile-savings-info' : '#savings-info');
+
+    if (!variant || !currentPriceEl) {
+      return;
+    }
+
+    // Update current price
+    currentPriceEl.textContent = (variant.price / 100).toLocaleString('en-US', {
+      style: 'currency',
+      currency: 'USD'
+    });
+
+    // Handle compare at price
+    if (variant.compare_at_price && variant.compare_at_price > variant.price) {
+      if (comparePriceEl) {
+        comparePriceEl.textContent = (variant.compare_at_price / 100).toLocaleString('en-US', {
+          style: 'currency',
+          currency: 'USD'
+        });
+        comparePriceEl.classList.remove('hidden');
+      }
+      if (compareSeparatorEl) compareSeparatorEl.classList.remove('hidden');
+      
+      if (savingsInfoEl) {
+        const savings = variant.compare_at_price - variant.price;
+        const percentage = Math.round((savings / variant.compare_at_price) * 100);
+        savingsInfoEl.innerHTML = `Save ${(savings / 100).toLocaleString('en-US', {
+          style: 'currency',
+          currency: 'USD'
+        })} (${percentage}% off)`;
+        savingsInfoEl.classList.remove('hidden');
+      }
+    } else {
+      if (comparePriceEl) comparePriceEl.classList.add('hidden');
+      if (compareSeparatorEl) compareSeparatorEl.classList.add('hidden');
+      if (savingsInfoEl) savingsInfoEl.classList.add('hidden');
+    }
+  }
+
+  function updateAddToCartButton(variant, isMobile = false) {
+    const button = document.querySelector(isMobile ? '.mobile-add-to-cart-btn' : '#add-to-cart-btn');
+    const variantIdInput = document.querySelector(isMobile ? '.mobile-variant-id' : '#variant-id');
+    const btnText = button ? button.querySelector(isMobile ? '#add-to-cart-btn-text-mobile' : '#add-to-cart-btn-text') : null;
+    const svg = button ? button.querySelector('svg') : null;
+
+    if (!button || !variantIdInput) return;
+
+    if (!variant || !variant.available) {
+      button.disabled = true;
+      if (btnText) btnText.textContent = variant ? 'SOLD OUT' : 'UNAVAILABLE';
+      button.classList.add('bg-gray-400');
+      button.classList.remove('add-to-cart-btn-custom');
+      button.style.cursor = 'not-allowed';
+      if (svg) svg.style.display = 'none';
+    } else {
+      button.disabled = false;
+      if (btnText) btnText.textContent = 'ADD TO CART';
+      button.classList.remove('bg-gray-400');
+      button.classList.add('add-to-cart-btn-custom');
+      button.style.cursor = 'pointer';
+      if (svg) svg.style.display = '';
+      variantIdInput.value = variant.id;
+    }
+  }
+
+  function updateSizeAvailability() {
+    const sizeBtns = document.querySelectorAll('.size-btn');
+    
+    sizeBtns.forEach(btn => {
+      const optionValue = btn.getAttribute('data-value');
+
+      let variant;
+      if (mainOptionIndex === sizeIndex) {
+        variant = findMatchingVariant(selectedColor, optionValue, optionValue);
+      } else {
+        variant = findMatchingVariant(selectedColor, selectedSize, optionValue);
+      }
+      
+      // Remove existing unavailable styling and slash
+      const existingSlash = btn.querySelector('.slash-unavailable');
+      if (existingSlash) existingSlash.remove();
+      
+      if (!variant || !variant.available) {
+        btn.classList.add('cursor-not-allowed', 'unavailable-size');
+        btn.classList.remove('bg-black', 'text-white'); 
+        btn.disabled = true;
+        btn.setAttribute('aria-disabled', 'true');
+        
+        const slash = document.createElement('span');
+        slash.className = 'slash-unavailable';
+        btn.appendChild(slash);
+      } else {
+        btn.classList.remove('cursor-not-allowed', 'unavailable-size');
+        btn.disabled = false;
+        btn.removeAttribute('aria-disabled');
+      }
+    });
+  }
+
+  function updateVariant() {
+    const variant = findMatchingVariant();
+    
+    // Update desktop
+    updatePriceDisplay(variant, false);
+    updateAddToCartButton(variant, false);
+    
+    // Update mobile
+    updatePriceDisplay(variant, true);
+    updateAddToCartButton(variant, true);
+
+    updateSizeAvailability();
+  }
+
+  function openCartDrawerFallback() {
+    var drawer = document.querySelector('cart-drawer, .cart-drawer, #cart-drawer, [data-drawer="cart"]');
+    if (drawer) {
+      drawer.classList.add('is-open', 'open', 'active');
+      drawer.classList.remove('hidden');
+      document.body.classList.add('overflow-hidden');
+    } else {
+      document.dispatchEvent(new CustomEvent('cart:open'));
+      document.dispatchEvent(new CustomEvent('drawer:open'));
+    }
+  }
+
+  // Add to Cart functionality
+  function addToCart(variantId, quantity) {
+    if (!variantId) {
+      console.error('No variant ID provided');
+      alert('Please select a valid product variant');
+      return;
+    }
+
+    // Show loading state
+    const buttons = document.querySelectorAll('#add-to-cart-btn, .mobile-add-to-cart-btn');
+    const originalTexts = [];
+    
+    buttons.forEach((btn, index) => {
+      if (btn.disabled) return; 
+      
+      btn.disabled = true;
+      const textEl = btn.querySelector('#add-to-cart-btn-text, #add-to-cart-btn-text-mobile');
+      if (textEl) {
+        originalTexts[index] = textEl.textContent;
+        textEl.textContent = 'ADDING...';
+      }
+    });
+
+    // Add to cart
+    fetch('{{ routes.cart_add_url }}', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+      },
+      body: JSON.stringify({
+        items: [{
+          id: variantId,
+          quantity: parseInt(quantity) || 1
+        }]
+      })
+    })
+    .then(response => {
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      return response.json();
+    })
+    .then(data => {
+      console.log('Product added to cart:', data);
+      if (cartType === 'drawer') {
+        if (typeof window.refreshCartDrawer === 'function') {
+          Promise.resolve(window.refreshCartDrawer()).then(() => {
+            document.dispatchEvent(new CustomEvent('cart:refresh', { detail: data }));
+            document.dispatchEvent(new CustomEvent('cart:updated', { detail: data }));
+            console.log('cart:refresh and cart:updated events dispatched');
+            if (typeof window.openCartDrawer === 'function') {
+              window.openCartDrawer();
+            } else if (typeof window.showCartDrawer === 'function') {
+              window.showCartDrawer();
+            } else if (typeof window.toggleCartDrawer === 'function') {
+              window.toggleCartDrawer();
+            } else {
+              openCartDrawerFallback();
+            }
+          });
+        } else {
+          document.dispatchEvent(new CustomEvent('cart:refresh', { detail: data }));
+          document.dispatchEvent(new CustomEvent('cart:updated', { detail: data }));
+          console.log('cart:refresh and cart:updated events dispatched');
+          openCartDrawerFallback();
+        }
+      } else {
+        window.location.href = '{{ routes.cart_url }}';
+      }
+    })
+    .catch(error => {
+      console.error('Error adding to cart:', error);
+
+      let errorMessage = 'There was an error adding the item to your cart. ';
+      
+      if (error.message.includes('422')) {
+        errorMessage += 'The selected variant may be out of stock.';
+      } else if (error.message.includes('404')) {
+        errorMessage += 'The product was not found.';
+      } else {
+        errorMessage += 'Please try again or go to the cart page.';
+      }
+      
+      alert(errorMessage);
+      
+      // Fallback to cart page redirect
+      setTimeout(() => {
+        window.location.href = '{{ routes.cart_url }}';
+      }, 2000);
+    })
+    .finally(() => {
+      // Restore button states after delay
+      setTimeout(() => {
+        buttons.forEach((btn, index) => {
+          if (originalTexts[index]) {
+            btn.disabled = false;
+            const textEl = btn.querySelector('#add-to-cart-btn-text, #add-to-cart-btn-text-mobile');
+            if (textEl) {
+              textEl.textContent = originalTexts[index];
+            }
+          }
+        });
+      }, 1500);
+    });
+  }
+
+  const desktopAddToCartBtn = document.getElementById('add-to-cart-btn');
+  if (desktopAddToCartBtn) {
+    desktopAddToCartBtn.addEventListener('click', function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      
+      if (this.disabled) return false;
+      
+      const variantId = document.getElementById('variant-id')?.value;
+      const quantity = document.getElementById('quantityInput')?.value || 
+                      document.getElementById('quantityDisplay')?.textContent || 1;
+      
+      addToCart(variantId, quantity);
+      return false;
+    });
+  }
+
+  // Mobile Add to Cart Button Handler
+  const mobileAddToCartBtn = document.querySelector('.mobile-add-to-cart-btn');
+  if (mobileAddToCartBtn) {
+    mobileAddToCartBtn.addEventListener('click', function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      
+      if (this.disabled) return false;
+      
+      const variantId = document.querySelector('.mobile-variant-id')?.value;
+      const quantity = document.querySelector('.mobile-quantity-input')?.value || 
+                      document.querySelector('.mobile-quantity-display')?.textContent || 1;
+      
+      addToCart(variantId, quantity);
+      return false;
+    });
+  }
+
+  const desktopForm = document.getElementById('add-to-cart-form');
+  const mobileForm = document.querySelector('.mobile-add-to-cart-form');
+
+  if (desktopForm) {
+    desktopForm.addEventListener('submit', function(e) {
+      e.preventDefault();
+      const button = this.querySelector('#add-to-cart-btn');
+      if (button && !button.disabled) {
+        button.click();
+      }
+      return false;
+    });
+  }
+
+  if (mobileForm) {
+    mobileForm.addEventListener('submit', function(e) {
+      e.preventDefault();
+      const button = this.querySelector('.mobile-add-to-cart-btn');
+      if (button && !button.disabled) {
+        button.click();
+      }
+      return false;
+    });
+  }
+
+  // Mobile size chart functionality
+  const mobileOpenBtn = document.getElementById('open-mobile-size-chart');
+  const mobileCloseBtn = document.getElementById('close-mobile-size-chart');
+  const mobileDrawer = document.getElementById('mobile-size-chart-drawer');
+
+  if (mobileOpenBtn && mobileCloseBtn && mobileDrawer) {
+    mobileOpenBtn.addEventListener('click', function() {
+      mobileDrawer.classList.remove('hidden');
+      requestAnimationFrame(() => {
+        mobileDrawer.classList.remove('translate-x-full');
+      });
+      lockBodyScroll();
+    });
+
+    mobileCloseBtn.addEventListener('click', function() {
+      mobileDrawer.classList.add('translate-x-full');
+      unlockBodyScroll();
+      setTimeout(() => {
+        mobileDrawer.classList.add('hidden');
+      }, 600);
+    });
+
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape' && !mobileDrawer.classList.contains('hidden')) {
+        mobileCloseBtn.click();
+      }
+    });
+  }
+
+  // Desktop size chart functionality
+  const openBtn = document.getElementById("open-size-chart");
+  const closeBtn = document.getElementById("close-size-chart");
+  const drawer = document.getElementById("size-chart-drawer");
+  const backdrop = document.getElementById("size-chart-backdrop");
+  
+  if (openBtn && drawer && backdrop && closeBtn) {
+    openBtn.addEventListener("click", () => {
+      drawer.classList.remove("hidden");
+      backdrop.classList.remove("hidden");
+      setTimeout(() => {
+        drawer.classList.add("open");
+      }, 20);
+      lockBodyScroll();
+    });
+  
+    const closeDrawer = () => {
+      drawer.classList.remove("open");
+      backdrop.classList.add("hidden");
+      unlockBodyScroll();
+      setTimeout(() => {
+        drawer.classList.add("hidden");
+      }, 400);
+    };
+  
+    closeBtn.addEventListener("click", closeDrawer);
+    backdrop.addEventListener("click", closeDrawer);
+  
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape") {
+        closeDrawer();
+      }
+    });
+  }
+
+  // Quantity selector functionality - Desktop
+  const increaseBtn = document.getElementById("increaseQty");
+  const decreaseBtn = document.getElementById("decreaseQty");
+  const quantityDisplay = document.getElementById("quantityDisplay");
+  const quantityInput = document.getElementById("quantityInput");
+
+  if (increaseBtn && decreaseBtn && quantityDisplay && quantityInput) {
+    let quantity = 1;
+
+    increaseBtn.addEventListener("click", () => {
+      quantity++;
+      quantityDisplay.textContent = quantity;
+      quantityInput.value = quantity;
+    });
+
+    decreaseBtn.addEventListener("click", () => {
+      if (quantity > 1) {
+        quantity--;
+        quantityDisplay.textContent = quantity;
+        quantityInput.value = quantity;
+      }
+    });
+  }
+
+  // Quantity selector functionality - Mobile
+  const mobileIncreaseBtn = document.querySelector(".mobile-increase-qty");
+  const mobileDecreaseBtn = document.querySelector(".mobile-decrease-qty");
+  const mobileQuantityDisplay = document.querySelector(".mobile-quantity-display");
+  const mobileQuantityInput = document.querySelector(".mobile-quantity-input");
+
+  if (mobileIncreaseBtn && mobileDecreaseBtn && mobileQuantityDisplay && mobileQuantityInput) {
+    let mobileQuantity = 1;
+
+    mobileIncreaseBtn.addEventListener("click", () => {
+      mobileQuantity++;
+      mobileQuantityDisplay.textContent = mobileQuantity;
+      mobileQuantityInput.value = mobileQuantity;
+    });
+
+    mobileDecreaseBtn.addEventListener("click", () => {
+      if (mobileQuantity > 1) {
+        mobileQuantity--;
+        mobileQuantityDisplay.textContent = mobileQuantity;
+        mobileQuantityInput.value = mobileQuantity;
+      }
+    });
+  }
+
+  // Mobile Gallery Handling
+  if (window.innerWidth < 1024) {
+    const mobileImages = document.querySelectorAll('.mobile-gallery-item');
+    const thumbnails = document.querySelectorAll('.thumbnail-item');
+
+    thumbnails.forEach((thumb, i) => {
+      thumb.addEventListener('click', () => {
+        showImage(i);
+      });
+    });
+    
+    function showImage(index) {
+      mobileImages.forEach((img, i) => {
+        if (i === index) {
+          img.classList.add('active');
+          img.classList.add('relative');
+          img.classList.remove('absolute', 'top-0', 'left-0');
+          img.style.opacity = '1';
+          img.style.zIndex = '2';
+          img.style.pointerEvents = 'auto';
+        } else {
+          img.classList.remove('active');
+          img.classList.remove('relative');
+          img.classList.add('absolute', 'top-0', 'left-0');
+          img.style.opacity = '0';
+          img.style.zIndex = '1';
+          img.style.pointerEvents = 'none';
+        }
+      });
+    
+      thumbnails.forEach((thumb, i) => {
+        if (i === index) {
+          thumb.classList.add('active');
+          thumb.style.opacity = '1';
+        } else {
+          thumb.classList.remove('active');
+          thumb.style.opacity = '0.6';
+        }
+      });
+    }
+
+    // Initialize with first image
+    if (mobileImages.length > 0) {
+      showImage(0);
+    }
+  }
+
+  // Desktop gallery handling
+  const gallery = document.querySelector('.product-gallery');
+  const items = document.querySelectorAll('.gallery-item');
+  const stripImages = document.querySelectorAll('.strip-image-wrapper');
+  const totalImages = items.length;
+
+  if (gallery && items.length && stripImages.length) {
+    let scrollLockUntil = 0;
+
+    function updateActiveImage() {
+      if (totalImages === 1) {
+        items[0].classList.add('is-active');
+        stripImages[0].classList.add('active');
+        return;
+      }
+
+      if (Date.now() < scrollLockUntil) return;
+
+      const galleryTop = gallery.offsetTop;
+      const scrollPosition = window.pageYOffset;
+      const sectionHeight = gallery.offsetHeight;
+      const windowHeight = window.innerHeight;
+      const scrollableDistance = sectionHeight - windowHeight;
+
+      const scrollFraction = (scrollPosition - galleryTop) / scrollableDistance;
+      const imageIndex = Math.min(Math.floor(scrollFraction * (totalImages - 0.1)), totalImages - 1);
+      const targetIndex = Math.max(0, imageIndex);
+
+      items.forEach((item, index) => {
+        item.classList.toggle('is-active', index === targetIndex);
+        const video = item.querySelector('video');
+        if (video) {
+          if (index === targetIndex) {
+            video.muted = true;
+            video.play().catch(() => {});
+          } else {
+            video.pause();
+            video.currentTime = 0;
+          }
+        }
+      });
+      
+      stripImages.forEach((img, index) => {
+        img.classList.toggle('active', index === targetIndex);
+      });
+    }
+
+    let ticking = false;
+    window.addEventListener('scroll', () => {
+      if (!ticking) {
+        window.requestAnimationFrame(() => {
+          updateActiveImage();
+          ticking = false;
+        });
+        ticking = true;
+      }
+    });
+
+    stripImages.forEach((stripImage, index) => {
+      stripImage.addEventListener('click', () => {
+        scrollLockUntil = Date.now() + 2000;
+
+        items.forEach((item, i) => {
+          item.classList.toggle('is-active', i === index);
+          const video = item.querySelector('video');
+          if (video) {
+            if (i === index) {
+              video.muted = true;
+              video.play();
+            } else {
+              video.pause();
+              video.currentTime = 0;
+            }
+          }
+        });
+
+        stripImages.forEach((img, i) => {
+          img.classList.toggle('active', i === index);
+        });
+      });
+    });
+
+    updateActiveImage();
+  }
+
+  // Tab functionality
+  const tabButtons = document.querySelectorAll(".tab-btn");
+  const tabPanes = document.querySelectorAll(".tab-pane");
+
+  tabButtons.forEach((button) => {
+    button.addEventListener("click", () => {
+      const targetTab = button.getAttribute("data-tab");
+      const borderDiv = button.querySelector(".tab-top-bar");
+
+      // Reset all tabs to inactive state
+      tabButtons.forEach((btn) => {
+        const btnBorderDiv = btn.querySelector(".tab-top-bar");
+        
+        btn.classList.remove("active-tab");
+        btn.style.color = "var(--secondary_text)";
+        
+        if (btnBorderDiv) {
+          btnBorderDiv.style.backgroundColor = "var(--secondary_text)";
+        }
+      });
+
+      // Set clicked tab to active state
+      button.classList.add("active-tab");
+      button.style.color = "var(--text)";
+      
+      if (borderDiv) {
+        borderDiv.style.backgroundColor = "var(--text)";
+      }
+
+      // Handle tab pane visibility
+      tabPanes.forEach((pane) => {
+        if (pane.getAttribute("data-content") === targetTab) {
+          pane.classList.remove("hidden");
+          pane.classList.add("block");
+        } else {
+          pane.classList.add("hidden");
+          pane.classList.remove("block");
+        }
+      });
+    });
+
+    // Tab hover effects
+    const borderDiv = button.querySelector(".tab-top-bar");
+    
+    button.addEventListener("mouseenter", () => {
+      if (!button.classList.contains("active-tab")) {
+        button.style.color = "var(--text)";
+        if (borderDiv) {
+          borderDiv.style.backgroundColor = "var(--text)";
+        }
+      }
+    });
+    
+    button.addEventListener("mouseleave", () => {
+      if (!button.classList.contains("active-tab")) {
+        button.style.color = "var(--secondary_text)";
+        if (borderDiv) {
+          borderDiv.style.backgroundColor = "var(--secondary_text)";
+        }
+      }
+    });
+  });
+
+  // Color swatch handling
+  const colorSwatches = document.querySelectorAll('.color-swatch');
+  const activeColorDisplays = document.querySelectorAll('[data-active-color]');
+  let lastSelectedColor = '';
+
+  function updateColorDisplays(color) {
+    activeColorDisplays.forEach(display => {
+      display.textContent = color;
+    });
+  }
+
+  function setActiveSwatch(swatch) {
+    const newSelectedColor = swatch.getAttribute('data-option-value');
+
+    // Remove ring from all swatches
+    colorSwatches.forEach((el) => {
+      el.classList.remove('ring-1', 'ring-offset-1', 'ring-black');
+    });
+
+    // Add ring to selected swatch
+    swatch.offsetWidth; 
+    swatch.classList.add('ring-1', 'ring-offset-2', 'ring-black');
+
+    // Update color displays
+    updateColorDisplays(newSelectedColor);
+    
+    // Update selected color and variant
+    selectedColor = newSelectedColor;
+    lastSelectedColor = newSelectedColor;
+    
+    swatch.blur();
+    updateVariant();
+  }
+
+  if (colorSwatches.length > 0) {
+    colorSwatches.forEach(swatch => {
+      const swatchColor = swatch.getAttribute('data-option-value');
+
+      swatch.addEventListener('click', () => setActiveSwatch(swatch));
+
+      swatch.addEventListener('mouseenter', () => {
+        if (swatchColor) updateColorDisplays(swatchColor);
+      });
+
+      swatch.addEventListener('mouseleave', () => {
+        if (lastSelectedColor) updateColorDisplays(lastSelectedColor);
+      });
+    });
+
+    // Initialize first swatch as selected
+    setActiveSwatch(colorSwatches[0]);
+  }
+
+  const sizeButtons = document.querySelectorAll('.size-btn');
+
+  if (sizeButtons.length > 0) {
+    sizeButtons.forEach((btn) => {
+      btn.addEventListener('click', () => {
+        if (btn.disabled) return;
+        
+        const newSelectedValue = btn.getAttribute('data-value');
+        
+        // Remove active styling from all size buttons
+        sizeButtons.forEach((b) => {
+          b.classList.remove('active', 'bg-black', 'text-white');
+        });
+        
+        // Add active styling to clicked button
+        btn.classList.add('active', 'bg-black', 'text-white');
+
+        if (mainOptionIndex === sizeIndex) {
+          selectedSize = newSelectedValue;
+          selectedMainOption = newSelectedValue;
+        } else {
+          // This is a denomination/value for gift cards
+          selectedMainOption = newSelectedValue;
+        }
+        
+        // Force variant update
+        updateVariant();
+      });
+    });
+
+    // Initialize first available option as selected
+    const firstAvailableBtn = Array.from(sizeButtons).find(btn => !btn.disabled);
+    if (firstAvailableBtn) {
+      const initialValue = firstAvailableBtn.getAttribute('data-value');
+      if (mainOptionIndex === sizeIndex) {
+        selectedSize = initialValue;
+        selectedMainOption = initialValue;
+      } else {
+        selectedMainOption = initialValue;
+      }
+      firstAvailableBtn.classList.add('active', 'bg-black', 'text-white');
+    }
+  }
+
+  // Initial variant update
+  updateVariant();
+
+  function openPickupDrawer() {
+    var pickupDrawer = document.querySelector('pickup-availability-drawer');
+    if (pickupDrawer) {
+      pickupDrawer.setAttribute('open', '');
+      document.body.classList.add('overflow-hidden');
+      pickupDrawer.focus();
+    }
+  }
+  function closePickupDrawer() {
+    var pickupDrawer = document.querySelector('pickup-availability-drawer');
+    if (pickupDrawer) {
+      pickupDrawer.removeAttribute('open');
+      document.body.classList.remove('overflow-hidden');
+    }
+  }
+  function pickupDrawerHandler(e) {
+    var target = e.target;
+    // Use closest to support event bubbling from child elements
+    var pickupBtn = target.closest('#ShowPickupAvailabilityDrawer');
+    var closeBtn = target.closest('.pickup-availability-drawer-button');
+    if (pickupBtn) {
+      e.preventDefault();
+      openPickupDrawer();
+    }
+    if (closeBtn) {
+      e.preventDefault();
+      closePickupDrawer();
+    }
+  }
+  document.body.addEventListener('click', pickupDrawerHandler);
+  document.body.addEventListener('touchend', pickupDrawerHandler, { passive: false });
+});
+</script>
+
+{% schema %}
+{
+  "name": "Product Details",
+  "tag": "section",
+  "class": "section",
+  "settings": [
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "Color scheme",
+      "default": "background-1"
+    },
+    {
+      "type": "select",
+      "id": "product_name_font_weight",
+      "label": "Product Name",
+      "info": "Font Weight",
+      "options": [
+        {
+          "value": "300",
+          "label": "Light"
+        },
+        {
+          "value": "400",
+          "label": "Normal"
+        },
+        {
+          "value": "500",
+          "label": "Medium"
+        },
+        {
+          "value": "600",
+          "label": "Semi Bold"
+        },
+        {
+          "value": "700",
+          "label": "Bold"
+        }
+      ],
+      "default": "400"
+    },
+    {
+      "type": "select",
+      "id": "product_price_font_weight",
+      "label": "Product Price",
+      "info": "Font Weight",
+      "options": [
+        {
+          "value": "300",
+          "label": "Light"
+        },
+        {
+          "value": "400",
+          "label": "Normal"
+        },
+        {
+          "value": "500",
+          "label": "Medium"
+        },
+        {
+          "value": "600",
+          "label": "Semi Bold"
+        },
+        {
+          "value": "700",
+          "label": "Bold"
+        }
+      ],
+      "default": "400"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "tab_description",
+      "name": "Tab: Description",
+      "limit": 1,
+      "settings": [
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Tab Title",
+          "default": "DESCRIPTION"
+        }
+      ]
+    },
+    {
+      "type": "tab_details",
+      "name": "Tab: Details",
+      "limit": 1,
+      "settings": [
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Tab Title",
+          "default": "DETAILS"
+        },
+        {
+          "type": "text",
+          "id": "metafield_namespace_key",
+          "label": "Product Details ",
+          "default": "CONNECT TO A DYNAMIC SOURCE FOR PRODUCT DETAILS"
+        }
+      ]
+    },
+    {
+      "type": "tab_sizing",
+      "name": "Tab: Sizing",
+      "limit": 1,
+      "settings": [
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Tab Title",
+          "default": "SIZING"
+        },
+        {
+          "type": "page",
+          "id": "size_chart_page",
+          "label": "Select a Size Chart Page"
+        }
+      ]
+    },
+    {
+      "type": "delivery_address",
+      "name": "Delivery Address",
+      "limit": 1,
+      "settings": []
+    },
+    {
+      "type": "quantity_selector",
+      "name": "Quantity Selector",
+      "limit": 1,
+      "settings": []
+    },
+    {
+      "type": "pickup_availability",
+      "name": "Pickup Availability",
+      "limit": 1,
+      "settings": []
+    }
+  ]
+}
+{% endschema %}
