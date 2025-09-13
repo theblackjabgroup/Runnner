@@ -99,48 +99,49 @@
               ADD TO CART
             </button>
 
-            <!-- Using fieldset/legend instead of role=group -->
-            <fieldset class="new-size-variants-container">
-              <legend id="size-label-{{ product_id }}">Size options for {{ product_title }}</legend>
-              <div class="new-size-options-wrapper" style="display: flex; gap: 5px;">
-                {% for option in product.options_with_values %}
-                  {% if option.name == 'Size' or option.name == 'size' %}
-                    {% for value in option.values %}
-                      {% assign variant_available = false %}
-                      {% assign variant_id = '' %}
-                      {% for variant in product_variants %}
-                        {% if variant.options[size_option_index] == value and variant.available %}
-                          {% assign variant_available = true %}
-                          {% assign variant_id = variant.id %}
-                          {% break %}
-                        {% endif %}
-                      {% endfor %}
+            <div class="new-size-variants-container">
+              <div class="new-size-label-wrapper">
+                <span class="new-size-label">Select Size</span>
+                <div class="new-size-options-wrapper" style="display: flex; gap: 5px;">
+                  {% for option in product.options_with_values %}
+                    {% if option.name == 'Size' or option.name == 'size' %}
+                      {% for value in option.values %}
+                        {% assign variant_available = false %}
+                        {% assign variant_id = '' %}
+                        {% for variant in product_variants %}
+                          {% if variant.options[size_option_index] == value and variant.available %}
+                            {% assign variant_available = true %}
+                            {% assign variant_id = variant.id %}
+                            {% break %}
+                          {% endif %}
+                        {% endfor %}
 
-                      <button
-                        class="new-size-option-btn{% unless variant_available %} unavailable-size{% endunless %}"
-                        {% if variant_available %}
-                          data-variant-id="{{ variant_id }}"
-                          data-variant-size="{{ value }}"
-                          aria-label="Size {{ value }} available"
-                          type="button"
-                        {% else %}
-                          data-waitlist="true"
-                          data-product-title="{{ product_title }}"
-                          data-variant-size="{{ value }}"
-                          aria-label="Size {{ value }} unavailable, join waitlist"
-                          aria-disabled="true"
-                          type="button"
-                        {% endif %}
-                        style="--animation-order: {{ forloop.index0 }};"
-                      >
-                        {{ value }}
-                      </button>
-                    {% endfor %}
-                    {% break %}
-                  {% endif %}
-                {% endfor %}
+                        <button
+                          class="new-size-option-btn{% unless variant_available %} unavailable-size{% endunless %}"
+                          {% if variant_available %}
+                            data-variant-id="{{ variant_id }}"
+                            data-variant-size="{{ value }}"
+                            aria-label="Size {{ value }} available"
+                            type="button"
+                          {% else %}
+                            data-waitlist="true"
+                            data-product-title="{{ product_title }}"
+                            data-variant-size="{{ value }}"
+                            aria-label="Size {{ value }} unavailable, join waitlist"
+                            aria-disabled="true"
+                            type="button"
+                          {% endif %}
+                          style="--animation-order: {{ forloop.index0 }};"
+                        >
+                          {{ value }}
+                        </button>
+                      {% endfor %}
+                      {% break %}
+                    {% endif %}
+                  {% endfor %}
+                </div>
               </div>
-            </fieldset>
+            </div>
 
           {% else %}
             <button
