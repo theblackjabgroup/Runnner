@@ -356,7 +356,7 @@
                   {% endif %}
                   aria-label="{{ variant_option.name }} {{ value }}{% unless variant_available %} - Sold out{% endunless %}"
                 >
-                  <span class="label z-10">{{ value }}</span>
+                  <span class="label">{{ value }}</span>
                   {% unless variant_available %}
                     <span class="slash-unavailable"></span>
                   {% endunless %}
@@ -365,11 +365,7 @@
             </div>
           </div>
         {% endif %}
-        {% if product.gift_card? %}
-          <div class="border-t border-gray-400 pt-4" style="padding-top: 1rem;">
-          {% render 'gift-card-recipient-form', product: product, form: form, section: section %}
-          </div>
-        {% endif %}
+
         <!-- PRICE + ACTIONS -->
         <div class="flex justify-between items-center border-t border-gray-400 pt-4" style="padding-top: 1rem;">
           <!-- Price + Compare at Price -->
@@ -415,7 +411,7 @@
             <div class="flex gap-2">
               {% if product.available %}
                 <!-- ADD TO CART form -->
-                <form method="post" action="{{ routes.cart_add_url }}" id="add-to-cart-form">
+                <form method="post" action="/cart/add" id="add-to-cart-form">
                   <input
                     type="hidden"
                     name="id"
@@ -455,7 +451,9 @@
             </div>
           </div>
         </div>
-
+        {% if product.gift_card? %}
+          {% render 'gift-card-recipient-form', product: product, form: form, section: section %}
+        {% endif %}
         {%- for block in section.blocks -%}
           {%- if block.type == 'pickup_availability' -%}
             <div class="pickup-availability-container mt-4" style="width:100%;">
@@ -813,7 +811,7 @@
                 {% endif %}
                 aria-label="{{ variant_option.name }} {{ value }}{% unless variant_available %} - Sold out{% endunless %}"
               >
-                <span class="label z-10">{{ value }}</span>
+                <span class="label">{{ value }}</span>
                 {% unless variant_available %}
                   <span class="slash-unavailable"></span>
                 {% endunless %}
@@ -822,11 +820,6 @@
           </div>
         </div>
       {% endif %}
-      {% if product.gift_card? %}
-          <div class="border-t border-gray-400 pt-4" style="padding-top: 1rem;">
-          {% render 'gift-card-recipient-form', product: product, form: form, section: section %}
-          </div>
-        {% endif %}
 
       <!-- PRICE + ACTIONS -->
       <div class="flex flex-col justify-evenly  border-t border-gray-400 pt-4" style="padding-top: 1rem;">
@@ -899,6 +892,9 @@
           {% endif %}
         </div>
       </div>
+      {% if product.gift_card? %}
+        {% render 'gift-card-recipient-form', product: product, form: form, section: section %}
+      {% endif %}
       {%- for block in section.blocks -%}
         {%- if block.type == 'pickup_availability' -%}
           <div class="pickup-availability-container mt-4" style="width:100%;">
@@ -1239,6 +1235,346 @@ document.addEventListener('DOMContentLoaded', () => {
     return variant;
   }
 
+  // Function to refresh cart drawer content (from featured collection)
+  function refreshCartDrawer() {
+    return fetch(`${window.location.pathname}?section_id=cart-drawer`)
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return response.text();
+      })
+      .then((responseText) => {
+        console.log('Cart drawer refreshed');
+
+        const html = new DOMParser().parseFromString(responseText, 'text/html');
+
+        // Update cart drawer content
+        const cartDrawerElement = document.querySelector('cart-drawer');
+        const newCartDrawerContent = html.querySelector('cart-drawer');
+
+        if (cartDrawerElement && newCartDrawerContent) {
+          // Store the current state
+          const isActive = cartDrawerElement.classList.contains('active');
+          const isAnimating = cartDrawerElement.classList.contains('animate');
+
+          // Replace the content
+          cartDrawerElement.innerHTML = newCartDrawerContent.innerHTML;
+
+          // Restore necessary classes
+          if (isActive) cartDrawerElement.classList.add('active');
+          if (isAnimating) cartDrawerElement.classList.add('animate');
+
+          // Remove empty state if it has items
+          if (!newCartDrawerContent.classList.contains('is-empty')) {
+            cartDrawerElement.classList.remove('is-empty');
+          }
+        }
+
+        // Also update cart icon bubble
+        const cartIconBubble = document.querySelector('#cart-icon-bubble');
+        const newCartIconBubble = html.querySelector('#cart-icon-bubble');
+
+        if (cartIconBubble && newCartIconBubble) {
+          cartIconBubble.innerHTML = newCartIconBubble.innerHTML;
+        }
+
+        // Update cart count
+        updateCartCount();
+        
+        // Re-initialize cart drawer event listeners
+        initializeCartDrawerEventListeners();
+      })
+      .catch((error) => {
+        console.error('Error refreshing cart drawer:', error);
+        return updateCartCount();
+      });
+  }
+
+  // Function to re-initialize cart drawer event listeners after content refresh
+  function initializeCartDrawerEventListeners() {
+    console.log('Re-initializing cart drawer event listeners');
+
+    // Re-initialize overlay click handler
+    const overlay = document.querySelector('#CartDrawer-Overlay');
+    if (overlay) {
+      overlay.addEventListener('click', function () {
+        const cartDrawer = document.querySelector('cart-drawer');
+        if (cartDrawer && typeof cartDrawer.close === 'function') {
+          cartDrawer.close();
+        }
+      });
+    }
+
+    // Re-initialize close button handlers
+    const closeButtons = document.querySelectorAll('.drawer__close, .drawer__close2');
+    closeButtons.forEach((button) => {
+      button.addEventListener('click', function () {
+        const cartDrawer = this.closest('cart-drawer');
+        if (cartDrawer && typeof cartDrawer.close === 'function') {
+          cartDrawer.close();
+        }
+      });
+    });
+
+    // Re-initialize quantity input handlers if they exist
+    const quantityInputs = document.querySelectorAll('.cart-quantity input[type="number"]');
+    quantityInputs.forEach((input) => {
+      // Remove any existing listeners first
+      input.removeEventListener('change', handleQuantityChange);
+      input.addEventListener('change', handleQuantityChange);
+    });
+
+    // Re-initialize remove buttons
+    const removeButtons = document.querySelectorAll('cart-remove-button button');
+    removeButtons.forEach((button) => {
+      if (!button.hasAttribute('data-listener-added')) {
+        button.setAttribute('data-listener-added', 'true');
+        button.addEventListener('click', function (e) {
+          e.preventDefault();
+          const cartItems = this.closest('cart-items') || this.closest('cart-drawer-items');
+          if (cartItems && cartItems.updateQuantity) {
+            const index = this.closest('cart-remove-button').dataset.index;
+            cartItems.updateQuantity(index, 0, e);
+          }
+        });
+      }
+    });
+  }
+
+  // Helper function for quantity change handling
+  function handleQuantityChange(event) {
+    const cartItems = event.target.closest('cart-items') || event.target.closest('cart-drawer-items');
+    if (cartItems && cartItems.validateQuantity) {
+      cartItems.validateQuantity(event);
+    }
+  }
+
+  // Function to open cart drawer
+  function openCartDrawer() {
+    // Try to click cart icon to open drawer
+    const cartIcon = document.querySelector('#cart-icon-bubble');
+    if (cartIcon) {
+      cartIcon.click();
+      return;
+    }
+
+    // Fallback: try to open cart drawer directly
+    const cartDrawer = document.querySelector('cart-drawer');
+    if (cartDrawer && typeof cartDrawer.open === 'function') {
+      cartDrawer.open();
+    } else if (cartDrawer) {
+      // Manually add active class
+      cartDrawer.classList.add('animate', 'active');
+      document.body.classList.add('overflow-hidden');
+    } else {
+      // Final fallback: redirect to cart page
+      window.location.href = '/cart';
+    }
+  }
+
+  // Function to update cart count in all possible locations
+  function updateCartCount() {
+    fetch(window.routes?.cart_url || '/cart.js')
+      .then((res) => {
+        if (!res.ok) {
+          throw new Error(`HTTP error! status: ${res.status}`);
+        }
+        return res.json();
+      })
+      .then((cart) => {
+        console.log('Cart updated:', cart);
+
+        // Target all possible cart count elements using various common selectors
+        const cartCountSelectors = [
+          '.cart-count',
+          '[data-cart-count]',
+          '.cart-count-bubble',
+          '#cart-icon-bubble .visually-hidden',
+          '.cart-item-count',
+          '.js-cart-count',
+          '.site-header__cart-count',
+          '.cart-count-number',
+          '[data-header-cart-count]',
+        ];
+
+        // Query all possible cart count elements
+        cartCountSelectors.forEach((selector) => {
+          const elements = document.querySelectorAll(selector);
+          if (elements.length > 0) {
+            elements.forEach((el) => {
+              el.textContent = cart.item_count;
+              el.classList.remove('hidden');
+
+              // Handle potential span inside cart bubble
+              if (el.querySelector('span')) {
+                el.querySelector('span').textContent = cart.item_count;
+              }
+            });
+          }
+        });
+
+        // If there's a cart icon with count displayed as attribute
+        const cartIcons = document.querySelectorAll('.cart-icon, [data-cart-icon]');
+        cartIcons.forEach((icon) => {
+          if (icon) {
+            icon.setAttribute('data-count', cart.item_count);
+          }
+        });
+
+        // Dispatch a custom event that theme might be listening for
+        document.dispatchEvent(
+          new CustomEvent('cart:updated', {
+            detail: { cart: cart },
+          })
+        );
+      })
+      .catch((error) => {
+        console.error('Error updating cart count:', error);
+      });
+  }
+
+  // Enhanced Add to Cart functionality with drawer refresh and success notification
+  function addToCart(variantId, quantity) {
+    if (!variantId) {
+      console.error('No variant ID provided');
+      alert('Please select a valid product variant');
+      return;
+    }
+
+    console.log('Adding to cart:', variantId, quantity);
+
+    // Show loading state
+    const buttons = document.querySelectorAll('#add-to-cart-btn, .mobile-add-to-cart-btn');
+    const originalTexts = [];
+    
+    buttons.forEach((btn, index) => {
+      if (btn.disabled) return; 
+      
+      btn.disabled = true;
+      const textEl = btn.querySelector('#add-to-cart-btn-text, #add-to-cart-btn-text-mobile');
+      if (textEl) {
+        originalTexts[index] = textEl.textContent;
+        textEl.textContent = 'ADDING...';
+      }
+    });
+
+    const formData = {
+      items: [
+        {
+          id: variantId,
+          quantity: quantity,
+        },
+      ],
+    };
+
+    fetch(window.routes?.cart_add_url || '/cart/add.js', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(formData),
+    })
+      .then((response) => {
+        console.log('Response status:', response.status);
+        console.log('Response headers:', response.headers);
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        // Check if response is actually JSON
+        const contentType = response.headers.get('content-type');
+        if (!contentType || !contentType.includes('application/json')) {
+          console.warn('Response is not JSON, treating as success');
+          // If it's not JSON but status is OK, treat as success
+          return { success: true };
+        }
+
+        return response.json();
+      })
+      .then((data) => {
+        console.log('Cart add success:', data);
+
+
+        // Update cart count immediately
+        updateCartCount();
+
+        refreshCartDrawer()
+          .then(() => {
+            openCartDrawer();
+          })
+          .catch((error) => {
+            console.error('Cart drawer refresh failed:', error);
+            // Fallback: just update count and open
+            updateCartCount();
+            openCartDrawer();
+          });
+      })
+      .catch((error) => {
+        console.error('Error adding to cart:', error);
+        console.log('Error type:', error.name, 'Error message:', error.message);
+
+        // Check if the error is likely a parsing issue rather than an actual cart error
+        if (error.message.includes('Unexpected') || error.message.includes('JSON')) {
+          console.log('Likely JSON parsing error, but cart add may have succeeded');
+
+          // Still try to update cart count as the add might have worked
+          setTimeout(() => {
+            updateCartCount();
+          }, 500);
+
+          // Show a more appropriate message
+          const notification = document.createElement('div');
+          notification.className =
+            'fixed bottom-4 right-4 bg-yellow-500 text-white px-6 py-3 rounded-lg z-50 opacity-0 transition-opacity duration-300';
+          notification.textContent = 'Item may have been added - please check cart';
+          document.body.appendChild(notification);
+
+          setTimeout(() => (notification.style.opacity = '1'), 10);
+          setTimeout(() => {
+            notification.style.opacity = '0';
+            setTimeout(() => notification.remove(), 300);
+          }, 3000);
+
+          return;
+        }
+
+        // Still try to update cart count even if there was an error
+        // because the item might have been added successfully
+        setTimeout(() => {
+          updateCartCount();
+        }, 1000);
+
+        // Show error notification
+        const notification = document.createElement('div');
+        notification.className =
+          'fixed bottom-4 right-4 bg-red-500 text-white px-6 py-3 rounded-lg z-50 opacity-0 transition-opacity duration-300';
+        notification.textContent = 'Error adding to cart';
+        document.body.appendChild(notification);
+
+        setTimeout(() => (notification.style.opacity = '1'), 10);
+        setTimeout(() => {
+          notification.style.opacity = '0';
+          setTimeout(() => notification.remove(), 300);
+        }, 2000);
+      })
+      .finally(() => {
+        // Restore button states after delay
+        setTimeout(() => {
+          buttons.forEach((btn, index) => {
+            if (originalTexts[index]) {
+              btn.disabled = false;
+              const textEl = btn.querySelector('#add-to-cart-btn-text, #add-to-cart-btn-text-mobile');
+              if (textEl) {
+                textEl.textContent = originalTexts[index];
+              }
+            }
+          });
+        }, 1500);
+      });
+  }
+
   function updatePriceDisplay(variant, isMobile = false) {
     const currentPriceEl = document.querySelector(isMobile ? '.mobile-current-price' : '#current-price');
     const comparePriceEl = document.querySelector(isMobile ? '.mobile-compare-price' : '#compare-price');
@@ -1356,125 +1692,7 @@ document.addEventListener('DOMContentLoaded', () => {
     updateSizeAvailability();
   }
 
-  function openCartDrawerFallback() {
-    var drawer = document.querySelector('cart-drawer, .cart-drawer, #cart-drawer, [data-drawer="cart"]');
-    if (drawer) {
-      drawer.classList.add('is-open', 'open', 'active');
-      drawer.classList.remove('hidden');
-      document.body.classList.add('overflow-hidden');
-    } else {
-      document.dispatchEvent(new CustomEvent('cart:open'));
-      document.dispatchEvent(new CustomEvent('drawer:open'));
-    }
-  }
-
-  // Add to Cart functionality
-  function addToCart(variantId, quantity) {
-    if (!variantId) {
-      console.error('No variant ID provided');
-      alert('Please select a valid product variant');
-      return;
-    }
-
-    // Show loading state
-    const buttons = document.querySelectorAll('#add-to-cart-btn, .mobile-add-to-cart-btn');
-    const originalTexts = [];
-    
-    buttons.forEach((btn, index) => {
-      if (btn.disabled) return; 
-      
-      btn.disabled = true;
-      const textEl = btn.querySelector('#add-to-cart-btn-text, #add-to-cart-btn-text-mobile');
-      if (textEl) {
-        originalTexts[index] = textEl.textContent;
-        textEl.textContent = 'ADDING...';
-      }
-    });
-
-    // Add to cart
-    fetch('{{ routes.cart_add_url }}', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json'
-      },
-      body: JSON.stringify({
-        items: [{
-          id: variantId,
-          quantity: parseInt(quantity) || 1
-        }]
-      })
-    })
-    .then(response => {
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      return response.json();
-    })
-    .then(data => {
-      console.log('Product added to cart:', data);
-      if (cartType === 'drawer') {
-        if (typeof window.refreshCartDrawer === 'function') {
-          Promise.resolve(window.refreshCartDrawer()).then(() => {
-            document.dispatchEvent(new CustomEvent('cart:refresh', { detail: data }));
-            document.dispatchEvent(new CustomEvent('cart:updated', { detail: data }));
-            console.log('cart:refresh and cart:updated events dispatched');
-            if (typeof window.openCartDrawer === 'function') {
-              window.openCartDrawer();
-            } else if (typeof window.showCartDrawer === 'function') {
-              window.showCartDrawer();
-            } else if (typeof window.toggleCartDrawer === 'function') {
-              window.toggleCartDrawer();
-            } else {
-              openCartDrawerFallback();
-            }
-          });
-        } else {
-          document.dispatchEvent(new CustomEvent('cart:refresh', { detail: data }));
-          document.dispatchEvent(new CustomEvent('cart:updated', { detail: data }));
-          console.log('cart:refresh and cart:updated events dispatched');
-          openCartDrawerFallback();
-        }
-      } else {
-        window.location.href = '{{ routes.cart_url }}';
-      }
-    })
-    .catch(error => {
-      console.error('Error adding to cart:', error);
-
-      let errorMessage = 'There was an error adding the item to your cart. ';
-      
-      if (error.message.includes('422')) {
-        errorMessage += 'The selected variant may be out of stock.';
-      } else if (error.message.includes('404')) {
-        errorMessage += 'The product was not found.';
-      } else {
-        errorMessage += 'Please try again or go to the cart page.';
-      }
-      
-      alert(errorMessage);
-      
-      // Fallback to cart page redirect
-      setTimeout(() => {
-        window.location.href = '{{ routes.cart_url }}';
-      }, 2000);
-    })
-    .finally(() => {
-      // Restore button states after delay
-      setTimeout(() => {
-        buttons.forEach((btn, index) => {
-          if (originalTexts[index]) {
-            btn.disabled = false;
-            const textEl = btn.querySelector('#add-to-cart-btn-text, #add-to-cart-btn-text-mobile');
-            if (textEl) {
-              textEl.textContent = originalTexts[index];
-            }
-          }
-        });
-      }, 1500);
-    });
-  }
-
+  // Desktop Add to Cart Button Handler
   const desktopAddToCartBtn = document.getElementById('add-to-cart-btn');
   if (desktopAddToCartBtn) {
     desktopAddToCartBtn.addEventListener('click', function(e) {
@@ -1510,6 +1728,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+  // Form submission handlers
   const desktopForm = document.getElementById('add-to-cart-form');
   const mobileForm = document.querySelector('.mobile-add-to-cart-form');
 
@@ -1895,6 +2114,7 @@ document.addEventListener('DOMContentLoaded', () => {
     setActiveSwatch(colorSwatches[0]);
   }
 
+  // Size/option button handling
   const sizeButtons = document.querySelectorAll('.size-btn');
 
   if (sizeButtons.length > 0) {
@@ -1939,9 +2159,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  // Initial variant update
-  updateVariant();
-
+  // Pickup availability drawer functionality
   function openPickupDrawer() {
     var pickupDrawer = document.querySelector('pickup-availability-drawer');
     if (pickupDrawer) {
@@ -1950,6 +2168,7 @@ document.addEventListener('DOMContentLoaded', () => {
       pickupDrawer.focus();
     }
   }
+  
   function closePickupDrawer() {
     var pickupDrawer = document.querySelector('pickup-availability-drawer');
     if (pickupDrawer) {
@@ -1957,6 +2176,7 @@ document.addEventListener('DOMContentLoaded', () => {
       document.body.classList.remove('overflow-hidden');
     }
   }
+  
   function pickupDrawerHandler(e) {
     var target = e.target;
     // Use closest to support event bubbling from child elements
@@ -1971,8 +2191,16 @@ document.addEventListener('DOMContentLoaded', () => {
       closePickupDrawer();
     }
   }
+  
   document.body.addEventListener('click', pickupDrawerHandler);
   document.body.addEventListener('touchend', pickupDrawerHandler, { passive: false });
+
+  // Initial variant update and cart count sync
+  updateVariant();
+  updateCartCount();
+
+  // Initialize cart drawer event listeners on page load
+  initializeCartDrawerEventListeners();
 });
 </script>
 
