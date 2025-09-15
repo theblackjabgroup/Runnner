@@ -1,155 +1,197 @@
-{% comment %}
-  Renders an article card for a given blog with settings to either show the image or not.
+<style>
+.blog-section p,
+.blog-section h1,
+.blog-section h2,
+.blog-section h3,
+.blog-section h4,
+.blog-section h5,
+.blog-section h6,
+.blog-section div,
+.blog-section span {
+  margin: 0;
+  padding: 0;
+  line-height: 0.94 !important;
+}
+.zoom-trigger p,
+.zoom-trigger h1,
+.zoom-trigger h2,
+.zoom-trigger h3,
+.zoom-trigger h4,
+.zoom-trigger h5,
+.zoom-trigger h6,
+.zoom-trigger div,
+.zoom-trigger span {
+  line-height: 0.94 !important;
+}
 
-  Accepts:
-  - blog: {Object} Blog object
-  - article: {Object} Article object
-  - media_aspect_ratio: {String} The setting changes the aspect ratio of the article image, if shown
-  - media_height: {String} The setting changes the height of the article image. Overrides media_aspect_ratio.
-  - show_image: {String} The setting either show the article image or not. If it's not included it will show the image by default
-  - show_date: {String} The setting either show the article date or not. If it's not included it will not show the image by default
-  - show_author: {String} The setting either show the article author or not. If it's not included it will not show the author by default
-  - show_badge: {String} The setting either show the blog badge or not.
-  - lazy_load: {Boolean} Image should be lazy loaded. Default: true (optional)
+@media (max-width: 767px) {
+  .load-more-btn-fb-container {
+    margin-top: 0px !important;
+  }
+  .arrow-svgsub {
+    height: 17px;
+    width: 16px;
+  }
+  .subclass-header {
+    font-size: var(--tm-h-3-size) !important;
+    line-height: var(--tm-h-3-line-height) !important;
+    margin-bottom: 10px !important;
+  }
+  .subclass-subheader {
+    font-size: var(--tm-b-3-size) !important;
+    line-height: var(--tm-b-3-line-height) !important;
+    margin-bottom: 35px;
+    display: block;
+  }
+  .divclass {
+    width: 371px;
+  }
+  .img1 {
+    width: 100% !important;
+  }
+  .blog-grid {
+    gap: 0 !important;
+    padding-right: {{ settings.side_space | default: 20 }}px;
+  }
+  .last-visible-article {
+    margin-bottom: 0 !important;
+  }
+  .blog-article.last-visible-article {
+    margin-bottom: 0 !important;
+  }
+}
 
-  Usage:
-  {% render 'article-card' blog: blog, article: article, show_image: section.settings.show_image %}
-{% endcomment %}
+.text-article-date-color {
+  margin-top: 6px;
+  margin-bottom: 7px;
+}
 
-{%- if article and article != empty -%}
-  {%- liquid
-    assign ratio = 1
-    if media_aspect_ratio != null
-      assign ratio = media_aspect_ratio
-    endif
-  -%}
-  <div class="article-card-wrapper card-wrapper underline-links-hover">
-    {% comment %} <article aria-labelledby="Article-{{ article.id }}"> {% endcomment %}
-    <div
-      class="
-        card article-card
-        card--{{ settings.blog_card_style }}
-        {% if media_height and media_height != 'adapt' %} article-card__image--{{ media_height }}{% endif %}
-        {% if article.image and show_image %} card--media{% else %} card--text{% endif %}
-        {% if settings.blog_card_style == 'card' %} color-{{ settings.blog_card_color_scheme }} gradient{% endif %}
-        {% if settings.blog_card_style == 'card' and media_height == nil and article.image == empty or show_image == false %} ratio{% endif %}
-      "
-      style="--ratio-percent: {{ 1 | divided_by: ratio | times: 100 }}%;"
-    >
-      <div
-        class="card__inner {% if settings.blog_card_style == 'standard' %} color-{{ settings.blog_card_color_scheme }} gradient{% endif %}{% if article.image and show_image or settings.blog_card_style == 'standard' %} ratio{% endif %}"
-        style="--ratio-percent: {{ 1 | divided_by: ratio | times: 100 }}%;"
-      >
-        {%- if show_image == true and article.image -%}
-          <div class="article-card__image-wrapper card__media">
-            <div
-              class="article-card__image media media--hover-effect"
-              {% if section.settings.media_height == 'adapt' %}
-                style="padding-bottom: {{ 1 | divided_by: article.image.aspect_ratio | times: 100 }}%;"
-              {% endif %}
-            >
-              {% comment %}theme-check-disable ImgLazyLoading{% endcomment %}
-              <img
-                srcset="
-                  {%- if article.image.src.width >= 165 -%}{{ article.image.src | image_url: width: 165 }} 165w,{%- endif -%}
-                  {%- if article.image.src.width >= 360 -%}{{ article.image.src | image_url: width: 360 }} 360w,{%- endif -%}
-                  {%- if article.image.src.width >= 533 -%}{{ article.image.src | image_url: width: 533 }} 533w,{%- endif -%}
-                  {%- if article.image.src.width >= 720 -%}{{ article.image.src | image_url: width: 720 }} 720w,{%- endif -%}
-                  {%- if article.image.src.width >= 1000 -%}{{ article.image.src | image_url: width: 1000 }} 1000w,{%- endif -%}
-                  {%- if article.image.src.width >= 1500 -%}{{ article.image.src | image_url: width: 1500 }} 1500w,{%- endif -%}
-                  {{ article.image.src | image_url }} {{ article.image.src.width }}w
-                "
-                src="{{ article.image.src | image_url: width: 533 }}"
-                sizes="(min-width: {{ settings.page_width }}px) {{ settings.page_width | minus: 100 | divided_by: 2 }}px, (min-width: 750px) calc((100vw - 130px) / 2), calc((100vw - 50px) / 2)"
-                alt="{{ article.image.src.alt | escape }}"
-                class="motion-reduce"
-                {% unless lazy_load == false %}
-                  loading="lazy"
-                {% endunless %}
-                width="{{ article.image.width }}"
-                height="{{ article.image.height }}"
-              >
-              {% comment %}theme-check-enable ImgLazyLoading{% endcomment %}
-            </div>
+:root {
+  --font-heading-family: {{ settings.type_heading_font.family | default: 'Arial, sans-serif' }};
+  --font-body-family: {{ settings.type_body_font.family | default: 'Arial, sans-serif' }};
+}
+
+:focus {
+  outline: 2px solid #f97316;
+  outline-offset: 2px;
+}
+
+.subclass-header,
+.subclass-subheader,
+.blog_highlight-tag,
+.blog_heading-highlight,
+.text-article-date-color {
+  color: var(--text);
+}
+
+.blog_highlight-tag {
+  width: 100vw;
+}
+
+.arrow-svgsub {
+  stroke: var(--text);
+  fill: var(--text);
+  margin-top: -6px;
+  margin-right: 5px;
+}
+
+::selection {
+  color: var(--accent);
+}
+
+.subclass-header {
+  font-weight: 500;
+  margin-bottom: 2rem;
+}
+
+.group:hover img,
+.zoom-trigger:hover img {
+  transform: scale(1.1);
+  transition: transform 0.3s;
+}
+
+.blog-grid {
+  display: grid;
+  gap: 1.34vw;
+  grid-template-columns: 1fr;
+}
+
+@media (min-width: 768px) {
+  .blog-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1024px) {
+  .blog-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.blog-article {
+  width: 100%;
+}
+
+.hidden-articles {
+  display: none;
+}
+
+.show-articles {
+  display: flex;
+}
+</style>
+
+<div class="blog-grid w-full" id="blog-posts-container">
+  {% assign default_blog_handle = 'news' %}
+  {% assign blog_handle = section.settings.selected_blog | default: default_blog_handle %}
+  {% assign blog = blogs[blog_handle] %}
+  {% assign articles_limit = section.settings.articles_per_page %}
+  {% assign articles_count = blog.articles.size %}
+
+  {% for article in blog.articles %}
+    {% if forloop.index <= articles_limit %}
+      {% assign article_class = 'blog-article block space-y-2 px-0 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 transition-shadow hover:shadow-lg' %}
+    {% else %}
+      {% assign article_class = 'blog-article hidden-articles block space-y-2 px-0 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 transition-shadow hover:shadow-lg' %}
+    {% endif %}
+
+    <a href="{{ article.url }}" class="{{ article_class }}">
+      <div class="zoom-trigger">
+        <div class="aspect-[5/3] overflow-hidden">
+          {% if article.image != blank %}
+            <img src="{{ article.image | image_url: width: 600 }}"
+                 alt="{{ article.title | default: 'Blog image' | escape }}"
+                 width="25vw"
+                 height="24.17vw"
+                 loading="lazy"
+                 class="img1 object-cover transition-transform duration-300 ease-in-out"
+                 style="width: 24.9vw; height: auto; max-height: 49.5vh; transform-origin: center center;" />
+          {% else %}
+            {{ 'collection-1' | placeholder_svg_tag: 'w-full h-full bg-gray' }}
+          {% endif %}
+        </div>
+        <div>
+          <p class="text-article-date-color" style="margin-bottom:2.7vh; margin-top:2.7vh; font-size:var(--t-b-3-size); font-weight:var(--t-b-3-weight); line-height:var(--t-b-3-line-height);">
+            {{ article.published_at | date: "%m.%d.%y" }}
+          </p>
+          <div class="subclass-header" id="article-title-{{ forloop.index0 }}" style="font-size:var(--t-h-4-size); font-weight:var(--t-h-4-weight); line-height:var(--t-h-4-line-height);">
+            <svg class="w-8 object-contain inline-block"
+                 style="height:22px; margin-top:-8px; margin-right:-4px;"
+                 viewBox="5.5 2 8.5 13"
+                 fill="currentColor"
+                 xmlns="http://www.w3.org/2000/svg"
+                 stroke="currentColor"
+                 aria-hidden="true">
+              <path d="m12.14 8.753-5.482 4.796c-.646.566-1.658.106-1.658-.753V3.204a1 1 0 0 1 1.659-.753l5.48 4.796a1 1 0 0 1 0 1.506z"/>
+            </svg>
+            {{ article.title }}
           </div>
-        {%- endif -%}
-        <div class="card__content">
-          <div class="card__information">
-            <h3 class="card__heading{% if show_excerpt %} h2{% endif %}">
-              <a href="{{ article.url }}" class="full-unstyled-link">
-                {{ article.title | truncate: 50 | escape }}
-              </a>
-            </h3>
-            <div class="article-card__info caption-with-letter-spacing h5">
-              {%- if show_date -%}
-                <span class="circle-divider">{{ article.published_at | time_tag: format: 'date' }}</span>
-              {%- endif -%}
-              {%- if show_author -%}
-                <span>{{ article.author }}</span>
-              {%- endif -%}
-            </div>
-            {%- if show_excerpt -%}
-              {%- if article.excerpt.size > 0 or article.content.size > 0 -%}
-                <p class="article-card__excerpt rte-width">
-                  {%- if article.excerpt.size > 0 -%}
-                    {{ article.excerpt | strip_html | truncatewords: 30 }}
-                  {%- else -%}
-                    {{ article.content | strip_html | truncatewords: 30 }}
-                  {%- endif -%}
-                </p>
-              {%- endif -%}
-              <div class="article-card__footer">
-                {%- if article.comments_count > 0 and blog.comments_enabled? -%}
-                  <span>{{ 'blogs.article.comments' | t: count: article.comments_count }}</span>
-                {%- endif -%}
-              </div>
-            {%- endif -%}
-          </div>
-          {%- if show_badge -%}
-            <div class="card__badge {{ settings.badge_position }}">
-              <span class="badge color-{{ settings.color_schemes | first }}">{{ 'blogs.article.blog' | t }}</span>
-            </div>
-          {%- endif -%}
+          <span class="subclass-subheader font-medium tracking-tight" style="font-size:var(--t-b-2-size); font-weight:var(--t-b-2-weight); line-height:var(--t-b-2-line-height);">
+            {{ article.content | strip_html | truncate: 50, "" }}
+          </span>
         </div>
       </div>
-      <div class="card__content">
-        <div class="card__information">
-          <h3 class="card__heading{% if show_excerpt %} h2{% endif %}">
-            <a href="{{ article.url }}" class="full-unstyled-link">
-              {{ article.title | truncate: 50 | escape }}
-            </a>
-          </h3>
-          <div class="article-card__info caption-with-letter-spacing h5">
-            {%- if show_date -%}
-              <span class="circle-divider">{{ article.published_at | time_tag: format: 'date' }}</span>
-            {%- endif -%}
-            {%- if show_author -%}
-              <span>{{ article.author }}</span>
-            {%- endif -%}
-          </div>
-          {%- if show_excerpt -%}
-            {%- if article.excerpt.size > 0 or article.content.size > 0 -%}
-              <p class="article-card__excerpt rte-width">
-                {%- if article.excerpt.size > 0 -%}
-                  {{ article.excerpt | strip_html | truncatewords: 30 }}
-                {%- else -%}
-                  {{ article.content | strip_html | truncatewords: 30 }}
-                {%- endif -%}
-              </p>
-            {%- endif -%}
-            <div class="article-card__footer">
-              {%- if article.comments_count > 0 and blog.comments_enabled? -%}
-                <span>{{ 'blogs.article.comments' | t: count: article.comments_count }}</span>
-              {%- endif -%}
-            </div>
-          {%- endif -%}
-        </div>
-        {%- if show_badge -%}
-          <div class="card__badge {{ settings.badge_position }}">
-            <span class="badge color-{{ settings.color_schemes | first }}">{{ 'blogs.article.blog' | t }}</span>
-          </div>
-        {%- endif -%}
-      </div>
-    </div>
-  </div>
-{%- endif -%}
+    </a>
+  {% endfor %}
+</div>
+
