@@ -171,13 +171,13 @@ class ProductCard {
       });
     });
 
-    // Notify me buttons
+    // Notify me buttons - disabled popup functionality
     const notifyButtons = this.card.querySelectorAll('.new-notify-me-btn');
     notifyButtons.forEach((button) => {
       button.addEventListener('click', (e) => {
         e.preventDefault();
         e.stopPropagation();
-        this.openWaitlistModal(button.getAttribute('data-product-title'), null);
+        // Popup disabled - no action taken
       });
     });
   }
@@ -190,7 +190,7 @@ class ProductCard {
         e.stopPropagation();
 
         if (button.hasAttribute('data-waitlist')) {
-          this.openWaitlistModal(button.getAttribute('data-product-title'), button.getAttribute('data-variant-size'));
+          // Popup disabled for waitlist - no action taken
         } else {
           const variantId = button.getAttribute('data-variant-id');
           if (variantId) {
@@ -374,31 +374,6 @@ class ProductCard {
       .catch((error) => {
         console.error('Error updating cart count:', error);
       });
-  }
-
-  openWaitlistModal(productTitle, variantSize) {
-    const waitlistModal = document.getElementById('waitlist-modal-overlay');
-    const titleElement = document.getElementById('waitlist-product-title');
-    const variantElement = document.getElementById('waitlist-product-variant');
-
-    if (titleElement) titleElement.textContent = productTitle || 'Product';
-
-    if (variantElement) {
-      if (variantSize) {
-        variantElement.textContent = `Size: ${variantSize}`;
-        variantElement.style.display = 'block';
-      } else {
-        variantElement.style.display = 'none';
-      }
-    }
-
-    if (waitlistModal) {
-      waitlistModal.classList.remove('hidden');
-      waitlistModal.style.display = 'flex';
-
-      const waitlistEmail = document.getElementById('waitlist-email');
-      if (waitlistEmail) waitlistEmail.value = '';
-    }
   }
 
   showNotification(message, type = 'success') {
