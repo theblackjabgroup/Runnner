@@ -6,8 +6,6 @@
 {% assign product_id = product.id %}
 {% assign product_title = product.title %}
 {% assign product_url = product.url %}
-{% assign product_price = product.price %}
-{% assign product_compare_at_price = product.compare_at_price %}
 {% assign product_available = product.available %}
 {% assign product_images = product.images %}
 {% assign product_variants = product.variants %}
@@ -69,15 +67,14 @@
         type="button"
       >
         <svg
-          width="20"
-          height="20"
-          viewBox="4.5 1.5 8.5 13"
-          fill="currentColor"
-          xmlns="http://www.w3.org/2000/svg"
-          style="transform: rotate(180deg);"
-          stroke="currentColor"
+          fill="none"
+          width="24"
+          height="24"
+          viewBox="5 8 14 8"
+          style="transform: rotate(90deg); transform-origin: center; transform-box: fill-box;"
+          class="rotate-arrow"
         >
-          <path d="m12.14 8.753-5.482 4.796c-.646.566-1.658.106-1.658-.753V3.204a1 1 0 0 1 1.659-.753l5.48 4.796a1 1 0 0 1 0 1.506z"/>
+          <path d="M6 9L12 15L18 9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
         </svg>
       </button>
       <button
@@ -87,14 +84,14 @@
         type="button"
       >
         <svg
-          width="20"
-          height="20"
-          viewBox="4.5 1.5 8.5 13"
-          fill="currentColor"
-          xmlns="http://www.w3.org/2000/svg"
-          stroke="currentColor"
+          fill="none"
+          width="24"
+          height="24"
+          viewBox="5 8 14 8"
+          style="transform-origin: center; transform-box: fill-box;"
+          class="rotate-arrow"
         >
-          <path d="m12.14 8.753-5.482 4.796c-.646.566-1.658.106-1.658-.753V3.204a1 1 0 0 1 1.659-.753l5.48 4.796a1 1 0 0 1 0 1.506z"/>
+          <path d="M6 9L12 15L18 9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
         </svg>
       </button>
     {% endif %}
@@ -196,22 +193,8 @@
         {{ product_title }}
       </a>
     </h3>
-    <div
-      class="new-product-price"
-      style="color: var(--text); padding-top: 5px;"
-      aria-live="polite"
-      aria-label="Price: {% if product_compare_at_price > product_price %}Sale price {{ product_price | money }}, was {{ product_compare_at_price | money }}{% else %}{{ product_price | money }}{% endif %}"
-    >
-      {% if product_compare_at_price > product_price %}
-        <span style="text-decoration: line-through; color: var(--disabled_text);" aria-hidden="true">
-          {{ product_compare_at_price | money }}
-        </span>
-        <span style="color: var(--text); margin-left: 8px;">
-          {{ product_price | money }}
-        </span>
-      {% else %}
-        {{ product_price | money }}
-      {% endif %}
+    <div style="padding-top: 5px;">
+      {% render 'price', product: product, price_class: 'new-product-price', show_compare_at_price: true %}
     </div>
   </div>
 </div>
@@ -253,8 +236,7 @@
     position: relative;
   }
 
-  .new-product-details .new-product-title,
-  .new-product-details .new-product-price {
+  .new-product-details .new-product-title {
     font-size: 15px;
   }
 
