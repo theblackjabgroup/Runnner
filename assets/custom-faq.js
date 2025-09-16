@@ -60,7 +60,7 @@ document.addEventListener("DOMContentLoaded", () => {
     // Start collapsed
     container.style.overflow = "hidden";
     container.style.maxHeight = "50px";
-    container.style.transition = "max-height 0.3s ease";
+    container.style.transition = "max-height 0.7s ease";
 
     // Replace button with fresh copy
     const newButton = button.cloneNode(true);

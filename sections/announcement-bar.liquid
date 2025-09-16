@@ -1,137 +1,5 @@
-<div
-  class="color-{{ section.settings.color_scheme }} color-{{ section.settings.color_scheme }}-text announcement-bar animate-slideDown"
-  style="
-    position: fixed;
-    height: auto;
-    top: 0;
-    z-index: 999;
-    padding-top: {{ section.settings.padding_vertical_mobile }}px;
-    padding-bottom: {{ section.settings.padding_vertical_mobile }}px;
-    padding-left: {{ section.settings.padding_horizontal }}px;
-    padding-right: {{ section.settings.padding_horizontal }}px;
-    margin-top: {{ section.settings.margin_top }}px;
-    margin-bottom: {{ section.settings.margin_bottom }}px;
-    margin-left: {{ section.settings.margin_horizontal }}px;
-    margin-right: {{ section.settings.margin_horizontal }}px;
-    font-weight: {{ section.settings.font_weight }};
-    {% if section.settings.show_border %}
-      border-bottom: {{ section.settings.border_thickness }}px {{ section.settings.border_style }} {{ section.settings.border_color }};
-    {% endif %}
-  "
->
-  <style>
-    .membership-link::before {
-      height: 1px;
-      background-color: var(--text) !important;
-    }
-    .announcement-bar {
-      transform: translateY(-100%);
-      animation: slideDown 0.5s ease forwards;
-      line-height:25px;
-    }
-
-    @keyframes slideDown {
-      from {
-        transform: translateY(-100%);
-      }
-      to {
-        transform: translateY(0);
-      }
-    }
-
-    .announcement-bar a::before {
-      transition-duration: var(--animation-duration);
-    }
-
-    @media (max-width: 767px) {
-      .announcement-svg path {
-        stroke-width: 1.5;
-      }
-    }
-
-    @media (min-width: 768px) {
-      .announcement-bar {
-        padding-top: {{ section.settings.padding_vertical }}px !important;
-        padding-bottom: {{ section.settings.padding_vertical }}px !important;
-      }
-    }
-  </style>
-  <div
-    class="announcement-content flex justify-between items-center !py-0 text-md w-[100vw]"
-    style="padding-left: {{ section.settings.padding_horizontal_mobile }}px; padding-right: {{ section.settings.padding_horizontal_mobile }}px;"
-  >
-    <style>
-      @media (min-width: 768px) {
-        .announcement-bar .announcement-content {
-          padding-left: {{ section.settings.padding_horizontal }}px !important;
-          padding-right: {{ section.settings.padding_horizontal }}px !important;
-        }
-      }
-    </style>
-    <span
-      class="break-words hyphens-auto pr-2 !tracking-normal  md:max-w-[800px]"
-      style="font-size: {{ section.settings.message_font_size_mobile }}px; color: var(--text);"
-    >
-      <style>
-        @media (min-width: 768px) {
-          .announcement-bar span.break-words {
-            font-size: {{ section.settings.message_font_size_desktop }}px !important;
-          }
-        }
-      </style>
-      {{ section.settings.announcement_text | default: 'Welcome to your Store' | escape }}
-    </span>
-    <a
-      href="{{ section.settings.membership_link }}"
-      aria-label="{{ 'sections.announcement-bar.settings.membership_link_text.label' | t }}"
-      class="membership-link relative flex items-center gap-2 !tracking-normal leading-none group before:absolute before:bottom-0 before:left-0 before:w-full {% if section.settings.underline_direction == 'left-to-right' %}before:origin-left{% else %}before:origin-right{% endif %} before:transition-transform before:ease-in-out {% if section.settings.underline_direction == 'left-to-right' %}hover:before:origin-right{% else %}hover:before:origin-left{% endif %} hover:before:scale-x-0 {% if section.settings.hide_underline_mobile %}before:hidden sm:before:block{% endif %}"
-      style="padding-bottom: {{ section.settings.border_spacing }}px; font-weight: {{ section.settings.link_font_weight }}; font-size: {{ section.settings.link_font_size_mobile }}px; --animation-duration: {{ section.settings.animation_speed }}ms; color: var(--text); border-color: var(--text);"
-    >
-      <style>
-        @media (min-width: 768px) {
-          .announcement-bar a.membership-link {
-            font-size: {{ section.settings.link_font_size_desktop }}px !important;
-          }
-        }
-      </style>
-      <span class="inline max-sm:hidden" style="color: var(--text);">
-        {{ section.settings.membership_link_text | default: 'Shop now' | escape }}
-      </span>
-
-      {% unless section.settings.hide_arrow_svg %}
-        {% if section.settings.custom_svg != blank %}
-          {{ section.settings.custom_svg }}
-        {% else %}
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="16"
-            height="16"
-            fill="var(--text)"
-            viewBox="0 0 16 16"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            class="announcement-svg"
-          >
-            <path d="m12.14 8.753-5.482 4.796c-.646.566-1.658.106-1.658-.753V3.204a1 1 0 0 1 1.659-.753l5.48 4.796a1 1 0 0 1 0 1.506z"/>
-          </svg>
-        {% endif %}
-      {% endunless %}
-    </a>
-  </div>
-</div>
-
-<script>
-  const announcementBar = document.querySelector('.announcement-bar');
-
-  const setAnnouncementBarHeight = () => {
-    if (!announcementBar) return;
-    const height = announcementBar.offsetHeight;
-    document.documentElement.style.setProperty('--announcement-bar-height', `${height}px`);
-  };
-
-  setAnnouncementBarHeight();
-  window.addEventListener('resize', setAnnouncementBarHeight, { passive: true });
-</script>
+{{ 'announcement-bar.css' | asset_url | stylesheet_tag }}
+<script src="{{ 'announcement-bar.js' | asset_url }}" defer></script>
 
 {% schema %}
 {
@@ -355,7 +223,7 @@
       "step": 50,
       "unit": "ms",
       "label": "Animation Speed",
-      "default": 800,
+      "default": 600,
       "info": "Controls the speed of both the underline and arrow animations (0 = instant, 1500 = very slow)"
     },
     {
@@ -418,3 +286,70 @@
   ]
 }
 {% endschema %}
+
+<div
+  class="color-{{ section.settings.color_scheme }} color-{{ section.settings.color_scheme }}-text announcement-bar animate-slideDown"
+  style="
+    position: fixed;
+    height: auto;
+    top: 0;
+    z-index: 999;
+    padding-top: {{ section.settings.padding_vertical_mobile }}px;
+    padding-bottom: {{ section.settings.padding_vertical_mobile }}px;
+    padding-left: {{ section.settings.padding_horizontal }}px;
+    padding-right: {{ section.settings.padding_horizontal }}px;
+    margin-top: {{ section.settings.margin_top }}px;
+    margin-bottom: {{ section.settings.margin_bottom }}px;
+    margin-left: {{ section.settings.margin_horizontal }}px;
+    margin-right: {{ section.settings.margin_horizontal }}px;
+    font-weight: {{ section.settings.font_weight }};
+    --announcement-padding-vertical-desktop: {{ section.settings.padding_vertical }}px;
+    --announcement-padding-horizontal-desktop: {{ section.settings.padding_horizontal }}px;
+    --announcement-message-font-size-desktop: {{ section.settings.message_font_size_desktop }}px;
+    --announcement-link-font-size-desktop: {{ section.settings.link_font_size_desktop }}px;
+    {% if section.settings.show_border %}
+      border-bottom: {{ section.settings.border_thickness }}px {{ section.settings.border_style }} {{ section.settings.border_color }};
+    {% endif %}
+  "
+>
+  <div
+    class="announcement-content flex justify-between items-center !py-0 text-md w-[100vw]"
+    style="padding-left: {{ section.settings.padding_horizontal_mobile }}px; padding-right: {{ section.settings.padding_horizontal_mobile }}px;"
+  >
+    <span
+      class="break-words uppercase hyphens-auto pr-2 !tracking-normal md:max-w-[800px]"
+      style="font-size: {{ section.settings.message_font_size_mobile }}px; color: var(--text);"
+    >
+      {{ section.settings.announcement_text | default: 'Welcome to your Store' | escape }}
+    </span>
+    <a
+      href="{{ section.settings.membership_link }}"
+      aria-label="{{ 'sections.announcement-bar.settings.membership_link_text.label' | t }}"
+      class="uppercase membership-link relative flex items-center gap-2 !tracking-normal leading-none group before:absolute before:bottom-0 before:left-0 before:w-full {% if section.settings.underline_direction == 'left-to-right' %}before:origin-left{% else %}before:origin-right{% endif %} before:transition-transform before:ease-in-out {% if section.settings.underline_direction == 'left-to-right' %}hover:before:origin-right{% else %}hover:before:origin-left{% endif %} hover:before:scale-x-0 {% if section.settings.hide_underline_mobile %}before:hidden sm:before:block{% endif %}"
+      style="padding-bottom: {{ section.settings.border_spacing }}px; font-weight: {{ section.settings.link_font_weight }}; font-size: {{ section.settings.link_font_size_mobile }}px; --animation-duration: {{ section.settings.animation_speed }}ms; color: var(--text); border-color: var(--text);"
+    >
+      <span class="inline max-sm:hidden" style="color: var(--text);">
+        {{ section.settings.membership_link_text | default: 'Shop now' | escape }}
+      </span>
+
+      {% unless section.settings.hide_arrow_svg %}
+        {% if section.settings.custom_svg != blank %}
+          {{ section.settings.custom_svg }}
+        {% else %}
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="16"
+            height="16"
+            fill="var(--text)"
+            viewBox="0 0 16 16"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            class="announcement-svg"
+          >
+            <path d="m12.14 8.753-5.482 4.796c-.646.566-1.658.106-1.658-.753V3.204a1 1 0 0 1 1.659-.753l5.48 4.796a1 1 0 0 1 0 1.506z"/>
+          </svg>
+        {% endif %}
+      {% endunless %}
+    </a>
+  </div>
+</div>
