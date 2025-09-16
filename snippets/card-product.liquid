@@ -84,8 +84,6 @@
       >
         {%- if card_product.featured_media -%}
           <div class="absolute card-inner-wrapper-product inset-0 w-full  overflow-hidden product-images-slider">
-            {% assign first_media = card_product.media[0] %}
-            {% assign second_media = card_product.media[1] %}
             {% for media in card_product.media %}
               <img
                 srcset="
@@ -97,16 +95,20 @@
                   {%- if media.width >= 1066 -%}{{ media | image_url: width: 1066 }} 1066w,{%- endif -%}
                   {{ media | image_url }} {{ media.width }}w
                 "
-                class="w-full h-full card-inner-wrapper-product  p-0 transition-all duration-300 absolute inset-0 opacity-0 image-config"
+                sizes="(max-width: 600px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                src="{{ media | image_url: width: 720 }}"
+                class="w-full h-full card-inner-wrapper-product p-0 absolute inset-0 opacity-0 image-config"
                 {% if forloop.first %}
                   loading="eager"
+                  fetchpriority="high"
                   style="opacity: 1;"
                 {% else %}
                   loading="lazy"
                 {% endif %}
+                decode="async"
                 width="{{ media.width }}"
                 height="{{ media.height }}"
-                alt="product-image"
+                alt="{{ card_product.title | escape }}"
                 data-index="{{ forloop.index0 }}"
               >
             {% endfor %}
@@ -142,7 +144,7 @@
         {%- endif -%}
 
         {% if card_product.available == false %}
-          <div class="absolute top-[10px] left-[10px]">
+          <div class="">
             <span
               class="sold-out-tag text-[14px] font-medium rounded px-1"
               style="background-color: transparent; color: var(--text); border: 1px solid var(--text);"
@@ -356,7 +358,10 @@
 
 <style>
   .sold-out-tag {
-    margin: 0 0 0 5px;
+    margin: 10px 0 0 5px !important;
+    position: absolute !important;
+    top: 0px !important;
+    left: 5px !important;
     padding: 0 8px;
     font-size: 16px;
   }
@@ -439,8 +444,12 @@
     position: absolute;
     top: 0;
     left: 0;
-    transition: opacity 0.3s;
     background: transparent;
+  }
+
+  /* Only add transitions to non-first images */
+  .product-card-height img:not([style*='opacity: 1']) {
+    transition: opacity 0.3s;
   }
 
   .quick-add-modal {

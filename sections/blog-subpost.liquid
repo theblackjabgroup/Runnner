@@ -52,17 +52,6 @@ height:18px !important;
       margin-bottom:6.3vh !important;
       padding-top:20px;
     }
-    .subclass-header {
-      font-size: var(--tm-h-3-size) !important;
-      line-height:var(--tm-h-3-line-height) !important;
-      margin-bottom:10px !important;
-    }
-    .subclass-subheader {
-      font-size: var(--tm-b-3-size) !important;
-      line-height:var(--tm-b-3-line-height) !important;
-      margin-bottom:35px;
-      display:block;
-    }
     .blog_heading-highlight {
       font-size: var(--tm-h-3-size) !important;
       line-height:var(--tm-h-3-line-height) !important;
@@ -85,17 +74,6 @@ height:18px !important;
     .img1{
       width:100% !important;
     }
-    .blog-grid{
-    gap:0 !important;
-    padding-right: {{ settings.side_space }}px;
-    
-  }
-.last-visible-article {
-  margin-bottom: 0 !important;
-}
-.blog-article.last-visible-article {
-  margin-bottom: 0 !important;
-}
 
   }
 
@@ -103,79 +81,22 @@ height:18px !important;
     margin-top: 6px;
     margin-bottom: 7px;
   }
-
-  :root {
-    --font-heading-family: {{ settings.type_heading_font.family }};
-    --font-body-family: {{ settings.type_body_font.family }};
-  }
-
+::selection {
+  color: var(--accent);
+}
   :focus {
     outline: 2px solid #f97316;
     outline-offset: 2px;
   }
-
-  .subclass-header,
-  .subclass-subheader,
   .blog_highlight-tag,
   .blog_heading-highlight,
   .text-article-date-color {
     color: var(--text);
   }
   .blog_highlight-tag{
-    width:100vw;
+    width:21vw;
   }
-  .arrow-svgsub {
-    stroke: var(--text);
-    fill: var(--text);
-    margin-top: -6px;
-    margin-right: 5px;
-  }
-
-  ::selection {
-    color: var(--accent);
-  }
-
-  .subclass-header {
-    {% comment %} font-size: 4.35vh; {% endcomment %}
-    font-weight: 500;
-    margin-bottom:2rem;
-  }
-
-  .group:hover img,
-  .zoom-trigger:hover img {
-    transform: scale(1.1);
-    transition: transform 0.3s;
-  }
-
-  .blog-grid {
-    display: grid;
-    gap: 1.34vw;
-    grid-template-columns: 1fr;
-  }
-
-  @media (min-width: 768px) {
-    .blog-grid {
-      grid-template-columns: repeat(2, 1fr);
-    }
-  }
-
   @media (min-width: 1024px) {
-    .blog-grid {
-      grid-template-columns: repeat(3, 1fr);
-    }
-  }
-
-  .blog-article {
-    width: 100%;
-  }
-
-  .hidden-articles {
-    display: none;
-  }
-
-  .show-articles {
-    display: flex;
-  }
 .load-more-btn-fb-container {
   margin-top: 40px;
   display: flex;
@@ -183,6 +104,7 @@ height:18px !important;
 }
 
 .load-more-btn-fb {
+  font-family: var(--font-body-family);
   position: relative;
   overflow: hidden;
   padding: 10px 20px;
@@ -309,69 +231,20 @@ height:18px !important;
   <div class="w-full uppercase">
     <div class="divclass flex flex-col md:flex-row md:items-start gap-10">
       <div style="width:20.35vw; margin-right:0.65vw;">
-         <p class="font-medium blog_highlight-tag tracking-tight" style="margin-bottom:5.5vh; font-size:var(--t-b-1-size); font-weight:var(--t-b-1-weight); line-height:var(--t-b-1-line-height);">{{ section.settings.top_text }}</p>
-        <p class="blog_heading-highlight tracking-tight" style="font-weight:500; font-size:var(--t-h-3-size); font-weight:var(--t-h-3-weight); line-height:var(--t-h-3-line-height);">
+         <p class="font-medium blog_highlight-tag tracking-tight" style="font-family: var(--font-body-family);margin-bottom:5.5vh; font-size:var(--t-b-2-size); font-weight:var(--t-b-2-weight); line-height:var(--t-b-2-line-height);">{{ section.settings.top_text }}</p>
+        <p class="blog_heading-highlight tracking-tight" style="font-family: var(--font-heading-family); font-size:var(--t-h-3-size); font-weight:var(--t-h-3-weight); line-height:var(--t-h-3-line-height);">
           {{ section.settings.main_heading }}
         </p>
       </div>
 
-      <div class="blog-grid w-full " id="blog-posts-container">
+       {% comment %} <div class="blog-grid w-full " id="blog-posts-container"> {% endcomment %}
         {% assign default_blog_handle = 'news' %}
         {% assign blog_handle = section.settings.selected_blog | default: default_blog_handle %}
         {% assign blog = blogs[blog_handle] %}
         {% assign articles_limit = section.settings.articles_per_page %}
         {% assign articles_count = blog.articles.size %}
-
-        {% for article in blog.articles %}
-          {% if forloop.index <= articles_limit %}
-            {% assign article_class = 'blog-article block space-y-2 px-0 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 transition-shadow hover:shadow-lg' %}
-          {% else %}
-            {% assign article_class = 'blog-article hidden-articles block space-y-2 px-0 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 transition-shadow hover:shadow-lg' %}
-          {% endif %}
-
-          <a href="{{ article.url }}" class="{{ article_class }}">
-            <div class="zoom-trigger">
-              <div class="aspect-[5/3] overflow-hidden">
-                {% if article.image != blank %}
-                 <img
-  src="{{ article.image | image_url: width: 600 }}"
-  alt="{{ article.title | default: 'Blog image' | escape }}"
-                    width="25vw"
-                    height="24.17vw"
-  loading="lazy"
-  class="img1 object-cover transition-transform duration-300 ease-in-out"
-  style="width: 24.9vw; height: auto; max-height: 49.5vh; transform-origin: center center;" />
-
-                {% else %}
-                  {{ 'collection-1' | placeholder_svg_tag: 'w-full h-full bg-gray' }}
-                {% endif %}
-              </div>
-              <div>
-                <p class="text-article-date-color" style="margin-bottom:2.7vh; margin-top:2.7vh; font-size:var(--t-b-3-size); font-weight:var(--t-b-3-weight); line-height:var(--t-b-3-line-height);">
-                  {{ article.published_at | date: "%m.%d.%y" }}
-                </p>
-                <div class="subclass-header" id="article-title-{{ forloop.index0 }}" style="font-size:var(--t-h-4-size); font-weight:var(--t-h-4-weight); line-height:var(--t-h-4-line-height);">
-                   <svg
-                      class="w-8 object-contain inline-block"
-                      style="height:22px; margin-top:-8px; margin-right:-4px;"
-                      viewBox="5.5 2 8.5 13"
-                      fill="currentColor"
-                      xmlns="http://www.w3.org/2000/svg"
-                      stroke="currentColor"
-                      aria-hidden="true"
-                    >
-                      <path d="m12.14 8.753-5.482 4.796c-.646.566-1.658.106-1.658-.753V3.204a1 1 0 0 1 1.659-.753l5.48 4.796a1 1 0 0 1 0 1.506z"/>
-                    </svg>
-                  {{ article.title }}
-                  </div>
-                <span class="subclass-subheader font-medium tracking-tight" style="font-size:var(--t-b-2-size); font-weight:var(--t-b-2-weight); line-height:var(--t-b-2-line-height);">
-                  {{ article.content | strip_html | truncate: 50, "" }}
-                </span>
-              </div>
-            </div>
-          </a>
-        {% endfor %}
-      </div>
+        {% comment %} rendering blog design {% endcomment %}
+      {% render 'article-card' %}
     </div>
 
     {% assign remaining_articles = articles_count | minus: articles_limit %}

@@ -12,19 +12,19 @@
       "type": "text",
       "id": "first_text",
       "label": "t:sections.404.first_text.label",
-      "default": "Did you take"
+      "default": "Lost in the "
     },
     {
       "type": "text",
       "id": "second_text",
       "label": "t:sections.404.second_text.label",
-      "default": "a wrong turn?"
+      "default": "internet?"
     },
     {
       "type": "text",
       "id": "third_text",
       "label": "t:sections.404.third_text.label",
-      "default": "Page not found"
+      "default": "Don’t worry, we’ll guide you back."
     },
     {
       "type": "text",
@@ -181,16 +181,11 @@
       </svg>
     {% endif %}
     <p class="sr-only">{{ section.settings.third_text }}</p>
-    <a href="/" class="main-404-custom-button-css" aria-label="Go to homepage">
-      <div class="main-404-button-text-container">
-        <div class="main-404-button-text">
-          {{ section.settings.button_text }}
-        </div>
-        <div class="main-404-button-text-hover">
-          {{ section.settings.button_text }}
-        </div>
-      </div>
-    </a>
+    {% render 'primary-button',
+      button_text: section.settings.button_text,
+      button_url: '/',
+      primary_class: 'main-404-button'
+    %}
   </div>
 
   <noscript>
@@ -250,47 +245,25 @@
     top: 30vh;
   }
 
-  .main-404-custom-button-css {
-    cursor: pointer;
+  .main-404-button {
     position: relative;
     top: 20vh;
-    display: inline-block;
-    padding: 2px 10px;
-    border: 2px solid var(--button_label);
-    color: var(--button_label);
-    background-color: var(--button);
-    border-radius: {{ settings.buttons_radius }}px;
-    overflow: hidden;
-    transition: background-color var(--duration-medium), color var(--duration-medium);
-    text-decoration: none;
-    font-size: 24px;
-    line-height: 1;
-    text-transform: uppercase;
-    letter-spacing: 1px;
     opacity: 0;
     transform: translateY(150px);
     animation: slideUpButton 0.5s forwards;
   }
 
-  .main-404-custom-button-css:hover,
-  .main-404-custom-button-css:focus {
-    background-color: var(--hovered_button_label);
-    color: var(--hovered_button_text_color);
-    border: 2px solid var(--hovered_button_text_color);
-    outline: none;
-    text-decoration: none;
-  }
-
   {% if section.settings.animation_mode == 'curved' %}
-    .main-404-custom-button-css {
+    .main-404-button {
       animation-delay: calc({{ section.settings.animation_speed | plus: 0.3 }}s + {{ section.settings.animation_speed | times: 1.5 }}s);
     }
   {% elsif section.settings.animation_mode == 'slide' %}
-    .main-404-custom-button-css {
+    .main-404-button {
       animation-delay: calc({{ section.settings.animation_speed | plus: 0.3 }}s + {{ section.settings.animation_speed | times: 1.5 }}s);
+      top: -5vh;
     }
   {% else %}
-    .main-404-custom-button-css {
+    .main-404-button {
       opacity: 1;
       transform: none;
       animation: none;
@@ -303,56 +276,6 @@
       transform: translateY(0);
     }
   }
-
-  .main-404-button-text-container {
-    position: relative;
-    width: 100%;
-    overflow: hidden;
-  }
-
-  .main-404-button-text {
-    display: flex;
-    align-items: center;
-    line-height: 1;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    transition: transform 0.7s ease;
-  }
-
-  .main-404-custom-button-css:hover .main-404-button-text,
-  .main-404-custom-button-css:focus .main-404-button-text {
-    transform: translateX(-100%);
-  }
-
-  .main-404-button-text-hover {
-    position: absolute;
-    top: 0;
-    left: 0;
-    display: flex;
-    align-items: center;
-    font-size: 24px;
-    line-height: 1;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    transform: translateX(100%);
-    transition: transform 0.7s ease;
-  }
-
-  .main-404-custom-button-css:hover .main-404-button-text-hover,
-  .main-404-custom-button-css:focus .main-404-button-text-hover {
-    transform: translateX(0);
-  }
-
-  .main-404-custom-button-css:not(:hover):not(:focus) .main-404-button-text,
-  .main-404-custom-button-css:not(:hover):not(:focus) .main-404-button-text-hover {
-    transition: none;
-  }
-
-  {% if section.settings.animation_mode == 'slide' %}
-  .main-404-custom-button-css {
-    top: -5vh;
-  }
-  {% endif %}
 
   @media screen and (max-width: 768px) {
     .bandit-404-section {
@@ -377,18 +300,12 @@
       font-size: 85px !important;
     }
 
-    .main-404-custom-button-css {
-    top: 10vh;
-    font-size: 15px;
-    }
-
-    .main-404-button-text-hover {
-    font-size: 15px;
-    color: var(--button) !important;
+    .main-404-button {
+      top: 10vh;
     }
 
     {% if section.settings.animation_mode == 'slide' %}
-    .main-404-custom-button-css {
+    .main-404-button {
       top: 4vh;
     }
     {% endif %}
@@ -401,6 +318,10 @@
     position: relative;
     width: 100%;
     height: 100%;
+  }
+
+  .main-404-button .primary-slide-button-arrow{
+    display: none !important;
   }
 
   .slide-text {
