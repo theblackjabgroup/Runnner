@@ -1,7 +1,20 @@
 {{ 'header-currency.css' | asset_url | stylesheet_tag }}
 
+
+{%- liquid
+  assign color_scheme = section.settings.color_scheme
+  if color_scheme == blank
+    assign color_scheme = 'background-1'
+  endif
+  
+  assign menu = section.settings.menu
+  if menu == blank
+    assign menu = linklists['main-menu']
+  endif
+-%}
+
 <header
-  class="header-main relative bg-[var(--header_background)] {% unless section.settings.enable_sticky %}sticky-disabled{% endunless %}"
+class="header-main relative color-{{ color_scheme }} {% unless section.settings.enable_sticky %}sticky-disabled{% endunless %}"
   data-header-sticky
   style="z-index: 999;"
 >
@@ -228,8 +241,7 @@
                     <div
                       class="scrolling-text-section"
                       id="scrolling-text-{{ section.id }}"
-                      style="border-top: 1px solid black; border-bottom: 1px solid black; margin-top: 25px;"
-                    >
+style="border-top: 1px solid rgb(var(--color-foreground)); border-bottom: 1px solid rgb(var(--color-foreground)); margin-top: 25px;"                    >
                       <div
                         class="scrolling-text-container"
                         data-direction="{{ section.settings.direction }}"
@@ -303,7 +315,7 @@
             <!-- Search Container -->
            <div
             id="search-container"
-            class="fixed left-0 right-0 hidden opacity-0 shadow-lg py-8"
+             class="fixed left-0 right-0 hidden opacity-0 shadow-lg py-8 color-{{ color_scheme }}"
             style="background: var(--header_background); top: var(--header-height); padding: 12px {{ settings.side_space }}px; z-index: 999;"
             aria-hidden="true"
             >
@@ -496,14 +508,14 @@
 <!-- Mobile Menu -->
 <div
   id="mobile-menu"
-  class=" lg:hidden w-[90vw] h-[100vh] fixed top-0 right-0  bg-[var(--header_background)] flex"
+  class=" lg:hidden w-[90vw] h-[100vh] fixed top-0 right-0  color-{{ color_scheme }} flex"
   style="transform: translateX(100%); transition: transform 0.3s ease-in-out; background: var(--header_background); z-index: 1000"
 >
   <!-- Vertical Scrolling Text -->
   <div
     class="scrolling-text-section"
     id="scrolling-text-{{ section.id }}"
-    style="border-top: 1px solid black; border-bottom: 1px solid black; "
+    style="border-top: 1px solid rgb(var(--color-foreground)); border-bottom: 1px solid rgb(var(--color-foreground)); "
   >
     <div
       class="scrolling-text-container"
@@ -770,7 +782,7 @@
 
           <!-- Dropdown -->
           <div
-            class="country-selector-dropdown absolute bottom-16 w-100 bg-[var(--header_background)] border border-gray-200 rounded-md shadow-lg opacity-0 invisible transition-all duration-300 z-[9999]"
+             class="country-selector-dropdown absolute bottom-16 w-100 border border-gray-200 rounded-md shadow-lg opacity-0 invisible transition-all duration-300 z-[9999] color-{{ color_scheme }}"
             style="background: var(--header_background); "
           >
             <ul class="max-h-100 overflow-y-auto divide-y divide-gray-100 text-xl">
@@ -797,7 +809,7 @@
         <a
           href="{{ routes.account_login_url }}"
           class="inline-flex items-center rounded-xl px-2 "
-          style="width: min-content;  background: var(--header_text); color: var(--header_background);"
+          style="width: min-content;  background: rgb(var(--color-foreground)); color: rgb(var(--color-background));"
           aria-label="Login"
         >
           LOGIN
@@ -988,8 +1000,8 @@
         overflow-y: hidden;
         border-top: none;
         border-bottom: none;
-        border-left: 1px solid black;
-        border-right: 1px solid black;
+         border-left: 1px solid rgb(var(--color-foreground));
+        border-right: 1px solid rgb(var(--color-foreground));
       }
 
       .scrolling-text-container {
