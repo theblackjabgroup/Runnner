@@ -2,6 +2,7 @@
     .image-with-text-media-section-{{ section.id }} ::selection {
       /* background: none; */
       color: var(--accent) !important;
+      background-color: rgb(var(--color-background));
     }
 
     /* Mute/Unmute Button Styles */
@@ -570,9 +571,16 @@
 {%- endstyle -%}
 
 {% if section.settings.enabled %}
+  {% assign section_classes = '' %}
+  {% if section.settings.color_scheme %}
+    {% assign section_classes = section_classes | append: ' color-' | append: section.settings.color_scheme %}
+    {% unless section.settings.color_scheme == '1' %}
+      {% assign section_classes = section_classes | append: ' invert-arrow' %}
+    {% endunless %}
+  {% endif %}
   <section
     id="ImageWithText-{{ section.id }}"
-    class="image-with-text-media-section-{{ section.id }} relative w-full overflow-hidden image-with-text-section-{{ section.id }}-padding"
+    class="image-with-text-media-section-{{ section.id }} relative w-full overflow-hidden image-with-text-section-{{ section.id }}-padding{{ section_classes }}"
     data-video="{% if section.settings.use_video %}true{% else %}false{% endif %}"
     role="region"
     aria-label="Image with text section"

@@ -6,8 +6,6 @@
 {% assign product_id = product.id %}
 {% assign product_title = product.title %}
 {% assign product_url = product.url %}
-{% assign product_price = product.price %}
-{% assign product_compare_at_price = product.compare_at_price %}
 {% assign product_available = product.available %}
 {% assign product_images = product.images %}
 {% assign product_variants = product.variants %}
@@ -69,15 +67,13 @@
         type="button"
       >
         <svg
-          width="20"
-          height="20"
-          viewBox="4.5 1.5 8.5 13"
-          fill="currentColor"
-          xmlns="http://www.w3.org/2000/svg"
-          style="transform: rotate(180deg);"
-          stroke="currentColor"
+          fill="none"
+          width="24"
+          height="24"
+          viewBox="5 8 14 8"
+          style="transform: rotate(90deg);"
         >
-          <path d="m12.14 8.753-5.482 4.796c-.646.566-1.658.106-1.658-.753V3.204a1 1 0 0 1 1.659-.753l5.48 4.796a1 1 0 0 1 0 1.506z"/>
+          <path d="M6 9L12 15L18 9" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/>
         </svg>
       </button>
       <button
@@ -87,14 +83,13 @@
         type="button"
       >
         <svg
-          width="20"
-          height="20"
-          viewBox="4.5 1.5 8.5 13"
-          fill="currentColor"
-          xmlns="http://www.w3.org/2000/svg"
-          stroke="currentColor"
+          fill="none"
+          width="24"
+          height="24"
+          viewBox="5 8 14 8"
+          style="transform: rotate(-90deg);"
         >
-          <path d="m12.14 8.753-5.482 4.796c-.646.566-1.658.106-1.658-.753V3.204a1 1 0 0 1 1.659-.753l5.48 4.796a1 1 0 0 1 0 1.506z"/>
+          <path d="M6 9L12 15L18 9" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/>
         </svg>
       </button>
     {% endif %}
@@ -104,7 +99,7 @@
         {% if product_available %}
           {% if has_size_variants %}
             <button
-              class="new-add-to-cart-btn"
+              class="new-add-to-cart-btn no-hover-css-product-card"
               data-product-id="{{ product_id }}"
               data-has-variants="true"
               style="background-color: rgb(var(--color-background)); color: var(--text);"
@@ -173,13 +168,13 @@
           {% endif %}
         {% else %}
           <button
-            class="new-notify-me-btn"
+            class="new-sold-out-btn"
             data-product-title="{{ product_title }}"
             style="background-color: rgb(var(--color-background)); color: var(--text);"
             aria-label="Get notified when {{ product_title }} is available"
             type="button"
           >
-            NOTIFY ME WHEN AVAILABLE
+            SOLD OUT
           </button>
         {% endif %}
       </div>
@@ -196,22 +191,8 @@
         {{ product_title }}
       </a>
     </h3>
-    <div
-      class="new-product-price"
-      style="color: var(--text); padding-top: 5px;"
-      aria-live="polite"
-      aria-label="Price: {% if product_compare_at_price > product_price %}Sale price {{ product_price | money }}, was {{ product_compare_at_price | money }}{% else %}{{ product_price | money }}{% endif %}"
-    >
-      {% if product_compare_at_price > product_price %}
-        <span style="text-decoration: line-through; color: var(--disabled_text);" aria-hidden="true">
-          {{ product_compare_at_price | money }}
-        </span>
-        <span style="color: var(--text); margin-left: 8px;">
-          {{ product_price | money }}
-        </span>
-      {% else %}
-        {{ product_price | money }}
-      {% endif %}
+    <div style="padding-top: 5px;">
+      {% render 'price', product: product, price_class: 'new-product-price', show_compare_at_price: true %}
     </div>
   </div>
 </div>
@@ -253,8 +234,7 @@
     position: relative;
   }
 
-  .new-product-details .new-product-title,
-  .new-product-details .new-product-price {
+  .new-product-details .new-product-title {
     font-size: 15px;
   }
 
@@ -331,7 +311,7 @@
   }
 
   .new-add-to-cart-btn,
-  .new-notify-me-btn {
+  .new-sold-out-btn {
     transition: all 0.3s ease;
     width: min(381px, calc(255px + 0.1835 * (100vw - 425px) - 60px));
     left: 50%;
@@ -347,9 +327,14 @@
   }
 
   .new-add-to-cart-btn:hover,
-  .new-notify-me-btn:hover {
+  .new-sold-out-btn:hover {
     background-color: var(--text) !important;
     color: rgb(var(--color-background)) !important;
+  }
+
+  .no-hover-css-product-card:hover{
+    color: var(--text) !important;
+    background-color: rgb(var(--color-background)) !important;
   }
 
   .new-size-variants-container {
@@ -406,9 +391,9 @@
   }
 
   .new-product-image-wrapper:hover .new-add-to-cart-btn[data-has-variants='false'],
-  .new-product-image-wrapper:hover .new-notify-me-btn,
+  .new-product-image-wrapper:hover .new-sold-out-btn,
   .new-product-cart-container.show-button .new-add-to-cart-btn,
-  .new-product-cart-container.show-button .new-notify-me-btn {
+  .new-product-cart-container.show-button .new-sold-out-btn {
     opacity: 1 !important;
     visibility: visible !important;
     transform: translateX(-50%) translateY(0);
@@ -422,7 +407,6 @@
   }
 
   .new-size-option-btn {
-    transition: all 0.3s ease;
     width: 23px;
     height: 22px;
     border-radius: {{ settings.buttons_radius }}px;
@@ -444,23 +428,25 @@
     transform: translateY(-2px);
     color: rgb(var(--color-background)) !important;
     background-color: var(--text) !important;
+    transition: background-color 0.3s ease, color 0.3s ease, transform 0.3s ease;
   }
 
   .unavailable-size {
-    opacity: 1;
-    visibility: visible;
+    opacity: 0;
+    visibility: hidden;
     position: relative;
     cursor: not-allowed;
     color: var(--text) !important;
     border-color: var(--disabled_text) !important;
     background-color: var(--disabled_text) !important;
     overflow: hidden;
-    transform: translateY(0);
+    transform: translateY(10px);
   }
 
   .unavailable-size:hover {
     background-color: var(--disabled_text) !important;
-    transform: translateY(0);
+    transform: translateY(-2px);
+    transition: background-color 0.3s ease, transform 0.3s ease;
   }
 
   .unavailable-size::after {
@@ -479,9 +465,6 @@
   }
 
   .new-size-option-btn.size-animate {
-    opacity: 1;
-    visibility: visible;
-    transform: translateY(0);
     animation: sizeOptionAppear 0.5s ease forwards;
     animation-delay: calc(0.15s * var(--animation-order));
   }
@@ -508,6 +491,13 @@
 
   .new-size-variants-container.active .new-size-option-btn,
   .new-add-to-cart-btn:hover + .new-size-variants-container .new-size-option-btn {
+    animation: sizeOptionAppear 0.5s ease forwards;
+    animation-delay: calc(0.15s * var(--animation-order));
+  }
+
+  /* Make unavailable sizes also animate in */
+  .new-size-variants-container.active .unavailable-size,
+  .new-add-to-cart-btn:hover + .new-size-variants-container .unavailable-size {
     animation: sizeOptionAppear 0.5s ease forwards;
     animation-delay: calc(0.15s * var(--animation-order));
   }
@@ -543,7 +533,7 @@
     border: {{ settings.buttons_border_thickness }}px solid var(--text);
   }
 
-  .new-product-cart-container.show-button .new-notify-me-btn[data-has-variants='true'] {
+  .new-product-cart-container.show-button .new-sold-out-btn[data-has-variants='true'] {
     opacity: 0 !important;
     visibility: hidden !important;
     transform: translateX(-50%) translateY(10px);
@@ -581,9 +571,9 @@
 
   @media (max-width: 768px) {
     .new-product-image-wrapper:hover .new-add-to-cart-btn[data-has-variants='false'],
-    .new-product-image-wrapper:hover .new-notify-me-btn,
+    .new-product-image-wrapper:hover .new-sold-out-btn,
     .new-product-cart-container.show-button .new-add-to-cart-btn,
-    .new-product-cart-container.show-button .new-notify-me-btn,
+    .new-product-cart-container.show-button .new-sold-out-btn,
     .new-add-to-cart-btn:hover + .new-size-variants-container,
     .new-size-variants-container.active {
       opacity: 1 !important;
@@ -591,23 +581,22 @@
       transform: translateX(-50%) translateY(0);
     }
 
-    .new-size-option-btn {
-      opacity: 1 !important;
-      visibility: visible !important;
-      transform: translateY(0);
+    /* Ensure size buttons still animate in on mobile */
+    .new-size-variants-container.active .new-size-option-btn,
+    .new-size-variants-container.active .unavailable-size {
+      opacity: 0;
+      visibility: hidden;
+      transform: translateY(10px);
+      animation: sizeOptionAppear 0.5s ease forwards;
+      animation-delay: calc(0.15s * var(--animation-order));
     }
 
-    @keyframes sizeOptionAppear {
-      0% {
-        opacity: 1;
-        transform: translateY(0);
-        visibility: visible;
-      }
-      100% {
-        opacity: 1;
-        transform: translateY(0);
-        visibility: visible;
-      }
+    /* Keep buttons hidden by default on mobile */
+    .new-size-variants-container:not(.active) .new-size-option-btn,
+    .new-size-variants-container:not(.active) .unavailable-size {
+      opacity: 0 !important;
+      visibility: hidden !important;
+      transform: translateY(10px);
     }
   }
 </style>
