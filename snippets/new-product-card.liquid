@@ -73,7 +73,7 @@
           viewBox="5 8 14 8"
           style="transform: rotate(90deg);"
         >
-          <path d="M6 9L12 15L18 9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M6 9L12 15L18 9" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/>
         </svg>
       </button>
       <button
@@ -89,7 +89,7 @@
           viewBox="5 8 14 8"
           style="transform: rotate(-90deg);"
         >
-          <path d="M6 9L12 15L18 9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M6 9L12 15L18 9" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/>
         </svg>
       </button>
     {% endif %}
@@ -402,7 +402,6 @@
   }
 
   .new-size-option-btn {
-    transition: all 0.3s ease;
     width: 23px;
     height: 22px;
     border-radius: {{ settings.buttons_radius }}px;
@@ -418,29 +417,32 @@
     visibility: hidden;
     background-color: transparent;
     transform: translateY(10px);
+    /* Remove transition to prevent conflict with animation */
   }
 
   .new-size-option-btn:hover {
     transform: translateY(-2px);
     color: rgb(var(--color-background)) !important;
     background-color: var(--text) !important;
+    transition: background-color 0.3s ease, color 0.3s ease, transform 0.3s ease;
   }
 
   .unavailable-size {
-    opacity: 1;
-    visibility: visible;
+    opacity: 0;
+    visibility: hidden;
     position: relative;
     cursor: not-allowed;
     color: var(--text) !important;
     border-color: var(--disabled_text) !important;
     background-color: var(--disabled_text) !important;
     overflow: hidden;
-    transform: translateY(0);
+    transform: translateY(10px);
   }
 
   .unavailable-size:hover {
     background-color: var(--disabled_text) !important;
-    transform: translateY(0);
+    transform: translateY(-2px);
+    transition: background-color 0.3s ease, transform 0.3s ease;
   }
 
   .unavailable-size::after {
@@ -459,9 +461,6 @@
   }
 
   .new-size-option-btn.size-animate {
-    opacity: 1;
-    visibility: visible;
-    transform: translateY(0);
     animation: sizeOptionAppear 0.5s ease forwards;
     animation-delay: calc(0.15s * var(--animation-order));
   }
@@ -488,6 +487,13 @@
 
   .new-size-variants-container.active .new-size-option-btn,
   .new-add-to-cart-btn:hover + .new-size-variants-container .new-size-option-btn {
+    animation: sizeOptionAppear 0.5s ease forwards;
+    animation-delay: calc(0.15s * var(--animation-order));
+  }
+
+  /* Make unavailable sizes also animate in */
+  .new-size-variants-container.active .unavailable-size,
+  .new-add-to-cart-btn:hover + .new-size-variants-container .unavailable-size {
     animation: sizeOptionAppear 0.5s ease forwards;
     animation-delay: calc(0.15s * var(--animation-order));
   }
@@ -571,23 +577,22 @@
       transform: translateX(-50%) translateY(0);
     }
 
-    .new-size-option-btn {
-      opacity: 1 !important;
-      visibility: visible !important;
-      transform: translateY(0);
+    /* Ensure size buttons still animate in on mobile */
+    .new-size-variants-container.active .new-size-option-btn,
+    .new-size-variants-container.active .unavailable-size {
+      opacity: 0;
+      visibility: hidden;
+      transform: translateY(10px);
+      animation: sizeOptionAppear 0.5s ease forwards;
+      animation-delay: calc(0.15s * var(--animation-order));
     }
 
-    @keyframes sizeOptionAppear {
-      0% {
-        opacity: 1;
-        transform: translateY(0);
-        visibility: visible;
-      }
-      100% {
-        opacity: 1;
-        transform: translateY(0);
-        visibility: visible;
-      }
+    /* Keep buttons hidden by default on mobile */
+    .new-size-variants-container:not(.active) .new-size-option-btn,
+    .new-size-variants-container:not(.active) .unavailable-size {
+      opacity: 0 !important;
+      visibility: hidden !important;
+      transform: translateY(10px);
     }
   }
 </style>
