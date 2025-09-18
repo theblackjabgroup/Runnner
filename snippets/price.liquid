@@ -8,9 +8,15 @@
   - show_badges: {Boolean} Renders 'Sale' and 'Sold Out' tags if the product matches the condition (optional)
   - price_class: {String} Adds a price class to the price element (optional)
   - show_compare_at_price: {Boolean} Renders the compare at price if the product matches the condition (optional)
+  - font_size_desktop: {String} Desktop font size (optional, default: 15px)
+  - font_size_mobile: {String} Mobile font size (optional, default: 14px)
+  - font_weight_desktop: {String} Desktop font weight (optional, default: normal)
+  - font_weight_mobile: {String} Mobile font weight (optional, default: normal)
+  - line_height_desktop: {String} Desktop line height (optional, default: 1.4)
+  - line_height_mobile: {String} Mobile line height (optional, default: 1.3)
 
   Usage:
-  {% render 'price', product: product %}
+  {% render 'price', product: product, font_size_desktop: '16px', font_weight_desktop: 'bold' %}
 {% endcomment %}
 {%- liquid
   if use_variant
@@ -40,6 +46,14 @@
       assign money_price = 'products.product.price.from_price_html' | t: price: money_price
     endunless
   endif
+
+  # Font customization parameters
+  assign desktop_font_size = font_size_desktop | default: '15px'
+  assign mobile_font_size = font_size_mobile | default: '14px'
+  assign desktop_font_weight = font_weight_desktop | default: 'normal'
+  assign mobile_font_weight = font_weight_mobile | default: 'normal'
+  assign desktop_line_height = line_height_desktop | default: '1.4'
+  assign mobile_line_height = line_height_mobile | default: '1.3'
 -%}
 
 {%- unless target == null and placeholder == null -%}
@@ -142,7 +156,9 @@
   .new-product-price {
     color: var(--text);
     padding-top: 5px;
-    font-size: 15px;
+    font-size: {{ desktop_font_size }};
+    font-weight: {{ desktop_font_weight }};
+    line-height: {{ desktop_line_height }};
   }
 
   .new-product-price .price__container {
@@ -159,7 +175,9 @@
   }
 
   .new-product-price .price-item {
-    font-size: 15px;
+    font-size: {{ desktop_font_size }};
+    font-weight: {{ desktop_font_weight }};
+    line-height: {{ desktop_line_height }};
     color: var(--text);
   }
 
@@ -211,5 +229,47 @@
 
   .new-product-price .badge {
     display: none;
+  }
+
+  /* Mobile Responsive Styles */
+  @media screen and (max-width: 749px) {
+    .new-product-price {
+      font-size: {{ mobile_font_size }};
+      font-weight: {{ mobile_font_weight }};
+      line-height: {{ mobile_line_height }};
+    }
+
+    .new-product-price .price-item {
+      font-size: {{ mobile_font_size }};
+      font-weight: {{ mobile_font_weight }};
+      line-height: {{ mobile_line_height }};
+    }
+  }
+
+  /* General Price Styles (for non-new-product-price classes) */
+  .price:not(.new-product-price) {
+    font-size: {{ desktop_font_size }};
+    font-weight: {{ desktop_font_weight }};
+    line-height: {{ desktop_line_height }};
+  }
+
+  .price:not(.new-product-price) .price-item {
+    font-size: {{ desktop_font_size }};
+    font-weight: {{ desktop_font_weight }};
+    line-height: {{ desktop_line_height }};
+  }
+
+  @media screen and (max-width: 749px) {
+    .price:not(.new-product-price) {
+      font-size: {{ mobile_font_size }};
+      font-weight: {{ mobile_font_weight }};
+      line-height: {{ mobile_line_height }};
+    }
+
+    .price:not(.new-product-price) .price-item {
+      font-size: {{ mobile_font_size }};
+      font-weight: {{ mobile_font_weight }};
+      line-height: {{ mobile_line_height }};
+    }
   }
 </style>
