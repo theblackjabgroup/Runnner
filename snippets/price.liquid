@@ -36,7 +36,9 @@
   endif
 
   if target == product and product.price_varies
-    assign money_price = 'products.product.price.from_price_html' | t: price: money_price
+    unless price_class == 'new-product-price'
+      assign money_price = 'products.product.price.from_price_html' | t: price: money_price
+    endunless
   endif
 -%}
 
@@ -134,3 +136,80 @@
     {%- endif -%}
   </div>
 {% endunless %}
+
+<style>
+  /* New Product Card Price Styles */
+  .new-product-price {
+    color: var(--text);
+    padding-top: 5px;
+    font-size: 15px;
+  }
+
+  .new-product-price .price__container {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .new-product-price .price__regular,
+  .new-product-price .price__sale {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .new-product-price .price-item {
+    font-size: 15px;
+    color: var(--text);
+  }
+
+  .new-product-price .price-item--regular {
+    color: var(--text);
+  }
+
+  /* Sale price styling - strikethrough for compare-at-price */
+  .new-product-price .price__sale .price-item--regular {
+    text-decoration: line-through;
+    color: var(--disabled_text);
+  }
+
+  /* Hide regular price section when on sale */
+  .new-product-price.price--on-sale .price__regular {
+    display: none !important;
+  }
+
+  /* Show sale price section when on sale */
+  .new-product-price.price--on-sale .price__sale {
+    display: flex !important;
+  }
+
+  /* Hide sale price section when not on sale */
+  .new-product-price:not(.price--on-sale) .price__sale {
+    display: none !important;
+  }
+
+  /* Show regular price section when not on sale */
+  .new-product-price:not(.price--on-sale) .price__regular {
+    display: flex !important;
+  }
+
+  .new-product-price .visually-hidden {
+    position: absolute !important;
+    width: 1px !important;
+    height: 1px !important;
+    padding: 0 !important;
+    margin: -1px !important;
+    overflow: hidden !important;
+    clip: rect(0, 0, 0, 0) !important;
+    white-space: nowrap !important;
+    border: 0 !important;
+  }
+
+  .new-product-price .unit-price {
+    display: none;
+  }
+
+  .new-product-price .badge {
+    display: none;
+  }
+</style>
