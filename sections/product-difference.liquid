@@ -141,20 +141,21 @@
   .prod-diff-product-name {
     font-family: var(--font-body-family);
     font-style: var(--font-body-style);
-    font-weight: var(--font-body-weight);
-    font-size: 20px;
     color: var(--text);
     margin: 0 0 6px 0;
-    line-height: 1.3;
+    font-size: var(--t-b-2-size);
+    font-weight: var(--t-b-2-weight);
+    line-height: var(--t-b-2-line-height);
   }
 
   .prod-diff-product-price {
+    margin: 0;
+  }
+
+  .prod-diff-product-price .prod-diff-price {
     font-family: var(--font-body-family);
     font-style: var(--font-body-style);
-    font-weight: var(--font-body-weight);
-    font-size: 20px;
     color: var(--text);
-    margin: 0;
   }
 
   @media (max-width: 768px) {
@@ -175,19 +176,13 @@
     }
 
     .prod-diff-product-name {
-      font-size: 16px;
-    }
-
-    .prod-diff-product-price {
-      font-size: 16px;
+      font-size: var(--tm-b-2-size);
+      line-height: var(--tm-b-2-line-height);
     }
   }
 </style>
 
 {% if section.settings.enabled %}
-  {% if section.settings.color_scheme %}
-    {% assign section_classes_fc = section_classes_fc | append: ' color-' | append: section.settings.color_scheme %}
-  {% endif %}
   {% comment %} Calculate the maximum height from both product images {% endcomment %}
   {% assign left_product = all_products[section.settings.left_product] %}
   {% assign right_product = all_products[section.settings.right_product] %}
@@ -303,14 +298,36 @@
       {% if left_product %}
         <div class="prod-diff-product-info left">
           <h3 class="prod-diff-product-name">{{ left_product.title }}</h3>
-          <p class="prod-diff-product-price">{{ left_product.price | money }}</p>
+          <div class="prod-diff-product-price">
+            {% render 'price',
+              product: left_product,
+              price_class: 'prod-diff-price',
+              font_size_desktop: 'var(--t-b-2-size)',
+              font_size_mobile: 'var(--tm-b-2-size)',
+              font_weight_desktop: 'var(--t-b-2-weight)',
+              font_weight_mobile: 'var(--t-b-2-weight)',
+              line_height_desktop: 'var(--t-b-2-line-height)',
+              line_height_mobile: 'var(--tm-b-2-line-height)'
+            %}
+          </div>
         </div>
       {% endif %}
 
       {% if right_product %}
         <div class="prod-diff-product-info right">
           <h3 class="prod-diff-product-name">{{ right_product.title }}</h3>
-          <p class="prod-diff-product-price">{{ right_product.price | money }}</p>
+          <div class="prod-diff-product-price">
+            {% render 'price',
+              product: right_product,
+              price_class: 'prod-diff-price',
+              font_size_desktop: 'var(--t-b-2-size)',
+              font_size_mobile: 'var(--tm-b-2-size)',
+              font_weight_desktop: 'var(--t-b-2-weight)',
+              font_weight_mobile: 'var(--t-b-2-weight)',
+              line_height_desktop: 'var(--t-b-2-line-height)',
+              line_height_mobile: 'var(--tm-b-2-line-height)'
+            %}
+          </div>
         </div>
       {% endif %}
     </div>
