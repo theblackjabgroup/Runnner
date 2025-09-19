@@ -53,24 +53,9 @@
       .image-with-text-button-text, .image-with-text-button-text-hover{
         font-size: 16px !important;
       }
-      .image-with-text-heading-size-large{
-        font-size: 40px !important;
-        line-height: 0.9 !important;
-      }
-       .image-with-text-heading-size-medium {
-        font-size: 30px !important;
-        line-height: 0.9 !important;
-      }
-      .image-with-text-heading-size-small {
-        font-size: 20px !important ;
-        line-height: 0.9 !important;
-      }
-      .image-with-text-heading-size-very-small {
-        font-size: 16px !important ;
-        line-height: 0.9 !important;
-      }
-      .image-with-text-button{
-        font-size: 16px !important;
+      .image-with-text-heading{
+        font-size: var(--tm-h-2-size) !important;
+        line-height: var(--tm-h-2-line-height) !important;
       }
       .image-with-text-text-content{
         font-size: 20px !important;
@@ -755,21 +740,10 @@
           {% for block in section.blocks %}
             {% case block.type %}
               {% when 'heading' %}
-                {% assign heading_class = '' %}
-                {% if block.settings.heading_size == 'very-small' %}
-                  {% assign heading_class = 'image-with-text-heading-size-very-small' %}
-                {% elsif block.settings.heading_size == 'small' %}
-                  {% assign heading_class = 'image-with-text-heading-size-small' %}
-                {% elsif block.settings.heading_size == 'medium' %}
-                  {% assign heading_class = 'image-with-text-heading-size-medium' %}
-                {% elsif block.settings.heading_size == 'large' %}
-                  {% assign heading_class = 'image-with-text-heading-size-large' %}
-                {% endif %}
-
                 <h2
                   id="Heading-{{ section.id }}-{{ forloop.index }}"
                   class="image-with-text-heading mb-4 {{ heading_class }} {% if section.settings.enable_text_animation %}image-with-text-letter-animation{% endif %}"
-                  style="color:{{ block.settings.text_color }}; font-weight: {{ block.settings.font_weight }}; margin-bottom: 20px; font-style: var(--font-heading-style); font-family: var(--font-heading-family);"
+                  style="color:{{ block.settings.text_color }}; font-weight: var(--t-h-2-weight); margin-bottom: 20px; font-style: var(--font-heading-style); font-family: var(--font-heading-family); font-size: var(--t-h-2-size); line-height: var(--t-h-2-line-height);"
                 >
                   {{ block.settings.heading | replace: '||', '<br>' }}
                 </h2>
@@ -843,14 +817,24 @@
                     {% render 'primary-button',
                       button_text: block.settings.button_label,
                       button_url: block.settings.button_link,
-                      button_font_size: block.settings.button_size,
+                      button_font_size: 'var(--t-b-1-size)',
+                      font_weight: 'var(--t-b-1-weight)',
+                      button_line_height: 'var(--t-b-1-line-height)',
+                      mobile_font_size: 'var(--tm-b-2-size)',
+                      mobile_font_weight: 'var(--t-b-2-weight)',
+                      mobile_line_height: 'var(--tm-b-2-line-height)',
                       primary_class: 'remove_button_svg'
                     %}
                   {% else %}
                     {% render 'primary-button',
                       button_text: block.settings.button_label,
                       button_url: block.settings.button_link,
-                      button_font_size: block.settings.button_size
+                      button_font_size: 'var(--t-b-1-size)',
+                      font_weight: 'var(--t-b-1-weight)',
+                      button_line_height: 'var(--t-b-1-line-height)',
+                      mobile_font_size: 'var(--tm-b-2-size)',
+                      mobile_font_weight: 'var(--t-b-2-weight)',
+                      mobile_line_height: 'var(--tm-b-2-line-height)'
                     %}
                   {% endif %}
                 </div>
@@ -1409,7 +1393,7 @@ document.addEventListener('DOMContentLoaded', function() {
       "step": 10,
       "unit": "px",
       "label": "Content width (desktop)",
-      "default": 600
+      "default": 800
     },
     {
       "type": "range",
@@ -1516,50 +1500,6 @@ document.addEventListener('DOMContentLoaded', function() {
           "default": "HEADING"
         },
         {
-          "type": "select",
-          "id": "heading_size",
-          "label": "Heading size",
-          "options": [
-            {
-              "value": "very-small",
-              "label": "Very Small"
-            },
-            {
-              "value": "small",
-              "label": "Small"
-            },
-            {
-              "value": "medium",
-              "label": "Medium"
-            },
-            {
-              "value": "large",
-              "label": "Large"
-            }
-          ],
-          "default": "large"
-        },
-        {
-          "type": "select",
-          "id": "font_weight",
-          "label": "Font weight",
-          "options": [
-            {
-              "value": "400",
-              "label": "Regular (400)"
-            },
-            {
-              "value": "500",
-              "label": "Medium (500)"
-            },
-            {
-              "value": "900",
-              "label": "Black (900)"
-            }
-          ],
-          "default": "500"
-        },
-        {
           "type": "color",
           "id": "text_color",
           "label": "Text Color",
@@ -1625,50 +1565,6 @@ document.addEventListener('DOMContentLoaded', function() {
           "type": "url",
           "id": "button_link",
           "label": "Button link"
-        },
-        {
-          "type": "select",
-          "id": "button_size",
-          "label": "Button font size",
-          "options": [
-            {
-              "value": "16",
-              "label": "Very Small"
-            },
-            {
-              "value": "20",
-              "label": "Small"
-            },
-            {
-              "value": "24",
-              "label": "Medium"
-            },
-            {
-              "value": "32",
-              "label": "Large"
-            }
-          ],
-          "default": "24"
-        },
-        {
-          "type": "select",
-          "id": "font_weight",
-          "label": "Font weight",
-          "options": [
-            {
-              "value": "400",
-              "label": "Regular (400)"
-            },
-            {
-              "value": "500",
-              "label": "Medium (500)"
-            },
-            {
-              "value": "900",
-              "label": "Bold (700)"
-            }
-          ],
-          "default": "500"
         }
       ]
     },
@@ -1828,10 +1724,7 @@ document.addEventListener('DOMContentLoaded', function() {
       "name": "Image with Text",
       "blocks": [
         {
-          "type": "heading",
-          "settings": {
-            "font_weight": "500"
-          }
+          "type": "heading"
         },
         {
           "type": "button"
