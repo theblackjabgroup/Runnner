@@ -1,6 +1,9 @@
 <link rel="stylesheet" href="{{ 'section-main-blog.css' | asset_url }}">
+{{ 'scroll-animations.css' | asset_url | stylesheet_tag }}
 
-<div class="blog-grid w-full" id="blog-posts-container">
+<script src="{{ 'scroll-animations.js' | asset_url }}" defer="defer"></script>
+
+<div class="blog-grid blog-grid-animated scroll-fade-stagger w-full" id="blog-posts-container">
   {% assign default_blog_handle = 'news' %}
   {% assign blog_handle = section.settings.selected_blog | default: default_blog_handle %}
   {% assign blog = blogs[blog_handle] %}
@@ -14,7 +17,7 @@
       {% assign article_class = 'blog-article hidden-articles block space-y-2 px-0 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 transition-shadow hover:shadow-lg' %}
     {% endif %}
 
-    <a href="{{ article.url }}" class="{{ article_class }}">
+    <a href="{{ article.url }}" class="{{ article_class }} blog-card-item scroll-fade-trigger scroll-fade-up" data-animation-index="{{ forloop.index0 }}">
       <div class="zoom-trigger">
         <div class="aspect-[5/3] overflow-hidden">
           {% if article.image != blank %}
@@ -54,3 +57,119 @@
   {% endfor %}
 </div>
 
+<style>
+  /* Blog Article Fade-Up Animations */
+  .blog-card-item.scroll-fade-trigger {
+    opacity: 0;
+    transform: translateY(50px);
+    transition: opacity 0.6s ease, transform 0.6s ease;
+  }
+
+  .blog-card-item.scroll-fade-trigger.animate {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* Staggered delays for blog article cards */
+  .blog-grid .blog-card-item:nth-child(1) {
+    transition-delay: 0s;
+  }
+  .blog-grid .blog-card-item:nth-child(2) {
+    transition-delay: 0.1s;
+  }
+  .blog-grid .blog-card-item:nth-child(3) {
+    transition-delay: 0.2s;
+  }
+  .blog-grid .blog-card-item:nth-child(4) {
+    transition-delay: 0.3s;
+  }
+  .blog-grid .blog-card-item:nth-child(5) {
+    transition-delay: 0.4s;
+  }
+  .blog-grid .blog-card-item:nth-child(6) {
+    transition-delay: 0.5s;
+  }
+  .blog-grid .blog-card-item:nth-child(7) {
+    transition-delay: 0.6s;
+  }
+  .blog-grid .blog-card-item:nth-child(8) {
+    transition-delay: 0.7s;
+  }
+  .blog-grid .blog-card-item:nth-child(9) {
+    transition-delay: 0.8s;
+  }
+  .blog-grid .blog-card-item:nth-child(10) {
+    transition-delay: 0.9s;
+  }
+  .blog-grid .blog-card-item:nth-child(11) {
+    transition-delay: 1.0s;
+  }
+  .blog-grid .blog-card-item:nth-child(12) {
+    transition-delay: 1.1s;
+  }
+
+  /* Hover enhancement for animated blog article cards */
+  .blog-card-item.animate:hover {
+    transform: translateY(-2px);
+    transition: transform 0.3s ease;
+  }
+
+  @media screen and (max-width: 768px) {
+    .blog-card-item.scroll-fade-trigger {
+      transform: translateY(30px);
+      transition: opacity 0.4s ease, transform 0.4s ease;
+    }
+
+    .blog-grid .blog-card-item:nth-child(n) {
+      transition-delay: calc(var(--index, 0) * 0.1s);
+    }
+  }
+
+  /* Accessibility - Respect reduced motion */
+  @media (prefers-reduced-motion: reduce) {
+    .blog-card-item.scroll-fade-trigger {
+      opacity: 1 !important;
+      transform: none !important;
+      transition: none !important;
+    }
+  }
+</style>
+
+<script>
+  // Custom Blog Article Grid Fade-Up Animation
+  document.addEventListener('DOMContentLoaded', function() {
+    const blogGrid = document.querySelector('.blog-grid');
+    if (!blogGrid) return;
+
+    const blogCards = blogGrid.querySelectorAll('.blog-card-item');
+
+    // Set initial state for all cards
+    blogCards.forEach((card, index) => {
+      card.style.opacity = '0';
+      card.style.transform = 'translateY(50px)';
+      card.style.transition = `opacity 0.6s ease ${index * 0.1}s, transform 0.6s ease ${index * 0.1}s`;
+    });
+
+    // Create intersection observer
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          // Trigger fade-up animation
+          entry.target.style.opacity = '1';
+          entry.target.style.transform = 'translateY(0)';
+
+          // Stop observing this element
+          observer.unobserve(entry.target);
+        }
+      });
+    }, {
+      rootMargin: '0px 0px -100px 0px',
+      threshold: 0.1
+    });
+
+    // Observe all blog cards
+    blogCards.forEach(card => {
+      observer.observe(card);
+    });
+  });
+</script>

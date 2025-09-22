@@ -1,3 +1,6 @@
+{{ 'scroll-animations.css' | asset_url | stylesheet_tag }}
+<script src="{{ 'scroll-animations.js' | asset_url }}" defer></script>
+
 <section
   class="color-{{ section.settings.color_scheme }} signup-with-image-section w-full min-h-screen"
   id="section-{{ section.id }}"
@@ -5,7 +8,7 @@
 >
   <div id="signup-with-image-slider" class="signup-with-image-slider">
     <!-- Image Column -->
-    <div class="signup-with-image-image">
+    <div class="signup-with-image-image scroll-slide-trigger scroll-slide-from-behind-right">
       {% if section.settings.main_image %}
         <img
           src="{{ section.settings.main_image | image_url: width: 1000 }}"
@@ -28,18 +31,18 @@
         style="max-width: 45rem; padding: 3rem 2rem; display: flex; flex-direction: column; align-items: center; text-align: center;"
       >
         <div
-          class="signup-with-image-subheading"
+          class="signup-with-image-subheading scroll-fade-trigger scroll-fade-up"
         >
           {{ section.settings.subheading }}
         </div>
-        <h2 class="signup-with-image-heading">
+        <h2 class="signup-with-image-heading scroll-fade-trigger scroll-fade-up scroll-fade-delay-1">
           {{ section.settings.heading | newline_to_br }}
         </h2>
-        <p class="signup-with-image-description">
+        <p class="signup-with-image-description scroll-fade-trigger scroll-fade-up scroll-fade-delay-2">
           {{ section.settings.description }}
         </p>
         <form
-          class="signup-with-image-form"
+          class="signup-with-image-form scroll-fade-trigger scroll-fade-up scroll-fade-delay-3"
           method="post"
           action="/contact#contact_form"
           id="email-signup-form-password"
@@ -47,7 +50,7 @@
         >
           <input type="hidden" name="form_type" value="customer">
           <input type="hidden" name="utf8" value="✓">
-          <div class="form-fields-container" style="width: 265px;">
+          <div class="form-fields-container scroll-fade-trigger scroll-fade-up scroll-fade-delay-4" style="width: 265px;">
             <input
               type="email"
               placeholder="{{ section.settings.email_placeholder }}"
@@ -59,13 +62,18 @@
               pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$"
             >
           </div>
-          {% render 'secondary-button', button_text: section.settings.button_text, button_id: 'buttonText-password' %}
+          <div class="scroll-fade-trigger scroll-fade-up scroll-fade-delay-5">
+            {% render 'secondary-button', button_text: section.settings.button_text, button_id: 'buttonText-password' %}
+          </div>
         </form>
       </div>
     </div>
   </div>
 
   <style>
+  .signup-with-image-form-container{
+      z-index:10;
+  }
     .signup-with-image-section ::selection {
       color: var(--accent) !important;
     }
@@ -114,6 +122,8 @@
       display: flex;
       align-items: center;
       justify-content: center;
+      position: relative;
+      z-index: 1;
     }
 
     .signup-with-image-form-container {
@@ -124,6 +134,8 @@
       align-items: center;
       justify-content: center;
       height: 100vh;
+      position: relative;
+      z-index: 2;
     }
 
     .signup-with-image-form-box {
@@ -136,6 +148,7 @@
       overflow-y: hidden;
       overflow-x: auto;
       scroll-snap-type: x mandatory;
+      position: relative;
     }
 
     .signup-with-image-slider::-webkit-scrollbar:vertical {
@@ -182,6 +195,11 @@
 
       .signup-with-image-image {
         margin-right: 0.7rem;
+        z-index: 1;
+      }
+
+      .signup-with-image-form-container {
+        z-index: 2;
       }
 
       .signup-with-image-subheading {

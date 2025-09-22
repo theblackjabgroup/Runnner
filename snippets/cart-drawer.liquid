@@ -313,28 +313,30 @@
             background-color: var(--secondary_button_label) !important;
             color: var(--secondary_button_text_color) !important;
             height: 35px !important;
-            min-width: 270px !important;
+            min-width: 210px !important;
+            border:1px solid var(--secondary_button_text_color) !important;
             transition: color 0.3s ease, border-color 0.3s ease;
           }
 
           #CartDrawer-Checkout::before {
             content: '';
             position: absolute;
-            top: 0;
+            top: 1px;
             left: -100%;
-            width: 100%;
-            height: 100%;
+            width: calc(100% - 2px);
+            height: calc(100% - 2px);
             background-color: var(--hovered_secondary_button_label);
             transition: left 0.3s ease;
             z-index: 1;
           }
 
           #CartDrawer-Checkout:hover::before {
-            left: 0;
+            left: 1px;
           }
 
           #CartDrawer-Checkout:hover {
             color: var(--hovered_secondary_button_text_color) !important;
+            border-color: var(--secondary_button_text_color) !important;
           }
 
           #CartDrawer-Checkout:hover svg path {
@@ -1072,57 +1074,23 @@
         <!-- Subtotals -->
 
         <div class="cart-drawer__footer" {{ block.shopify_attributes }}>
-          <div class="totals !text-[16px] border-y" role="status" style="border-color: var(--border);">
+          <div class="totals !text-[16px] border-t flex justify-between items-center" role="status" style="border-color: var(--border); padding: 10px 0;">
             <h2 class="totals__total !text-normal" style="color: var(--text);">SUBTOTAL</h2>
+            <span class="!text-[16px] !font-medium" style="color: var(--text);">${{ cart.total_price | money_without_currency }}</span>
           </div>
 
-          <div class="cart-drawer__pricing-options !flex !flex-col !mt-0">
-            <label
-              class="pricing-option !text-[16px] border-b flex items-center justify-center gap-3"
-              style="border-color: var(--border); color: var(--text);"
-            >
-              <input type="radio" name="pricing" value="regular" checked>
-              <div class="flex justify-between w-full !font-medium">
-                <span class="!text-[16px]">REGULAR PRICE</span>
-                <span class="!text-[16px]">${{ cart.total_price | money_without_currency }}</span>
-              </div>
-            </label>
-            <label
-              class="pricing-option !text-[16px] border-b flex items-center justify-center gap-3"
-              style="border-color: var(--border); color: var(--text);"
-            >
-              <input id="subscribe-radio" type="radio" name="pricing" value="member">
-              <div class="flex justify-between w-full !font-medium">
-                <span class="!text-[16px]">SUBSCRIBE AND SAVE 10%</span>
-                <span class="!text-[16px]">${{ cart.total_price | times: 0.9 | money_without_currency }}</span>
-              </div>
-            </label>
-            <div id="subscribe-form" style="display:none; margin-top: 10px; ">
-              <input
-                type="email"
-                id="subscribe-email"
-                placeholder="Enter your email"
-                style="padding: 8px; border: 1px solid var(--border); border-radius: 4px; background: var(--background); color: var(--text);"
-              >
-              <button
-                type="button"
-                id="subscribe-btn"
-                style="padding: 5px 10px; background: var(--button); color: var(--button_label); border: none; margin-top:10px; border-radius: 4px; display:flex; align-items:center; text-transform: uppercase; font-weight: bold; font-size: 2rem;"
-              >
-                <svg
-                  width="20"
-                  height="20"
-                  class="!mr-2"
-                  viewBox="0 0 9 9"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path d="M1.1875 7.7334H7.6599M7.6599 7.7334V1.261M7.6599 7.7334L1.1875 1.261" stroke="white" stroke-linejoin="round"/>
-                </svg>
-                &nbsp; Subscribe
-              </button>
+          <details class="border-t border-b" style="border-color: var(--border);">
+            <summary class="!text-[16px] !font-medium cursor-pointer py-3" style="color: var(--text);">ORDER NOTE</summary>
+            <div class="pb-3">
+              <textarea
+                name="note"
+                id="CartDrawer-Note"
+                class="w-full p-2 border rounded"
+                style="border-color: var(--border); background: var(--background); color: var(--text); min-height: 80px; resize: vertical;"
+                placeholder="Add a note to your order..."
+              >{{ cart.note }}</textarea>
             </div>
-          </div>
+          </details>
         </div>
 
         <div class="cart__ctas" {{ block.shopify_attributes }}>
@@ -1156,55 +1124,30 @@
 </cart-drawer>
 <script>
   document.addEventListener('DOMContentLoaded', function () {
-    var subscribeRadio = document.getElementById('subscribe-radio');
-    var regularRadio = document.querySelector('input[name="pricing"][value="regular"]');
-    var subscribeForm = document.getElementById('subscribe-form');
-    var subscribeBtn = document.getElementById('subscribe-btn');
-    var subscribeEmail = document.getElementById('subscribe-email');
+    // Order note functionality
+    var orderNoteTextarea = document.getElementById('CartDrawer-Note');
 
-    function toggleSubscribeForm() {
-      if (subscribeRadio.checked) {
-        subscribeForm.style.display = 'block';
-      } else {
-        subscribeForm.style.display = 'none';
-      }
-    }
+    if (orderNoteTextarea) {
+      orderNoteTextarea.addEventListener('blur', function () {
+        var note = this.value;
 
-    if (subscribeRadio && subscribeForm) {
-      subscribeRadio.addEventListener('change', toggleSubscribeForm);
-      if (regularRadio) {
-        regularRadio.addEventListener('change', toggleSubscribeForm);
-      }
-      // Initial state
-      toggleSubscribeForm();
-    }
-
-    if (subscribeBtn && subscribeEmail) {
-      subscribeBtn.addEventListener('click', function () {
-        var email = subscribeEmail.value.trim();
-        if (!email) {
-          alert('Please enter a valid email address.');
-          return;
-        }
-        // Ajax POST to Shopify newsletter endpoint
-        fetch('/contact', {
+        // Update cart note via AJAX
+        fetch('/cart/update.js', {
           method: 'POST',
           headers: {
-            'Content-Type': 'application/x-www-form-urlencoded',
+            'Content-Type': 'application/json',
           },
-          body: 'form_type=newsletter&contact[email]=' + encodeURIComponent(email) + '&utf8=✓',
-        })
-          .then(function (response) {
-            if (response.ok) {
-              alert('Thank you for subscribing!');
-              subscribeEmail.value = '';
-            } else {
-              alert('There was a problem subscribing. Please try again.');
-            }
+          body: JSON.stringify({
+            note: note
           })
-          .catch(function () {
-            alert('There was a problem subscribing. Please try again.');
-          });
+        })
+        .then(response => response.json())
+        .then(data => {
+          console.log('Cart note updated successfully');
+        })
+        .catch(error => {
+          console.error('Error updating cart note:', error);
+        });
       });
     }
   });
