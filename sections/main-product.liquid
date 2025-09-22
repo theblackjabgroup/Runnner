@@ -2,28 +2,33 @@
 <section
   class="product-section color-{{ section.settings.color_scheme }} section-{{ section.id }}-padding hidden lg:!flex lg:flex-row gap-4 lg:gap-8 px-4 py-8"
   style="background-color: var(--background); color: var(--text);"
+  role="main"
+  aria-labelledby="product-title"
 >
   {%- comment -%} Left: Image Gallery {%- endcomment -%}
-  <div class="product-gallery w-1/2">
+  <div class="product-gallery w-1/2" role="region" aria-label="Product images">
     <div
       class="gallery-wrapper sticky top-[80px] h-[calc(100vh-80px)]"
       style="max-height: calc(100vh - 70px); overflow-y: auto; position: sticky; top: 70px;"
     >
-      <div class="gallery-track w-full h-full relative" data-gallery-track>
+      <div class="gallery-track w-full h-full relative" data-gallery-track role="img" aria-live="polite">
         {%- if product.media.size >= 0 -%}
           {%- for media in product.media -%}
             <div
               class="gallery-item absolute inset-0 w-full h-full {% if forloop.first %}is-active{% endif %}"
               data-index="{{ forloop.index0 }}"
+              id="gallery-item-{{ forloop.index0 }}"
+              {% if forloop.first %}aria-current="true"{% endif %}
             >
               {% if media.media_type == 'image' %}
                 <img
                   src="{{ media | image_url: width: 1200 }}"
-                  alt="{{ media.alt | escape }}"
+                  alt="{{ media.alt | escape | default: product.title | append: ' - Image ' | append: forloop.index }}"
                   class="w-full h-full object-cover"
                   loading="{% if forloop.first %}lazy{% else %}lazy{% endif %}"
                   width="full"
                   height="full"
+                  role="img"
                 >
               {% elsif media.media_type == 'video' %}
                 {{
@@ -34,7 +39,8 @@
                     muted: true,
                     playsinline: true,
                     controls: true,
-                    class: 'w-full h-full object-cover'
+                    class: 'w-full h-full object-cover',
+                    aria-label: media.alt | escape | default: product.title | append: ' - Video ' | append: forloop.index
                 }}
               {% endif %}
             </div>
@@ -42,24 +48,30 @@
         {%- endif -%}
 
         <!-- Add vertical image strip -->
-        <div class="image-strip-container opacity-0">
+        <div class="image-strip-container opacity-0" role="tablist" aria-label="Product image thumbnails">
           <div class="image-strip">
             {%- for media in product.media -%}
-              <div
+              <button
                 class="strip-image-wrapper {% if forloop.first %}active{% endif %}"
                 data-strip-index="{{ forloop.index0 }}"
+                role="tab"
+                aria-selected="{% if forloop.first %}true{% else %}false{% endif %}"
+                aria-controls="gallery-item-{{ forloop.index0 }}"
+                aria-label="View {{ media.alt | escape | default: 'product image' }} {{ forloop.index }}"
+                tabindex="{% if forloop.first %}0{% else %}-1{% endif %}"
               >
                 {% if media.media_type == 'video' %}
                   <div class="relative w-full h-full">
                     <img
                       src="{{ media.preview_image | image_url: width: 150 }}"
-                      alt="{{ media.alt | escape }}"
+                      alt=""
                       class="strip-image"
                       loading="lazy"
                       width="150"
                       height="full"
+                      aria-hidden="true"
                     >
-                    <span class="video-play-icon absolute inset-0 flex items-center justify-center pointer-events-none">
+                    <span class="video-play-icon absolute inset-0 flex items-center justify-center pointer-events-none" aria-hidden="true">
                       <svg width="32" height="32" fill="none" viewBox="0 0 32 32">
                         <circle cx="16" cy="16" r="16" fill="rgba(0,0,0,0.5)"/>
                         <polygon points="13,10 24,16 13,22" fill="white"/>
@@ -69,14 +81,15 @@
                 {% else %}
                   <img
                     src="{{ media | image_url: width: 150 }}"
-                    alt="{{ media.alt | escape }}"
+                    alt=""
                     class="strip-image"
                     loading="lazy"
                     width="150"
                     height="full"
+                    aria-hidden="true"
                   >
                 {% endif %}
-              </div>
+              </button>
             {%- endfor -%}
           </div>
         </div>
@@ -85,7 +98,7 @@
   </div>
 
   {%- comment -%} Right: Product Details {%- endcomment -%}
-  <div class="product-details w-1/2 mx-2">
+  <div class="product-details w-1/2 mx-2" role="region" aria-labelledby="product-title">
     <div
       class="details-inner sticky top-[80px] flex flex-col"
       style="height: calc(100vh - 70px); overflow-y: auto; position: sticky; top: 70px;"
@@ -93,14 +106,17 @@
       {%- comment -%} Header {%- endcomment -%}
       <div class="product-header w-[80%] space-y-8">
         <div class="header-top flex flex-col gap-4">
-          <div class="product-status flex items-center gap-4">
+          <div class="product-status flex items-center gap-4" role="status" aria-live="polite">
             {% if product.available != true %}
               <span class="inline-flex items-center px-3 py-1 text-[14px] tracking-wider bg-black text-white uppercase rounded"
+                role="status"
+                aria-label="Product is sold out"
                 >Sold Out</span
               >
             {% endif %}
           </div>
           <h1
+            id="product-title"
             class="text-[42px] pb-10"
             style="font-weight: {{section.settings.product_name_font_weight}};  padding-bottom: 10px;"
           >
@@ -110,48 +126,58 @@
           {%- comment -%} Product Variant {%- endcomment -%}
           {%- assign color_option = product.options_with_values | where: 'name', 'Color' | first -%}
           {%- if color_option and color_option.values.size > 0 -%}
-            <div class="product-variants my-4">
-              <div class="flex items-center gap-2">
+            <fieldset class="product-variants my-4" role="group" aria-labelledby="color-legend">
+              <legend id="color-legend" class="flex items-center gap-2">
                 <span class="inline-block text-[14px] font-medium">SELECT COLOR:</span>
-                <span class="active-color text-[14px] font-medium uppercase" data-active-color>
+                <span class="active-color text-[14px] font-medium uppercase" data-active-color aria-live="polite">
                   {{- color_option.values | first -}}
                 </span>
-              </div>
-              <div class="color-options flex gap-4 p-2">
+              </legend>
+              <div class="color-options flex gap-4 p-2" role="radiogroup" aria-labelledby="color-legend">
                 {%- for value in color_option.values -%}
                   <button
                     type="button"
-                    class="color-swatch rounded-full hover:scale-110 transition-transform focus:outline-none"
+                    class="color-swatch rounded-full hover:scale-110 transition-transform focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
                     style="background-color: {{ value | handleize }}; width: 20px; height: 20px;"
                     data-option-value="{{ value | escape }}"
+                    role="radio"
+                    aria-checked="{% if forloop.first %}true{% else %}false{% endif %}"
+                    aria-label="Color: {{ value }}"
+                    tabindex="{% if forloop.first %}0{% else %}-1{% endif %}"
                   >
                     <span class="sr-only">{{ value }}</span>
                   </button>
                 {%- endfor -%}
               </div>
-            </div>
+            </fieldset>
           {%- endif -%}
         </div>
       </div>
 
       {% comment %} tabs  {% endcomment %}
-      <div class="product-tabs w-[80%] flex-1 overflow-hidden">
+      <div class="product-tabs w-[80%] flex-1 overflow-hidden" role="region" aria-label="Product information">
         <!-- Tab Navigation -->
-        <div class="tabs-nav flex justify-evenly space-x-3 h-auto mt-2 w-full">
+        <div class="tabs-nav flex justify-evenly space-x-3 h-auto mt-2 w-full" role="tablist" aria-label="Product details">
           {%- assign tab_index = 0 -%}
           {%- for block in section.blocks -%}
             {% if block.type == 'tab_description' or block.type == 'tab_details' or block.type == 'tab_sizing' %}
               {%- assign tab_index = tab_index | plus: 1 -%}
               <button
-                class="tab-btn group text-[16px] text-left pt-[5px] mr-3 w-full transition-colors duration-300 relative {% if tab_index == 1 %}active-tab{% endif %}"
+                class="tab-btn group text-[16px] text-left pt-[5px] mr-3 w-full transition-colors duration-300 relative {% if tab_index == 1 %}active-tab{% endif %} focus:outline-none focus:ring-2 focus:ring-blue-500"
                 style="color: {% if tab_index == 1 %}var(--text){% else %}var(--secondary_text){% endif %};"
                 data-tab="tab-{{ block.id }}"
+                role="tab"
+                aria-selected="{% if tab_index == 1 %}true{% else %}false{% endif %}"
+                aria-controls="tab-content-{{ block.id }}"
+                tabindex="{% if tab_index == 1 %}0{% else %}-1{% endif %}"
+                id="tab-{{ block.id }}-button"
                 {{ block.shopify_attributes }}
               >
                 <!-- Div acting as top border -->
                 <div
                   class="tab-top-bar absolute top-0 left-0 right-0 rounded transition-colors duration-300"
                   style="height: 3px; background-color: {% if tab_index == 1 %}var(--text){% else %}var(--secondary_text){% endif %};"
+                  aria-hidden="true"
                 >
                   &nbsp;
                 </div>
@@ -167,6 +193,10 @@
             <div
               class="tab-pane {% if forloop.first %}active{% else %}hidden{% endif %} tracking-normal leading-none text-[16px]"
               data-content="tab-{{ block.id }}"
+              role="tabpanel"
+              aria-labelledby="tab-{{ block.id }}-button"
+              id="tab-content-{{ block.id }}"
+              {% unless forloop.first %}tabindex="0"{% endunless %}
             >
               {% case block.type %}
                 {% when 'tab_description' %}
@@ -184,15 +214,20 @@
                 {% when 'tab_sizing' %}
                   <button
                     id="open-size-chart"
-                    class="bg-black text-white px-4 py-2 rounded hover:bg-gray-900 transition-colors"
+                    class="bg-black text-white px-4 py-2 rounded hover:bg-gray-900 transition-colors focus:outline-none focus:ring-2 focus:ring-white"
+                    aria-describedby="size-chart-description"
                   >
                     SIZE CHART
                   </button>
+                  <span id="size-chart-description" class="sr-only">Opens size chart in a drawer</span>
 
                   <div
                     id="size-chart-drawer"
                     class="fixed top-0 right-0 h-full bg-white shadow-lg transform translate-x-full hidden transition-transform duration-300 ease-in-out overflow-y-auto"
                     style="width: 40vw; z-index: 1001;"
+                    role="dialog"
+                    aria-modal="true"
+                    aria-labelledby="size-chart-title"
                     aria-hidden="true"
                   >
                     <div
@@ -201,13 +236,14 @@
                     >
                       <button
                         id="close-size-chart"
-                        class="text-gray-500 hover:text-black transition-colors "
+                        class="text-gray-500 hover:text-black transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500"
                         aria-label="Close size chart"
                       >
                         CLOSE
                       </button>
                     </div>
                     <div class="p-4">
+                      <h2 id="size-chart-title" class="sr-only">Size Chart</h2>
                       {% if block.settings.size_chart_page != blank %}
                         <div class="prose max-w-none">
                           {{ block.settings.size_chart_page.content }}
@@ -217,7 +253,11 @@
                       {% endif %}
                     </div>
                   </div>
-                  <div id="size-chart-backdrop" class="fixed inset-0 bg-black/60 hidden z-[999]">&nbsp;</div>
+                  <div 
+                    id="size-chart-backdrop" 
+                    class="fixed inset-0 bg-black/60 hidden z-[999]"
+                    aria-hidden="true"
+                  >&nbsp;</div>
               {% endcase %}
             </div>
           {% endfor %}
@@ -235,6 +275,8 @@
 
       <div
         class="size-price-selector flex flex-col gap-6 text-[14px] font-medium"
+        role="region"
+        aria-label="Product options and purchase"
       >
         <!-- DELIVERY SECTION -->
         {%- for block in section.blocks -%}
@@ -242,35 +284,35 @@
             <div class="flex justify-between items-start border-b border-gray-400 py-4" {{ block.shopify_attributes }}>
               {% if customer and customer.default_address %}
                 <!-- Logged-in: Show saved address -->
-                <div>
-                  <div class="font-medium uppercase">DELIVER TO</div>
-                  <div class="text-sm leading-relaxed">
+                <div role="group" aria-labelledby="delivery-heading">
+                  <div id="delivery-heading" class="font-medium uppercase">DELIVER TO</div>
+                  <div class="text-sm leading-relaxed" aria-describedby="delivery-heading">
                     {{ customer.default_address | format_address }}
                   </div>
                 </div>
-                <a
-                  href="#"
-                  class=" delivery-change-btn border px-2 py-0 text-[14px] font-medium rounded transition-colors duration-200 "
+                <button
+                  class="delivery-change-btn border px-2 py-0 text-[14px] font-medium rounded transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
                   aria-label="Change delivery address"
+                  aria-describedby="current-address"
                 >
                   CHANGE
-                </a>
+                </button>
+                <span id="current-address" class="sr-only">Current address: {{ customer.default_address | format_address }}</span>
               {% else %}
                 <!-- Guest: Show login prompt -->
-                <div>
-                  <div class="font-medium uppercase">DELIVER TO</div>
+                <div role="group" aria-labelledby="delivery-heading-guest">
+                  <div id="delivery-heading-guest" class="font-medium uppercase">DELIVER TO</div>
                   <div class="text-[14px]" style="color: var(--secondary_text);">
-                    Please <a href="/account/login" class="underline text-blue-600">log in</a> to set your delivery
-                    address.
+                    Please <a href="/account/login" class="underline text-blue-600" aria-describedby="login-help">log in</a> to set your delivery address.
                   </div>
+                  <span id="login-help" class="sr-only">Login required to save and manage delivery addresses</span>
                 </div>
-                <a
-                  href="#"
-                  class=" delivery-change-btn border px-2 py-0 text-[14px] font-medium rounded transition-colors duration-200 "
-                  aria-label="Change delivery address"
+                <button
+                  class="delivery-change-btn border px-2 py-0 text-[14px] font-medium rounded transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  aria-label="Set delivery address"
                 >
                   CHANGE
-                </a>
+                </button>
               {% endif %}
             </div>
           {%- endif -%}
@@ -280,31 +322,45 @@
         {%- for block in section.blocks -%}
           {%- if block.type == 'quantity_selector' -%}
             <div class="flex justify-between items-center border-b border-gray-400 pb-4" {{ block.shopify_attributes }}>
-              <span class="font-medium uppercase ">QUANTITY SELECTOR</span>
+              <label for="quantityInput" class="font-medium uppercase">QUANTITY SELECTOR</label>
               <div
                 class="flex items-center justify-center py-1 border rounded overflow-hidden h-10"
                 style="width: 8rem; border-color: var(--border); height: 3rem;"
+                role="group"
+                aria-labelledby="quantity-label"
               >
+                <span id="quantity-label" class="sr-only">Quantity</span>
                 <button
                   type="button"
                   id="decreaseQty"
-                  class="px-3 text-[16px]   hover:bg-gray-100"
+                  class="px-3 text-[16px] hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
                   aria-label="Decrease quantity"
+                  aria-controls="quantityDisplay"
                 >
                   -
                 </button>
                 <span
                   id="quantityDisplay"
-                  class="px-3 border-x-1 text-[16px]  "
+                  class="px-3 border-x-1 text-[16px]"
                   style="border-left: 1px solid var(--border); border-right: 1px solid var(--border);"
+                  role="status"
+                  aria-live="polite"
+                  aria-label="Current quantity"
                   >1</span
                 >
-                <input type="hidden" name="quantity" id="quantityInput" value="1">
+                <input 
+                  type="hidden" 
+                  name="quantity" 
+                  id="quantityInput" 
+                  value="1"
+                  aria-label="Product quantity"
+                >
                 <button
                   type="button"
                   id="increaseQty"
-                  class="px-3 text-[16px]  hover:bg-gray-100"
+                  class="px-3 text-[16px] hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
                   aria-label="Increase quantity"
+                  aria-controls="quantityDisplay"
                 >
                   +
                 </button>
@@ -374,20 +430,27 @@
         <!-- PRICE + ACTIONS -->
         <div class="flex justify-between items-center border-t border-gray-400 pt-4" style="padding-top: 1rem;">
           <!-- Price + Compare at Price -->
-          <div class="text-[18px]  flex flex-col">
+          <div class="text-[18px] flex flex-col" role="region" aria-labelledby="price-heading">
+            <span id="price-heading" class="sr-only">Product pricing</span>
             <div class="flex items-center gap-2">
-              <span id="current-price" style="font-weight: {{section.settings.product_price_font_weight}};">
+              <span 
+                id="current-price" 
+                style="font-weight: {{section.settings.product_price_font_weight}};"
+                aria-label="Current price"
+              >
                 {{- product.price | money -}}
               </span>
               <span
                 id="compare-price-separator"
                 class="text-black text-[14px] {% unless product.compare_at_price > product.price %}hidden{% endunless %}"
+                aria-hidden="true"
                 >|</span
               >
               <span
                 id="compare-price"
                 class="line-through{% unless product.compare_at_price > product.price %}hidden{% endunless %}"
                 style="color: var(--secondary_text);"
+                aria-label="Original price"
               >
                 {% if product.compare_at_price > product.price %}{{ product.compare_at_price | money }}{% endif %}
               </span>
@@ -396,7 +459,9 @@
             <div
               id="savings-info"
               class="text-[14px] font-medium {% unless product.compare_at_price > product.price %}hidden{% endunless %}"
-              style="color: var(--sale_badge); "
+              style="color: var(--sale_badge);"
+              role="status"
+              aria-live="polite"
             >
               {% if product.compare_at_price > product.price %}
                 Save {{ product.compare_at_price | minus: product.price | money }} (
@@ -416,19 +481,21 @@
             <div class="flex gap-2">
               {% if product.available %}
                 <!-- ADD TO CART form -->
-                <form method="post" action="/cart/add" id="add-to-cart-form">
+                <form method="post" action="/cart/add" id="add-to-cart-form" role="form" aria-labelledby="add-to-cart-heading">
+                  <span id="add-to-cart-heading" class="sr-only">Add product to cart</span>
                   <input
                     type="hidden"
                     name="id"
                     id="variant-id"
                     value="{{ product.selected_or_first_available_variant.id }}"
+                    aria-label="Selected variant ID"
                   >
-                  <input type="hidden" name="quantity" value="1">
+                  <input type="hidden" name="quantity" value="1" aria-label="Quantity">
                   <button
                     id="add-to-cart-btn"
-                    class="add-to-cart-btn-custom text-4xl rounded group flex items-center justify-between gap-2"
+                    class="add-to-cart-btn-custom text-4xl rounded group flex items-center justify-between gap-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                     style="height: 50px; width: 370px;"
-                    aria-label="Add to cart"
+                    aria-describedby="add-to-cart-description"
                     type="button"
                   >
                     <svg
@@ -437,11 +504,13 @@
                       height="24"
                       viewBox="0 0 24 24"
                       style="transform: rotate(-90deg); transform-origin: center; transform-box: fill-box;"
+                      aria-hidden="true"
                     >
                       <path d="M6 9L12 15L18 9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                     </svg>
                     <span id="add-to-cart-btn-text">ADD TO CART</span>
                   </button>
+                  <span id="add-to-cart-description" class="sr-only">Add this product to your shopping cart</span>
                 </form>
               {% else %}
                 <!-- SOLD OUT button -->
@@ -449,16 +518,19 @@
                   class="bg-gray-400 text-white text-4xl px-6 py-3 rounded cursor-not-allowed"
                   type="button"
                   disabled
+                  aria-label="Product is sold out"
+                  aria-describedby="sold-out-description"
                 >
                   SOLD OUT
                 </button>
+                <span id="sold-out-description" class="sr-only">This product is currently out of stock</span>
               {% endif %}
             </div>
           </div>
         </div>
         {%- for block in section.blocks -%}
           {%- if block.type == 'pickup_availability' -%}
-            <div class="pickup-availability-container mt-4" style="width:100%;">
+            <div class="pickup-availability-container mt-4" style="width:100%;" role="region" aria-label="Pickup availability">
               {% render 'pickup-availability', product_variant: product.selected_or_first_available_variant %}
               {{ 'component-pickup-availability.css' | asset_url | stylesheet_tag }}
               <script src="{{ 'pickup-availability.js' | asset_url }}" defer="defer"></script>
@@ -474,17 +546,21 @@
 <section
   class="lg:hidden flex flex-col gap-6 px-4 py-4"
   style="background-color: var(--background); color: var(--text);"
+  role="main"
+  aria-labelledby="mobile-product-title"
 >
   <!-- Mobile Image Gallery -->
-  <div class="mobile-gallery">
+  <div class="mobile-gallery" role="region" aria-label="Product images">
     <!-- Main Image Stack -->
-    <div class="main-images relative h-[60vh] overflow-hidden">
+    <div class="main-images relative h-[60vh] overflow-hidden" role="img" aria-live="polite">
       {%- if product.media.size > 0 -%}
         {%- for media in product.media -%}
           <div
             class="mobile-gallery-item w-full h-full {% unless forloop.first %}absolute top-0 left-0{% endunless %} {% if forloop.first %}relative active{% endif %}"
             data-mobile-index="{{ forloop.index0 }}"
             style="opacity: {% if forloop.first %}1{% else %}0{% endif %}; transition: opacity 0.3s ease;"
+            id="mobile-gallery-item-{{ forloop.index0 }}"
+            {% if forloop.first %}aria-current="true"{% endif %}
           >
             {% if media.media_type == 'image' %}
               <img
@@ -498,11 +574,12 @@
                   {{ media | image_url }} {{ media.width }}w
                 "
                 src="{{ media | image_url: width: 1200 }}"
-                alt="{{ media.alt | escape }}"
+                alt="{{ media.alt | escape | default: product.title | append: ' - Image ' | append: forloop.index }}"
                 class="w-full h-full object-cover"
                 loading="{% if forloop.first %}lazy{% else %}lazy{% endif %}"
                 width="full"
                 height="full"
+                role="img"
               >
             {% elsif media.media_type == 'video' %}
               {{
@@ -513,7 +590,8 @@
                   muted: true,
                   playsinline: true,
                   controls: true,
-                  class: 'w-full h-full object-cover'
+                  class: 'w-full h-full object-cover',
+                  aria-label: media.alt | escape | default: product.title | append: ' - Video ' | append: forloop.index
               }}
             {% endif %}
           </div>
@@ -522,25 +600,30 @@
     </div>
 
     <!-- Mobile Thumbnail Strip -->
-    <div class="thumbnail-strip mt-2 pb-2 overflow-x-auto mx-auto w-fit">
+    <div class="thumbnail-strip mt-2 pb-2 overflow-x-auto mx-auto w-fit" role="tablist" aria-label="Product image thumbnails">
       <div class="flex gap-2 snap-x p-4">
         {%- for media in product.media -%}
           <button
-            class="thumbnail-item flex-shrink-0 w-20 h-20 p-2 {% if forloop.first %} active{% endif %}"
+            class="thumbnail-item flex-shrink-0 w-20 h-20 p-2 {% if forloop.first %} active{% endif %} focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
             data-thumb-index="{{ forloop.index0 }}"
-            aria-label="product image thumbnail"
+            role="tab"
+            aria-selected="{% if forloop.first %}true{% else %}false{% endif %}"
+            aria-controls="mobile-gallery-item-{{ forloop.index0 }}"
+            aria-label="View {{ media.alt | escape | default: 'product image' }} {{ forloop.index }}"
+            tabindex="{% if forloop.first %}0{% else %}-1{% endif %}"
           >
             {% if media.media_type == 'video' %}
               <div class="relative w-full h-full">
                 <img
                   src="{{ media.preview_image | image_url: width: 150 }}"
-                  alt="Product video thumbnail"
+                  alt=""
                   class="w-full h-full object-cover rounded"
                   loading="lazy"
                   width="full"
                   height="full"
+                  aria-hidden="true"
                 >
-                <span class="video-play-icon absolute inset-0 flex items-center justify-center pointer-events-none">
+                <span class="video-play-icon absolute inset-0 flex items-center justify-center pointer-events-none" aria-hidden="true">
                   <svg width="32" height="32" fill="none" viewBox="0 0 32 32">
                     <circle cx="16" cy="16" r="16" fill="rgba(0,0,0,0.5)"/>
                     <polygon points="13,10 24,16 13,22" fill="white"/>
@@ -550,11 +633,12 @@
             {% else %}
               <img
                 src="{{ media | image_url: width: 150 }}"
-                alt="{% if media.alt != blank %}{{ media.alt | escape }}{% else %}Product image thumbnail{% endif %}"
+                alt=""
                 class="w-full h-full object-cover rounded"
                 loading="lazy"
                 width="full"
                 height="full"
+                aria-hidden="true"
               >
             {% endif %}
           </button>
@@ -564,63 +648,75 @@
   </div>
 
   <!-- Mobile Product Details -->
-  <div class="details-inner flex flex-col">
+  <div class="details-inner flex flex-col" role="region" aria-labelledby="mobile-product-title">
     {%- comment -%} Header {%- endcomment -%}
     <div class="product-header w-[80%] space-y-8">
       <div class="header-top flex flex-col gap-4">
-        <div class="product-status flex items-center gap-4">
+        <div class="product-status flex items-center gap-4" role="status" aria-live="polite">
           {% if product.available != true %}
             <span class="inline-flex items-center px-3 py-1 text-[14px] tracking-wider bg-black text-white uppercase rounded"
+              role="status"
+              aria-label="Product is sold out"
               >Sold Out</span
             >
           {% endif %}
         </div>
-        <h1 class="text-[42px] font-bold">{{ product.title }}</h1>
+        <h1 id="mobile-product-title" class="text-[42px] font-bold">{{ product.title }}</h1>
 
         {%- comment -%} Product Variant {%- endcomment -%}
         {%- assign color_option = product.options_with_values | where: 'name', 'Color' | first -%}
         {%- if color_option and color_option.values.size > 0 -%}
-          <div class="product-variants my-4">
-            <div class="flex items-center gap-2">
+          <fieldset class="product-variants my-4" role="group" aria-labelledby="mobile-color-legend">
+            <legend id="mobile-color-legend" class="flex items-center gap-2">
               <span class="inline-block text-[14px] font-medium">SELECT COLOR:</span>
-              <span class="active-color text-[14px]" data-active-color>
+              <span class="active-color text-[14px]" data-active-color aria-live="polite">
                 {{- color_option.values | first -}}
               </span>
-            </div>
-            <div class="color-options flex gap-3 p-2">
+            </legend>
+            <div class="color-options flex gap-3 p-2" role="radiogroup" aria-labelledby="mobile-color-legend">
               {%- for value in color_option.values -%}
                 <button
                   type="button"
-                  class="color-swatch w-8 h-8 rounded-full hover:scale-110 transition-transform focus:outline-none"
+                  class="color-swatch w-8 h-8 rounded-full hover:scale-110 transition-transform focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
                   style="background-color: {{ value | handleize }};"
                   data-option-value="{{ value | escape }}"
+                  role="radio"
+                  aria-checked="{% if forloop.first %}true{% else %}false{% endif %}"
+                  aria-label="Color: {{ value }}"
+                  tabindex="{% if forloop.first %}0{% else %}-1{% endif %}"
                 >
                   <span class="sr-only">{{ value }}</span>
                 </button>
               {%- endfor -%}
             </div>
-          </div>
+          </fieldset>
         {%- endif -%}
       </div>
     </div>
 
     {% comment %} tabs  {% endcomment %}
-    <div class="product-tabs flex-1 overflow-hidden">
+    <div class="product-tabs flex-1 overflow-hidden" role="region" aria-label="Mobile product information">
       <!-- Tab Navigation -->
-      <div class="tabs-nav flex justify-evenly space-x-3 h-auto mt-2 w-full">
+      <div class="tabs-nav flex justify-evenly space-x-3 h-auto mt-2 w-full" role="tablist" aria-label="Mobile product details">
         {%- assign tab_index = 0 -%}
         {%- for block in section.blocks -%}
           {% if block.type == 'tab_description' or block.type == 'tab_details' or block.type == 'tab_sizing' %}
             {%- assign tab_index = tab_index | plus: 1 -%}
             <button
-              class="tab-btn group text-[12px] text-left mr-3 w-full transition-colors duration-300 relative {% if tab_index == 1 %}active-tab{% endif %}"
+              class="tab-btn group text-[12px] text-left mr-3 w-full transition-colors duration-300 relative {% if tab_index == 1 %}active-tab{% endif %} focus:outline-none focus:ring-2 focus:ring-blue-500"
               style="color: {% if tab_index == 1 %}var(--text){% else %}var(--secondary_text){% endif %};"
               data-tab="tab-{{ block.id }}"
+              role="tab"
+              aria-selected="{% if tab_index == 1 %}true{% else %}false{% endif %}"
+              aria-controls="mobile-tab-content-{{ block.id }}"
+              tabindex="{% if tab_index == 1 %}0{% else %}-1{% endif %}"
+              id="mobile-tab-{{ block.id }}-button"
               {{ block.shopify_attributes }}
             >
               <div
                 class="tab-top-bar absolute top-0 left-0 right-0 rounded transition-colors duration-300"
                 style="height: 2px; background-color: {% if tab_index == 1 %}var(--text){% else %}var(--secondary_text){% endif %};"
+                aria-hidden="true"
               >
                 &nbsp;
               </div>
@@ -636,6 +732,10 @@
           <div
             class="tab-pane {% if forloop.first %}active{% else %}hidden{% endif %} tracking-normal leading-1 text-[12px]"
             data-content="tab-{{ block.id }}"
+            role="tabpanel"
+            aria-labelledby="mobile-tab-{{ block.id }}-button"
+            id="mobile-tab-content-{{ block.id }}"
+            {% unless forloop.first %}tabindex="0"{% endunless %}
           >
             {% case block.type %}
               {% when 'tab_description' %}
@@ -653,27 +753,33 @@
               {% when 'tab_sizing' %}
                 <button
                   id="open-mobile-size-chart"
-                  class="bg-black text-white px-4 py-2 rounded hover:bg-gray-900 transition-colors"
+                  class="bg-black text-white px-4 py-2 rounded hover:bg-gray-900 transition-colors focus:outline-none focus:ring-2 focus:ring-white"
+                  aria-describedby="mobile-size-chart-description"
                 >
                   Size Chart
                 </button>
+                <span id="mobile-size-chart-description" class="sr-only">Opens size chart in a full-screen drawer</span>
 
                 <div
                   id="mobile-size-chart-drawer"
                   class="fixed top-0 right-0 w-full h-full bg-white shadow-lg transform translate-x-full hidden transition-transform duration-300 overflow-y-auto"
                   style="z-index: 1000;"
+                  role="dialog"
+                  aria-modal="true"
+                  aria-labelledby="mobile-size-chart-title"
                   aria-hidden="true"
                 >
                   <div class="p-6" style="text-decoration-line: underline; display: flex; flex-direction: row-reverse;">
                     <button
                       id="close-mobile-size-chart"
-                      class="text-gray-500 hover:text-black transition-colors"
+                      class="text-gray-500 hover:text-black transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500"
                       aria-label="Close size chart"
                     >
                       CLOSE
                     </button>
                   </div>
                   <div class="p-4">
+                    <h2 id="mobile-size-chart-title" class="sr-only">Size Chart</h2>
                     {% if block.settings.size_chart_page != blank %}
                       <div class="prose max-w-none">
                         {{ block.settings.size_chart_page.content }}
@@ -698,42 +804,43 @@
       {%- endif -%}
     {%- endfor -%}
 
-    <div class="size-price-selector flex flex-col gap-6 text-[12px]">
+    <div class="size-price-selector flex flex-col gap-6 text-[12px]" role="region" aria-label="Mobile product options and purchase">
       <!-- DELIVERY SECTION -->
       {%- for block in section.blocks -%}
         {%- if block.type == 'delivery_address' -%}
           <div class="flex justify-between items-start border-b border-gray-400 py-4" {{ block.shopify_attributes }}>
             {% if customer and customer.default_address %}
               <!-- Logged-in: Show saved address -->
-              <div>
-                <div class="font-semibold uppercase">DELIVER TO</div>
-                <div class="text-sm leading-relaxed">
+              <div role="group" aria-labelledby="mobile-delivery-heading">
+                <div id="mobile-delivery-heading" class="font-semibold uppercase">DELIVER TO</div>
+                <div class="text-sm leading-relaxed" aria-describedby="mobile-delivery-heading">
                   {{ customer.default_address | format_address }}
                 </div>
               </div>
-              <a
-                href="#"
-                class=" delivery-change-btn border px-2 py-1 text-[14px] font-medium rounded transition-colors duration-200 "
+              <button
+                class="delivery-change-btn border px-2 py-1 text-[14px] font-medium rounded transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 aria-label="Change delivery address"
+                aria-describedby="mobile-current-address"
               >
                 CHANGE
-              </a>
+              </button>
+              <span id="mobile-current-address" class="sr-only">Current address: {{ customer.default_address | format_address }}</span>
             {% else %}
               <!-- Guest: Show login prompt -->
-              <div>
-                <div class="font-semibold uppercase">DELIVER TO</div>
+              <div role="group" aria-labelledby="mobile-delivery-heading-guest">
+                <div id="mobile-delivery-heading-guest" class="font-semibold uppercase">DELIVER TO</div>
                 <div class="text-[10px]" style="color: var(--secondary_text);">
-                  Please <a href="/account/login" class="underline !text-blue-900">log in</a> to set your delivery
+                  Please <a href="/account/login" class="underline !text-blue-900" aria-describedby="mobile-login-help">log in</a> to set your delivery
                   address.
                 </div>
+                <span id="mobile-login-help" class="sr-only">Login required to save and manage delivery addresses</span>
               </div>
-              <a
-                href="#"
-                class="delivery-change-btn border  py-0 text-[14px] font-medium rounded transition-colors duration-200 "
-                aria-label="Change delivery address"
+              <button
+                class="delivery-change-btn border py-0 text-[14px] font-medium rounded transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                aria-label="Set delivery address"
               >
                 CHANGE
-              </a>
+              </button>
             {% endif %}
           </div>
         {%- endif -%}
@@ -743,25 +850,32 @@
       {%- for block in section.blocks -%}
         {%- if block.type == 'quantity_selector' -%}
           <div class="flex justify-between items-center border-b border-gray-400 pb-4" {{ block.shopify_attributes }}>
-            <span class="uppercase font-semibold">QUANTITY SELECTOR</span>
-            <div class="flex items-center justify-center h-10 border rounded" style="width: 8rem;">
+            <label for="mobileQuantityInput" class="uppercase font-semibold">QUANTITY SELECTOR</label>
+            <div class="flex items-center justify-center h-10 border rounded" style="width: 8rem;" role="group" aria-labelledby="mobile-quantity-label">
+              <span id="mobile-quantity-label" class="sr-only">Quantity</span>
               <button
                 type="button"
-                class="mobile-decrease-qty px-3 py-1 text-lg hover:bg-gray-100"
+                class="mobile-decrease-qty px-3 py-1 text-lg hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 aria-label="Decrease quantity"
+                aria-controls="mobileQuantityDisplay"
               >
                 -
               </button>
               <span
+                id="mobileQuantityDisplay"
                 class="mobile-quantity-display px-4"
                 style="border-left: 1px solid black; border-right: 1px solid black;"
+                role="status"
+                aria-live="polite"
+                aria-label="Current quantity"
                 >1</span
               >
-              <input type="hidden" name="quantity" class="mobile-quantity-input" value="1">
+              <input type="hidden" name="quantity" id="mobileQuantityInput" class="mobile-quantity-input" value="1" aria-label="Product quantity">
               <button
                 type="button"
-                class="mobile-increase-qty px-3 py-1 text-lg hover:bg-gray-100"
+                class="mobile-increase-qty px-3 py-1 text-lg hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 aria-label="Increase quantity"
+                aria-controls="mobileQuantityDisplay"
               >
                 +
               </button>
@@ -781,9 +895,10 @@
         {% endunless %}
       {% endfor %}
       {% if variant_option %}
-        <div class="flex justify-between items-center gap-2">
-          <span class="font-medium uppercase">SELECT {{ variant_option.name | upcase }}</span>
-          <div class="flex gap-2 flex-wrap">
+        <fieldset class="flex justify-between items-center gap-2" role="group">
+          <legend class="font-medium uppercase">SELECT {{ variant_option.name | upcase }}</legend>
+          <div class="flex gap-2 flex-wrap" role="radiogroup" aria-labelledby="mobile-size-legend">
+            <span id="mobile-size-legend" class="sr-only">{{ variant_option.name }} options</span>
             {% for value in variant_option.values %}
               {% assign variant_available = false %}
               {% assign variant_id = null %}
@@ -801,26 +916,31 @@
                 type="button"
                 class="
                   size-btn relative px-3 h-10 min-w-[2.5rem] flex items-center justify-center border-transparent rounded font-semibold border
+                  focus:outline-none focus:ring-2 focus:ring-blue-500
                   {% if forloop.first and variant_available %}bg-black text-white{% endif %}
                   {% unless variant_available %} cursor-not-allowed bg-gray-200 unavailable-size{% endunless %}
                 "
                 data-option-index="{{ variant_option_index }}"
                 data-value="{{ value | escape }}"
+                role="radio"
+                aria-checked="{% if forloop.first and variant_available %}true{% else %}false{% endif %}"
                 {% if variant_available %}
                   data-variant-id="{{ variant_id }}"
+                  tabindex="{% if forloop.first %}0{% else %}-1{% endif %}"
                 {% else %}
                   disabled aria-disabled="true"
+                  tabindex="-1"
                 {% endif %}
                 aria-label="{{ variant_option.name }} {{ value }}{% unless variant_available %} - Sold out{% endunless %}"
               >
                 <span class="label">{{ value }}</span>
                 {% unless variant_available %}
-                  <span class="slash-unavailable"></span>
+                  <span class="slash-unavailable" aria-hidden="true"></span>
                 {% endunless %}
               </button>
             {% endfor %}
           </div>
-        </div>
+        </fieldset>
       {% endif %}
           {% if product.gift_card? %}
           <div class="border-t border-gray-400 pt-4" style="padding-top: 1rem;">
@@ -831,15 +951,17 @@
       <!-- PRICE + ACTIONS -->
       <div class="flex flex-col justify-evenly  border-t border-gray-400 pt-4" style="padding-top: 1rem;">
         <!-- Price + Compare at Price -->
-        <div class="text-[18px] flex flex-col justify-between">
+        <div class="text-[18px] flex flex-col justify-between" role="region" aria-labelledby="mobile-price-heading">
+          <span id="mobile-price-heading" class="sr-only">Product pricing</span>
           <div class="flex items-center gap-2">
-            <span class="mobile-current-price">{{ product.price | money }}</span>
-            <span class="mobile-compare-price-separator text-black text-[14px] {% unless product.compare_at_price > product.price %}hidden{% endunless %}"
+            <span class="mobile-current-price" aria-label="Current price">{{ product.price | money }}</span>
+            <span class="mobile-compare-price-separator text-black text-[14px] {% unless product.compare_at_price > product.price %}hidden{% endunless %}" aria-hidden="true"
               >|</span
             >
             <span
               class="mobile-compare-price line-through {% unless product.compare_at_price > product.price %}hidden{% endunless %}"
               style="color: var(--secondary_text);"
+              aria-label="Original price"
             >
               {% if product.compare_at_price > product.price %}{{ product.compare_at_price | money }}{% endif %}
             </span>
@@ -848,6 +970,8 @@
           <div
             class="mobile-savings-info text-[14px] font-medium {% unless product.compare_at_price > product.price %}hidden{% endunless %}"
             style="color: var(--sale_badge);"
+            role="status"
+            aria-live="polite"
           >
             {% if product.compare_at_price > product.price %}
               Save {{ product.compare_at_price | minus: product.price | money }} (
@@ -861,18 +985,20 @@
         <div class="flex justify-evenly w-full gap-2">
           {% if product.available %}
             <!-- ADD TO CART form -->
-            <form method="post" action="/cart/add" class="mobile-add-to-cart-form">
+            <form method="post" action="/cart/add" class="mobile-add-to-cart-form" role="form" aria-labelledby="mobile-add-to-cart-heading">
+              <span id="mobile-add-to-cart-heading" class="sr-only">Add product to cart</span>
               <input
                 type="hidden"
                 name="id"
                 class="mobile-variant-id"
                 value="{{ product.selected_or_first_available_variant.id }}"
+                aria-label="Selected variant ID"
               >
-              <input type="hidden" name="quantity" value="1">
+              <input type="hidden" name="quantity" value="1" aria-label="Quantity">
               <button
-                class="add-to-cart-btn-custom mobile-add-to-cart-btn text-3xl rounded group flex items-center justify-between gap-2"
+                class="add-to-cart-btn-custom mobile-add-to-cart-btn text-3xl rounded group flex items-center justify-between gap-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 style="width: 95vw"
-                aria-label="Add to cart"
+                aria-describedby="mobile-add-to-cart-description"
                 type="submit"
               >
                 <svg
@@ -881,11 +1007,13 @@
                   height="24"
                   viewBox="5 8 14 8"
                   style="transform: rotate(-90deg); transform-origin: center; transform-box: fill-box;"
+                  aria-hidden="true"
                 >
                   <path d="M6 9L12 15L18 9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                 </svg>
                 <span id="add-to-cart-btn-text-mobile">ADD TO CART</span>
               </button>
+              <span id="mobile-add-to-cart-description" class="sr-only">Add this product to your shopping cart</span>
             </form>
           {% else %}
             <!-- SOLD OUT button -->
@@ -893,18 +1021,19 @@
               class="bg-gray-400 text-white text-4xl px-4 py-2 rounded cursor-not-allowed"
               type="button"
               disabled
+              aria-label="Product is sold out"
+              aria-describedby="mobile-sold-out-description"
             >
               SOLD OUT
             </button>
+            <span id="mobile-sold-out-description" class="sr-only">This product is currently out of stock</span>
           {% endif %}
         </div>
       </div>
       {%- for block in section.blocks -%}
         {%- if block.type == 'pickup_availability' -%}
-          <div class="pickup-availability-container mt-4" style="width:100%;">
+          <div class="pickup-availability-container mt-4" style="width:100%;" role="region" aria-label="Pickup availability">
             {% render 'pickup-availability', product_variant: product.selected_or_first_available_variant %}
-            {{ 'component-pickup-availability.css' | asset_url | stylesheet_tag }}
-            <script src="{{ 'pickup-availability.js' | asset_url }}" defer="defer"></script>
           </div>
         {%- endif -%}
       {%- endfor -%}
@@ -1173,6 +1302,53 @@
 </style>
 <script>
 document.addEventListener('DOMContentLoaded', () => {
+  const shopCurrency = {{ shop.currency | json }};
+  const moneyFormat = {{ shop.money_format | json }};
+
+  function formatMoney(cents) {
+    if (cents === null || cents === undefined || isNaN(cents)) return '';
+    
+    try {
+      const amount = (cents / 100).toFixed(2);
+      const amountNoDecimals = Math.floor(cents / 100);
+      
+      if (!moneyFormat || typeof moneyFormat !== 'string') {
+        throw new Error('Invalid money format');
+      }
+      
+      let formatted = moneyFormat
+        .replace(/\{\{\s*amount\s*\}\}/g, amount)
+        .replace(/\{\{\s*amount_no_decimals\s*\}\}/g, amountNoDecimals)
+        .replace(/\{\{\s*amount_with_comma_separator\s*\}\}/g, amount.replace('.', ','))
+        .replace(/\{\{\s*amount_no_decimals_with_comma_separator\s*\}\}/g, amountNoDecimals.toString())
+        .replace(/\{\{\s*amount_with_space_separator\s*\}\}/g, amount.replace(/\B(?=(\d{3})+(?!\d))/g, ' '))
+        .replace(/\{\{\s*amount_no_decimals_with_space_separator\s*\}\}/g, amountNoDecimals.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ' '));
+      
+      return formatted;
+    } catch (error) {
+      console.warn('Shopify money format error, using fallback:', error);
+      return formatMoneyFallback(cents);
+    }
+  }
+
+  function formatMoneyFallback(cents, currencyCode = shopCurrency) {
+    if (cents === null || cents === undefined || isNaN(cents)) return '';
+    
+    const amount = cents / 100;
+    
+    try {
+      return new Intl.NumberFormat('en-US', {
+        style: 'currency',
+        currency: currencyCode || 'USD',
+        minimumFractionDigits: amount % 1 === 0 ? 0 : 2,
+        maximumFractionDigits: 2
+      }).format(amount);
+    } catch (error) {
+      console.warn('Currency formatting error:', error);
+      return `$${amount.toFixed(2)}`;
+    }
+  }
+
   // Product data from Shopify
   const productOptions = {{ product.options | json }};
   const productVariants = {{ product.variants | json }};
@@ -1242,7 +1418,121 @@ document.addEventListener('DOMContentLoaded', () => {
     return variant;
   }
 
-  // Function to refresh cart drawer content (from featured collection)
+  // URL Management Functions
+  function updateURLWithVariant(variant) {
+    if (!variant || !variant.id) return;
+    
+    const url = new URL(window.location);
+    url.searchParams.set('variant', variant.id);
+    
+    // Update the URL without reloading the page
+    window.history.replaceState({ variantId: variant.id }, '', url);
+    
+    // Update canonical URL if it exists
+    const canonicalLink = document.querySelector('link[rel="canonical"]');
+    if (canonicalLink) {
+      canonicalLink.href = url.href;
+    }
+    
+    // Dispatch custom event for analytics or other tracking
+    window.dispatchEvent(new CustomEvent('variant:changed', {
+      detail: { variant: variant, url: url.href }
+    }));
+  }
+
+  function initializeVariantFromURL() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const variantId = urlParams.get('variant');
+    
+    if (variantId) {
+      // Find the variant by ID
+      const variant = productVariants.find(v => v.id.toString() === variantId);
+      
+      if (variant && variant.available) {
+        // Update selected options based on the variant
+        if (colorIndex >= 0) {
+          selectedColor = variant[`option${colorIndex + 1}`];
+        }
+        if (sizeIndex >= 0) {
+          selectedSize = variant[`option${sizeIndex + 1}`];
+        }
+        if (mainOptionIndex >= 0) {
+          selectedMainOption = variant[`option${mainOptionIndex + 1}`];
+        }
+        
+        // Update UI to reflect the selected variant
+        updateUIForVariant(variant);
+        
+        return true;
+      }
+    }
+    return false;
+  }
+
+  function updateUIForVariant(variant) {
+    // Update color swatches
+    if (colorIndex >= 0 && selectedColor) {
+      const colorSwatch = document.querySelector(`[data-option-value="${selectedColor}"]`);
+      if (colorSwatch) {
+        // Remove active styling from all swatches
+        document.querySelectorAll('.color-swatch').forEach(swatch => {
+          swatch.classList.remove('ring-1', 'ring-offset-1', 'ring-black');
+        });
+        
+        // Add active styling to selected swatch
+        colorSwatch.classList.add('ring-1', 'ring-offset-2', 'ring-black');
+        
+        // Update color display
+        document.querySelectorAll('[data-active-color]').forEach(display => {
+          display.textContent = selectedColor;
+        });
+      }
+    }
+    
+    // Update size/option buttons
+    if (selectedMainOption) {
+      const sizeButton = document.querySelector(`[data-value="${selectedMainOption}"]`);
+      if (sizeButton && !sizeButton.disabled) {
+        // Remove active styling from all size buttons
+        document.querySelectorAll('.size-btn').forEach(btn => {
+          btn.classList.remove('active', 'bg-black', 'text-white');
+        });
+        
+        // Add active styling to selected button
+        sizeButton.classList.add('active', 'bg-black', 'text-white');
+      }
+    }
+    
+    // Update price and availability
+    updatePriceDisplay(variant, false);
+    updatePriceDisplay(variant, true);
+    updateAddToCartButton(variant, false);
+    updateAddToCartButton(variant, true);
+  }
+
+  function handlePopState(event) {
+    if (event.state && event.state.variantId) {
+      const variant = productVariants.find(v => v.id.toString() === event.state.variantId);
+      if (variant) {
+        // Update selected options
+        if (colorIndex >= 0) {
+          selectedColor = variant[`option${colorIndex + 1}`];
+        }
+        if (sizeIndex >= 0) {
+          selectedSize = variant[`option${sizeIndex + 1}`];
+        }
+        if (mainOptionIndex >= 0) {
+          selectedMainOption = variant[`option${mainOptionIndex + 1}`];
+        }
+        
+        // Update UI
+        updateUIForVariant(variant);
+        updateSizeAvailability();
+      }
+    }
+  }
+
+  // Function to refresh cart drawer content
   function refreshCartDrawer() {
     return fetch(`${window.location.pathname}?section_id=cart-drawer`)
       .then((response) => {
@@ -1503,7 +1793,6 @@ document.addEventListener('DOMContentLoaded', () => {
       .then((data) => {
         console.log('Cart add success:', data);
 
-
         // Update cart count immediately
         updateCartCount();
 
@@ -1592,19 +1881,12 @@ document.addEventListener('DOMContentLoaded', () => {
       return;
     }
 
-    // Update current price
-    currentPriceEl.textContent = (variant.price / 100).toLocaleString('en-IN', {
-      style: 'currency',
-      currency: 'INR'
-    });
+    currentPriceEl.textContent = formatMoney(variant.price);
 
     // Handle compare at price
     if (variant.compare_at_price && variant.compare_at_price > variant.price) {
       if (comparePriceEl) {
-        comparePriceEl.textContent = (variant.compare_at_price / 100).toLocaleString('en-IN', {
-          style: 'currency',
-          currency: 'INR'
-        });
+        comparePriceEl.textContent = formatMoney(variant.compare_at_price);
         comparePriceEl.classList.remove('hidden');
       }
       if (compareSeparatorEl) compareSeparatorEl.classList.remove('hidden');
@@ -1612,10 +1894,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if (savingsInfoEl) {
         const savings = variant.compare_at_price - variant.price;
         const percentage = Math.round((savings / variant.compare_at_price) * 100);
-        savingsInfoEl.innerHTML = `Save ${(savings / 100).toLocaleString('en-IN', {
-          style: 'currency',
-          currency: 'INR'
-        })} (${percentage}% off)`;
+        savingsInfoEl.innerHTML = `Save ${formatMoney(savings)} (${percentage}% off)`;
         savingsInfoEl.classList.remove('hidden');
       }
     } else {
@@ -1697,6 +1976,11 @@ document.addEventListener('DOMContentLoaded', () => {
     updateAddToCartButton(variant, true);
 
     updateSizeAvailability();
+    
+    // Update URL with new variant
+    if (variant && variant.available) {
+      updateURLWithVariant(variant);
+    }
   }
 
   // Desktop Add to Cart Button Handler
@@ -2201,6 +2485,20 @@ document.addEventListener('DOMContentLoaded', () => {
   
   document.body.addEventListener('click', pickupDrawerHandler);
   document.body.addEventListener('touchend', pickupDrawerHandler, { passive: false });
+
+  // Handle browser navigation (back/forward buttons)
+  window.addEventListener('popstate', handlePopState);
+
+  // Initialize variant from URL if present
+  const urlInitialized = initializeVariantFromURL();
+
+  // If URL didn't have a variant or it was invalid, update URL with current selection
+  if (!urlInitialized) {
+    const currentVariant = findMatchingVariant();
+    if (currentVariant) {
+      updateURLWithVariant(currentVariant);
+    }
+  }
 
   // Initial variant update and cart count sync
   updateVariant();
