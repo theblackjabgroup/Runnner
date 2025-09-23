@@ -9,7 +9,7 @@
   aria-labelledby="product-title"
 >
   {%- comment -%} Left: Image Gallery {%- endcomment -%}
-  <div class="product-gallery w-1/2 scroll-fade-trigger" role="region" aria-label="Product images">
+  <div class="product-gallery w-1/2 scroll-fade-trigger scroll-fade-left" role="region" aria-label="Product images">
     <div
       class="gallery-wrapper sticky top-[80px] h-[calc(100vh-80px)]"
       style="max-height: calc(100vh - 70px); overflow-y: auto; position: sticky; top: 70px;"
@@ -106,7 +106,7 @@
       style="height: calc(100vh - 70px); overflow-y: auto; position: sticky; top: 70px;"
     >
       {%- comment -%} Header {%- endcomment -%}
-      <div class="product-header w-[80%] space-y-8 scroll-fade-trigger scroll-fade-up">
+  <div class="product-header w-[80%] space-y-8 scroll-fade-trigger scroll-fade-up">
         <div class="header-top flex flex-col gap-4">
           <div class="product-status flex items-center gap-4 scroll-fade-trigger scroll-fade-up scroll-fade-delay-1" role="status" aria-live="polite">
             {% if product.available != true %}
@@ -256,8 +256,8 @@
                       {% endif %}
                     </div>
                   </div>
-                  <div 
-                    id="size-chart-backdrop" 
+                  <div
+                    id="size-chart-backdrop"
                     class="fixed inset-0 bg-black/60 hidden z-[999]"
                     aria-hidden="true"
                   >&nbsp;</div>
@@ -277,7 +277,7 @@
       {%- endfor -%}
 
       <div
-        class="size-price-selector flex flex-col gap-6 text-[14px] font-medium scroll-fade-trigger scroll-fade-up scroll-fade-delay-5"
+        class="size-price-selector flex flex-col gap-6 text-[14px] font-medium scroll-fade-trigger scroll-fade-up scroll-fade-immediate"
         role="region"
         aria-label="Product options and purchase"
 >
@@ -325,7 +325,7 @@
         {%- for block in section.blocks -%}
           {%- if block.type == 'quantity_selector' -%}
 
-            <div class="flex justify-between items-center border-b border-gray-400 pb-4 scroll-fade-trigger scroll-fade-up scroll-fade-delay-3" {{ block.shopify_attributes }}>
+            <div class="flex justify-between items-center border-b border-gray-400 pb-4 scroll-fade-trigger scroll-fade-up scroll-fade-immediate" {{ block.shopify_attributes }}>
               <label for="quantityInput" class="font-medium uppercase">QUANTITY SELECTOR</label>
               <div
                 class="flex items-center justify-center py-1 border rounded overflow-hidden h-10"
@@ -352,10 +352,10 @@
                   aria-label="Current quantity"
                   >1</span
                 >
-                <input 
-                  type="hidden" 
-                  name="quantity" 
-                  id="quantityInput" 
+                <input
+                  type="hidden"
+                  name="quantity"
+                  id="quantityInput"
                   value="1"
                   aria-label="Product quantity"
                 >
@@ -384,7 +384,7 @@
           {% endunless %}
         {% endfor %}
         {% if variant_option %}
-          <div class="flex justify-between items-center gap-2">
+          <div class="flex justify-between items-center gap-2 scroll-fade-trigger scroll-fade-up scroll-fade-immediate">
             <span class="font-medium uppercase">SELECT {{ variant_option.name | upcase }}</span>
             <div class="flex gap-2 flex-wrap">
               {% for value in variant_option.values %}
@@ -432,13 +432,13 @@
         {% endif %}
 
         <!-- PRICE + ACTIONS -->
-        <div class="flex justify-between items-center border-t border-gray-400 pt-4 scroll-fade-trigger scroll-fade-up scroll-fade-delay-3" style="padding-top: 1rem;">
+        <div class="flex justify-between items-center border-t border-gray-400 pt-4 scroll-fade-trigger scroll-fade-up scroll-fade-immediate" style="padding-top: 1rem;">
           <!-- Price + Compare at Price -->
           <div class="text-[18px] flex flex-col" role="region" aria-labelledby="price-heading">
             <span id="price-heading" class="sr-only">Product pricing</span>
             <div class="flex items-center gap-2">
-              <span 
-                id="current-price" 
+              <span
+                id="current-price"
                 style="font-weight: {{section.settings.product_price_font_weight}};"
                 aria-label="Current price"
               >
@@ -481,7 +481,7 @@
           </div>
 
           <!-- Add to Cart -->
-          <div class="flex gap-2 flex-col scroll-fade-trigger scroll-fade-up scroll-fade-delay-4">
+          <div class="flex gap-2 flex-col scroll-fade-trigger scroll-fade-up scroll-fade-immediate">
             <div class="flex gap-2">
               {% if product.available %}
                 <!-- ADD TO CART form -->
@@ -1310,15 +1310,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function formatMoney(cents) {
     if (cents === null || cents === undefined || isNaN(cents)) return '';
-    
+
     try {
       const amount = (cents / 100).toFixed(2);
       const amountNoDecimals = Math.floor(cents / 100);
-      
+
       if (!moneyFormat || typeof moneyFormat !== 'string') {
         throw new Error('Invalid money format');
       }
-      
+
       let formatted = moneyFormat
         .replace(/\{\{\s*amount\s*\}\}/g, amount)
         .replace(/\{\{\s*amount_no_decimals\s*\}\}/g, amountNoDecimals)
@@ -1326,7 +1326,7 @@ document.addEventListener('DOMContentLoaded', () => {
         .replace(/\{\{\s*amount_no_decimals_with_comma_separator\s*\}\}/g, amountNoDecimals.toString())
         .replace(/\{\{\s*amount_with_space_separator\s*\}\}/g, amount.replace(/\B(?=(\d{3})+(?!\d))/g, ' '))
         .replace(/\{\{\s*amount_no_decimals_with_space_separator\s*\}\}/g, amountNoDecimals.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ' '));
-      
+
       return formatted;
     } catch (error) {
       console.warn('Shopify money format error, using fallback:', error);
@@ -1336,9 +1336,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function formatMoneyFallback(cents, currencyCode = shopCurrency) {
     if (cents === null || cents === undefined || isNaN(cents)) return '';
-    
+
     const amount = cents / 100;
-    
+
     try {
       return new Intl.NumberFormat('en-US', {
         style: 'currency',
@@ -1424,19 +1424,19 @@ document.addEventListener('DOMContentLoaded', () => {
   // URL Management Functions
   function updateURLWithVariant(variant) {
     if (!variant || !variant.id) return;
-    
+
     const url = new URL(window.location);
     url.searchParams.set('variant', variant.id);
-    
+
     // Update the URL without reloading the page
     window.history.replaceState({ variantId: variant.id }, '', url);
-    
+
     // Update canonical URL if it exists
     const canonicalLink = document.querySelector('link[rel="canonical"]');
     if (canonicalLink) {
       canonicalLink.href = url.href;
     }
-    
+
     // Dispatch custom event for analytics or other tracking
     window.dispatchEvent(new CustomEvent('variant:changed', {
       detail: { variant: variant, url: url.href }
@@ -1446,11 +1446,11 @@ document.addEventListener('DOMContentLoaded', () => {
   function initializeVariantFromURL() {
     const urlParams = new URLSearchParams(window.location.search);
     const variantId = urlParams.get('variant');
-    
+
     if (variantId) {
       // Find the variant by ID
       const variant = productVariants.find(v => v.id.toString() === variantId);
-      
+
       if (variant && variant.available) {
         // Update selected options based on the variant
         if (colorIndex >= 0) {
@@ -1462,10 +1462,10 @@ document.addEventListener('DOMContentLoaded', () => {
         if (mainOptionIndex >= 0) {
           selectedMainOption = variant[`option${mainOptionIndex + 1}`];
         }
-        
+
         // Update UI to reflect the selected variant
         updateUIForVariant(variant);
-        
+
         return true;
       }
     }
@@ -1481,17 +1481,17 @@ document.addEventListener('DOMContentLoaded', () => {
         document.querySelectorAll('.color-swatch').forEach(swatch => {
           swatch.classList.remove('ring-1', 'ring-offset-1', 'ring-black');
         });
-        
+
         // Add active styling to selected swatch
         colorSwatch.classList.add('ring-1', 'ring-offset-2', 'ring-black');
-        
+
         // Update color display
         document.querySelectorAll('[data-active-color]').forEach(display => {
           display.textContent = selectedColor;
         });
       }
     }
-    
+
     // Update size/option buttons
     if (selectedMainOption) {
       const sizeButton = document.querySelector(`[data-value="${selectedMainOption}"]`);
@@ -1500,12 +1500,12 @@ document.addEventListener('DOMContentLoaded', () => {
         document.querySelectorAll('.size-btn').forEach(btn => {
           btn.classList.remove('active', 'bg-black', 'text-white');
         });
-        
+
         // Add active styling to selected button
         sizeButton.classList.add('active', 'bg-black', 'text-white');
       }
     }
-    
+
     // Update price and availability
     updatePriceDisplay(variant, false);
     updatePriceDisplay(variant, true);
@@ -1527,7 +1527,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (mainOptionIndex >= 0) {
           selectedMainOption = variant[`option${mainOptionIndex + 1}`];
         }
-        
+
         // Update UI
         updateUIForVariant(variant);
         updateSizeAvailability();
@@ -1979,7 +1979,7 @@ document.addEventListener('DOMContentLoaded', () => {
     updateAddToCartButton(variant, true);
 
     updateSizeAvailability();
-    
+
     // Update URL with new variant
     if (variant && variant.available) {
       updateURLWithVariant(variant);
