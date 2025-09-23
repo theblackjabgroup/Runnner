@@ -1,13 +1,10 @@
-{{ 'scroll-animations.css' | asset_url | stylesheet_tag }}
-<script src="{{ 'scroll-animations.js' | asset_url }}" defer></script>
-
 <!-- Desktop view -->
 <section
   class="product-section color-{{ section.settings.color_scheme }} section-{{ section.id }}-padding hidden lg:!flex lg:flex-row gap-4 lg:gap-8 px-4 py-8"
   style="background-color: var(--background); color: var(--text);"
 >
   {%- comment -%} Left: Image Gallery {%- endcomment -%}
-  <div class="product-gallery w-1/2 scroll-fade-trigger">
+  <div class="product-gallery w-1/2">
     <div
       class="gallery-wrapper sticky top-[80px] h-[calc(100vh-80px)]"
       style="max-height: calc(100vh - 70px); overflow-y: auto; position: sticky; top: 70px;"
@@ -94,9 +91,9 @@
       style="height: calc(100vh - 70px); overflow-y: auto; position: sticky; top: 70px;"
     >
       {%- comment -%} Header {%- endcomment -%}
-      <div class="product-header w-[80%] space-y-8 scroll-fade-trigger scroll-fade-up">
+      <div class="product-header w-[80%] space-y-8">
         <div class="header-top flex flex-col gap-4">
-          <div class="product-status flex items-center gap-4 scroll-fade-trigger scroll-fade-up scroll-fade-delay-1">
+          <div class="product-status flex items-center gap-4">
             {% if product.available != true %}
               <span class="inline-flex items-center px-3 py-1 text-[14px] tracking-wider bg-black text-white uppercase rounded"
                 >Sold Out</span
@@ -104,7 +101,7 @@
             {% endif %}
           </div>
           <h1
-            class="text-[42px] pb-10 scroll-fade-trigger scroll-fade-up scroll-fade-delay-2"
+            class="text-[42px] pb-10"
             style="font-weight: {{section.settings.product_name_font_weight}};  padding-bottom: 10px;"
           >
             {{ product.title }}
@@ -113,7 +110,7 @@
           {%- comment -%} Product Variant {%- endcomment -%}
           {%- assign color_option = product.options_with_values | where: 'name', 'Color' | first -%}
           {%- if color_option and color_option.values.size > 0 -%}
-            <div class="product-variants my-4 scroll-fade-trigger scroll-fade-up scroll-fade-delay-3">
+            <div class="product-variants my-4">
               <div class="flex items-center gap-2">
                 <span class="inline-block text-[14px] font-medium">SELECT COLOR:</span>
                 <span class="active-color text-[14px] font-medium uppercase" data-active-color>
@@ -138,7 +135,7 @@
       </div>
 
       {% comment %} tabs  {% endcomment %}
-      <div class="product-tabs w-[80%] flex-1 overflow-hidden scroll-fade-trigger scroll-fade-up scroll-fade-delay-4">
+      <div class="product-tabs w-[80%] flex-1 overflow-hidden">
         <!-- Tab Navigation -->
         <div class="tabs-nav flex justify-evenly space-x-3 h-auto mt-2 w-full">
           {%- assign tab_index = 0 -%}
@@ -237,7 +234,7 @@
       {%- endfor -%}
 
       <div
-        class="size-price-selector flex flex-col gap-6 text-[14px] font-medium scroll-fade-trigger scroll-fade-up scroll-fade-delay-5"
+        class="size-price-selector flex flex-col gap-6 text-[14px] font-medium"
       >
         <!-- DELIVERY SECTION -->
         {%- for block in section.blocks -%}
@@ -282,7 +279,7 @@
         <!-- QUANTITY SELECTOR -->
         {%- for block in section.blocks -%}
           {%- if block.type == 'quantity_selector' -%}
-            <div class="flex justify-between items-center border-b border-gray-400 pb-4 scroll-fade-trigger scroll-fade-up scroll-fade-delay-3" {{ block.shopify_attributes }}>
+            <div class="flex justify-between items-center border-b border-gray-400 pb-4" {{ block.shopify_attributes }}>
               <span class="font-medium uppercase ">QUANTITY SELECTOR</span>
               <div
                 class="flex items-center justify-center py-1 border rounded overflow-hidden h-10"
@@ -375,7 +372,7 @@
         {% endif %}
 
         <!-- PRICE + ACTIONS -->
-        <div class="flex justify-between items-center border-t border-gray-400 pt-4 scroll-fade-trigger scroll-fade-up scroll-fade-delay-3" style="padding-top: 1rem;">
+        <div class="flex justify-between items-center border-t border-gray-400 pt-4" style="padding-top: 1rem;">
           <!-- Price + Compare at Price -->
           <div class="text-[18px]  flex flex-col">
             <div class="flex items-center gap-2">
@@ -415,7 +412,7 @@
           </div>
 
           <!-- Add to Cart -->
-          <div class="flex gap-2 flex-col scroll-fade-trigger scroll-fade-up scroll-fade-delay-4">
+          <div class="flex gap-2 flex-col">
             <div class="flex gap-2">
               {% if product.available %}
                 <!-- ADD TO CART form -->
@@ -1180,17 +1177,17 @@ document.addEventListener('DOMContentLoaded', () => {
   const productOptions = {{ product.options | json }};
   const productVariants = {{ product.variants | json }};
   const cartType = {{ settings.cart_type | default: "page" | json }};
-
-  const colorIndex = productOptions.findIndex(opt =>
+  
+  const colorIndex = productOptions.findIndex(opt => 
     opt.toLowerCase() === 'color' || opt.toLowerCase() === 'colour'
   );
-  const sizeIndex = productOptions.findIndex(opt =>
+  const sizeIndex = productOptions.findIndex(opt => 
     opt.toLowerCase() === 'size'
   );
-
-  const denominationIndex = productOptions.findIndex(opt =>
-    opt.toLowerCase().includes('denomination') ||
-    opt.toLowerCase().includes('value') ||
+  
+  const denominationIndex = productOptions.findIndex(opt => 
+    opt.toLowerCase().includes('denomination') || 
+    opt.toLowerCase().includes('value') || 
     opt.toLowerCase().includes('amount') ||
     opt.toLowerCase().includes('price')
   );
@@ -1203,11 +1200,11 @@ document.addEventListener('DOMContentLoaded', () => {
   } else {
     mainOptionIndex = productOptions.findIndex((opt, index) => index !== colorIndex);
   }
-
+  
   // State management
   let selectedColor = null;
   let selectedSize = null;
-  let selectedMainOption = null;
+  let selectedMainOption = null; 
 
   const firstVariant = productVariants.find(v => v.available) || productVariants[0];
   if (firstVariant) {
@@ -1227,7 +1224,7 @@ document.addEventListener('DOMContentLoaded', () => {
     document.body.style.overflow = 'hidden';
     document.body.style.touchAction = 'none';
   }
-
+  
   function unlockBodyScroll() {
     document.body.style.overflow = '';
     document.body.style.touchAction = '';
@@ -1238,10 +1235,10 @@ document.addEventListener('DOMContentLoaded', () => {
       const colorMatch = colorIndex >= 0 ? variant[`option${colorIndex + 1}`] === color : true;
       const sizeMatch = sizeIndex >= 0 ? variant[`option${sizeIndex + 1}`] === size : true;
       const mainOptionMatch = mainOptionIndex >= 0 ? variant[`option${mainOptionIndex + 1}`] === mainOption : true;
-
+      
       return colorMatch && sizeMatch && mainOptionMatch;
     });
-
+    
     return variant;
   }
 
@@ -1291,7 +1288,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Update cart count
         updateCartCount();
-
+        
         // Re-initialize cart drawer event listeners
         initializeCartDrawerEventListeners();
       })
@@ -1457,10 +1454,10 @@ document.addEventListener('DOMContentLoaded', () => {
     // Show loading state
     const buttons = document.querySelectorAll('#add-to-cart-btn, .mobile-add-to-cart-btn');
     const originalTexts = [];
-
+    
     buttons.forEach((btn, index) => {
-      if (btn.disabled) return;
-
+      if (btn.disabled) return; 
+      
       btn.disabled = true;
       const textEl = btn.querySelector('#add-to-cart-btn-text, #add-to-cart-btn-text-mobile');
       if (textEl) {
@@ -1611,7 +1608,7 @@ document.addEventListener('DOMContentLoaded', () => {
         comparePriceEl.classList.remove('hidden');
       }
       if (compareSeparatorEl) compareSeparatorEl.classList.remove('hidden');
-
+      
       if (savingsInfoEl) {
         const savings = variant.compare_at_price - variant.price;
         const percentage = Math.round((savings / variant.compare_at_price) * 100);
@@ -1656,7 +1653,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function updateSizeAvailability() {
     const sizeBtns = document.querySelectorAll('.size-btn');
-
+    
     sizeBtns.forEach(btn => {
       const optionValue = btn.getAttribute('data-value');
 
@@ -1666,17 +1663,17 @@ document.addEventListener('DOMContentLoaded', () => {
       } else {
         variant = findMatchingVariant(selectedColor, selectedSize, optionValue);
       }
-
+      
       // Remove existing unavailable styling and slash
       const existingSlash = btn.querySelector('.slash-unavailable');
       if (existingSlash) existingSlash.remove();
-
+      
       if (!variant || !variant.available) {
         btn.classList.add('cursor-not-allowed', 'unavailable-size');
-        btn.classList.remove('bg-black', 'text-white');
+        btn.classList.remove('bg-black', 'text-white'); 
         btn.disabled = true;
         btn.setAttribute('aria-disabled', 'true');
-
+        
         const slash = document.createElement('span');
         slash.className = 'slash-unavailable';
         btn.appendChild(slash);
@@ -1690,11 +1687,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function updateVariant() {
     const variant = findMatchingVariant();
-
+    
     // Update desktop
     updatePriceDisplay(variant, false);
     updateAddToCartButton(variant, false);
-
+    
     // Update mobile
     updatePriceDisplay(variant, true);
     updateAddToCartButton(variant, true);
@@ -1708,13 +1705,13 @@ document.addEventListener('DOMContentLoaded', () => {
     desktopAddToCartBtn.addEventListener('click', function(e) {
       e.preventDefault();
       e.stopPropagation();
-
+      
       if (this.disabled) return false;
-
+      
       const variantId = document.getElementById('variant-id')?.value;
-      const quantity = document.getElementById('quantityInput')?.value ||
+      const quantity = document.getElementById('quantityInput')?.value || 
                       document.getElementById('quantityDisplay')?.textContent || 1;
-
+      
       addToCart(variantId, quantity);
       return false;
     });
@@ -1726,13 +1723,13 @@ document.addEventListener('DOMContentLoaded', () => {
     mobileAddToCartBtn.addEventListener('click', function(e) {
       e.preventDefault();
       e.stopPropagation();
-
+      
       if (this.disabled) return false;
-
+      
       const variantId = document.querySelector('.mobile-variant-id')?.value;
-      const quantity = document.querySelector('.mobile-quantity-input')?.value ||
+      const quantity = document.querySelector('.mobile-quantity-input')?.value || 
                       document.querySelector('.mobile-quantity-display')?.textContent || 1;
-
+      
       addToCart(variantId, quantity);
       return false;
     });
@@ -1798,7 +1795,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const closeBtn = document.getElementById("close-size-chart");
   const drawer = document.getElementById("size-chart-drawer");
   const backdrop = document.getElementById("size-chart-backdrop");
-
+  
   if (openBtn && drawer && backdrop && closeBtn) {
     openBtn.addEventListener("click", () => {
       drawer.classList.remove("hidden");
@@ -1808,7 +1805,7 @@ document.addEventListener('DOMContentLoaded', () => {
       }, 20);
       lockBodyScroll();
     });
-
+  
     const closeDrawer = () => {
       drawer.classList.remove("open");
       backdrop.classList.add("hidden");
@@ -1817,10 +1814,10 @@ document.addEventListener('DOMContentLoaded', () => {
         drawer.classList.add("hidden");
       }, 400);
     };
-
+  
     closeBtn.addEventListener("click", closeDrawer);
     backdrop.addEventListener("click", closeDrawer);
-
+  
     document.addEventListener("keydown", (e) => {
       if (e.key === "Escape") {
         closeDrawer();
@@ -1886,7 +1883,7 @@ document.addEventListener('DOMContentLoaded', () => {
         showImage(i);
       });
     });
-
+    
     function showImage(index) {
       mobileImages.forEach((img, i) => {
         if (i === index) {
@@ -1905,7 +1902,7 @@ document.addEventListener('DOMContentLoaded', () => {
           img.style.pointerEvents = 'none';
         }
       });
-
+    
       thumbnails.forEach((thumb, i) => {
         if (i === index) {
           thumb.classList.add('active');
@@ -1964,7 +1961,7 @@ document.addEventListener('DOMContentLoaded', () => {
           }
         }
       });
-
+      
       stripImages.forEach((img, index) => {
         img.classList.toggle('active', index === targetIndex);
       });
@@ -2020,10 +2017,10 @@ document.addEventListener('DOMContentLoaded', () => {
       // Reset all tabs to inactive state
       tabButtons.forEach((btn) => {
         const btnBorderDiv = btn.querySelector(".tab-top-bar");
-
+        
         btn.classList.remove("active-tab");
         btn.style.color = "var(--secondary_text)";
-
+        
         if (btnBorderDiv) {
           btnBorderDiv.style.backgroundColor = "var(--secondary_text)";
         }
@@ -2032,7 +2029,7 @@ document.addEventListener('DOMContentLoaded', () => {
       // Set clicked tab to active state
       button.classList.add("active-tab");
       button.style.color = "var(--text)";
-
+      
       if (borderDiv) {
         borderDiv.style.backgroundColor = "var(--text)";
       }
@@ -2051,7 +2048,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Tab hover effects
     const borderDiv = button.querySelector(".tab-top-bar");
-
+    
     button.addEventListener("mouseenter", () => {
       if (!button.classList.contains("active-tab")) {
         button.style.color = "var(--text)";
@@ -2060,7 +2057,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
       }
     });
-
+    
     button.addEventListener("mouseleave", () => {
       if (!button.classList.contains("active-tab")) {
         button.style.color = "var(--secondary_text)";
@@ -2091,16 +2088,16 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // Add ring to selected swatch
-    swatch.offsetWidth;
+    swatch.offsetWidth; 
     swatch.classList.add('ring-1', 'ring-offset-2', 'ring-black');
 
     // Update color displays
     updateColorDisplays(newSelectedColor);
-
+    
     // Update selected color and variant
     selectedColor = newSelectedColor;
     lastSelectedColor = newSelectedColor;
-
+    
     swatch.blur();
     updateVariant();
   }
@@ -2131,14 +2128,14 @@ document.addEventListener('DOMContentLoaded', () => {
     sizeButtons.forEach((btn) => {
       btn.addEventListener('click', () => {
         if (btn.disabled) return;
-
+        
         const newSelectedValue = btn.getAttribute('data-value');
-
+        
         // Remove active styling from all size buttons
         sizeButtons.forEach((b) => {
           b.classList.remove('active', 'bg-black', 'text-white');
         });
-
+        
         // Add active styling to clicked button
         btn.classList.add('active', 'bg-black', 'text-white');
 
@@ -2149,7 +2146,7 @@ document.addEventListener('DOMContentLoaded', () => {
           // This is a denomination/value for gift cards
           selectedMainOption = newSelectedValue;
         }
-
+        
         // Force variant update
         updateVariant();
       });
@@ -2178,7 +2175,7 @@ document.addEventListener('DOMContentLoaded', () => {
       pickupDrawer.focus();
     }
   }
-
+  
   function closePickupDrawer() {
     var pickupDrawer = document.querySelector('pickup-availability-drawer');
     if (pickupDrawer) {
@@ -2186,7 +2183,7 @@ document.addEventListener('DOMContentLoaded', () => {
       document.body.classList.remove('overflow-hidden');
     }
   }
-
+  
   function pickupDrawerHandler(e) {
     var target = e.target;
     // Use closest to support event bubbling from child elements
@@ -2201,7 +2198,7 @@ document.addEventListener('DOMContentLoaded', () => {
       closePickupDrawer();
     }
   }
-
+  
   document.body.addEventListener('click', pickupDrawerHandler);
   document.body.addEventListener('touchend', pickupDrawerHandler, { passive: false });
 
