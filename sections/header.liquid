@@ -251,7 +251,7 @@
                         <!-- First set of content -->
                         {% for i in (1..section.settings.repeat_count) %}
                           <span class="scrolling-text-item">{{ section.settings.scrolling_text }}</span>
-                          {% if section.settings.separator_image != blank %}
+                          {% if section.settings.separator_image %}
                             <img
                               class="scrolling-separator"
                               src="{{ section.settings.separator_image | image_url }}"
@@ -260,7 +260,9 @@
                               width="100%"
                             >
                           {% else %}
-                            <span class=" text-[var(--header_text)] px-2">–</span>
+                          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-caret-right-fill" viewBox="0 0 16 16">
+  <path d="m12.14 8.753-5.482 4.796c-.646.566-1.658.106-1.658-.753V3.204a1 1 0 0 1 1.659-.753l5.48 4.796a1 1 0 0 1 0 1.506z"/>
+</svg>
                           {% endif %}
                         {% endfor %}
                         <!-- Duplicate set for seamless infinite scrolling -->
@@ -420,8 +422,15 @@
 
           
           <div class="bb-only-desktop">
-          {% render 'currency-dropdown' , position: "header" %}
-          </div> 
+            <localization-form class="small-hide medium-hide" data-prevent-hide>
+              {%- form 'localization', id: 'HeaderCountryForm', class: 'localization-form' -%}
+                <div>
+                  <h2 class="visually-hidden" id="HeaderCountryLabel">{{ 'localization.country_label' | t }}</h2>
+                  {%- render 'currency-dropdown', localPosition: 'HeaderCountry' -%}
+                </div>
+              {%- endform -%} 
+            </localization-form>          
+            </div> 
 
  
           <!-- Login -->
@@ -528,6 +537,7 @@ style="border-top: 1px solid rgb(var(--color-foreground)); border-bottom: 1px so
       <!-- First set of content -->
       {% for i in (1..section.settings.repeat_count) %}
         <span class="scrolling-text-item">{{ section.settings.scrolling_text }}</span>
+        {% if section.settings.separator_image %}
         <img
           class="scrolling-separator"
           src="{{ section.settings.separator_image | image_url }}"
@@ -535,18 +545,37 @@ style="border-top: 1px solid rgb(var(--color-foreground)); border-bottom: 1px so
           height="100%"
           width="100%"
         >
+        {% else %}
+        <img
+        class="scrolling-separator"
+        src="{{ 'caret-right-fill2.svg' | asset_url }}"
+        alt="separator"
+        height="100%"
+        width="100%"
+      >
+        {% endif %}
       {% endfor %}
       <!-- Duplicate set for seamless infinite scrolling -->
       {% for i in (1..section.settings.repeat_count) %}
         <span class="scrolling-text-item">{{ section.settings.scrolling_text }}</span>
         {% unless forloop.last %}
-          <img
+          {% if section.settings.separator_image %}
+            <img
+              class="scrolling-separator"
+              src="{{ section.settings.separator_image | image_url }}"
+              alt="separator"
+              height="100%"
+              width="100%"
+            >
+            {% else %}
+            <img
             class="scrolling-separator"
-            src="{{ section.settings.separator_image | image_url }}"
+            src="{{ 'caret-right-fill2.svg' | asset_url }}"
             alt="separator"
             height="100%"
             width="100%"
           >
+            {% endif %}
         {% endunless %}
       {% endfor %}
     </div>
@@ -766,7 +795,7 @@ style="border-top: 1px solid rgb(var(--color-foreground)); border-bottom: 1px so
           >
             {% assign current_country = localization.country %}
             <span class="" style="color: var(--header_text);">
-              {{ current_country.name }}
+              {{ current_country.name | upcase }}
             </span>
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-caret-right-fill" viewBox="0 0 16 16">
             <path d="m12.14 8.753-5.482 4.796c-.646.566-1.658.106-1.658-.753V3.204a1 1 0 0 1 1.659-.753l5.48 4.796a1 1 0 0 1 0 1.506z"/>
@@ -797,7 +826,7 @@ class="country-selector-dropdown absolute bottom-16 w-100 border border-gray-200
             ss
           </div>
         </div>
-
+<!--
         <a
           href="{{ routes.account_login_url }}"
          style="width: min-content; background: rgb(var(--color-foreground)); color: rgb(var(--color-background));"
@@ -819,6 +848,7 @@ class="country-selector-dropdown absolute bottom-16 w-100 border border-gray-200
             <path d="M1.1875 7.7334H7.6599M7.6599 7.7334V1.261M7.6599 7.7334L1.1875 1.261"/>
           </svg>
         </a>
+        -->
       </div>
       <div class="horizontal-line w-full h-0.5" style="background: var(--header_text)">&nbsp;</div>
       <div id="social-link-container" class="flex flex-wrap items-center justify-between gap-4 m-4">
