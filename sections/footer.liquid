@@ -1,6 +1,9 @@
 {{ 'section-footer.css' | asset_url | stylesheet_tag }}
 {{ 'component-newsletters.css' | asset_url | stylesheet_tag }}
 {{ 'footer.css' | asset_url | stylesheet_tag }}
+{{ 'scroll-animations.css' | asset_url | stylesheet_tag }}
+
+<script src="{{ 'scroll-animations.js' | asset_url }}" defer="defer"></script>
 
 {% style %}
 :root {
@@ -13,7 +16,7 @@
 {% endstyle %}
 
 <footer
-  class="color-{{ section.settings.color_scheme }}p-4 sm:px-6 md:px-8 md:py-8 relative overflow-hidden"
+  class="color-{{ section.settings.color_scheme }}p-4 sm:px-6 md:px-8 md:py-8 relative overflow-hidden scroll-fade-trigger scroll-fade-up"
   style="
     padding-top: {{ section.settings.padding_top }}px;
     padding-bottom: {{ section.settings.padding_bottom }}px;
@@ -35,10 +38,10 @@
   <!-- Footer Content -->
   <div class="footer-content">
     {% for block in section.blocks %}
-      <div class="w-full">
+      <div class="w-full footer-section scroll-fade-trigger scroll-fade-up" data-animation-index="{{ forloop.index0 }}">
         {% case block.type %}
           {% when 'email_signup' %}
-            <div class="email-signup-section" {{ block.shopify_attributes }}>
+            <div class="email-signup-section footer-block" {{ block.shopify_attributes }}>
               {% form 'customer', id: 'email-signup-form', class: 'email-signup-container newsletter-form' %}
                 <input type="hidden" name="contact[tags]" value="newsletter">
                 <input type="hidden" name="form_type" value="customer">
@@ -85,7 +88,7 @@
             </div>
 
           {% when 'support' %}
-            <div class="w-1/2 md:w-full flex pr-1 md:pr-2 mt-[0px] md:mt-[1%] justify-end desktop-ml-15">
+            <div class="w-1/2 md:w-full flex pr-1 md:pr-2 mt-[0px] md:mt-[1%] justify-end desktop-ml-15 footer-block">
               <div style="margin-left: 10px;" class="mb-6 w-[350px] md:max-w-[50%] custom-mr-25 md:ml-0" {{ block.shopify_attributes }}>
                 <p class="uppercase md:normal-case font-medium text-[14px] md:text-[24px] break-words text-left heading-font"
                    style="word-wrap: break-word; overflow-wrap: break-word; margin-bottom: 5px; margin-top: 2px; color: {{ section.settings.menu_item_color }}; line-height: normal;">
@@ -100,12 +103,12 @@
                <a href="mailto:{{ block.settings.email_address }}"
    class="relative mt-2 inline-block text-[16px] md:text-[24px] uppercase md:normal-case animated-underline break-words group body-font"
    style="word-wrap: break-word; overflow-wrap: break-word; margin-top: 15px; color: {{ section.settings.menu_item_color }};">
-  
+
   {{ block.settings.email_link_text }}
 
-  {{ 'icon-email.svg' 
-     | inline_asset_content 
-     | replace: '<svg', '<svg class="email-icon" role="img" aria-hidden="true" style="height: 20px; fill: ' 
+  {{ 'icon-email.svg'
+     | inline_asset_content
+     | replace: '<svg', '<svg class="email-icon" role="img" aria-hidden="true" style="height: 20px; fill: '
      | remove: "'" }}
 </a>
 
@@ -144,7 +147,7 @@
 
             <div class="flex flex-col md:flex-row justify-between items-start w-full" style="margin-left:15px">
               <!-- Menu Section -->
-              <nav class="menu-section w-full md:w-2/5 order-1 md:order-2 custom-nav-mr-25" aria-label="Footer Navigation">
+              <nav class="menu-section w-full md:w-2/5 order-1 md:order-2 custom-nav-mr-25 footer-block" aria-label="Footer Navigation">
                 <div class="flex flex-wrap justify-start md:justify-end" style="margin-left:-10px;">
                   <div style="padding-left: 10px;" class="flex flex-row flex-wrap justify-start md:justify-end custom-gap w-full mr-[20px] md:ml-0" {{ block.shopify_attributes }}>
                     {% for block in section.blocks %}
@@ -165,7 +168,7 @@
                     {% endfor %}
                   </div>
                 </div>
-                
+
                 <div class="mobile-social-icons" aria-labelledby="mobile-social-heading">
                   <h4 id="mobile-social-heading" class="sr-only">Follow Us</h4>
                   {%- if settings.social_instagram_link != blank -%}
@@ -202,7 +205,7 @@
               </nav>
 
               <!-- Logo Section -->
-              <div class="logo-container">
+              <div class="logo-container footer-block">
                 {% if section.settings.logo != blank %}
                   <img src="{{ section.settings.logo | img_url: 'master' }}" alt="{{ shop.name }}" width="760" height="150" loading="lazy">
                 {% else %}
@@ -216,8 +219,93 @@
   </div>
 </footer>
 
+<style>
+  /* Footer Fade-Up Animations */
+  .footer-section.scroll-fade-trigger {
+    opacity: 0;
+    transform: translateY(50px);
+    transition: opacity 0.8s ease, transform 0.8s ease;
+  }
+
+  .footer-section.scroll-fade-trigger.animate {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* Staggered delays for footer sections */
+  .footer-animated .footer-section:nth-child(1) {
+    transition-delay: 0s;
+  }
+  .footer-animated .footer-section:nth-child(2) {
+    transition-delay: 0.2s;
+  }
+  .footer-animated .footer-section:nth-child(3) {
+    transition-delay: 0.4s;
+  }
+  .footer-animated .footer-section:nth-child(4) {
+    transition-delay: 0.6s;
+  }
+
+  /* Smooth hover effects for footer elements */
+  .footer-block {
+    transition: transform 0.3s ease;
+  }
+
+  .footer-block:hover {
+    transform: translateY(-2px);
+  }
+
+  @media screen and (max-width: 768px) {
+    .footer-section.scroll-fade-trigger {
+      transform: translateY(30px);
+      transition: opacity 0.6s ease, transform 0.6s ease;
+    }
+
+    .footer-animated .footer-section:nth-child(n) {
+      transition-delay: calc(var(--index, 0) * 0.15s);
+    }
+  }
+
+  /* Accessibility - Respect reduced motion */
+  @media (prefers-reduced-motion: reduce) {
+    .footer-section.scroll-fade-trigger {
+      opacity: 1 !important;
+      transform: none !important;
+      transition: none !important;
+    }
+  }
+</style>
+
 <script>
-  document.addEventListener('DOMContentLoaded', function () {
+  // Custom Footer Fade-Up Animation
+  document.addEventListener('DOMContentLoaded', function() {
+    const footer = document.querySelector('.footer-animated');
+    if (!footer) return;
+
+    const footerSections = footer.querySelectorAll('.footer-section');
+
+    // Set initial state for all sections
+    footerSections.forEach((section, index) => {
+      section.style.opacity = '0';
+      section.style.transform = 'translateY(50px)';
+      section.style.transition = `opacity 0.8s ease ${index * 0.2}s, transform 0.8s ease ${index * 0.2}s`;
+    });
+
+    // Create intersection observer
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          // Trigger fade-up animation
+          entry.target.style.opacity = '1';
+          entry.target.style.transform = 'translateY(0)';
+
+          // Stop observing this element
+          observer.unobserve(entry.target);
+        }
+      });
+    }, {
+      rootMargin: '0px 0px -50px 0px',
+      threshold: 0.1
     const newsletterForm = document.getElementById('email-signup-form');
 
     if (newsletterForm) {
