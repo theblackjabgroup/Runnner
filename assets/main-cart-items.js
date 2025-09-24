@@ -217,7 +217,7 @@ function findVariantForOptions(itemKey, newColor, currentSize) {
   return new Promise((resolve, reject) => {
     // Get the product handle from the current item
     const cartItem = document.querySelector(`[data-item-key="${itemKey}"]`).closest('.cart-item');
-    const itemTitle = cartItem.querySelector('.item-title').textContent;
+    const itemTitle = cartItem.querySelector('.item-title-cart-page').textContent;
 
     // We need to fetch product data to find the correct variant
     // For now, we'll use the variant ID from the color picker

@@ -272,19 +272,54 @@
                                       <span class="option-label">COLOR:</span>
                                       <div class="color-options !ml-1">
                                         {%- assign available_colors = '' -%}
+                                        {%- assign current_size = '' -%}
+                                        {%- for option in item.options_with_values -%}
+                                          {%- if option.name == 'Size' -%}
+                                            {%- assign current_size = option.value -%}
+                                          {%- endif -%}
+                                        {%- endfor -%}
+
                                         {%- for variant in item.product.variants -%}
                                           {%- for i in (0..2) -%}
                                             {%- assign option_name = item.product.options[i] | downcase -%}
                                             {%- if option_name contains 'color' or option_name contains 'colour' -%}
                                               {%- assign color_value = variant.options[i] -%}
                                               {%- assign color_key = color_value | downcase | replace: ' ', '_' -%}
-                                              {%- unless available_colors contains color_key -%}
-                                                {%- assign available_colors = available_colors | append: color_key | append: ',' -%}
+                                              {%- assign color_delimiter = '|' | append: color_key | append: '|' -%}
+                                              {%- unless available_colors contains color_delimiter -%}
+                                                {%- assign available_colors = available_colors | append: color_delimiter -%}
+
+                                                {%- comment -%} Find variant that matches this color and current size {%- endcomment -%}
+                                                {%- assign target_variant_id = variant.id -%}
+                                                {%- if current_size != blank -%}
+                                                  {%- for size_variant in item.product.variants -%}
+                                                    {%- assign variant_matches = true -%}
+                                                    {%- for j in (0..2) -%}
+                                                      {%- assign check_option_name = item.product.options[j] | downcase -%}
+                                                      {%- if check_option_name contains 'color' or check_option_name contains 'colour' -%}
+                                                        {%- if size_variant.options[j] != color_value -%}
+                                                          {%- assign variant_matches = false -%}
+                                                        {%- endif -%}
+                                                      {%- elsif check_option_name contains 'size' -%}
+                                                        {%- if size_variant.options[j] != current_size -%}
+                                                          {%- assign variant_matches = false -%}
+                                                        {%- endif -%}
+                                                      {%- endif -%}
+                                                    {%- endfor -%}
+                                                    {%- if variant_matches -%}
+                                                      {%- assign target_variant_id = size_variant.id -%}
+                                                      {%- break -%}
+                                                    {%- endif -%}
+                                                  {%- endfor -%}
+                                                {%- endif -%}
+
                                                 <button
                                                   class="color-picker {{ color_key }} {% if color_value == current_color %}selected{% endif %}"
                                                   type="button"
                                                   data-color="{{ color_value }}"
-                                                  data-variant-id="{{ variant.id }}"
+                                                  data-variant-id="{{ target_variant_id }}"
+                                                  data-item-key="{{ item.key }}"
+                                                  data-current-size="{{ current_size }}"
                                                   aria-label="Select {{ color_value }} color"
                                                   style="width: 20px; height: 20px;"
                                                 ></button>
@@ -724,19 +759,54 @@
                                     <span class="option-label">COLOR:</span>
                                     <div class="color-options">
                                       {%- assign available_colors = '' -%}
+                                      {%- assign current_size = '' -%}
+                                      {%- for option in item.options_with_values -%}
+                                        {%- if option.name == 'Size' -%}
+                                          {%- assign current_size = option.value -%}
+                                        {%- endif -%}
+                                      {%- endfor -%}
+
                                       {%- for variant in item.product.variants -%}
                                         {%- for i in (0..2) -%}
                                           {%- assign option_name = item.product.options[i] | downcase -%}
                                           {%- if option_name contains 'color' or option_name contains 'colour' -%}
                                             {%- assign color_value = variant.options[i] -%}
                                             {%- assign color_key = color_value | downcase | replace: ' ', '_' -%}
-                                            {%- unless available_colors contains color_key -%}
-                                              {%- assign available_colors = available_colors | append: color_key | append: ',' -%}
+                                            {%- assign color_delimiter = '|' | append: color_key | append: '|' -%}
+                                            {%- unless available_colors contains color_delimiter -%}
+                                              {%- assign available_colors = available_colors | append: color_delimiter -%}
+
+                                              {%- comment -%} Find variant that matches this color and current size {%- endcomment -%}
+                                              {%- assign target_variant_id = variant.id -%}
+                                              {%- if current_size != blank -%}
+                                                {%- for size_variant in item.product.variants -%}
+                                                  {%- assign variant_matches = true -%}
+                                                  {%- for j in (0..2) -%}
+                                                    {%- assign check_option_name = item.product.options[j] | downcase -%}
+                                                    {%- if check_option_name contains 'color' or check_option_name contains 'colour' -%}
+                                                      {%- if size_variant.options[j] != color_value -%}
+                                                        {%- assign variant_matches = false -%}
+                                                      {%- endif -%}
+                                                    {%- elsif check_option_name contains 'size' -%}
+                                                      {%- if size_variant.options[j] != current_size -%}
+                                                        {%- assign variant_matches = false -%}
+                                                      {%- endif -%}
+                                                    {%- endif -%}
+                                                  {%- endfor -%}
+                                                  {%- if variant_matches -%}
+                                                    {%- assign target_variant_id = size_variant.id -%}
+                                                    {%- break -%}
+                                                  {%- endif -%}
+                                                {%- endfor -%}
+                                              {%- endif -%}
+
                                               <button
                                                 class="color-picker {{ color_key }} {% if color_value == current_color %}selected{% endif %}"
                                                 type="button"
                                                 data-color="{{ color_value }}"
-                                                data-variant-id="{{ variant.id }}"
+                                                data-variant-id="{{ target_variant_id }}"
+                                                data-item-key="{{ item.key }}"
+                                                data-current-size="{{ current_size }}"
                                                 aria-label="Select {{ color_value }} color"
                                               ></button>
                                             {%- endunless -%}

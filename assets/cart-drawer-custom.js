@@ -18,16 +18,16 @@ document.addEventListener('DOMContentLoaded', function () {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          note: note
+          note: note,
+        }),
+      })
+        .then((response) => response.json())
+        .then((data) => {
+          console.log('Cart note updated successfully');
         })
-      })
-      .then(response => response.json())
-      .then(data => {
-        console.log('Cart note updated successfully');
-      })
-      .catch(error => {
-        console.error('Error updating cart note:', error);
-      });
+        .catch((error) => {
+          console.error('Error updating cart note:', error);
+        });
     });
   }
 });
@@ -40,13 +40,13 @@ document.addEventListener('DOMContentLoaded', function () {
  */
 function changeItemColor(element, itemKey, newColor) {
   // Get cart items data from the global variable or fetch it
-  if (typeof cartItemsData === 'undefined') {
+  if (typeof window.cartItemsData === 'undefined') {
     console.error('Cart items data not available');
     return;
   }
 
   // Find the cart item data
-  const currentItem = cartItemsData.find(item => item.key === itemKey);
+  const currentItem = window.cartItemsData.find((item) => item.key === itemKey);
 
   if (!currentItem) {
     console.error('Item not found in cart');
@@ -74,7 +74,7 @@ function changeItemColor(element, itemKey, newColor) {
  * @returns {Object|null} The matching variant or null
  */
 function findVariantForOptions(product, currentOptions, changingOptionType, newValue) {
-  return product.variants.find(variant => {
+  return product.variants.find((variant) => {
     return variant.options.every((option, index) => {
       const optionName = product.options[index].toLowerCase();
 
@@ -82,7 +82,7 @@ function findVariantForOptions(product, currentOptions, changingOptionType, newV
         return option.toLowerCase() === newValue.toLowerCase();
       } else {
         // For other options, keep the current value
-        const currentOptionValue = Object.values(currentOptions)[index];
+        const currentOptionValue = currentOptions[index] ? currentOptions[index].value : null;
         return option === currentOptionValue;
       }
     });
@@ -103,31 +103,31 @@ function changeCartItemVariant(currentItem, newVariant) {
     },
     body: JSON.stringify({
       quantity: 0,
-      id: currentItem.variant.id
+      id: currentItem.variant.id,
+    }),
+  })
+    .then((response) => response.json())
+    .then(() => {
+      // Then add the new variant with the same quantity
+      return fetch('/cart/add.js', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          id: newVariant.id,
+          quantity: currentItem.quantity,
+        }),
+      });
     })
-  })
-  .then(response => response.json())
-  .then(() => {
-    // Then add the new variant with the same quantity
-    return fetch('/cart/add.js', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        id: newVariant.id,
-        quantity: currentItem.quantity
-      })
+    .then((response) => response.json())
+    .then(() => {
+      // Reload the page to reflect changes
+      window.location.reload();
+    })
+    .catch((error) => {
+      console.error('Error changing item variant:', error);
     });
-  })
-  .then(response => response.json())
-  .then(() => {
-    // Reload the page to reflect changes
-    window.location.reload();
-  })
-  .catch(error => {
-    console.error('Error changing item variant:', error);
-  });
 }
 
 /**
@@ -138,12 +138,12 @@ function changeCartItemVariant(currentItem, newVariant) {
  */
 function changeItemSize(element, itemKey, newSize) {
   // Get cart items data
-  if (typeof cartItemsData === 'undefined') {
+  if (typeof window.cartItemsData === 'undefined') {
     console.error('Cart items data not available');
     return;
   }
 
-  const currentItem = cartItemsData.find(item => item.key === itemKey);
+  const currentItem = window.cartItemsData.find((item) => item.key === itemKey);
 
   if (!currentItem) {
     console.error('Item not found in cart');
@@ -173,10 +173,10 @@ function initializeCartDrawer() {
   }
 
   // Add event listeners for size and color changes
-  document.addEventListener('click', function(e) {
+  document.addEventListener('click', function (e) {
     if (e.target.classList.contains('size-option')) {
       e.preventDefault();
-      const itemKey = e.target.closest('.cart-item').dataset.itemKey;
+      const itemKey = e.target.closest('.cart-drawer-item').dataset.itemKey;
       const newSize = e.target.dataset.size;
       if (itemKey && newSize) {
         changeItemSize(e.target, itemKey, newSize);
@@ -185,7 +185,7 @@ function initializeCartDrawer() {
 
     if (e.target.classList.contains('color-option')) {
       e.preventDefault();
-      const itemKey = e.target.closest('.cart-item').dataset.itemKey;
+      const itemKey = e.target.closest('.cart-drawer-item').dataset.itemKey;
       const newColor = e.target.dataset.color;
       if (itemKey && newColor) {
         changeItemColor(e.target, itemKey, newColor);

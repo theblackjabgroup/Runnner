@@ -1,38 +1,68 @@
 class CartDrawerColorSwatch {
   constructor() {
+    if (CartDrawerColorSwatch.instance) {
+      return CartDrawerColorSwatch.instance;
+    }
+
+    this.isInitialized = false;
+    this.boundHandlers = {
+      handleClick: this.handleClick.bind(this),
+      handleCartUpdate: this.handleCartUpdate.bind(this),
+    };
+
+    CartDrawerColorSwatch.instance = this;
     this.init();
   }
 
   init() {
+    if (this.isInitialized) {
+      return;
+    }
+
     this.bindEvents();
+    this.isInitialized = true;
   }
 
   bindEvents() {
+    // Remove existing listeners first to prevent duplicates
+    this.removeEvents();
+
     // Listen for color picker clicks
-    document.addEventListener('click', (e) => {
-      if (e.target.classList.contains('color-picker')) {
-        this.handleColorChange(e.target);
-      }
-    });
+    document.addEventListener('click', this.boundHandlers.handleClick);
 
     // Listen for cart drawer updates
-    document.addEventListener('cart:updated', () => {
-      this.updateColorSwatches();
-    });
+    document.addEventListener('cart:updated', this.boundHandlers.handleCartUpdate);
+  }
+
+  removeEvents() {
+    document.removeEventListener('click', this.boundHandlers.handleClick);
+    document.removeEventListener('cart:updated', this.boundHandlers.handleCartUpdate);
+  }
+
+  handleClick(e) {
+    if (e.target.classList.contains('color-picker')) {
+      this.handleColorChange(e.target);
+    }
+  }
+
+  handleCartUpdate() {
+    this.updateColorSwatches();
   }
 
   handleColorChange(colorButton) {
     const selectedColor = colorButton.dataset.color;
     const variantId = colorButton.dataset.variantId;
+    const itemKey = colorButton.dataset.itemKey;
+    const currentSize = colorButton.dataset.currentSize;
     const cartItem = colorButton.closest('tr');
     const currentVariantId = this.getCurrentVariantId(cartItem);
 
-    if (!selectedColor || !variantId || variantId === currentVariantId) {
+    if (!selectedColor || !variantId || !itemKey || variantId === currentVariantId) {
       return;
     }
 
     // Update the cart item with the new variant
-    this.updateCartItemVariant(cartItem, variantId, selectedColor);
+    this.updateCartItemVariant(cartItem, itemKey, variantId, selectedColor, currentSize);
   }
 
   getCurrentVariantId(cartItem) {
@@ -40,65 +70,63 @@ class CartDrawerColorSwatch {
     return quantityInput ? quantityInput.dataset.quantityVariantId : null;
   }
 
-  async updateCartItemVariant(cartItem, newVariantId, selectedColor) {
+  async updateCartItemVariant(cartItem, itemKey, newVariantId, selectedColor, currentSize) {
     const quantityInput = cartItem.querySelector('input[data-quantity-variant-id]');
     const currentQuantity = parseInt(quantityInput.value);
     const currentVariantId = quantityInput.dataset.quantityVariantId;
-    const lineIndex = quantityInput.dataset.index;
 
     try {
       // Show loading state
       this.showLoadingState(cartItem);
 
-      // Remove the old variant from cart
-      await this.removeFromCart(lineIndex);
-
-      // Add the new variant to cart
-      await this.addToCart(newVariantId, currentQuantity);
+      // Use cart change API to update the variant
+      await this.changeCartItemVariant(itemKey, newVariantId, currentQuantity);
 
       // Update the cart drawer
       await this.refreshCartDrawer();
 
+      // Update color swatch selection
+      this.updateColorSwatchSelection(cartItem, selectedColor);
     } catch (error) {
       console.error('Error updating cart item variant:', error);
       this.showError(cartItem, 'Failed to update color selection');
     }
   }
 
-  async removeFromCart(lineIndex) {
-    const formData = new FormData();
-    formData.append(`updates[${lineIndex - 1}]`, '0');
-
-    const response = await fetch('/cart/update', {
-      method: 'POST',
-      body: formData
-    });
-
-    if (!response.ok) {
-      throw new Error('Failed to remove item from cart');
-    }
-
-    return response.json();
-  }
-
-  async addToCart(variantId, quantity) {
-    const formData = new FormData();
-    formData.append('id', variantId);
-    formData.append('quantity', quantity);
-
-    const response = await fetch('/cart/add', {
+  async changeCartItemVariant(itemKey, newVariantId, quantity) {
+    // First remove the current item
+    const removeResponse = await fetch('/cart/change.js', {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
+        'Content-Type': 'application/json',
       },
-      body: new URLSearchParams(formData)
+      body: JSON.stringify({
+        id: itemKey,
+        quantity: 0,
+      }),
     });
 
-    if (!response.ok) {
-      throw new Error('Failed to add item to cart');
+    if (!removeResponse.ok) {
+      throw new Error('Failed to remove current variant from cart');
     }
 
-    return response.json();
+    // Then add the new variant
+    const addResponse = await fetch('/cart/add.js', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        id: newVariantId,
+        quantity: quantity,
+      }),
+    });
+
+    if (!addResponse.ok) {
+      throw new Error('Failed to add new variant to cart');
+    }
+
+    return addResponse.json();
   }
 
   async refreshCartDrawer() {
@@ -107,7 +135,7 @@ class CartDrawerColorSwatch {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
-      }
+      },
     });
 
     if (!response.ok) {
@@ -134,11 +162,24 @@ class CartDrawerColorSwatch {
     // Update color swatch selection states after cart updates
     const colorPickers = document.querySelectorAll('.color-picker');
 
-    colorPickers.forEach(picker => {
+    colorPickers.forEach((picker) => {
       const cartItem = picker.closest('tr');
       const currentColor = this.getCurrentItemColor(cartItem);
 
       if (picker.dataset.color === currentColor) {
+        picker.classList.add('selected');
+      } else {
+        picker.classList.remove('selected');
+      }
+    });
+  }
+
+  updateColorSwatchSelection(cartItem, selectedColor) {
+    // Update selection state for a specific cart item
+    const colorPickers = cartItem.querySelectorAll('.color-picker');
+
+    colorPickers.forEach((picker) => {
+      if (picker.dataset.color === selectedColor) {
         picker.classList.add('selected');
       } else {
         picker.classList.remove('selected');
@@ -206,7 +247,7 @@ class CartDrawerColorSwatch {
   getColorVariants(productId) {
     if (!window.cartItemsData) return [];
 
-    const cartItem = window.cartItemsData.find(item => item.product_id === productId);
+    const cartItem = window.cartItemsData.find((item) => item.product_id === productId);
     return cartItem ? cartItem.product.variants || [] : [];
   }
 
@@ -214,16 +255,12 @@ class CartDrawerColorSwatch {
   findVariantByColor(productId, colorValue, currentSize = null) {
     const variants = this.getColorVariants(productId);
 
-    return variants.find(variant => {
-      const hasMatchingColor = variant.options.some(option =>
-        option.toLowerCase() === colorValue.toLowerCase()
-      );
+    return variants.find((variant) => {
+      const hasMatchingColor = variant.options.some((option) => option.toLowerCase() === colorValue.toLowerCase());
 
       if (!currentSize) return hasMatchingColor;
 
-      const hasMatchingSize = variant.options.some(option =>
-        option.toLowerCase() === currentSize.toLowerCase()
-      );
+      const hasMatchingSize = variant.options.some((option) => option.toLowerCase() === currentSize.toLowerCase());
 
       return hasMatchingColor && hasMatchingSize;
     });
@@ -232,10 +269,25 @@ class CartDrawerColorSwatch {
 
 // Initialize the color swatch functionality when the DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
-  new CartDrawerColorSwatch();
+  CartDrawerColorSwatch.getInstance();
 });
 
 // Also initialize when the cart drawer is opened (for dynamic content)
 document.addEventListener('cart-drawer:open', () => {
-  new CartDrawerColorSwatch();
+  CartDrawerColorSwatch.getInstance();
+});
+
+// Static method to get singleton instance
+CartDrawerColorSwatch.getInstance = function () {
+  if (!CartDrawerColorSwatch.instance) {
+    new CartDrawerColorSwatch();
+  }
+  return CartDrawerColorSwatch.instance;
+};
+
+// Clean up on page unload
+window.addEventListener('beforeunload', () => {
+  if (CartDrawerColorSwatch.instance) {
+    CartDrawerColorSwatch.instance.removeEvents();
+  }
 });
