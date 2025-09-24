@@ -176,7 +176,7 @@ function initializeCartDrawer() {
   document.addEventListener('click', function (e) {
     if (e.target.classList.contains('size-option')) {
       e.preventDefault();
-      const itemKey = e.target.closest('.cart-drawer-item').dataset.itemKey;
+      const itemKey = e.target.dataset.itemKey;
       const newSize = e.target.dataset.size;
       if (itemKey && newSize) {
         changeItemSize(e.target, itemKey, newSize);
@@ -185,7 +185,7 @@ function initializeCartDrawer() {
 
     if (e.target.classList.contains('color-option')) {
       e.preventDefault();
-      const itemKey = e.target.closest('.cart-drawer-item').dataset.itemKey;
+      const itemKey = e.target.dataset.itemKey;
       const newColor = e.target.dataset.color;
       if (itemKey && newColor) {
         changeItemColor(e.target, itemKey, newColor);
