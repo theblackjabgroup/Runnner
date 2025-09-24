@@ -7,360 +7,39 @@
 
 {{ 'quantity-popover.css' | asset_url | stylesheet_tag }}
 {{ 'component-card.css' | asset_url | stylesheet_tag }}
+{{ 'cart-drawer.css' | asset_url | stylesheet_tag }}
 
 <script src="{{ 'cart.js' | asset_url }}" defer="defer"></script>
 <script src="{{ 'quantity-popover.js' | asset_url }}" defer="defer"></script>
+<script src="{{ 'cart-drawer-custom.js' | asset_url }}" defer="defer"></script>
+<script src="{{ 'cart-drawer-color-swatch.js' | asset_url }}" defer="defer"></script>
 
 <style>
-    .drawer__header2{
-        font-size:16px !important;}
-    .size-variant{
-        margin-top:10px !important;
-    }
-           .quantity__button:disabled {
-            cursor: not-allowed !important;
-            opacity: 0.5 !important;
-
-          }
-
-
-    .cart__empty-text{
-        font-size:24px !important;
-        text-transform: uppercase;
-        font-weight:500;
-    }
-    .svg-wrapper2{
-        font-weight:500;
-        transform: translateY(-1px);
-    }
-    .empty-cart-number{
-        border-bottom:1px solid var(--border);
-        padding-bottom:20px;
-    }
-        .item-image{
-        height:200px !important;
-    width:100%;}
-        .totals{
-        padding:10px 0 13px 0;}
-        .size-variant{
-            line-height:1.2;
-            font-size:14px !important;
-        }
-          .empty-cart-number{
-          margin-top:20px;
-      }
-          .drawer__close{
-              transform: translateY(-px);
-          }
-          .cart-drawer .cart-item > td + td{
-              padding-left:0 !important;
-          }
-          .drawer {
-            visibility: hidden;
-          }
-                .pricing-option{
-                padding:10px 0;}
-          .drawer__close{
-            right:-20px !important;
-          }
-          .svg-wrapper {
-            font-weight: 600;
-        font-size:20px}
-  .cart-item-padding{
-      padding-bottom:17px !important;
+  :root {
+    --scroll-speed: {{ settings.scroll_speed | default: 10 }}s;
   }
-          @media only screen and (max-width: 600px) {
-            .size-variant{
-        margin-top:0px !important;
-    }
-            .cart-item-padding{
-      padding-bottom:5px !important;
+
+  .vertical-text-cart-drawer .separator-image {
+    transform: rotate({{ 90 | plus: settings.vertical_scroll_image_rotation | default: 90 }}deg);
+    -webkit-transform: rotate({{ 90 | plus: settings.vertical_scroll_image_rotation | default: 90 }}deg);
+    -moz-transform: rotate({{ 90 | plus: settings.vertical_scroll_image_rotation | default: 90 }}deg);
+    -ms-transform: rotate({{ 90 | plus: settings.vertical_scroll_image_rotation | default: 90 }}deg);
   }
-                  .pricing-option input[type='radio']:checked::before {
-            content: '';
-            display: block;
-            width: 8px;
-            height: 9px;
-            background: var(--text);
-            border-radius: 50%;
-            position: absolute;
-            top: 0.10rem !important; /* Center the dot vertically */
-            left: 0.147rem;
-          }
-              .cart__ctas{
-              text-align:right !important; }
-              .item-price,.item-title{
-              font-size:14px;}
-              .item-title {
-            line-height:0.8 !important; }
-            .item-image{
-            width:85px !important;
-        height:102px}
-            .vertical-text-cart-drawer-container {
-              width: 25px !important;
-            }
-            .vertical-text-cart-drawer {
-              font-size: 15px !important;
-              padding: 0px 0 !important;
-              height: 15px;
-              margin-top: -7.5px; /* Half of mobile font-size for centering */
-            }
-          }
-          .vertical-text-cart-drawer-container {
-            position: fixed;
-            left: 0px;
-            top: 0;
-            bottom: 0;
-            line-height: 1.2;
-            width: 30px;
-            overflow: hidden;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border: 1px solid var(--text);
-            z-index: 10;
-          }
 
-          .vertical-text-cart-drawer {
-            position: absolute;
-            /* Edge-compatible vertical text approach */
-            width: 100vh;
-            height: 24px;
-            transform: rotate(-90deg);
-            -webkit-transform: rotate(-90deg);
-            -moz-transform: rotate(-90deg);
-            -ms-transform: rotate(-90deg);
-            transform-origin: center center;
-            -webkit-transform-origin: center center;
-            -moz-transform-origin: center center;
-            -ms-transform-origin: center center;
-            /* Animation with vendor prefixes */
-            animation: scrollTextHorizontal {{ settings.scroll_speed }}s linear infinite !important;
-            -webkit-animation: scrollTextHorizontal {{ settings.scroll_speed }}s linear infinite !important;
-            -moz-animation: scrollTextHorizontal {{ settings.scroll_speed }}s linear infinite !important;
-            color: var(--text) !important;
-            font-size: 24px;
-            white-space: nowrap;
-            font-weight: 500;
-            text-align: center;
-            display: flex;
-            align-items: center;
-            justify-content: flex-start;
-            left: 50%;
-            top: 50%;
-            margin-left: -50vh;
-            margin-top: -12px;
-          }
-
-          .vertical-text-cart-drawer:nth-child(2) {
-            animation: scrollTextHorizontal2 {{ settings.scroll_speed }}s linear infinite !important;
-            -webkit-animation: scrollTextHorizontal2 {{ settings.scroll_speed }}s linear infinite !important;
-            -moz-animation: scrollTextHorizontal2 {{ settings.scroll_speed }}s linear infinite !important;
-            animation-delay: calc(-{{ settings.scroll_speed }}s / 2);
-            /* Offset the second element to prevent overlap */
-            margin-top: -100vh; /* Move it up to create separation */
-          }          .vertical-text-cart-drawer .separator-image {
-            width: 20px;
-            height: 20px;
-            object-fit: contain;
-            margin: 0 10px; /* Increased margin for better spacing */
-            display: inline-block;
-            vertical-align: middle;
-            /* Rotate image to counteract parent rotation + additional rotation */
-            transform: rotate({{ 90 | plus: settings.vertical_scroll_image_rotation | default: 90 }}deg);
-            -webkit-transform: rotate({{ 90 | plus: settings.vertical_scroll_image_rotation | default: 90 }}deg);
-            -moz-transform: rotate({{ 90 | plus: settings.vertical_scroll_image_rotation | default: 90 }}deg);
-            -ms-transform: rotate({{ 90 | plus: settings.vertical_scroll_image_rotation | default: 90 }}deg);
-            flex-shrink: 0; /* Prevent image from shrinking */
-          }
-
-          @media only screen and (max-width: 600px) {
-               .drawer__header2{
-        font-size:12px !important;}
-            .vertical-text-cart-drawer .separator-image {
-              width: 15px;
-              height: 15px;
-              transform: rotate({{ 90 | plus: settings.vertical_scroll_image_rotation | default: 90 }}deg);
-              -webkit-transform: rotate({{ 90 | plus: settings.vertical_scroll_image_rotation | default: 90 }}deg);
-              -moz-transform: rotate({{ 90 | plus: settings.vertical_scroll_image_rotation | default: 90 }}deg);
-              -ms-transform: rotate({{ 90 | plus: settings.vertical_scroll_image_rotation | default: 90 }}deg);
-              margin: 0 8px; /* Adjusted for mobile */
-            }
-            .vertical-text-cart-drawer-container {
-              width: 25px !important;
-            }
-            .vertical-text-cart-drawer {
-              font-size: 15px !important;
-              padding: 0px 0 !important;
-              height: 15px;
-              margin-top: -7.5px; /* Half of mobile font-size for centering */
-            }
-            .vertical-text-cart-drawer:nth-child(2) {
-              margin-top: -22.5px; /* Adjusted for mobile to prevent overlap */
-            }
-          }
-
-          /* Edge-compatible horizontal scrolling keyframes */
-          @keyframes scrollTextHorizontal {
-            0% {
-              transform: rotate(-90deg) translateX(0);
-              -webkit-transform: rotate(-90deg) translateX(0);
-              -moz-transform: rotate(-90deg) translateX(0);
-              -ms-transform: rotate(-90deg) translateX(0);
-            }
-            100% {
-              transform: rotate(-90deg) translateX(-100%);
-              -webkit-transform: rotate(-90deg) translateX(-100%);
-              -moz-transform: rotate(-90deg) translateX(-100%);
-              -ms-transform: rotate(-90deg) translateX(-100%);
-            }
-          }
-
-          @-webkit-keyframes scrollTextHorizontal {
-            0% {
-              -webkit-transform: rotate(-90deg) translateX(0);
-            }
-            100% {
-              -webkit-transform: rotate(-90deg) translateX(-100%);
-            }
-          }
-
-          @keyframes scrollTextHorizontal2 {
-            0% {
-              transform: rotate(-90deg) translateX(100%);
-              -webkit-transform: rotate(-90deg) translateX(100%);
-              -moz-transform: rotate(-90deg) translateX(100%);
-              -ms-transform: rotate(-90deg) translateX(100%);
-            }
-            100% {
-              transform: rotate(-90deg) translateX(0);
-              -webkit-transform: rotate(-90deg) translateX(0);
-              -moz-transform: rotate(-90deg) translateX(0);
-              -ms-transform: rotate(-90deg) translateX(0);
-            }
-          }
-
-          @-webkit-keyframes scrollTextHorizontal2 {
-            0% {
-              -webkit-transform: rotate(-90deg) translateX(100%);
-            }
-            100% {
-              -webkit-transform: rotate(-90deg) translateX(0);
-            }
-          }
-
-          /* Hide the default radio */
-          .pricing-option [type='radio'] {
-            -webkit-appearance: none;
-            background-color: var(--background);
-            border: 2px solid var(--text);
-            width: 15px;
-            height: 15px;
-            border-radius: 50%;
-            position: relative;
-            outline: none;
-            cursor: pointer;
-            margin-right: 10px;
-            transition: border-color 0.2s;
-            vertical-align: middle;
-            box-sizing: border-box;
-          }
-
-          /* Only show the black dot when checked */
-          .pricing-option input[type='radio']:checked::before {
-            content: '';
-            display: block;
-            width: 8px;
-            height: 9px;
-            background: var(--text);
-            border-radius: 50%;
-            position: absolute;
-            top: 0.13rem; /* Center the dot vertically */
-            left: 0.147rem;
-          }
-
-          /* Optional: focus state */
-          .pricing-option input[type='radio']:focus {
-            box-shadow: 0 0 0 2px var(--text);
-          }
-
-          /* Quantity button hover effects */
-          .quantity__button:hover {
-            background-color: var(--text) !important;
-            color: var(--background) !important;
-          }
-
-          .quantity__button {
-            color: var(--text) !important;
-            background-color: var(--background) !important;
-            border-color: var(--text) !important;
-          }
-
-          .quantity__input {
-            color: var(--text) !important;
-            background-color: var(--background) !important;
-            border-color: var(--text) !important;
-          }
-
-          .quantity {
-            border-color: var(--text) !important;
-          }
-
-          /* New Checkout button with background animation */
-          #CartDrawer-Checkout {
-            position: relative;
-            overflow: hidden;
-            background-color: var(--secondary_button_label) !important;
-            color: var(--secondary_button_text_color) !important;
-            height: 35px !important;
-            min-width: 210px !important;
-            border:1px solid var(--secondary_button_text_color) !important;
-            transition: color 0.3s ease, border-color 0.3s ease;
-          }
-
-          #CartDrawer-Checkout::before {
-            content: '';
-            position: absolute;
-            top: 1px;
-            left: -100%;
-            width: calc(100% - 2px);
-            height: calc(100% - 2px);
-            background-color: var(--hovered_secondary_button_label);
-            transition: left 0.3s ease;
-            z-index: 1;
-          }
-
-          #CartDrawer-Checkout:hover::before {
-            left: 1px;
-          }
-
-          #CartDrawer-Checkout:hover {
-            color: var(--hovered_secondary_button_text_color) !important;
-            border-color: var(--secondary_button_text_color) !important;
-          }
-
-          #CartDrawer-Checkout:hover svg path {
-            stroke: var(--hovered_secondary_button_text_color) !important;
-          }
-
-          #CartDrawer-Checkout svg path {
-            stroke: var(--secondary_button_text_color) !important;
-            transition: stroke 0.3s ease;
-          }
-
-          #CartDrawer-Checkout .checkout-content {
-            position: relative;
-            z-index: 2;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-          }
-
-          .button {
-            min-height: unset !important;
-          }
+  @media only screen and (max-width: 600px) {
+    .vertical-text-cart-drawer .separator-image {
+      transform: rotate({{ 90 | plus: settings.vertical_scroll_image_rotation | default: 90 }}deg);
+      -webkit-transform: rotate({{ 90 | plus: settings.vertical_scroll_image_rotation | default: 90 }}deg);
+      -moz-transform: rotate({{ 90 | plus: settings.vertical_scroll_image_rotation | default: 90 }}deg);
+      -ms-transform: rotate({{ 90 | plus: settings.vertical_scroll_image_rotation | default: 90 }}deg);
+    }
+  }
 </style>
+
+<script>
+  // Make cart items data available to external scripts
+  window.cartItemsData = {{ cart.items | json }};
+</script>
 
 <cart-drawer class="drawer {% if cart == empty %} is-empty{% endif %}">
   <div id="CartDrawer" class="cart-drawer">
@@ -518,7 +197,7 @@
                     {%- for item in cart.items -%}
                       <tr
                         id="CartDrawer-Item-{{ item.index | plus: 1 }}"
-                        class="!flex !items-start cart-item-padding !border-b cart-item"
+                        class="!flex !items-start cart-item-padding !border-b cart-drawer-item"
                         role="row"
                       >
                         <!-- Product Image -->
@@ -529,7 +208,7 @@
                         >
                           {% if item.image %}
                             <img
-                              class="  item-image"
+                              class="  item-image-cart-drawer"
                               src="{{ item.image | image_url: width: 300 }}"
                               alt="{{ item.image.alt | escape }}"
                               loading="lazy"
@@ -543,26 +222,26 @@
                         <td class="!flex-1 !flex !flex-col !h-full " role="cell">
                           <!-- Top Row: Title and Price -->
                           <div class="!flex !justify-between !items-start !mb-[auto]">
-                            <div class="!flex !flex-col">
+                            <div class="!flex !flex-col ml-4">
                               <div
-                                class=" !text-[14px]"
-                                style="color: var(--text); padding:0 0 5px 0 !important;"
+                                class=" "
+                                style="color: var(--text); font-size:13px;"
                               >
                                 ${{ item.final_price | money_without_currency }}
                               </div>
                               <div class="!flex-col !gap-2 ">
                                 <a
                                   href="{{ item.url }}"
-                                  class="item-title !uppercase  !font-medium !mb-2"
+                                  class="item-title-cart-drawer !uppercase  !font-medium !mb-2"
                                   style="color: var(--text);"
                                 >
                                   {{- item.product.title | escape -}}
                                 </a>
                                 {%- for option in item.options_with_values -%}
                                   {%- if option.name == 'Size' -%}
-                                    <div class="!text-[12px] !uppercase" style="color: var(--text); size-selector">
+                                    <div class=" !uppercase" style="color: var(--text); font-size:12px; size-selector ">
                                       SIZE:
-                                      <span style="background-color: var(--button); padding:2px 5px; border-radius:3px;">
+                                      <span style="background-color: var(--button); padding:2px 5px; border-radius:3px; font-size:12px;">
                                         {{- option.value -}}
                                       </span>
                                     </div>
@@ -581,22 +260,73 @@
                                 {%- endfor -%}
 
                                 {%- comment -%} Color Swatch Section {%- endcomment -%}
-                                {%- assign color_option_found = false -%}
                                 {%- assign current_color = '' -%}
                                 {%- for option in item.options_with_values -%}
                                   {%- assign option_name_lower = option.name | downcase -%}
                                   {%- if option_name_lower contains 'color' or option_name_lower contains 'colour' -%}
-                                    {%- assign color_option_found = true -%}
                                     {%- assign current_color = option.value -%}
                                     <div
-                                      class="!text-[12px] !uppercase !mt-2 !flex !items-center"
-                                      style="color: var(--text);"
+                                      class="option-row !uppercase !mt-2 !flex !items-center"
+                                      style="color: var(--text); font-size: 12px;"
                                     >
-                                      COLOR:
-                                      <div style="width: 20px !important; height: 20px !important; border-radius: 50% !important; border: 1px solid #000 !important; cursor: pointer !important; display: inline-block !important; margin-left: 4px !important; padding: 2px !important; background: var(--background) !important;">
-                                        <div
-                                          style="width: 100% !important; height: 100% !important; border-radius: 50% !important; background: {{ current_color | downcase }} !important;"
-                                        ></div>
+                                      <span class="option-label">COLOR:</span>
+                                      <div class="color-options !ml-1">
+                                        {%- assign available_colors = '' -%}
+                                        {%- assign current_size = '' -%}
+                                        {%- for option in item.options_with_values -%}
+                                          {%- if option.name == 'Size' -%}
+                                            {%- assign current_size = option.value -%}
+                                          {%- endif -%}
+                                        {%- endfor -%}
+
+                                        {%- for variant in item.product.variants -%}
+                                          {%- for i in (0..2) -%}
+                                            {%- assign option_name = item.product.options[i] | downcase -%}
+                                            {%- if option_name contains 'color' or option_name contains 'colour' -%}
+                                              {%- assign color_value = variant.options[i] -%}
+                                              {%- assign color_key = color_value | downcase | replace: ' ', '_' -%}
+                                              {%- assign color_delimiter = '|' | append: color_key | append: '|' -%}
+                                              {%- unless available_colors contains color_delimiter -%}
+                                                {%- assign available_colors = available_colors | append: color_delimiter -%}
+
+                                                {%- comment -%} Find variant that matches this color and current size {%- endcomment -%}
+                                                {%- assign target_variant_id = variant.id -%}
+                                                {%- if current_size != blank -%}
+                                                  {%- for size_variant in item.product.variants -%}
+                                                    {%- assign variant_matches = true -%}
+                                                    {%- for j in (0..2) -%}
+                                                      {%- assign check_option_name = item.product.options[j] | downcase -%}
+                                                      {%- if check_option_name contains 'color' or check_option_name contains 'colour' -%}
+                                                        {%- if size_variant.options[j] != color_value -%}
+                                                          {%- assign variant_matches = false -%}
+                                                        {%- endif -%}
+                                                      {%- elsif check_option_name contains 'size' -%}
+                                                        {%- if size_variant.options[j] != current_size -%}
+                                                          {%- assign variant_matches = false -%}
+                                                        {%- endif -%}
+                                                      {%- endif -%}
+                                                    {%- endfor -%}
+                                                    {%- if variant_matches -%}
+                                                      {%- assign target_variant_id = size_variant.id -%}
+                                                      {%- break -%}
+                                                    {%- endif -%}
+                                                  {%- endfor -%}
+                                                {%- endif -%}
+
+                                                <button
+                                                  class="color-picker {{ color_key }} {% if color_value == current_color %}selected{% endif %}"
+                                                  type="button"
+                                                  data-color="{{ color_value }}"
+                                                  data-variant-id="{{ target_variant_id }}"
+                                                  data-item-key="{{ item.key }}"
+                                                  data-current-size="{{ current_size }}"
+                                                  aria-label="Select {{ color_value }} color"
+                                                  style="width: 20px; height: 20px;"
+                                                ></button>
+                                              {%- endunless -%}
+                                            {%- endif -%}
+                                          {%- endfor -%}
+                                        {%- endfor -%}
                                       </div>
                                     </div>
                                     {%- break -%}
@@ -617,7 +347,7 @@
                               <quantity-popover>
                                 <div class="cart-item__quantity-wrapper quantity-popover-wrapper ">
                                   <div class="quantity-popover-container{% if has_qty_rules or has_vol_pricing %} quantity-popover-container--hover{% endif %}">
-                                    <quantity-input class="quantity cart-quantity !border !rounded-lg">
+                                    <quantity-input class="quantity cart-quantity  !rounded-lg">
                                       <button
                                         class="quantity__button"
                                         name="minus"
@@ -815,7 +545,7 @@
                         >
                           {% if item.image %}
                             <img
-                              class=" item-image"
+                              class=" item-image-cart-drawer"
                               src="{{ item.image | image_url: width: 300 }}"
                               alt="{{ item.image.alt | escape }}"
                               loading="lazy"
@@ -843,7 +573,7 @@
                               <quantity-popover>
                                 <div class="cart-item__quantity-wrapper quantity-popover-wrapper ">
                                   <div class="quantity-popover-container{% if has_qty_rules or has_vol_pricing %} quantity-popover-container--hover{% endif %}">
-                                    <quantity-input class="quantity cart-quantity !border !rounded-lg">
+                                    <quantity-input class="quantity cart-quantity  !rounded-lg">
                                       <button
                                         class="quantity__button"
                                         name="minus"
@@ -995,7 +725,7 @@
                             <div class="!flex-col !gap-2">
                               <a
                                 href="{{ item.url }}"
-                                class="!text-[16px] !uppercase  !font-medium !mb-2 item-title"
+                                class="!text-[16px] !uppercase  !font-medium !mb-2 item-title-cart-drawer"
                                 style="color: var(--text);"
                               >
                                 {{- item.product.title | escape -}}
@@ -1020,21 +750,70 @@
                               {%- endfor -%}
 
                               {%- comment -%} Color Swatch Section {%- endcomment -%}
-                              {%- assign color_option_found = false -%}
                               {%- assign current_color = '' -%}
                               {%- for option in item.options_with_values -%}
                                 {%- assign option_name_lower = option.name | downcase -%}
                                 {%- if option_name_lower contains 'color' or option_name_lower contains 'colour' -%}
-                                  {%- assign color_option_found = true -%}
                                   {%- assign current_color = option.value -%}
-                                  <div
-                                    class="!uppercase size-variant !mt-2 !flex !items-center"
-                                    style="color: var(--text);"
-                                  >
-                                    COLOR:
-                                    <div
-                                      style="width: 20px !important; height: 20px !important; border-radius: 50% !important; border: 2px solid #000 !important; box-shadow: inset 0 0 0 2px var(--background) !important; cursor: pointer !important; display: inline-block !important; margin-left: 4px !important; background: {{ current_color | downcase }} !important;"
-                                    ></div>
+                                  <div class="option-row !uppercase size-variant !mt-2">
+                                    <span class="option-label">COLOR:</span>
+                                    <div class="color-options">
+                                      {%- assign available_colors = '' -%}
+                                      {%- assign current_size = '' -%}
+                                      {%- for option in item.options_with_values -%}
+                                        {%- if option.name == 'Size' -%}
+                                          {%- assign current_size = option.value -%}
+                                        {%- endif -%}
+                                      {%- endfor -%}
+
+                                      {%- for variant in item.product.variants -%}
+                                        {%- for i in (0..2) -%}
+                                          {%- assign option_name = item.product.options[i] | downcase -%}
+                                          {%- if option_name contains 'color' or option_name contains 'colour' -%}
+                                            {%- assign color_value = variant.options[i] -%}
+                                            {%- assign color_key = color_value | downcase | replace: ' ', '_' -%}
+                                            {%- assign color_delimiter = '|' | append: color_key | append: '|' -%}
+                                            {%- unless available_colors contains color_delimiter -%}
+                                              {%- assign available_colors = available_colors | append: color_delimiter -%}
+
+                                              {%- comment -%} Find variant that matches this color and current size {%- endcomment -%}
+                                              {%- assign target_variant_id = variant.id -%}
+                                              {%- if current_size != blank -%}
+                                                {%- for size_variant in item.product.variants -%}
+                                                  {%- assign variant_matches = true -%}
+                                                  {%- for j in (0..2) -%}
+                                                    {%- assign check_option_name = item.product.options[j] | downcase -%}
+                                                    {%- if check_option_name contains 'color' or check_option_name contains 'colour' -%}
+                                                      {%- if size_variant.options[j] != color_value -%}
+                                                        {%- assign variant_matches = false -%}
+                                                      {%- endif -%}
+                                                    {%- elsif check_option_name contains 'size' -%}
+                                                      {%- if size_variant.options[j] != current_size -%}
+                                                        {%- assign variant_matches = false -%}
+                                                      {%- endif -%}
+                                                    {%- endif -%}
+                                                  {%- endfor -%}
+                                                  {%- if variant_matches -%}
+                                                    {%- assign target_variant_id = size_variant.id -%}
+                                                    {%- break -%}
+                                                  {%- endif -%}
+                                                {%- endfor -%}
+                                              {%- endif -%}
+
+                                              <button
+                                                class="color-picker {{ color_key }} {% if color_value == current_color %}selected{% endif %}"
+                                                type="button"
+                                                data-color="{{ color_value }}"
+                                                data-variant-id="{{ target_variant_id }}"
+                                                data-item-key="{{ item.key }}"
+                                                data-current-size="{{ current_size }}"
+                                                aria-label="Select {{ color_value }} color"
+                                              ></button>
+                                            {%- endunless -%}
+                                          {%- endif -%}
+                                        {%- endfor -%}
+                                      {%- endfor -%}
+                                    </div>
                                   </div>
                                   {%- break -%}
                                 {%- endif -%}
@@ -1122,108 +901,3 @@
     </div>
   </div>
 </cart-drawer>
-<script>
-  document.addEventListener('DOMContentLoaded', function () {
-    // Order note functionality
-    var orderNoteTextarea = document.getElementById('CartDrawer-Note');
-
-    if (orderNoteTextarea) {
-      orderNoteTextarea.addEventListener('blur', function () {
-        var note = this.value;
-
-        // Update cart note via AJAX
-        fetch('/cart/update.js', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            note: note
-          })
-        })
-        .then(response => response.json())
-        .then(data => {
-          console.log('Cart note updated successfully');
-        })
-        .catch(error => {
-          console.error('Error updating cart note:', error);
-        });
-      });
-    }
-  });
-
-  // Color changing functionality for cart drawer
-  function changeItemColor(element, itemKey, newColor) {
-    // Find the cart item data
-    const cartItems = {{ cart.items | json }};
-    const currentItem = cartItems.find(item => item.key === itemKey);
-
-    if (!currentItem) {
-      console.error('Item not found in cart');
-      return;
-    }
-
-    // Find the variant that matches the new color and other current options
-    const targetVariant = findVariantForOptions(currentItem.product, currentItem.options_with_values, 'color', newColor);
-
-    if (!targetVariant) {
-      console.error('No variant found for color:', newColor);
-      return;
-    }
-
-    // Change the cart item to the new variant
-    changeCartItemVariant(currentItem, targetVariant);
-  }
-
-  function findVariantForOptions(product, currentOptions, changingOptionType, newValue) {
-    return product.variants.find(variant => {
-      return variant.options.every((option, index) => {
-        const optionName = product.options[index].toLowerCase();
-
-        if (optionName.includes(changingOptionType)) {
-          return option.toLowerCase() === newValue.toLowerCase();
-        } else {
-          // For other options, keep the current value
-          const currentOptionValue = Object.values(currentOptions)[index];
-          return option === currentOptionValue;
-        }
-      });
-    });
-  }
-
-  function changeCartItemVariant(currentItem, newVariant) {
-    // First remove the current item
-    fetch('/cart/change.js', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        quantity: 0,
-        id: currentItem.variant.id
-      })
-    })
-    .then(response => response.json())
-    .then(() => {
-      // Then add the new variant with the same quantity
-      return fetch('/cart/add.js', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          id: newVariant.id,
-          quantity: currentItem.quantity
-        })
-      });
-    })
-    .then(response => response.json())
-    .then(() => {
-      // Reload the page to reflect changes
-      window.location.reload();
-    })
-    .catch(error => {
-      console.error('Error changing item variant:', error);
-    });
-  }
-</script>
