@@ -153,6 +153,7 @@
                     {% unless option_name_lower contains 'size'
                       or option_name_lower contains 'color'
                       or option_name_lower contains 'colour'
+                      or option_name_lower contains 'title'
                     %}
                       <div class="option-row">
                         <span class="option-label">{{ option.name }}:</span>
@@ -238,10 +239,17 @@
             <span class="expand-icon"><span class="pmorph__icon"></span></span>
           </div>
           <div class="sidebar-content">
-            <form class="sidebar-form">
-              <input type="text" class="sidebar-input" placeholder="Zip Code">
+            <form class="sidebar-form shipping-estimate-form" id="shipping-estimate-form">
+              <input type="text" class="sidebar-input" placeholder="Zip Code" id="shipping-zip" required>
               <button type="submit" class="sidebar-btn">[SEARCH]</button>
             </form>
+            <div class="shipping-results" id="shipping-results" style="display: none;">
+              <div class="shipping-loading" id="shipping-loading" style="display: none;">
+                <span>Calculating rates...</span>
+              </div>
+              <div class="shipping-options" id="shipping-options"></div>
+              <div class="shipping-error" id="shipping-error" style="display: none;"></div>
+            </div>
           </div>
         </div>
       </div>
@@ -254,9 +262,9 @@
         </div>
         <button
           type="submit"
-          form="MainCartForm"
           class="checkout-btn"
           name="checkout"
+          onclick="window.location.href='/checkout'; return false;"
           {% if cart == empty %}
             disabled
           {% endif %}
