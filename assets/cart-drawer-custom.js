@@ -56,9 +56,8 @@ document.addEventListener('DOMContentLoaded', function () {
   if (orderNoteTextarea) {
     orderNoteTextarea.addEventListener('blur', function () {
       var note = this.value.trim();
-      if (note) {
-        updateCartNote(note);
-      }
+      // Always update cart note (allows clearing notes)
+      updateCartNote(note);
     });
   }
 

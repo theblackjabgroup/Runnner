@@ -389,7 +389,7 @@ function handleOrderNote(form) {
 
   const note = noteTextarea.value.trim();
 
-  // Update cart note
+  // Always update cart note (allows clearing notes)
   updateCartNote(note, sendButton);
 }
 
@@ -598,7 +598,8 @@ document.addEventListener('DOMContentLoaded', function () {
         const sendButton = form.querySelector('.sidebar-btn');
         const note = e.target.value.trim();
 
-        if (note) {
+        // Always update cart note (allows clearing notes)
+        if (sendButton) {
           updateCartNote(note, sendButton);
         }
       }
