@@ -26,11 +26,11 @@
       {% if section.settings.logo != blank %}
   <img
     src="{{ section.settings.logo | image_url }}"
-    class="mr-10 fade-in"
+    class="fade-in"
     width="auto"
     height="auto"
     alt="Logo"
-    style="max-height: 100px; max-width: 300px;"
+    style="width: 100%; height: 100%; padding-right: 50px"
   >
 {% else %}
   <span
@@ -260,9 +260,13 @@
                               width="100%"
                             >
                           {% else %}
-                          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-caret-right-fill" viewBox="0 0 16 16">
-  <path d="m12.14 8.753-5.482 4.796c-.646.566-1.658.106-1.658-.753V3.204a1 1 0 0 1 1.659-.753l5.48 4.796a1 1 0 0 1 0 1.506z"/>
-</svg>
+                          <img
+                          class="scrolling-separator"
+                          src="{{ 'caret-right-fill2.svg' | asset_url }}"
+                          alt="separator"
+                          height="100%"
+                          width="100%"
+                        >
                           {% endif %}
                         {% endfor %}
                         <!-- Duplicate set for seamless infinite scrolling -->
@@ -320,7 +324,7 @@
            <div
             id="search-container"
             class="fixed left-0 right-0 hidden opacity-0 shadow-lg py-8 color-{{ color_scheme }}"
-            style="background: var(--header_background); top: var(--header-height); padding: 12px {{ settings.side_space }}px; z-index: 999;"
+            style="background: var(--header_background); top: var(--header-height); padding: 12px 34px; z-index: 999;"
             aria-hidden="true"
             >
               <div
@@ -337,7 +341,7 @@
                       type="search"
                       name="q"
                       placeholder="Search"
-                      class="search-input w-full py-3 text-[26px] lg:text-4xl focus:outline-none bg-transparent placeholder-black"
+                      class="bb-search-input search-input w-full py-3 text-[26px] lg:text-4xl focus:outline-none bg-transparent placeholder-black"
                     >
                   </div>
                   <button
@@ -1408,9 +1412,21 @@ class="country-selector-dropdown absolute bottom-16 w-100 border border-gray-200
       let stickyEnabled = !header.classList.contains('sticky-disabled');
 
       const setHeaderHeight = () => {
-        const height = header.offsetHeight;
-        document.documentElement.style.setProperty('--header-height', `${height}px`);
-        initialHeaderTop = header.offsetTop;
+        const headerEl = document.getElementById("shopify-section-sections--20177858461925__header");
+        const announcementBar = document.getElementsByClassName("announcement-bar")[0];
+        console.log("Nikhil headerEl ", headerEl)
+      if (headerEl && announcementBar) {
+        const height = headerEl.offsetHeight;
+        const h2 = announcementBar.offsetHeight;
+        const finalHeight = height + h2;
+        console.log("Nikhil height ", finalHeight);
+        document.documentElement.style.setProperty('--header-height', `${finalHeight}px`);
+        const root = document.documentElement;
+        const headerHeight = getComputedStyle(root).getPropertyValue('--header-height');
+
+console.log("Header height:", headerHeight);
+        initialHeaderTop = headerEl.offsetTop;
+      }
       };
 
       const handleScroll = () => {
@@ -1479,10 +1495,9 @@ class="country-selector-dropdown absolute bottom-16 w-100 border border-gray-200
 
     if (searchToggle && searchContainer && searchOverlay && closeSearch && searchInput) {
       let isSearchOpen = false;
-
       searchContainer.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
       searchOverlay.style.transition = 'opacity 0.3s ease';
-      searchContainer.style.transform = 'translateY(0px)';
+      searchContainer.style.transform = 'translate3d(0, calc(var(--header-height) - 1px), 0)';
       searchOverlay.classList.add('pointer-events-none');
 
       function toggleSearch(show) {
@@ -1491,20 +1506,23 @@ class="country-selector-dropdown absolute bottom-16 w-100 border border-gray-200
         isSearchOpen = show;
         searchToggle.setAttribute('aria-expanded', show);
 
-        const headerEl = document.querySelector('[data-header-sticky]');
-        if (headerEl) {
-          const headerHeight = headerEl.offsetHeight;
-          searchContainer.style.top = `${headerHeight}px`;
-        }
+        const headerEl2 = document.querySelector('[data-header-sticky]');
+        const announcementBar = document.getElementsByClassName("announcement-bar")[0];
+      if (headerEl2 && announcementBar) {
+        const height = headerEl2.offsetHeight;
+        const h2 = announcementBar.offsetHeight;
+        const finalHeight = height + h2;
+        searchContainer.style.top = `${finalHeight}px`;
+      } 
 
         if (show) {
           searchContainer.classList.remove('hidden');
-          searchOverlay.style.opacity = '0.5';
+          searchOverlay.style.opacity = '0';
           searchOverlay.classList.remove('pointer-events-none');
 
           requestAnimationFrame(() => {
             searchContainer.style.opacity = '1';
-            searchContainer.style.transform = 'translateY(0)';
+            searchContainer.style.transform = 'translate3d(0, 0, 0)';
 
             setTimeout(() => searchInput.focus(), 400);
           });
