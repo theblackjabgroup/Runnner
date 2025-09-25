@@ -35,6 +35,11 @@ class CurrencyUpdateHandler {
     try {
       // Fetch current cart data with new currency
       const response = await fetch('/cart.js');
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
       const cartData = await response.json();
 
       // Update cart prices
@@ -89,6 +94,11 @@ class CurrencyUpdateHandler {
       const productUrl = productHandle ? `/products/${productHandle}.js` : null;
       if (productUrl) {
         const response = await fetch(productUrl);
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
         const productData = await response.json();
 
         // Find the variant and update price
