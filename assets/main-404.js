@@ -3,3 +3,5 @@ document.querySelectorAll('.main-404-button').forEach(btn => {
     btn.style.setProperty('--animation-delay', btn.dataset.delay);
   }
 });
+
+
