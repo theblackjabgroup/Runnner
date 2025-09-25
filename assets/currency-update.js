@@ -133,19 +133,70 @@ class CurrencyUpdateHandler {
       return window.Shopify.formatMoney(cents);
     }
 
-    // Fallback to basic formatting
+    // Fallback to basic formatting with proper currency detection
     const amount = (cents / 100).toFixed(2);
-    return `$${amount}`;
+
+    // Try to get currency from Shopify's global settings or URL params
+    let currency = 'USD'; // Default fallback
+
+    if (window.Shopify && window.Shopify.currency) {
+      currency = window.Shopify.currency.active;
+    } else if (window.Shopify && window.Shopify.locale) {
+      // Extract currency from locale if available
+      const locale = window.Shopify.locale;
+      if (locale.includes('_')) {
+        currency = locale.split('_')[1];
+      }
+    } else {
+      // Try to get currency from URL parameters
+      const urlParams = new URLSearchParams(window.location.search);
+      if (urlParams.has('currency')) {
+        currency = urlParams.get('currency');
+      }
+    }
+
+    // Format with appropriate currency symbol
+    const currencySymbols = {
+      USD: '$',
+      EUR: '€',
+      GBP: '£',
+      CAD: 'C$',
+      AUD: 'A$',
+      JPY: '¥',
+      CHF: 'CHF',
+      SEK: 'kr',
+      NOK: 'kr',
+      DKK: 'kr',
+      PLN: 'zł',
+      CZK: 'Kč',
+      HUF: 'Ft',
+      RUB: '₽',
+      BRL: 'R$',
+      MXN: '$',
+      INR: '₹',
+      CNY: '¥',
+      KRW: '₩',
+      THB: '฿',
+      SGD: 'S$',
+      HKD: 'HK$',
+      NZD: 'NZ$',
+      ZAR: 'R',
+      TRY: '₺',
+      ILS: '₪',
+      AED: 'د.إ',
+      SAR: 'ر.س',
+    };
+
+    const symbol = currencySymbols[currency] || currency;
+    return `${symbol}${amount}`;
   }
 }
 
 // Initialize when DOM is ready
 document.addEventListener('DOMContentLoaded', () => {
   new CurrencyUpdateHandler();
-});
 
-// Also set up listener for localization form submissions
-document.addEventListener('DOMContentLoaded', () => {
+  // Set up listener for localization form submissions
   const localizationForms = document.querySelectorAll('localization-form');
   localizationForms.forEach((form) => {
     const formElement = form.querySelector('form');
