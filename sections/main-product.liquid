@@ -1,6 +1,3 @@
-{{ 'scroll-animations.css' | asset_url | stylesheet_tag }}
-<script src="{{ 'scroll-animations.js' | asset_url }}" defer></script>
-
 <!-- Desktop view -->
 <section
   class="product-section color-{{ section.settings.color_scheme }} section-{{ section.id }}-padding hidden lg:!flex lg:flex-row gap-4 lg:gap-8 px-4 py-8"
@@ -9,7 +6,7 @@
   aria-labelledby="product-title"
 >
   {%- comment -%} Left: Image Gallery {%- endcomment -%}
-  <div class="product-gallery w-1/2 scroll-fade-trigger scroll-fade-left" role="region" aria-label="Product images">
+  <div class="product-gallery w-1/2" role="region" aria-label="Product images">
     <div
       class="gallery-wrapper sticky top-[80px] h-[calc(100vh-80px)]"
       style="max-height: calc(100vh - 70px); overflow-y: auto; position: sticky; top: 70px;"
@@ -20,10 +17,19 @@
             <div
               class="gallery-item absolute inset-0 w-full h-full {% if forloop.first %}is-active{% endif %}"
               data-index="{{ forloop.index0 }}"
+              data-media-id="{{ media.id }}"
+              {%- assign variant_tags = '' -%}
+              {%- if media.alt contains 'variant:' -%}
+                {%- assign variant_part = media.alt | split: 'variant:' | last -%}
+                {%- assign variant_tags = variant_part | split: ',' -%}
+                data-variant-options="{{ variant_tags | join: '|' | downcase }}"
+              {%- endif -%}
               id="gallery-item-{{ forloop.index0 }}"
-              {% if forloop.first %}aria-current="true"{% endif %}
+              {% if forloop.first %}
+                aria-current="true"
+              {% endif %}
             >
-               {% if media.media_type == 'image' %}
+              {% if media.media_type == 'image' %}
                 <img
                   src="{{ media | image_url: width: 1200 }}"
                   alt="{{ media.alt | escape }}"
@@ -50,12 +56,19 @@
         {%- endif -%}
 
         <!-- Add vertical image strip -->
-        <div class="image-strip-container opacity-0" role="tablist" aria-label="Product image thumbnails">
-          <div class="image-strip">
+        <div class="image-strip-container" role="tablist" aria-label="Product image thumbnails">
+          <div class="image-strip" id="desktop-image-strip">
             {%- for media in product.media -%}
               <button
                 class="strip-image-wrapper {% if forloop.first %}active{% endif %}"
                 data-strip-index="{{ forloop.index0 }}"
+                data-media-id="{{ media.id }}"
+                {%- assign variant_tags = '' -%}
+                {%- if media.alt contains 'variant:' -%}
+                  {%- assign variant_part = media.alt | split: 'variant:' | last -%}
+                  {%- assign variant_tags = variant_part | split: ',' -%}
+                  data-variant-options="{{ variant_tags | join: '|' | downcase }}"
+                {%- endif -%}
                 role="tab"
                 aria-selected="{% if forloop.first %}true{% else %}false{% endif %}"
                 aria-controls="gallery-item-{{ forloop.index0 }}"
@@ -73,7 +86,10 @@
                       height="full"
                       aria-hidden="true"
                     >
-                    <span class="video-play-icon absolute inset-0 flex items-center justify-center pointer-events-none" aria-hidden="true">
+                    <span
+                      class="video-play-icon absolute inset-0 flex items-center justify-center pointer-events-none"
+                      aria-hidden="true"
+                    >
                       <svg width="32" height="32" fill="none" viewBox="0 0 32 32">
                         <circle cx="16" cy="16" r="16" fill="rgba(0,0,0,0.5)"/>
                         <polygon points="13,10 24,16 13,22" fill="white"/>
@@ -106,11 +122,12 @@
       style="height: calc(100vh - 70px); overflow-y: auto; position: sticky; top: 70px;"
     >
       {%- comment -%} Header {%- endcomment -%}
-  <div class="product-header w-[80%] space-y-8 scroll-fade-trigger scroll-fade-up">
+      <div class="product-header w-[80%] space-y-8">
         <div class="header-top flex flex-col gap-4">
-          <div class="product-status flex items-center gap-4 scroll-fade-trigger scroll-fade-up scroll-fade-delay-1" role="status" aria-live="polite">
+          <div class="product-status flex items-center gap-4" role="status" aria-live="polite">
             {% if product.available != true %}
-              <span class="inline-flex items-center px-3 py-1 text-[14px] tracking-wider bg-black text-white uppercase rounded"
+              <span
+                class="inline-flex items-center px-3 py-1 text-[14px] tracking-wider bg-black text-white uppercase rounded"
                 role="status"
                 aria-label="Product is sold out"
                 >Sold Out</span
@@ -119,9 +136,8 @@
           </div>
           <h1
             id="product-title"
-            class="text-[42px] pb-10 scroll-fade-trigger scroll-fade-up scroll-fade-delay-2"
-
-            style="font-weight: {{section.settings.product_name_font_weight}};  padding-bottom: 10px;"
+            class="text-[42px] pb-10"
+            style="font-weight: var(--t-h-4-weight); font-size: var(--t-h-4-size); line-height: var(--t-h-4-line-height);  padding-bottom: 10px;"
           >
             {{ product.title }}
           </h1>
@@ -129,10 +145,10 @@
           {%- comment -%} Product Variant {%- endcomment -%}
           {%- assign color_option = product.options_with_values | where: 'name', 'Color' | first -%}
           {%- if color_option and color_option.values.size > 0 -%}
-            <fieldset class="product-variants my-4 scroll-fade-trigger scroll-fade-up scroll-fade-delay-3" role="group" aria-labelledby="color-legend">
+            <fieldset class="product-variants my-4" role="group" aria-labelledby="color-legend">
               <legend id="color-legend" class="flex items-center gap-2">
-                <span class="inline-block text-[14px] font-medium">SELECT COLOR:</span>
-                <span class="active-color text-[14px] font-medium uppercase" data-active-color aria-live="polite">
+                <span class="inline-block text-[14px] font-medium" style="font-weight: var(--t-b-4-weight); font-size: var(--t-b-4-size); line-height: var(--t-b-4-line-height);">SELECT COLOR:</span>
+                <span class="active-color text-[14px] font-medium uppercase" data-active-color aria-live="polite" style="font-weight: var(--t-b-4-weight); font-size: var(--t-b-4-size); line-height: var(--t-b-4-line-height);">
                   {{- color_option.values | first -}}
                 </span>
               </legend>
@@ -158,16 +174,24 @@
       </div>
 
       {% comment %} tabs  {% endcomment %}
-      <div class="product-tabs w-[80%] flex-1 overflow-hidden scroll-fade-trigger scroll-fade-up scroll-fade-delay-4" role="region" aria-label="Product information">
+      <div
+        class="product-tabs w-[80%] flex-1 overflow-hidden scroll-fade-trigger scroll-fade-up scroll-fade-delay-4"
+        role="region"
+        aria-label="Product information"
+      >
         <!-- Tab Navigation -->
-        <div class="tabs-nav flex justify-evenly space-x-3 h-auto mt-2 w-full" role="tablist" aria-label="Product details">
+        <div
+          class="tabs-nav flex justify-evenly space-x-3 h-auto mt-2 w-full"
+          role="tablist"
+          aria-label="Product details"
+        >
           {%- assign tab_index = 0 -%}
           {%- for block in section.blocks -%}
             {% if block.type == 'tab_description' or block.type == 'tab_details' or block.type == 'tab_sizing' %}
               {%- assign tab_index = tab_index | plus: 1 -%}
               <button
                 class="tab-btn group text-[16px] text-left pt-[5px] mr-3 w-full transition-colors duration-300 relative {% if tab_index == 1 %}active-tab{% endif %} focus:outline-none focus:ring-2 focus:ring-blue-500"
-                style="color: {% if tab_index == 1 %}var(--text){% else %}var(--secondary_text){% endif %};"
+                style="color: {% if tab_index == 1 %}var(--text){% else %}var(--secondary_text){% endif %}; font-weight: var(--t-b-3-weight); font-size: var(--t-b-3-size); line-height: var(--t-b-3-line-height);" 
                 data-tab="tab-{{ block.id }}"
                 role="tab"
                 aria-selected="{% if tab_index == 1 %}true{% else %}false{% endif %}"
@@ -194,12 +218,15 @@
         <div class="tab-content mt-6 overflow-y-auto">
           {% for block in section.blocks %}
             <div
-              class="tab-pane {% if forloop.first %}active{% else %}hidden{% endif %} tracking-normal leading-none text-[16px]"
+              class="tab-pane {% if forloop.first %}active{% else %}hidden{% endif %} tracking-normal leading-none"
+              style="font-weight: var(--t-b-3-weight); font-size: var(--t-b-3-size); line-height: var(--t-b-3-line-height);"
               data-content="tab-{{ block.id }}"
               role="tabpanel"
               aria-labelledby="tab-{{ block.id }}-button"
               id="tab-content-{{ block.id }}"
-              {% unless forloop.first %}tabindex="0"{% endunless %}
+              {% unless forloop.first %}
+                tabindex="0"
+              {% endunless %}
             >
               {% case block.type %}
                 {% when 'tab_description' %}
@@ -260,7 +287,9 @@
                     id="size-chart-backdrop"
                     class="fixed inset-0 bg-black/60 hidden z-[999]"
                     aria-hidden="true"
-                  >&nbsp;</div>
+                  >
+                    &nbsp;
+                  </div>
               {% endcase %}
             </div>
           {% endfor %}
@@ -277,10 +306,11 @@
       {%- endfor -%}
 
       <div
-        class="size-price-selector flex flex-col gap-6 text-[14px] font-medium scroll-fade-trigger scroll-fade-up scroll-fade-immediate"
+        class="size-price-selector flex flex-col gap-6"
+        style="font-weight: var(--t-b-3-weight); font-size: var(--t-b-3-size); line-height: var(--t-b-3-line-height);"
         role="region"
         aria-label="Product options and purchase"
->
+      >
         <!-- DELIVERY SECTION -->
         {%- for block in section.blocks -%}
           {%- if block.type == 'delivery_address' -%}
@@ -294,24 +324,28 @@
                   </div>
                 </div>
                 <button
-                  class="delivery-change-btn border px-2 py-0 text-[14px] font-medium rounded transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  class="delivery-change-btn border px-2 py-0 rounded transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
                   aria-label="Change delivery address"
                   aria-describedby="current-address"
                 >
                   CHANGE
                 </button>
-                <span id="current-address" class="sr-only">Current address: {{ customer.default_address | format_address }}</span>
+                <span id="current-address" class="sr-only"
+                  >Current address: {{ customer.default_address | format_address -}}
+                </span>
               {% else %}
                 <!-- Guest: Show login prompt -->
                 <div role="group" aria-labelledby="delivery-heading-guest">
-                  <div id="delivery-heading-guest" class="font-medium uppercase">DELIVER TO</div>
-                  <div class="text-[14px]" style="color: var(--secondary_text);">
-                    Please <a href="/account/login" class="underline text-blue-600" aria-describedby="login-help">log in</a> to set your delivery address.
+                  <div id="delivery-heading-guest" class="uppercase">DELIVER TO</div>
+                  <div style="color: var(--secondary_text);">
+                    Please
+                    <a href="/account/login" class="underline text-blue-600" aria-describedby="login-help">log in</a> to
+                    set your delivery address.
                   </div>
                   <span id="login-help" class="sr-only">Login required to save and manage delivery addresses</span>
                 </div>
                 <button
-                  class="delivery-change-btn border px-2 py-0 text-[14px] font-medium rounded transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  class="delivery-change-btn border px-2 py-0 rounded transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
                   aria-label="Set delivery address"
                 >
                   CHANGE
@@ -324,8 +358,7 @@
         <!-- QUANTITY SELECTOR -->
         {%- for block in section.blocks -%}
           {%- if block.type == 'quantity_selector' -%}
-
-            <div class="flex justify-between items-center border-b border-gray-400 pb-4 scroll-fade-trigger scroll-fade-up scroll-fade-immediate" {{ block.shopify_attributes }}>
+            <div class="flex justify-between items-center border-b border-gray-400 pb-4" {{ block.shopify_attributes }}>
               <label for="quantityInput" class="font-medium uppercase">QUANTITY SELECTOR</label>
               <div
                 class="flex items-center justify-center py-1 border rounded overflow-hidden h-10"
@@ -337,7 +370,7 @@
                 <button
                   type="button"
                   id="decreaseQty"
-                  class="px-3 text-[16px] hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  class="px-3 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
                   aria-label="Decrease quantity"
                   aria-controls="quantityDisplay"
                 >
@@ -345,7 +378,7 @@
                 </button>
                 <span
                   id="quantityDisplay"
-                  class="px-3 border-x-1 text-[16px]"
+                  class="px-3 border-x-1"
                   style="border-left: 1px solid var(--border); border-right: 1px solid var(--border);"
                   role="status"
                   aria-live="polite"
@@ -362,7 +395,7 @@
                 <button
                   type="button"
                   id="increaseQty"
-                  class="px-3 text-[16px] hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  class="px-3 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
                   aria-label="Increase quantity"
                   aria-controls="quantityDisplay"
                 >
@@ -384,8 +417,8 @@
           {% endunless %}
         {% endfor %}
         {% if variant_option %}
-          <div class="flex justify-between items-center gap-2 scroll-fade-trigger scroll-fade-up scroll-fade-immediate">
-            <span class="font-medium uppercase">SELECT {{ variant_option.name | upcase }}</span>
+          <div class="flex justify-between items-center gap-2">
+            <span class="uppercase">SELECT {{ variant_option.name | upcase }}</span>
             <div class="flex gap-2 flex-wrap">
               {% for value in variant_option.values %}
                 {% assign variant_available = false %}
@@ -403,7 +436,7 @@
                 <button
                   type="button"
                   class="
-                    size-btn relative px-3 h-10 min-w-[2.5rem] flex items-center justify-center border-transparent rounded font-semibold border
+                    size-btn relative px-3 h-10 min-w-[2.5rem] flex items-center justify-center border-transparent rounded border
                     {% if forloop.first and variant_available %}bg-black text-white{% endif %}
                     {% unless variant_available %}cursor-not-allowed bg-gray-200 unavailable-size{% endunless %}
                   "
@@ -425,17 +458,17 @@
             </div>
           </div>
         {% endif %}
-         {% if product.gift_card? %}
+        {% if product.gift_card? %}
           <div class="border-t border-gray-400 pt-4" style="padding-top: 1rem;">
-          {% render 'gift-card-recipient-form', product: product, form: form, section: section %}
+            {% render 'gift-card-recipient-form', product: product, form: form, section: section %}
           </div>
         {% endif %}
 
         <!-- PRICE + ACTIONS -->
-        <div class="flex justify-between items-center border-t border-gray-400 pt-4 scroll-fade-trigger scroll-fade-up scroll-fade-immediate" style="padding-top: 1rem;">
+        <div class="flex justify-between items-center border-t border-gray-400 pt-4" style="padding-top: 1rem;">
           <!-- Price + Compare at Price -->
-          <div class="text-[18px] flex flex-col" role="region" aria-labelledby="price-heading">
-            <span id="price-heading" class="sr-only">Product pricing</span>
+          <div class="flex flex-col" style="font-weight: var(--t-b-2-weight); font-size: var(--t-b-2-size); line-height: var(--t-b-2-line-height);" role="region" aria-labelledby="price-heading">
+            <span id="current-price" class="sr-only">Product pricing</span>
             <div class="flex items-center gap-2">
               <span
                 id="current-price"
@@ -446,7 +479,7 @@
               </span>
               <span
                 id="compare-price-separator"
-                class="text-black text-[14px] {% unless product.compare_at_price > product.price %}hidden{% endunless %}"
+                class="text-black{% unless product.compare_at_price > product.price %}hidden{% endunless %}"
                 aria-hidden="true"
                 >|</span
               >
@@ -462,7 +495,7 @@
 
             <div
               id="savings-info"
-              class="text-[14px] font-medium {% unless product.compare_at_price > product.price %}hidden{% endunless %}"
+              class="font-medium {% unless product.compare_at_price > product.price %}hidden{% endunless %}"
               style="color: var(--sale_badge);"
               role="status"
               aria-live="polite"
@@ -481,11 +514,17 @@
           </div>
 
           <!-- Add to Cart -->
-          <div class="flex gap-2 flex-col scroll-fade-trigger scroll-fade-up scroll-fade-immediate">
+          <div class="flex gap-2 flex-col">
             <div class="flex gap-2">
               {% if product.available %}
                 <!-- ADD TO CART form -->
-                <form method="post" action="/cart/add" id="add-to-cart-form" role="form" aria-labelledby="add-to-cart-heading">
+                <form
+                  method="post"
+                  action="/cart/add"
+                  id="add-to-cart-form"
+                  role="form"
+                  aria-labelledby="add-to-cart-heading"
+                >
                   <span id="add-to-cart-heading" class="sr-only">Add product to cart</span>
                   <input
                     type="hidden"
@@ -498,7 +537,7 @@
                   <button
                     id="add-to-cart-btn"
                     class="add-to-cart-btn-custom text-4xl rounded group flex items-center justify-between gap-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    style="height: 50px; width: 370px;"
+                    style="height: 50px; width: 370px; font-weight: var(--t-b-1-weight); font-size: var(--t-b-1-size); line-height: var(--t-b-1-line-height);"
                     aria-describedby="add-to-cart-description"
                     type="button"
                   >
@@ -520,6 +559,7 @@
                 <!-- SOLD OUT button -->
                 <button
                   class="bg-gray-400 text-white text-4xl px-6 py-3 rounded cursor-not-allowed"
+                  style="font-weight: var(--t-b-1-weight); font-size: var(--t-b-1-size); line-height: var(--t-b-1-line-height); padding: 10px;"
                   type="button"
                   disabled
                   aria-label="Product is sold out"
@@ -534,7 +574,12 @@
         </div>
         {%- for block in section.blocks -%}
           {%- if block.type == 'pickup_availability' -%}
-            <div class="pickup-availability-container mt-4" style="width:100%;" role="region" aria-label="Pickup availability">
+            <div
+              class="pickup-availability-container mt-4"
+              style="width:100%;"
+              role="region"
+              aria-label="Pickup availability"
+            >
               {% render 'pickup-availability', product_variant: product.selected_or_first_available_variant %}
               {{ 'component-pickup-availability.css' | asset_url | stylesheet_tag }}
               <script src="{{ 'pickup-availability.js' | asset_url }}" defer="defer"></script>
@@ -562,9 +607,18 @@
           <div
             class="mobile-gallery-item w-full h-full {% unless forloop.first %}absolute top-0 left-0{% endunless %} {% if forloop.first %}relative active{% endif %}"
             data-mobile-index="{{ forloop.index0 }}"
+            data-media-id="{{ media.id }}"
+            {%- assign variant_tags = '' -%}
+            {%- if media.alt contains 'variant:' -%}
+              {%- assign variant_part = media.alt | split: 'variant:' | last -%}
+              {%- assign variant_tags = variant_part | split: ',' -%}
+              data-variant-options="{{ variant_tags | join: '|' | downcase }}"
+            {%- endif -%}
             style="opacity: {% if forloop.first %}1{% else %}0{% endif %}; transition: opacity 0.3s ease;"
             id="mobile-gallery-item-{{ forloop.index0 }}"
-            {% if forloop.first %}aria-current="true"{% endif %}
+            {% if forloop.first %}
+              aria-current="true"
+            {% endif %}
           >
             {% if media.media_type == 'image' %}
               <img
@@ -603,7 +657,11 @@
     </div>
 
     <!-- Mobile Thumbnail Strip -->
-    <div class="thumbnail-strip mt-2 pb-2 overflow-x-auto mx-auto w-fit" role="tablist" aria-label="Product image thumbnails">
+    <div
+      class="thumbnail-strip mt-2 pb-2 overflow-x-auto mx-auto w-fit"
+      role="tablist"
+      aria-label="Product image thumbnails"
+    >
       <div class="flex gap-2 snap-x p-4">
         {%- for media in product.media -%}
           <button
@@ -626,7 +684,10 @@
                   height="full"
                   aria-hidden="true"
                 >
-                <span class="video-play-icon absolute inset-0 flex items-center justify-center pointer-events-none" aria-hidden="true">
+                <span
+                  class="video-play-icon absolute inset-0 flex items-center justify-center pointer-events-none"
+                  aria-hidden="true"
+                >
                   <svg width="32" height="32" fill="none" viewBox="0 0 32 32">
                     <circle cx="16" cy="16" r="16" fill="rgba(0,0,0,0.5)"/>
                     <polygon points="13,10 24,16 13,22" fill="white"/>
@@ -657,22 +718,23 @@
       <div class="header-top flex flex-col gap-4">
         <div class="product-status flex items-center gap-4" role="status" aria-live="polite">
           {% if product.available != true %}
-            <span class="inline-flex items-center px-3 py-1 text-[14px] tracking-wider bg-black text-white uppercase rounded"
+            <span
+              class="inline-flex items-center px-3 py-1 tracking-wider bg-black text-white uppercase rounded"
               role="status"
               aria-label="Product is sold out"
               >Sold Out</span
             >
           {% endif %}
         </div>
-        <h1 id="mobile-product-title" class="text-[42px] font-bold">{{ product.title }}</h1>
+        <h1 id="mobile-product-title" style="font-weight: var(--t-h-3-weight); font-size: var(--t-h-3-size); line-height: var(--t-h-3-line-height);">{{ product.title }}</h1>
 
         {%- comment -%} Product Variant {%- endcomment -%}
         {%- assign color_option = product.options_with_values | where: 'name', 'Color' | first -%}
         {%- if color_option and color_option.values.size > 0 -%}
           <fieldset class="product-variants my-4" role="group" aria-labelledby="mobile-color-legend">
             <legend id="mobile-color-legend" class="flex items-center gap-2">
-              <span class="inline-block text-[14px] font-medium">SELECT COLOR:</span>
-              <span class="active-color text-[14px]" data-active-color aria-live="polite">
+              <span class="inline-block=" style="font-weight: var(--t-b-3-weight); font-size: var(--t-b-3-size); line-height: var(--t-b-3-line-height);">SELECT COLOR:</span>
+              <span class="active-color=" data-active-color aria-live="polite" style="font-weight: var(--t-b-3-weight); font-size: var(--t-b-3-size); line-height: var(--t-b-3-line-height);">
                 {{- color_option.values | first -}}
               </span>
             </legend>
@@ -700,14 +762,18 @@
     {% comment %} tabs  {% endcomment %}
     <div class="product-tabs flex-1 overflow-hidden" role="region" aria-label="Mobile product information">
       <!-- Tab Navigation -->
-      <div class="tabs-nav flex justify-evenly space-x-3 h-auto mt-2 w-full" role="tablist" aria-label="Mobile product details">
+      <div
+        class="tabs-nav flex justify-evenly space-x-3 h-auto mt-2 w-full"
+        role="tablist"
+        aria-label="Mobile product details"
+      >
         {%- assign tab_index = 0 -%}
         {%- for block in section.blocks -%}
           {% if block.type == 'tab_description' or block.type == 'tab_details' or block.type == 'tab_sizing' %}
             {%- assign tab_index = tab_index | plus: 1 -%}
             <button
-              class="tab-btn group text-[12px] text-left mr-3 w-full transition-colors duration-300 relative {% if tab_index == 1 %}active-tab{% endif %} focus:outline-none focus:ring-2 focus:ring-blue-500"
-              style="color: {% if tab_index == 1 %}var(--text){% else %}var(--secondary_text){% endif %};"
+              class="tab-btn group  text-left mr-3 w-full transition-colors duration-300 relative {% if tab_index == 1 %}active-tab{% endif %} focus:outline-none focus:ring-2 focus:ring-blue-500"
+              style="color: {% if tab_index == 1 %}var(--text){% else %}var(--secondary_text){% endif %}; font-weight: var(--t-b-4-weight); font-size: var(--t-b-4-size); line-height: var(--t-b-4-line-height);"
               data-tab="tab-{{ block.id }}"
               role="tab"
               aria-selected="{% if tab_index == 1 %}true{% else %}false{% endif %}"
@@ -730,15 +796,17 @@
       </div>
 
       <!-- Tab Content -->
-      <div class="tab-content mt-6 overflow-y-auto max-h-[50vh]">
+      <div class="tab-content mt-6 overflow-y-auto max-h-[50vh]" style="font-weight: var(--t-b-4-weight); font-size: var(--t-b-4-size); line-height: var(--t-b-4-line-height);">
         {% for block in section.blocks %}
           <div
-            class="tab-pane {% if forloop.first %}active{% else %}hidden{% endif %} tracking-normal leading-1 text-[12px]"
+            class="tab-pane {% if forloop.first %}active{% else %}hidden{% endif %} tracking-normal leading-1"
             data-content="tab-{{ block.id }}"
             role="tabpanel"
             aria-labelledby="mobile-tab-{{ block.id }}-button"
             id="mobile-tab-content-{{ block.id }}"
-            {% unless forloop.first %}tabindex="0"{% endunless %}
+            {% unless forloop.first %}
+              tabindex="0"
+            {% endunless %}
           >
             {% case block.type %}
               {% when 'tab_description' %}
@@ -807,7 +875,12 @@
       {%- endif -%}
     {%- endfor -%}
 
-    <div class="size-price-selector flex flex-col gap-6 text-[12px]" role="region" aria-label="Mobile product options and purchase">
+    <div
+      class="size-price-selector flex flex-col gap-6"
+      style="font-weight: var(--t-b-4-weight); font-size: var(--t-b-4-size); line-height: var(--t-b-4-line-height);"
+      role="region"
+      aria-label="Mobile product options and purchase"
+    >
       <!-- DELIVERY SECTION -->
       {%- for block in section.blocks -%}
         {%- if block.type == 'delivery_address' -%}
@@ -821,25 +894,30 @@
                 </div>
               </div>
               <button
-                class="delivery-change-btn border px-2 py-1 text-[14px] font-medium rounded transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                class="delivery-change-btn border px-2 py-1 rounded transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 aria-label="Change delivery address"
                 aria-describedby="mobile-current-address"
               >
                 CHANGE
               </button>
-              <span id="mobile-current-address" class="sr-only">Current address: {{ customer.default_address | format_address }}</span>
+              <span id="mobile-current-address" class="sr-only"
+                >Current address: {{ customer.default_address | format_address -}}
+              </span>
             {% else %}
               <!-- Guest: Show login prompt -->
               <div role="group" aria-labelledby="mobile-delivery-heading-guest">
                 <div id="mobile-delivery-heading-guest" class="font-semibold uppercase">DELIVER TO</div>
-                <div class="text-[10px]" style="color: var(--secondary_text);">
-                  Please <a href="/account/login" class="underline !text-blue-900" aria-describedby="mobile-login-help">log in</a> to set your delivery
-                  address.
+                <div style="color: var(--secondary_text);">
+                  Please
+                  <a href="/account/login" class="underline !text-blue-900" aria-describedby="mobile-login-help"
+                    >log in</a
+                  >
+                  to set your delivery address.
                 </div>
                 <span id="mobile-login-help" class="sr-only">Login required to save and manage delivery addresses</span>
               </div>
               <button
-                class="delivery-change-btn border py-0 text-[14px] font-medium rounded transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                class="delivery-change-btn border py-0 rounded transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 aria-label="Set delivery address"
               >
                 CHANGE
@@ -854,7 +932,12 @@
         {%- if block.type == 'quantity_selector' -%}
           <div class="flex justify-between items-center border-b border-gray-400 pb-4" {{ block.shopify_attributes }}>
             <label for="mobileQuantityInput" class="uppercase font-semibold">QUANTITY SELECTOR</label>
-            <div class="flex items-center justify-center h-10 border rounded" style="width: 8rem;" role="group" aria-labelledby="mobile-quantity-label">
+            <div
+              class="flex items-center justify-center h-10 border rounded"
+              style="width: 8rem;"
+              role="group"
+              aria-labelledby="mobile-quantity-label"
+            >
               <span id="mobile-quantity-label" class="sr-only">Quantity</span>
               <button
                 type="button"
@@ -873,7 +956,14 @@
                 aria-label="Current quantity"
                 >1</span
               >
-              <input type="hidden" name="quantity" id="mobileQuantityInput" class="mobile-quantity-input" value="1" aria-label="Product quantity">
+              <input
+                type="hidden"
+                name="quantity"
+                id="mobileQuantityInput"
+                class="mobile-quantity-input"
+                value="1"
+                aria-label="Product quantity"
+              >
               <button
                 type="button"
                 class="mobile-increase-qty px-3 py-1 text-lg hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -899,7 +989,7 @@
       {% endfor %}
       {% if variant_option %}
         <fieldset class="flex justify-between items-center gap-2" role="group">
-          <legend class="font-medium uppercase">SELECT {{ variant_option.name | upcase }}</legend>
+          <legend style="font-weight: var(--t-b-4-weight); font-size: var(--t-b-4-size); line-height: var(--t-b-4-line-height);">SELECT {{ variant_option.name | upcase }}</legend>
           <div class="flex gap-2 flex-wrap" role="radiogroup" aria-labelledby="mobile-size-legend">
             <span id="mobile-size-legend" class="sr-only">{{ variant_option.name }} options</span>
             {% for value in variant_option.values %}
@@ -918,7 +1008,7 @@
               <button
                 type="button"
                 class="
-                  size-btn relative px-3 h-10 min-w-[2.5rem] flex items-center justify-center border-transparent rounded font-semibold border
+                  size-btn relative px-3 h-10 min-w-[2.5rem] flex items-center justify-center border-transparent rounded border
                   focus:outline-none focus:ring-2 focus:ring-blue-500
                   {% if forloop.first and variant_available %}bg-black text-white{% endif %}
                   {% unless variant_available %} cursor-not-allowed bg-gray-200 unavailable-size{% endunless %}
@@ -945,11 +1035,11 @@
           </div>
         </fieldset>
       {% endif %}
-          {% if product.gift_card? %}
-          <div class="border-t border-gray-400 pt-4" style="padding-top: 1rem;">
+      {% if product.gift_card? %}
+        <div class="border-t border-gray-400 pt-4" style="padding-top: 1rem;">
           {% render 'gift-card-recipient-form', product: product, form: form, section: section %}
-          </div>
-        {% endif %}
+        </div>
+      {% endif %}
 
       <!-- PRICE + ACTIONS -->
       <div class="flex flex-col justify-evenly  border-t border-gray-400 pt-4" style="padding-top: 1rem;">
@@ -957,13 +1047,15 @@
         <div class="text-[18px] flex flex-col justify-between" role="region" aria-labelledby="mobile-price-heading">
           <span id="mobile-price-heading" class="sr-only">Product pricing</span>
           <div class="flex items-center gap-2">
-            <span class="mobile-current-price" aria-label="Current price">{{ product.price | money }}</span>
-            <span class="mobile-compare-price-separator text-black text-[14px] {% unless product.compare_at_price > product.price %}hidden{% endunless %}" aria-hidden="true"
+            <span class="mobile-current-price" aria-label="Current price" style="font-weight: var(--t-b-1-weight); font-size: var(--t-b-1-size); line-height: var(--t-b-1-line-height);">{{ product.price | money }}</span>
+            <span
+              class="mobile-compare-price-separator{% unless product.compare_at_price > product.price %} hidden{% endunless %}"
+              aria-hidden="true" style="font-weight: var(--t-b-2-weight); font-size: var(--t-b-2-size); line-height: var(--t-b-2-line-height);"
               >|</span
             >
             <span
               class="mobile-compare-price line-through {% unless product.compare_at_price > product.price %}hidden{% endunless %}"
-              style="color: var(--secondary_text);"
+              style="color: var(--secondary_text); font-weight: var(--t-b-1-weight); font-size: var(--t-b-1-size); line-height: var(--t-b-1-line-height);"
               aria-label="Original price"
             >
               {% if product.compare_at_price > product.price %}{{ product.compare_at_price | money }}{% endif %}
@@ -971,8 +1063,8 @@
           </div>
 
           <div
-            class="mobile-savings-info text-[14px] font-medium {% unless product.compare_at_price > product.price %}hidden{% endunless %}"
-            style="color: var(--sale_badge);"
+            class="mobile-savings-info {% unless product.compare_at_price > product.price %}hidden{% endunless %}"
+            style="color: var(--sale_badge); font-weight: var(--t-b-1-weight); font-size: var(--t-b-1-size); line-height: var(--t-b-1-line-height);"
             role="status"
             aria-live="polite"
           >
@@ -988,7 +1080,13 @@
         <div class="flex justify-evenly w-full gap-2">
           {% if product.available %}
             <!-- ADD TO CART form -->
-            <form method="post" action="/cart/add" class="mobile-add-to-cart-form" role="form" aria-labelledby="mobile-add-to-cart-heading">
+            <form
+              method="post"
+              action="/cart/add"
+              class="mobile-add-to-cart-form"
+              role="form"
+              aria-labelledby="mobile-add-to-cart-heading"
+            >
               <span id="mobile-add-to-cart-heading" class="sr-only">Add product to cart</span>
               <input
                 type="hidden"
@@ -1000,7 +1098,7 @@
               <input type="hidden" name="quantity" value="1" aria-label="Quantity">
               <button
                 class="add-to-cart-btn-custom mobile-add-to-cart-btn text-3xl rounded group flex items-center justify-between gap-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                style="width: 95vw"
+                style="width: 95vw; font-weight: var(--t-b-2-weight); font-size: var(--t-b-2-size); line-height: var(--t-b-2-line-height); padding: 10px;"
                 aria-describedby="mobile-add-to-cart-description"
                 type="submit"
               >
@@ -1022,6 +1120,7 @@
             <!-- SOLD OUT button -->
             <button
               class="bg-gray-400 text-white text-4xl px-4 py-2 rounded cursor-not-allowed"
+              style="font-weight: var(--t-b-2-weight); font-size: var(--t-b-2-size); line-height: var(--t-b-2-line-height); padding: 10px;"
               type="button"
               disabled
               aria-label="Product is sold out"
@@ -1035,7 +1134,12 @@
       </div>
       {%- for block in section.blocks -%}
         {%- if block.type == 'pickup_availability' -%}
-          <div class="pickup-availability-container mt-4" style="width:100%;" role="region" aria-label="Pickup availability">
+          <div
+            class="pickup-availability-container mt-4"
+            style="width:100%;"
+            role="region"
+            aria-label="Pickup availability"
+          >
             {% render 'pickup-availability', product_variant: product.selected_or_first_available_variant %}
           </div>
         {%- endif -%}
@@ -1045,263 +1149,278 @@
 </section>
 
 <style>
-        .delivery-change-btn{
-         background-color: var(--button);
-        color: var(--button_label);
-        border: 1px solid var(--border);
-      }
-      .delivery-change-btn:hover {
-        background-color: var(--hovered_button_label);
-        color: var(--hovered_button_text_color);
-      }
-        .section-{{ section.id }}-padding {
-          padding-top: {{  settings.sections_spacing | times: 0.75 | round: 0 }}px;
-          padding-bottom: {{  settings.sections_spacing | times: 0.75 | round: 0 }}px;
-          padding-left: {{  settings.side_space | times: 0.75 | round: 0 }}px;
-          padding-right: {{  settings.side_space | times: 0.75 | round: 0 }}px;
-        }
+      .gallery-item {
+      display: block !important;
+    }
 
-        @media screen and (min-width: 750px) {
-          .section-{{ section.id }}-padding {
-            padding-top: {{  settings.sections_spacing}}px;
-            padding-bottom: {{  settings.sections_spacing}}px;
-            padding-left: {{  settings.side_space  }}px;
-            padding-right: {{  settings.side_space }}px;
+    .gallery-item.is-active {
+      opacity: 1;
+      outline: 2px solid black;
+    }
+
+    .gallery-item:not(.is-active) {
+      opacity: 0.6;
+    }
+
+.gallery-wrapper {
+  overflow-y: auto;
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE/Edge */
+}
+            .delivery-change-btn{
+             background-color: var(--button);
+            color: var(--button_label);
+            border: 1px solid var(--border);
           }
-        }
+          .delivery-change-btn:hover {
+            background-color: var(--hovered_button_label);
+            color: var(--hovered_button_text_color);
+          }
+            .section-{{ section.id }}-padding {
+              padding-top: {{  settings.sections_spacing | times: 0.75 | round: 0 }}px;
+              padding-bottom: {{  settings.sections_spacing | times: 0.75 | round: 0 }}px;
+              padding-left: {{  settings.side_space | times: 0.75 | round: 0 }}px;
+              padding-right: {{  settings.side_space | times: 0.75 | round: 0 }}px;
+            }
 
-        #size-chart-drawer {
-          transition: transform 1s cubic-bezier(0.4,0,0.2,1);
-          transform: translateX(100%);
-          will-change: transform;
-        }
-        #size-chart-drawer.open {
-          transform: translateX(0);
-        }
+            @media screen and (min-width: 750px) {
+              .section-{{ section.id }}-padding {
+                padding-top: {{  settings.sections_spacing}}px;
+                padding-bottom: {{  settings.sections_spacing}}px;
+                padding-left: {{  settings.side_space  }}px;
+                padding-right: {{  settings.side_space }}px;
+              }
+            }
 
-        .product-section {
-          display: flex;
-          height: calc(100vh * {{product.media.size}});
-          position: relative;
-        }
+            #size-chart-drawer {
+              transition: transform 1s cubic-bezier(0.4,0,0.2,1);
+              transform: translateX(100%);
+              will-change: transform;
+            }
+            #size-chart-drawer.open {
+              transform: translateX(0);
+            }
 
-        .gallery-wrapper {
-          position: sticky;
-          top: 0;
-          height: 100vh;
-          overflow: hidden;
-        }
+            .product-section {
+              display: flex;
+              height: calc(100vh * {{product.media.size}});
+              position: relative;
+            }
 
-        .gallery-track {
-          height: 100%;
-        }
+            .gallery-wrapper {
+              position: sticky;
+              top: 0;
+              height: 100vh;
+              overflow: hidden;
+            }
 
-        .gallery-item {
-          opacity: 0;
-          transition: opacity 0.3s ease-out;
-          will-change: opacity;
-        }
+            .gallery-track {
+              height: 100%;
+            }
 
-        .gallery-item.is-active {
-          opacity: 1;
-          pointer-events: auto;
-          z-index: 1;
-        }
+            .gallery-item {
+              opacity: 0;
+              transition: opacity 0.3s ease-out;
+              will-change: opacity;
+            }
 
-        .image-strip-container {
-          position: absolute;
-          top: 50%;
-          left: 10px;
-          transform: translateY(-50%);
-          z-index: 100;
-          transition: opacity 0.3s ease;
-        }
+            .gallery-item.is-active {
+              opacity: 1;
+              pointer-events: auto;
+              z-index: 1;
+            }
 
-        .gallery-track:hover .image-strip-container {
-          opacity: 1;
-        }
+            .image-strip-container {
+              position: absolute;
+              top: 50%;
+              left: 10px;
+              transform: translateY(-50%);
+              z-index: 100;
+              transition: opacity 0.3s ease;
+            }
 
-        .image-strip {
-          display: flex;
-          flex-direction: column;
-          gap: 10px;
-          padding: 10px;
-          border-radius: 8px;
-        }
+            .gallery-track:hover .image-strip-container {
+              opacity: 1;
+            }
 
-        .strip-image-wrapper {
-          width: 60px;
-          height: 60px;
-          cursor: pointer;
-          opacity: 0.7;
-          transition: all 0.3s ease;
-        }
+            .image-strip {
+              display: flex;
+              flex-direction: column;
+              gap: 10px;
+              padding: 10px;
+              border-radius: 8px;
+            }
 
-        .strip-image-wrapper:hover,
-        .strip-image-wrapper.active {
-          opacity: 1;
-          transform: scale(1.1);
-          border: 1px solid black;
-        }
-        .strip-image {
-          width: 100%;
-          height: 100%;
-          object-fit: cover;
-          border-radius: 4px;
-        }
+            .strip-image-wrapper {
+              width: 60px;
+              height: 60px;
+              cursor: pointer;
+              opacity: 0.7;
+              transition: all 0.3s ease;
+            }
 
-        .tab-content {
-          height: calc(100% - 50px);
-        }
+            .strip-image-wrapper:hover,
+            .strip-image-wrapper.active {
+              opacity: 1;
+              transform: scale(1.1);
+              border: 1px solid black;
+            }
+            .strip-image {
+              width: 100%;
+              height: 100%;
+              object-fit: cover;
+              border-radius: 4px;
+            }
 
-        .size-btn {
-          transition: all 0.3s ease;
-           background-color: var(--button);
-        color: var(--button_label);
-        border: 1px solid var(--border);
+            .tab-content {
+              height: calc(100% - 50px);
+            }
+
+            .size-btn {
+              transition: all 0.3s ease;
+               background-color: var(--button);
+            color: var(--button_label);
+            border: 1px solid var(--border);
+            padding: 14px 10px;
+            }
+
+            .size-btn:not(:disabled):hover,
+            .size-btn.bg-black {
+            background-color: var(--hovered_button_label);
+            color: var(--hovered_button_text_color);
+            }
+
+            .size-btn:disabled {
+              opacity: 0.8;
+              cursor: not-allowed;
+               border: 1px solid var(--border);
+               padding: 14px 10px;
+            }
+
+            /* Mobile-specific styles */
+            @media (max-width: 1024px) {
+              .mobile-gallery-item {
+                will-change: opacity, transform;
+                transition: opacity 0.3s ease;
+                position: absolute;
+                inset: 0;
+                max-height: 65vh !important;
+                object-fit: cover !important;
+                display: block;
+              }
+
+              .mobile-gallery-item.active {
+                opacity: 1;
+                z-index: 2;
+                position: relative;
+              }
+
+              .thumbnail-item {
+                transition: all 0.3s ease;
+                opacity: 0.6;
+                border: 2px solid transparent;
+              }
+
+              .thumbnail-item.active {
+                opacity: 1;
+                border-color: black;
+                transform: scale(1.05);
+              }
+
+              .product-tabs {
+                height: auto;
+                min-height: 200px;
+              }
+
+              .tab-content {
+                height: auto;
+              }
+
+              #mobile-size-chart-drawer {
+                transition: transform 0.6s cubic-bezier(0.4,0,0.2,1);
+              }
+            }
+      .size-btn.unavailable-size {
+        opacity: 1;
+        visibility: visible;
+        position: relative;
+        cursor: not-allowed;
+        color: var(--text) !important;
+        border-color: var(--border) !important;
+        background-color: var(--disabled_text) !important;
+        overflow: hidden;
+        transform: translateY(0);
         padding: 14px 10px;
-        }
+      }
 
-        .size-btn:not(:disabled):hover,
-        .size-btn.bg-black {
-        background-color: var(--hovered_button_label);
-        color: var(--hovered_button_text_color);
-        }
+      .size-btn.unavailable-size:hover {
+        background-color: var(--disabled_text) !important;
+        transform: translateY(0);
+      }
 
-        .size-btn:disabled {
-          opacity: 0.8;
-          cursor: not-allowed;
-           border: 1px solid var(--border);
-           padding: 14px 10px;
-        }
+      .size-btn.unavailable-size::after {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: -2px;
+        right: -2px;
+        height: 2px;
+        background-color: var(--text);
+        transform: rotate(-45deg);
+        pointer-events: none;
+      }
 
-        /* Mobile-specific styles */
-        @media (max-width: 1024px) {
-          .mobile-gallery-item {
-            will-change: opacity, transform;
-            transition: opacity 0.3s ease;
-            position: absolute;
-            inset: 0;
-            max-height: 65vh !important;
-            object-fit: cover !important;
-            display: block;
-          }
-
-          .mobile-gallery-item.active {
-            opacity: 1;
-            z-index: 2;
-            position: relative;
-          }
-
-          .thumbnail-item {
-            transition: all 0.3s ease;
-            opacity: 0.6;
-            border: 2px solid transparent;
-          }
-
-          .thumbnail-item.active {
-            opacity: 1;
-            border-color: black;
-            transform: scale(1.05);
-          }
-
-          .product-tabs {
-            height: auto;
-            min-height: 200px;
-          }
-
-          .tab-content {
-            height: auto;
-          }
-
-          #mobile-size-chart-drawer {
-            transition: transform 0.6s cubic-bezier(0.4,0,0.2,1);
-          }
-        }
-  .size-btn.unavailable-size {
-    opacity: 1;
-    visibility: visible;
-    position: relative;
-    cursor: not-allowed;
-    color: var(--text) !important;
-    border-color: var(--border) !important;
-    background-color: var(--disabled_text) !important;
-    overflow: hidden;
-    transform: translateY(0);
-    padding: 14px 10px;
-  }
-
-  .size-btn.unavailable-size:hover {
-    background-color: var(--disabled_text) !important;
-    transform: translateY(0);
-  }
-
-  /* Slash line */
-  .size-btn.unavailable-size::after {
-    content: '';
-    position: absolute;
-    top: 50%;
-    left: -2px;
-    right: -2px;
-    height: 2px;
-    background-color: var(--text);
-    transform: rotate(-45deg);
-    pointer-events: none;
-  }
-
-  .add-to-cart-btn-custom {
-    font-weight: var(--font-heading-weight);
-    font-size: 32px;
-    color: var(--secondary_button_text_color);
-    background-color: var(--secondary_button_label);
-    border-radius: 4px;
-    padding: 5px 10px;
-    line-height: 1;
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    gap: 20px;
-    border: var(--settings-buttons_border_thickness, 1px) solid var(--secondary_button_label);
-    transition: border 0.5s, background-color 0.5s, color 0.5s;
-    position: relative;
-    overflow: hidden;
-    cursor: pointer;
-  }
-  .add-to-cart-btn-custom::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: -100%;
-    width: 100%;
-    height: 100%;
-    background: var(--hovered_secondary_button_label);
-    transition: left 0.5s;
-    z-index: 0;
-  }
-  .add-to-cart-btn-custom:hover::before,
-  .add-to-cart-btn-custom:focus::before {
-    left: 0;
-  }
-  .add-to-cart-btn-custom > * {
-    position: relative;
-    z-index: 1;
-  }
-  .add-to-cart-btn-custom:hover,
-  .add-to-cart-btn-custom:focus {
-    color: var(--hovered_secondary_button_text_color);
-    border-color: var(--hovered_secondary_button_text_color);
-    outline: none;
-  }
-  .add-to-cart-btn-custom svg {
-    stroke-linecap: round;
-    transition: transform 0.3s;
-    transform-origin: center;
-    color: inherit;
-  }
-  .add-to-cart-btn-custom:hover svg,
-  .add-to-cart-btn-custom:focus svg {
-    transform: rotate(-90deg) scale(1.1);
-  }
+      .add-to-cart-btn-custom {
+        font-weight: var(--font-heading-weight);
+        color: var(--secondary_button_text_color);
+        background-color: var(--secondary_button_label);
+        border-radius: 4px;
+        padding: 5px 10px;
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        gap: 20px;
+        border: var(--settings-buttons_border_thickness, 1px) solid var(--secondary_button_label);
+        transition: border 0.5s, background-color 0.5s, color 0.5s;
+        position: relative;
+        overflow: hidden;
+        cursor: pointer;
+      }
+      .add-to-cart-btn-custom::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: var(--hovered_secondary_button_label);
+        transition: left 0.5s;
+        z-index: 0;
+      }
+      .add-to-cart-btn-custom:hover::before,
+      .add-to-cart-btn-custom:focus::before {
+        left: 0;
+      }
+      .add-to-cart-btn-custom > * {
+        position: relative;
+        z-index: 1;
+      }
+      .add-to-cart-btn-custom:hover,
+      .add-to-cart-btn-custom:focus {
+        color: var(--hovered_secondary_button_text_color);
+        border-color: var(--hovered_secondary_button_text_color);
+        outline: none;
+      }
+      .add-to-cart-btn-custom svg {
+        stroke-linecap: round;
+        transition: transform 0.3s;
+        transform-origin: center;
+        color: inherit;
+      }
+      .add-to-cart-btn-custom:hover svg,
+      .add-to-cart-btn-custom:focus svg {
+        transform: rotate(-90deg) scale(1.1);
+      }
 </style>
 <script>
 document.addEventListener('DOMContentLoaded', () => {
@@ -1310,15 +1429,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function formatMoney(cents) {
     if (cents === null || cents === undefined || isNaN(cents)) return '';
-
+    
     try {
       const amount = (cents / 100).toFixed(2);
       const amountNoDecimals = Math.floor(cents / 100);
-
+      
       if (!moneyFormat || typeof moneyFormat !== 'string') {
         throw new Error('Invalid money format');
       }
-
+      
       let formatted = moneyFormat
         .replace(/\{\{\s*amount\s*\}\}/g, amount)
         .replace(/\{\{\s*amount_no_decimals\s*\}\}/g, amountNoDecimals)
@@ -1326,7 +1445,7 @@ document.addEventListener('DOMContentLoaded', () => {
         .replace(/\{\{\s*amount_no_decimals_with_comma_separator\s*\}\}/g, amountNoDecimals.toString())
         .replace(/\{\{\s*amount_with_space_separator\s*\}\}/g, amount.replace(/\B(?=(\d{3})+(?!\d))/g, ' '))
         .replace(/\{\{\s*amount_no_decimals_with_space_separator\s*\}\}/g, amountNoDecimals.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ' '));
-
+      
       return formatted;
     } catch (error) {
       console.warn('Shopify money format error, using fallback:', error);
@@ -1336,9 +1455,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function formatMoneyFallback(cents, currencyCode = shopCurrency) {
     if (cents === null || cents === undefined || isNaN(cents)) return '';
-
+    
     const amount = cents / 100;
-
+    
     try {
       return new Intl.NumberFormat('en-US', {
         style: 'currency',
@@ -1356,17 +1475,17 @@ document.addEventListener('DOMContentLoaded', () => {
   const productOptions = {{ product.options | json }};
   const productVariants = {{ product.variants | json }};
   const cartType = {{ settings.cart_type | default: "page" | json }};
-
-  const colorIndex = productOptions.findIndex(opt =>
+  
+  const colorIndex = productOptions.findIndex(opt => 
     opt.toLowerCase() === 'color' || opt.toLowerCase() === 'colour'
   );
-  const sizeIndex = productOptions.findIndex(opt =>
+  const sizeIndex = productOptions.findIndex(opt => 
     opt.toLowerCase() === 'size'
   );
-
-  const denominationIndex = productOptions.findIndex(opt =>
-    opt.toLowerCase().includes('denomination') ||
-    opt.toLowerCase().includes('value') ||
+  
+  const denominationIndex = productOptions.findIndex(opt => 
+    opt.toLowerCase().includes('denomination') || 
+    opt.toLowerCase().includes('value') || 
     opt.toLowerCase().includes('amount') ||
     opt.toLowerCase().includes('price')
   );
@@ -1379,11 +1498,11 @@ document.addEventListener('DOMContentLoaded', () => {
   } else {
     mainOptionIndex = productOptions.findIndex((opt, index) => index !== colorIndex);
   }
-
-  // State management
+  
+  // State management - Initialize with first available variant or first variant
   let selectedColor = null;
   let selectedSize = null;
-  let selectedMainOption = null;
+  let selectedMainOption = null; 
 
   const firstVariant = productVariants.find(v => v.available) || productVariants[0];
   if (firstVariant) {
@@ -1403,7 +1522,7 @@ document.addEventListener('DOMContentLoaded', () => {
     document.body.style.overflow = 'hidden';
     document.body.style.touchAction = 'none';
   }
-
+  
   function unlockBodyScroll() {
     document.body.style.overflow = '';
     document.body.style.touchAction = '';
@@ -1414,29 +1533,29 @@ document.addEventListener('DOMContentLoaded', () => {
       const colorMatch = colorIndex >= 0 ? variant[`option${colorIndex + 1}`] === color : true;
       const sizeMatch = sizeIndex >= 0 ? variant[`option${sizeIndex + 1}`] === size : true;
       const mainOptionMatch = mainOptionIndex >= 0 ? variant[`option${mainOptionIndex + 1}`] === mainOption : true;
-
+      
       return colorMatch && sizeMatch && mainOptionMatch;
     });
-
+    
     return variant;
   }
 
   // URL Management Functions
   function updateURLWithVariant(variant) {
     if (!variant || !variant.id) return;
-
+    
     const url = new URL(window.location);
     url.searchParams.set('variant', variant.id);
-
+    
     // Update the URL without reloading the page
     window.history.replaceState({ variantId: variant.id }, '', url);
-
+    
     // Update canonical URL if it exists
     const canonicalLink = document.querySelector('link[rel="canonical"]');
     if (canonicalLink) {
       canonicalLink.href = url.href;
     }
-
+    
     // Dispatch custom event for analytics or other tracking
     window.dispatchEvent(new CustomEvent('variant:changed', {
       detail: { variant: variant, url: url.href }
@@ -1446,11 +1565,11 @@ document.addEventListener('DOMContentLoaded', () => {
   function initializeVariantFromURL() {
     const urlParams = new URLSearchParams(window.location.search);
     const variantId = urlParams.get('variant');
-
+    
     if (variantId) {
       // Find the variant by ID
       const variant = productVariants.find(v => v.id.toString() === variantId);
-
+      
       if (variant && variant.available) {
         // Update selected options based on the variant
         if (colorIndex >= 0) {
@@ -1462,10 +1581,10 @@ document.addEventListener('DOMContentLoaded', () => {
         if (mainOptionIndex >= 0) {
           selectedMainOption = variant[`option${mainOptionIndex + 1}`];
         }
-
+        
         // Update UI to reflect the selected variant
         updateUIForVariant(variant);
-
+        
         return true;
       }
     }
@@ -1481,17 +1600,17 @@ document.addEventListener('DOMContentLoaded', () => {
         document.querySelectorAll('.color-swatch').forEach(swatch => {
           swatch.classList.remove('ring-1', 'ring-offset-1', 'ring-black');
         });
-
+        
         // Add active styling to selected swatch
         colorSwatch.classList.add('ring-1', 'ring-offset-2', 'ring-black');
-
+        
         // Update color display
         document.querySelectorAll('[data-active-color]').forEach(display => {
           display.textContent = selectedColor;
         });
       }
     }
-
+    
     // Update size/option buttons
     if (selectedMainOption) {
       const sizeButton = document.querySelector(`[data-value="${selectedMainOption}"]`);
@@ -1500,12 +1619,12 @@ document.addEventListener('DOMContentLoaded', () => {
         document.querySelectorAll('.size-btn').forEach(btn => {
           btn.classList.remove('active', 'bg-black', 'text-white');
         });
-
+        
         // Add active styling to selected button
         sizeButton.classList.add('active', 'bg-black', 'text-white');
       }
     }
-
+    
     // Update price and availability
     updatePriceDisplay(variant, false);
     updatePriceDisplay(variant, true);
@@ -1527,7 +1646,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (mainOptionIndex >= 0) {
           selectedMainOption = variant[`option${mainOptionIndex + 1}`];
         }
-
+        
         // Update UI
         updateUIForVariant(variant);
         updateSizeAvailability();
@@ -1581,7 +1700,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Update cart count
         updateCartCount();
-
+        
         // Re-initialize cart drawer event listeners
         initializeCartDrawerEventListeners();
       })
@@ -1706,7 +1825,6 @@ document.addEventListener('DOMContentLoaded', () => {
               el.textContent = cart.item_count;
               el.classList.remove('hidden');
 
-              // Handle potential span inside cart bubble
               if (el.querySelector('span')) {
                 el.querySelector('span').textContent = cart.item_count;
               }
@@ -1714,15 +1832,14 @@ document.addEventListener('DOMContentLoaded', () => {
           }
         });
 
-        // If there's a cart icon with count displayed as attribute
         const cartIcons = document.querySelectorAll('.cart-icon, [data-cart-icon]');
         cartIcons.forEach((icon) => {
           if (icon) {
+
             icon.setAttribute('data-count', cart.item_count);
           }
         });
 
-        // Dispatch a custom event that theme might be listening for
         document.dispatchEvent(
           new CustomEvent('cart:updated', {
             detail: { cart: cart },
@@ -1734,7 +1851,6 @@ document.addEventListener('DOMContentLoaded', () => {
       });
   }
 
-  // Enhanced Add to Cart functionality with drawer refresh and success notification
   function addToCart(variantId, quantity) {
     if (!variantId) {
       console.error('No variant ID provided');
@@ -1747,10 +1863,10 @@ document.addEventListener('DOMContentLoaded', () => {
     // Show loading state
     const buttons = document.querySelectorAll('#add-to-cart-btn, .mobile-add-to-cart-btn');
     const originalTexts = [];
-
+    
     buttons.forEach((btn, index) => {
-      if (btn.disabled) return;
-
+      if (btn.disabled) return; 
+      
       btn.disabled = true;
       const textEl = btn.querySelector('#add-to-cart-btn-text, #add-to-cart-btn-text-mobile');
       if (textEl) {
@@ -1787,7 +1903,6 @@ document.addEventListener('DOMContentLoaded', () => {
         const contentType = response.headers.get('content-type');
         if (!contentType || !contentType.includes('application/json')) {
           console.warn('Response is not JSON, treating as success');
-          // If it's not JSON but status is OK, treat as success
           return { success: true };
         }
 
@@ -1805,7 +1920,6 @@ document.addEventListener('DOMContentLoaded', () => {
           })
           .catch((error) => {
             console.error('Cart drawer refresh failed:', error);
-            // Fallback: just update count and open
             updateCartCount();
             openCartDrawer();
           });
@@ -1814,11 +1928,9 @@ document.addEventListener('DOMContentLoaded', () => {
         console.error('Error adding to cart:', error);
         console.log('Error type:', error.name, 'Error message:', error.message);
 
-        // Check if the error is likely a parsing issue rather than an actual cart error
         if (error.message.includes('Unexpected') || error.message.includes('JSON')) {
           console.log('Likely JSON parsing error, but cart add may have succeeded');
 
-          // Still try to update cart count as the add might have worked
           setTimeout(() => {
             updateCartCount();
           }, 500);
@@ -1839,8 +1951,6 @@ document.addEventListener('DOMContentLoaded', () => {
           return;
         }
 
-        // Still try to update cart count even if there was an error
-        // because the item might have been added successfully
         setTimeout(() => {
           updateCartCount();
         }, 1000);
@@ -1893,7 +2003,7 @@ document.addEventListener('DOMContentLoaded', () => {
         comparePriceEl.classList.remove('hidden');
       }
       if (compareSeparatorEl) compareSeparatorEl.classList.remove('hidden');
-
+      
       if (savingsInfoEl) {
         const savings = variant.compare_at_price - variant.price;
         const percentage = Math.round((savings / variant.compare_at_price) * 100);
@@ -1935,7 +2045,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function updateSizeAvailability() {
     const sizeBtns = document.querySelectorAll('.size-btn');
-
+    
     sizeBtns.forEach(btn => {
       const optionValue = btn.getAttribute('data-value');
 
@@ -1945,17 +2055,17 @@ document.addEventListener('DOMContentLoaded', () => {
       } else {
         variant = findMatchingVariant(selectedColor, selectedSize, optionValue);
       }
-
+      
       // Remove existing unavailable styling and slash
       const existingSlash = btn.querySelector('.slash-unavailable');
       if (existingSlash) existingSlash.remove();
-
+      
       if (!variant || !variant.available) {
         btn.classList.add('cursor-not-allowed', 'unavailable-size');
-        btn.classList.remove('bg-black', 'text-white');
+        btn.classList.remove('bg-black', 'text-white'); 
         btn.disabled = true;
         btn.setAttribute('aria-disabled', 'true');
-
+        
         const slash = document.createElement('span');
         slash.className = 'slash-unavailable';
         btn.appendChild(slash);
@@ -1969,17 +2079,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function updateVariant() {
     const variant = findMatchingVariant();
-
+    
     // Update desktop
     updatePriceDisplay(variant, false);
     updateAddToCartButton(variant, false);
-
+    
     // Update mobile
     updatePriceDisplay(variant, true);
     updateAddToCartButton(variant, true);
 
     updateSizeAvailability();
-
+    
     // Update URL with new variant
     if (variant && variant.available) {
       updateURLWithVariant(variant);
@@ -1992,13 +2102,13 @@ document.addEventListener('DOMContentLoaded', () => {
     desktopAddToCartBtn.addEventListener('click', function(e) {
       e.preventDefault();
       e.stopPropagation();
-
+      
       if (this.disabled) return false;
-
+      
       const variantId = document.getElementById('variant-id')?.value;
-      const quantity = document.getElementById('quantityInput')?.value ||
+      const quantity = document.getElementById('quantityInput')?.value || 
                       document.getElementById('quantityDisplay')?.textContent || 1;
-
+      
       addToCart(variantId, quantity);
       return false;
     });
@@ -2010,13 +2120,13 @@ document.addEventListener('DOMContentLoaded', () => {
     mobileAddToCartBtn.addEventListener('click', function(e) {
       e.preventDefault();
       e.stopPropagation();
-
+      
       if (this.disabled) return false;
-
+      
       const variantId = document.querySelector('.mobile-variant-id')?.value;
-      const quantity = document.querySelector('.mobile-quantity-input')?.value ||
+      const quantity = document.querySelector('.mobile-quantity-input')?.value || 
                       document.querySelector('.mobile-quantity-display')?.textContent || 1;
-
+      
       addToCart(variantId, quantity);
       return false;
     });
@@ -2082,7 +2192,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const closeBtn = document.getElementById("close-size-chart");
   const drawer = document.getElementById("size-chart-drawer");
   const backdrop = document.getElementById("size-chart-backdrop");
-
+  
   if (openBtn && drawer && backdrop && closeBtn) {
     openBtn.addEventListener("click", () => {
       drawer.classList.remove("hidden");
@@ -2092,7 +2202,7 @@ document.addEventListener('DOMContentLoaded', () => {
       }, 20);
       lockBodyScroll();
     });
-
+  
     const closeDrawer = () => {
       drawer.classList.remove("open");
       backdrop.classList.add("hidden");
@@ -2101,10 +2211,10 @@ document.addEventListener('DOMContentLoaded', () => {
         drawer.classList.add("hidden");
       }, 400);
     };
-
+  
     closeBtn.addEventListener("click", closeDrawer);
     backdrop.addEventListener("click", closeDrawer);
-
+  
     document.addEventListener("keydown", (e) => {
       if (e.key === "Escape") {
         closeDrawer();
@@ -2160,26 +2270,176 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // Mobile Gallery Handling
-  if (window.innerWidth < 1024) {
-    const mobileImages = document.querySelectorAll('.mobile-gallery-item');
-    const thumbnails = document.querySelectorAll('.thumbnail-item');
+  // Desktop gallery and thumbnails
+  const galleryItems = Array.from(document.querySelectorAll('.gallery-item'));
+  const stripImages = Array.from(document.querySelectorAll('.strip-image-wrapper'));
+  let lastScrollActiveIdx = 0;
+  let variantGalleryLock = false;
 
-    thumbnails.forEach((thumb, i) => {
-      thumb.addEventListener('click', () => {
-        showImage(i);
-      });
+  // Infinite scroll logic for desktop gallery
+  function updateActiveImageOnScroll() {
+    if (window.innerWidth < 1024) return;
+    if (variantGalleryLock) return;
+
+    const galleryWrapper = document.querySelector('.gallery-wrapper');
+    if (!galleryWrapper) return;
+
+    galleryItems.forEach(item => {
+      item.style.position = 'static';
+      item.style.top = '';
+      item.style.left = '';
+      item.style.right = '';
+      item.style.bottom = '';
+      item.style.width = '100%';
+      item.style.height = '100%';
     });
 
-    function showImage(index) {
-      mobileImages.forEach((img, i) => {
-        if (i === index) {
+    const wrapperRect = galleryWrapper.getBoundingClientRect();
+    const wrapperCenter = wrapperRect.top + wrapperRect.height / 2;
+
+    let minDistance = Infinity;
+    let activeIdx = 0;
+    galleryItems.forEach((item, idx) => {
+      const rect = item.getBoundingClientRect();
+      const itemCenter = rect.top + rect.height / 2;
+      const distance = Math.abs(itemCenter - wrapperCenter);
+      if (distance < minDistance) {
+        minDistance = distance;
+        activeIdx = idx;
+      }
+    });
+
+    if (activeIdx !== lastScrollActiveIdx) {
+      galleryItems.forEach((item, idx) => {
+        item.classList.toggle('is-active', idx === activeIdx);
+        if (idx === activeIdx) {
+          item.setAttribute('aria-current', 'true');
+        } else {
+          item.removeAttribute('aria-current');
+        }
+      });
+      stripImages.forEach((btn, idx) => {
+        btn.classList.toggle('active', idx === activeIdx);
+        btn.setAttribute('aria-selected', idx === activeIdx ? 'true' : 'false');
+        btn.setAttribute('tabindex', idx === activeIdx ? '0' : '-1');
+      });
+      lastScrollActiveIdx = activeIdx;
+    }
+  }
+
+  const galleryWrapper = document.querySelector('.gallery-wrapper');
+  if (galleryWrapper && window.innerWidth >= 1024) {
+    galleryItems.forEach(item => {
+      item.style.position = 'static';
+      item.style.width = '100%';
+      item.style.height = '100%';
+    });
+    galleryWrapper.addEventListener('scroll', updateActiveImageOnScroll, { passive: true });
+    galleryWrapper.addEventListener('wheel', function(e) {
+      if (Math.abs(e.deltaY) > Math.abs(e.deltaX)) {
+        galleryWrapper.scrollTop += e.deltaY;
+        updateActiveImageOnScroll();
+        e.preventDefault();
+      }
+    }, { passive: false });
+    setTimeout(updateActiveImageOnScroll, 100);
+  }
+
+  // Thumbnail click: show corresponding image (desktop)
+  stripImages.forEach((strip, idx) => {
+    strip.addEventListener('click', function () {
+      variantGalleryLock = true;
+      galleryItems.forEach((item, i) => {
+        item.classList.toggle('is-active', i === idx);
+        if (i === idx) {
+          item.setAttribute('aria-current', 'true');
+        } else {
+          item.removeAttribute('aria-current');
+        }
+      });
+      stripImages.forEach((btn, i) => {
+        btn.classList.toggle('active', i === idx);
+        btn.setAttribute('aria-selected', i === idx ? 'true' : 'false');
+        btn.setAttribute('tabindex', i === idx ? '0' : '-1');
+      });
+      lastScrollActiveIdx = idx;
+      const item = galleryItems[idx];
+      if (item && galleryWrapper) {
+        const itemRect = item.getBoundingClientRect();
+        const wrapperRect = galleryWrapper.getBoundingClientRect();
+        const scrollTop = galleryWrapper.scrollTop + (itemRect.top + itemRect.height / 2) - (wrapperRect.top + wrapperRect.height / 2);
+        galleryWrapper.scrollTo({ top: scrollTop, behavior: 'smooth' });
+      }
+      setTimeout(() => { variantGalleryLock = false; }, 400);
+    });
+  });
+
+  // Variant-aware gallery switching (desktop & mobile)
+  function showVariantGalleryImage(variant) {
+    variantGalleryLock = true;
+    let found = false;
+    galleryItems.forEach((item, idx) => {
+      item.style.display = '';
+      if (
+        variant &&
+        variant.featured_media &&
+        item.getAttribute('data-media-id') === variant.featured_media.id.toString()
+      ) {
+        item.classList.add('is-active');
+        item.setAttribute('aria-current', 'true');
+        stripImages[idx].classList.add('active');
+        stripImages[idx].setAttribute('aria-selected', 'true');
+        stripImages[idx].setAttribute('tabindex', '0');
+        found = true;
+
+        const galleryWrapper = document.querySelector('.gallery-wrapper');
+        if (galleryWrapper) {
+          const itemRect = item.getBoundingClientRect();
+          const wrapperRect = galleryWrapper.getBoundingClientRect();
+          const scrollTop = galleryWrapper.scrollTop + (itemRect.top + itemRect.height / 2) - (wrapperRect.top + wrapperRect.height / 2);
+          galleryWrapper.scrollTo({ top: scrollTop, behavior: 'smooth' });
+        }
+      } else {
+        item.classList.remove('is-active');
+        item.removeAttribute('aria-current');
+        stripImages[idx].classList.remove('active');
+        stripImages[idx].setAttribute('aria-selected', 'false');
+        stripImages[idx].setAttribute('tabindex', '-1');
+      }
+    });
+    lastScrollActiveIdx = found
+      ? galleryItems.findIndex(item =>
+          variant &&
+          variant.featured_media &&
+          item.getAttribute('data-media-id') === variant.featured_media.id.toString()
+        )
+      : 0;
+
+    if (typeof mobileGalleryItems !== 'undefined' && typeof mobileThumbnails !== 'undefined') {
+      mobileGalleryItems.forEach((img, idx) => {
+        img.style.display = '';
+        if (
+          variant &&
+          variant.featured_media &&
+          img.getAttribute('data-media-id') === variant.featured_media.id.toString()
+        ) {
           img.classList.add('active');
           img.classList.add('relative');
           img.classList.remove('absolute', 'top-0', 'left-0');
           img.style.opacity = '1';
           img.style.zIndex = '2';
           img.style.pointerEvents = 'auto';
+          mobileThumbnails[idx].classList.add('active');
+          mobileThumbnails[idx].setAttribute('aria-selected', 'true');
+          mobileThumbnails[idx].setAttribute('tabindex', '0');
+          mobileThumbnails[idx].style.opacity = '1';
+
+          const mainImages = document.querySelector('.main-images');
+          if (mainImages) {
+            const imgRect = img.getBoundingClientRect();
+            const mainRect = mainImages.getBoundingClientRect();
+            mainImages.scrollTop += (imgRect.top + imgRect.height / 2) - (mainRect.top + mainRect.height / 2);
+          }
         } else {
           img.classList.remove('active');
           img.classList.remove('relative');
@@ -2187,109 +2447,15 @@ document.addEventListener('DOMContentLoaded', () => {
           img.style.opacity = '0';
           img.style.zIndex = '1';
           img.style.pointerEvents = 'none';
-        }
-      });
-
-      thumbnails.forEach((thumb, i) => {
-        if (i === index) {
-          thumb.classList.add('active');
-          thumb.style.opacity = '1';
-        } else {
-          thumb.classList.remove('active');
-          thumb.style.opacity = '0.6';
+          mobileThumbnails[idx].classList.remove('active');
+          mobileThumbnails[idx].setAttribute('aria-selected', 'false');
+          mobileThumbnails[idx].setAttribute('tabindex', '-1');
+          mobileThumbnails[idx].style.opacity = '0.6';
         }
       });
     }
 
-    // Initialize with first image
-    if (mobileImages.length > 0) {
-      showImage(0);
-    }
-  }
-
-  // Desktop gallery handling
-  const gallery = document.querySelector('.product-gallery');
-  const items = document.querySelectorAll('.gallery-item');
-  const stripImages = document.querySelectorAll('.strip-image-wrapper');
-  const totalImages = items.length;
-
-  if (gallery && items.length && stripImages.length) {
-    let scrollLockUntil = 0;
-
-    function updateActiveImage() {
-      if (totalImages === 1) {
-        items[0].classList.add('is-active');
-        stripImages[0].classList.add('active');
-        return;
-      }
-
-      if (Date.now() < scrollLockUntil) return;
-
-      const galleryTop = gallery.offsetTop;
-      const scrollPosition = window.pageYOffset;
-      const sectionHeight = gallery.offsetHeight;
-      const windowHeight = window.innerHeight;
-      const scrollableDistance = sectionHeight - windowHeight;
-
-      const scrollFraction = (scrollPosition - galleryTop) / scrollableDistance;
-      const imageIndex = Math.min(Math.floor(scrollFraction * (totalImages - 0.1)), totalImages - 1);
-      const targetIndex = Math.max(0, imageIndex);
-
-      items.forEach((item, index) => {
-        item.classList.toggle('is-active', index === targetIndex);
-        const video = item.querySelector('video');
-        if (video) {
-          if (index === targetIndex) {
-            video.muted = true;
-            video.play().catch(() => {});
-          } else {
-            video.pause();
-            video.currentTime = 0;
-          }
-        }
-      });
-
-      stripImages.forEach((img, index) => {
-        img.classList.toggle('active', index === targetIndex);
-      });
-    }
-
-    let ticking = false;
-    window.addEventListener('scroll', () => {
-      if (!ticking) {
-        window.requestAnimationFrame(() => {
-          updateActiveImage();
-          ticking = false;
-        });
-        ticking = true;
-      }
-    });
-
-    stripImages.forEach((stripImage, index) => {
-      stripImage.addEventListener('click', () => {
-        scrollLockUntil = Date.now() + 2000;
-
-        items.forEach((item, i) => {
-          item.classList.toggle('is-active', i === index);
-          const video = item.querySelector('video');
-          if (video) {
-            if (i === index) {
-              video.muted = true;
-              video.play();
-            } else {
-              video.pause();
-              video.currentTime = 0;
-            }
-          }
-        });
-
-        stripImages.forEach((img, i) => {
-          img.classList.toggle('active', i === index);
-        });
-      });
-    });
-
-    updateActiveImage();
+    setTimeout(() => { variantGalleryLock = false; }, 300);
   }
 
   // Tab functionality
@@ -2301,7 +2467,6 @@ document.addEventListener('DOMContentLoaded', () => {
       const targetTab = button.getAttribute("data-tab");
       const borderDiv = button.querySelector(".tab-top-bar");
 
-      // Reset all tabs to inactive state
       tabButtons.forEach((btn) => {
         const btnBorderDiv = btn.querySelector(".tab-top-bar");
 
@@ -2313,15 +2478,12 @@ document.addEventListener('DOMContentLoaded', () => {
         }
       });
 
-      // Set clicked tab to active state
       button.classList.add("active-tab");
       button.style.color = "var(--text)";
 
       if (borderDiv) {
         borderDiv.style.backgroundColor = "var(--text)";
       }
-
-      // Handle tab pane visibility
       tabPanes.forEach((pane) => {
         if (pane.getAttribute("data-content") === targetTab) {
           pane.classList.remove("hidden");
@@ -2333,7 +2495,6 @@ document.addEventListener('DOMContentLoaded', () => {
       });
     });
 
-    // Tab hover effects
     const borderDiv = button.querySelector(".tab-top-bar");
 
     button.addEventListener("mouseenter", () => {
@@ -2355,10 +2516,9 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  // Color swatch handling
   const colorSwatches = document.querySelectorAll('.color-swatch');
   const activeColorDisplays = document.querySelectorAll('[data-active-color]');
-  let lastSelectedColor = '';
+  let lastSelectedColor = selectedColor || ''; 
 
   function updateColorDisplays(color) {
     activeColorDisplays.forEach(display => {
@@ -2368,147 +2528,141 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function setActiveSwatch(swatch) {
     const newSelectedColor = swatch.getAttribute('data-option-value');
-
-    // Remove ring from all swatches
     colorSwatches.forEach((el) => {
       el.classList.remove('ring-1', 'ring-offset-1', 'ring-black');
+      el.setAttribute('aria-checked', 'false');
+      el.setAttribute('tabindex', '-1');
     });
-
-    // Add ring to selected swatch
-    swatch.offsetWidth;
     swatch.classList.add('ring-1', 'ring-offset-2', 'ring-black');
-
-    // Update color displays
+    swatch.setAttribute('aria-checked', 'true');
+    swatch.setAttribute('tabindex', '0');
     updateColorDisplays(newSelectedColor);
-
-    // Update selected color and variant
     selectedColor = newSelectedColor;
     lastSelectedColor = newSelectedColor;
-
     swatch.blur();
     updateVariant();
+    const variant = findMatchingVariant();
+    showVariantGalleryImage(variant);
   }
 
   if (colorSwatches.length > 0) {
     colorSwatches.forEach(swatch => {
       const swatchColor = swatch.getAttribute('data-option-value');
-
+  
+      if (selectedColor && swatchColor === selectedColor) {
+        swatch.classList.add('ring-1', 'ring-offset-2', 'ring-black');
+        swatch.setAttribute('aria-checked', 'true');
+        swatch.setAttribute('tabindex', '0');
+        updateColorDisplays(selectedColor);
+        lastSelectedColor = selectedColor;
+      } else {
+        swatch.classList.remove('ring-1', 'ring-offset-2', 'ring-black');
+        swatch.setAttribute('aria-checked', 'false');
+        swatch.setAttribute('tabindex', '-1');
+      }
+      
       swatch.addEventListener('click', () => setActiveSwatch(swatch));
-
       swatch.addEventListener('mouseenter', () => {
         if (swatchColor) updateColorDisplays(swatchColor);
       });
-
       swatch.addEventListener('mouseleave', () => {
         if (lastSelectedColor) updateColorDisplays(lastSelectedColor);
       });
     });
-
-    // Initialize first swatch as selected
-    setActiveSwatch(colorSwatches[0]);
+   
+    if (!selectedColor) {
+      updateColorDisplays('');
+    }
   }
-
-  // Size/option button handling
   const sizeButtons = document.querySelectorAll('.size-btn');
-
   if (sizeButtons.length > 0) {
     sizeButtons.forEach((btn) => {
       btn.addEventListener('click', () => {
         if (btn.disabled) return;
-
         const newSelectedValue = btn.getAttribute('data-value');
-
-        // Remove active styling from all size buttons
         sizeButtons.forEach((b) => {
           b.classList.remove('active', 'bg-black', 'text-white');
         });
-
-        // Add active styling to clicked button
         btn.classList.add('active', 'bg-black', 'text-white');
-
         if (mainOptionIndex === sizeIndex) {
           selectedSize = newSelectedValue;
           selectedMainOption = newSelectedValue;
         } else {
-          // This is a denomination/value for gift cards
           selectedMainOption = newSelectedValue;
         }
-
-        // Force variant update
         updateVariant();
       });
     });
-
-    // Initialize first available option as selected
-    const firstAvailableBtn = Array.from(sizeButtons).find(btn => !btn.disabled);
-    if (firstAvailableBtn) {
-      const initialValue = firstAvailableBtn.getAttribute('data-value');
-      if (mainOptionIndex === sizeIndex) {
-        selectedSize = initialValue;
-        selectedMainOption = initialValue;
-      } else {
-        selectedMainOption = initialValue;
+    if (selectedMainOption) {
+      const selectedBtn = Array.from(sizeButtons).find(btn => 
+        btn.getAttribute('data-value') === selectedMainOption && !btn.disabled
+      );
+      if (selectedBtn) {
+        selectedBtn.classList.add('active', 'bg-black', 'text-white');
       }
-      firstAvailableBtn.classList.add('active', 'bg-black', 'text-white');
+    } else {
+      const firstAvailableBtn = Array.from(sizeButtons).find(btn => !btn.disabled);
+      if (firstAvailableBtn) {
+        const initialValue = firstAvailableBtn.getAttribute('data-value');
+        if (mainOptionIndex === sizeIndex) {
+          selectedSize = initialValue;
+          selectedMainOption = initialValue;
+        } else {
+          selectedMainOption = initialValue;
+        }
+        firstAvailableBtn.classList.add('active', 'bg-black', 'text-white');
+      }
     }
   }
 
-  // Pickup availability drawer functionality
-  function openPickupDrawer() {
-    var pickupDrawer = document.querySelector('pickup-availability-drawer');
-    if (pickupDrawer) {
-      pickupDrawer.setAttribute('open', '');
-      document.body.classList.add('overflow-hidden');
-      pickupDrawer.focus();
+  const mobileGalleryItems = Array.from(document.querySelectorAll('.mobile-gallery-item'));
+  const mobileThumbnails = Array.from(document.querySelectorAll('.thumbnail-item'));
+
+  mobileThumbnails.forEach((thumb, idx) => {
+    thumb.addEventListener('click', function () {
+      mobileThumbnails.forEach((t, i) => {
+        t.classList.toggle('active', i === idx);
+        t.setAttribute('aria-selected', i === idx ? 'true' : 'false');
+        t.setAttribute('tabindex', i === idx ? '0' : '-1');
+      });
+      mobileGalleryItems.forEach((img, i) => {
+        if (i === idx) {
+          img.classList.add('active');
+          img.classList.add('relative');
+          img.classList.remove('absolute', 'top-0', 'left-0');
+          img.style.opacity = '1';
+          img.style.zIndex = '2';
+          img.style.pointerEvents = 'auto';
+        } else {
+          img.classList.remove('active');
+          img.classList.remove('relative');
+          img.classList.add('absolute', 'top-0', 'left-0');
+          img.style.opacity = '0';
+          img.style.zIndex = '1';
+          img.style.pointerEvents = 'none';
+        }
+      });
+    });
+  });
+
+  function initializePage() {
+    const urlInitialized = initializeVariantFromURL();
+    
+    if (!urlInitialized) {
+      updateUIForVariant(findMatchingVariant());
     }
-  }
 
-  function closePickupDrawer() {
-    var pickupDrawer = document.querySelector('pickup-availability-drawer');
-    if (pickupDrawer) {
-      pickupDrawer.removeAttribute('open');
-      document.body.classList.remove('overflow-hidden');
-    }
-  }
+    updateVariant();
 
-  function pickupDrawerHandler(e) {
-    var target = e.target;
-    // Use closest to support event bubbling from child elements
-    var pickupBtn = target.closest('#ShowPickupAvailabilityDrawer');
-    var closeBtn = target.closest('.pickup-availability-drawer-button');
-    if (pickupBtn) {
-      e.preventDefault();
-      openPickupDrawer();
-    }
-    if (closeBtn) {
-      e.preventDefault();
-      closePickupDrawer();
-    }
-  }
-
-  document.body.addEventListener('click', pickupDrawerHandler);
-  document.body.addEventListener('touchend', pickupDrawerHandler, { passive: false });
-
-  // Handle browser navigation (back/forward buttons)
-  window.addEventListener('popstate', handlePopState);
-
-  // Initialize variant from URL if present
-  const urlInitialized = initializeVariantFromURL();
-
-  // If URL didn't have a variant or it was invalid, update URL with current selection
-  if (!urlInitialized) {
     const currentVariant = findMatchingVariant();
     if (currentVariant) {
-      updateURLWithVariant(currentVariant);
+      showVariantGalleryImage(currentVariant);
     }
+
+    window.addEventListener('popstate', handlePopState);
   }
 
-  // Initial variant update and cart count sync
-  updateVariant();
-  updateCartCount();
-
-  // Initialize cart drawer event listeners on page load
-  initializeCartDrawerEventListeners();
+  initializePage();
 });
 </script>
 
