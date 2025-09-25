@@ -114,13 +114,17 @@ class CurrencyUpdateHandler {
         drawerTotal.textContent = this.formatMoney(cartData.total_price);
       }
 
-      // Update cart drawer item prices
-      cartData.items.forEach((item, index) => {
-        const itemElement = cartDrawer.querySelector(`#CartDrawer-Item-${index + 1}`);
+      // Update cart drawer item prices using data-item-key like the cart page
+      cartData.items.forEach((item) => {
+        const itemElement = cartDrawer.querySelector(`[data-item-key="${item.key}"]`);
         if (itemElement) {
-          const priceElement = itemElement.querySelector('.item-price');
-          if (priceElement) {
-            priceElement.textContent = this.formatMoney(item.final_price);
+          // Find the price element within the cart item row
+          const cartItemRow = itemElement.closest('tr[id^="CartDrawer-Item-"]');
+          if (cartItemRow) {
+            const priceElement = cartItemRow.querySelector('.item-price');
+            if (priceElement) {
+              priceElement.textContent = this.formatMoney(item.final_price);
+            }
           }
         }
       });
@@ -145,7 +149,57 @@ class CurrencyUpdateHandler {
       // Extract currency from locale if available
       const locale = window.Shopify.locale;
       if (locale.includes('_')) {
-        currency = locale.split('_')[1];
+        const countryCode = locale.split('_')[1];
+        // Map country codes to currency codes
+        const countryToCurrency = {
+          US: 'USD',
+          CA: 'CAD',
+          GB: 'GBP',
+          AU: 'AUD',
+          DE: 'EUR',
+          FR: 'EUR',
+          IT: 'EUR',
+          ES: 'EUR',
+          NL: 'EUR',
+          BE: 'EUR',
+          AT: 'EUR',
+          FI: 'EUR',
+          IE: 'EUR',
+          PT: 'EUR',
+          GR: 'EUR',
+          LU: 'EUR',
+          CY: 'EUR',
+          MT: 'EUR',
+          SK: 'EUR',
+          SI: 'EUR',
+          EE: 'EUR',
+          LV: 'EUR',
+          LT: 'EUR',
+          JP: 'JPY',
+          CN: 'CNY',
+          KR: 'KRW',
+          IN: 'INR',
+          BR: 'BRL',
+          MX: 'MXN',
+          CH: 'CHF',
+          SE: 'SEK',
+          NO: 'NOK',
+          DK: 'DKK',
+          PL: 'PLN',
+          CZ: 'CZK',
+          HU: 'HUF',
+          RU: 'RUB',
+          TH: 'THB',
+          SG: 'SGD',
+          HK: 'HKD',
+          NZ: 'NZD',
+          ZA: 'ZAR',
+          TR: 'TRY',
+          IL: 'ILS',
+          AE: 'AED',
+          SA: 'SAR',
+        };
+        currency = countryToCurrency[countryCode] || 'USD';
       }
     } else {
       // Try to get currency from URL parameters
