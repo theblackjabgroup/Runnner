@@ -378,6 +378,75 @@ function showShippingError(message) {
 }
 
 /**
+ * Handle order note form submission
+ * @param {HTMLFormElement} form - The order note form
+ */
+function handleOrderNote(form) {
+  const noteTextarea = form.querySelector('textarea');
+  const sendButton = form.querySelector('.sidebar-btn');
+
+  if (!noteTextarea || !sendButton) return;
+
+  const note = noteTextarea.value.trim();
+
+  // Update cart note
+  updateCartNote(note, sendButton);
+}
+
+/**
+ * Update cart note via API
+ * @param {string} note - The note text
+ * @param {HTMLElement} button - The button to show feedback on
+ */
+async function updateCartNote(note, button) {
+  try {
+    const response = await fetch('/cart/update.js', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Accept: 'application/json',
+      },
+      body: JSON.stringify({
+        note: note,
+      }),
+    });
+
+    if (response.ok) {
+      const data = await response.json();
+      console.log('Cart note updated successfully');
+
+      // Show success feedback
+      if (button) {
+        const originalText = button.textContent;
+        button.textContent = '[SENT]';
+        button.style.color = '#28a745';
+
+        setTimeout(() => {
+          button.textContent = originalText;
+          button.style.color = 'var(--text)';
+        }, 2000);
+      }
+    } else {
+      throw new Error('Failed to update cart note');
+    }
+  } catch (error) {
+    console.error('Error updating cart note:', error);
+
+    // Show error feedback
+    if (button) {
+      const originalText = button.textContent;
+      button.textContent = '[ERROR]';
+      button.style.color = '#dc3545';
+
+      setTimeout(() => {
+        button.textContent = originalText;
+        button.style.color = 'var(--text)';
+      }, 2000);
+    }
+  }
+}
+
+/**
  * Change item color
  * @param {HTMLElement} colorPicker - The clicked color picker element
  */
@@ -513,6 +582,27 @@ document.addEventListener('DOMContentLoaded', function () {
     if (e.target.id === 'shipping-estimate-form') {
       handleShippingEstimate(e.target);
     }
-    // Add your form handling logic here for other forms
+
+    // Handle order note form
+    if (e.target.classList.contains('note-form')) {
+      handleOrderNote(e.target);
+    }
   });
+
+  // Auto-save order note on blur
+  document.addEventListener(
+    'blur',
+    function (e) {
+      if (e.target.tagName === 'TEXTAREA' && e.target.closest('.note-form')) {
+        const form = e.target.closest('.note-form');
+        const sendButton = form.querySelector('.sidebar-btn');
+        const note = e.target.value.trim();
+
+        if (note) {
+          updateCartNote(note, sendButton);
+        }
+      }
+    },
+    true
+  );
 });
