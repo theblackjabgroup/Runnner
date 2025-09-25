@@ -5,6 +5,7 @@ class CartDrawer extends HTMLElement {
     this.addEventListener('keyup', (evt) => evt.code === 'Escape' && this.close());
     this.querySelector('#CartDrawer-Overlay').addEventListener('click', this.close.bind(this));
     this.setHeaderCartIconAccessibility();
+    this.setupOrderNoteFunctionality();
   }
 
   setHeaderCartIconAccessibility() {
@@ -111,6 +112,72 @@ class CartDrawer extends HTMLElement {
 
   setActiveElement(element) {
     this.activeElement = element;
+  }
+
+  setupOrderNoteFunctionality() {
+    const saveNoteButton = this.querySelector('#CartDrawer-SaveNote');
+    const noteTextarea = this.querySelector('#CartDrawer-Note');
+
+    if (saveNoteButton && noteTextarea) {
+      saveNoteButton.addEventListener('click', () => {
+        this.updateCartNote(noteTextarea.value);
+      });
+
+      // Auto-save on blur (when user clicks away from textarea)
+      noteTextarea.addEventListener('blur', () => {
+        this.updateCartNote(noteTextarea.value);
+      });
+    }
+  }
+
+  async updateCartNote(note) {
+    try {
+      const response = await fetch('/cart/update.js', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Accept: 'application/json',
+        },
+        body: JSON.stringify({
+          note: note,
+        }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        console.log('Cart note updated successfully');
+
+        // Show success feedback
+        const saveButton = this.querySelector('#CartDrawer-SaveNote');
+        if (saveButton) {
+          const originalText = saveButton.textContent;
+          saveButton.textContent = 'Saved!';
+          saveButton.style.color = '#28a745';
+
+          setTimeout(() => {
+            saveButton.textContent = originalText;
+            saveButton.style.color = 'var(--text)';
+          }, 2000);
+        }
+      } else {
+        throw new Error('Failed to update cart note');
+      }
+    } catch (error) {
+      console.error('Error updating cart note:', error);
+
+      // Show error feedback
+      const saveButton = this.querySelector('#CartDrawer-SaveNote');
+      if (saveButton) {
+        const originalText = saveButton.textContent;
+        saveButton.textContent = 'Error!';
+        saveButton.style.color = '#dc3545';
+
+        setTimeout(() => {
+          saveButton.textContent = originalText;
+          saveButton.style.color = 'var(--text)';
+        }, 2000);
+      }
+    }
   }
 }
 

@@ -287,7 +287,9 @@
                                               {%- assign color_key = color_value | downcase | replace: ' ', '_' -%}
                                               {%- assign color_delimiter = '|' | append: color_key | append: '|' -%}
                                               {%- unless available_colors contains color_delimiter -%}
-                                                {%- assign available_colors = available_colors | append: color_delimiter -%}
+                                                {%- assign available_colors = available_colors
+                                                  | append: color_delimiter
+                                                -%}
 
                                                 {%- comment -%} Find variant that matches this color and current size {%- endcomment -%}
                                                 {%- assign target_variant_id = variant.id -%}
@@ -295,8 +297,12 @@
                                                   {%- for size_variant in item.product.variants -%}
                                                     {%- assign variant_matches = true -%}
                                                     {%- for j in (0..2) -%}
-                                                      {%- assign check_option_name = item.product.options[j] | downcase -%}
-                                                      {%- if check_option_name contains 'color' or check_option_name contains 'colour' -%}
+                                                      {%- assign check_option_name = item.product.options[j]
+                                                        | downcase
+                                                      -%}
+                                                      {%- if check_option_name contains 'color'
+                                                        or check_option_name contains 'colour'
+                                                      -%}
                                                         {%- if size_variant.options[j] != color_value -%}
                                                           {%- assign variant_matches = false -%}
                                                         {%- endif -%}
@@ -774,7 +780,9 @@
                                             {%- assign color_key = color_value | downcase | replace: ' ', '_' -%}
                                             {%- assign color_delimiter = '|' | append: color_key | append: '|' -%}
                                             {%- unless available_colors contains color_delimiter -%}
-                                              {%- assign available_colors = available_colors | append: color_delimiter -%}
+                                              {%- assign available_colors = available_colors
+                                                | append: color_delimiter
+                                              -%}
 
                                               {%- comment -%} Find variant that matches this color and current size {%- endcomment -%}
                                               {%- assign target_variant_id = variant.id -%}
@@ -782,8 +790,12 @@
                                                 {%- for size_variant in item.product.variants -%}
                                                   {%- assign variant_matches = true -%}
                                                   {%- for j in (0..2) -%}
-                                                    {%- assign check_option_name = item.product.options[j] | downcase -%}
-                                                    {%- if check_option_name contains 'color' or check_option_name contains 'colour' -%}
+                                                    {%- assign check_option_name = item.product.options[j]
+                                                      | downcase
+                                                    -%}
+                                                    {%- if check_option_name contains 'color'
+                                                      or check_option_name contains 'colour'
+                                                    -%}
                                                       {%- if size_variant.options[j] != color_value -%}
                                                         {%- assign variant_matches = false -%}
                                                       {%- endif -%}
@@ -853,13 +865,21 @@
         <!-- Subtotals -->
 
         <div class="cart-drawer__footer" {{ block.shopify_attributes }}>
-          <div class="totals !text-[16px] border-t flex justify-between items-center" role="status" style="border-color: var(--border); padding: 10px 0;">
+          <div
+            class="totals !text-[16px] border-t flex justify-between items-center"
+            role="status"
+            style="border-color: var(--border); padding: 10px 0;"
+          >
             <h2 class="totals__total !text-normal" style="color: var(--text);">SUBTOTAL</h2>
-            <span class="!text-[16px] !font-medium" style="color: var(--text);">${{ cart.total_price | money_without_currency }}</span>
+            <span class="!text-[16px] !font-medium" style="color: var(--text);"
+              >${{ cart.total_price | money_without_currency -}}
+            </span>
           </div>
 
           <details class="border-t border-b" style="border-color: var(--border);">
-            <summary class="!text-[16px] !font-medium cursor-pointer py-3" style="color: var(--text);">ORDER NOTE</summary>
+            <summary class="!text-[16px] !font-medium cursor-pointer py-3" style="color: var(--text);">
+              ORDER NOTE
+            </summary>
             <div class="pb-3">
               <textarea
                 name="note"
@@ -867,7 +887,16 @@
                 class="w-full p-2 border rounded"
                 style="border-color: var(--border); background: var(--background); color: var(--text); min-height: 80px; resize: vertical;"
                 placeholder="Add a note to your order..."
+                data-cart-note
               >{{ cart.note }}</textarea>
+              <button
+                type="button"
+                id="CartDrawer-SaveNote"
+                class="mt-2 px-4 py-2 text-sm border rounded cursor-pointer"
+                style="border-color: var(--border); background: var(--background); color: var(--text);"
+              >
+                Save Note
+              </button>
             </div>
           </details>
         </div>
