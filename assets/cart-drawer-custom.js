@@ -6,28 +6,66 @@
 document.addEventListener('DOMContentLoaded', function () {
   // Order note functionality
   var orderNoteTextarea = document.getElementById('CartDrawer-Note');
+  var saveNoteButton = document.getElementById('CartDrawer-SaveNote');
 
+  // Function to update cart note
+  function updateCartNote(note) {
+    fetch('/cart/update.js', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        note: note,
+      }),
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        console.log('Cart note updated successfully');
+
+        // Show success feedback
+        if (saveNoteButton) {
+          const originalText = saveNoteButton.textContent;
+          saveNoteButton.textContent = 'Saved!';
+          saveNoteButton.style.color = '#28a745';
+
+          setTimeout(() => {
+            saveNoteButton.textContent = originalText;
+            saveNoteButton.style.color = 'var(--text)';
+          }, 2000);
+        }
+      })
+      .catch((error) => {
+        console.error('Error updating cart note:', error);
+
+        // Show error feedback
+        if (saveNoteButton) {
+          const originalText = saveNoteButton.textContent;
+          saveNoteButton.textContent = 'Error!';
+          saveNoteButton.style.color = '#dc3545';
+
+          setTimeout(() => {
+            saveNoteButton.textContent = originalText;
+            saveNoteButton.style.color = 'var(--text)';
+          }, 2000);
+        }
+      });
+  }
+
+  // Auto-save on blur
   if (orderNoteTextarea) {
     orderNoteTextarea.addEventListener('blur', function () {
-      var note = this.value;
+      var note = this.value.trim();
+      // Always update cart note (allows clearing notes)
+      updateCartNote(note);
+    });
+  }
 
-      // Update cart note via AJAX
-      fetch('/cart/update.js', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          note: note,
-        }),
-      })
-        .then((response) => response.json())
-        .then((data) => {
-          console.log('Cart note updated successfully');
-        })
-        .catch((error) => {
-          console.error('Error updating cart note:', error);
-        });
+  // Save button click
+  if (saveNoteButton) {
+    saveNoteButton.addEventListener('click', function () {
+      var note = orderNoteTextarea ? orderNoteTextarea.value.trim() : '';
+      updateCartNote(note);
     });
   }
 });
