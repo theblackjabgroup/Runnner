@@ -56,7 +56,12 @@
         {%- endif -%}
 
         <!-- Add vertical image strip -->
-        <div class="image-strip-container" role="tablist" aria-label="Product image thumbnails">
+        <div
+          class="image-strip-container"
+          style="position: fixed; top: 50%; left: 10px; transform: translateY(-50%); z-index: 100;"
+          role="tablist"
+          aria-label="Product image thumbnails"
+        >
           <div class="image-strip" id="desktop-image-strip">
             {%- for media in product.media -%}
               <button
@@ -147,12 +152,21 @@
           {%- if color_option and color_option.values.size > 0 -%}
             <fieldset class="product-variants my-4" role="group" aria-labelledby="color-legend">
               <legend id="color-legend" class="flex items-center gap-2">
-                <span class="inline-block text-[14px] font-medium" style="font-weight: var(--t-b-4-weight); font-size: var(--t-b-4-size); line-height: var(--t-b-4-line-height);">SELECT COLOR:</span>
-                <span class="active-color text-[14px] font-medium uppercase" data-active-color aria-live="polite" style="font-weight: var(--t-b-4-weight); font-size: var(--t-b-4-size); line-height: var(--t-b-4-line-height);">
+                <span
+                  class="inline-block text-[14px] font-medium"
+                  style="font-weight: var(--t-b-4-weight); font-size: var(--t-b-4-size); line-height: var(--t-b-4-line-height);"
+                  >SELECT COLOR:</span
+                >
+                <span
+                  class="active-color text-[14px] font-medium uppercase"
+                  data-active-color
+                  aria-live="polite"
+                  style="font-weight: var(--t-b-4-weight); font-size: var(--t-b-4-size); line-height: var(--t-b-4-line-height);"
+                >
                   {{- color_option.values | first -}}
                 </span>
               </legend>
-              <div class="color-options flex gap-4 p-2" role="radiogroup" aria-labelledby="color-legend">
+              <div class="product-color-options flex gap-3 p-2" role="radiogroup" aria-labelledby="color-legend">
                 {%- for value in color_option.values -%}
                   <button
                     type="button"
@@ -175,7 +189,7 @@
 
       {% comment %} tabs  {% endcomment %}
       <div
-        class="product-tabs w-[80%] flex-1 overflow-hidden scroll-fade-trigger scroll-fade-up scroll-fade-delay-4"
+        class="product-tabs w-[100%] flex-1 overflow-hidden scroll-fade-trigger scroll-fade-up scroll-fade-delay-4"
         role="region"
         aria-label="Product information"
       >
@@ -191,7 +205,7 @@
               {%- assign tab_index = tab_index | plus: 1 -%}
               <button
                 class="tab-btn group text-[16px] text-left pt-[5px] mr-3 w-full transition-colors duration-300 relative {% if tab_index == 1 %}active-tab{% endif %} focus:outline-none focus:ring-2 focus:ring-blue-500"
-                style="color: {% if tab_index == 1 %}var(--text){% else %}var(--secondary_text){% endif %}; font-weight: var(--t-b-3-weight); font-size: var(--t-b-3-size); line-height: var(--t-b-3-line-height);" 
+                style="color: {% if tab_index == 1 %}var(--text){% else %}var(--secondary_text){% endif %}; font-weight: var(--t-b-3-weight); font-size: var(--t-b-3-size); line-height: var(--t-b-3-line-height);"
                 data-tab="tab-{{ block.id }}"
                 role="tab"
                 aria-selected="{% if tab_index == 1 %}true{% else %}false{% endif %}"
@@ -253,29 +267,29 @@
 
                   <div
                     id="size-chart-drawer"
-                    class="fixed top-0 right-0 h-full bg-white shadow-lg transform translate-x-full hidden transition-transform duration-300 ease-in-out overflow-y-auto"
-                    style="width: 40vw; z-index: 1001;"
+                    class="fixed top-0 h-full bg-white shadow-lg hidden overflow-y-auto"
+                    style="width: 50vw; right: 0; z-index: 1001; transform: translateX(100%);"
                     role="dialog"
                     aria-modal="true"
                     aria-labelledby="size-chart-title"
                     aria-hidden="true"
                   >
                     <div
-                      class="p-6"
-                      style="text-decoration-line: underline; margin-top: 12vh; padding: 0 10px; display: flex; flex-direction: row-reverse;"
+                      class="flex justify-end items-center"
+                      style="padding: 20px 20px 0 20px;"
                     >
                       <button
                         id="close-size-chart"
-                        class="text-gray-500 hover:text-black transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        class="text-gray-500 hover:text-black underline transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500"
                         aria-label="Close size chart"
                       >
                         CLOSE
                       </button>
                     </div>
-                    <div class="p-4">
+                    <div style="padding: 0 20px 20px 20px;">
                       <h2 id="size-chart-title" class="sr-only">Size Chart</h2>
                       {% if block.settings.size_chart_page != blank %}
-                        <div class="prose max-w-none">
+                        <div class="prose max-w-none p-4">
                           {{ block.settings.size_chart_page.content }}
                         </div>
                       {% else %}
@@ -358,7 +372,11 @@
         <!-- QUANTITY SELECTOR -->
         {%- for block in section.blocks -%}
           {%- if block.type == 'quantity_selector' -%}
-            <div class="flex justify-between items-center border-b border-gray-400 pb-4" {{ block.shopify_attributes }}>
+            <div
+              class="flex justify-between items-center border-b border-t border-gray-400 pb-4 pt-4"
+              style="padding: 10px 0;"
+              {{ block.shopify_attributes }}
+            >
               <label for="quantityInput" class="font-medium uppercase">QUANTITY SELECTOR</label>
               <div
                 class="flex items-center justify-center py-1 border rounded overflow-hidden h-10"
@@ -467,7 +485,12 @@
         <!-- PRICE + ACTIONS -->
         <div class="flex justify-between items-center border-t border-gray-400 pt-4" style="padding-top: 1rem;">
           <!-- Price + Compare at Price -->
-          <div class="flex flex-col" style="font-weight: var(--t-b-2-weight); font-size: var(--t-b-2-size); line-height: var(--t-b-2-line-height);" role="region" aria-labelledby="price-heading">
+          <div
+            class="flex flex-col"
+            style="font-weight: var(--t-b-2-weight); font-size: var(--t-b-2-size); line-height: var(--t-b-2-line-height);"
+            role="region"
+            aria-labelledby="price-heading"
+          >
             <span id="current-price" class="sr-only">Product pricing</span>
             <div class="flex items-center gap-2">
               <span
@@ -714,7 +737,7 @@
   <!-- Mobile Product Details -->
   <div class="details-inner flex flex-col" role="region" aria-labelledby="mobile-product-title">
     {%- comment -%} Header {%- endcomment -%}
-    <div class="product-header w-[80%] space-y-8">
+    <div class="product-header w-[95%] space-y-8">
       <div class="header-top flex flex-col gap-4">
         <div class="product-status flex items-center gap-4" role="status" aria-live="polite">
           {% if product.available != true %}
@@ -726,19 +749,33 @@
             >
           {% endif %}
         </div>
-        <h1 id="mobile-product-title" style="font-weight: var(--t-h-3-weight); font-size: var(--t-h-3-size); line-height: var(--t-h-3-line-height);">{{ product.title }}</h1>
+        <h1
+          id="mobile-product-title"
+          style="font-size: var(--tm-h-3-size); line-height: var(--tm-h-3-line-height); padding: 10px 0;"
+        >
+          {{ product.title }}
+        </h1>
 
         {%- comment -%} Product Variant {%- endcomment -%}
         {%- assign color_option = product.options_with_values | where: 'name', 'Color' | first -%}
         {%- if color_option and color_option.values.size > 0 -%}
           <fieldset class="product-variants my-4" role="group" aria-labelledby="mobile-color-legend">
             <legend id="mobile-color-legend" class="flex items-center gap-2">
-              <span class="inline-block=" style="font-weight: var(--t-b-3-weight); font-size: var(--t-b-3-size); line-height: var(--t-b-3-line-height);">SELECT COLOR:</span>
-              <span class="active-color=" data-active-color aria-live="polite" style="font-weight: var(--t-b-3-weight); font-size: var(--t-b-3-size); line-height: var(--t-b-3-line-height);">
+              <span
+                class="inline-block="
+                style="font-size: var(--tm-b-3-size); line-height: var(--tm-b-3-line-height);"
+                >SELECT COLOR:</span
+              >
+              <span
+                class="active-color="
+                data-active-color
+                aria-live="polite"
+                style="font-size: var(--tm-b-3-size); line-height: var(--tm-b-3-line-height);"
+              >
                 {{- color_option.values | first -}}
               </span>
             </legend>
-            <div class="color-options flex gap-3 p-2" role="radiogroup" aria-labelledby="mobile-color-legend">
+            <div class="product-color-options flex gap-3 p-2" role="radiogroup" aria-labelledby="mobile-color-legend">
               {%- for value in color_option.values -%}
                 <button
                   type="button"
@@ -773,7 +810,7 @@
             {%- assign tab_index = tab_index | plus: 1 -%}
             <button
               class="tab-btn group  text-left mr-3 w-full transition-colors duration-300 relative {% if tab_index == 1 %}active-tab{% endif %} focus:outline-none focus:ring-2 focus:ring-blue-500"
-              style="color: {% if tab_index == 1 %}var(--text){% else %}var(--secondary_text){% endif %}; font-weight: var(--t-b-4-weight); font-size: var(--t-b-4-size); line-height: var(--t-b-4-line-height);"
+              style="color: {% if tab_index == 1 %}var(--text){% else %}var(--secondary_text){% endif %};font-size: var(--tm-b-4-size); line-height: var(--tm-b-4-line-height); padding: 4px 0 0 0;"
               data-tab="tab-{{ block.id }}"
               role="tab"
               aria-selected="{% if tab_index == 1 %}true{% else %}false{% endif %}"
@@ -796,7 +833,10 @@
       </div>
 
       <!-- Tab Content -->
-      <div class="tab-content mt-6 overflow-y-auto max-h-[50vh]" style="font-weight: var(--t-b-4-weight); font-size: var(--t-b-4-size); line-height: var(--t-b-4-line-height);">
+      <div
+        class="tab-content mt-6 overflow-y-auto max-h-[50vh]"
+        style="font-size: var(--tm-b-4-size); line-height: var(--tm-b-4-line-height);"
+      >
         {% for block in section.blocks %}
           <div
             class="tab-pane {% if forloop.first %}active{% else %}hidden{% endif %} tracking-normal leading-1"
@@ -833,23 +873,24 @@
 
                 <div
                   id="mobile-size-chart-drawer"
-                  class="fixed top-0 right-0 w-full h-full bg-white shadow-lg transform translate-x-full hidden transition-transform duration-300 overflow-y-auto"
-                  style="z-index: 1000;"
+                  class="fixed top-0 w-full h-full bg-white shadow-lg hidden overflow-y-auto"
+                  style="right: 0; z-index: 1000; transform: translateX(100%);"
                   role="dialog"
                   aria-modal="true"
                   aria-labelledby="mobile-size-chart-title"
                   aria-hidden="true"
                 >
-                  <div class="p-6" style="text-decoration-line: underline; display: flex; flex-direction: row-reverse;">
+                  <div class="flex justify-end items-center" style="padding: 20px 20px 0 20px;">
                     <button
                       id="close-mobile-size-chart"
-                      class="text-gray-500 hover:text-black transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      class="text-gray-500 hover:text-black underline transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      style="margin-top: 10px;"
                       aria-label="Close size chart"
                     >
                       CLOSE
                     </button>
                   </div>
-                  <div class="p-4">
+                  <div style="padding: 0 20px 20px 20px;">
                     <h2 id="mobile-size-chart-title" class="sr-only">Size Chart</h2>
                     {% if block.settings.size_chart_page != blank %}
                       <div class="prose max-w-none">
@@ -859,6 +900,13 @@
                       <p class="text-gray-500">No size guide page selected.</p>
                     {% endif %}
                   </div>
+                </div>
+                <div
+                  id="mobile-size-chart-backdrop"
+                  class="fixed inset-0 bg-black/60 hidden z-[999]"
+                  aria-hidden="true"
+                >
+                  &nbsp;
                 </div>
             {% endcase %}
           </div>
@@ -877,7 +925,7 @@
 
     <div
       class="size-price-selector flex flex-col gap-6"
-      style="font-weight: var(--t-b-4-weight); font-size: var(--t-b-4-size); line-height: var(--t-b-4-line-height);"
+      style="font-size: var(--tm-b-4-size); line-height: var(--tm-b-4-line-height);"
       role="region"
       aria-label="Mobile product options and purchase"
     >
@@ -888,7 +936,7 @@
             {% if customer and customer.default_address %}
               <!-- Logged-in: Show saved address -->
               <div role="group" aria-labelledby="mobile-delivery-heading">
-                <div id="mobile-delivery-heading" class="font-semibold uppercase">DELIVER TO</div>
+                <div id="mobile-delivery-heading" class="uppercase">DELIVER TO</div>
                 <div class="text-sm leading-relaxed" aria-describedby="mobile-delivery-heading">
                   {{ customer.default_address | format_address }}
                 </div>
@@ -906,7 +954,7 @@
             {% else %}
               <!-- Guest: Show login prompt -->
               <div role="group" aria-labelledby="mobile-delivery-heading-guest">
-                <div id="mobile-delivery-heading-guest" class="font-semibold uppercase">DELIVER TO</div>
+                <div id="mobile-delivery-heading-guest" class="uppercase">DELIVER TO</div>
                 <div style="color: var(--secondary_text);">
                   Please
                   <a href="/account/login" class="underline !text-blue-900" aria-describedby="mobile-login-help"
@@ -930,8 +978,12 @@
       <!-- QUANTITY SELECTOR -->
       {%- for block in section.blocks -%}
         {%- if block.type == 'quantity_selector' -%}
-          <div class="flex justify-between items-center border-b border-gray-400 pb-4" {{ block.shopify_attributes }}>
-            <label for="mobileQuantityInput" class="uppercase font-semibold">QUANTITY SELECTOR</label>
+          <div
+            class="flex justify-between items-center border-b border-t border-gray-400 pb-4"
+            style="padding: 10px 0;"
+            {{ block.shopify_attributes }}
+          >
+            <label for="mobileQuantityInput" class="uppercase">QUANTITY SELECTOR</label>
             <div
               class="flex items-center justify-center h-10 border rounded"
               style="width: 8rem;"
@@ -988,8 +1040,10 @@
         {% endunless %}
       {% endfor %}
       {% if variant_option %}
-        <fieldset class="flex justify-between items-center gap-2" role="group">
-          <legend style="font-weight: var(--t-b-4-weight); font-size: var(--t-b-4-size); line-height: var(--t-b-4-line-height);">SELECT {{ variant_option.name | upcase }}</legend>
+        <fieldset class="flex justify-between items-center gap-2" style="padding: 10px 0;" role="group">
+          <legend style="font-size: var(--tm-b-4-size); line-height: var(--tm-b-4-line-height);">
+            SELECT {{ variant_option.name | upcase }}
+          </legend>
           <div class="flex gap-2 flex-wrap" role="radiogroup" aria-labelledby="mobile-size-legend">
             <span id="mobile-size-legend" class="sr-only">{{ variant_option.name }} options</span>
             {% for value in variant_option.values %}
@@ -1047,15 +1101,22 @@
         <div class="text-[18px] flex flex-col justify-between" role="region" aria-labelledby="mobile-price-heading">
           <span id="mobile-price-heading" class="sr-only">Product pricing</span>
           <div class="flex items-center gap-2">
-            <span class="mobile-current-price" aria-label="Current price" style="font-weight: var(--t-b-1-weight); font-size: var(--t-b-1-size); line-height: var(--t-b-1-line-height);">{{ product.price | money }}</span>
+            <span
+              class="mobile-current-price"
+              aria-label="Current price"
+              style="font-size: var(--tm-b-1-size); line-height: var(--tm-b-1-line-height);"
+            >
+              {{- product.price | money -}}
+            </span>
             <span
               class="mobile-compare-price-separator{% unless product.compare_at_price > product.price %} hidden{% endunless %}"
-              aria-hidden="true" style="font-weight: var(--t-b-2-weight); font-size: var(--t-b-2-size); line-height: var(--t-b-2-line-height);"
+              aria-hidden="true"
+              style="font-size: var(--tm-b-2-size); line-height: var(--tm-b-2-line-height);"
               >|</span
             >
             <span
               class="mobile-compare-price line-through {% unless product.compare_at_price > product.price %}hidden{% endunless %}"
-              style="color: var(--secondary_text); font-weight: var(--t-b-1-weight); font-size: var(--t-b-1-size); line-height: var(--t-b-1-line-height);"
+              style="color: var(--secondary_text); font-size: var(--tm-b-1-size); line-height: var(--tm-b-1-line-height);"
               aria-label="Original price"
             >
               {% if product.compare_at_price > product.price %}{{ product.compare_at_price | money }}{% endif %}
@@ -1064,7 +1125,7 @@
 
           <div
             class="mobile-savings-info {% unless product.compare_at_price > product.price %}hidden{% endunless %}"
-            style="color: var(--sale_badge); font-weight: var(--t-b-1-weight); font-size: var(--t-b-1-size); line-height: var(--t-b-1-line-height);"
+            style="color: var(--sale_badge); font-size: var(--tm-b-1-size); line-height: var(--tm-b-1-line-height); padding-bottom: 10px;"
             role="status"
             aria-live="polite"
           >
@@ -1098,7 +1159,7 @@
               <input type="hidden" name="quantity" value="1" aria-label="Quantity">
               <button
                 class="add-to-cart-btn-custom mobile-add-to-cart-btn text-3xl rounded group flex items-center justify-between gap-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                style="width: 95vw; font-weight: var(--t-b-2-weight); font-size: var(--t-b-2-size); line-height: var(--t-b-2-line-height); padding: 10px;"
+                style="width: 95vw; font-size: var(--tm-b-2-size); line-height: var(--tm-b-2-line-height); padding: 10px;"
                 aria-describedby="mobile-add-to-cart-description"
                 type="submit"
               >
@@ -1120,7 +1181,7 @@
             <!-- SOLD OUT button -->
             <button
               class="bg-gray-400 text-white text-4xl px-4 py-2 rounded cursor-not-allowed"
-              style="font-weight: var(--t-b-2-weight); font-size: var(--t-b-2-size); line-height: var(--t-b-2-line-height); padding: 10px;"
+              style="font-size: var(--tm-b-2-size); line-height: var(--tm-b-2-line-height); padding: 10px;"
               type="button"
               disabled
               aria-label="Product is sold out"
@@ -1149,278 +1210,288 @@
 </section>
 
 <style>
-      .gallery-item {
-      display: block !important;
-    }
+        .gallery-item {
+        display: block !important;
+      }
 
-    .gallery-item.is-active {
-      opacity: 1;
-      outline: 2px solid black;
-    }
+      .gallery-item.is-active {
+        opacity: 1;
+        outline: 2px solid black;
+      }
 
-    .gallery-item:not(.is-active) {
-      opacity: 0.6;
-    }
+      .gallery-item:not(.is-active) {
+        opacity: 1;
+      }
 
-.gallery-wrapper {
-  overflow-y: auto;
-  scrollbar-width: none; /* Firefox */
-  -ms-overflow-style: none; /* IE/Edge */
-}
-            .delivery-change-btn{
-             background-color: var(--button);
-            color: var(--button_label);
-            border: 1px solid var(--border);
-          }
-          .delivery-change-btn:hover {
-            background-color: var(--hovered_button_label);
-            color: var(--hovered_button_text_color);
-          }
-            .section-{{ section.id }}-padding {
-              padding-top: {{  settings.sections_spacing | times: 0.75 | round: 0 }}px;
-              padding-bottom: {{  settings.sections_spacing | times: 0.75 | round: 0 }}px;
-              padding-left: {{  settings.side_space | times: 0.75 | round: 0 }}px;
-              padding-right: {{  settings.side_space | times: 0.75 | round: 0 }}px;
-            }
-
-            @media screen and (min-width: 750px) {
-              .section-{{ section.id }}-padding {
-                padding-top: {{  settings.sections_spacing}}px;
-                padding-bottom: {{  settings.sections_spacing}}px;
-                padding-left: {{  settings.side_space  }}px;
-                padding-right: {{  settings.side_space }}px;
-              }
-            }
-
-            #size-chart-drawer {
-              transition: transform 1s cubic-bezier(0.4,0,0.2,1);
-              transform: translateX(100%);
-              will-change: transform;
-            }
-            #size-chart-drawer.open {
-              transform: translateX(0);
-            }
-
-            .product-section {
-              display: flex;
-              height: calc(100vh * {{product.media.size}});
-              position: relative;
-            }
-
-            .gallery-wrapper {
-              position: sticky;
-              top: 0;
-              height: 100vh;
-              overflow: hidden;
-            }
-
-            .gallery-track {
-              height: 100%;
-            }
-
-            .gallery-item {
-              opacity: 0;
-              transition: opacity 0.3s ease-out;
-              will-change: opacity;
-            }
-
-            .gallery-item.is-active {
-              opacity: 1;
-              pointer-events: auto;
-              z-index: 1;
-            }
-
-            .image-strip-container {
-              position: absolute;
-              top: 50%;
-              left: 10px;
-              transform: translateY(-50%);
-              z-index: 100;
-              transition: opacity 0.3s ease;
-            }
-
-            .gallery-track:hover .image-strip-container {
-              opacity: 1;
-            }
-
-            .image-strip {
-              display: flex;
-              flex-direction: column;
-              gap: 10px;
-              padding: 10px;
-              border-radius: 8px;
-            }
-
-            .strip-image-wrapper {
-              width: 60px;
-              height: 60px;
-              cursor: pointer;
-              opacity: 0.7;
-              transition: all 0.3s ease;
-            }
-
-            .strip-image-wrapper:hover,
-            .strip-image-wrapper.active {
-              opacity: 1;
-              transform: scale(1.1);
-              border: 1px solid black;
-            }
-            .strip-image {
-              width: 100%;
-              height: 100%;
-              object-fit: cover;
-              border-radius: 4px;
-            }
-
-            .tab-content {
-              height: calc(100% - 50px);
-            }
-
-            .size-btn {
-              transition: all 0.3s ease;
+  .gallery-wrapper {
+    overflow-y: auto;
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE/Edge */
+  }
+              .delivery-change-btn{
                background-color: var(--button);
-            color: var(--button_label);
-            border: 1px solid var(--border);
-            padding: 14px 10px;
+              color: var(--button_label);
+              border: 1px solid var(--border);
             }
-
-            .size-btn:not(:disabled):hover,
-            .size-btn.bg-black {
-            background-color: var(--hovered_button_label);
-            color: var(--hovered_button_text_color);
+            .delivery-change-btn:hover {
+              background-color: var(--hovered_button_label);
+              color: var(--hovered_button_text_color);
             }
-
-            .size-btn:disabled {
-              opacity: 0.8;
-              cursor: not-allowed;
-               border: 1px solid var(--border);
-               padding: 14px 10px;
-            }
-
-            /* Mobile-specific styles */
-            @media (max-width: 1024px) {
-              .mobile-gallery-item {
-                will-change: opacity, transform;
-                transition: opacity 0.3s ease;
-                position: absolute;
-                inset: 0;
-                max-height: 65vh !important;
-                object-fit: cover !important;
-                display: block;
+              .section-{{ section.id }}-padding {
+                padding-top: {{  settings.sections_spacing | times: 0.75 | round: 0 }}px;
+                padding-bottom: {{  settings.sections_spacing | times: 0.75 | round: 0 }}px;
+                padding-left: {{  settings.side_space | times: 0.75 | round: 0 }}px;
+                padding-right: {{  settings.side_space | times: 0.75 | round: 0 }}px;
               }
 
-              .mobile-gallery-item.active {
-                opacity: 1;
-                z-index: 2;
+              @media screen and (min-width: 750px) {
+                .section-{{ section.id }}-padding {
+                  padding-top: {{  settings.sections_spacing}}px;
+                  padding-bottom: {{  settings.sections_spacing}}px;
+                  padding-left: {{  settings.side_space  }}px;
+                  padding-right: {{  settings.side_space }}px;
+                }
+              }
+
+              #size-chart-drawer {
+                transition: transform 0.3s cubic-bezier(0.4,0,0.2,1);
+                will-change: transform;
+                margin: 0 !important;
+                padding: 0 !important;
+              }
+              #size-chart-drawer.open {
+                transform: translateX(0) !important;
+              }
+
+              .product-section {
+                display: flex;
+                height: calc(100vh * {{product.media.size}});
                 position: relative;
               }
 
-              .thumbnail-item {
-                transition: all 0.3s ease;
-                opacity: 0.6;
-                border: 2px solid transparent;
+              .gallery-wrapper {
+                position: sticky;
+                top: 0;
+                height: 100vh;
+                overflow: hidden;
               }
 
-              .thumbnail-item.active {
+              .gallery-track {
+                height: 100%;
+                pointer-events: auto;
+              }
+
+              .gallery-item {
+                opacity: 0;
+                transition: opacity 0.3s ease-out;
+                will-change: opacity;
+                pointer-events: none;
+              }
+
+              .gallery-item.is-active {
                 opacity: 1;
-                border-color: black;
-                transform: scale(1.05);
+                pointer-events: auto;
+                z-index: 1;
               }
 
-              .product-tabs {
-                height: auto;
-                min-height: 200px;
+              .image-strip-container {
+                position: absolute;
+                top: 50%;
+                left: 10px;
+                transform: translateY(-50%);
+                z-index: 100;
+                opacity: 0;
+                transition: opacity 0.3s ease;
+              }
+
+              .gallery-track:hover .image-strip-container {
+                opacity: 1;
+              }
+
+              .image-strip {
+                display: flex;
+                flex-direction: column;
+                gap: 10px;
+                padding: 10px;
+                border-radius: 8px;
+              }
+
+              .strip-image-wrapper {
+                width: 60px;
+                height: 60px;
+                cursor: pointer;
+                opacity: 0.7;
+                transition: all 0.3s ease;
+              }
+
+              .strip-image-wrapper:hover,
+              .strip-image-wrapper.active {
+                opacity: 1;
+                transform: scale(1.1);
+                border: 1px solid black;
+              }
+              .strip-image {
+                width: 100%;
+                height: 100%;
+                object-fit: cover;
+                border-radius: 4px;
               }
 
               .tab-content {
-                height: auto;
+                height: calc(100% - 50px);
               }
 
-              #mobile-size-chart-drawer {
-                transition: transform 0.6s cubic-bezier(0.4,0,0.2,1);
+              .size-btn {
+                transition: all 0.3s ease;
+                 background-color: var(--button);
+              color: var(--button_label);
+              border: 1px solid var(--border);
+              padding: 14px 10px;
               }
-            }
-      .size-btn.unavailable-size {
-        opacity: 1;
-        visibility: visible;
-        position: relative;
-        cursor: not-allowed;
-        color: var(--text) !important;
-        border-color: var(--border) !important;
-        background-color: var(--disabled_text) !important;
-        overflow: hidden;
-        transform: translateY(0);
-        padding: 14px 10px;
-      }
 
-      .size-btn.unavailable-size:hover {
-        background-color: var(--disabled_text) !important;
-        transform: translateY(0);
-      }
+              .size-btn:not(:disabled):hover,
+              .size-btn.bg-black {
+              background-color: var(--hovered_button_label);
+              color: var(--hovered_button_text_color);
+              }
 
-      .size-btn.unavailable-size::after {
-        content: '';
-        position: absolute;
-        top: 50%;
-        left: -2px;
-        right: -2px;
-        height: 2px;
-        background-color: var(--text);
-        transform: rotate(-45deg);
-        pointer-events: none;
-      }
+              .size-btn:disabled {
+                opacity: 0.8;
+                cursor: not-allowed;
+                 border: 1px solid var(--border);
+                 padding: 14px 10px;
+              }
 
-      .add-to-cart-btn-custom {
-        font-weight: var(--font-heading-weight);
-        color: var(--secondary_button_text_color);
-        background-color: var(--secondary_button_label);
-        border-radius: 4px;
-        padding: 5px 10px;
-        display: flex;
-        flex-direction: row;
-        align-items: center;
-        gap: 20px;
-        border: var(--settings-buttons_border_thickness, 1px) solid var(--secondary_button_label);
-        transition: border 0.5s, background-color 0.5s, color 0.5s;
-        position: relative;
-        overflow: hidden;
-        cursor: pointer;
-      }
-      .add-to-cart-btn-custom::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: -100%;
-        width: 100%;
-        height: 100%;
-        background: var(--hovered_secondary_button_label);
-        transition: left 0.5s;
-        z-index: 0;
-      }
-      .add-to-cart-btn-custom:hover::before,
-      .add-to-cart-btn-custom:focus::before {
-        left: 0;
-      }
-      .add-to-cart-btn-custom > * {
-        position: relative;
-        z-index: 1;
-      }
-      .add-to-cart-btn-custom:hover,
-      .add-to-cart-btn-custom:focus {
-        color: var(--hovered_secondary_button_text_color);
-        border-color: var(--hovered_secondary_button_text_color);
-        outline: none;
-      }
-      .add-to-cart-btn-custom svg {
-        stroke-linecap: round;
-        transition: transform 0.3s;
-        transform-origin: center;
-        color: inherit;
-      }
-      .add-to-cart-btn-custom:hover svg,
-      .add-to-cart-btn-custom:focus svg {
-        transform: rotate(-90deg) scale(1.1);
-      }
+              /* Mobile-specific styles */
+              @media (max-width: 1024px) {
+                .mobile-gallery-item {
+                  will-change: opacity, transform;
+                  transition: opacity 0.3s ease;
+                  position: absolute;
+                  inset: 0;
+                  max-height: 65vh !important;
+                  object-fit: cover !important;
+                  display: block;
+                }
+
+                .mobile-gallery-item.active {
+                  opacity: 1;
+                  z-index: 2;
+                  position: relative;
+                }
+
+                .thumbnail-item {
+                  transition: all 0.3s ease;
+                  opacity: 0.6;
+                  border: 2px solid transparent;
+                }
+
+                .thumbnail-item.active {
+                  opacity: 1;
+                  border-color: black;
+                  transform: scale(1.05);
+                }
+
+                .product-tabs {
+                  height: auto;
+                  min-height: 200px;
+                }
+
+                .tab-content {
+                  height: auto;
+                }
+
+                #mobile-size-chart-drawer {
+                  transition: transform 0.3s cubic-bezier(0.4,0,0.2,1);
+                  will-change: transform;
+                  margin: 0 !important;
+                  padding: 0 !important;
+                }
+                #mobile-size-chart-drawer.open {
+                  transform: translateX(0) !important;
+                }
+              }
+        .size-btn.unavailable-size {
+          opacity: 1;
+          visibility: visible;
+          position: relative;
+          cursor: not-allowed;
+          color: var(--text) !important;
+          border-color: var(--border) !important;
+          background-color: var(--disabled_text) !important;
+          overflow: hidden;
+          transform: translateY(0);
+          padding: 14px 10px;
+        }
+
+        .size-btn.unavailable-size:hover {
+          background-color: var(--disabled_text) !important;
+          transform: translateY(0);
+        }
+
+        .size-btn.unavailable-size::after {
+          content: '';
+          position: absolute;
+          top: 50%;
+          left: -2px;
+          right: -2px;
+          height: 2px;
+          background-color: var(--text);
+          transform: rotate(-45deg);
+          pointer-events: none;
+        }
+
+        .add-to-cart-btn-custom {
+          font-weight: var(--font-heading-weight);
+          color: var(--secondary_button_text_color);
+          background-color: var(--secondary_button_label);
+          border-radius: 4px;
+          padding: 5px 10px;
+          display: flex;
+          flex-direction: row;
+          align-items: center;
+          gap: 20px;
+          border: var(--settings-buttons_border_thickness, 1px) solid var(--secondary_button_label);
+          transition: border 0.5s, background-color 0.5s, color 0.5s;
+          position: relative;
+          overflow: hidden;
+          cursor: pointer;
+        }
+        .add-to-cart-btn-custom::before {
+          content: '';
+          position: absolute;
+          top: 0;
+          left: -100%;
+          width: 100%;
+          height: 100%;
+          background: var(--hovered_secondary_button_label);
+          transition: left 0.5s;
+          z-index: 0;
+        }
+        .add-to-cart-btn-custom:hover::before,
+        .add-to-cart-btn-custom:focus::before {
+          left: 0;
+        }
+        .add-to-cart-btn-custom > * {
+          position: relative;
+          z-index: 1;
+        }
+        .add-to-cart-btn-custom:hover,
+        .add-to-cart-btn-custom:focus {
+          color: var(--hovered_secondary_button_text_color);
+          border-color: var(--hovered_secondary_button_text_color);
+          outline: none;
+        }
+        .add-to-cart-btn-custom svg {
+          stroke-linecap: round;
+          transition: transform 0.3s;
+          transform-origin: center;
+          color: inherit;
+        }
+        .add-to-cart-btn-custom:hover svg,
+        .add-to-cart-btn-custom:focus svg {
+          transform: rotate(-90deg) scale(1.1);
+        }
 </style>
 <script>
 document.addEventListener('DOMContentLoaded', () => {
@@ -2162,27 +2233,33 @@ document.addEventListener('DOMContentLoaded', () => {
   const mobileOpenBtn = document.getElementById('open-mobile-size-chart');
   const mobileCloseBtn = document.getElementById('close-mobile-size-chart');
   const mobileDrawer = document.getElementById('mobile-size-chart-drawer');
+  const mobileBackdrop = document.getElementById('mobile-size-chart-backdrop');
 
-  if (mobileOpenBtn && mobileCloseBtn && mobileDrawer) {
+  if (mobileOpenBtn && mobileCloseBtn && mobileDrawer && mobileBackdrop) {
     mobileOpenBtn.addEventListener('click', function() {
       mobileDrawer.classList.remove('hidden');
-      requestAnimationFrame(() => {
-        mobileDrawer.classList.remove('translate-x-full');
-      });
+      mobileBackdrop.classList.remove('hidden');
+      setTimeout(() => {
+        mobileDrawer.classList.add('open');
+      }, 20);
       lockBodyScroll();
     });
 
-    mobileCloseBtn.addEventListener('click', function() {
-      mobileDrawer.classList.add('translate-x-full');
+    const closeMobileDrawer = () => {
+      mobileDrawer.classList.remove('open');
+      mobileBackdrop.classList.add('hidden');
       unlockBodyScroll();
       setTimeout(() => {
         mobileDrawer.classList.add('hidden');
-      }, 600);
-    });
+      }, 300);
+    };
+
+    mobileCloseBtn.addEventListener('click', closeMobileDrawer);
+    mobileBackdrop.addEventListener('click', closeMobileDrawer);
 
     document.addEventListener('keydown', function(e) {
       if (e.key === 'Escape' && !mobileDrawer.classList.contains('hidden')) {
-        mobileCloseBtn.click();
+        closeMobileDrawer();
       }
     });
   }
@@ -2209,7 +2286,7 @@ document.addEventListener('DOMContentLoaded', () => {
       unlockBodyScroll();
       setTimeout(() => {
         drawer.classList.add("hidden");
-      }, 400);
+      }, 300);
     };
   
     closeBtn.addEventListener("click", closeDrawer);
@@ -2645,6 +2722,47 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
+  function initializeMobileGallery() {
+    const mobileGalleryItems = Array.from(document.querySelectorAll('.mobile-gallery-item'));
+    const mobileThumbnails = Array.from(document.querySelectorAll('.thumbnail-item'));
+    
+    // Ensure first image is active
+    if (mobileGalleryItems.length > 0) {
+      mobileGalleryItems.forEach((img, idx) => {
+        if (idx === 0) {
+          img.classList.add('active');
+          img.classList.add('relative');
+          img.classList.remove('absolute', 'top-0', 'left-0');
+          img.style.opacity = '1';
+          img.style.zIndex = '2';
+          img.style.pointerEvents = 'auto';
+        } else {
+          img.classList.remove('active');
+          img.classList.remove('relative');
+          img.classList.add('absolute', 'top-0', 'left-0');
+          img.style.opacity = '0';
+          img.style.zIndex = '1';
+          img.style.pointerEvents = 'none';
+        }
+      });
+    }
+    
+    // Ensure first thumbnail is active
+    if (mobileThumbnails.length > 0) {
+      mobileThumbnails.forEach((thumb, idx) => {
+        if (idx === 0) {
+          thumb.classList.add('active');
+          thumb.setAttribute('aria-selected', 'true');
+          thumb.setAttribute('tabindex', '0');
+        } else {
+          thumb.classList.remove('active');
+          thumb.setAttribute('aria-selected', 'false');
+          thumb.setAttribute('tabindex', '-1');
+        }
+      });
+    }
+  }
+
   function initializePage() {
     const urlInitialized = initializeVariantFromURL();
     
@@ -2658,6 +2776,8 @@ document.addEventListener('DOMContentLoaded', () => {
     if (currentVariant) {
       showVariantGalleryImage(currentVariant);
     }
+
+    initializeMobileGallery();
 
     window.addEventListener('popstate', handlePopState);
   }
