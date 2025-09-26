@@ -1,557 +1,108 @@
+{{ 'image-with-text.css' | asset_url | stylesheet_tag }}
+
 {%- style -%}
-    .image-with-text-media-section-{{ section.id }} ::selection {
-      /* background: none; */
-      color: var(--accent) !important;
-      background-color: rgb(var(--color-background));
+  /* Dynamic styles that depend on section settings */
+  @media screen and (min-width: 750px) {
+    .image-with-text-section-{{ section.id }}-padding {
+      padding-top: {{ section.settings.padding_top }}px;
+      padding-bottom: {{ section.settings.padding_bottom }}px;
     }
-
-    /* Mute/Unmute Button Styles */
-    .video-mute-button {
-      position: absolute;
-      z-index: 20;
-      background-color: rgba(0, 0, 0, 0.5);
-      color: white;
-      border: none;
-      border-radius: 50%;
-      width: 40px;
-      height: 40px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      transition: background-color 0.3s, opacity 0.3s;
-      top: 20px;
-      right: 20px;
-      opacity: 0.7;
-    }
-    .video-mute-button:hover {
-      background-color: rgba(0,0,0,0.8);
-      opacity: 1;
-      cursor: pointer;
-    }
-    @media (max-width: 749px) {
-      .video-mute-button {
-        top: 20px;
-        bottom: auto;
-        right: 20px;
-        width: 35px;
-        height: 35px;
-      }
-    }
-    .video-mute-button svg {
-      width: 20px;
-      height: 20px;
-    }
-    @media (max-width: 749px) {
-      .video-mute-button svg {
-        width: 16px;
-        height: 16px;
-      }
-    }
-
-    @media screen and (max-width: 750px){
-      .image-with-text-button-text, .image-with-text-button-text-hover{
-        font-size: 16px !important;
-      }
-      .image-with-text-heading{
-        font-size: var(--tm-h-2-size) !important;
-        line-height: var(--tm-h-2-line-height) !important;
-      }
-      .image-with-text-text-content{
-        font-size: 20px !important;
-        line-height: 2rem !important;
-      }
-    }
-    @media screen and (min-width: 750px) {
-      .image-with-text-section-{{ section.id }}-padding {
-        padding-top: {{ section.settings.padding_top }}px;
-        padding-bottom: {{ section.settings.padding_bottom }}px;
-      }
-    }
-    @keyframes letterAppear {
-      0% {
-        transform: translateX(10000%);
-        opacity: 0;
-      }
-      100% {
-        transform: translateX(0);
-        opacity: 1;
-      }
-    }
-
-    /* Animation styling for word-level control */
-    .image-with-text-image-with-text-letter-animation-container {
-      display: inline-block;
-      width: 100%;
-      /* max-width: 550px; */
-      overflow: visible;
-      position: relative;
-    }
-
-    /* Style for each word container */
-    .animated-word {
-      display: inline-block;
-      white-space: nowrap; /* Ensure words don't break */
-      margin-right: 0.2em; /* Optional: slight spacing between words */
-    }
-
-    /* Style for individual letters */
-    .animated-letter {
-      display: inline-block;
-      opacity: 0;
-      transform: translateX(500%);
-      position: relative;
-    }
-
-    /* Style for spaces between words */
-    .animated-space {
-      display: inline-block;
-      opacity: 0;
-      transform: translateX(500%);
-      position: relative;
-      /* Adjust this if needed for proper spacing */
-    }
-
-    /* Ensure headings don't break words at boundaries */
-    .image-with-text-heading {
-      word-break: keep-all; /* Prevent breaking words */
-      overflow-wrap: break-word;
-      line-height: 1.2; /* Allow wrapping between words */
-    }
-
-    .image-with-text-text-content{
-    font-size: 24px;
   }
 
-    .animated-letter {
-      display: inline-block;
-      opacity: 0;
-      transform: translateX(500%);
-      position: relative;
-    }
-
-    /* Animation ready states for all blocks */
-    .image-with-text-image-with-text-letter-animation {
-      opacity: 0;
-    }
-
-    .image-with-text-image-with-text-letter-animation.animation-ready {
-      opacity: 1;
-    }
-
-    .button-animation {
-      opacity: 0;
-    }
-
-    .button-animation.animation-ready {
-      opacity: 1;
-    }
-
-    .date-animation {
-      opacity: 0;
-    }
-
-    .date-animation.animation-ready {
-      opacity: 1;
-    }
-
-    .text-animation {
-      opacity: 0;
-    }
-
-    .text-animation.animation-ready {
-      opacity: 1;
-    }
-
-    /* Non-animated states */
-    .no-animation .image-with-text-image-with-text-letter-animation,
-    .no-animation .button-animation,
-    .no-animation .date-animation,
-    .no-animation .text-animation {
-      opacity: 1 !important;
-    }
-
-  .image-with-text-custom-button-css {
-    position: relative;
-    display: inline-block;
-    padding: 0px 5px;
-    border: {{ settings.buttons_border_thickness }}px solid var(--button_label);
-    color: var(--button_label);
-    background-color: var(--button);
-    border-radius: {{ settings.buttons_radius }}px;
-    overflow: hidden;
-    transition: background-color var(--duration-medium), color var(--duration-medium);
+  /* For videos: use 16:9 aspect ratio with padding compensation */
+  .image-with-text-media-section-{{ section.id }}[data-video="true"] {
+    width: 100vw;
+    min-height: 450px;
+    height: calc(100vw * 9 / 16 + {{ settings.sections_spacing | times: 2 }}px - 12px);
   }
 
-  .image-with-text-custom-button-css:hover,
-  .image-with-text-custom-button-css:focus {
-    background-color: var(--hovered_button_label);
-    color: var(--hovered_button_text_color);
-    border-color: var(--hovered_button_text_color);
-    outline: none;
-    text-decoration: none;
+  /* For images: use the old section height settings */
+  .image-with-text-media-section-{{ section.id }}[data-video="false"] {
+    width: 100vw;
+    height: {{ section.settings.img_height_mobile }}px;
   }
 
-  .image-with-text-button-text-container {
-    position: relative;
+  @media (min-width: 750px) {
+    .image-with-text-media-section-{{ section.id }}[data-video="false"] {
+      height: {{ section.settings.img_height }}px;
+    }
+  }
+
+  .image-with-text-text-content-wrapper-{{ section.id }} {
+    position: absolute;
+    left: 0;
     width: 100%;
-    overflow: hidden;
-  }
-
-  .image-with-text-button-text {
+    height: calc(100% - calc({{ settings.sections_spacing }}px * 2));
+    margin-top: {{ settings.sections_spacing }}px;
+    min-height: 0;
     display: flex;
-    align-items: center;
-    line-height: 1;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    transition: transform 0.7s ease;
+    pointer-events: none;
+    justify-content: {{ section.settings.horizontal_position }};
+    /* Use a Liquid case statement for vertical alignment */
+    {% case section.settings.vertical_content_position %}
+      {% when 'top' %}align-items: flex-start;
+      {% when 'center' %}align-items: center;
+      {% when 'bottom' %}align-items: flex-end;
+      {% when 'space-between' %}align-items: space-between;
+      {% else %}align-items: center;
+    {% endcase %}
+    z-index: 3;
   }
 
-  .image-with-text-custom-button-css:hover .image-with-text-button-text,
-  .image-with-text-custom-button-css:focus .image-with-text-button-text {
-    transform: translateX(-100%);
+  .image-with-text-text-content-container-{{ section.id }} {
+    width: 100%;
+    max-width: {{ section.settings.content_width }}px;
+    padding: {{ section.settings.content_padding }}px {{ section.settings.content_padding | plus: settings.side_space }}px;
+    display: flex;
+    flex-direction: column;
+    height: auto;
+    min-height: 0;
+    pointer-events: auto;
   }
 
-  .image-with-text-button-text-hover {
+  .content-wrapper-flex {
+    /* Vertical alignment logic */
+    justify-content:
+      {% case section.settings.vertical_content_position %}
+        {% when 'top' %}flex-start;
+        {% when 'center' %}center;
+        {% when 'bottom' %}flex-end;
+        {% when 'space-between' %}space-between;
+        {% else %}center;
+      {% endcase %}
+  }
+
+  @media (max-width: 749px) {
+    .image-with-text-text-content-container-{{ section.id }} {
+      max-width: {{ section.settings.content_width_mobile }}px;
+      padding: {{ section.settings.content_padding_mobile | plus: 10 }}px;
+    }
+  }
+
+  .image-with-text-media-overlay-{{ section.id }} {
     position: absolute;
     top: 0;
     left: 0;
-    display: flex;
-    align-items: center;
-    font-size: 24px;
-    line-height: 1;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    transform: translateX(100%);
-    transition: transform 0.7s ease;
+    inset: 0;
+    background-color: black;
+    height: 100%;
+    width: 100%;
+    opacity: {% if section.settings.enable_overlay_animation %}1{% else %}0{% endif %};
+    z-index: 2;
+    /* pointer-events: none; */
+    transition: opacity {{ section.settings.overlay_duration | default: 1 }}s ease-out;
+    display: {% if section.settings.enable_overlay_animation %}block{% else %}none{% endif %} !important;
   }
 
-  .image-with-text-custom-button-css:hover .image-with-text-button-text-hover,
-  .image-with-text-custom-button-css:focus .image-with-text-button-text-hover {
-    transform: translateX(0);
-  }
-
-  .image-with-text-custom-button-css:not(:hover):not(:focus) .image-with-text-button-text,
-  .image-with-text-custom-button-css:not(:hover):not(:focus) .image-with-text-button-text-hover {
-    transition: none;
-  }
-
-  .image-with-text-button-arrow {
-    margin-left: 20px;
-  }
-    /* For videos: use 16:9 aspect ratio with padding compensation */
-    .image-with-text-media-section-{{ section.id }}[data-video="true"] {
-      width: 100vw;
-      min-height: 450px;
-      height: calc(100vw * 9 / 16 + {{ settings.sections_spacing | times: 2 }}px - 12px);
-    }
-
-    /* For images: use the old section height settings */
-    .image-with-text-media-section-{{ section.id }}[data-video="false"] {
-      width: 100vw;
-      height: {{ section.settings.img_height_mobile }}px;
-    }
-
-    @media (min-width: 750px) {
-      .image-with-text-media-section-{{ section.id }}[data-video="false"] {
-        height: {{ section.settings.img_height }}px;
-      }
-    }
-
-    .image-with-text-heading-size-very-small {
-      font-size: 24px;
-      line-height: 0.9;
-    }
-
-    .image-with-text-heading-size-small {
-      font-size: 36px;
-      line-height: 0.9;
-    }
-
-    .image-with-text-heading-size-medium {
-      font-size: 50px;
-      line-height: 0.9;
-    }
-
-    .image-with-text-heading-size-large {
-      font-size: 72px;
-      line-height: 0.9;
-    }
-
-    /* @media (min-width: 750px) {
-      .image-with-text-heading-size-very-small {
-        font-size: 30px;
-        line-height: 3rem;
-      }
-
-      .image-with-text-heading-size-small {
-        font-size: 50px;
-        line-height: 5rem;
-      }
-
-      .image-with-text-heading-size-medium {
-        font-size: 60px;
-        line-height: 6rem;
-      }
-
-      .image-with-text-heading-size-large {
-        font-size: 70px;
-        line-height: 7rem;
-      }
-    } */
-
-    .image-with-text-text-content-wrapper-{{ section.id }} {
-      position: absolute;
-      left: 0;
-      width: 100%;
-      height: calc(100% - calc({{ settings.sections_spacing }}px * 2));
-      margin-top: {{ settings.sections_spacing }}px;
-      min-height: 0;
-      display: flex;
-      pointer-events: none;
-      justify-content: {{ section.settings.horizontal_position }};
-      /* Use a Liquid case statement for vertical alignment */
-      {% case section.settings.vertical_content_position %}
-        {% when 'top' %}align-items: flex-start;
-        {% when 'center' %}align-items: center;
-        {% when 'bottom' %}align-items: flex-end;
-        {% when 'space-between' %}align-items: space-between;
-        {% else %}align-items: center;
-      {% endcase %}
-      z-index: 3;
-    }
-
-    .image-with-text-text-content-container-{{ section.id }} {
-      width: 100%;
-      max-width: {{ section.settings.content_width }}px;
-      padding: {{ section.settings.content_padding }}px {{ section.settings.content_padding | plus: settings.side_space }}px;
-      display: flex;
-      flex-direction: column;
-      height: auto;
-      min-height: 0;
-      pointer-events: auto;
-    }
-
-    .content-wrapper-flex {
-      display: flex;
-      flex-direction: column;
-      width: 100%;
-      height: auto;
-      min-height: 0;
-      /* Vertical alignment logic */
-      justify-content:
-        {% case section.settings.vertical_content_position %}
-          {% when 'top' %}flex-start;
-          {% when 'center' %}center;
-          {% when 'bottom' %}flex-end;
-          {% when 'space-between' %}space-between;
-          {% else %}center;
-        {% endcase %}
-    }
-
-    /* .image-with-text-iframe{
-      position: relative;
-      width: 100%;
-      height: 100%;
-      overflow: hidden;
-    }
-
-    .image-with-text-iframe iframe {
-      display: block;
-      width: 100%;
-      height: 100%;
-    }
-
-    .image-with-text-iframe .image-with-text-iframe-overlay {
-      position: absolute;
-      inset: 0;
-      background: black;
-      opacity: 1;
-      z-index: 999;
-      animation-name: fadeOverlay;
-      animation-duration: 1s;
-      animation-delay: 1s;
-      animation-timing-function: ease-out;
-      animation-fill-mode: forwards;
-    }
-
-    @keyframes fade-overlay {
-      from { opacity: 1; }
-      to   { opacity: 0; }
-    } */
-
-    .image-with-text-button-container{
-      background-color: transparent;
-    }
-
-    @media (max-width: 749px) {
-      .image-with-text-text-content-container-{{ section.id }} {
-        max-width: {{ section.settings.content_width_mobile }}px;
-        padding: {{ section.settings.content_padding_mobile | plus: 10 }}px;
-      }
-
-      .image-with-text-button-arrow {
-        margin-left: 0px;
-      }
-    }
-
-    .image-with-text-button-container {
-      margin-top: 20px;
-      margin-bottom: 20px;
-    }
-
-    @media (max-width: 749px) {
-      .image-with-text-button-container {
-        margin-top: 10px;
-        margin-bottom: 10px;
-      }
-    }
-
-    @media (prefers-reduced-motion: reduce) {
-      .animated-letter {
-        animation: none !important;
-        opacity: 1 !important;
-        transform: none !important;
-      }
-
-      .button-animation {
-        animation: none !important;
-        opacity: 1 !important;
-        transform: none !important;
-      }
-
-      .image-with-text-button-text,
-      .image-with-text-button-text-hover {
-        transition: none !important;
-      }
-    }
-
-    /* New styles for dual headings */
-    .dual-heading-container {
-      width: 100%;
-    }
-
-    .dual-heading-top {
-      margin-bottom: 20px;
-    }
-
-    .dual-heading-bottom {
-      margin-top: 20px;
-    }
-
-    .content-wrapper-flex {
-      display: flex;
-      flex-direction: column;
-      height: 100%;
-      width: 100%;
-    }
-
-    .content-flex-top {
-      justify-content: flex-start;
-    }
-
-    .content-flex-bottom {
-      justify-content: flex-end;
-    }
-
-    .content-flex-center {
-      justify-content: center;
-    }
-
-    .content-flex-space-between {
-      justify-content: space-between;
-    }
-
-    .image-with-text-media-overlay-{{ section.id }} {
-      position: absolute;
-      top: 0;
-      left: 0;
-      inset: 0;
-      background-color: black;
-      height: 100%;
-      width: 100%;
-      opacity: {% if section.settings.enable_overlay_animation %}1{% else %}0{% endif %};
-      z-index: 2;
-      /* pointer-events: none; */
-      transition: opacity {{ section.settings.overlay_duration | default: 1 }}s ease-out;
-      display: {% if section.settings.enable_overlay_animation %}block{% else %}none{% endif %} !important;
-    }
-
-    .image-with-text-media-container-{{ section.id }} {
-      position: relative;
-      width: 100%;
-      height: 100%;
-      min-height: 100%;
-    }
-  .image-with-text-iframe {
+  .image-with-text-media-container-{{ section.id }} {
+    position: relative;
     width: 100%;
     height: 100%;
     min-height: 100%;
-    display: block;
-    position: relative;
-    z-index: 1;
-    overflow: hidden;
-    background: #000;
-  }
-
-  .image-with-text-iframe iframe {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    width: 100vw;
-    height: 100vh;
-    transform: translate(-50%, -50%);
-    border: none;
-    outline: none;
-    min-width: 100%;
-    min-height: 100%;
-  }
-
-  /* Ensure video fills container completely for Vimeo */
-  .image-with-text-iframe iframe[src*="vimeo"] {
-    width: 100% !important;
-    height: 100% !important;
-    min-width: 100% !important;
-    min-height: 100% !important;
-    transform: translate(-50%, -50%) scale(1);
-    transform-origin: center center;
-  }
-
-  /* For YouTube videos */
-  .image-with-text-iframe iframe[src*="youtube"] {
-    width: 100% !important;
-    height: 100% !important;
-    min-width: 100% !important;
-    min-height: 100% !important;
-    transform: translate(-50%, -50%);
   }
 
   .image-with-text-media-section-{{ section.id }}{
     padding: {{ settings.sections_spacing }}px {{ settings.side_space}}px;
-  }
-
-  .remove_button_svg .primary-slide-button-arrow{
-    display: none !important;
-  }
-
-  @media (max-width: 749px) {
-
-    .image-with-text-iframe iframe[src*="vimeo"] {
-      width: 200% !important;
-      height: 200% !important;
-      min-width: 200% !important;
-      min-height: 200% !important;
-      transform: translate(-50%, -50%) scale(1);
-      transform-origin: center center;
-    }
-
-    .image-with-text-iframe iframe[src*="youtube"] {
-      width: 200% !important;
-      height: 200% !important;
-      min-width: 200% !important;
-      min-height: 200% !important;
-      transform: translate(-50%, -50%);
-    }
   }
 {%- endstyle -%}
 
@@ -567,6 +118,11 @@
     id="ImageWithText-{{ section.id }}"
     class="image-with-text-media-section-{{ section.id }} relative w-full overflow-hidden image-with-text-section-{{ section.id }}-padding{{ section_classes }}"
     data-video="{% if section.settings.use_video %}true{% else %}false{% endif %}"
+    data-enable-text-animation="{{ section.settings.enable_text_animation }}"
+    data-enable-button-animation="{{ section.settings.enable_button_animation }}"
+    data-button-animation-delay="{{ section.settings.button_animation_delay }}"
+    data-enable-overlay-animation="{{ section.settings.enable_overlay_animation }}"
+    data-overlay-duration="{{ section.settings.overlay_duration }}"
     role="region"
     aria-label="Image with text section"
   >
@@ -726,7 +282,10 @@
         </div>
       {% endif %}
       {% if section.settings.enable_overlay_animation %}
-        <div class="image-with-text-media-overlay-{{ section.id }}"></div>
+        <div
+          class="image-with-text-media-overlay-{{ section.id }}"
+          data-duration="{{ section.settings.overlay_duration | times: 1000 | default: 1000 }}"
+        ></div>
       {% endif %}
     </div>
     <div class="absolute inset-0 image-with-text-text-content-wrapper-{{ section.id }}" style="z-index:3;">
@@ -742,7 +301,7 @@
               {% when 'heading' %}
                 <h2
                   id="Heading-{{ section.id }}-{{ forloop.index }}"
-                  class="image-with-text-heading mb-4 {{ heading_class }} {% if section.settings.enable_text_animation %}image-with-text-letter-animation{% endif %}"
+                  class="image-with-text-heading mb-4 {% if section.settings.enable_text_animation %}image-with-text-letter-animation{% endif %}"
                   style="color:{{ block.settings.text_color }}; font-weight: var(--t-h-2-weight); margin-bottom: 20px; font-style: var(--font-heading-style); font-family: var(--font-heading-family); font-size: var(--t-h-2-size); line-height: var(--t-h-2-line-height);"
                 >
                   {{ block.settings.heading | replace: '||', '<br>' }}
@@ -846,365 +405,7 @@
   </section>
 {% endif %}
 
-<script>
-
-window.addEventListener('load', function() {
-    {% if section.settings.enable_overlay_animation %}
-    const overlay = document.querySelector('.image-with-text-media-overlay-{{ section.id }}');
-    if (!overlay) return;
-    setTimeout(() => {
-      overlay.style.opacity = '0';
-      overlay.addEventListener('transitionend', () => overlay.remove());
-    }, {{ section.settings.overlay_duration | times: 1000 | default: 1000 }});
-    {% endif %}
-  });
-
-document.addEventListener('DOMContentLoaded', function() {
-const buttonAnimationDelay = {{ section.settings.button_animation_delay }};
-
-const styleElement = document.createElement('style');
-styleElement.textContent = `
-@keyframes letterAppear {
-  0% {
-    transform: translateX(10000%);
-    opacity: 0;
-  }
-  100% {
-    transform: translateX(0);
-    opacity: 1;
-  }
-}
-
-@keyframes buttonAppear {
-  0% {
-    transform: translateY(100px);
-    opacity: 0;
-  }
-  100% {
-    transform: translateY(0);
-    opacity: 1;
-  }
-}
-
-.button-animation.animated {
-  animation: buttonAppear 0.8s forwards;
-  animation-delay: ${buttonAnimationDelay}s; 
-}
-`;
-document.head.appendChild(styleElement);
-
-const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-
-// Set initial states based on animation settings
-const sectionElement = document.querySelector('.image-with-text-media-section-{{ section.id }}');
-if (sectionElement) {
-  if (prefersReducedMotion || (!{{ section.settings.enable_text_animation }} && !{{ section.settings.enable_button_animation }})) {
-    sectionElement.classList.add('no-animation');
-  } else {
-    // For elements that should be animated, ensure they start hidden
-    {% if section.settings.enable_text_animation %}
-    sectionElement.querySelectorAll('.image-with-text-image-with-text-letter-animation, .date-animation, .text-animation').forEach(element => {
-      element.style.opacity = '0';
-    });
-    {% else %}
-    sectionElement.querySelectorAll('.image-with-text-image-with-text-letter-animation, .date-animation, .text-animation').forEach(element => {
-      element.style.opacity = '1';
-    });
-    {% endif %}
-
-    {% if section.settings.enable_button_animation %}
-    sectionElement.querySelectorAll('.button-animation').forEach(button => {
-      button.style.opacity = '0';
-    });
-    {% else %}
-    sectionElement.querySelectorAll('.button-animation').forEach(button => {
-      button.style.opacity = '1';
-    });
-    {% endif %}
-  }
-}
-
-if (prefersReducedMotion) {
-  // For reduced motion, make everything visible immediately
-  document.querySelectorAll('.image-with-text-image-with-text-letter-animation, .date-animation, .text-animation, .button-animation').forEach(element => {
-    element.style.opacity = '1';
-  });
-} else {
-  const observer = new IntersectionObserver((entries, observer) => {
-    entries.forEach(entry => {
-      if (entry.isIntersecting) {
-        {% if section.settings.enable_text_animation %}
-        // Handle heading animations
-        const headingElements = entry.target.querySelectorAll('.image-with-text-image-with-text-letter-animation');
-        
-        headingElements.forEach(element => {
-          const text = element.textContent.trim();
-          element.textContent = '';
-          element.classList.add('image-with-text-letter-animation-container', 'animation-ready');
-          element.setAttribute('aria-label', text);
-          element.style.opacity = '1'; // Make container visible
-          
-          // Split the text into words first
-          const words = text.split(' ');
-          
-          let letterIndex = 0;
-          words.forEach((word, wordIndex) => {
-            // Create a word container span
-            const wordSpan = document.createElement('span');
-            wordSpan.classList.add('animated-word');
-            wordSpan.style.display = 'inline-block';
-            wordSpan.style.whiteSpace = 'nowrap'; // Prevent word breaking
-            
-            for (let i = 0; i < word.length; i++) {
-              const letterSpan = document.createElement('span');
-              letterSpan.classList.add('animated-letter');
-              letterSpan.textContent = word[i];
-              letterSpan.setAttribute('aria-hidden', 'true');
-              
-              letterSpan.style.animation = `letterAppear 1s forwards`;
-              letterSpan.style.animationDelay = `${letterIndex * 0.07}s`;
-              letterIndex++;
-              
-              wordSpan.appendChild(letterSpan);
-            }
-            
-            element.appendChild(wordSpan);
-            
-            // Add space between words (except for the last word)
-            if (wordIndex < words.length - 1) {
-              const spaceSpan = document.createElement('span');
-              spaceSpan.classList.add('animated-space');
-              spaceSpan.innerHTML = '&nbsp;';
-              spaceSpan.style.animation = `letterAppear 1s forwards`;
-              spaceSpan.style.animationDelay = `${letterIndex * 0.07}s`;
-              letterIndex++;
-              element.appendChild(spaceSpan);
-            }
-          });
-        });
-
-        // Handle text content animations - similar approach for paragraph text
-        const textContentElements = entry.target.querySelectorAll('.image-with-text-text-content p.image-with-text-image-with-text-letter-animation');
-        
-        textContentElements.forEach(element => {
-          const text = element.textContent.trim();
-          element.textContent = '';
-          element.classList.add('image-with-text-letter-animation-container', 'animation-ready');
-          element.setAttribute('aria-label', text);
-          element.style.opacity = '1'; // Make container visible
-          
-          // Split the text into words first
-          const words = text.split(' ');
-          
-          let letterIndex = 0;
-          words.forEach((word, wordIndex) => {
-            // Create a word container span
-            const wordSpan = document.createElement('span');
-            wordSpan.classList.add('animated-word');
-            wordSpan.style.display = 'inline-block';
-            wordSpan.style.whiteSpace = 'nowrap'; // Prevent word breaking
-            
-            for (let i = 0; i < word.length; i++) {
-              const letterSpan = document.createElement('span');
-              letterSpan.classList.add('animated-letter');
-              letterSpan.textContent = word[i];
-              letterSpan.setAttribute('aria-hidden', 'true');
-              
-              letterSpan.style.animation = `letterAppear 1s forwards`;
-              letterSpan.style.animationDelay = `${letterIndex * 0.07}s`;
-              letterIndex++;
-              
-              wordSpan.appendChild(letterSpan);
-            }
-            
-            element.appendChild(wordSpan);
-            
-            // Add space between words (except for the last word)
-            if (wordIndex < words.length - 1) {
-              const spaceSpan = document.createElement('span');
-              spaceSpan.classList.add('animated-space');
-              spaceSpan.innerHTML = '&nbsp;';
-              spaceSpan.style.animation = `letterAppear 1s forwards`;
-              spaceSpan.style.animationDelay = `${letterIndex * 0.07}s`;
-              letterIndex++;
-              element.appendChild(spaceSpan);
-            }
-          });
-        });
-
-        // Handle date animations
-        const dateElements = entry.target.querySelectorAll('.date-animation');
-        dateElements.forEach((element, index) => {
-          element.classList.add('animation-ready');
-          element.style.opacity = '1';
-          element.style.animation = 'buttonAppear 0.8s forwards';
-          element.style.animationDelay = `${index * 0.2}s`;
-        });
-
-        // Handle text block animations
-        const textElements = entry.target.querySelectorAll('.text-animation');
-        textElements.forEach((element, index) => {
-          element.classList.add('animation-ready');
-          element.style.opacity = '1';
-          element.style.animation = 'buttonAppear 0.8s forwards';
-          element.style.animationDelay = `${index * 0.3}s`;
-        });
-        {% else %}
-        // If text animation is disabled, make text visible immediately
-        const textElements = entry.target.querySelectorAll('.image-with-text-image-with-text-letter-animation, .date-animation, .text-animation');
-        textElements.forEach(element => {
-          element.style.opacity = '1';
-        });
-        {% endif %}
-
-        {% if section.settings.enable_button_animation %}
-        const buttons = entry.target.querySelectorAll('.button-animation');
-        buttons.forEach(button => {
-          button.classList.add('animation-ready');
-          setTimeout(() => {
-            button.classList.add('animated');
-          }, 100);
-        });
-        {% else %}
-        const buttons = entry.target.querySelectorAll('.button-animation');
-        buttons.forEach(button => {
-          button.style.opacity = '1';
-        });
-        {% endif %}
-
-        observer.unobserve(entry.target);
-      }
-    });
-  }, {
-    root: null, 
-    rootMargin: '0px', 
-    threshold: 0.1 
-  });
-
-  document.querySelectorAll('.image-with-text-media-section-{{ section.id }}').forEach(section => {
-    observer.observe(section);
-  });
-}
-
-const buttons = document.querySelectorAll('.image-with-text-custom-button-css');
-buttons.forEach(button => {
-button.addEventListener('keydown', function(event) {
-  if (event.key === 'Enter' || event.key === ' ') {
-    event.preventDefault();
-    this.click();
-  }
-});
-});
-});
-
-// Mute/Unmute Button Functionality (robust, supports multiple sections and avoids global conflicts)
-document.addEventListener('DOMContentLoaded', function() {
-  var sectionId = '{{ section.id }}';
-  var muteBtn = document.getElementById('video-mute-button-' + sectionId);
-  if (!muteBtn) return;
-  var ytFrame = document.getElementById('youtube-player-' + sectionId);
-  var vimeoFrame = document.getElementById('vimeo-player-' + sectionId);
-  var shopifyVideo = document.getElementById('shopify-video-' + sectionId);
-  var isMuted = true;
-  function toggleIcon(muted) {
-    var muteIcon = muteBtn.querySelector('.mute-icon');
-    var unmuteIcon = muteBtn.querySelector('.unmute-icon');
-    if (muted) {
-      muteIcon.style.display = 'block';
-      unmuteIcon.style.display = 'none';
-      muteBtn.setAttribute('title', 'Unmute');
-      muteBtn.setAttribute('aria-label', 'Unmute');
-    } else {
-      muteIcon.style.display = 'none';
-      unmuteIcon.style.display = 'block';
-      muteBtn.setAttribute('title', 'Mute');
-      muteBtn.setAttribute('aria-label', 'Mute');
-    }
-  }
-  // YouTube
-  if (ytFrame) {
-    if (!window._ytApiLoading) {
-      var tag = document.createElement('script');
-      tag.src = 'https://www.youtube.com/iframe_api';
-      document.head.appendChild(tag);
-      window._ytApiLoading = true;
-    }
-    window._ytMuteReady = window._ytMuteReady || [];
-    window._ytMuteReady.push(function() {
-      var ytPlayer = new YT.Player('youtube-player-' + sectionId, {
-        events: {
-          'onReady': function(event) {
-            muteBtn.addEventListener('click', function() {
-              if (isMuted) {
-                ytPlayer.unMute();
-                isMuted = false;
-              } else {
-                ytPlayer.mute();
-                isMuted = true;
-              }
-              toggleIcon(isMuted);
-            });
-          }
-        }
-      });
-    });
-    if (!window.onYouTubeIframeAPIReady) {
-      window.onYouTubeIframeAPIReady = function() {
-        window._ytMuteReady.forEach(function(cb){cb();});
-      };
-    }
-  }
-  // Vimeo
-  if (vimeoFrame) {
-    if (!window._vimeoApiLoading) {
-      var vimeoScript = document.createElement('script');
-      vimeoScript.src = 'https://player.vimeo.com/api/player.js';
-      document.head.appendChild(vimeoScript);
-      window._vimeoApiLoading = true;
-    }
-    function vimeoReady() {
-      var vimeoPlayer = new Vimeo.Player(vimeoFrame);
-      muteBtn.addEventListener('click', function() {
-        if (isMuted) {
-          vimeoPlayer.setVolume(1);
-          isMuted = false;
-        } else {
-          vimeoPlayer.setVolume(0);
-          isMuted = true;
-        }
-        toggleIcon(isMuted);
-      });
-    }
-    if (window.Vimeo && window.Vimeo.Player) {
-      vimeoReady();
-    } else {
-      var checkVimeo = setInterval(function() {
-        if (window.Vimeo && window.Vimeo.Player) {
-          clearInterval(checkVimeo);
-          vimeoReady();
-        }
-      }, 100);
-    }
-  }
-  // Shopify video
-  if (shopifyVideo) {
-    muteBtn.addEventListener('click', function() {
-      if (isMuted) {
-        shopifyVideo.muted = false;
-        isMuted = false;
-      } else {
-        shopifyVideo.muted = true;
-        isMuted = true;
-      }
-      toggleIcon(isMuted);
-    });
-  }
-  // Hide button if no video
-  if (!ytFrame && !vimeoFrame && !shopifyVideo) {
-    muteBtn.style.display = 'none';
-  }
-});
-</script>
+<script src="{{ 'image-with-text.js' | asset_url }}" defer></script>
 
 {% schema %}
 {
