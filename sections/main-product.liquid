@@ -1265,19 +1265,26 @@
 
               .product-section {
                 display: flex;
-                height: calc(100vh * {{product.media.size}});
                 position: relative;
+                width: 100%;
+                max-width: 100vw;
+                overflow-x: hidden;
               }
 
               .gallery-wrapper {
                 position: sticky;
                 top: 0;
                 height: 100vh;
-                overflow: hidden;
+                overflow-y: auto;
+                overflow-x: hidden;
+                width: 100%;
+                max-width: 100%;
               }
 
               .gallery-track {
                 height: 100%;
+                width: 100%;
+                max-width: 100%;
                 pointer-events: auto;
               }
 
@@ -2353,7 +2360,7 @@ document.addEventListener('DOMContentLoaded', () => {
   let lastScrollActiveIdx = 0;
   let variantGalleryLock = false;
 
-  // Infinite scroll logic for desktop gallery
+  // Fast scroll logic for desktop gallery
   function updateActiveImageOnScroll() {
     if (window.innerWidth < 1024) return;
     if (variantGalleryLock) return;
@@ -2361,46 +2368,39 @@ document.addEventListener('DOMContentLoaded', () => {
     const galleryWrapper = document.querySelector('.gallery-wrapper');
     if (!galleryWrapper) return;
 
-    galleryItems.forEach(item => {
-      item.style.position = 'static';
-      item.style.top = '';
-      item.style.left = '';
-      item.style.right = '';
-      item.style.bottom = '';
-      item.style.width = '100%';
-      item.style.height = '100%';
-    });
+    // Calculate which image should be active based on scroll position
+    const scrollTop = galleryWrapper.scrollTop;
+    const wrapperHeight = galleryWrapper.clientHeight;
+    const scrollHeight = galleryWrapper.scrollHeight;
+    const itemHeight = wrapperHeight; // Each image takes full height
+    
+    // Calculate active index based on scroll position
+    let activeIdx;
+    if (scrollTop >= scrollHeight - wrapperHeight - 1) {
+      // If we're at or near the bottom, show the last image
+      activeIdx = galleryItems.length - 1;
+    } else {
+      // Normal calculation for other positions
+      activeIdx = Math.round(scrollTop / itemHeight);
+    }
+    
+    const clampedIdx = Math.max(0, Math.min(activeIdx, galleryItems.length - 1));
 
-    const wrapperRect = galleryWrapper.getBoundingClientRect();
-    const wrapperCenter = wrapperRect.top + wrapperRect.height / 2;
-
-    let minDistance = Infinity;
-    let activeIdx = 0;
-    galleryItems.forEach((item, idx) => {
-      const rect = item.getBoundingClientRect();
-      const itemCenter = rect.top + rect.height / 2;
-      const distance = Math.abs(itemCenter - wrapperCenter);
-      if (distance < minDistance) {
-        minDistance = distance;
-        activeIdx = idx;
-      }
-    });
-
-    if (activeIdx !== lastScrollActiveIdx) {
+    if (clampedIdx !== lastScrollActiveIdx) {
       galleryItems.forEach((item, idx) => {
-        item.classList.toggle('is-active', idx === activeIdx);
-        if (idx === activeIdx) {
+        item.classList.toggle('is-active', idx === clampedIdx);
+        if (idx === clampedIdx) {
           item.setAttribute('aria-current', 'true');
         } else {
           item.removeAttribute('aria-current');
         }
       });
       stripImages.forEach((btn, idx) => {
-        btn.classList.toggle('active', idx === activeIdx);
-        btn.setAttribute('aria-selected', idx === activeIdx ? 'true' : 'false');
-        btn.setAttribute('tabindex', idx === activeIdx ? '0' : '-1');
+        btn.classList.toggle('active', idx === clampedIdx);
+        btn.setAttribute('aria-selected', idx === clampedIdx ? 'true' : 'false');
+        btn.setAttribute('tabindex', idx === clampedIdx ? '0' : '-1');
       });
-      lastScrollActiveIdx = activeIdx;
+      lastScrollActiveIdx = clampedIdx;
     }
   }
 
@@ -2414,7 +2414,9 @@ document.addEventListener('DOMContentLoaded', () => {
     galleryWrapper.addEventListener('scroll', updateActiveImageOnScroll, { passive: true });
     galleryWrapper.addEventListener('wheel', function(e) {
       if (Math.abs(e.deltaY) > Math.abs(e.deltaX)) {
-        galleryWrapper.scrollTop += e.deltaY;
+        // Increase scroll sensitivity for faster scrolling
+        const scrollAmount = e.deltaY * 2;
+        galleryWrapper.scrollTop += scrollAmount;
         updateActiveImageOnScroll();
         e.preventDefault();
       }
@@ -2440,12 +2442,17 @@ document.addEventListener('DOMContentLoaded', () => {
         btn.setAttribute('tabindex', i === idx ? '0' : '-1');
       });
       lastScrollActiveIdx = idx;
-      const item = galleryItems[idx];
-      if (item && galleryWrapper) {
-        const itemRect = item.getBoundingClientRect();
-        const wrapperRect = galleryWrapper.getBoundingClientRect();
-        const scrollTop = galleryWrapper.scrollTop + (itemRect.top + itemRect.height / 2) - (wrapperRect.top + wrapperRect.height / 2);
-        galleryWrapper.scrollTo({ top: scrollTop, behavior: 'smooth' });
+      if (galleryWrapper) {
+        // Direct scroll to the target image position
+        let targetScrollTop;
+        if (idx === galleryItems.length - 1) {
+          // For the last image, scroll to the bottom
+          targetScrollTop = galleryWrapper.scrollHeight - galleryWrapper.clientHeight;
+        } else {
+          // For other images, use normal calculation
+          targetScrollTop = idx * galleryWrapper.clientHeight;
+        }
+        galleryWrapper.scrollTo({ top: targetScrollTop, behavior: 'smooth' });
       }
       setTimeout(() => { variantGalleryLock = false; }, 400);
     });
