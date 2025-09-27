@@ -60,7 +60,7 @@
    }
    .view-toggle button {
      position: relative;
-     padding: 0.3rem 0.45rem;
+     padding: 0px 5px;
      border: none;
      background: transparent;
      color: var(--text);
@@ -691,6 +691,8 @@
       </div>
     {% endif %}
 
+     {% assign blog_handle = section.settings.blog %}
+    {% assign post_limit = section.settings.post_limit %}
     <div
       class="featured-blog-grid blog-grid-animated scroll-fade-stagger grid-view"
       id="archiveContainer"
@@ -946,7 +948,7 @@
 
 <script>
   // Custom Blog Grid Fade-Up Animation
-  document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     const blogGrid = document.querySelector('.featured-blog-grid');
     if (!blogGrid) return;
 
@@ -958,26 +960,27 @@
       card.style.transform = 'translateY(50px)';
       card.style.transition = `opacity 0.6s ease ${index * 0.1}s, transform 0.6s ease ${index * 0.1}s`;
     });
+ const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            // Trigger fade-up animation
+            entry.target.style.opacity = '1';
+            entry.target.style.transform = 'translateY(0)';
 
-    // Create intersection observer
-    const observer = new IntersectionObserver((entries) => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          // Trigger fade-up animation
-          entry.target.style.opacity = '1';
-          entry.target.style.transform = 'translateY(0)';
-
-          // Stop observing this element
-          observer.unobserve(entry.target);
-        }
-      });
-    }, {
-      rootMargin: '0px 0px -100px 0px',
-      threshold: 0.1
-    });
+            // Stop observing this element
+            observer.unobserve(entry.target);
+          }
+        });
+      },
+      {
+        rootMargin: '0px 0px -100px 0px',
+        threshold: 0.1,
+      }
+    );
 
     // Observe all blog cards
-    blogCards.forEach(card => {
+    blogCards.forEach((card) => {
       observer.observe(card);
     });
   });
