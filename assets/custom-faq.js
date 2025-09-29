@@ -18,6 +18,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Prepare full & short answer
     let fullAnswer = container.dataset.fullAnswer || ansText.textContent;
+    if (!container || !ansText) return; // Skip items with no answer
     const shortAnswer = fullAnswer.split(' ').slice(0, 6).join(' ') + '...';
     container.dataset.fullHTML = convertLinks(fullAnswer);
     container.dataset.shortHTML = convertLinks(shortAnswer);
