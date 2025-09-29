@@ -16,17 +16,14 @@ document.addEventListener('DOMContentLoaded', () => {
     const container = item.querySelector('.ans');
     const svg = container.querySelector('svg') || null;
 
-    // Prepare full & short answer
-    let fullAnswer = container?.dataset?.fullAnswer || ansText?.textContent;
     if (!container || !ansText || !svg || !button) return;
-    if (!shortAnswer) return;
-
+    let fullAnswer = container?.dataset?.fullAnswer || ansText?.textContent;
+    if (!fullAnswer) return;
     const shortAnswer = fullAnswer.split(' ').slice(0, 6).join(' ') + '...';
     container.dataset.fullHTML = convertLinks(fullAnswer);
     container.dataset.shortHTML = convertLinks(shortAnswer);
     ansText.innerHTML = container.dataset.shortHTML;
 
-    // Icon setup
     if (svg) {
       svg.classList.remove('arrow-svg1');
       svg.classList.add('plus-minus-icon');
@@ -42,16 +39,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
           const otherAns = otherItem.querySelector('.ans-text');
           const otherContainer = otherItem.querySelector('.ans');
+          const otherButton = otherItem.querySelector('.faq-row');
 
-          if (otherContainer && otherAns) {
+          if (otherContainer && otherAns && otherButton) {
             otherContainer.dataset.expanded = 'false';
             otherAns.innerHTML = otherContainer.dataset.shortHTML;
             otherButton.setAttribute('aria-expanded', 'false');
           }
-
-          otherContainer.dataset.expanded = 'false';
-          otherAns.innerHTML = otherContainer.dataset.shortHTML;
-          otherItem.querySelector('.faq-row').setAttribute('aria-expanded', 'false');
         }
       });
       if (isExpanded) {
