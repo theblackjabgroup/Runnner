@@ -34,6 +34,7 @@ document.addEventListener('DOMContentLoaded', () => {
       e.preventDefault();
 
       const isExpanded = item.classList.contains('expanded');
+      item.classList.toggle('expanded'); // triggers CSS animation
 
       // Collapse all other items
       wrappers.forEach((otherItem) => {
