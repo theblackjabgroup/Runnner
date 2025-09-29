@@ -18,7 +18,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Prepare full & short answer
     let fullAnswer = container?.dataset?.fullAnswer || ansText?.textContent;
-    if (!container || !ansText) return;
+    if (!container || !ansText || !svg || !button) return;
+    if (!shortAnswer) return;
 
     const shortAnswer = fullAnswer.split(' ').slice(0, 6).join(' ') + '...';
     container.dataset.fullHTML = convertLinks(fullAnswer);
@@ -41,9 +42,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
           const otherAns = otherItem.querySelector('.ans-text');
           const otherContainer = otherItem.querySelector('.ans');
-          const otherButton = otherItem.querySelector('.faq-row');
 
-          if (otherContainer && otherAns && otherButton) {
+          if (otherContainer && otherAns) {
             otherContainer.dataset.expanded = 'false';
             otherAns.innerHTML = otherContainer.dataset.shortHTML;
             otherButton.setAttribute('aria-expanded', 'false');
