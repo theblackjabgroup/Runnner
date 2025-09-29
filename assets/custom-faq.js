@@ -14,11 +14,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const button = item.querySelector('.faq-row');
     const ansText = item.querySelector('.ans-text');
     const container = item.querySelector('.ans');
-    const svg = container.querySelector('svg');
+    const svg = container.querySelector('svg') || null;
 
     // Prepare full & short answer
-    let fullAnswer = container.dataset.fullAnswer || ansText.textContent;
-    if (!container || !ansText) return; // Skip items with no answer
+    let fullAnswer = container?.dataset?.fullAnswer || ansText?.textContent;
+    if (!container || !ansText) return;
+
     const shortAnswer = fullAnswer.split(' ').slice(0, 6).join(' ') + '...';
     container.dataset.fullHTML = convertLinks(fullAnswer);
     container.dataset.shortHTML = convertLinks(shortAnswer);
@@ -34,25 +35,30 @@ document.addEventListener('DOMContentLoaded', () => {
       e.preventDefault();
       const isExpanded = item.classList.contains('expanded');
 
-      // Collapse all other items
       wrappers.forEach((otherItem) => {
         if (otherItem !== item) {
           otherItem.classList.remove('expanded');
+
           const otherAns = otherItem.querySelector('.ans-text');
           const otherContainer = otherItem.querySelector('.ans');
+          const otherButton = otherItem.querySelector('.faq-row');
+
+          if (otherContainer && otherAns && otherButton) {
+            otherContainer.dataset.expanded = 'false';
+            otherAns.innerHTML = otherContainer.dataset.shortHTML;
+            otherButton.setAttribute('aria-expanded', 'false');
+          }
+
           otherContainer.dataset.expanded = 'false';
           otherAns.innerHTML = otherContainer.dataset.shortHTML;
           otherItem.querySelector('.faq-row').setAttribute('aria-expanded', 'false');
         }
       });
-
       if (isExpanded) {
-        // Collapse
         item.classList.remove('expanded');
         ansText.innerHTML = container.dataset.shortHTML;
         button.setAttribute('aria-expanded', 'false');
       } else {
-        // Expand
         item.classList.add('expanded');
         ansText.innerHTML = container.dataset.fullHTML;
         button.setAttribute('aria-expanded', 'true');
