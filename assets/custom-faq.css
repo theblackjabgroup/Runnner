@@ -1,40 +1,54 @@
+/* ---------------------------------- */
+/* General Styles */
 .faq-row:focus {
   outline: none;
 }
 .faq-row:focus-visible {
   outline: 2px solid blue;
 }
-.preview-text a {
+
+.faq-answer-box a {
   text-decoration: underline;
   word-break: break-word;
 }
+
 .faq-title {
   color: var(--text);
 }
 
 .faq-item {
   color: var(--text);
+  padding-top: 15px;
+  padding-bottom: 15px;
 }
+
 .faq-toggle {
   display: flex;
-  align-items: flex-start;
-  margin-bottom: 5px;
+  align-items: center;
+  gap: 0.6rem;
 }
-.faq-preview {
-  margin-left:10px;
-  margin-top:-2px;
-}
-.preview-text {
-  opacity: 1;
+
+.faq-answer-box {
+  width: 45vw; 
+  max-width: 600px;
+  margin-block-start: 1em;
+  margin-block-end: 1em;
+  box-sizing: border-box;
+  letter-spacing: 0.02rem;
   transition: opacity 0.3s ease;
 }
 
-.preview-text.fade-out {
-  opacity: 0;
+.faq-preview {
+  margin-left: 10px;
+  margin-top: -2px;
 }
 
-.preview-text.fade-in {
-  opacity: 1;
+.faq-row-question-heading {
+  font-size: var(--t-h-5-size); 
+  font-weight: var(--t-h-5-weight); 
+  line-height: var(--t-h-5-line-height);
+  margin-top: 6px;
+  font-family: var(--font-heading-family);
 }
 
 .arrow-svg1 {
@@ -42,98 +56,148 @@
   transform-origin: center;
 }
 
-.faq-text-wrapper {
-  transition: all 0.7s cubic-bezier(0.65, 0, 0.35, 1);
+/* ---------------------------------- */
+/* FAQ Answer Container Animation */
+.ans {
+  display: flex; 
+  align-items: flex-start; 
+  gap: 0.6rem;            /* space between icon and text */
   overflow: hidden;
-  max-height: 100px;
-  opacity: 1;
+  /* transition: max-height 0.5s ease; */
+   line-height: 1.5em;      /* match line-height */
+  max-height: 1.5em;  /* collapsed single line */
+  flex-wrap: nowrap;      /* prevent text from dropping below icon */
+
 }
 
-.preview-text {
-  transition: opacity 0.5s ease-in-out;
-  opacity: 1;
-}
-.faq-text-wrapper {
-  transition: max-height 0.6s ease;
+.ans-text {
+  white-space: nowrap;  /* collapsed */
   overflow: hidden;
+  text-overflow: ellipsis;
+  display: block;
+  line-height: 1.5em; /* ensure single line */
+  position: relative;
+  top: -2vh;
 }
 
-.faq-text-wrapper div {
-  opacity: 0;
-  transition: opacity 0.3s ease-in-out;
+/* Expanded state */
+.faq-item.expanded .ans {
+  max-height: 1000px;   /* enough for long text */
+    overflow: visible;    /* allow full content */
+      flex-wrap: nowrap;      /* stay on same row; text grows beside icon */
+position: relative;
+top: -2vh;
+  align-items: flex-start; /* ensure text starts from top */
+
 }
 
-.faq-text-wrapper div.show {
-  opacity: 1;
+.faq-item.expanded .ans-text {
+  white-space: normal;  /* multiline allowed */
+  overflow: visible;
+  text-overflow: unset;
+  display: block;
+   line-height: 1.5em;   /* consistent line-height */
+     margin: 0;                 /* no extra top margin */
+  padding: 0;
+
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .arrow-svg1,
-  .faq-answer {
-    transition: none !important;
+/* ---------------------------------- */
+/* Arrow rotation */
+.faq-toggle[data-expanded="true"] .arrow-svg1 {
+  transform: rotate(-90deg);
+  margin-top: -7px;
+}
+
+/* ---------------------------------- */
+/* Responsive for mobile */
+@media (max-width: 600px) {
+  .faq-header {
+    height: 26px !important;
   }
-}
+  #faq-heading {
+    font-size: var(--tm-h-1-size) !important;
+    line-height: var(--tm-h-1-line-height) !important;
+    height: 26px !important;
+  }
 
-@media (max-width: 767px) {
-  .faq-header{
-    height:26px !important;
-  }
-  #faq-heading{
-    font-size:var(--tm-h-1-size) !important;
-    line-height:var(--tm-h-1-line-height) !important;
-    height:26px !important;
-  }
-  .faq-toggle {
-  margin-bottom: 5px;
-}
   .faq-item {
     display: flex;
     align-items: flex-start; 
     gap: 18px;
   }
+
   .faq-preview {
     flex: 1;
-    margin-left:2px;
-    font-size:16px !important;
+    margin-left: 2px;
+    font-size: 16px !important;
   }
-  .ans{
-    font-size:var(--tm-b-2-size) !important;
-    line-height:var(--tm-b-2-line-height) !important;
+
+  .ans {
+    width: 88vw !important;
+    font-size: var(--tm-b-2-size) !important;
+    line-height: var(--tm-b-2-line-height) !important;
   }
-  .faq-row-answer{
-    margin-top:10px;
-    letter-spacing:initial;
+
+  .faq-question {
+    font-size: var(--tm-h-4-size) !important;
+    line-height: var(--tm-h-4-line-height) !important;
   }
-  .faq-question{
-    font-size:var(--tm-h-4-size) !important;
-    line-height:var(--tm-h-4-line-height) !important;
-  }
-  .ans{
-    width:88vw !important;
-  }
-}
-@keyframes fadeUpIn {
-  0% {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-  100% {
-    opacity: 1;
-    transform: translateY(0);
+
+  .faq-row-answer {
+    margin-top: 10px;
+    letter-spacing: initial;
   }
 }
 
-.fadeUpIn {
-  animation: fadeUpIn 1s ease-out forwards;
+/* Larger screens: side-by-side layout */
+@media (min-width: 600px) {
+  .faq-row {
+    display: flex;
+    flex-direction: row; 
+    align-items: flex-start;
+    gap: 1rem;
+  }
+
+  .faq-row-question-heading {
+    flex: 0 0 48%;
+    max-width: 48%;
+    min-width: 0;
+    padding-right: 1rem;
+  }
+
+  .faq-row-answer {
+    flex: 0 0 50%;
+    max-width: 50%;
+    min-width: 0;
+    display: flex;
+    align-items: flex-start;
+    overflow: hidden;
+    transition: max-height 0.5s ease, opacity 0.3s ease;
+  }
+
+  .ans {
+    white-space: normal; 
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .faq-item.expanded .ans-text {
+    white-space: normal;
+    overflow: visible;
+    position: relative;
+  top: -2px;  /* adjust as needed: move text up */
+  }
+
+  .ans .plus-minus-icon {
+    flex: 0 0 auto;
+    width: 20px;
+    height: 24px;
+      transition: transform 0.4s ease; /* smooth rotation */
+
+  }
 }
 
-.arrow-svg1 {
-  display: inline-block;
-   transition: transform 0.4s ease, margin-top 0.4s ease;
-}
-
-.faq-toggle[data-expanded="true"] .arrow-svg1 {
-  transform: rotate(-90deg);
-  margin-top:-7px;
-  
-}
+/* Rotate on expanded state */
+.faq-item.expanded .plus-minus-icon {
+opacity: 0;}

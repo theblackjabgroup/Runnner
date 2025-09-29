@@ -1,114 +1,62 @@
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener('DOMContentLoaded', () => {
   const urlPattern = /(https?:\/\/[^\s<]+(?:\.[a-z]{2,})(?:\/[^\s<]*)?)/gi;
   const styleClass = 'font-medium underline break-all';
 
   const convertLinks = (text) => {
-    return text.replace(urlPattern, match => {
+    return text.replace(urlPattern, (match) => {
       return `<a href="${match}" target="_blank" rel="noopener noreferrer" class="${styleClass}">${match}</a>`;
     });
   };
 
-  const wrappers = document.querySelectorAll(".faq-item");
+  const wrappers = document.querySelectorAll('.faq-item');
 
-  wrappers.forEach((item, index) => {
-    const wrapper = item.querySelector(".faq-toggle");
-    if (!wrapper) return;
+  wrappers.forEach((item) => {
+    const button = item.querySelector('.faq-row');
+    const ansText = item.querySelector('.ans-text');
+    const container = item.querySelector('.ans');
+    const svg = container.querySelector('svg');
 
-    const container = wrapper.querySelector("div");
-    const svg = container.querySelector("svg");
-    const button = item.querySelector(".faq-row");
-
-    if (!container || !svg || !button) return;
+    // Prepare full & short answer
+    let fullAnswer = container.dataset.fullAnswer || ansText.textContent;
+    const shortAnswer = fullAnswer.split(' ').slice(0, 6).join(' ') + '...';
+    container.dataset.fullHTML = convertLinks(fullAnswer);
+    container.dataset.shortHTML = convertLinks(shortAnswer);
+    ansText.innerHTML = container.dataset.shortHTML;
 
     // Icon setup
-    svg.classList.remove("arrow-svg1");
-    svg.classList.add("plus-minus-icon");
-
-    // Get answer text
-    let fullAnswerText = container.getAttribute("data-full-answer") || "";
-
-    if (!fullAnswerText) {
-      const currentText = container.textContent.replace(/^\s*\S+\s*/, "").trim();
-      fullAnswerText = currentText.replace(/…$/, "");
-      if (currentText.includes("…") || currentText.includes("...")) {
-        console.warn(
-          `FAQ item ${index}: Full answer text not available. Please add data-full-answer attribute to the container div.`
-        );
-        fullAnswerText = currentText;
-      }
+    if (svg) {
+      svg.classList.remove('arrow-svg1');
+      svg.classList.add('plus-minus-icon');
     }
 
-    const fullHTML = convertLinks(fullAnswerText);
-    const shortHTML = convertLinks(
-      fullAnswerText.split(" ").slice(0, 6).join(" ") + "..."
-    );
-
-    container.dataset.fullHTML = fullHTML;
-    container.dataset.shortHTML = shortHTML;
-    container.dataset.expanded = "false";
-
-    // Remove old siblings & add preview span
-    while (svg.nextSibling) {
-      svg.parentNode.removeChild(svg.nextSibling);
-    }
-
-    const previewSpan = document.createElement("span");
-    previewSpan.className = "preview-text";
-    previewSpan.innerHTML = shortHTML;
-    svg.insertAdjacentElement("afterend", previewSpan);
-
-    // Start collapsed
-    container.style.overflow = "hidden";
-    container.style.maxHeight = "50px";
-    container.style.transition = "max-height 0.7s ease";
-
-    // Replace button with fresh copy
-    const newButton = button.cloneNode(true);
-    button.parentNode.replaceChild(newButton, button);
-
-    newButton.addEventListener("click", (e) => {
+    button.addEventListener('click', (e) => {
       e.preventDefault();
 
-      const currentItem = newButton.closest(".faq-item");
-      const currentContainer = currentItem.querySelector(".faq-toggle div");
-      const currentPreviewSpan = currentContainer.querySelector(".preview-text");
-
-      const isExpanded = currentContainer.dataset.expanded === "true";
-      const newState = !isExpanded;
+      const isExpanded = item.classList.contains('expanded');
 
       // Collapse all other items
       wrappers.forEach((otherItem) => {
-        if (otherItem !== currentItem) {
-          const otherContainer = otherItem.querySelector(".faq-toggle div");
-          const otherPreviewSpan = otherContainer.querySelector(".preview-text");
-          if (otherContainer.dataset.expanded === "true") {
-            otherItem.classList.remove("expanded");
-            otherContainer.dataset.expanded = "false";
-            otherContainer.style.maxHeight = "50px";
-            otherPreviewSpan.innerHTML = otherContainer.dataset.shortHTML;
-          }
+        if (otherItem !== item) {
+          otherItem.classList.remove('expanded');
+          const otherAns = otherItem.querySelector('.ans-text');
+          const otherContainer = otherItem.querySelector('.ans');
+          otherContainer.dataset.expanded = 'false';
+          otherAns.innerHTML = otherContainer.dataset.shortHTML;
+          otherItem.querySelector('.faq-row').setAttribute('aria-expanded', 'false');
         }
       });
 
-      // Toggle current
-      currentContainer.dataset.expanded = newState.toString();
-      newButton.setAttribute("aria-expanded", newState.toString());
-
-      if (newState) {
-        // Open instantly with smooth slide
-        currentItem.classList.add("expanded");
-        currentPreviewSpan.innerHTML = currentContainer.dataset.fullHTML;
-        currentContainer.style.maxHeight = currentContainer.scrollHeight + "px";
-      } else {
+      if (isExpanded) {
         // Collapse
-        currentItem.classList.remove("expanded");
-        currentContainer.style.maxHeight = "50px";
-        setTimeout(() => {
-          currentPreviewSpan.innerHTML = currentContainer.dataset.shortHTML;
-        }, 300);
+        item.classList.remove('expanded');
+        ansText.innerHTML = container.dataset.shortHTML;
+        button.setAttribute('aria-expanded', 'false');
+      } else {
+        // Expand
+        item.classList.add('expanded');
+        ansText.innerHTML = container.dataset.fullHTML;
+        button.setAttribute('aria-expanded', 'true');
       }
     });
-
-    newButton.setAttribute("aria-expanded", "false");
   });
 });
