@@ -495,16 +495,6 @@
       color: var(--header_text, var(--color-foreground));
       margin-bottom: 45px;
     }
-    .btn-text {
-      font-size: 20px;
-      font-weight: 500;
-      width: 100%;
-      display: flex;
-      align-items: center;
-      justify-content: right;
-      position: relative;
-      z-index: 1;
-    }
     .outfit-sold-out {
       font-size: 13px;
       font-weight: 500;
@@ -516,8 +506,18 @@
     }
     }
 
+  .outfit-add-to-cart-btn-{{ section.id }} {
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    width: 100% !important;
+  }
+
   .outfit-primary-btn {
     width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 auto !important;
+    display: block !important;
   }
 
   .outfit-primary-btn:disabled {
@@ -545,6 +545,7 @@
   @media screen and (max-width: 750px) {
     .outfit-primary-btn {
       width: 100% !important;
+      max-width: 100% !important;
     }
   }
 
@@ -1356,47 +1357,13 @@
 
       if (!button || !btnText) return;
 
-      // Store the arrow HTML before updating text
-      const arrowHTML = btnText ? btnText.querySelector('.primary-slide-button-arrow')?.outerHTML || '' : '';
-      const arrowHoverHTML = btnTextHover
-        ? btnTextHover.querySelector('.primary-slide-button-arrow')?.outerHTML || ''
-        : '';
-
-      // Show loading state
-      button.disabled = true;
-      if (btnText) {
-        btnText.innerHTML = 'ADDING...' + arrowHTML;
-      }
-      if (btnTextHover) {
-        btnTextHover.innerHTML = 'ADDING...' + arrowHoverHTML;
-      }
-
       // Get form data
       const formData = new FormData(form);
       const variantId = formData.get('id');
       const quantity = parseInt(formData.get('quantity')) || 1;
 
+      // Add to cart silently without showing loading states
       addToCart(variantId, quantity);
-
-      // Reset button state
-      setTimeout(() => {
-        button.disabled = false;
-        if (btnText) {
-          btnText.innerHTML = 'ADDED!' + arrowHTML;
-        }
-        if (btnTextHover) {
-          btnTextHover.innerHTML = 'ADDED!' + arrowHoverHTML;
-        }
-
-        setTimeout(() => {
-          if (btnText) {
-            btnText.innerHTML = 'ADD TO CART' + arrowHTML;
-          }
-          if (btnTextHover) {
-            btnTextHover.innerHTML = 'ADD TO CART' + arrowHoverHTML;
-          }
-        }, 2000);
-      }, 1000);
     });
 
     document.addEventListener('click', function (e) {
@@ -1497,34 +1464,6 @@
             }
           }
         }
-      }
-    });
-
-    document.addEventListener('click', function (e) {
-      if (!e.target.closest(`.outfit-add-to-cart-btn-${sectionId}`)) return;
-
-      const targetSection = e.target.closest('[data-section-id]');
-      if (!targetSection || targetSection.getAttribute('data-section-id') !== sectionId) {
-        return;
-      }
-
-      e.preventDefault();
-      const form = e.target.closest(`.outfit-form-${sectionId}`);
-      const button = form.querySelector(`.outfit-add-to-cart-btn-${sectionId}`);
-      const btnText = button.querySelector('.btn-text');
-      const spinner = button.querySelector('.loading-spinner');
-
-      // Show loading state
-      button.disabled = true;
-      btnText.classList.add('hidden');
-      spinner.classList.remove('hidden');
-
-      if (typeof window.theme !== 'undefined' && window.theme.cart) {
-        handleThemeCartAdd(form, button, btnText, spinner, sectionId);
-      } else if (typeof CartJS !== 'undefined') {
-        handleCartJSAdd(form, button, btnText, spinner, sectionId);
-      } else {
-        handleRegularFormSubmission(form, button, btnText, spinner, sectionId);
       }
     });
   })();
