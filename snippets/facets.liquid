@@ -148,7 +148,7 @@
                     >
                       <div class="flex items-center">
                         <h1
-                          class="facets__summary-label  uppercase !text-[1.6rem] !font-[500]"
+                          class="facets__summary-label uppercase !text-[16px] !font-[500]"
                           style="color: var(--text);"
                         >
                           {{- filter.label | escape }}
@@ -298,7 +298,7 @@
                     >
                       <div class="flex items-center">
                         <h1
-                          class="facets__summary-label uppercase !text-[1.6rem] !font-[500]"
+                          class="facets__summary-label uppercase !text-[16px] !font-[500]"
                           style="color: var(--text);"
                         >
                           {{- filter.label | escape -}}
@@ -308,9 +308,9 @@
                     </summary>
                     <div
                       id="Facet-{{ forloop.index }}-{{ section.id }}"
-                      class="{% if filter_type == 'horizontal' %}-translate-y-[15px] !rounded-lg facets__display -translate-x-[150px] {% else %}facets__display-vertical{% endif %}"
+                      class="{% if filter_type == 'horizontal' %}-translate-y-[15px] !rounded-lg facets__display {% else %}facets__display-vertical{% endif %}"
                     >
-                      <price-range class="flex items-center px-4 price-range uppercase">
+                      <price-range class="price-range-wrapper">
                         {% render 'price-facet', filter: filter, id_prefix: 'Filter-', filter_type: filter_type %}
                       </price-range>
                     </div>
@@ -540,28 +540,45 @@
     <span class="uppercase filters-tabs" style="color: var(--text);">Filters</span>
   </button>
 
-  <div class="mobile-sort-dropdown relative w-1/2  ">
+  <div class="mobile-sort-dropdown relative w-1/2">
     <button
-      class="mobile-sort-trigger flex items-center gap-2 px-4 py-2  w-full justify-center"
+      class="mobile-sort-trigger flex items-center gap-2 px-4 py-2 w-full justify-center"
       onclick="this.nextElementSibling.classList.toggle('hidden')"
     >
       <span class="uppercase filters-tabs" style="color: var(--text);">Sort</span>
     </button>
     <div
-      class="mobile-sort-options hidden absolute top-full left-0 right-0 mt-1 border rounded-lg shadow-lg z-[100]"
+      class="mobile-sort-options hidden absolute top-full left-0 right-0 mt-1 border rounded-lg shadow-lg z-[100000]"
       style="background-color: var(--background); border-color: var(--border);"
     >
-      {%- for option in results.sort_options -%}
-        <button
-          class="w-full text-left px-4 py-2 {% if option.value == sort_by %}font-bold{% endif %}"
-          style="color: var(--text);"
-
-          data-value="{{ option.value | escape }}"
-          onclick="updateMobileSort(this)"
-        >
-          {{ option.name | escape }}
-        </button>
-      {%- endfor -%}
+      <fieldset class="facets-wrap parent-wrap">
+        <ul class="!py-2 !m-0 facets-layout facets-layout-list list-unstyled" role="list">
+          {%- for option in results.sort_options -%}
+            <li class="list-menu__item facets__item">
+              <label for="MobileSort-{{ option.value | escape }}" class="facet-checkbox hover:bg-gray-200 !px-4">
+                <input
+                  type="radio"
+                  name="sort_by"
+                  value="{{ option.value | escape }}"
+                  id="MobileSort-{{ option.value | escape }}"
+                  {% if option.value == sort_by %}
+                    checked
+                  {% endif %}
+                  class="facet-checkbox__input"
+                  onchange="updateMobileSortFromRadio(this)"
+                >
+                {{- 'square.svg' | inline_asset_content -}}
+                <div class="svg-wrapper translate-y-[5px]">
+                  {{- 'icon-checkmark.svg' | inline_asset_content -}}
+                </div>
+                <span class="text-[16px] text-nowrap" style="color: var(--text);">
+                  {{- option.name | escape -}}
+                </span>
+              </label>
+            </li>
+          {%- endfor -%}
+        </ul>
+      </fieldset>
     </div>
   </div>
 </div>
@@ -671,8 +688,8 @@
     });
   });
 
-  function updateMobileSort(button) {
-    const value = button.dataset.value;
+  function updateMobileSortFromRadio(radioInput) {
+    const value = radioInput.value;
     const form = document.getElementById('FacetFiltersFormMobile');
     let sortInput = form.querySelector('input[name="sort_by"]');
     if (!sortInput) {
@@ -683,19 +700,7 @@
     }
     sortInput.value = value;
     form.submit();
-
-    // Close the dropdown
-    button.closest('.mobile-sort-options').classList.add('hidden');
   }
-
-  // Close sort dropdown when clicking outside
-  document.addEventListener('click', function (event) {
-    if (!event.target.closest('.mobile-sort-dropdown')) {
-      document.querySelectorAll('.mobile-sort-options').forEach((dropdown) => {
-        dropdown.classList.add('hidden');
-      });
-    }
-  });
 </script>
 
 <style>
@@ -708,11 +713,11 @@
   }
   /* Plus/Minus Morphing Icon Styles */
   :root {
-    --dur: 200ms;
+    --dur: 400ms;
     --ease-open: ease;
     --ease-close: ease;
     --fg: var(--text);
-    --size: 15px;
+    --size: 12px;
     --thickness: 2px;
   }
 
@@ -722,7 +727,10 @@
     height: var(--size);
     flex-shrink: 0;
     margin-left: 6px;
-    font-weight: 500; /* Make icon font weight 500 */
+    font-family: var(--font-body-family);
+    font-style: var(--font-body-style);
+    font-weight: var(--font-body-weight);
+    font-size: var(--tm-b-3-size);
     color: var(--text); /* Use body text color */
   }
 
@@ -773,11 +781,15 @@
   .mobile-pmorph__icon {
     width: 12px;
     height: 12px;
+    font-family: var(--font-body-family);
+    font-style: var(--font-body-style);
+    font-weight: var(--font-body-weight);
+    font-size: var(--tm-b-3-size);
   }
 
   .facets__summary-label {
     margin-right: 6px !important;
-    font-family: var(--font-body-family), var(--font-body-fallback);
+    font-family: var(--font-heading-family) !important;
   }
 
   /* Apply body font to all facet text elements */
@@ -789,7 +801,7 @@
   .mobile-filter-summary span,
   .mobile-sort-options button,
   .filters-tabs {
-    font-family: var(--font-body-family), var(--font-body-fallback);
+    font-family: var(--font-body-family) !important;
   }
 
   .filters-tabs {
@@ -851,6 +863,11 @@
   .facets__display {
     background-color: var(--background) !important;
     border: 1px solid var(--border) !important;
+    width: 180px !important;
+    max-width: 180px !important;
+    left: 50% !important;
+    transform: translateX(-50%) translateY(-0px) !important;
+    position: absolute !important;
   }
 
   /* Adjust disclosure width */
@@ -938,7 +955,7 @@
     right: 0;
     bottom: 0;
     background: rgba(0, 0, 0, 0.7);
-    z-index: 99;
+    z-index: 1001 !important;
     opacity: 0;
     visibility: hidden;
     transition: all 0.3s ease;
@@ -968,6 +985,8 @@
     flex-direction: column;
     overflow: hidden;
     position: relative;
+    border-radius: 12px 0 0 12px;
+    z-index: 1002 !important;
   }
 
   .mobile-filter-overlay.active .mobile-filter-drawer {
@@ -978,49 +997,60 @@
     display: flex;
     justify-content: space-between;
     align-items: flex-end;
-    padding: 20px;
+    padding: 24px 20px 20px 20px;
     background: white;
     position: sticky;
     top: 0;
-    z-index: 10;
+    z-index: 1003 !important;
+    border-radius: 12px 0 0 0;
   }
 
   .mobile-filter-header h2 {
-    font-size: 30px;
-    font-weight: 500;
-    line-height: 0.9;
+    font-family: var(--font-heading-family);
+    font-style: var(--font-heading-style);
+    font-weight: var(--font-heading-weight);
+    font-size: var(--tm-h-2-size);
+    line-height: var(--tm-h-2-line-height);
     margin: 0;
   }
 
   .mobile-filter-close {
     background: none;
     border: 10px;
-    font-size: 1.5rem;
+    font-family: var(--font-body-family);
+    font-style: var(--font-body-style);
+    font-weight: var(--font-body-weight);
+    font-size: var(--tm-b-3-size);
+    line-height: var(--tm-b-3-line-height);
     cursor: pointer;
-    font-weight: 300;
     position: relative;
   }
 
   .mobile-filter-content {
     flex: 1;
     overflow-y: auto;
-    padding: 20px;
+    padding: 0 20px 20px 20px;
   }
 
   .mobile-filter-section {
     border-top: 1px solid var(--border);
+    margin: 0 -20px;
+    padding: 0 20px;
   }
 
   .mobile-filter-summary {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 10px 0;
-    font-size: 12px;
+    padding: 16px 0;
+    font-family: var(--font-body-family);
+    font-style: var(--font-body-style);
+    font-weight: var(--font-body-weight);
+    font-size: var(--tm-b-2-size);
+    line-height: var(--tm-b-2-line-height);
     cursor: pointer;
     list-style: none;
     background: white;
-    font-weight: 500;
   }
 
   .mobile-filter-summary::-webkit-details-marker {
@@ -1036,20 +1066,15 @@
   }
 
   .mobile-filter-options {
-    padding: 0 1.5rem 1rem;
+    padding: 0 0 20px 0;
     background: var(--background);
   }
 
   .mobile-filter-option {
     display: flex;
     align-items: center;
-    padding: 0.75rem 0;
+    padding: 12px 0;
     cursor: pointer;
-    border-bottom: 1px solid var(--border);
-  }
-
-  .mobile-filter-option:last-child {
-    border-bottom: none;
   }
 
   .mobile-filter-option input[type='checkbox'] {
@@ -1057,12 +1082,13 @@
   }
 
   .mobile-filter-checkbox {
-    width: 20px;
-    height: 20px;
-    border: 2px solid var(--border);
+    width: 16px;
+    height: 16px;
+    border: 1px solid var(--border);
     margin-right: 0.75rem;
     position: relative;
     flex-shrink: 0;
+    border-radius: 2px;
   }
 
   .mobile-filter-option.active .mobile-filter-checkbox {
@@ -1077,12 +1103,16 @@
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    font-size: 12px;
+    font-size: 10px;
     font-weight: bold;
   }
 
   .mobile-filter-label {
-    font-size: 1rem;
+    font-family: var(--font-body-family);
+    font-style: var(--font-body-style);
+    font-weight: var(--font-body-weight);
+    font-size: var(--tm-b-3-size);
+    line-height: var(--tm-b-3-line-height);
     text-transform: uppercase;
     color: var(--text);
   }
@@ -1093,7 +1123,7 @@
   }
 
   .mobile-filter-footer {
-    padding: 1.5rem;
+    padding: 0px;
     border-top: 1px solid var(--border) !important;
     background: var(--background);
     display: flex;
@@ -1101,27 +1131,173 @@
     position: absolute !important;
     left: 0;
     right: 0;
-    bottom: 10px !important;
+    bottom: 0 !important;
     width: 100%;
+    border-radius: 0 0 12px 0;
+    z-index: 1003 !important;
   }
 
   .mobile-apply-btn {
     flex: 1;
-    padding: 0.4rem !important;
+    padding: 16px !important;
     background: var(--button);
     color: var(--button_label);
-    border-radius: 3px !important;
+    border-radius: 8px !important;
     text-transform: uppercase;
-    font-weight: 500;
+    font-family: var(--font-heading-family);
+    font-style: var(--font-heading-style);
+    font-weight: var(--font-heading-weight);
+    font-size: var(--tm-h-4-size);
+    line-height: var(--tm-h-4-line-height);
     cursor: pointer;
     width: 100% !important;
+    border: none;
   }
 
   .mobile-price-range {
-    padding: 1rem 0;
+    padding: 20px 0;
+  }
+
+  /* Mobile Price Facet Styling */
+  .mobile-price-range .price-facet-container {
+    background-color: transparent;
+    border-radius: 8px;
+    padding: 0;
+    width: 100%;
+    max-width: none;
+  }
+
+  .mobile-price-range .price-facet-header {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 16px;
+  }
+
+  .mobile-price-range .price-reset {
+    font-family: var(--font-body-family);
+    font-style: var(--font-body-style);
+    font-weight: var(--font-body-weight);
+    font-size: var(--tm-b-2-size);
+    line-height: var(--tm-b-2-line-height);
+    color: var(--text);
+    cursor: pointer;
+    text-transform: uppercase;
+    padding: 8px 12px;
+    border-radius: 6px;
+    background: var(--background);
+    transition: all 0.2s ease;
+  }
+
+  .mobile-price-range .price-reset:hover {
+    background: var(--button);
+    color: var(--button_label);
+  }
+
+  .mobile-price-range .price-facet-inputs {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    margin-bottom: 16px;
+  }
+
+  .mobile-price-range .price-facet-row {
+    display: flex;
+    width: 100%;
+  }
+
+  .mobile-price-range .field {
+    width: 100%;
+    position: relative;
+    margin-bottom: 0;
+  }
+
+  .mobile-price-range .price-input {
+    width: 100%;
+    height: 48px;
+    padding: 12px 16px;
+    border-radius: 8px;
+    font-family: var(--font-body-family);
+    font-style: var(--font-body-style);
+    font-weight: var(--font-body-weight);
+    font-size: var(--tm-b-3-size);
+    line-height: var(--tm-b-3-line-height);
+    background-color: white;
+    box-sizing: border-box;
+    outline: none;
+    transition: border-color 0.2s ease;
+  }
+
+  .mobile-price-range .price-input:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px var(--button);
+    border-color: var(--button);
+  }
+
+  .mobile-price-range .field__label {
+    position: absolute;
+    left: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-family: var(--font-body-family);
+    font-style: var(--font-body-style);
+    font-weight: var(--font-body-weight);
+    font-size: var(--tm-b-3-size);
+    line-height: var(--tm-b-3-line-height);
+    color: #999;
+    pointer-events: none;
+    transition: all 0.2s ease;
+    background-color: white;
+    padding: 4px 8px;
+    z-index: 10;
+  }
+
+  .mobile-price-range .price-input:focus + .field__label,
+  .mobile-price-range .price-input:not(:placeholder-shown) + .field__label,
+  .mobile-price-range .price-input[value]:not([value='']) + .field__label {
+    top: 0;
+    font-size: var(--tm-b-2-size);
+    color: var(--button);
+    transform: translateY(-50%);
+  }
+
+  .mobile-price-range .price-facet-info {
+    font-family: var(--font-body-family);
+    font-style: var(--font-body-style);
+    font-weight: var(--font-body-weight);
+    font-size: var(--tm-b-2-size);
+    line-height: var(--tm-b-2-line-height);
+    color: var(--text);
+    margin-top: 8px;
+    text-align: center;
+  }
+
+  .mobile-price-range .highest-price-text {
+    font-family: var(--font-body-family);
+    font-style: var(--font-body-style);
+    font-weight: var(--font-body-weight);
+    font-size: var(--tm-b-2-size);
+    line-height: var(--tm-b-2-line-height);
+    color: var(--text);
+    opacity: 0.7;
   }
   .facets {
     padding-top: 5px;
+  }
+
+  /* Price Range Wrapper Styling */
+  .price-range-wrapper {
+    background-color: transparent;
+    padding: 0;
+    width: 180px !important;
+    max-width: 180px !important;
+    position: relative;
+  }
+
+  .price-range-wrapper .price-facet-container {
+    background-color: transparent;
+    border-radius: 6px;
+    padding: 12px;
+    width: 100%;
   }
 </style>
 
