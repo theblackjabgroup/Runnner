@@ -329,7 +329,7 @@
                                           mobile_font_weight: 'var(--font-heading-weight)',
                                           mobile_line_height: '1.2',
                                           primary_class: 'outfit-primary-btn',
-                                          button_type: 'button',
+                                          button_type: 'submit',
                                           button_height: '50px'
                                         %}
                                       {% else %}
@@ -539,6 +539,41 @@
 
   .outfit-primary-btn:disabled:hover .primary-slide-button-text-hover,
   .outfit-primary-btn:disabled:focus .primary-slide-button-text-hover {
+    transform: none !important;
+  }
+
+  /* Disable all animations during loading state */
+  .outfit-primary-btn.loading {
+    pointer-events: none !important;
+  }
+
+  .outfit-primary-btn.loading .primary-slide-button-text {
+    transform: none !important;
+    transition: none !important;
+  }
+
+  .outfit-primary-btn.loading .primary-slide-button-text-hover {
+    transform: none !important;
+    transition: none !important;
+  }
+
+  .outfit-primary-btn.loading .primary-slide-button-arrow svg {
+    transform: none !important;
+    transition: none !important;
+  }
+
+  .outfit-primary-btn.loading:hover .primary-slide-button-text,
+  .outfit-primary-btn.loading:focus .primary-slide-button-text {
+    transform: none !important;
+  }
+
+  .outfit-primary-btn.loading:hover .primary-slide-button-text-hover,
+  .outfit-primary-btn.loading:focus .primary-slide-button-text-hover {
+    transform: none !important;
+  }
+
+  .outfit-primary-btn.loading:hover .primary-slide-button-arrow svg,
+  .outfit-primary-btn.loading:focus .primary-slide-button-arrow svg {
     transform: none !important;
   }
 
@@ -1340,16 +1375,19 @@
       );
     }
 
-    document.addEventListener('click', function (e) {
-      if (!e.target.closest(`.outfit-add-to-cart-btn-${sectionId}`)) return;
+    // Enhanced form submission with loading feedback
+    document.addEventListener('submit', function (e) {
+      const form = e.target;
+      if (!form.classList.contains(`outfit-form-${sectionId}`)) return;
 
-      const targetSection = e.target.closest('[data-section-id]');
+      const targetSection = form.closest('[data-section-id]');
       if (!targetSection || targetSection.getAttribute('data-section-id') !== sectionId) {
         return;
       }
 
+      // Prevent default form submission to use AJAX
       e.preventDefault();
-      const form = e.target.closest(`.outfit-form-${sectionId}`);
+
       const buttonContainer = form.querySelector(`.outfit-add-to-cart-btn-${sectionId}`);
       const button = buttonContainer ? buttonContainer.querySelector('button') : null;
       const btnText = button ? button.querySelector('.primary-slide-button-text') : null;
@@ -1357,13 +1395,41 @@
 
       if (!button || !btnText) return;
 
+      // Store the arrow HTML before updating text
+      const arrowHTML = btnText ? btnText.querySelector('.primary-slide-button-arrow')?.outerHTML || '' : '';
+      const arrowHoverHTML = btnTextHover
+        ? btnTextHover.querySelector('.primary-slide-button-arrow')?.outerHTML || ''
+        : '';
+
+      // Show loading state
+      button.disabled = true;
+      button.classList.add('loading');
+      if (btnText) {
+        btnText.innerHTML = 'ADDING...' + arrowHTML;
+      }
+      if (btnTextHover) {
+        btnTextHover.innerHTML = 'ADDING...' + arrowHoverHTML;
+      }
+
       // Get form data
       const formData = new FormData(form);
       const variantId = formData.get('id');
       const quantity = parseInt(formData.get('quantity')) || 1;
 
-      // Add to cart silently without showing loading states
+      // Add to cart with AJAX
       addToCart(variantId, quantity);
+
+      // Reset button state after a short delay
+      setTimeout(() => {
+        button.disabled = false;
+        button.classList.remove('loading');
+        if (btnText) {
+          btnText.innerHTML = 'ADD TO CART' + arrowHTML;
+        }
+        if (btnTextHover) {
+          btnTextHover.innerHTML = 'ADD TO CART' + arrowHoverHTML;
+        }
+      }, 1000);
     });
 
     document.addEventListener('click', function (e) {
