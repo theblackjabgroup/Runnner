@@ -377,49 +377,15 @@
               style="padding: 10px 0;"
               {{ block.shopify_attributes }}
             >
-              <label for="quantityInput" class="font-medium uppercase">QUANTITY SELECTOR</label>
-              <div
-                class="flex items-center justify-center py-1 border rounded overflow-hidden h-10"
-                style="width: 8rem; border-color: var(--border); height: 3rem;"
-                role="group"
-                aria-labelledby="quantity-label"
+              <label for="Quantity-{{ product.selected_or_first_available_variant.id }}" class="font-medium uppercase"
+                >QUANTITY SELECTOR</label
               >
-                <span id="quantity-label" class="sr-only">Quantity</span>
-                <button
-                  type="button"
-                  id="decreaseQty"
-                  class="px-3 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  aria-label="Decrease quantity"
-                  aria-controls="quantityDisplay"
-                >
-                  -
-                </button>
-                <span
-                  id="quantityDisplay"
-                  class="px-3 border-x-1"
-                  style="border-left: 1px solid var(--border); border-right: 1px solid var(--border);"
-                  role="status"
-                  aria-live="polite"
-                  aria-label="Current quantity"
-                  >1</span
-                >
-                <input
-                  type="hidden"
-                  name="quantity"
-                  id="quantityInput"
-                  value="1"
-                  aria-label="Product quantity"
-                >
-                <button
-                  type="button"
-                  id="increaseQty"
-                  class="px-3 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  aria-label="Increase quantity"
-                  aria-controls="quantityDisplay"
-                >
-                  +
-                </button>
-              </div>
+              {% render 'quantity-input',
+                variant: product.selected_or_first_available_variant,
+                mobile: false,
+                min: 1,
+                for_cart: false
+              %}
             </div>
           {%- endif -%}
         {%- endfor -%}
@@ -927,48 +893,15 @@
             style="padding: 10px 0;"
             {{ block.shopify_attributes }}
           >
-            <label for="mobileQuantityInput" class="uppercase">QUANTITY SELECTOR</label>
-            <div
-              class="flex items-center justify-center h-10 border rounded"
-              style="width: 8rem;"
-              role="group"
-              aria-labelledby="mobile-quantity-label"
+            <label for="Quantity-{{ product.selected_or_first_available_variant.id }}-mobile" class="uppercase"
+              >QUANTITY SELECTOR</label
             >
-              <span id="mobile-quantity-label" class="sr-only">Quantity</span>
-              <button
-                type="button"
-                class="mobile-decrease-qty px-3 py-1 text-lg hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                aria-label="Decrease quantity"
-                aria-controls="mobileQuantityDisplay"
-              >
-                -
-              </button>
-              <span
-                id="mobileQuantityDisplay"
-                class="mobile-quantity-display px-4"
-                style="border-left: 1px solid black; border-right: 1px solid black;"
-                role="status"
-                aria-live="polite"
-                aria-label="Current quantity"
-                >1</span
-              >
-              <input
-                type="hidden"
-                name="quantity"
-                id="mobileQuantityInput"
-                class="mobile-quantity-input"
-                value="1"
-                aria-label="Product quantity"
-              >
-              <button
-                type="button"
-                class="mobile-increase-qty px-3 py-1 text-lg hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                aria-label="Increase quantity"
-                aria-controls="mobileQuantityDisplay"
-              >
-                +
-              </button>
-            </div>
+            {% render 'quantity-input',
+              variant: product.selected_or_first_available_variant,
+              mobile: true,
+              min: 1,
+              for_cart: false
+            %}
           </div>
         {%- endif -%}
       {%- endfor -%}
@@ -2047,8 +1980,15 @@ document.addEventListener('DOMContentLoaded', () => {
         if (this.disabled) return false;
         
         const variantId = document.getElementById('variant-id')?.value;
-        const quantity = document.getElementById('quantityInput')?.value || 
-                        document.getElementById('quantityDisplay')?.textContent || 1;
+        // Find the quantity input that's not inside the mobile section
+        const quantityInput = document.querySelector('.desktop-quantity-input');
+        const quantity = quantityInput ? parseInt(quantityInput.value) || 1 : 1;
+        
+        // Update the hidden quantity input in the form
+        const hiddenQuantityInput = document.querySelector('#add-to-cart-form input[name="quantity"]');
+        if (hiddenQuantityInput) {
+          hiddenQuantityInput.value = quantity;
+        }
         
         addToCart(variantId, quantity);
         return false;
@@ -2068,8 +2008,15 @@ document.addEventListener('DOMContentLoaded', () => {
         if (this.disabled) return false;
         
         const variantId = document.querySelector('.mobile-variant-id')?.value;
-        const quantity = document.querySelector('.mobile-quantity-input')?.value || 
-                        document.querySelector('.mobile-quantity-display')?.textContent || 1;
+        // Find the quantity input that's inside the mobile section
+        const quantityInput = document.querySelector('.mobile-quantity-input');
+        const quantity = quantityInput ? parseInt(quantityInput.value) || 1 : 1;
+        
+        // Update the hidden quantity input in the mobile form
+        const hiddenQuantityInput = document.querySelector('.mobile-add-to-cart-form input[name="quantity"]');
+        if (hiddenQuantityInput) {
+          hiddenQuantityInput.value = quantity;
+        }
         
         addToCart(variantId, quantity);
         return false;
@@ -2149,53 +2096,9 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // Quantity selector functionality - Desktop
-  const increaseBtn = document.getElementById("increaseQty");
-  const decreaseBtn = document.getElementById("decreaseQty");
-  const quantityDisplay = document.getElementById("quantityDisplay");
-  const quantityInput = document.getElementById("quantityInput");
+  // Quantity selector functionality is now handled by quantity-input.liquid snippet
 
-  if (increaseBtn && decreaseBtn && quantityDisplay && quantityInput) {
-    let quantity = 1;
-
-    increaseBtn.addEventListener("click", () => {
-      quantity++;
-      quantityDisplay.textContent = quantity;
-      quantityInput.value = quantity;
-    });
-
-    decreaseBtn.addEventListener("click", () => {
-      if (quantity > 1) {
-        quantity--;
-        quantityDisplay.textContent = quantity;
-        quantityInput.value = quantity;
-      }
-    });
-  }
-
-  // Quantity selector functionality - Mobile
-  const mobileIncreaseBtn = document.querySelector(".mobile-increase-qty");
-  const mobileDecreaseBtn = document.querySelector(".mobile-decrease-qty");
-  const mobileQuantityDisplay = document.querySelector(".mobile-quantity-display");
-  const mobileQuantityInput = document.querySelector(".mobile-quantity-input");
-
-  if (mobileIncreaseBtn && mobileDecreaseBtn && mobileQuantityDisplay && mobileQuantityInput) {
-    let mobileQuantity = 1;
-
-    mobileIncreaseBtn.addEventListener("click", () => {
-      mobileQuantity++;
-      mobileQuantityDisplay.textContent = mobileQuantity;
-      mobileQuantityInput.value = mobileQuantity;
-    });
-
-    mobileDecreaseBtn.addEventListener("click", () => {
-      if (mobileQuantity > 1) {
-        mobileQuantity--;
-        mobileQuantityDisplay.textContent = mobileQuantity;
-        mobileQuantityInput.value = mobileQuantity;
-      }
-    });
-  }
+  // Mobile quantity selector functionality is now handled by quantity-input.liquid snippet
 
   // Desktop gallery and thumbnails
   const galleryItems = Array.from(document.querySelectorAll('.gallery-item'));
