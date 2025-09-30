@@ -377,8 +377,10 @@
               style="padding: 10px 0;"
               {{ block.shopify_attributes }}
             >
-              <label class="font-medium uppercase">QUANTITY SELECTOR</label>
-              {% render 'quantity-input', variant: product.selected_or_first_available_variant %}
+              <label for="Quantity-{{ product.selected_or_first_available_variant.id }}" class="font-medium uppercase"
+                >QUANTITY SELECTOR</label
+              >
+              {% render 'quantity-input', variant: product.selected_or_first_available_variant, mobile: false %}
             </div>
           {%- endif -%}
         {%- endfor -%}
@@ -886,8 +888,10 @@
             style="padding: 10px 0;"
             {{ block.shopify_attributes }}
           >
-            <label class="uppercase">QUANTITY SELECTOR</label>
-            {% render 'quantity-input', variant: product.selected_or_first_available_variant %}
+            <label for="Quantity-{{ product.selected_or_first_available_variant.id }}-mobile" class="uppercase"
+              >QUANTITY SELECTOR</label
+            >
+            {% render 'quantity-input', variant: product.selected_or_first_available_variant, mobile: true %}
           </div>
         {%- endif -%}
       {%- endfor -%}
@@ -1966,7 +1970,8 @@ document.addEventListener('DOMContentLoaded', () => {
         if (this.disabled) return false;
         
         const variantId = document.getElementById('variant-id')?.value;
-        const quantityInput = document.querySelector('.quantity__input');
+        // Find the quantity input that's not inside the mobile section
+        const quantityInput = document.querySelector('.desktop-quantity-input');
         const quantity = quantityInput ? parseInt(quantityInput.value) || 1 : 1;
         
         console.log('Desktop Add to Cart - Quantity Input Value:', quantityInput?.value);
@@ -1997,13 +2002,18 @@ document.addEventListener('DOMContentLoaded', () => {
         if (this.disabled) return false;
         
         const variantId = document.querySelector('.mobile-variant-id')?.value;
-        const quantityInput = document.querySelector('.quantity__input');
+        // Find the quantity input that's inside the mobile section
+        const quantityInput = document.querySelector('.mobile-quantity-input');
         const quantity = quantityInput ? parseInt(quantityInput.value) || 1 : 1;
+        
+        console.log('Mobile Add to Cart - Quantity Input Value:', quantityInput?.value);
+        console.log('Mobile Add to Cart - Parsed Quantity:', quantity);
         
         // Update the hidden quantity input in the mobile form
         const hiddenQuantityInput = document.querySelector('.mobile-add-to-cart-form input[name="quantity"]');
         if (hiddenQuantityInput) {
           hiddenQuantityInput.value = quantity;
+          console.log('Mobile Add to Cart - Updated hidden input to:', hiddenQuantityInput.value);
         }
         
         addToCart(variantId, quantity);
