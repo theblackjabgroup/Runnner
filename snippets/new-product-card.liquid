@@ -115,42 +115,12 @@
               <div class="new-size-label-wrapper">
                 <span class="new-size-label">Select Size</span>
                 <div class="new-size-options-wrapper" style="display: flex; gap: 5px;">
-                  {% for option in product.options_with_values %}
-                    {% if option.name == 'Size' or option.name == 'size' %}
-                      {% for value in option.values %}
-                        {% assign variant_available = false %}
-                        {% assign variant_id = '' %}
-                        {% for variant in product_variants %}
-                          {% if variant.options[size_option_index] == value and variant.available %}
-                            {% assign variant_available = true %}
-                            {% assign variant_id = variant.id %}
-                            {% break %}
-                          {% endif %}
-                        {% endfor %}
-
-                        <button
-                          class="new-size-option-btn{% unless variant_available %} unavailable-size{% endunless %}"
-                          {% if variant_available %}
-                            data-variant-id="{{ variant_id }}"
-                            data-variant-size="{{ value }}"
-                            aria-label="Size {{ value }} available"
-                            type="button"
-                          {% else %}
-                            data-waitlist="true"
-                            data-product-title="{{ product_title }}"
-                            data-variant-size="{{ value }}"
-                            aria-label="Size {{ value }} unavailable, join waitlist"
-                            aria-disabled="true"
-                            type="button"
-                          {% endif %}
-                          style="--animation-order: {{ forloop.index0 }};"
-                        >
-                          {{ value }}
-                        </button>
-                      {% endfor %}
-                      {% break %}
-                    {% endif %}
-                  {% endfor %}
+                  {% render 'size-variant-picker',
+                    product: product,
+                    mobile: false,
+                    show_label: false,
+                    size_only: true
+                  %}
                 </div>
               </div>
             </div>
@@ -337,7 +307,7 @@
     width: min(381px, calc(255px + 0.1835 * (100vw - 425px) - 60px));
     left: 50%;
     transform: translateX(-50%) translateY(10px);
-    height: 37px;
+    height: 50px;
     border-radius: {{ settings.buttons_radius }}px;
     font-size: var(--t-b-2-size);
     font-weight: var(--t-b-2-weight);
@@ -367,7 +337,7 @@
     left: 50%;
     transform: translateX(-50%) translateY(10px);
     width: min(381px, calc(255px + 0.1835 * (100vw - 425px) - 60px));
-    height: 37px;
+    height: 50px;
     z-index: 10;
     transition: all 0.3s ease;
     display: flex;
@@ -384,6 +354,7 @@
     display: flex;
     width: 100%;
     align-items: center;
+    justify-content: space-between;
     border-radius: {{ settings.buttons_radius }}px;
   }
 
@@ -456,38 +427,6 @@
     transition: background-color 0.3s ease, color 0.3s ease, transform 0.3s ease;
   }
 
-  .unavailable-size {
-    opacity: 0;
-    visibility: hidden;
-    position: relative;
-    cursor: not-allowed;
-    color: var(--text) !important;
-    border-color: var(--disabled_text) !important;
-    background-color: var(--disabled_text) !important;
-    overflow: hidden;
-    transform: translateY(10px);
-  }
-
-  .unavailable-size:hover {
-    background-color: var(--disabled_text) !important;
-    transform: translateY(-2px);
-    transition: background-color 0.3s ease, transform 0.3s ease;
-  }
-
-  .unavailable-size::after {
-    content: '';
-    position: absolute;
-    top: 50%;
-    left: -2px;
-    right: -2px;
-    height: 2px;
-    background-color: var(--text);
-    transform: rotate(-45deg);
-  }
-
-  .unavailable-size:hover::after {
-    height: 0px;
-  }
 
   .new-size-option-btn.size-animate {
     animation: sizeOptionAppear 0.5s ease forwards;
