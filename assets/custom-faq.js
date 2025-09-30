@@ -50,6 +50,7 @@ document.addEventListener('DOMContentLoaded', () => {
       tempSpan.style.fontFamily = getComputedStyle(container).fontFamily;
       tempSpan.style.fontWeight = getComputedStyle(container).fontWeight;
       tempSpan.style.lineHeight = getComputedStyle(container).lineHeight;
+      tempSpan.style.letterSpacing = getComputedStyle(container).letterSpacing;
       tempSpan.textContent = text;
 
       document.body.appendChild(tempSpan);
@@ -61,29 +62,28 @@ document.addEventListener('DOMContentLoaded', () => {
         return text;
       }
 
-      // Binary search to find the optimal truncation point
-      let left = 0;
-      let right = text.length;
-      let bestFit = '';
+      // Split text into words
+      const words = text.split(' ');
+      let truncatedText = '';
 
-      while (left <= right) {
-        const mid = Math.floor((left + right) / 2);
-        const testText = text.substring(0, mid) + '...';
+      // Add words one by one until we run out of space
+      for (let i = 0; i < words.length; i++) {
+        const testText = truncatedText + (truncatedText ? ' ' : '') + words[i] + '...';
 
         tempSpan.textContent = testText;
         document.body.appendChild(tempSpan);
         const testWidth = tempSpan.offsetWidth;
         document.body.removeChild(tempSpan);
 
-        if (testWidth <= containerWidth) {
-          bestFit = testText;
-          left = mid + 1;
-        } else {
-          right = mid - 1;
+        if (testWidth > containerWidth) {
+          // If adding this word exceeds width, stop
+          break;
         }
+
+        truncatedText += (truncatedText ? ' ' : '') + words[i];
       }
 
-      return bestFit || '...';
+      return truncatedText ? truncatedText + '...' : '...';
     };
 
     const shortHTML = convertLinks(truncateToSingleLine(fullAnswerText, container));
@@ -181,6 +181,7 @@ document.addEventListener('DOMContentLoaded', () => {
               tempSpan.style.fontFamily = getComputedStyle(container).fontFamily;
               tempSpan.style.fontWeight = getComputedStyle(container).fontWeight;
               tempSpan.style.lineHeight = getComputedStyle(container).lineHeight;
+              tempSpan.style.letterSpacing = getComputedStyle(container).letterSpacing;
               tempSpan.textContent = text;
 
               document.body.appendChild(tempSpan);
@@ -192,28 +193,28 @@ document.addEventListener('DOMContentLoaded', () => {
                 return text;
               }
 
-              let left = 0;
-              let right = text.length;
-              let bestFit = '';
+              // Split text into words
+              const words = text.split(' ');
+              let truncatedText = '';
 
-              while (left <= right) {
-                const mid = Math.floor((left + right) / 2);
-                const testText = text.substring(0, mid) + '...';
+              // Add words one by one until we run out of space
+              for (let i = 0; i < words.length; i++) {
+                const testText = truncatedText + (truncatedText ? ' ' : '') + words[i] + '...';
 
                 tempSpan.textContent = testText;
                 document.body.appendChild(tempSpan);
                 const testWidth = tempSpan.offsetWidth;
                 document.body.removeChild(tempSpan);
 
-                if (testWidth <= containerWidth) {
-                  bestFit = testText;
-                  left = mid + 1;
-                } else {
-                  right = mid - 1;
+                if (testWidth > containerWidth) {
+                  // If adding this word exceeds width, stop
+                  break;
                 }
+
+                truncatedText += (truncatedText ? ' ' : '') + words[i];
               }
 
-              return bestFit || '...';
+              return truncatedText ? truncatedText + '...' : '...';
             };
 
             const shortHTML = convertLinks(truncateToSingleLine(fullAnswerText, container));
