@@ -2,19 +2,32 @@
   Unified Variant Picker Snippet
   Handles any non-color variant option (Size, Denomination, Material, Type, etc.)
   Works for both mobile and desktop with responsive styling
-  Usage: {% render 'size-variant-picker', product: product, mobile: true/false, show_label: true/false %}
+  Usage: {% render 'size-variant-picker', product: product, mobile: true/false, show_label: true/false, size_only: true/false %}
 {% endcomment %}
 
 {%- liquid
   assign variant_option = null
   assign variant_option_index = null
+  assign has_any_variants = false
 
   for option in product.options_with_values
-    unless option.name == 'Color' or option.name == 'Colour'
-      assign variant_option = option
-      assign variant_option_index = forloop.index0
-      break
-    endunless
+    assign has_any_variants = true
+
+    if size_only == true
+      # For product cards, only show Size variants
+      if option.name == 'Size' or option.name == 'size'
+        assign variant_option = option
+        assign variant_option_index = forloop.index0
+        break
+      endif
+    else
+      # For main product page, show any non-color variant
+      unless option.name == 'Color' or option.name == 'Colour'
+        assign variant_option = option
+        assign variant_option_index = forloop.index0
+        break
+      endunless
+    endif
   endfor
 -%}
 
@@ -52,6 +65,7 @@
             data-value="{{ value | escape }}"
             role="radio"
             aria-checked="{% if forloop.first and variant_available %}true{% else %}false{% endif %}"
+            style="--animation-order: {{ forloop.index0 }};"
             {% if variant_available %}
               data-variant-id="{{ variant_id }}"
               tabindex="{% if forloop.first %}0{% else %}-1{% endif %}"
@@ -98,6 +112,7 @@
             "
             data-option-index="{{ variant_option_index }}"
             data-value="{{ value | escape }}"
+            style="--animation-order: {{ forloop.index0 }};"
             {% if variant_available %}
               data-variant-id="{{ variant_id }}"
             {% else %}
@@ -114,8 +129,8 @@
       </div>
     </div>
   {% endif %}
-{% else %}
-  <!-- Default title when no non-color variant option exists -->
+{% elsif has_any_variants %}
+  <!-- Show SELECT OPTION only when there are variants but no non-color ones -->
   {% if mobile %}
     <div class="flex justify-between items-center gap-2" style="padding: 10px 0;">
       <span style="font-size: var(--tm-b-4-size); line-height: var(--tm-b-4-line-height);"> SELECT OPTION </span>
@@ -183,5 +198,60 @@
     background-color: var(--text) !important;
     opacity: 1 !important;
     visibility: visible !important;
+  }
+
+  /* Animation for size buttons */
+  .size-btn.size-animate {
+    animation: sizeOptionAppear 0.5s ease forwards;
+    animation-delay: calc(0.15s * var(--animation-order));
+  }
+
+  @keyframes sizeOptionAppear {
+    0% {
+      opacity: 0;
+      transform: translateY(10px);
+      visibility: hidden;
+    }
+    100% {
+      opacity: 1;
+      transform: translateY(0);
+      visibility: visible;
+    }
+  }
+
+  /* Animation only applies to product cards, not main product page */
+  .new-size-options-wrapper .size-btn {
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(10px);
+  }
+
+  /* Animate in when container is active or on hover */
+  .new-size-variants-container.active .size-btn,
+  .new-add-to-cart-btn:hover + .new-size-variants-container .size-btn {
+    animation: sizeOptionAppear 0.5s ease forwards;
+    animation-delay: calc(0.15s * var(--animation-order));
+  }
+
+  /* Specific animation delays for better staggered effect */
+  .new-size-variants-container.active .size-btn:nth-child(1),
+  .new-add-to-cart-btn:hover + .new-size-variants-container .size-btn:nth-child(1) {
+    animation-delay: 0s;
+  }
+  .new-size-variants-container.active .size-btn:nth-child(2),
+  .new-add-to-cart-btn:hover + .new-size-variants-container .size-btn:nth-child(2) {
+    animation-delay: 0.1s;
+  }
+  .new-size-variants-container.active .size-btn:nth-child(3),
+  .new-add-to-cart-btn:hover + .new-size-variants-container .size-btn:nth-child(3) {
+    animation-delay: 0.2s;
+  }
+  .new-size-variants-container.active .size-btn:nth-child(4),
+  .new-add-to-cart-btn:hover + .new-size-variants-container .size-btn:nth-child(4) {
+    animation-delay: 0.3s;
+  }
+  .new-size-variants-container.active .size-btn:nth-child(5),
+  .new-add-to-cart-btn:hover + .new-size-variants-container .size-btn:nth-child(5) {
+    animation-delay: 0.4s;
   }
 </style>

@@ -445,43 +445,38 @@
           >
             <span class="sr-only">Product pricing</span>
             <div class="flex items-center gap-2">
-              <span
-                id="current-price"
-                style="font-weight: {{section.settings.product_price_font_weight}};"
-                aria-label="Current price"
-              >
-                {{- product.price | money -}}
-              </span>
-              <span
-                id="compare-price-separator"
-                class="text-black{% unless product.compare_at_price > product.price %}hidden{% endunless %}"
-                aria-hidden="true"
-                >|</span
-              >
-              <span
-                id="compare-price"
-                class="line-through{% unless product.compare_at_price > product.price %}hidden{% endunless %}"
-                style="color: var(--secondary_text);"
-                aria-label="Original price"
-              >
-                {% if product.compare_at_price > product.price %}{{ product.compare_at_price | money }}{% endif %}
-              </span>
+              {% render 'price',
+                product: product,
+                use_variant: true,
+                show_compare_at_price: true,
+                font_weight_desktop: section.settings.product_price_font_weight,
+                price_class: 'main-product-price'
+              %}
             </div>
 
             <div
               id="savings-info"
-              class="font-medium {% unless product.compare_at_price > product.price %}hidden{% endunless %}"
+              class="font-medium {% unless product.selected_or_first_available_variant.compare_at_price and product.selected_or_first_available_variant.compare_at_price > product.selected_or_first_available_variant.price %}hidden{% endunless %}"
               style="color: var(--sale_badge);"
               role="status"
               aria-live="polite"
             >
-              {% if product.compare_at_price > product.price %}
-                Save {{ product.compare_at_price | minus: product.price | money }} (
+              {% if product.selected_or_first_available_variant.compare_at_price
+                and product.selected_or_first_available_variant.compare_at_price
+                  > product.selected_or_first_available_variant.price
+              %}
+                Save
                 {{
-                  product.compare_at_price
-                  | minus: product.price
+                  product.selected_or_first_available_variant.compare_at_price
+                  | minus: product.selected_or_first_available_variant.price
+                  | money
+                }}
+                (
+                {{
+                  product.selected_or_first_available_variant.compare_at_price
+                  | minus: product.selected_or_first_available_variant.price
                   | times: 100
-                  | divided_by: product.compare_at_price
+                  | divided_by: product.selected_or_first_available_variant.compare_at_price
                 -}}
                 % off)
               {% endif %}
@@ -994,37 +989,39 @@
         <div class="text-[18px] flex flex-col justify-between" role="region" aria-labelledby="mobile-price-heading">
           <span id="mobile-price-heading" class="sr-only">Product pricing</span>
           <div class="flex items-center gap-2 pb-4">
-            <span
-              class="mobile-current-price"
-              aria-label="Current price"
-              style="font-size: var(--tm-b-1-size); line-height: var(--tm-b-1-line-height);"
-            >
-              {{- product.price | money -}}
-            </span>
-            <span
-              class="mobile-compare-price-separator{% unless product.compare_at_price > product.price %} hidden{% endunless %}"
-              aria-hidden="true"
-              style="font-size: var(--tm-b-2-size); line-height: var(--tm-b-2-line-height);"
-              >|</span
-            >
-            <span
-              class="mobile-compare-price line-through {% unless product.compare_at_price > product.price %}hidden{% endunless %}"
-              style="color: var(--secondary_text); font-size: var(--tm-b-1-size); line-height: var(--tm-b-1-line-height);"
-              aria-label="Original price"
-            >
-              {% if product.compare_at_price > product.price %}{{ product.compare_at_price | money }}{% endif %}
-            </span>
+            {% render 'price',
+              product: product,
+              use_variant: true,
+              show_compare_at_price: true,
+              font_size_mobile: 'var(--tm-b-1-size)',
+              line_height_mobile: 'var(--tm-b-1-line-height)',
+              price_class: 'mobile-main-product-price'
+            %}
           </div>
 
           <div
-            class="mobile-savings-info {% unless product.compare_at_price > product.price %}hidden{% endunless %}"
+            class="mobile-savings-info {% unless product.selected_or_first_available_variant.compare_at_price and product.selected_or_first_available_variant.compare_at_price > product.selected_or_first_available_variant.price %}hidden{% endunless %}"
             style="color: var(--sale_badge); font-size: var(--tm-b-1-size); line-height: var(--tm-b-1-line-height); padding-bottom: 10px;"
             role="status"
             aria-live="polite"
           >
-            {% if product.compare_at_price > product.price %}
-              Save {{ product.compare_at_price | minus: product.price | money }} (
-              {{ product.compare_at_price | minus: product.price | times: 100 | divided_by: product.compare_at_price -}}
+            {% if product.selected_or_first_available_variant.compare_at_price
+              and product.selected_or_first_available_variant.compare_at_price
+                > product.selected_or_first_available_variant.price
+            %}
+              Save
+              {{
+                product.selected_or_first_available_variant.compare_at_price
+                | minus: product.selected_or_first_available_variant.price
+                | money
+              }}
+              (
+              {{
+                product.selected_or_first_available_variant.compare_at_price
+                | minus: product.selected_or_first_available_variant.price
+                | times: 100
+                | divided_by: product.selected_or_first_available_variant.compare_at_price
+              -}}
               % off)
             {% endif %}
           </div>
@@ -1311,6 +1308,47 @@
                   transform: translateX(0) !important;
                 }
               }
+
+  /* Price snippet styling for main product page */
+  .main-product-price .price__regular,
+  .main-product-price .price__sale,
+  .mobile-main-product-price .price__regular,
+  .mobile-main-product-price .price__sale {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  /* Sale price styling - strikethrough for compare-at-price */
+  .main-product-price .price__sale .price-item--regular,
+  .mobile-main-product-price .price__sale .price-item--regular {
+    text-decoration: line-through;
+    color: var(--secondary_text);
+  }
+
+  /* Hide regular price section when on sale */
+  .main-product-price.price--on-sale .price__regular,
+  .mobile-main-product-price.price--on-sale .price__regular {
+    display: none !important;
+  }
+
+  /* Show sale price section when on sale */
+  .main-product-price.price--on-sale .price__sale,
+  .mobile-main-product-price.price--on-sale .price__sale {
+    display: flex !important;
+  }
+
+  /* Hide sale price section when not on sale */
+  .main-product-price:not(.price--on-sale) .price__sale,
+  .mobile-main-product-price:not(.price--on-sale) .price__sale {
+    display: none !important;
+  }
+
+  /* Show regular price section when not on sale */
+  .main-product-price:not(.price--on-sale) .price__regular,
+  .mobile-main-product-price:not(.price--on-sale) .price__regular {
+    display: flex !important;
+  }
 </style>
 <script>
 document.addEventListener('DOMContentLoaded', () => {
@@ -1880,24 +1918,31 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function updatePriceDisplay(variant, isMobile = false) {
-    const currentPriceEl = document.querySelector(isMobile ? '.mobile-current-price' : '#current-price');
-    const comparePriceEl = document.querySelector(isMobile ? '.mobile-compare-price' : '#compare-price');
-    const compareSeparatorEl = document.querySelector(isMobile ? '.mobile-compare-price-separator' : '#compare-price-separator');
+    const priceContainer = document.querySelector(isMobile ? '.mobile-main-product-price' : '.main-product-price');
     const savingsInfoEl = document.querySelector(isMobile ? '.mobile-savings-info' : '#savings-info');
 
-    if (!variant || !currentPriceEl) {
+    if (!variant || !priceContainer) {
       return;
     }
 
-    currentPriceEl.textContent = formatMoney(variant.price);
-
-    // Handle compare at price
-    if (variant.compare_at_price && variant.compare_at_price > variant.price) {
-      if (comparePriceEl) {
-        comparePriceEl.textContent = formatMoney(variant.compare_at_price);
-        comparePriceEl.classList.remove('hidden');
+    // Find all price elements and update them
+    const allPriceElements = priceContainer.querySelectorAll('.price-item');
+    allPriceElements.forEach(el => {
+      if (el.classList.contains('price-item--sale') || el.classList.contains('price-item--regular')) {
+        el.textContent = formatMoney(variant.price);
       }
-      if (compareSeparatorEl) compareSeparatorEl.classList.remove('hidden');
+    });
+
+    // Handle compare at price and update price container classes
+    if (variant.compare_at_price && variant.compare_at_price > variant.price) {
+      // Add sale class to show sale price section
+      priceContainer.classList.add('price--on-sale');
+      
+      // Update compare at price in the sale section
+      const saleComparePriceEl = priceContainer.querySelector('.price__sale .price-item--regular');
+      if (saleComparePriceEl) {
+        saleComparePriceEl.textContent = formatMoney(variant.compare_at_price);
+      }
       
       if (savingsInfoEl) {
         const savings = variant.compare_at_price - variant.price;
@@ -1906,9 +1951,12 @@ document.addEventListener('DOMContentLoaded', () => {
         savingsInfoEl.classList.remove('hidden');
       }
     } else {
-      if (comparePriceEl) comparePriceEl.classList.add('hidden');
-      if (compareSeparatorEl) compareSeparatorEl.classList.add('hidden');
-      if (savingsInfoEl) savingsInfoEl.classList.add('hidden');
+      // Remove sale class to show regular price section
+      priceContainer.classList.remove('price--on-sale');
+      
+      if (savingsInfoEl) {
+        savingsInfoEl.classList.add('hidden');
+      }
     }
   }
 
