@@ -380,7 +380,12 @@
               <label for="Quantity-{{ product.selected_or_first_available_variant.id }}" class="font-medium uppercase"
                 >QUANTITY SELECTOR</label
               >
-              {% render 'quantity-input', variant: product.selected_or_first_available_variant, mobile: false %}
+              {% render 'quantity-input',
+                variant: product.selected_or_first_available_variant,
+                mobile: false,
+                min: 1,
+                for_cart: false
+              %}
             </div>
           {%- endif -%}
         {%- endfor -%}
@@ -891,7 +896,12 @@
             <label for="Quantity-{{ product.selected_or_first_available_variant.id }}-mobile" class="uppercase"
               >QUANTITY SELECTOR</label
             >
-            {% render 'quantity-input', variant: product.selected_or_first_available_variant, mobile: true %}
+            {% render 'quantity-input',
+              variant: product.selected_or_first_available_variant,
+              mobile: true,
+              min: 1,
+              for_cart: false
+            %}
           </div>
         {%- endif -%}
       {%- endfor -%}
@@ -1974,14 +1984,10 @@ document.addEventListener('DOMContentLoaded', () => {
         const quantityInput = document.querySelector('.desktop-quantity-input');
         const quantity = quantityInput ? parseInt(quantityInput.value) || 1 : 1;
         
-        console.log('Desktop Add to Cart - Quantity Input Value:', quantityInput?.value);
-        console.log('Desktop Add to Cart - Parsed Quantity:', quantity);
-        
         // Update the hidden quantity input in the form
         const hiddenQuantityInput = document.querySelector('#add-to-cart-form input[name="quantity"]');
         if (hiddenQuantityInput) {
           hiddenQuantityInput.value = quantity;
-          console.log('Desktop Add to Cart - Updated hidden input to:', hiddenQuantityInput.value);
         }
         
         addToCart(variantId, quantity);
@@ -2006,14 +2012,10 @@ document.addEventListener('DOMContentLoaded', () => {
         const quantityInput = document.querySelector('.mobile-quantity-input');
         const quantity = quantityInput ? parseInt(quantityInput.value) || 1 : 1;
         
-        console.log('Mobile Add to Cart - Quantity Input Value:', quantityInput?.value);
-        console.log('Mobile Add to Cart - Parsed Quantity:', quantity);
-        
         // Update the hidden quantity input in the mobile form
         const hiddenQuantityInput = document.querySelector('.mobile-add-to-cart-form input[name="quantity"]');
         if (hiddenQuantityInput) {
           hiddenQuantityInput.value = quantity;
-          console.log('Mobile Add to Cart - Updated hidden input to:', hiddenQuantityInput.value);
         }
         
         addToCart(variantId, quantity);

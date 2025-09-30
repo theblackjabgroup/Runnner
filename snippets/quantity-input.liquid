@@ -4,11 +4,12 @@
   Accepts:
   - variant: {Object} Variant object
   - variant_id: {String} Variant ID (optional)
-  - min: {Number} Min (optional)
+  - min: {Number} Min (optional, defaults to 1)
   - mobile: {Boolean} Whether this is for mobile (optional)
+  - for_cart: {Boolean} Whether this is for cart updates vs add-to-cart (optional, defaults to false)
 
   Usage:
-  {% render 'quantity-input' variant: variant, mobile: true %}
+  {% render 'quantity-input' variant: variant, mobile: true, min: 1, for_cart: false %}
 {% endcomment %}
 
 <quantity-input class="quantity cart-quantity">
@@ -27,11 +28,11 @@
     class="quantity__input {% if mobile %}mobile-quantity-input{% else %}desktop-quantity-input{% endif %}"
     data-quantity-variant-id="{{ variant.id }}"
     type="number"
-    name="updates[{{ variant.id }}]"
+    name="{% if for_cart %}updates[{{ variant.id }}]{% else %}quantity{% endif %}"
     {% # theme-check-disable %}
     value="{{ cart | item_count_for_variant: variant.id }}"
     data-cart-quantity="{{ cart | item_count_for_variant: variant.id }}"
-    min="{{ min }}"
+    min="{{ min | default: 1 }}"
     data-min="{{ variant.quantity_rule.min }}"
     {% if variant.quantity_rule.max != null %}
       max="{{ variant.quantity_rule.max }}"
