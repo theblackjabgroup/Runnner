@@ -10,53 +10,118 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const wrappers = document.querySelectorAll('.faq-item');
 
-  wrappers.forEach((item) => {
+  wrappers.forEach((item, index) => {
+    const wrapper = item.querySelector('.faq-toggle');
+    if (!wrapper) return;
+
+    const container = wrapper.querySelector('div');
+    const svg = container.querySelector('svg');
     const button = item.querySelector('.faq-row');
-    const ansText = item.querySelector('.ans-text');
-    const container = item.querySelector('.ans');
-    const svg = container.querySelector('svg') || null;
 
-    if (!container || !ansText || !svg || !button) return;
-    let fullAnswer = container?.dataset?.fullAnswer || ansText?.textContent;
-    if (!fullAnswer) return;
-    const shortAnswer = fullAnswer.split(' ').slice(0, 6).join(' ') + '...';
-    container.dataset.fullHTML = convertLinks(fullAnswer);
-    container.dataset.shortHTML = convertLinks(shortAnswer);
-    ansText.innerHTML = container.dataset.shortHTML;
+    if (!container || !svg || !button) return;
 
-    if (svg) {
-      svg.classList.remove('arrow-svg1');
-      svg.classList.add('plus-minus-icon');
+    // Icon setup
+    svg.classList.remove('arrow-svg1');
+    svg.classList.add('plus-minus-icon');
+
+    // Get answer text
+    let fullAnswerText = container.getAttribute('data-full-answer') || '';
+
+    if (!fullAnswerText) {
+      const currentText = container.textContent.replace(/^\s*\S+\s*/, '').trim();
+      fullAnswerText = currentText.replace(/…$/, '');
+      if (currentText.includes('…') || currentText.includes('...')) {
+        console.warn(
+          `FAQ item ${index}: Full answer text not available. Please add data-full-answer attribute to the container div.`
+        );
+        fullAnswerText = currentText;
+      }
     }
 
-    button.addEventListener('click', (e) => {
+    const fullHTML = convertLinks(fullAnswerText);
+    const shortHTML = convertLinks(fullAnswerText.split(' ').slice(0, 6).join(' ') + '...');
+
+    container.dataset.fullHTML = fullHTML;
+    container.dataset.shortHTML = shortHTML;
+    container.dataset.expanded = 'false';
+
+    // Remove old siblings & add preview span
+    while (svg.nextSibling) {
+      svg.parentNode.removeChild(svg.nextSibling);
+    }
+
+    const previewSpan = document.createElement('span');
+    previewSpan.className = 'preview-text';
+    previewSpan.innerHTML = shortHTML;
+    svg.insertAdjacentElement('afterend', previewSpan);
+
+    // Start collapsed
+    container.style.overflow = 'hidden';
+    container.style.maxHeight = '50px';
+    container.style.transition = 'max-height 0.7s ease';
+
+    // Replace button with fresh copy
+    const newButton = button.cloneNode(true);
+    button.parentNode.replaceChild(newButton, button);
+
+    newButton.addEventListener('click', (e) => {
       e.preventDefault();
-      const isExpanded = item.classList.contains('expanded');
 
+      const currentItem = newButton.closest('.faq-item');
+      const currentContainer = currentItem.querySelector('.faq-toggle div');
+      const currentPreviewSpan = currentContainer.querySelector('.preview-text');
+
+      const isExpanded = currentContainer.dataset.expanded === 'true';
+      const newState = !isExpanded;
+
+      // Collapse all other items
       wrappers.forEach((otherItem) => {
-        if (otherItem !== item) {
-          otherItem.classList.remove('expanded');
-
-          const otherAns = otherItem.querySelector('.ans-text');
-          const otherContainer = otherItem.querySelector('.ans');
-          const otherButton = otherItem.querySelector('.faq-row');
-
-          if (otherContainer && otherAns && otherButton) {
+        if (otherItem !== currentItem) {
+          const otherContainer = otherItem.querySelector('.faq-toggle div');
+          const otherPreviewSpan = otherContainer.querySelector('.preview-text');
+          if (otherContainer.dataset.expanded === 'true') {
+            otherItem.classList.remove('expanded');
             otherContainer.dataset.expanded = 'false';
-            otherAns.innerHTML = otherContainer.dataset.shortHTML;
-            otherButton.setAttribute('aria-expanded', 'false');
+            otherContainer.style.maxHeight = '50px';
+            otherPreviewSpan.innerHTML = otherContainer.dataset.shortHTML;
           }
         }
       });
-      if (isExpanded) {
-        item.classList.remove('expanded');
-        ansText.innerHTML = container.dataset.shortHTML;
-        button.setAttribute('aria-expanded', 'false');
+
+      // Toggle current
+      currentContainer.dataset.expanded = newState.toString();
+      newButton.setAttribute('aria-expanded', newState.toString());
+
+      if (newState) {
+        // Open instantly with smooth slide
+        currentItem.classList.add('expanded');
+        currentPreviewSpan.innerHTML = currentContainer.dataset.fullHTML;
+        currentContainer.style.maxHeight = currentContainer.scrollHeight + 'px';
       } else {
-        item.classList.add('expanded');
-        ansText.innerHTML = container.dataset.fullHTML;
-        button.setAttribute('aria-expanded', 'true');
+        // Collapse
+        currentItem.classList.remove('expanded');
+        currentContainer.style.maxHeight = '50px';
+        setTimeout(() => {
+          currentPreviewSpan.innerHTML = currentContainer.dataset.shortHTML;
+        }, 300);
       }
     });
+
+    newButton.setAttribute('aria-expanded', 'false');
+  });
+});
+
+// Example from custom-faq.js (conceptual)
+document.querySelectorAll('.faq-row').forEach((button) => {
+  button.addEventListener('click', () => {
+    const faqItem = button.closest('.faq-item');
+    const isExpanded = button.getAttribute('aria-expanded') === 'true';
+
+    // Toggle the expanded state
+    button.setAttribute('aria-expanded', !isExpanded);
+    faqItem.classList.toggle('expanded'); // Add or remove the 'expanded' class here
+
+    // Your existing logic to show/hide the full answer
+    // ...
   });
 });
