@@ -164,7 +164,10 @@ document.addEventListener('DOMContentLoaded', () => {
     resizeTimeout = setTimeout(() => {
       wrappers.forEach((item) => {
         const container = item.querySelector('.faq-toggle div');
+        if (!container) return;
         const previewSpan = container.querySelector('.preview-text');
+
+        if (!previewSpan) return;
 
         if (container && previewSpan && container.dataset.expanded !== 'true') {
           const fullAnswerText = container.getAttribute('data-full-answer') || '';
