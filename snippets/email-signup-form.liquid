@@ -6,14 +6,10 @@
   %}
 {% endcomment %}
 {{ 'email-signup-banner.css' | asset_url | stylesheet_tag }}
-<form
-  method="post"
-  action="/contact#contact_form"
-  id="email-signup-form-password"
-  class="flex flex-col gap-4 w-full mb-[28px] max-w-[1000px]"
->
-  <input type="hidden" name="form_type" value="customer">
-  <input type="hidden" name="utf8" value="✓">
+
+{%- form 'customer', id: 'email-signup-form-password', class: 'flex flex-col gap-4 w-full mb-[28px] max-w-[1000px]' -%}
+  <input type="hidden" name="contact[tags]" value="newsletter">
+
   <div class="form-fields-container relative">
     <div class="flex flex-col">
       <div class="flex justify-end">
@@ -25,16 +21,25 @@
           placeholder="EMAIL"
           name="contact[email]"
           class="pass-input w-full px-6 py-4 text-left border mt-4 ml-2 pt-2 pb-1 h-[55px] leading-[50px] md:pt-0 md:mt-0 md:pb-0 focus:outline-none focus:ring-1 leading-none peer mb-[13px]"
-          aria-label="{{ placeholder }}"
+          aria-label="{{ placeholder | default: 'Enter your email' }}"
           required
           pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$"
+          value="{{ form.email }}"
         >
       </div>
+
+      {%- if form.errors -%}
+        <div class="text-red-500 text-sm mt-3 ml-2">
+          {{ form.errors | default_errors }}
+        </div>
+      {%- endif -%}
+
       <div id="email-error-password" class="hidden text-red-500 text-sm mt-3 ml-2 peer-invalid:block">
         Please enter a valid email address
       </div>
     </div>
   </div>
+
   <div class="flex justify-end w-full">
     <button
       type="submit"
@@ -55,7 +60,7 @@
         stroke-linecap="round"
         stroke-linejoin="round"
       >
-        <path xmlns="http://www.w3.org/2000/svg" d="M181.66,133.66l-80,80a8,8,0,0,1-11.32-11.32L164.69,128,90.34,53.66a8,8,0,0,1,11.32-11.32l80,80A8,8,0,0,1,181.66,133.66Z"/>
+        <path d="M181.66,133.66l-80,80a8,8,0,0,1-11.32-11.32L164.69,128,90.34,53.66a8,8,0,0,1,11.32-11.32l80,80A8,8,0,0,1,181.66,133.66Z"/>
       </svg>
       <span id="buttonText-password">{{ button_text }}</span>
       <span id="loadingSpinner-password" class="hidden">
@@ -66,11 +71,14 @@
       </span>
     </button>
   </div>
-</form>
-<div
-  id="successMessage-password"
-  class="hidden text-[var(--text)] text-xl font-light mt-8 text-center w-full"
-  aria-live="polite"
->
-  Thanks for subscribing!
-</div>
+{%- endform -%}
+
+{%- if form.posted_successfully? -%}
+  <div
+    id="successMessage-password"
+    class="text-[var(--text)] text-xl font-light mt-8 text-center w-full"
+    aria-live="polite"
+  >
+    Thanks for subscribing!
+  </div>
+{%- endif -%}
