@@ -50,6 +50,22 @@
     display: block;
   }
 
+  .prod-diff-img,
+  .placeholder-svg {
+    position: absolute;
+    left: 0;
+    width: 100vw;
+    height: auto;
+    object-fit: cover;
+    max-width: none;
+    display: block;
+    transition: opacity 0.3s ease, transform 0.3s ease;
+  }
+
+  .media__transparent {
+    opacity: 1;
+  }
+
   .prod-diff-slider-container {
     position: absolute;
     width: 100%;
@@ -183,6 +199,12 @@
       line-height: var(--tm-b-2-line-height);
     }
   }
+/* NEW: Grey effect for left side */
+.prod-diff-wrapper.prod-diff-left .prod-diff-img,
+.prod-diff-wrapper.prod-diff-left .placeholder-svg {
+  filter: grayscale(1) brightness(1.5) contrast(0.5);
+  opacity: 0.5;
+}
 </style>
 
 {% if section.settings.enabled %}
@@ -191,7 +213,7 @@
   {% assign right_product = all_products[section.settings.right_product] %}
 
   {% assign max_aspect_ratio = 0 %}
-
+  
   {% if left_product and left_product.featured_image %}
     {% assign left_aspect_ratio = left_product.featured_image.aspect_ratio %}
     {% if left_aspect_ratio < max_aspect_ratio or max_aspect_ratio == 0 %}
@@ -216,7 +238,10 @@
   <section class="prod-diff-section" style="height: {{ height_vw }}vw;">
     <div class="prod-diff-container" style="height: {{ height_vw }}vw;">
       <div class="prod-diff-wrapper prod-diff-left" style="height: {{ height_vw }}vw;">
-        {% if left_product and left_product.featured_image %}
+        {% comment %}
+          {% if left_product and left_product.featured_image %}
+        {% endcomment %}
+        {% if false %}
           <img
             srcset="
               {% if left_product.featured_image.width >= 375 %}{{ left_product.featured_image | image_url: width: 375 }} 375w,{% endif %}
@@ -229,20 +254,21 @@
             "
             src="{{ left_product.featured_image | image_url: width: 1200 }}"
             alt="{{ left_product.title | escape }}"
-            class="prod-diff-img"
+            class="prod-diff-img media__transparent"
             width="600"
             height="auto"
             style="height: auto; width: 100vw;"
           >
         {% else %}
-          <div style="width: 500px; height: 100%;">
-            {{ 'collection-1' | placeholder_svg_tag }}
-          </div>
+          {{ 'image' | placeholder_svg_tag: 'prod-diff-img media__transparent placeholder-svg' }}
         {% endif %}
       </div>
 
       <div class="prod-diff-wrapper prod-diff-right" style="height: {{ height_vw }}vw;">
-        {% if right_product and right_product.featured_image %}
+{% comment %}
+  {% if right_product and right_product.featured_image %}
+{% endcomment %}
+        {% if false %}
           <img
             srcset="
               {% if right_product.featured_image.width >= 375 %}{{ right_product.featured_image | image_url: width: 375 }} 375w,{% endif %}
@@ -255,15 +281,13 @@
             "
             src="{{ right_product.featured_image | image_url: width: 1200 }}"
             alt="{{ right_product.title | escape }}"
-            class="prod-diff-img"
+            class="prod-diff-img media__transparent"
             width="600"
             height="auto"
             style="height: auto; width: 100vw;"
           >
         {% else %}
-          <div style="width: 500px; height: 100%;">
-            {{ 'collection-1' | placeholder_svg_tag }}
-          </div>
+          {{ 'image' | placeholder_svg_tag: 'prod-diff-img media__transparent placeholder-svg' }}
         {% endif %}
       </div>
 
