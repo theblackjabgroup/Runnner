@@ -19,6 +19,16 @@
     margin-bottom: 3rem;
   }
 
+  .bb-search-field::after 
+  {
+    box-shadow: none;
+  }
+
+  .bb-search-field:hover.bb-search-field:after
+  {
+    box-shadow: none;
+  }
+
   .template-search__search {
     margin: 0 auto 3.5rem;
     max-width: 74.1rem;
@@ -31,7 +41,10 @@
   .template-search--empty {
     padding-bottom: 18rem;
   }
-
+  
+  .bb-field__input:focus {
+    box-shadow: none;
+  }
   @media screen and (min-width: 750px) {
     .template-search__header {
       margin-bottom: 5rem;
@@ -126,11 +139,11 @@
         <main-search>
           <form action="{{ routes.search_url }}" method="get" role="search" class="search">
             <div
-              class="field"
+              class="bb-search-field field"
               style="border-bottom: 1px solid var(--text); position: relative; display: flex; align-items: center;"
             >
               <input
-                class="search__input field__input"
+                class="bb-field__input search__input field__input"
                 id="Search-In-Template"
                 type="search"
                 name="q"
@@ -312,15 +325,15 @@
                   {%- if forloop.index > 2 -%}
                     {%- assign lazy_load = true -%}
                   {%- endif -%}
-
+                  {%- case item.object_type -%}
+                  {%- when 'product' -%}
                   <li
                     class="grid__item{% if settings.animations_reveal_on_scroll %} scroll-trigger animate--slide-in{% endif %}"
                     {% if settings.animations_reveal_on_scroll %}
                       data-cascade
                     {% endif %}
                   >
-                    {%- case item.object_type -%}
-                      {%- when 'product' -%}
+
                         {%- capture product_settings -%}{%- if section.settings.product_show_vendor -%}vendor,{%- endif -%}title,price{%- endcapture -%}
                         {% render 'card-product',
                           card_product: item,
@@ -333,40 +346,8 @@
                           skip_styles: skip_card_product_styles
                         %}
                         {%- assign skip_card_product_styles = true -%}
-                      {%- when 'article' -%}
-                        {% render 'article-card',
-                          article: item,
-                          show_image: true,
-                          show_date: section.settings.article_show_date,
-                          show_author: section.settings.article_show_author,
-                          show_badge: true,
-                          media_aspect_ratio: 1,
-                          lazy_load: lazy_load
-                        %}
-                      {%- when 'page' -%}
-                        <div class="article-card-wrapper card-wrapper underline-links-hover">
-                          <div
-                            class="card card--card card--text ratio color-{{ settings.blog_card_color_scheme }}"
-                            style="--ratio-percent: 100%;"
-                          >
-                            <div class="card__content">
-                              <div class="card__information">
-                                <h3 class="card__heading">
-                                  <a href="{{ item.url }}" class="full-unstyled-link">
-                                    {{ item.title | truncate: 50 | escape }}
-                                  </a>
-                                </h3>
-                              </div>
-                              <div class="card__badge {{ settings.badge_position }}">
-                                <span class="badge color-{{ settings.color_schemes | first }}">
-                                  {{- 'templates.search.page' | t -}}
-                                </span>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                    {%- endcase -%}
                   </li>
+                {%- endcase -%}
                 {%- endfor -%}
               </ul>
               {%- if paginate.pages > 1 -%}

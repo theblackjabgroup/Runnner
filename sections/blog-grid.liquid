@@ -18,7 +18,16 @@
         {% assign articles_limit = section.settings.articles_per_page %}
         {% assign articles_count = blog.articles.size %}
         {% comment %} rendering blog design {% endcomment %}
-      {% render 'article-card' %}
+        {% for article in blog.articles %}
+          {% if forloop.index <= articles_limit %}
+            {% assign article_class = 'blog-article block space-y-2 px-0 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 transition-shadow hover:shadow-lg' %}
+          {% else %}
+            {% assign article_class = 'blog-article hidden-articles block space-y-2 px-0 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 transition-shadow hover:shadow-lg' %}
+          {% endif %}
+          {% render 'article-card',
+             article: article 
+          %} 
+        {% endfor %}
     </div>
 
     {% assign remaining_articles = articles_count | minus: articles_limit %}
