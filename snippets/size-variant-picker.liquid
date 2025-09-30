@@ -1,5 +1,6 @@
 {% comment %}
-  Unified Size Variant Picker Snippet
+  Unified Variant Picker Snippet
+  Handles any non-color variant option (Size, Denomination, Material, Type, etc.)
   Works for both mobile and desktop with responsive styling
   Usage: {% render 'size-variant-picker', product: product, mobile: true/false, show_label: true/false %}
 {% endcomment %}
@@ -9,11 +10,11 @@
   assign variant_option_index = null
 
   for option in product.options_with_values
-    if option.name == 'Size' or option.name == 'size'
+    unless option.name == 'Color' or option.name == 'Colour'
       assign variant_option = option
       assign variant_option_index = forloop.index0
       break
-    endif
+    endunless
   endfor
 -%}
 
@@ -114,7 +115,7 @@
     </div>
   {% endif %}
 {% else %}
-  <!-- Default title when no size option exists -->
+  <!-- Default title when no non-color variant option exists -->
   {% if mobile %}
     <div class="flex justify-between items-center gap-2" style="padding: 10px 0;">
       <span style="font-size: var(--tm-b-4-size); line-height: var(--tm-b-4-line-height);"> SELECT OPTION </span>
