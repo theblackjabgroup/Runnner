@@ -1,14 +1,10 @@
-{{ 'featured-collection.css' | asset_url | stylesheet_tag }}
-{{ 'scroll-animations.css' | asset_url | stylesheet_tag }}
-
 {% if section.settings.enabled %}
   {% assign section_classes_fc = '' %}
   {% if section.settings.color_scheme %}
     {% assign section_classes_fc = section_classes_fc | append: ' color-' | append: section.settings.color_scheme %}
   {% endif %}
-  
   <div
-    class="featured-collection-page-width overflow-hidden {{section_classes_fc}}{% if section.settings.uppercase_text %} featured-collection-uppercase{% endif %}"
+    class="featured-collection-page-width overflow-hidden {{section_classes_fc}}"
     role="region"
     aria-labelledby="featured-collection-heading"
     aria-describedby="featured-collection-description"
@@ -24,7 +20,7 @@
 
     <div
       class="flex justify-between items-start w-full featured-collection-subheading"
-      style="padding-top: 10px; color: var(--text); font-weight:var(--font-subheading-weight); font-family: var(--font-subheading-family); font-style: var(--font-subheading-style);"
+      style="padding: 10px; color: var(--text); font-weight:var(--font-subheading-weight); font-family: var(--font-subheading-family); font-style: var(--font-subheading-style);"
     >
       <div class="flex-grow md:text-[24px] text-[16px] md:mt-[-20px]" style="line-height: 1;">
         {% if section.settings.description != blank %}
@@ -33,48 +29,60 @@
       </div>
       <div class="flex-shrink-0 fc-shop-all-wrapper">
         {% if section.settings.show_shop_all and section.settings.main_collection %}
-          <a
-            href="{{ section.settings.main_collection.url }}"
-            class="featured-collection-custom-button"
-            aria-label="{{ section.settings.button_text }} for {{ section.settings.main_collection.title }}"
-          >
-            <div class="featured-collection-button-text-container">
-              <div class="featured-collection-button-text">
-                {{ section.settings.button_text }}
-                <span class="featured-collection-button-arrow">
-                  <svg
-                    width="18"
-                    height="16"
-                    viewBox="4.5 1.5 8.5 13"
-                    fill="currentColor"
-                    xmlns="http://www.w3.org/2000/svg"
-                    style="width: 16px; height: 16px;"
-                    class="featured-collection-arrow-svg object-contain transition-transform duration-200 ease-in-out mx-1"
-                    stroke="currentColor"
-                  >
-                    <path d="m12.14 8.753-5.482 4.796c-.646.566-1.658.106-1.658-.753V3.204a1 1 0 0 1 1.659-.753l5.48 4.796a1 1 0 0 1 0 1.506z"/>
-                  </svg>
-                </span>
+          {% render 'primary-button',
+            button_text: section.settings.button_text,
+            button_url: section.settings.main_collection.url,
+            button_font_size: 'var(--t-b-1-size)',
+            font_weight: 'var(--t-b-1-weight)',
+            button_line_height: 'var(--t-b-1-line-height)',
+            mobile_font_size: 'var(--tm-b-2-size)',
+            mobile_font_weight: 'var(--t-b-2-weight)',
+            mobile_line_height: 'var(--tm-b-2-line-height)'
+          %}
+          {% comment %}
+            <a
+              href="{{ section.settings.main_collection.url }}"
+              class="featured-collection-custom-button"
+              aria-label="{{ section.settings.button_text }} for {{ section.settings.main_collection.title }}"
+            >
+              <div class="featured-collection-button-text-container">
+                <div class="featured-collection-button-text">
+                  {{ section.settings.button_text }}
+                  <span class="featured-collection-button-arrow">
+                    <svg
+                      width="18"
+                      height="16"
+                      viewBox="4.5 1.5 8.5 13"
+                      fill="currentColor"
+                      xmlns="http://www.w3.org/2000/svg"
+                      style="width: 16px; height: 16px;"
+                      class="featured-collection-arrow-svg object-contain transition-transform duration-200 ease-in-out mx-1"
+                      stroke="currentColor"
+                    >
+                      <path d="m12.14 8.753-5.482 4.796c-.646.566-1.658.106-1.658-.753V3.204a1 1 0 0 1 1.659-.753l5.48 4.796a1 1 0 0 1 0 1.506z"/>
+                    </svg>
+                  </span>
+                </div>
+                <div class="featured-collection-button-text-hover">
+                  {{ section.settings.button_text }}
+                  <span class="featured-collection-button-arrow">
+                    <svg
+                      width="18"
+                      height="16"
+                      viewBox="4.5 1.5 8.5 13"
+                      fill="currentColor"
+                      xmlns="http://www.w3.org/2000/svg"
+                      style="width: 16px; height: 16px;"
+                      class="featured-collection-arrow-svg object-contain transition-transform duration-200 ease-in-out mx-1"
+                      stroke="currentColor"
+                    >
+                      <path d="m12.14 8.753-5.482 4.796c-.646.566-1.658.106-1.658-.753V3.204a1 1 0 0 1 1.659-.753l5.48 4.796a1 1 0 0 1 0 1.506z"/>
+                    </svg>
+                  </span>
+                </div>
               </div>
-              <div class="featured-collection-button-text-hover">
-                {{ section.settings.button_text }}
-                <span class="featured-collection-button-arrow">
-                  <svg
-                    width="18"
-                    height="16"
-                    viewBox="4.5 1.5 8.5 13"
-                    fill="currentColor"
-                    xmlns="http://www.w3.org/2000/svg"
-                    style="width: 16px; height: 16px;"
-                    class="featured-collection-arrow-svg object-contain transition-transform duration-200 ease-in-out mx-1"
-                    stroke="currentColor"
-                  >
-                    <path d="m12.14 8.753-5.482 4.796c-.646.566-1.658.106-1.658-.753V3.204a1 1 0 0 1 1.659-.753l5.48 4.796a1 1 0 0 1 0 1.506z"/>
-                  </svg>
-                </span>
-              </div>
-            </div>
-          </a>
+            </a>
+          {% endcomment %}
         {% endif %}
       </div>
     </div>
@@ -111,10 +119,41 @@
                   <span class="product-count-mobile"> [{{ block.settings.collection.products_count }}]</span>
                 {% endif %}
               </span>
+              {% comment %}
+                <svg class="svg-arrow-right" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 37 36" width="18" height="18">
+                  <path fill="currentColor" d="M26.79,9.21A35.06,35.06,0,0,0,37,16.2v3.66a35.34,35.34,0,0,0-10.21,7A12.84,12.84,0,0,0,23.21,36H17.56q0-6.22,3-10a15.4,15.4,0,0,1,8.06-5.2V20.6H0V15.43H28.63v-.3A15.16,15.16,0,0,1,20.57,10q-3-3.77-3-10h5.65a13,13,0,0,0,.87,5A12.79,12.79,0,0,0,26.79,9.21Z"/>
+                </svg>
+              {% endcomment %}
+              {% comment %}
+                <img
+                  src="{{ "arrow-down.png" | asset_url }}"
+                  alt="Dropdown Icon"
+                  class="w-12 h-6 object-contain transition-transform duration-300 group-hover:-rotate-90 collection-arrow-img"
+                  width="100%"
+                  height="auto"
+                  aria-hidden="true"
+                >
+              {% endcomment %}
               <div
                 class="object-contain transition-transform duration-300 fc-arrow-img relative"
                 alt="Dropdown Icon"
               >
+                {% comment %}
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    class="featured-collection-arrow-svg object-contain transition-transform duration-300 ease-in-out group-hover:-rotate-90 mx-1"
+                    fill="none"
+                    style="width: 18px; height: 16px;"
+                    viewBox="0 0 9 9"
+                    stroke-width="1.5"
+                    stroke="currentColor"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    aria-hidden="true"
+                  >
+                    <path d="M1.1875 7.7334H7.6599M7.6599 7.7334V1.261M7.6599 7.7334L1.1875 1.261"/>
+                  </svg>
+                {% endcomment %}
                 <svg
                   width="18"
                   height="16"
@@ -127,6 +166,21 @@
                 >
                   <path d="m12.14 8.753-5.482 4.796c-.646.566-1.658.106-1.658-.753V3.204a1 1 0 0 1 1.659-.753l5.48 4.796a1 1 0 0 1 0 1.506z"/>
                 </svg>
+
+                {% comment %}
+                  <svg
+                    class="featured-collection-arrow-svg transition-transform duration-200 ease-in-out"
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="25px"
+                    height="25px"
+                    stroke-width="10"
+                    viewBox="0 0 20 20"
+                  >
+                    <g transform="rotate(270 12 12)">
+                      <path fill="currentColor" d="M1.1875 7.7334H7.6599M7.6599 7.7334V1.261M7.6599 7.7334L1.1875 1.261"></path>
+                    </g>
+                  </svg>
+                {% endcomment %}
               </div>
             </button>
           {% endfor %}
@@ -218,6 +272,50 @@
   </div>
 {% endif %}
 
+<style>
+    .featured-collection-page-width {
+      padding: {{ settings.sections_spacing }}px {{ settings.side_space}}px;
+    }
+
+    .collection-filters .collection-btn {
+      border-bottom: {{ settings.buttons_border_thickness }}px solid var(--text);
+      font-size: var(--t-h-5-size);
+      line-height: var( --t-h-5-line-height)
+    }
+
+    .collection-filters .collection-btn:hover,
+    .collection-filters .collection-btn.active {
+      border-bottom: {{ settings.buttons_border_thickness }}px solid rgb(var(--color-background));
+    }
+
+    {% if section.settings.uppercase_text %}
+      .featured-collection-main-heading {
+        text-transform: uppercase !important;
+      }
+    {% endif %}
+
+    .featured-collection-custom-button {
+      border-radius: {{ settings.buttons_radius |  minus: 1 }}px;
+      border: var(--button_label) {{ settings.buttons_border_thickness }}px solid;
+    }
+
+    .shop-all-button {
+      border-radius: {{ settings.buttons_radius |  minus: 1 }}px;
+    }
+
+    @media (max-width: 768px) {
+      .collection-btn {
+        border-radius: {{ settings.buttons_radius |  minus: 1 }}px; !important;
+      }
+
+      .featured-collection-main-heading {
+        padding-top: {{ section.settings.padding_top }}px;
+      }
+    }
+</style>
+
+{{ 'featured-collection.css' | asset_url | stylesheet_tag }}
+{{ 'scroll-animations.css' | asset_url | stylesheet_tag }}
 <script src="{{ 'scroll-animations.js' | asset_url }}" defer></script>
 <script src="{{ 'featured-collection.js' | asset_url }}" defer></script>
 <script src="{{ 'new-product-card.js' | asset_url }}" defer></script>
