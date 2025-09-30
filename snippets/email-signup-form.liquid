@@ -7,28 +7,64 @@
 {% endcomment %}
 {{ 'email-signup-banner.css' | asset_url | stylesheet_tag }}
 
-{%- form 'customer', class: 'flex flex-col gap-6 w-[95%] mx-auto' -%}
-  <input type="hidden" name="contact[tags]" value="{{ section.settings.customer_tag }}" />
-  <input type="hidden" name="contact[accepts_marketing]" value="true" />
+{%- form 'customer', id: 'email-signup-form-password', class: 'flex flex-col gap-4 w-full mb-[28px] max-w-[1000px]' -%}
+  <input type="hidden" name="contact[tags]" value="newsletter">
 
-  <div class="form-fields-container relative"> 
-    <input
-      type="email"
-      id="custom-email-input"
-      name="contact[email]"
-      placeholder="EMAIL"
-      class="w-full px-4 text-[30px] md:text-[50px] text-left text-white bg-black border border-white placeholder-gray-400 focus:outline-none rounded-lg leading-none py-0"
-      value="{{ form.email }}"
-      required
-    />
+  <div class="form-fields-container relative">
+    <div class="flex flex-col">
+      <div class="flex justify-end">
+        <label for="email-input-password" class="sr-only">Email address</label>
+        
+        <input
+          type="email"
+          id="email-input-password"
+          placeholder="EMAIL"
+          name="contact[email]"
+          class="pass-input w-full px-6 py-4 text-left border mt-4 ml-2 pt-2 pb-1 h-[55px] leading-[50px] md:pt-0 md:mt-0 md:pb-0 focus:outline-none focus:ring-1 leading-none peer mb-[13px]"
+          aria-label="{{ placeholder | default: 'Enter your email' }}"
+          required
+          pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$"
+          value="{{ form.email }}"
+        >
+      </div>
+
+      {%- if form.errors -%}
+        <div class="text-red-500 text-sm mt-3 ml-2">
+          {{ form.errors | default_errors }}
+        </div>
+      {%- endif -%}
+
+      <div id="email-error-password" class="hidden text-red-500 text-sm mt-3 ml-2 peer-invalid:block">
+        Please enter a valid email address
+      </div>
+    </div>
   </div>
 
   <div class="flex justify-end w-full">
-    <button type="submit" id="custom-submitButton" class="custom-submit-button w-full text-[30px] md:text-[50px] font-bold px-6 flex items-center justify-between hover:bg-red-700 transition-colors rounded-lg button-with-arrow">
-      <img src="{{ 'arrow-down.png' | asset_url }}" alt="Dropdown Icon" width="100%" height="auto" class="rotate-arrow w-12 h-10 object-contain" aria-hidden="true" />
-      <span id="custom-buttonText">{{ section.settings.button_text }}</span>
-      <span id="custom-loadingSpinner" class="hidden">
-        <svg class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+    <button
+      type="submit"
+      id="submitButton-password"
+      class="
+        pass-subscribe w-full px-6 py-4 font-light flex items-center justify-between cursor-pointer h-16 ml-2 text-4xl leading-[50px] pt-2 md:h-16 md:mb-0 md:pt-0 md:pb-0
+        transition-colors button-with-arrow focus:outline-none focus:ring-1
+      "
+      aria-label="Subscribe to our email list"
+    >
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        class="rotate-arrow w-10 h-15 inline"
+        fill="currentColor"
+        viewBox="0 0 215 215"
+        stroke-width="2.5"
+        stroke="currentColor"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      >
+        <path d="M181.66,133.66l-80,80a8,8,0,0,1-11.32-11.32L164.69,128,90.34,53.66a8,8,0,0,1,11.32-11.32l80,80A8,8,0,0,1,181.66,133.66Z"/>
+      </svg>
+      <span id="buttonText-password">{{ button_text }}</span>
+      <span id="loadingSpinner-password" class="hidden">
+        <svg class="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
           <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
           <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
         </svg>
@@ -37,10 +73,12 @@
   </div>
 {%- endform -%}
 
-<div
-  id="successMessage-password"
-  class="hidden text-[var(--text)] text-xl font-light mt-8 text-center w-full"
-  aria-live="polite"
->
-  Thanks for subscribing!
-</div>
+{%- if form.posted_successfully? -%}
+  <div
+    id="successMessage-password"
+    class="text-[var(--text)] text-xl font-light mt-8 text-center w-full"
+    aria-live="polite"
+  >
+    Thanks for subscribing!
+  </div>
+{%- endif -%}
