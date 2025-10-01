@@ -242,33 +242,38 @@ function initializeCartDrawer() {
   // Watch for cart drawer opening and initialize quantities
   const cartDrawer = document.querySelector('cart-drawer');
   if (cartDrawer) {
+    // Track previous open state to avoid redundant calls
+    let wasOpen = cartDrawer.classList.contains('is-open') || cartDrawer.hasAttribute('open');
+
     // Initialize immediately if drawer is already open
-    if (cartDrawer.classList.contains('is-open') || cartDrawer.hasAttribute('open')) {
+    if (wasOpen) {
       initializeCartDrawerQuantities();
     }
 
     // Watch for drawer opening using MutationObserver
     const observer = new MutationObserver((mutations) => {
-      mutations.forEach((mutation) => {
-        if (
-          mutation.type === 'attributes' &&
-          (mutation.attributeName === 'class' || mutation.attributeName === 'open')
-        ) {
-          const isOpen = cartDrawer.classList.contains('is-open') || cartDrawer.hasAttribute('open');
-          if (isOpen) {
-            // Small delay to ensure DOM is updated
-            setTimeout(() => {
-              initializeCartDrawerQuantities();
-            }, 50);
-          }
-        }
-      });
+      // Check current state only once per batch of mutations
+      const isOpen = cartDrawer.classList.contains('is-open') || cartDrawer.hasAttribute('open');
+
+      // Only trigger if the state changed from closed to open
+      if (isOpen && !wasOpen) {
+        // Use requestAnimationFrame for better DOM synchronization
+        requestAnimationFrame(() => {
+          initializeCartDrawerQuantities();
+        });
+      }
+
+      // Update tracked state
+      wasOpen = isOpen;
     });
 
     observer.observe(cartDrawer, {
       attributes: true,
       attributeFilter: ['class', 'open'],
     });
+
+    // Store observer reference for potential cleanup
+    window.cartDrawerObserver = observer;
   }
 
   // Add event listeners for size and color changes
