@@ -1,0 +1,368 @@
+# Z-Index Design System
+
+This document outlines the comprehensive z-index token system for the Runnner Shopify theme, providing a systematic approach to managing layering and stacking contexts throughout the application.
+
+## Overview
+
+The current codebase uses inconsistent z-index values ranging from -3 to 100000 without a systematic approach. This document provides a standardized token system to ensure predictable layering, prevent conflicts, and improve maintainability.
+
+## Z-Index Token System
+
+### CSS Custom Properties
+
+Add these tokens to your `layout/theme.liquid` file in the CSS custom properties section:
+
+```css
+:root {
+  /* Background & Shadow Layers */
+  --z-background: -1;           /* Background elements, shadows */
+  --z-background-deep: -2;      /* Deep background layers */
+  --z-background-deeper: -3;    /* Deepest background layers */
+  
+  /* Base Content Layers */
+  --z-base: 0;                  /* Default document flow */
+  --z-content: 1;               /* Basic content layering */
+  --z-content-elevated: 2;      /* Elevated content (cards, buttons) */
+  
+  /* Interactive Elements */
+  --z-dropdown: 10;             /* Dropdowns, tooltips */
+  --z-sticky: 20;               /* Sticky elements */
+  --z-fixed: 30;                /* Fixed positioned elements */
+  --z-overlay: 50;              /* Light overlays, hover states */
+  
+  /* Navigation & Header */
+  --z-navigation: 100;          /* Main navigation */
+  --z-header: 200;              /* Site header */
+  --z-announcement: 300;        /* Announcement bar */
+  
+  /* Modals & Popups */
+  --z-modal-backdrop: 1000;     /* Modal backdrops */
+  --z-modal: 1001;              /* Modal dialogs */
+  --z-modal-elevated: 1002;     /* Elevated modals */
+  --z-modal-super: 1003;        /* Super high modals */
+  
+  /* Mobile Specific */
+  --z-mobile-menu: 990;         /* Mobile navigation menu */
+  --z-mobile-overlay: 980;      /* Mobile overlay backgrounds */
+  
+  /* Critical UI */
+  --z-toast: 2000;              /* Toast notifications */
+  --z-tooltip: 3000;            /* Tooltips */
+  --z-debug: 9999;              /* Debug tools, skip links */
+}
+```
+
+## Current Z-Index Analysis
+
+### Values Currently Used in Codebase:
+- **Negative values**: -3, -2, -1 (background layers, shadows)
+- **Low positive**: 0, 1, 2, 3, 4, 5 (basic layering, shadows, buttons)
+- **Medium**: 10, 15, 20, 50 (dropdowns, overlays, interactive elements)
+- **High**: 100, 101, 102 (modals, popups, overlays)
+- **Very high**: 999, 1000, 1001, 1002, 1003 (header, mobile menus, modals)
+- **Extreme**: 9999, 100000 (country selectors, skip links, debug tools)
+
+## Section-Specific Recommendations
+
+### 1. Header & Navigation
+**Files**: `sections/header.liquid`, `sections/announcement-bar.liquid`
+
+```css
+/* Current → Recommended */
+z-index: 999;          → z-index: var(--z-header);              /* Main header: 200 */
+z-index: 999;          → z-index: var(--z-announcement);        /* Announcement bar: 300 */
+z-index: 1000;         → z-index: var(--z-mobile-menu);         /* Mobile menu: 990 */
+z-index: 998;          → z-index: var(--z-mobile-overlay);      /* Mobile overlay: 980 */
+```
+
+### 2. Product Sections
+**Files**: `sections/main-product.liquid`, `snippets/new-product-card.liquid`
+
+```css
+/* Current → Recommended */
+z-index: 1001;         → z-index: var(--z-modal);               /* Size chart modal: 1001 */
+z-index: 1000;         → z-index: var(--z-modal-backdrop);      /* Modal backdrop: 1000 */
+z-index: 100;          → z-index: var(--z-fixed);               /* Image strip: 30 */
+z-index: 15;           → z-index: var(--z-content-elevated);    /* Card elements: 2 */
+z-index: 10;           → z-index: var(--z-dropdown);            /* Quick actions: 10 */
+z-index: 5;            → z-index: var(--z-content);             /* Basic content: 1 */
+```
+
+### 3. Collection & Grid Sections
+**Files**: `sections/main-collection-product-grid.css`, `sections/featured-collection.liquid`
+
+```css
+/* Current → Recommended */
+z-index: 1;            → z-index: var(--z-content);             /* Grid items: 1 */
+z-index: 10;           → z-index: var(--z-dropdown);            /* Filter dropdowns: 10 */
+z-index: 2;            → z-index: var(--z-content-elevated);    /* Product cards: 2 */
+z-index: -1;           → z-index: var(--z-background);          /* Background elements: -1 */
+```
+
+### 4. Cart & Checkout
+**Files**: `sections/cart-drawer.css`, `assets/main-cart-items.css`
+
+```css
+/* Current → Recommended */
+z-index: 1001;         → z-index: var(--z-modal);               /* Cart drawer: 1001 */
+z-index: 10;           → z-index: var(--z-dropdown);            /* Cart items: 10 */
+z-index: 2;            → z-index: var(--z-content-elevated);    /* Cart content: 2 */
+z-index: 0;            → z-index: var(--z-base);                /* Base cart: 0 */
+z-index: 1;            → z-index: var(--z-content);             /* Cart items: 1 */
+```
+
+### 5. Modals & Popups
+**Files**: `sections/popup.liquid`, `sections/main-search.liquid`
+
+```css
+/* Current → Recommended */
+z-index: 1001;         → z-index: var(--z-modal);               /* Popup modal: 1001 */
+z-index: 10;           → z-index: var(--z-dropdown);            /* Search dropdown: 10 */
+z-index: 2;            → z-index: var(--z-content-elevated);    /* Search buttons: 2 */
+```
+
+### 6. Footer & Background Elements
+**Files**: `assets/footer.css`
+
+```css
+/* Current → Recommended */
+z-index: -3;           → z-index: var(--z-background-deeper);   /* Background animations: -3 */
+z-index: -2;           → z-index: var(--z-background-deep);     /* Background layers: -2 */
+z-index: -1;           → z-index: var(--z-background);          /* Background elements: -1 */
+z-index: 0;            → z-index: var(--z-base);                /* Footer content: 0 */
+```
+
+### 7. Interactive Components
+**Files**: `snippets/facets.liquid`, `snippets/card-product.liquid`
+
+```css
+/* Current → Recommended */
+z-index: 1003;         → z-index: var(--z-modal-super);         /* Facet modal: 1003 */
+z-index: 1002;         → z-index: var(--z-modal-elevated);      /* Facet overlay: 1002 */
+z-index: 1001;         → z-index: var(--z-modal);               /* Facet backdrop: 1001 */
+z-index: 10;           → z-index: var(--z-dropdown);            /* Facet dropdowns: 10 */
+z-index: 1000;         → z-index: var(--z-modal);               /* Quick add modal: 1001 */
+z-index: 50;           → z-index: var(--z-overlay);             /* Slider arrows: 50 */
+z-index: 20;           → z-index: var(--z-sticky);              /* Add to cart button: 20 */
+```
+
+## Implementation Phases
+
+### Phase 1: Critical Sections (High Impact)
+**Priority**: 🔴 High
+**Files to update**:
+- `sections/header.liquid`
+- `sections/announcement-bar.liquid`
+- `sections/popup.liquid`
+- `snippets/facets.liquid`
+
+**Current Issues**:
+- Header using inconsistent values (999, 998, 997, 1000)
+- Modals using extreme values (9999, 100000)
+- Mobile menu conflicts
+
+### Phase 2: Product & Collection Sections (Medium Impact)
+**Priority**: 🟡 Medium
+**Files to update**:
+- `sections/main-product.liquid`
+- `snippets/new-product-card.liquid`
+- `sections/main-collection-product-grid.css`
+- `sections/featured-collection.liquid`
+- `sections/cart-drawer.css`
+
+**Current Issues**:
+- Product cards using mixed values (15, 10, 5, 2)
+- Collection grids inconsistent layering
+- Cart components overlapping
+
+### Phase 3: Background & Utility Elements (Low Impact)
+**Priority**: 🟢 Low
+**Files to update**:
+- `assets/footer.css`
+- `assets/base.css`
+- Various component files
+
+**Current Issues**:
+- Background elements using negative values inconsistently
+- Base components scattered values
+
+## Benefits of This System
+
+### 1. Predictable Layering
+- Clear hierarchy from background (-3) to debug tools (9999)
+- Logical progression of values
+- Easy to understand component relationships
+
+### 2. Maintainable
+- Single source of truth for z-index values
+- Easy to modify and extend
+- Reduced cognitive load for developers
+
+### 3. Scalable
+- Room for new components within logical ranges
+- Extensible token system
+- Future-proof architecture
+
+### 4. Conflict Prevention
+- Prevents z-index wars
+- Eliminates overlapping issues
+- Consistent behavior across devices
+
+### 5. Performance
+- Reduces browser reflow/repaint issues
+- Optimized stacking contexts
+- Better rendering performance
+
+## Usage Guidelines
+
+### When to Use Each Token
+
+#### Background Layers
+- `--z-background`: Shadows, background decorations
+- `--z-background-deep`: Multi-layer backgrounds
+- `--z-background-deeper`: Complex background animations
+
+#### Content Layers
+- `--z-base`: Default document flow
+- `--z-content`: Basic content layering
+- `--z-content-elevated`: Cards, elevated content blocks
+
+#### Interactive Elements
+- `--z-dropdown`: Dropdowns, tooltips, small overlays
+- `--z-sticky`: Sticky positioned elements
+- `--z-fixed`: Fixed positioned elements
+- `--z-overlay`: Hover states, light overlays
+
+#### Navigation
+- `--z-navigation`: Main navigation elements
+- `--z-header`: Site header
+- `--z-announcement`: Announcement bar (highest navigation)
+
+#### Modals
+- `--z-modal-backdrop`: Modal background overlays
+- `--z-modal`: Standard modal dialogs
+- `--z-modal-elevated`: Multi-step modals
+- `--z-modal-super`: Critical system modals
+
+#### Mobile Specific
+- `--z-mobile-menu`: Mobile navigation
+- `--z-mobile-overlay`: Mobile overlay backgrounds
+
+#### Critical UI
+- `--z-toast`: Toast notifications
+- `--z-tooltip`: Tooltips
+- `--z-debug`: Debug tools, skip links
+
+## Migration Checklist
+
+### Pre-Migration
+- [ ] Add z-index tokens to `theme.liquid`
+- [ ] Test current z-index behavior
+- [ ] Document current issues
+
+### Phase 1 (Critical)
+- [ ] Update header z-index values
+- [ ] Update announcement bar z-index
+- [ ] Update modal z-index values
+- [ ] Update mobile menu z-index
+- [ ] Test on mobile and desktop
+
+### Phase 2 (Medium)
+- [ ] Update product section z-index values
+- [ ] Update collection grid z-index values
+- [ ] Update cart component z-index values
+- [ ] Test product interactions
+
+### Phase 3 (Low)
+- [ ] Update footer z-index values
+- [ ] Update base component z-index values
+- [ ] Final testing and cleanup
+
+### Post-Migration
+- [ ] Remove unused z-index values
+- [ ] Update documentation
+- [ ] Train team on new system
+
+## Best Practices
+
+### 1. Always Use Tokens
+```css
+/* ✅ Good */
+z-index: var(--z-modal);
+
+/* ❌ Bad */
+z-index: 1001;
+```
+
+### 2. Avoid Inline Z-Index
+```css
+/* ✅ Good - Use CSS classes */
+.modal {
+  z-index: var(--z-modal);
+}
+
+/* ❌ Bad - Avoid inline styles */
+<div style="z-index: 1001;">
+```
+
+### 3. Document Custom Values
+If you need a custom z-index value, document why:
+```css
+/* Custom z-index for special case - see Z-INDEX-SYSTEM.md */
+.special-component {
+  z-index: 1500; /* Between modal and toast */
+}
+```
+
+### 4. Test Stacking Contexts
+- Test on multiple devices
+- Check modal interactions
+- Verify mobile menu behavior
+- Test with different content lengths
+
+## Troubleshooting
+
+### Common Issues
+
+#### 1. Elements Not Appearing Above Others
+- Check if parent element has `position: relative`
+- Verify stacking context isolation
+- Ensure z-index tokens are properly defined
+
+#### 2. Modal Not Appearing
+- Check backdrop z-index
+- Verify modal z-index is higher than backdrop
+- Test on different screen sizes
+
+#### 3. Mobile Menu Issues
+- Ensure mobile menu z-index is higher than header
+- Check overlay z-index values
+- Test touch interactions
+
+### Debug Tools
+Use browser dev tools to inspect stacking contexts:
+1. Open DevTools
+2. Select element
+3. Check Computed styles for z-index
+4. Use 3D view to visualize stacking
+
+## Contributing
+
+When adding new components:
+1. Check existing z-index usage
+2. Choose appropriate token from system
+3. Document any custom values needed
+4. Test thoroughly before committing
+5. Update this documentation if adding new tokens
+
+## References
+
+- [MDN Z-Index Documentation](https://developer.mozilla.org/en-US/docs/Web/CSS/z-index)
+- [CSS Stacking Contexts](https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_Positioning/Understanding_z_index/The_stacking_context)
+- [Shopify Theme Development Best Practices](https://shopify.dev/docs/themes/best-practices)
+
+---
+
+**Last Updated**: December 2024
+**Version**: 1.0
+**Maintained by**: Development Team
