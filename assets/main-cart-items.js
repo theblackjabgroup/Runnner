@@ -72,6 +72,43 @@ function updateQuantity(itemKey, quantity) {
 }
 
 /**
+ * Update cart item quantity by variant ID
+ * @param {string} variantId - The variant ID
+ * @param {number} quantity - The new quantity
+ */
+function updateQuantityByVariantId(variantId, quantity) {
+  console.log('Updating quantity by variant ID:', variantId, quantity);
+
+  fetch('/cart/change.js', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Accept: 'application/json',
+    },
+    body: JSON.stringify({
+      id: variantId,
+      quantity: quantity,
+    }),
+  })
+    .then((response) => {
+      console.log('Response status:', response.status);
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      return response.json();
+    })
+    .then((data) => {
+      console.log('Cart data received:', data);
+      updateCartDisplay(data);
+    })
+    .catch((error) => {
+      console.error('Error updating cart:', error);
+      // Reload the page if cart update fails
+      window.location.reload();
+    });
+}
+
+/**
  * Update cart display after quantity changes
  * @param {Object} cartData - The updated cart data
  */
@@ -547,6 +584,7 @@ function changeCartItemVariant(itemKey, newVariantId) {
 document.addEventListener('DOMContentLoaded', function () {
   // Quantity controls event listeners
   document.addEventListener('click', function (e) {
+    // Handle legacy quantity buttons
     if (e.target.classList.contains('decrease-qty')) {
       e.preventDefault();
       const itemKey = e.target.dataset.itemKey;
@@ -564,6 +602,25 @@ document.addEventListener('DOMContentLoaded', function () {
       const currentQty = parseInt(input.value);
       console.log('Increasing quantity from', currentQty, 'to', currentQty + 1);
       updateQuantity(itemKey, currentQty + 1);
+    }
+
+    // Handle quantity-input snippet buttons
+    if (e.target.classList.contains('quantity__button') || e.target.closest('.quantity__button')) {
+      const button = e.target.classList.contains('quantity__button') ? e.target : e.target.closest('.quantity__button');
+      const quantityInput = button.closest('quantity-input');
+      if (quantityInput) {
+        const input = quantityInput.querySelector('.quantity__input');
+        if (input) {
+          const variantId = input.dataset.quantityVariantId;
+          const currentQty = parseInt(input.value);
+
+          if (button.name === 'minus' && currentQty > 1) {
+            updateQuantityByVariantId(variantId, currentQty - 1);
+          } else if (button.name === 'plus') {
+            updateQuantityByVariantId(variantId, currentQty + 1);
+          }
+        }
+      }
     }
 
     if (e.target.classList.contains('remove-btn')) {
