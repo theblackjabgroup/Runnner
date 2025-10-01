@@ -538,9 +538,10 @@ function initializeCartQuantities() {
  * @returns {Promise} Promise for the cart update
  */
 function changeCartItemVariant(itemKey, newVariantId) {
-  // Get current quantity
-  const qtyInput = document.querySelector(`[data-item-key="${itemKey}"]`);
-  const currentQty = parseInt(qtyInput.value);
+  // Get current quantity from the wrapper's data attribute or find the input
+  const wrapper = document.querySelector(`[data-item-key="${itemKey}"]`);
+  const currentQty =
+    parseInt(wrapper.dataset.itemQuantity) || parseInt(wrapper.querySelector('.quantity__input')?.value) || 1;
 
   // Remove the current item and add the new variant
   return fetch('/cart/change.js', {
