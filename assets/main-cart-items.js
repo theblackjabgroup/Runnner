@@ -538,10 +538,15 @@ function initializeCartQuantities() {
  * @returns {Promise} Promise for the cart update
  */
 function changeCartItemVariant(itemKey, newVariantId) {
-  // Get current quantity from the wrapper's data attribute or find the input
-  const wrapper = document.querySelector(`[data-item-key="${itemKey}"]`);
-  const currentQty =
-    parseInt(wrapper.dataset.itemQuantity) || parseInt(wrapper.querySelector('.quantity__input')?.value) || 1;
+  // Get current quantity - prioritize current input value over stale dataset
+  const quantityInput = document.querySelector(`[data-item-key="${itemKey}"] .quantity__input`);
+  let currentQty = quantityInput ? parseInt(quantityInput.value) : 1;
+
+  // Validate quantity and fallback to safe default
+  if (isNaN(currentQty) || currentQty < 1) {
+    console.warn(`Invalid quantity ${currentQty} for item ${itemKey}, using 1`);
+    currentQty = 1;
+  }
 
   // Remove the current item and add the new variant
   return fetch('/cart/change.js', {
@@ -612,9 +617,13 @@ document.addEventListener('DOMContentLoaded', function () {
         return; // Not a cart quantity button, let other handlers deal with it
       }
 
+      // Skip if button is disabled
+      if (button.disabled) {
+        return;
+      }
+
       // This is a cart quantity button, handle it here
       e.preventDefault();
-      e.stopPropagation();
 
       const itemKey = wrapper.dataset.itemKey;
       const quantityInput = button.closest('quantity-input');
@@ -636,12 +645,16 @@ document.addEventListener('DOMContentLoaded', function () {
         return;
       }
 
-      // Determine if this is increment or decrement - check button name first, then fallback to data-target
-      const buttonName = button.getAttribute('name') || '';
-      const targetAttr = button.getAttribute('data-target') || '';
+      // Determine if this is increment or decrement - check button name attribute
+      const buttonName = button.getAttribute('name');
 
-      const isDecrement = buttonName === 'minus' || targetAttr.includes('decrement');
-      const isIncrement = buttonName === 'plus' || targetAttr.includes('increment');
+      if (!buttonName) {
+        console.error('Button name attribute not found');
+        return;
+      }
+
+      const isDecrement = buttonName === 'minus';
+      const isIncrement = buttonName === 'plus';
 
       // Update cart quantity
       if (isDecrement && currentQty > 1) {
