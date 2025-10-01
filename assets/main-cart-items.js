@@ -503,15 +503,67 @@ function findVariantForOptions(itemKey, newColor, currentSize) {
 }
 
 /**
+ * Initialize cart quantity inputs with correct values from cart items
+ * This is needed because the quantity-input snippet doesn't have access to item data
+ */
+function initializeCartQuantities() {
+  // Find all quantity input wrappers that have item data
+  const wrappers = document.querySelectorAll('[data-item-key][data-item-quantity]');
+
+  wrappers.forEach((wrapper) => {
+    const itemQuantity = parseInt(wrapper.dataset.itemQuantity);
+    const quantityInput = wrapper.querySelector('.quantity__input');
+
+    if (quantityInput && itemQuantity) {
+      // Set the correct quantity value
+      quantityInput.value = itemQuantity;
+
+      // Disable minus button if quantity is 1
+      const minusButton = wrapper.querySelector('.quantity__button[name="minus"]');
+      if (minusButton) {
+        if (itemQuantity <= 1) {
+          minusButton.disabled = true;
+        } else {
+          minusButton.disabled = false;
+        }
+      }
+    }
+  });
+}
+
+/**
  * Change cart item variant
  * @param {string} itemKey - The current item key
  * @param {string} newVariantId - The new variant ID
  * @returns {Promise} Promise for the cart update
  */
 function changeCartItemVariant(itemKey, newVariantId) {
-  // Get current quantity
-  const qtyInput = document.querySelector(`[data-item-key="${itemKey}"]`);
-  const currentQty = parseInt(qtyInput.value);
+  // Get current quantity - find the wrapper element and then the input within it
+  const wrapper = document.querySelector(`[data-item-key="${itemKey}"]`);
+  let currentQty = 1; // Default fallback
+
+  if (wrapper) {
+    // Try to get quantity from the dataset first (most reliable)
+    const datasetQty = parseInt(wrapper.dataset.itemQuantity);
+    if (!isNaN(datasetQty) && datasetQty > 0) {
+      currentQty = datasetQty;
+    } else {
+      // Fallback: find the quantity input within the wrapper
+      const quantityInput = wrapper.querySelector('.quantity__input');
+      if (quantityInput) {
+        const inputQty = parseInt(quantityInput.value);
+        if (!isNaN(inputQty) && inputQty > 0) {
+          currentQty = inputQty;
+        }
+      }
+    }
+  }
+
+  // Validate quantity and fallback to safe default
+  if (isNaN(currentQty) || currentQty < 1) {
+    console.warn(`Invalid quantity ${currentQty} for item ${itemKey}, using 1`);
+    currentQty = 1;
+  }
 
   // Remove the current item and add the new variant
   return fetch('/cart/change.js', {
@@ -545,8 +597,12 @@ function changeCartItemVariant(itemKey, newVariantId) {
 
 // Event Listeners
 document.addEventListener('DOMContentLoaded', function () {
+  // Initialize quantity inputs with correct values from cart items
+  initializeCartQuantities();
+
   // Quantity controls event listeners
   document.addEventListener('click', function (e) {
+    // Handle legacy quantity buttons
     if (e.target.classList.contains('decrease-qty')) {
       e.preventDefault();
       const itemKey = e.target.dataset.itemKey;
@@ -564,6 +620,67 @@ document.addEventListener('DOMContentLoaded', function () {
       const currentQty = parseInt(input.value);
       console.log('Increasing quantity from', currentQty, 'to', currentQty + 1);
       updateQuantity(itemKey, currentQty + 1);
+    }
+
+    // Handle quantity-input snippet buttons for cart items only
+    if (e.target.classList.contains('quantity__button') || e.target.closest('.quantity__button')) {
+      const button = e.target.classList.contains('quantity__button') ? e.target : e.target.closest('.quantity__button');
+
+      // Check if this button is within a cart context by looking for data-item-key
+      const wrapper = button.closest('[data-item-key]');
+
+      // Only handle this event if we're in a cart context (have itemKey)
+      if (!wrapper) {
+        return; // Not a cart quantity button, let other handlers deal with it
+      }
+
+      // Skip if button is disabled
+      if (button.disabled) {
+        return;
+      }
+
+      // This is a cart quantity button, handle it here
+      e.preventDefault();
+
+      const itemKey = wrapper.dataset.itemKey;
+      const quantityInput = button.closest('quantity-input');
+
+      if (!quantityInput) {
+        console.error('quantity-input element not found');
+        return;
+      }
+
+      const input = quantityInput.querySelector('.quantity__input');
+      if (!input) {
+        console.error('.quantity__input element not found');
+        return;
+      }
+
+      const currentQty = parseInt(input.value);
+      if (isNaN(currentQty) || currentQty < 0) {
+        console.error('Invalid quantity value:', input.value);
+        return;
+      }
+
+      // Determine if this is increment or decrement - check button name attribute
+      const buttonName = button.getAttribute('name');
+
+      if (!buttonName) {
+        console.error('Button name attribute not found');
+        return;
+      }
+
+      const isDecrement = buttonName === 'minus';
+      const isIncrement = buttonName === 'plus';
+
+      // Update cart quantity
+      if (isDecrement && currentQty > 1) {
+        updateQuantity(itemKey, currentQty - 1);
+      } else if (isIncrement) {
+        updateQuantity(itemKey, currentQty + 1);
+      }
+      // Note: If quantity is 1 and user clicks minus, we do nothing (don't remove item)
+      // The remove button should be used for removing items
     }
 
     if (e.target.classList.contains('remove-btn')) {

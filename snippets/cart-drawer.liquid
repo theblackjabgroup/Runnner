@@ -148,7 +148,10 @@
                 onclick="this.closest('cart-drawer').close()"
                 aria-label="{{ 'accessibility.close' | t }}"
               >
-                <span class="svg-wrapper2 drawer__header2 uppercase !translate-x-[-100px]" style="color: var(--text); transform: translateX(calc(-1 * var(--space-8xl)));">
+                <span
+                  class="svg-wrapper2 drawer__header2 uppercase !translate-x-[-100px]"
+                  style="color: var(--text); transform: translateX(calc(-1 * var(--space-8xl)));"
+                >
                   close
                 </span>
               </button>
@@ -229,7 +232,7 @@
                                 class=" "
                                 style="color: var(--text);"
                               >
-                                ${{ item.final_price | money_without_currency }}
+                                {{ item.final_price | money }}
                               </div>
                               <div class="!flex-col !gap-2 ">
                                 <a
@@ -352,58 +355,18 @@
                               style="transform: translateX(calc(-1 * var(--space-3xl)));"
                               role="cell"
                               headers="CartDrawer-ColumnQuantity"
+                              data-item-key="{{ item.key }}"
+                              data-item-quantity="{{ item.quantity }}"
                             >
                               <quantity-popover>
                                 <div class="cart-item__quantity-wrapper quantity-popover-wrapper ">
                                   <div class="quantity-popover-container{% if has_qty_rules or has_vol_pricing %} quantity-popover-container--hover{% endif %}">
-                                    <quantity-input class="quantity cart-quantity  !rounded-lg">
-                                      <button
-                                        class="quantity__button"
-                                        name="minus"
-                                        type="button"
-                                        {% if item.quantity <= 1 %}
-                                          disabled
-                                        {% endif %}
-                                      >
-                                        <span class="visually-hidden">
-                                          {{-
-                                            'products.product.quantity.decrease'
-                                            | t: product: item.product.title
-                                            | escape
-                                          -}}
-                                        </span>
-                                        <span class="svg-wrapper"> - </span>
-                                      </button>
-                                      <input
-                                        class="quantity__input !border-r !border-l "
-                                        type="number"
-                                        data-quantity-variant-id="{{ item.variant.id }}"
-                                        name="updates[]"
-                                        value="{{ item.quantity }}"
-                                        {% # theme-check-disable %}
-                                        data-cart-quantity="{{ cart | item_count_for_variant: item.variant.id }}"
-                                        min="0"
-                                        data-min="{{ item.variant.quantity_rule.min }}"
-                                        {% if item.variant.quantity_rule.max != null %}
-                                          max="{{ item.variant.quantity_rule.max }}"
-                                        {% endif %}
-                                        step="{{ item.variant.quantity_rule.increment }}"
-                                        {% # theme-check-enable %}
-                                        aria-label="{{ 'products.product.quantity.input_label' | t: product: item.product.title | escape }}"
-                                        id="Drawer-quantity-{{ item.index | plus: 1 }}"
-                                        data-index="{{ item.index | plus: 1 }}"
-                                      >
-                                      <button class="quantity__button " name="plus" type="button">
-                                        <span class="visually-hidden">
-                                          {{-
-                                            'products.product.quantity.increase'
-                                            | t: product: item.product.title
-                                            | escape
-                                          -}}
-                                        </span>
-                                        <span class="svg-wrapper"> + </span>
-                                      </button>
-                                    </quantity-input>
+                                    {% render 'quantity-input',
+                                      item: item,
+                                      variant: item.variant,
+                                      mobile: true,
+                                      for_cart: true
+                                    %}
                                   </div>
                                 </div>
                                 {%- if has_qty_rules or has_vol_pricing -%}
@@ -571,7 +534,7 @@
                           <div class="!flex !justify-between !items-start !mb-[auto]">
                             <div class="!flex !flex-col">
                               <div class=" item-price-cart-drawer" style="color: var(--text);">
-                                ${{ item.final_price | money_without_currency }}
+                                {{ item.final_price | money }}
                               </div>
                             </div>
                             <!-- Quantity Controls -->
@@ -579,58 +542,18 @@
                               class="cart-item__quantity {% if has_qty_rules or has_vol_pricing %} cart-item__quantity--info{% endif %}"
                               role="cell"
                               headers="CartDrawer-ColumnQuantity"
+                              data-item-key="{{ item.key }}"
+                              data-item-quantity="{{ item.quantity }}"
                             >
                               <quantity-popover>
                                 <div class="cart-item__quantity-wrapper quantity-popover-wrapper ">
                                   <div class="quantity-popover-container{% if has_qty_rules or has_vol_pricing %} quantity-popover-container--hover{% endif %}">
-                                    <quantity-input class="quantity cart-quantity  !rounded-lg">
-                                      <button
-                                        class="quantity__button"
-                                        name="minus"
-                                        type="button"
-                                        {% if item.quantity <= 1 %}
-                                          disabled
-                                        {% endif %}
-                                      >
-                                        <span class="visually-hidden">
-                                          {{-
-                                            'products.product.quantity.decrease'
-                                            | t: product: item.product.title
-                                            | escape
-                                          -}}
-                                        </span>
-                                        <span class="svg-wrapper"> - </span>
-                                      </button>
-                                      <input
-                                        class="quantity__input !border-r !border-l "
-                                        type="number"
-                                        data-quantity-variant-id="{{ item.variant.id }}"
-                                        name="updates[]"
-                                        value="{{ item.quantity }}"
-                                        {% # theme-check-disable %}
-                                        data-cart-quantity="{{ cart | item_count_for_variant: item.variant.id }}"
-                                        min="0"
-                                        data-min="{{ item.variant.quantity_rule.min }}"
-                                        {% if item.variant.quantity_rule.max != null %}
-                                          max="{{ item.variant.quantity_rule.max }}"
-                                        {% endif %}
-                                        step="{{ item.variant.quantity_rule.increment }}"
-                                        {% # theme-check-enable %}
-                                        aria-label="{{ 'products.product.quantity.input_label' | t: product: item.product.title | escape }}"
-                                        id="Drawer-quantity-{{ item.index | plus: 1 }}"
-                                        data-index="{{ item.index | plus: 1 }}"
-                                      >
-                                      <button class="quantity__button " name="plus" type="button">
-                                        <span class="visually-hidden">
-                                          {{-
-                                            'products.product.quantity.increase'
-                                            | t: product: item.product.title
-                                            | escape
-                                          -}}
-                                        </span>
-                                        <span class="svg-wrapper"> + </span>
-                                      </button>
-                                    </quantity-input>
+                                    {% render 'quantity-input',
+                                      item: item,
+                                      variant: item.variant,
+                                      mobile: false,
+                                      for_cart: true
+                                    %}
                                   </div>
                                 </div>
                                 {%- if has_qty_rules or has_vol_pricing -%}
@@ -870,14 +793,12 @@
 
         <div class="cart-drawer__footer" {{ block.shopify_attributes }}>
           <div
-            class="totals border-t flex justify-between items-center"
+            class="totals  flex justify-between items-center"
             role="status"
-            style="border-color: var(--border); padding: 10px 0;"
+            style=" padding: 0px 0;"
           >
             <h2 class="totals__total !text-normal" style="color: var(--text);">SUBTOTAL</h2>
-            <span class="!font-medium" style="color: var(--text);"
-              >${{ cart.total_price | money_without_currency -}}
-            </span>
+            <span class="!font-medium" style="color: var(--text);">{{ cart.total_price | money -}}</span>
           </div>
 
           <details class="border-t border-b" style="border-color: var(--border);">
