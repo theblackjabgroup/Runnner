@@ -44,7 +44,10 @@
         >
           {% if collections.all.products.size == 0 %}
             {% for i in (1..5) %}
-              <div class="flex-none related-product-item scroll-fade-trigger scroll-fade-up" data-animation-index="{{ forloop.index0 }}">
+              <div
+                class="flex-none related-product-item scroll-fade-trigger scroll-fade-up"
+                data-animation-index="{{ forloop.index0 }}"
+              >
                 <div class="new-product-card" style="width: min(441px, calc(255px + 0.1835 * (100vw - 425px)));">
                   <div class="new-product-image-wrapper">
                     <div class="new-product-images-container">
@@ -69,7 +72,10 @@
             {% endfor %}
           {% else %}
             {% for product in collections.all.products limit: section.settings.products_to_show %}
-              <div class="flex-none related-product-item scroll-fade-trigger scroll-fade-up" data-animation-index="{{ forloop.index0 }}">
+              <div
+                class="flex-none related-product-item scroll-fade-trigger scroll-fade-up"
+                data-animation-index="{{ forloop.index0 }}"
+              >
                 {% render 'new-product-card', product: product, collection: collections.all %}
               </div>
             {% endfor %}
@@ -141,10 +147,6 @@
 {% endif %}
 
 <style>
-  .related-products-page-width ::selection {
-    color: var(--cr-yellow-2) !important;
-  }
-
   .related-products-page-width {
     margin: 0;
     overflow-y: hidden;
@@ -434,7 +436,7 @@
     transition-delay: 0.9s;
   }
   .related-products-grid .related-product-item:nth-child(11) {
-    transition-delay: 1.0s;
+    transition-delay: 1s;
   }
   .related-products-grid .related-product-item:nth-child(12) {
     transition-delay: 1.1s;
@@ -535,7 +537,7 @@
 
 <script>
   // Custom Related Products Fade-Up Animation
-  document.addEventListener('DOMContentLoaded', function() {
+  document.addEventListener('DOMContentLoaded', function () {
     const relatedProductsGrid = document.querySelector('.related-products-grid');
     if (!relatedProductsGrid) return;
 
@@ -549,24 +551,27 @@
     });
 
     // Create intersection observer
-    const observer = new IntersectionObserver((entries) => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          // Trigger fade-up animation
-          entry.target.style.opacity = '1';
-          entry.target.style.transform = 'translateY(0)';
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            // Trigger fade-up animation
+            entry.target.style.opacity = '1';
+            entry.target.style.transform = 'translateY(0)';
 
-          // Stop observing this element
-          observer.unobserve(entry.target);
-        }
-      });
-    }, {
-      rootMargin: '0px 0px -100px 0px',
-      threshold: 0.1
-    });
+            // Stop observing this element
+            observer.unobserve(entry.target);
+          }
+        });
+      },
+      {
+        rootMargin: '0px 0px -100px 0px',
+        threshold: 0.1,
+      }
+    );
 
     // Observe all product cards
-    productCards.forEach(card => {
+    productCards.forEach((card) => {
       observer.observe(card);
     });
   });
