@@ -1,46 +1,54 @@
 {{ 'blog-grid.css' | asset_url | stylesheet_tag }}
 <script src="{{ 'blog-grid.js' | asset_url }}" defer></script>
 
-<section class="color-{{ section.settings.color_scheme }}" style=" padding: {{ settings.sections_spacing }}px {{ settings.side_space}}px;">
+<section
+  class="color-{{ section.settings.color_scheme }}"
+  style=" padding: {{ settings.sections_spacing }}px {{ settings.side_space}}px;"
+>
   <div class="w-full uppercase">
     <div class="divclass flex flex-col md:flex-row md:items-start gap-10">
       <div style="width:20.35vw; margin-right:0.65vw;">
-         <p class="font-medium blog_highlight-tag tracking-tight" style="font-family: var(--font-body-family);margin-bottom:5.5vh; font-size:var(--t-b-2-size); font-weight:var(--t-b-2-weight); line-height:var(--t-b-2-line-height);">{{ section.settings.top_text }}</p>
-        <p class="blog_heading-highlight tracking-tight" style="font-family: var(--font-heading-family); font-size:var(--t-h-3-size); font-weight:var(--t-h-3-weight); line-height:var(--t-h-3-line-height);">
+        <p
+          class="font-medium blog_highlight-tag tracking-tight"
+          style="font-family: var(--font-body-family);margin-bottom:5.5vh; font-size:var(--t-b-2-size); font-weight:var(--t-b-2-weight); line-height:var(--t-b-2-line-height);"
+        >
+          {{ section.settings.top_text }}
+        </p>
+        <p
+          class="blog_heading-highlight tracking-tight"
+          style="font-family: var(--font-heading-family); font-size:var(--t-h-3-size); font-weight:var(--t-h-3-weight); line-height:var(--t-h-3-line-height);"
+        >
           {{ section.settings.main_heading }}
         </p>
       </div>
 
-       {% comment %} <div class="blog-grid w-full " id="blog-posts-container"> {% endcomment %}
-        {% assign default_blog_handle = 'news' %}
-        {% assign blog_handle = section.settings.selected_blog | default: default_blog_handle %}
-        {% assign blog = blogs[blog_handle] %}
-        {% assign articles_limit = section.settings.articles_per_page %}
-        {% assign articles_count = blog.articles.size %}
-        {% comment %} rendering blog design {% endcomment %}
-        {% for article in blog.articles %}
-          {% if forloop.index <= articles_limit %}
-            {% assign article_class = 'blog-article block space-y-2 px-0 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 transition-shadow hover:shadow-lg' %}
-          {% else %}
-            {% assign article_class = 'blog-article hidden-articles block space-y-2 px-0 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 transition-shadow hover:shadow-lg' %}
-          {% endif %}
-          {% render 'article-card',
-             article: article 
-          %} 
-        {% endfor %}
+      {% comment %} <div class="blog-grid w-full " id="blog-posts-container"> {% endcomment %}
+      {% assign default_blog_handle = 'news' %}
+      {% assign blog_handle = section.settings.selected_blog | default: default_blog_handle %}
+      {% assign blog = blogs[blog_handle] %}
+      {% assign articles_limit = section.settings.articles_per_page %}
+      {% assign articles_count = blog.articles.size %}
+      {% comment %} rendering blog design {% endcomment %}
+      {% for article in blog.articles %}
+        {% if forloop.index <= articles_limit %}
+          {% assign article_class = 'blog-article block space-y-2 px-0 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 transition-shadow hover:shadow-lg' %}
+        {% else %}
+          {% assign article_class = 'blog-article hidden-articles block space-y-2 px-0 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 transition-shadow hover:shadow-lg' %}
+        {% endif %}
+        {% render 'article-card', article: article %}
+      {% endfor %}
     </div>
 
     {% assign remaining_articles = articles_count | minus: articles_limit %}
     {% if remaining_articles > 0 %}
-    <div class="load-more-btn-fb-container">
-  <button id="load-more-btn-fb" class="load-more-btn-fb">
-    <span class="load-more-text-container">
-      <span class="load-more-text" style=margin-left:5px;>LOAD MORE &nbsp;</span>
-      <span class="load-more-text-hover">&nbsp;LOAD MORE</span>
-    </span>
-  </button>
-</div>
-
+      <div class="load-more-btn-fb-container">
+        <button id="load-more-btn-fb" class="load-more-btn-fb">
+          <span class="load-more-text-container">
+            <span class="load-more-text" style="margin-left:5px;">LOAD MORE &nbsp;</span>
+            <span class="load-more-text-hover">&nbsp;LOAD MORE</span>
+          </span>
+        </button>
+      </div>
     {% endif %}
   </div>
 </section>
