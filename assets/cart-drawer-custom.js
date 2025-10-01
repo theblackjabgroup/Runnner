@@ -40,25 +40,33 @@ function initializeCartDrawerQuantitiesWithFallback() {
   // Try to initialize immediately
   initializeCartDrawerQuantities();
 
-  // If no wrappers found, retry with exponential backoff
-  let retryCount = 0;
-  const maxRetries = 5;
+  // Check if initialization was successful
+  const wrappers = document.querySelectorAll('[data-item-key][data-item-quantity]');
 
-  function retry() {
-    const wrappers = document.querySelectorAll('[data-item-key][data-item-quantity]');
+  // Only retry if no wrappers were found
+  if (wrappers.length === 0) {
+    let retryCount = 0;
+    const maxRetries = 5;
 
-    if (wrappers.length === 0 && retryCount < maxRetries) {
+    function retry() {
       retryCount++;
       const delay = Math.pow(2, retryCount) * 50; // 100ms, 200ms, 400ms, 800ms, 1600ms
 
       setTimeout(() => {
         initializeCartDrawerQuantities();
-        retry();
+
+        // Check if initialization succeeded
+        const wrappers = document.querySelectorAll('[data-item-key][data-item-quantity]');
+
+        // Only continue retrying if wrappers still not found and retries remaining
+        if (wrappers.length === 0 && retryCount < maxRetries) {
+          retry();
+        }
       }, delay);
     }
-  }
 
-  retry();
+    retry();
+  }
 }
 
 document.addEventListener('DOMContentLoaded', function () {
