@@ -73,12 +73,17 @@ function updateQuantity(itemKey, quantity) {
 
 /**
  * Update cart item quantity by variant ID
+ * @deprecated This function is deprecated and should not be used as it updates ALL line items with the same variant ID
  * @param {string} variantId - The variant ID
  * @param {number} quantity - The new quantity
  */
 function updateQuantityByVariantId(variantId, quantity) {
-  console.log('Updating quantity by variant ID:', variantId, quantity);
+  console.error('DEPRECATED: updateQuantityByVariantId should not be used. Use updateQuantity with itemKey instead.');
+  console.error('Using variant ID will update ALL cart items with this variant, causing incorrect behavior.');
+  console.log('Attempting to update by variant ID (this may affect multiple items):', variantId, quantity);
 
+  // This is fundamentally broken for carts with duplicate variants
+  // Keeping for backwards compatibility but logging errors
   fetch('/cart/change.js', {
     method: 'POST',
     headers: {
@@ -540,6 +545,35 @@ function findVariantForOptions(itemKey, newColor, currentSize) {
 }
 
 /**
+ * Initialize cart quantity inputs with correct values from cart items
+ * This is needed because the quantity-input snippet doesn't have access to item data
+ */
+function initializeCartQuantities() {
+  // Find all quantity input wrappers that have item data
+  const wrappers = document.querySelectorAll('[data-item-key][data-item-quantity]');
+
+  wrappers.forEach((wrapper) => {
+    const itemQuantity = parseInt(wrapper.dataset.itemQuantity);
+    const quantityInput = wrapper.querySelector('.quantity__input');
+
+    if (quantityInput && itemQuantity) {
+      // Set the correct quantity value
+      quantityInput.value = itemQuantity;
+
+      // Disable minus button if quantity is 1
+      const minusButton = wrapper.querySelector('.quantity__button[name="minus"]');
+      if (minusButton) {
+        if (itemQuantity <= 1) {
+          minusButton.disabled = true;
+        } else {
+          minusButton.disabled = false;
+        }
+      }
+    }
+  });
+}
+
+/**
  * Change cart item variant
  * @param {string} itemKey - The current item key
  * @param {string} newVariantId - The new variant ID
@@ -582,6 +616,9 @@ function changeCartItemVariant(itemKey, newVariantId) {
 
 // Event Listeners
 document.addEventListener('DOMContentLoaded', function () {
+  // Initialize quantity inputs with correct values from cart items
+  initializeCartQuantities();
+
   // Quantity controls event listeners
   document.addEventListener('click', function (e) {
     // Handle legacy quantity buttons
@@ -606,18 +643,38 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Handle quantity-input snippet buttons
     if (e.target.classList.contains('quantity__button') || e.target.closest('.quantity__button')) {
+      e.preventDefault(); // Prevent any default button behavior
+
       const button = e.target.classList.contains('quantity__button') ? e.target : e.target.closest('.quantity__button');
       const quantityInput = button.closest('quantity-input');
+
       if (quantityInput) {
         const input = quantityInput.querySelector('.quantity__input');
+
         if (input) {
-          const variantId = input.dataset.quantityVariantId;
           const currentQty = parseInt(input.value);
 
-          if (button.name === 'minus' && currentQty > 1) {
-            updateQuantityByVariantId(variantId, currentQty - 1);
-          } else if (button.name === 'plus') {
-            updateQuantityByVariantId(variantId, currentQty + 1);
+          // Get itemKey from parent wrapper element (cart-item__quantity or quantity-controls)
+          const wrapper = button.closest('[data-item-key]');
+          const itemKey = wrapper ? wrapper.dataset.itemKey : null;
+
+          // Determine if this is increment or decrement based on data-target attribute
+          const targetAttr = button.getAttribute('data-target') || '';
+          const isDecrement = targetAttr.includes('decrement') || button.name === 'minus';
+          const isIncrement = targetAttr.includes('increment') || button.name === 'plus';
+
+          if (itemKey) {
+            // Use itemKey for reliable cart updates that work with duplicate variants
+            if (isDecrement && currentQty > 1) {
+              updateQuantity(itemKey, currentQty - 1);
+            } else if (isIncrement) {
+              updateQuantity(itemKey, currentQty + 1);
+            }
+          } else {
+            // No itemKey found - this is an error state
+            console.error('ERROR: Cannot update cart quantity - itemKey not found on wrapper element');
+            console.error('Make sure the parent wrapper has data-item-key="{{ item.key }}" attribute');
+            alert('Unable to update cart. Please refresh the page and try again.');
           }
         }
       }

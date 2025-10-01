@@ -4,9 +4,41 @@
  */
 
 document.addEventListener('DOMContentLoaded', function () {
+  // Initialize cart drawer quantity inputs with correct values
+  initializeCartDrawerQuantities();
+
   // Order note functionality
   var orderNoteTextarea = document.getElementById('CartDrawer-Note');
   var saveNoteButton = document.getElementById('CartDrawer-SaveNote');
+
+  /**
+   * Initialize cart drawer quantity inputs with correct values from cart items
+   * This is needed because the quantity-input snippet doesn't have access to item data
+   */
+  function initializeCartDrawerQuantities() {
+    // Find all quantity input wrappers that have item data
+    const wrappers = document.querySelectorAll('[data-item-key][data-item-quantity]');
+
+    wrappers.forEach((wrapper) => {
+      const itemQuantity = parseInt(wrapper.dataset.itemQuantity);
+      const quantityInput = wrapper.querySelector('.quantity__input');
+
+      if (quantityInput && itemQuantity) {
+        // Set the correct quantity value
+        quantityInput.value = itemQuantity;
+
+        // Disable minus button if quantity is 1
+        const minusButton = wrapper.querySelector('.quantity__button[name="minus"]');
+        if (minusButton) {
+          if (itemQuantity <= 1) {
+            minusButton.disabled = true;
+          } else {
+            minusButton.disabled = false;
+          }
+        }
+      }
+    });
+  }
 
   // Function to update cart note
   function updateCartNote(note) {
