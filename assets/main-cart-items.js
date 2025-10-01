@@ -538,9 +538,26 @@ function initializeCartQuantities() {
  * @returns {Promise} Promise for the cart update
  */
 function changeCartItemVariant(itemKey, newVariantId) {
-  // Get current quantity - prioritize current input value over stale dataset
-  const quantityInput = document.querySelector(`[data-item-key="${itemKey}"] .quantity__input`);
-  let currentQty = quantityInput ? parseInt(quantityInput.value) : 1;
+  // Get current quantity - find the wrapper element and then the input within it
+  const wrapper = document.querySelector(`[data-item-key="${itemKey}"]`);
+  let currentQty = 1; // Default fallback
+
+  if (wrapper) {
+    // Try to get quantity from the dataset first (most reliable)
+    const datasetQty = parseInt(wrapper.dataset.itemQuantity);
+    if (!isNaN(datasetQty) && datasetQty > 0) {
+      currentQty = datasetQty;
+    } else {
+      // Fallback: find the quantity input within the wrapper
+      const quantityInput = wrapper.querySelector('.quantity__input');
+      if (quantityInput) {
+        const inputQty = parseInt(quantityInput.value);
+        if (!isNaN(inputQty) && inputQty > 0) {
+          currentQty = inputQty;
+        }
+      }
+    }
+  }
 
   // Validate quantity and fallback to safe default
   if (isNaN(currentQty) || currentQty < 1) {
