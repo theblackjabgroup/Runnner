@@ -482,7 +482,7 @@
                   >
                   <input type="hidden" name="quantity" value="1" aria-label="Quantity">
                   <div id="add-to-cart-btn">
-                    {% render 'primary-button',
+                    {% render 'secondary-button',
                       button_text: 'ADD TO CART',
                       button_font_size: 'var(--t-b-1-size)',
                       font_weight: 'var(--t-b-1-weight)',
@@ -490,7 +490,7 @@
                       mobile_font_size: 'var(--tm-b-2-size)',
                       mobile_font_weight: 'var(--tm-b-2-weight)',
                       mobile_line_height: 'var(--tm-b-2-line-height)',
-                      primary_class: 'add-to-cart-primary-btn',
+                      secondary_class: 'add-to-cart-secondary-btn',
                       button_type: 'button',
                       button_width: '370px',
                       button_height: '50px',
@@ -912,7 +912,10 @@
             style="border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); padding: var(--space-2xl) 0;"
             {{ block.shopify_attributes }}
           >
-            <label for="Quantity-{{ product.selected_or_first_available_variant.id }}-mobile" class="uppercase" style="margin-bottom: var(--space-xl);"
+            <label
+              for="Quantity-{{ product.selected_or_first_available_variant.id }}-mobile"
+              class="uppercase"
+              style="margin-bottom: var(--space-xl);"
               >QUANTITY SELECTOR</label
             >
             <div class="flex justify-start">
@@ -1003,7 +1006,7 @@
               >
               <input type="hidden" name="quantity" value="1" aria-label="Quantity">
               <div class="mobile-add-to-cart-btn">
-                {% render 'primary-button',
+                {% render 'secondary-button',
                   button_text: 'ADD TO CART',
                   button_font_size: 'var(--tm-b-2-size)',
                   font_weight: 'var(--tm-b-2-weight)',
@@ -1011,7 +1014,7 @@
                   mobile_font_size: 'var(--tm-b-2-size)',
                   mobile_font_weight: 'var(--tm-b-2-weight)',
                   mobile_line_height: 'var(--tm-b-2-line-height)',
-                  primary_class: 'mobile-add-to-cart-primary-btn',
+                  secondary_class: 'mobile-add-to-cart-secondary-btn',
                   button_type: 'button',
                   button_width: '370px',
                   button_height: '50px',
@@ -1721,10 +1724,10 @@ document.addEventListener('DOMContentLoaded', () => {
       if (!btn || btn.disabled) return; 
       
       btn.disabled = true;
-      const textEl = btn.querySelector('.primary-slide-button-text');
+      const textEl = btn.querySelector('.secondary-slide-button-text');
       if (textEl) {
         originalTexts[index] = textEl.innerHTML;
-        const arrowHTML = textEl.querySelector('.primary-slide-button-arrow')?.outerHTML || '';
+        const arrowHTML = textEl.querySelector('.secondary-slide-button-arrow')?.outerHTML || '';
         textEl.innerHTML = 'ADDING...' + arrowHTML;
       }
     });
@@ -1822,7 +1825,7 @@ document.addEventListener('DOMContentLoaded', () => {
               const btn = container.querySelector('button');
               if (btn) {
                 btn.disabled = false;
-                const textEl = btn.querySelector('.primary-slide-button-text');
+                const textEl = btn.querySelector('.secondary-slide-button-text');
                 if (textEl && originalTexts[index]) {
                   textEl.innerHTML = originalTexts[index];
                 }
@@ -1880,14 +1883,14 @@ document.addEventListener('DOMContentLoaded', () => {
     const buttonContainer = document.querySelector(isMobile ? '.mobile-add-to-cart-btn' : '#add-to-cart-btn');
     const button = buttonContainer ? buttonContainer.querySelector('button') : null;
     const variantIdInput = document.querySelector(isMobile ? '.mobile-variant-id' : '#variant-id');
-    const btnText = button ? button.querySelector('.primary-slide-button-text') : null;
-    const btnTextHover = button ? button.querySelector('.primary-slide-button-text-hover') : null;
+    const btnText = button ? button.querySelector('.secondary-slide-button-text') : null;
+    const btnTextHover = button ? button.querySelector('.secondary-slide-button-text-hover') : null;
 
     if (!button || !variantIdInput) return;
 
     // Store the arrow HTML before updating text
-    const arrowHTML = btnText ? btnText.querySelector('.primary-slide-button-arrow')?.outerHTML || '' : '';
-    const arrowHoverHTML = btnTextHover ? btnTextHover.querySelector('.primary-slide-button-arrow')?.outerHTML || '' : '';
+    const arrowHTML = btnText ? btnText.querySelector('.secondary-slide-button-arrow')?.outerHTML || '' : '';
+    const arrowHoverHTML = btnTextHover ? btnTextHover.querySelector('.secondary-slide-button-arrow')?.outerHTML || '' : '';
 
     if (!variant || !variant.available) {
       button.disabled = true;
@@ -1910,7 +1913,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if (btnTextHover) {
         btnTextHover.innerHTML = 'ADD TO CART' + arrowHoverHTML;
       }
-      // Reset to default primary button styling
+      // Reset to default secondary button styling
       button.style.backgroundColor = '';
       button.style.color = '';
       button.style.borderColor = '';
@@ -2434,18 +2437,6 @@ document.addEventListener('DOMContentLoaded', () => {
       if (selectedBtn) {
         selectedBtn.classList.add('active', 'bg-black', 'text-white');
       }
-    } else {
-      const firstAvailableBtn = Array.from(sizeButtons).find(btn => !btn.disabled);
-      if (firstAvailableBtn) {
-        const initialValue = firstAvailableBtn.getAttribute('data-value');
-        if (mainOptionIndex === sizeIndex) {
-          selectedSize = initialValue;
-          selectedMainOption = initialValue;
-        } else {
-          selectedMainOption = initialValue;
-        }
-        firstAvailableBtn.classList.add('active', 'bg-black', 'text-white');
-      }
     }
   }
 
@@ -2533,6 +2524,71 @@ document.addEventListener('DOMContentLoaded', () => {
     if (currentVariant) {
       showVariantGalleryImage(currentVariant);
     }
+
+    // Ensure first size is selected if no size is currently selected
+    setTimeout(() => {
+      // Check both desktop and mobile size buttons
+      const desktopSizeButtons = document.querySelectorAll('.size-btn[data-desktop]');
+      const mobileSizeButtons = document.querySelectorAll('.size-btn[data-mobile]');
+      
+      // Process desktop buttons
+      if (desktopSizeButtons.length > 0) {
+        const hasSelectedDesktopSize = Array.from(desktopSizeButtons).some(btn => 
+          btn.classList.contains('active') || btn.classList.contains('bg-black')
+        );
+        
+        if (!hasSelectedDesktopSize) {
+          let firstAvailableBtn = Array.from(desktopSizeButtons).find(btn => 
+            btn.getAttribute('data-default-selected') === 'true' && !btn.disabled
+          );
+          
+          if (!firstAvailableBtn) {
+            firstAvailableBtn = Array.from(desktopSizeButtons).find(btn => !btn.disabled);
+          }
+          
+          if (firstAvailableBtn) {
+            const initialValue = firstAvailableBtn.getAttribute('data-value');
+            if (mainOptionIndex === sizeIndex) {
+              selectedSize = initialValue;
+              selectedMainOption = initialValue;
+            } else {
+              selectedMainOption = initialValue;
+            }
+            firstAvailableBtn.classList.add('active', 'bg-black', 'text-white');
+            updateVariant();
+          }
+        }
+      }
+      
+      // Process mobile buttons
+      if (mobileSizeButtons.length > 0) {
+        const hasSelectedMobileSize = Array.from(mobileSizeButtons).some(btn => 
+          btn.classList.contains('active') || btn.classList.contains('bg-black')
+        );
+        
+        if (!hasSelectedMobileSize) {
+          let firstAvailableBtn = Array.from(mobileSizeButtons).find(btn => 
+            btn.getAttribute('data-default-selected') === 'true' && !btn.disabled
+          );
+          
+          if (!firstAvailableBtn) {
+            firstAvailableBtn = Array.from(mobileSizeButtons).find(btn => !btn.disabled);
+          }
+          
+          if (firstAvailableBtn) {
+            const initialValue = firstAvailableBtn.getAttribute('data-value');
+            if (mainOptionIndex === sizeIndex) {
+              selectedSize = initialValue;
+              selectedMainOption = initialValue;
+            } else {
+              selectedMainOption = initialValue;
+            }
+            firstAvailableBtn.classList.add('active', 'bg-black', 'text-white');
+            updateVariant();
+          }
+        }
+      }
+    }, 100);
 
     initializeMobileGallery();
 
