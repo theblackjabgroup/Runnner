@@ -202,8 +202,6 @@ class ProductCard {
   }
 
   addToCart(variantId, quantity) {
-    console.log('Adding to cart:', variantId, quantity);
-
     const formData = {
       items: [
         {
@@ -221,22 +219,18 @@ class ProductCard {
       body: JSON.stringify(formData),
     })
       .then((response) => {
-        console.log('Response status:', response.status);
-
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
 
         const contentType = response.headers.get('content-type');
         if (!contentType || !contentType.includes('application/json')) {
-          console.warn('Response is not JSON, treating as success');
           return { success: true };
         }
 
         return response.json();
       })
       .then((data) => {
-        console.log('Cart add success:', data);
         this.showNotification('Added to cart successfully!', 'success');
         this.updateCartCount();
         this.refreshCartDrawer()
@@ -244,16 +238,12 @@ class ProductCard {
             this.openCartDrawer();
           })
           .catch((error) => {
-            console.error('Cart drawer refresh failed:', error);
             this.updateCartCount();
             this.openCartDrawer();
           });
       })
       .catch((error) => {
-        console.error('Error adding to cart:', error);
-
         if (error.message.includes('Unexpected') || error.message.includes('JSON')) {
-          console.log('Likely JSON parsing error, but cart add may have succeeded');
           setTimeout(() => this.updateCartCount(), 500);
           this.showNotification('Item may have been added - please check cart', 'warning');
           return;
@@ -273,7 +263,6 @@ class ProductCard {
         return response.text();
       })
       .then((responseText) => {
-        console.log('Cart drawer refreshed');
         const html = new DOMParser().parseFromString(responseText, 'text/html');
 
         const cartDrawerElement = document.querySelector('cart-drawer');
@@ -303,7 +292,6 @@ class ProductCard {
         this.updateCartCount();
       })
       .catch((error) => {
-        console.error('Error refreshing cart drawer:', error);
         return this.updateCartCount();
       });
   }
@@ -335,8 +323,6 @@ class ProductCard {
         return res.json();
       })
       .then((cart) => {
-        console.log('Cart updated:', cart);
-
         const cartCountSelectors = [
           '.cart-count',
           '[data-cart-count]',
@@ -371,9 +357,7 @@ class ProductCard {
           })
         );
       })
-      .catch((error) => {
-        console.error('Error updating cart count:', error);
-      });
+      .catch((error) => {});
   }
 
   showNotification(message, type = 'success') {

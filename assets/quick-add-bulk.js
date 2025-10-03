@@ -98,7 +98,6 @@ if (!customElements.get('quick-add-bulk')) {
               resolve();
             })
             .catch((e) => {
-              console.error(e);
               reject(e);
             });
         });

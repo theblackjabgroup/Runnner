@@ -1307,7 +1307,6 @@ document.addEventListener('DOMContentLoaded', () => {
       
       return formatted;
     } catch (error) {
-      console.warn('Shopify money format error, using fallback:', error);
       return formatMoneyFallback(cents);
     }
   }
@@ -1325,7 +1324,6 @@ document.addEventListener('DOMContentLoaded', () => {
         maximumFractionDigits: 2
       }).format(amount);
     } catch (error) {
-      console.warn('Currency formatting error:', error);
       return `$${amount.toFixed(2)}`;
     }
   }
@@ -1523,7 +1521,6 @@ document.addEventListener('DOMContentLoaded', () => {
         return response.text();
       })
       .then((responseText) => {
-        console.log('Cart drawer refreshed');
 
         const html = new DOMParser().parseFromString(responseText, 'text/html');
 
@@ -1564,14 +1561,12 @@ document.addEventListener('DOMContentLoaded', () => {
         initializeCartDrawerEventListeners();
       })
       .catch((error) => {
-        console.error('Error refreshing cart drawer:', error);
         return updateCartCount();
       });
   }
 
   // Function to re-initialize cart drawer event listeners after content refresh
   function initializeCartDrawerEventListeners() {
-    console.log('Re-initializing cart drawer event listeners');
 
     // Re-initialize overlay click handler
     const overlay = document.querySelector('#CartDrawer-Overlay');
@@ -1661,7 +1656,6 @@ document.addEventListener('DOMContentLoaded', () => {
         return res.json();
       })
       .then((cart) => {
-        console.log('Cart updated:', cart);
 
         // Target all possible cart count elements using various common selectors
         const cartCountSelectors = [
@@ -1706,18 +1700,15 @@ document.addEventListener('DOMContentLoaded', () => {
         );
       })
       .catch((error) => {
-        console.error('Error updating cart count:', error);
       });
   }
 
   function addToCart(variantId, quantity) {
     if (!variantId) {
-      console.error('No variant ID provided');
       alert('Please select a valid product variant');
       return;
     }
 
-    console.log('Adding to cart:', variantId, quantity);
 
     // Show loading state
     const buttonContainers = document.querySelectorAll('#add-to-cart-btn, .mobile-add-to-cart-btn');
@@ -1753,8 +1744,6 @@ document.addEventListener('DOMContentLoaded', () => {
       body: JSON.stringify(formData),
     })
       .then((response) => {
-        console.log('Response status:', response.status);
-        console.log('Response headers:', response.headers);
 
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
@@ -1763,14 +1752,12 @@ document.addEventListener('DOMContentLoaded', () => {
         // Check if response is actually JSON
         const contentType = response.headers.get('content-type');
         if (!contentType || !contentType.includes('application/json')) {
-          console.warn('Response is not JSON, treating as success');
           return { success: true };
         }
 
         return response.json();
       })
       .then((data) => {
-        console.log('Cart add success:', data);
 
         // Update cart count immediately
         updateCartCount();
@@ -1780,17 +1767,13 @@ document.addEventListener('DOMContentLoaded', () => {
             openCartDrawer();
           })
           .catch((error) => {
-            console.error('Cart drawer refresh failed:', error);
             updateCartCount();
             openCartDrawer();
           });
       })
       .catch((error) => {
-        console.error('Error adding to cart:', error);
-        console.log('Error type:', error.name, 'Error message:', error.message);
 
         if (error.message.includes('Unexpected') || error.message.includes('JSON')) {
-          console.log('Likely JSON parsing error, but cart add may have succeeded');
 
           setTimeout(() => {
             updateCartCount();

@@ -50,9 +50,7 @@ class CurrencyUpdateHandler {
 
       // Update cart drawer if open
       this.updateCartDrawerPrices(cartData);
-    } catch (error) {
-      console.error('Error updating prices after currency change:', error);
-    }
+    } catch (error) {}
   }
 
   updateCartPrices(cartData) {
@@ -110,9 +108,7 @@ class CurrencyUpdateHandler {
           priceElement.textContent = this.formatMoney(variant.price);
         }
       }
-    } catch (error) {
-      console.error('Error updating product price:', error);
-    }
+    } catch (error) {}
   }
 
   updateCartDrawerPrices(cartData) {

@@ -87,8 +87,6 @@ document.addEventListener('DOMContentLoaded', function () {
     })
       .then((response) => response.json())
       .then((data) => {
-        console.log('Cart note updated successfully');
-
         // Show success feedback
         if (saveNoteButton) {
           const originalText = saveNoteButton.textContent;
@@ -102,8 +100,6 @@ document.addEventListener('DOMContentLoaded', function () {
         }
       })
       .catch((error) => {
-        console.error('Error updating cart note:', error);
-
         // Show error feedback
         if (saveNoteButton) {
           const originalText = saveNoteButton.textContent;
@@ -145,7 +141,6 @@ document.addEventListener('DOMContentLoaded', function () {
 function changeItemColor(element, itemKey, newColor) {
   // Get cart items data from the global variable or fetch it
   if (typeof window.cartItemsData === 'undefined') {
-    console.error('Cart items data not available');
     return;
   }
 
@@ -153,7 +148,6 @@ function changeItemColor(element, itemKey, newColor) {
   const currentItem = window.cartItemsData.find((item) => item.key === itemKey);
 
   if (!currentItem) {
-    console.error('Item not found in cart');
     return;
   }
 
@@ -161,7 +155,6 @@ function changeItemColor(element, itemKey, newColor) {
   const targetVariant = findVariantForOptions(currentItem.product, currentItem.options_with_values, 'color', newColor);
 
   if (!targetVariant) {
-    console.error('No variant found for color:', newColor);
     return;
   }
 
@@ -229,9 +222,7 @@ function changeCartItemVariant(currentItem, newVariant) {
       // Reload the page to reflect changes
       window.location.reload();
     })
-    .catch((error) => {
-      console.error('Error changing item variant:', error);
-    });
+    .catch((error) => {});
 }
 
 /**
@@ -243,14 +234,12 @@ function changeCartItemVariant(currentItem, newVariant) {
 function changeItemSize(element, itemKey, newSize) {
   // Get cart items data
   if (typeof window.cartItemsData === 'undefined') {
-    console.error('Cart items data not available');
     return;
   }
 
   const currentItem = window.cartItemsData.find((item) => item.key === itemKey);
 
   if (!currentItem) {
-    console.error('Item not found in cart');
     return;
   }
 
@@ -258,7 +247,6 @@ function changeItemSize(element, itemKey, newSize) {
   const targetVariant = findVariantForOptions(currentItem.product, currentItem.options_with_values, 'size', newSize);
 
   if (!targetVariant) {
-    console.error('No variant found for size:', newSize);
     return;
   }
 
