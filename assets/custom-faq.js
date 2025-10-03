@@ -31,9 +31,6 @@ document.addEventListener('DOMContentLoaded', () => {
       const currentText = container.textContent.replace(/^\s*\S+\s*/, '').trim();
       fullAnswerText = currentText.replace(/…$/, '');
       if (currentText.includes('…') || currentText.includes('...')) {
-        console.warn(
-          `FAQ item ${index}: Full answer text not available. Please add data-full-answer attribute to the container div.`
-        );
         fullAnswerText = currentText;
       }
     }
