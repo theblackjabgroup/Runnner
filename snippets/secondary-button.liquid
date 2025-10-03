@@ -1,119 +1,266 @@
 {% comment %}
-  Renders a secondary button with hover effects and icon
-
-  Accepts:
-  - button_text: {String} Text to display in the button
-  - button_id: {String} Optional ID for the button text span
-  - button_type: {String} Button type (default: 'submit')
-  - button_classes: {String} Additional CSS classes for the button
-  - icon_rotation: {String} Initial rotation for the icon (default: '-90deg')
-  - button_width: {String} Custom width for the button (e.g., '300px', '50vh', '20rem', 'auto')
-  - button_width_mobile: {String} Custom width for the button on mobile (optional, falls back to button_width)
+  Secondary Button with Sliding Text Animation
 
   Usage:
-  {% render 'secondary-button', button_text: 'Subscribe', button_id: 'buttonText-password', button_width: '400px' %}
-  {% render 'secondary-button', button_text: 'Subscribe', button_width: '50vh', button_width_mobile: '80vw' %}
+  {% render 'secondary-button',
+    button_text: 'Click Me',
+    button_url: '/collection/all',
+    button_font_size: '24px',
+    font_weight: 500,
+    button_line_height: 1.3,
+    mobile_font_size: '16px',
+    mobile_font_weight: 400,
+    mobile_line_height: 1.3,
+    secondary_class: 'my-secondary-button',
+    button_type: 'button',
+    data_attributes: 'data-increment="6"'
+  %}
+
+  Parameters:
+  - button_text: String - The text to display on the button
+  - button_url: String - The URL the button should link to (if provided, renders as <a>, otherwise as <button>)
+  - button_font_size: String - Font size in pixels (default: 24)
+  - font_weight: Number - Font weight (default: 500)
+  - button_line_height: Number - Line height (default: 1.3)
+  - mobile_font_size: String - Mobile font size in pixels (default: 16)
+  - mobile_font_weight: Number - Mobile font weight (default: 400)
+  - mobile_line_height: Number - Mobile line height (default: 1.3)
+  - secondary_class: String - Additional CSS class for styling
+  - button_type: String - Button type when rendered as button (default: 'button')
+  - data_attributes: String - Additional data attributes (e.g., 'data-increment="6" data-action="load-more"')
+  - button_width: String - Custom button width (e.g., '370px')
+  - button_height: String - Custom button height (e.g., '50px')
+  - mobile_button_width: String - Custom mobile button width (e.g., '95vw')
 {% endcomment %}
 
-{%- assign button_type = button_type | default: 'submit' -%}
-{%- assign icon_rotation = icon_rotation | default: '-90deg' -%}
-{%- assign button_classes = button_classes | default: '' -%}
-{%- assign default_width = '265px' -%}
-{%- assign default_width_mobile = '182px' -%}
-{%- assign custom_width = button_width | default: default_width -%}
-{%- assign custom_width_mobile = button_width_mobile | default: button_width | default: default_width_mobile -%}
+{%- assign button_text = button_text | default: 'Button' -%}
+{%- assign button_url = button_url | default: '' -%}
+{%- assign button_font_size = button_font_size | default: '24px' -%}
+{%- assign font_weight = font_weight | default: 500 -%}
+{%- assign button_line_height = button_line_height | default: 1.3 -%}
+{%- assign mobile_font_size = mobile_font_size | default: '16px' -%}
+{%- assign mobile_font_weight = mobile_font_weight | default: 400 -%}
+{%- assign mobile_line_height = mobile_line_height | default: 1.3 -%}
+{%- assign secondary_class = secondary_class | default: '' -%}
+{%- assign button_type = button_type | default: 'button' -%}
+{%- assign data_attributes = data_attributes | default: '' -%}
+{%- assign button_width = button_width | default: '' -%}
+{%- assign button_height = button_height | default: '' -%}
+{%- assign mobile_button_width = mobile_button_width | default: '' -%}
 
-<button
-  type="{{ button_type }}"
-  class="secondary-button {{ button_classes }}"
-  style="{% if button_width %}--custom-width: {{ custom_width }};{% endif %}{% if button_width_mobile or button_width %}--custom-width-mobile: {{ custom_width_mobile }};{% endif %}"
->
-  <svg
-    fill="none"
-    width="24"
-    height="24"
-    viewBox="5 8 14 8"
-    style="transform: rotate({{ icon_rotation }}); transform-origin: center; transform-box: fill-box;"
-    class="rotate-arrow"
-  >
-    <path d="M6 9L12 15L18 9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-  </svg>
-  <span
-    {% if button_id %}
-      id="{{ button_id }}"
-    {% endif %}
-  >
-    {{- button_text -}}
-  </span>
-</button>
+{%- comment -%} Check if we should render as anchor or button {%- endcomment -%}
+{%- assign render_as_anchor = false -%}
+{%- if button_url != blank and button_url != '#' and button_url != '' -%}
+  {%- assign render_as_anchor = true -%}
+{%- endif -%}
 
 <style>
-  .secondary-button {
-    font-weight: var(--font-heading-weight);
-    font-size: 32px;
+  .secondary-slide-button {
+    position: relative;
+    display: inline-block;
+    padding: 0px;
+    border: {{ settings.buttons_border_thickness | default: 1 }}px solid var(--secondary_button_text_color);
     color: var(--secondary_button_text_color);
     background-color: var(--secondary_button_label);
-    border-radius: 4px;
-    padding: 5px 10px;
-    line-height: 1;
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    transition: color 1.5s ease;
-    gap: 20px;
-    border: {{ settings.buttons_border_thickness }}px solid var(--secondary_button_label);
-    transition: border 0.6s ease, background-color 0.6s ease, color 0.6s ease;
-    position: relative;
+    border-radius: {{ settings.buttons_radius | default: 0 }}px;
     overflow: hidden;
-    width: var(--custom-width, 265px);
+    transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+    text-decoration: none;
     cursor: pointer;
+    width: 360px;
+    {% if button_width != blank %}width: {{ button_width }};{% endif %}
+    {% if button_height != blank %}height: {{ button_height }};{% endif %}
   }
 
-  .secondary-button::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: -100%;
+  .secondary-slide-button:hover,
+  .secondary-slide-button:focus {
+    background-color: var(--hovered_secondary_button_label);
+    color: var(--hovered_secondary_button_text_color);
+    border-color: var(--hovered_secondary_button_text_color);
+    outline: none;
+    text-decoration: none;
+  }
+
+  .secondary-slide-button-text-container {
+    position: relative;
     width: 100%;
     height: 100%;
-    background: var(--hovered_secondary_button_label);
-    transition: left 0.6s ease;
-    z-index: 0;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
 
-  .secondary-button:hover::before {
+  .secondary-slide-button-text {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    line-height: 1;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    transition: transform 0.6s ease-in-out;
+    width: 100%;
+    height: 100%;
+    padding: 0 10px;
+  }
+
+  .secondary-slide-button:hover .secondary-slide-button-text,
+  .secondary-slide-button:focus .secondary-slide-button-text {
+    transform: translateX(-100%);
+  }
+
+  .secondary-slide-button-text-hover {
+    position: absolute;
+    top: 0;
     left: 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    line-height: 1;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    transform: translateX(100%);
+    transition: transform 0.6s ease-in-out;
+    width: 100%;
+    height: 100%;
+    padding: 0 10px;
   }
 
-  .secondary-button > * {
-    position: relative;
-    z-index: 1;
+  .secondary-slide-button:hover .secondary-slide-button-text-hover,
+  .secondary-slide-button:focus .secondary-slide-button-text-hover {
+    transform: translateX(0);
   }
 
-  .secondary-button:hover {
-    color: var(--hovered_secondary_button_text_color);
-    border: {{ settings.buttons_border_thickness }}px solid var(--hovered_secondary_button_text_color);
+  .secondary-slide-button:not(:hover):not(:focus) .secondary-slide-button-text,
+  .secondary-slide-button:not(:hover):not(:focus) .secondary-slide-button-text-hover {
+    transition: none;
   }
 
-  .rotate-arrow {
-    stroke-linecap: round;
-    transition: transform 0.3s ease;
-    transform-origin: center;
-    color: inherit;
+  .secondary-slide-button-arrow {
+    display: inline-block;
   }
 
-  @media (max-width: 768px) {
-    .secondary-button {
-      font-size: 2.4rem;
-      width: var(--custom-width-mobile, 182px); /* Use custom mobile width or fallback to 182px */
-      height: 28px; /* Fixed height to 28px */
-      padding: 2px 5px;
-      letter-spacing: -0.02em; /* Reduced letter spacing */
+  .secondary-slide-button-arrow svg {
+    width: 16px;
+    height: 16px;
+    transition: transform 0.2s ease;
+    display: block;
+    fill: currentColor;
+    margin-left: 15px;
+  }
+
+  @media screen and (max-width: 750px) {
+    .secondary-slide-button-text,
+    .secondary-slide-button-text-hover {
+      font-size: {{ mobile_font_size }} !important;
+      font-weight: {{ mobile_font_weight }} !important;
+      line-height: {{ mobile_line_height }} !important;
     }
 
-    .rotate-arrow {
-      width: 16px;
-      height: 16px;
+    .secondary-slide-button{
+      padding: 1px 5px;
+      width: 95vw !important;
+      {% if mobile_button_width != blank %}width: {{ mobile_button_width }} !important;{% endif %}
+    }
+
+    .secondary-slide-button-arrow svg {
+      width: 14px;
+      height: 14px;
     }
   }
 </style>
+
+{% if render_as_anchor %}
+  <a
+    href="{{ button_url }}"
+    class="secondary-slide-button {{ secondary_class }}"
+    aria-label="{{ button_text | escape }}"
+    role="button"
+    tabindex="0"
+  >
+    <div class="secondary-slide-button-text-container">
+      <div
+        class="secondary-slide-button-text"
+        style="font-size: {{ button_font_size }}; font-weight: {{ font_weight }}; line-height: {{ button_line_height }}; font-style: var(--font-body-style); font-family: var(--font-body-family);"
+      >
+        {{ button_text | escape }}
+        <span class="secondary-slide-button-arrow" aria-hidden="true">
+          <svg
+            width="16"
+            height="16"
+            viewBox="4.5 1.5 8.5 13"
+            fill="currentColor"
+            xmlns="http://www.w3.org/2000/svg"
+            stroke="currentColor"
+          >
+            <path d="m12.14 8.753-5.482 4.796c-.646.566-1.658.106-1.658-.753V3.204a1 1 0 0 1 1.659-.753l5.48 4.796a1 1 0 0 1 0 1.506z"/>
+          </svg>
+        </span>
+      </div>
+      <div
+        class="secondary-slide-button-text-hover"
+        style="font-size: {{ button_font_size }}; font-weight: {{ font_weight }}; line-height: {{ button_line_height }}; font-style: var(--font-body-style); font-family: var(--font-body-family);"
+      >
+        {{ button_text | escape }}
+        <span class="secondary-slide-button-arrow" aria-hidden="true">
+          <svg
+            width="16"
+            height="16"
+            viewBox="4.5 1.5 8.5 13"
+            fill="currentColor"
+            xmlns="http://www.w3.org/2000/svg"
+            stroke="currentColor"
+          >
+            <path d="m12.14 8.753-5.482 4.796c-.646.566-1.658.106-1.658-.753V3.204a1 1 0 0 1 1.659-.753l5.48 4.796a1 1 0 0 1 0 1.506z"/>
+          </svg>
+        </span>
+      </div>
+    </div>
+  </a>
+{% else %}
+  <button
+    type="{{ button_type }}"
+    class="secondary-slide-button {{ secondary_class }}"
+    aria-label="{{ button_text | escape }}"
+    {{ data_attributes }}
+  >
+    <div class="secondary-slide-button-text-container">
+      <div
+        class="secondary-slide-button-text"
+        style="font-size: {{ button_font_size }}; font-weight: {{ font_weight }}; line-height: {{ button_line_height }}; font-style: var(--font-body-style); font-family: var(--font-body-family);"
+      >
+        {{ button_text | escape }}
+        <span class="secondary-slide-button-arrow" aria-hidden="true">
+          <svg
+            width="16"
+            height="16"
+            viewBox="4.5 1.5 8.5 13"
+            fill="currentColor"
+            xmlns="http://www.w3.org/2000/svg"
+            stroke="currentColor"
+          >
+            <path d="m12.14 8.753-5.482 4.796c-.646.566-1.658.106-1.658-.753V3.204a1 1 0 0 1 1.659-.753l5.48 4.796a1 1 0 0 1 0 1.506z"/>
+          </svg>
+        </span>
+      </div>
+      <div
+        class="secondary-slide-button-text-hover"
+        style="font-size: {{ button_font_size }}; font-weight: {{ font_weight }}; line-height: {{ button_line_height }}; font-style: var(--font-body-style); font-family: var(--font-body-family);"
+      >
+        {{ button_text | escape }}
+        <span class="secondary-slide-button-arrow" aria-hidden="true">
+          <svg
+            width="16"
+            height="16"
+            viewBox="4.5 1.5 8.5 13"
+            fill="currentColor"
+            xmlns="http://www.w3.org/2000/svg"
+            stroke="currentColor"
+          >
+            <path d="m12.14 8.753-5.482 4.796c-.646.566-1.658.106-1.658-.753V3.204a1 1 0 0 1 1.659-.753l5.48 4.796a1 1 0 0 1 0 1.506z"/>
+          </svg>
+        </span>
+      </div>
+    </div>
+  </button>
+{% endif %}
