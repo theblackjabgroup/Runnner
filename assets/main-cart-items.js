@@ -31,7 +31,6 @@ function toggleSection(header) {
  */
 function closeCart() {
   // Add your close cart logic here
-  console.log('Close cart');
 }
 
 /**
@@ -40,8 +39,6 @@ function closeCart() {
  * @param {number} quantity - The new quantity
  */
 function updateQuantity(itemKey, quantity) {
-  console.log('Updating quantity:', itemKey, quantity);
-
   fetch('/cart/change.js', {
     method: 'POST',
     headers: {
@@ -54,18 +51,15 @@ function updateQuantity(itemKey, quantity) {
     }),
   })
     .then((response) => {
-      console.log('Response status:', response.status);
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
       return response.json();
     })
     .then((data) => {
-      console.log('Cart data received:', data);
       updateCartDisplay(data);
     })
     .catch((error) => {
-      console.error('Error updating cart:', error);
       // Optionally reload the page if cart update fails
       // window.location.reload();
     });
@@ -254,7 +248,6 @@ function getShippingRates(zipCode) {
         if (!response.ok) {
           // If the modern API fails, try alternative approach
           if (response.status === 422) {
-            console.log('Modern API failed, trying alternative approach...');
             return getShippingRatesAlternative(zipCode);
           }
           throw new Error(`HTTP error! status: ${response.status}`);
@@ -269,7 +262,6 @@ function getShippingRates(zipCode) {
         }
       })
       .catch((error) => {
-        console.error('Error fetching shipping rates:', error);
         // Try alternative approach as fallback
         getShippingRatesAlternative(zipCode).then(resolve).catch(reject);
       });
@@ -310,7 +302,6 @@ function getShippingRatesAlternative(zipCode) {
       .then((response) => response.json())
       .then((data) => {
         // If this approach doesn't work, provide mock data for testing
-        console.log('Alternative API response:', data);
 
         // Provide mock shipping rates for testing
         const mockRates = [
@@ -322,7 +313,6 @@ function getShippingRatesAlternative(zipCode) {
         resolve(mockRates);
       })
       .catch((error) => {
-        console.error('Alternative API also failed:', error);
         reject(new Error('Unable to calculate shipping rates. Please try again later.'));
       });
   });
@@ -413,7 +403,6 @@ async function updateCartNote(note, button) {
 
     if (response.ok) {
       const data = await response.json();
-      console.log('Cart note updated successfully');
 
       // Show success feedback
       if (button) {
@@ -430,8 +419,6 @@ async function updateCartNote(note, button) {
       throw new Error('Failed to update cart note');
     }
   } catch (error) {
-    console.error('Error updating cart note:', error);
-
     // Show error feedback
     if (button) {
       const originalText = button.textContent;
@@ -456,8 +443,6 @@ function changeItemColor(colorPicker) {
   const currentSize = colorPicker.dataset.currentSize;
   const newVariantId = colorPicker.dataset.variantId;
 
-  console.log('Changing color:', { itemKey, newColor, currentSize, newVariantId });
-
   // First, find the correct variant for the new color and current size
   findVariantForOptions(itemKey, newColor, currentSize)
     .then((targetVariantId) => {
@@ -473,7 +458,6 @@ function changeItemColor(colorPicker) {
       window.location.reload();
     })
     .catch((error) => {
-      console.error('Error changing item color:', error);
       alert('Unable to change color. Please try again.');
     });
 }
@@ -561,7 +545,6 @@ function changeCartItemVariant(itemKey, newVariantId) {
 
   // Validate quantity and fallback to safe default
   if (isNaN(currentQty) || currentQty < 1) {
-    console.warn(`Invalid quantity ${currentQty} for item ${itemKey}, using 1`);
     currentQty = 1;
   }
 
@@ -618,7 +601,6 @@ document.addEventListener('DOMContentLoaded', function () {
       const itemKey = e.target.dataset.itemKey;
       const input = document.querySelector(`input[data-item-key="${itemKey}"]`);
       const currentQty = parseInt(input.value);
-      console.log('Increasing quantity from', currentQty, 'to', currentQty + 1);
       updateQuantity(itemKey, currentQty + 1);
     }
 
@@ -646,19 +628,16 @@ document.addEventListener('DOMContentLoaded', function () {
       const quantityInput = button.closest('quantity-input');
 
       if (!quantityInput) {
-        console.error('quantity-input element not found');
         return;
       }
 
       const input = quantityInput.querySelector('.quantity__input');
       if (!input) {
-        console.error('.quantity__input element not found');
         return;
       }
 
       const currentQty = parseInt(input.value);
       if (isNaN(currentQty) || currentQty < 0) {
-        console.error('Invalid quantity value:', input.value);
         return;
       }
 
@@ -666,7 +645,6 @@ document.addEventListener('DOMContentLoaded', function () {
       const buttonName = button.getAttribute('name');
 
       if (!buttonName) {
-        console.error('Button name attribute not found');
         return;
       }
 
@@ -693,7 +671,6 @@ document.addEventListener('DOMContentLoaded', function () {
   // Form submissions
   document.addEventListener('submit', function (e) {
     e.preventDefault();
-    console.log('Form submitted:', e.target);
 
     // Handle shipping estimate form
     if (e.target.id === 'shipping-estimate-form') {

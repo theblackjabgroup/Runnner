@@ -88,7 +88,6 @@ class CartDrawerColorSwatch {
       // Update color swatch selection
       this.updateColorSwatchSelection(cartItem, selectedColor);
     } catch (error) {
-      console.error('Error updating cart item variant:', error);
       this.showError(cartItem, 'Failed to update color selection');
     }
   }

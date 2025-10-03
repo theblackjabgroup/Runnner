@@ -189,9 +189,7 @@ if (!customElements.get('quick-order-list')) {
             this.innerHTML = responseQuickOrderList.innerHTML;
             this.initEventListeners();
           })
-          .catch((e) => {
-            console.error(e);
-          });
+          .catch((e) => {});
       }
 
       renderSections(parsedState) {
@@ -349,7 +347,6 @@ if (!customElements.get('quick-order-list')) {
             });
           })
           .catch((e) => {
-            console.error(e);
             this.setErrorMessage(window.cartStrings.error);
           })
           .finally(() => {

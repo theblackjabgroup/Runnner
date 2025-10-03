@@ -1,5 +1,30 @@
 <link rel="stylesheet" href="{{ 'section-blog-post.css' | asset_url }}">
 <script src="{{ 'main-article.js' | asset_url }}" defer></script>
+
+<style>
+/* Main Article Fade-Up Animation */
+.article-content-animated {
+  opacity: 0;
+  transform: translateY(50px);
+  transition: opacity 0.8s ease, transform 0.8s ease;
+}
+
+.article-content-animated.animate {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.related-articles-animated {
+  opacity: 0;
+  transform: translateY(50px);
+  transition: opacity 0.8s ease, transform 0.8s ease;
+}
+
+.related-articles-animated.animate {
+  opacity: 1;
+  transform: translateY(0);
+}
+</style>
 <section
   id="parallax-section"
   class="section1 color-{{ section.settings.color_scheme }} relative overflow-hidden items-start"
@@ -30,7 +55,7 @@
 </div>
 </section>
 <div
-  class="blog-article-container color-{{ section.settings.color_scheme }} {% unless article.image %}no-image{% endunless %}"
+  class="blog-article-container color-{{ section.settings.color_scheme }} {% unless article.image %}no-image{% endunless %} article-content-animated"
   style="padding-left:{{ settings.side_space}}px; padding-right:{{ settings.side_space }}px; "
 >
   {% if section.settings.show_blog_section %}
@@ -57,8 +82,21 @@
     </div>
 
    <div class="maintext flex flex-row" style="margin-top:50px;font-size:2.6vh;">
-      {% render 'icon-playback', viewBox: '0 0 15 15', class: 'arrow-svg12',
-      stroke-width: '1.5', stroke-linecap: "round", stroke-linejoin: "round",  style: 'fill:var(--text); margin-top:1px; height: 23px ; width: 30px;' %}    
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        class="arrow-svg12"
+        viewBox="0 0 15 15"
+        stroke-width="1.5"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        style="fill:var(--text);
+        margin-top:1px;
+  height: 23px ;
+  width: 30px;"
+      >
+         <path d="m12.14 8.753-5.482 4.796c-.646.566-1.658.106-1.658-.753V3.204a1 1 0 0 1 1.659-.753l5.48 4.796a1 1 0 0 1 0 1.506z"/>
+      </svg>
+
       <div
   class="blog-article-section color-{{ section.settings.color_scheme }}"
   style="font-family: var(--font-body-family);margin-left: auto; margin-right: auto; font-size:var(--t-b-2-size); font-weight:var(--t-b-2-weight); line-height:var(--t-b-2-line-height);width:1000px;"
@@ -101,7 +139,7 @@
   </div>
 </div>
 <hr class="hrline1 w-screen max-w-none mx-auto" style="border-top: 1px solid var(--text);margin:0px;margin-left:{{ settings.side_space}}px; margin-right:{{ settings.side_space }}px;">
-<div class="colordiv color-{{ section.settings.color_scheme }}" style="padding-left:{{ settings.side_space}}px; padding-right:{{ settings.side_space }}px; padding-bottom: {{ section.settings.related_padding_desktop | default: 50 }}px;">
+<div class="colordiv color-{{ section.settings.color_scheme }} related-articles-animated" style="padding-left:{{ settings.side_space}}px; padding-right:{{ settings.side_space }}px; padding-bottom: {{ section.settings.related_padding_desktop | default: 50 }}px;">
   <div class="w-full uppercase">
     <div class="mainhead flex flex-col md:flex-row md:items-start" style="margin-top:6.9vh;">
       <div style="width:26vw; margin-right:0.65vw;">
@@ -138,8 +176,17 @@
                   {{ article.published_at | date: "%m.%d.%y" }}
                 </p>
                 <div class="subclass-header" id="article-title-{{ forloop.index0 }}" style="font-family: var(--font-heading-family);font-size:var(--t-h-4-size); font-weight:var(--t-h-4-weight); line-height:var(--t-h-4-line-height);">
-                    {% render 'icon-playback', fill: 'var(--text)', viewBox: '5.5 2 8.5 13', class: 'arrow-svgsubw-8 object-contain inline-block',
-                    stroke: 'var(--text)', style: 'height:22px; margin-top:-8px; margin-right:-4px;' %}                       
+                   <svg
+                      class=" arrow-svgsubw-8 object-contain inline-block"
+                      style="height:22px; margin-top:-8px; margin-right:-4px;"
+                      viewBox="5.5 2 8.5 13"
+                      fill="var(--text)"
+                      xmlns="http://www.w3.org/2000/svg"
+                      stroke="var(--text)"
+                      aria-hidden="true"
+                    >
+                      <path d="m12.14 8.753-5.482 4.796c-.646.566-1.658.106-1.658-.753V3.204a1 1 0 0 1 1.659-.753l5.48 4.796a1 1 0 0 1 0 1.506z"/>
+                    </svg>
                   {{ article.title }}
                   </div>
                 <span class="subclass-subheader text-[20px] tracking-tight" style="font-family: var(--font-body-family);font-size:var(--t-b-2-size); font-weight:var(--t-b-2-weight); line-height:var(--t-b-2-line-height);">
@@ -153,6 +200,42 @@
     </div>
     </div>
   </div>
+<script>
+  // Main Article Fade-Up Animation
+  document.addEventListener('DOMContentLoaded', function() {
+    const animatedElements = document.querySelectorAll('.article-content-animated, .related-articles-animated');
+    
+    // Set initial state for all elements
+    animatedElements.forEach((element, index) => {
+      element.style.opacity = '0';
+      element.style.transform = 'translateY(50px)';
+      element.style.transition = `opacity 0.8s ease ${index * 0.2}s, transform 0.8s ease ${index * 0.2}s`;
+    });
+
+    // Create intersection observer
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          // Trigger fade-up animation
+          entry.target.style.opacity = '1';
+          entry.target.style.transform = 'translateY(0)';
+
+          // Stop observing this element
+          observer.unobserve(entry.target);
+        }
+      });
+    }, {
+      rootMargin: '0px 0px -100px 0px',
+      threshold: 0.1
+    });
+
+    // Observe all animated elements
+    animatedElements.forEach(element => {
+      observer.observe(element);
+    });
+  });
+</script>
+
 <script type="application/ld+json">
   {{ article | structured_data }}
 </script>

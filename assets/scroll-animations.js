@@ -102,7 +102,6 @@ class ScrollAnimations {
       // Add debug info if enabled
       if (this.options.debugMode) {
         element.dataset.animationIndex = index;
-        console.log(`Observing element ${index}:`, element);
       }
 
       this.observer.observe(element);
@@ -145,7 +144,7 @@ class ScrollAnimations {
     element.dispatchEvent(
       new CustomEvent('scrollAnimationStart', {
         detail: { element },
-      }),
+      })
     );
 
     // Clean up after animation completes
@@ -154,7 +153,7 @@ class ScrollAnimations {
       element.dispatchEvent(
         new CustomEvent('scrollAnimationComplete', {
           detail: { element },
-        }),
+        })
       );
     }, duration);
   }
@@ -254,7 +253,6 @@ class ScrollAnimations {
   enableDebug() {
     this.options.debugMode = true;
     document.documentElement.classList.add('scroll-animations-debug');
-    console.log('Scroll animations debug mode enabled');
   }
 
   /**
@@ -330,7 +328,7 @@ class ProductGridAnimations extends ScrollAnimations {
     element.dispatchEvent(
       new CustomEvent('scrollAnimationStart', {
         detail: { element },
-      }),
+      })
     );
   }
 }
@@ -396,7 +394,7 @@ function initScrollAnimations() {
         const hasProductCards = Array.from(mutation.addedNodes).some(
           (node) =>
             node.nodeType === 1 &&
-            (node.classList?.contains('product-card-item') || node.querySelector?.('.product-card-item')),
+            (node.classList?.contains('product-card-item') || node.querySelector?.('.product-card-item'))
         );
 
         if (hasProductCards && window.productGridAnimations) {
@@ -448,7 +446,7 @@ if (window.Shopify && window.Shopify.designMode) {
     // Clean up any animations in the unloaded section
     const section = event.target;
     const animatedElements = section.querySelectorAll(
-      '.scroll-fade-trigger, .scroll-slide-trigger, .product-card-item',
+      '.scroll-fade-trigger, .scroll-slide-trigger, .product-card-item'
     );
     animatedElements.forEach((element) => {
       if (window.scrollAnimations && window.scrollAnimations.observer) {
@@ -474,8 +472,3 @@ window.ScrollAnimationUtils = {
   ScrollAnimations,
   ProductGridAnimations,
 };
-
-// Console helper for debugging
-if (typeof console !== 'undefined') {
-  console.log('🎬 Scroll Animations loaded. Use ?debug=animations to enable debug mode.');
-}

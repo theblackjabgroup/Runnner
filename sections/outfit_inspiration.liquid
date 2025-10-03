@@ -142,7 +142,12 @@
                                 data-product-id="{{ paired_product.id }}"
                                 data-section-id="{{ section.id }}"
                               >
-                                {% render 'icon-playback', class: 'bi bi-caret-right-fill outfit-expand-product-btn-svg', width: '16', height: '16', fill: "currentColor" %}
+                                {% render 'icon-playback',
+                                  class: 'bi bi-caret-right-fill outfit-expand-product-btn-svg',
+                                  width: '16',
+                                  height: '16',
+                                  fill: 'currentColor'
+                                %}
                               </button>
                             </div>
                           </div>
@@ -183,7 +188,13 @@
                                     data-product-id="{{ paired_product.id }}"
                                     data-section-id="{{ section.id }}"
                                   >
-                                  {% render 'icon-playback', class: 'bi bi-caret-right-fill', width: '16', height: '16', fill: "currentColor", style: "transform: rotate(90deg);" %}
+                                    {% render 'icon-playback',
+                                      class: 'bi bi-caret-right-fill',
+                                      width: '16',
+                                      height: '16',
+                                      fill: 'currentColor',
+                                      style: 'transform: rotate(90deg);'
+                                    %}
                                   </button>
                                 </div>
 
@@ -1073,13 +1084,9 @@
         if (prevMobile) prevMobile.style.display = 'none';
         if (nextMobile) nextMobile.style.display = 'none';
       }
-
-      console.log(`Outfit section ${sectionId} - Total slides found:`, slides.length);
     });
 
     function addToCart(variantId, quantity) {
-      console.log('Adding to cart:', variantId, quantity);
-
       const formData = {
         items: [
           {
@@ -1097,8 +1104,6 @@
         body: JSON.stringify(formData),
       })
         .then((response) => {
-          console.log('Response status:', response.status); // Debug log
-
           if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
           }
@@ -1106,7 +1111,6 @@
           // Check if response is actually JSON
           const contentType = response.headers.get('content-type');
           if (!contentType || !contentType.includes('application/json')) {
-            console.warn('Response is not JSON, treating as success');
             // If it's not JSON but status is OK, treat as success
             return { success: true };
           }
@@ -1114,8 +1118,6 @@
           return response.json();
         })
         .then((data) => {
-          console.log('Cart add success:', data); // Debug log
-
           // Update cart count immediately
           updateCartCount();
 
@@ -1125,19 +1127,14 @@
               openCartDrawer();
             })
             .catch((error) => {
-              console.error('Cart drawer refresh failed:', error);
               // Fallback: just update count and open
               updateCartCount();
               openCartDrawer();
             });
         })
         .catch((error) => {
-          console.error('Error adding to cart:', error);
-
           // Check if the error is likely a parsing issue rather than an actual cart error
           if (error.message.includes('Unexpected') || error.message.includes('JSON')) {
-            console.log('Likely JSON parsing error, but cart add may have succeeded');
-
             // Still try to update cart count as the add might have worked
             setTimeout(() => {
               updateCartCount();
@@ -1166,8 +1163,6 @@
           return response.text();
         })
         .then((responseText) => {
-          console.log('Cart drawer refreshed');
-
           const html = new DOMParser().parseFromString(responseText, 'text/html');
 
           // Update cart drawer content
@@ -1207,14 +1202,11 @@
           initializeCartDrawerEventListeners();
         })
         .catch((error) => {
-          console.error('Error refreshing cart drawer:', error);
           return updateCartCount();
         });
     }
 
     function initializeCartDrawerEventListeners() {
-      console.log('Re-initializing cart drawer event listeners');
-
       // Re-initialize overlay click handler
       const overlay = document.querySelector('#CartDrawer-Overlay');
       if (overlay) {
@@ -1294,7 +1286,6 @@
           return res.json();
         })
         .then((cart) => {
-          console.log('Cart updated:', cart);
           const cartCountSelectors = [
             '.cart-count',
             '[data-cart-count]',
@@ -1333,9 +1324,7 @@
             })
           );
         })
-        .catch((error) => {
-          console.error('Error updating cart count:', error);
-        });
+        .catch((error) => {});
     }
 
     function showNotification(message, type = 'success') {
