@@ -169,6 +169,18 @@ height:18px !important;
   }
 }
 
+/* Blog Grid Fade-Up Animation */
+.blog-article-card {
+  opacity: 0;
+  transform: translateY(50px);
+  transition: opacity 0.8s ease, transform 0.8s ease;
+}
+
+.blog-article-card.animate {
+  opacity: 1;
+  transform: translateY(0);
+}
+
 
 </style>
 
@@ -209,8 +221,20 @@ height:18px !important;
         const articlesPerLoad = parseInt(loadMoreBtn.getAttribute('data-articles-per-load')) || 3;
 
         for (let i = 0; i < Math.min(articlesPerLoad, hiddenArticles.length); i++) {
-          hiddenArticles[i].classList.remove('hidden-articles');
-          hiddenArticles[i].classList.add('show-articles');
+          const article = hiddenArticles[i];
+          article.classList.remove('hidden-articles');
+          article.classList.add('show-articles');
+          
+          // Add fade-up animation for newly shown articles
+          article.style.opacity = '0';
+          article.style.transform = 'translateY(50px)';
+          article.style.transition = `opacity 0.8s ease ${i * 0.1}s, transform 0.8s ease ${i * 0.1}s`;
+          
+          // Trigger animation after a short delay
+          setTimeout(() => {
+            article.style.opacity = '1';
+            article.style.transform = 'translateY(0)';
+          }, 50);
         }
 
         const remainingHidden = document.querySelectorAll('.blog-article.hidden-articles');
@@ -224,6 +248,38 @@ height:18px !important;
         updateLastVisibleMargin(); // Update the last visible article
       });
     }
+
+    // Blog Grid Fade-Up Animation
+    const blogCards = document.querySelectorAll('.blog-article-card');
+    
+    // Set initial state for all cards
+    blogCards.forEach((card, index) => {
+      card.style.opacity = '0';
+      card.style.transform = 'translateY(50px)';
+      card.style.transition = `opacity 0.8s ease ${index * 0.1}s, transform 0.8s ease ${index * 0.1}s`;
+    });
+
+    // Create intersection observer
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          // Trigger fade-up animation
+          entry.target.style.opacity = '1';
+          entry.target.style.transform = 'translateY(0)';
+
+          // Stop observing this element
+          observer.unobserve(entry.target);
+        }
+      });
+    }, {
+      rootMargin: '0px 0px -100px 0px',
+      threshold: 0.1
+    });
+
+    // Observe all blog cards
+    blogCards.forEach(card => {
+      observer.observe(card);
+    });
   });
 </script>
 

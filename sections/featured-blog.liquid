@@ -417,23 +417,17 @@
      transition: none;
    }
 
-   /* Removed fade-in animation and transitions */
-   /* @keyframes fadeInAnimation { ... } */
+  /* Blog Article Fade-Up Animation */
+  .blog-article-fb {
+    opacity: 0;
+    transform: translateY(50px);
+    transition: opacity 0.8s ease, transform 0.8s ease;
+  }
 
-   .blog-article-fb {
-     opacity: 1;
-     transition: none;
-   }
-
-   .blog-article-fb.visible {
-     opacity: 1;
-     transform: none;
-     animation: none;
-   }
-
-   .blog-article-fb:not(.visible) {
-     transform: none;
-   }
+  .blog-article-fb.animate {
+    opacity: 1;
+    transform: translateY(0);
+  }
 
    @media (max-width: 1025px) {
      .featured-blog-grid.list-view .featured-blog-card-date {
@@ -617,7 +611,7 @@
       aria-live="polite"
       aria-label="Blog articles"
       data-post-limit="{{ section.settings.post_limit }}"
-      data-total-posts="{% if blog_handle != blank %}{{ blogs[blog_handle].articles.size }}{% else %}0{% endif %}"
+      data-total-posts="{% assign blog_handle = section.settings.blog %}{% if blog_handle != blank %}{{ blogs[blog_handle].articles.size }}{% else %}0{% endif %}"
     >
       <!-- Separator before container (only visible in list view) -->
       <div class="list-separator"></div>
@@ -781,8 +775,37 @@
     const buttons = [gridBtn, listBtn];
     const loadMoreBtn = document.querySelector('.load-more-btn-fb');
 
-    // Remove scroll animation logic
-    // No IntersectionObserver, no fade-in
+    // Featured Blog Fade-Up Animation
+    const blogArticles = document.querySelectorAll('.blog-article-fb');
+    
+    // Set initial state for all articles
+    blogArticles.forEach((article, index) => {
+      article.style.opacity = '0';
+      article.style.transform = 'translateY(50px)';
+      article.style.transition = `opacity 0.8s ease ${index * 0.1}s, transform 0.8s ease ${index * 0.1}s`;
+    });
+
+    // Create intersection observer
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          // Trigger fade-up animation
+          entry.target.style.opacity = '1';
+          entry.target.style.transform = 'translateY(0)';
+
+          // Stop observing this element
+          observer.unobserve(entry.target);
+        }
+      });
+    }, {
+      rootMargin: '0px 0px -100px 0px',
+      threshold: 0.1
+    });
+
+    // Observe all blog articles
+    blogArticles.forEach(article => {
+      observer.observe(article);
+    });
 
     // Load more functionality
     if (loadMoreBtn) {
@@ -797,6 +820,16 @@
         for (let i = currentlyVisible; i < endIndex; i++) {
           if (blogArticles[i]) {
             blogArticles[i].style.display = '';
+            // Add fade-up animation for newly shown articles
+            blogArticles[i].style.opacity = '0';
+            blogArticles[i].style.transform = 'translateY(50px)';
+            blogArticles[i].style.transition = `opacity 0.8s ease ${(i - currentlyVisible) * 0.1}s, transform 0.8s ease ${(i - currentlyVisible) * 0.1}s`;
+            
+            // Trigger animation after a short delay
+            setTimeout(() => {
+              blogArticles[i].style.opacity = '1';
+              blogArticles[i].style.transform = 'translateY(0)';
+            }, 50);
           }
         }
         currentlyVisible = endIndex;

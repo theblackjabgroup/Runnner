@@ -1,5 +1,30 @@
 <link rel="stylesheet" href="{{ 'section-blog-post.css' | asset_url }}">
 <script src="{{ 'main-article.js' | asset_url }}" defer></script>
+
+<style>
+/* Main Article Fade-Up Animation */
+.article-content-animated {
+  opacity: 0;
+  transform: translateY(50px);
+  transition: opacity 0.8s ease, transform 0.8s ease;
+}
+
+.article-content-animated.animate {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.related-articles-animated {
+  opacity: 0;
+  transform: translateY(50px);
+  transition: opacity 0.8s ease, transform 0.8s ease;
+}
+
+.related-articles-animated.animate {
+  opacity: 1;
+  transform: translateY(0);
+}
+</style>
 <section
   id="parallax-section"
   class="section1 color-{{ section.settings.color_scheme }} relative overflow-hidden items-start"
@@ -30,7 +55,7 @@
 </div>
 </section>
 <div
-  class="blog-article-container color-{{ section.settings.color_scheme }} {% unless article.image %}no-image{% endunless %}"
+  class="blog-article-container color-{{ section.settings.color_scheme }} {% unless article.image %}no-image{% endunless %} article-content-animated"
   style="padding-left:{{ settings.side_space}}px; padding-right:{{ settings.side_space }}px; "
 >
   {% if section.settings.show_blog_section %}
@@ -114,7 +139,7 @@
   </div>
 </div>
 <hr class="hrline1 w-screen max-w-none mx-auto" style="border-top: 1px solid var(--text);margin:0px;margin-left:{{ settings.side_space}}px; margin-right:{{ settings.side_space }}px;">
-<div class="colordiv color-{{ section.settings.color_scheme }}" style="padding-left:{{ settings.side_space}}px; padding-right:{{ settings.side_space }}px; padding-bottom: {{ section.settings.related_padding_desktop | default: 50 }}px;">
+<div class="colordiv color-{{ section.settings.color_scheme }} related-articles-animated" style="padding-left:{{ settings.side_space}}px; padding-right:{{ settings.side_space }}px; padding-bottom: {{ section.settings.related_padding_desktop | default: 50 }}px;">
   <div class="w-full uppercase">
     <div class="mainhead flex flex-col md:flex-row md:items-start" style="margin-top:6.9vh;">
       <div style="width:26vw; margin-right:0.65vw;">
@@ -175,6 +200,42 @@
     </div>
     </div>
   </div>
+<script>
+  // Main Article Fade-Up Animation
+  document.addEventListener('DOMContentLoaded', function() {
+    const animatedElements = document.querySelectorAll('.article-content-animated, .related-articles-animated');
+    
+    // Set initial state for all elements
+    animatedElements.forEach((element, index) => {
+      element.style.opacity = '0';
+      element.style.transform = 'translateY(50px)';
+      element.style.transition = `opacity 0.8s ease ${index * 0.2}s, transform 0.8s ease ${index * 0.2}s`;
+    });
+
+    // Create intersection observer
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          // Trigger fade-up animation
+          entry.target.style.opacity = '1';
+          entry.target.style.transform = 'translateY(0)';
+
+          // Stop observing this element
+          observer.unobserve(entry.target);
+        }
+      });
+    }, {
+      rootMargin: '0px 0px -100px 0px',
+      threshold: 0.1
+    });
+
+    // Observe all animated elements
+    animatedElements.forEach(element => {
+      observer.observe(element);
+    });
+  });
+</script>
+
 <script type="application/ld+json">
   {{ article | structured_data }}
 </script>
