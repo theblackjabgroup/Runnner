@@ -1,7 +1,11 @@
-<div class="outfit-inspiration-section color-{{ section.settings.color_scheme }} bg-color:var(--background) p-8  px-0 flex justify-center items-center md:py-16">
+<div
+  class="outfit-inspiration-section color-{{ section.settings.color_scheme }} p-8  px-0 flex justify-center items-center md:py-16"
+  style="background-color: var(--background);"
+>
   <div class="outfit-navigation-arrows desktop-arrows ">
     <button
-      class="outfit-navigation z-1 bg-color:var(--background) transition-opacity duration-300"
+      class="outfit-navigation z-1 transition-opacity duration-300"
+      style="background-color: var(--background);"
       id="outfit-slider-prev-{{ section.id }}"
       aria-label="Previous"
       type="button"
@@ -18,7 +22,7 @@
     </button>
   </div>
 
-  <div class="relative bg-color:var(--background)">
+  <div class="relative" style="background-color: var(--background);">
     <div class="flex flex-col color-{{ section.settings.color_scheme }} lg:flex-row gap-4 justify-center ">
       <div class="outfit-contianer flex flex-col">
         <h2 class="outfit-section-title">
@@ -35,9 +39,18 @@
                 class="flex items-center justify-center w-full"
               >
                 <img
-                  src="{{ product.featured_image | img_url: '409x512', crop: 'center' }}"
+                  srcset="
+                    {%- if product.featured_image.width >= 205 -%}{{ product.featured_image | image_url: width: 205 }} 205w,{%- endif -%}
+                    {%- if product.featured_image.width >= 409 -%}{{ product.featured_image | image_url: width: 409 }} 409w,{%- endif -%}
+                    {%- if product.featured_image.width >= 818 -%}{{ product.featured_image | image_url: width: 818 }} 818w,{%- endif -%}
+                    {{ product.featured_image | image_url }} {{ product.featured_image.width }}w
+                  "
+                  sizes="(max-width: 767px) 184px, 409px"
+                  src="{{ product.featured_image | image_url: width: 409 }}"
                   alt="{{ product.title }}"
                   class="outfit-main-img"
+                  loading="eager"
+                  decoding="async"
                   height="512"
                   width="409"
                 >
@@ -46,18 +59,7 @@
                 <h4 class="main-product-title">
                   {{ product.title }}
                 </h4>
-                {% if product.compare_at_price > product.price %}
-                  <span class="line-through outfit-price" style="color: var(--text);">
-                    {{ product.compare_at_price | money }}
-                  </span>
-                  <span class="outfit-price" style="color: var(--sale_badge);">
-                    {{ product.price | money }}
-                  </span>
-                {% else %}
-                  <span class="outfit-price" style="color: var(--text);">
-                    {{ product.price | money }}
-                  </span>
-                {% endif %}
+                {% render 'price', product: product, price_class: 'new-product-price' %}
               </div>
             </div>
           </div>
@@ -68,7 +70,8 @@
                 class="transition-transform duration-300 ease-in-out w-full h-full"
                 id="outfit-slider-track-{{ section.id }}"
               >
-                {% for block in section.blocks %}
+                {% for block in section.blocks limit: 3 %}
+                  {% comment %} Count products and render in single loop {% endcomment %}
                   {% assign product_count = 0 %}
                   {% for i in (1..3) %}
                     {% assign product_key = 'product_' | append: i %}
@@ -83,6 +86,7 @@
                     data-products="{{ product_count }}"
                     data-section-id="{{ section.id }}"
                   >
+                    {% comment %} Render products {% endcomment %}
                     {% for i in (1..3) %}
                       {% assign product_key = 'product_' | append: i %}
                       {% if block.settings[product_key] != blank %}
@@ -98,9 +102,18 @@
                           <div class=" paired-product-img w-[140px] h-[150px] flex items-center justify-center overflow-hidden flex-shrink-0">
                             {% if paired_product.featured_image %}
                               <img
-                                src="{{ paired_product.featured_image | img_url: '140x150', crop: 'center' }}"
+                                srcset="
+                                  {%- if paired_product.featured_image.width >= 70 -%}{{ paired_product.featured_image | image_url: width: 70 }} 70w,{%- endif -%}
+                                  {%- if paired_product.featured_image.width >= 140 -%}{{ paired_product.featured_image | image_url: width: 140 }} 140w,{%- endif -%}
+                                  {%- if paired_product.featured_image.width >= 280 -%}{{ paired_product.featured_image | image_url: width: 280 }} 280w,{%- endif -%}
+                                  {{ paired_product.featured_image | image_url }} {{ paired_product.featured_image.width }}w
+                                "
+                                sizes="(max-width: 767px) 60px, 140px"
+                                src="{{ paired_product.featured_image | image_url: width: 140 }}"
                                 alt="{{ paired_product.title }}"
                                 class="paired-product-img"
+                                loading="lazy"
+                                decoding="async"
                                 height="150"
                                 width="140"
                               >
@@ -113,18 +126,7 @@
                               <h4 class="paired-product-title">
                                 {{ paired_product.title }}
                               </h4>
-                              {% if paired_product.compare_at_price > paired_product.price %}
-                                <span class="line-through paired-product-price" style="color: var(--text);">
-                                  {{ paired_product.compare_at_price | money }}
-                                </span>
-                                <span class="paired-product-price" style="color: var(--sale_badge);">
-                                  {{ paired_product.price | money }}
-                                </span>
-                              {% else %}
-                                <span class="paired-product-price" style="color: var(--text);">
-                                  {{ paired_product.price | money }}
-                                </span>
-                              {% endif %}
+                              {% render 'price', product: paired_product, price_class: 'new-product-price' %}
                             </div>
                             <div class="flex items-center justify-between gap-2 mt-auto">
                               <div>
@@ -164,11 +166,20 @@
                                 <div class=" flex items-center justify-center overflow-hidden mb-6">
                                   {% if paired_product.featured_image %}
                                     <img
-                                      src="{{ paired_product.featured_image | img_url: '200x250', crop: 'center' }}"
+                                      srcset="
+                                        {%- if paired_product.featured_image.width >= 100 -%}{{ paired_product.featured_image | image_url: width: 100 }} 100w,{%- endif -%}
+                                        {%- if paired_product.featured_image.width >= 200 -%}{{ paired_product.featured_image | image_url: width: 200 }} 200w,{%- endif -%}
+                                        {%- if paired_product.featured_image.width >= 400 -%}{{ paired_product.featured_image | image_url: width: 400 }} 400w,{%- endif -%}
+                                        {{ paired_product.featured_image | image_url }} {{ paired_product.featured_image.width }}w
+                                      "
+                                      sizes="(max-width: 767px) 80px, 200px"
+                                      src="{{ paired_product.featured_image | image_url: width: 200 }}"
                                       alt="{{ paired_product.title }}"
                                       height="250"
                                       width="200"
                                       class="exapnded-product-img"
+                                      loading="lazy"
+                                      decoding="async"
                                       style="aspect-ratio: 1/1; object-fit: cover;"
                                     >
                                   {% else %}
@@ -199,25 +210,16 @@
                                 </div>
 
                                 <div class="outfit-expanded-price">
-                                  {% if paired_product.compare_at_price > paired_product.price %}
-                                    <span class="line-through outfit-expanded-price" style="color: var(--text);">
-                                      {{ paired_product.compare_at_price | money }}
-                                    </span>
-                                    <span class="outfit-expanded-price" style="color: var(--sale_badge);">
-                                      {{ paired_product.price | money }}
-                                    </span>
-                                  {% else %}
-                                    <span class="outfit-expanded-price" style="color: var(--text);">
-                                      {{ paired_product.price | money }}
-                                    </span>
-                                  {% endif %}
+                                  {% render 'price', product: paired_product, price_class: 'new-product-price' %}
                                 </div>
 
                                 <div class=" outfit-size flex justify-between items-center">
+                                  {% comment %} Find size option efficiently {% endcomment %}
                                   {% assign size_option = null %}
                                   {% for option in paired_product.options_with_values %}
                                     {% if option.name == 'Size' or option.name == 'size' %}
                                       {% assign size_option = option %}
+                                      {% break %}
                                     {% endif %}
                                   {% endfor %}
                                   {% if size_option %}
@@ -260,6 +262,7 @@
                                     <div></div>
                                   {% endif %}
 
+                                  {% comment %} Find color option efficiently {% endcomment %}
                                   {% assign color_option = null %}
                                   {% for option in paired_product.options_with_values %}
                                     {% if option.name == 'Color'
@@ -268,6 +271,7 @@
                                       or option.name == 'colour'
                                     %}
                                       {% assign color_option = option %}
+                                      {% break %}
                                     {% endif %}
                                   {% endfor %}
                                   {% if color_option %}
@@ -299,7 +303,11 @@
                                 </div>
 
                                 <div class="mt-auto">
-                                  <form method="post" action="/cart/add" class="w-full outfit-form-{{ section.id }}">
+                                  <form
+                                    method="post"
+                                    action="{{ routes.cart_add_url }}"
+                                    class="w-full outfit-form-{{ section.id }}"
+                                  >
                                     <input
                                       type="hidden"
                                       name="id"
@@ -367,7 +375,8 @@
 
       <div class="outfit-navigation-arrows mobile-arrows">
         <button
-          class="outfit-navigation-mobile flex items-center justify-center bg-color:var(--background) transition-opacity duration-300"
+          class="outfit-navigation-mobile flex items-center justify-center transition-opacity duration-300"
+          style="background-color: var(--background);"
           id="outfit-slider-prev-mobile-{{ section.id }}"
           aria-label="Previous"
           type="button"
@@ -383,7 +392,8 @@
           </svg>
         </button>
         <button
-          class="outfit-navigation-mobile flex items-center justify-center bg-color:var(--background) transition-opacity duration-300"
+          class="outfit-navigation-mobile flex items-center justify-center transition-opacity duration-300"
+          style="background-color: var(--background);"
           id="outfit-slider-next-mobile-{{ section.id }}"
           aria-label="Next"
           type="button"
@@ -404,7 +414,8 @@
 
   <div class="outfit-navigation-arrows desktop-arrows ">
     <button
-      class="outfit-navigation flex items-center justify-center z-1 bg-color:var(--background)  transition-opacity duration-300"
+      class="outfit-navigation flex items-center justify-center z-1 transition-opacity duration-300"
+      style="background-color: var(--background);"
       id="outfit-slider-next-{{ section.id }}"
       aria-label="Next"
       type="button"
@@ -465,18 +476,35 @@
     .outfit-size{
       padding-bottom: 36px;
     }
-    .main-product-title, .outfit-price{
+    .main-product-title{
       font-size: var(--t-b-3-size);
       font-weight: var(--t-b-3-weight);
       line-height: var(--t-b-3-line-height);
       color: var(--text);
     }
-     .outfit-price{
-     font-size: 16px;
-     font-weight: 500;
-  }
     .outfit-expanded-price{
       padding-bottom: 24px;
+    }
+    /* Reduce font size for paired product prices in desktop view */
+    .outfit-paired-title .new-product-price {
+      font-size: 14px !important;
+    }
+    .outfit-paired-title .new-product-price .price-item {
+      font-size: 14px !important;
+    }
+
+    /* Hide price in mobile view for paired products */
+    @media (max-width: 767px) {
+      .outfit-paired-title .new-product-price {
+        display: none !important;
+      }
+      /* Reduce font size for main product prices in mobile view */
+      .main-product-details .new-product-price {
+        font-size: 1rem !important;
+      }
+      .main-product-details .new-product-price .price-item {
+        font-size: 1rem !important;
+      }
     }
     .outfit-wrapper{
       gap: 20px;
@@ -495,7 +523,6 @@
       color: var(--text);
       background-color: var(--background);
       border: 1px solid var(--border);
-    }
     }
 
   .outfit-add-to-cart-btn-{{ section.id }} {
@@ -594,8 +621,9 @@
     }
     .outfit-size-option-{{ section.id }} {
       transition: background 0.2s, color 0.2s;
-      height: 28px;
-      width: 28px;
+      height: 40px;
+      min-width: 48px;
+      padding: 0 7px;
       border-radius: 4px;
       font-size: 16px;
       font-weight: 500;
@@ -755,13 +783,6 @@
       line-height: 1.2em !important;
       width: 170px;
       padding: 1px 0;
-    }
-    .outfit-price{
-       font-size: 1rem !important;
-       padding: 0;
-    }
-      .paired-product-price{
-      display: none;
     }
        .outfit-wrapper{
       gap: 20px;
@@ -1554,6 +1575,7 @@
     {
       "type": "product_group",
       "name": "Paired Products",
+      "limit": 3,
       "settings": [
         {
           "type": "product",
