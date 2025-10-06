@@ -1,175 +1,171 @@
 <style>
-  /* --- COMMENT: The main 'section' element now handles padding --- */
-  .prod-diff-section {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    width: 100%;
-    overflow: hidden;
-    padding-top: {{ section.settings.padding_top | times: 0.75 | round: 0 }}px;
-    padding-bottom: {{ section.settings.padding_bottom | times: 0.75 | round: 0 }}px;
-    max-height: 80vh; /* Maximum height constraint for both desktop and mobile */
-  }
-
-  @media screen and (min-width: 750px) {
+    /* --- COMMENT: The main 'section' element now handles padding --- */
     .prod-diff-section {
-      padding-top: {{ section.settings.padding_top }}px;
-      padding-bottom: {{ section.settings.padding_bottom }}px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      width: 100%;
+      overflow: hidden;
+      padding-top: {{ section.settings.padding_top | times: 0.75 | round: 0 }}px;
+      padding-bottom: {{ section.settings.padding_bottom | times: 0.75 | round: 0 }}px;
+      max-height: 80vh; /* Maximum height constraint for both desktop and mobile */
     }
-  }
 
-  /* --- COMMENT: The slider is now a single container using layered images instead of two sliding divs --- */
-  .prod-diff-container {
-    position: relative;
-    width: 100%; /* Changed from 100vw to be contained by the parent's padding */
-    overflow: hidden;
-    cursor: col-resize;
-    margin-top: {{ section.settings.margin_top }}px;
-    margin-bottom: {{ section.settings.margin_bottom }}px;
-    max-height: 80vh; /* Maximum height constraint for both desktop and mobile */
-  }
+    @media screen and (min-width: 750px) {
+      .prod-diff-section {
+        padding-top: {{ section.settings.padding_top }}px;
+        padding-bottom: {{ section.settings.padding_bottom }}px;
+      }
+    }
 
-  /* --- COMMENT: Base style for BOTH layered images. Now uses height: 100% to fill its parent --- */
-  .prod-diff-img {
-    position: absolute;
-    top: 0; left: 0;
-    width: 100%; height: 100%;
-    object-fit: cover;
-    pointer-events: none;
-    background-color: rgb(var(--color-background)); /* Ensures placeholders are visible */
-  }
+    /* --- COMMENT: The slider is now a single container using layered images instead of two sliding divs --- */
+    .prod-diff-container {
+      position: relative;
+      width: 100%; /* Changed from 100vw to be contained by the parent's padding */
+      overflow: hidden;
+      cursor: col-resize;
+      margin-top: {{ section.settings.margin_top }}px;
+      margin-bottom: {{ section.settings.margin_bottom }}px;
+      max-height: 80vh; /* Maximum height constraint for both desktop and mobile */
+    }
 
-  /* --- COMMENT: A new class to apply the clip-path, revealing the image underneath --- */
-  .prod-diff-img--before {
-    clip-path: inset(0 50% 0 0);
-  }
+    /* --- COMMENT: Base style for BOTH layered images. Now uses height: 100% to fill its parent --- */
+    .prod-diff-img {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      object-fit: cover;
+      pointer-events: none;
+      background-color: rgb(var(--color-background)); /* Ensures placeholders are visible */
+    }
 
-  /* --- COMMENT: Style for the new INVISIBLE range slider that controls the effect --- */
-  .prod-diff-slider-range {
-    position: absolute;
-    top: 0; left: 0;
-    width: 100%; height: 100%;
-    margin: 0;
-    opacity: 0;
-    cursor: grab;
-    z-index: var(--z-fixed);
-  }
-  .prod-diff-slider-range:active { cursor: grabbing; }
+    /* --- COMMENT: A new class to apply the clip-path, revealing the image underneath --- */
+    .prod-diff-img--before {
+      clip-path: inset(0 50% 0 0);
+    }
 
-  /* --- COMMENT: Style for the VISIBLE divider, now completely transparent --- */
-  .prod-diff-slider-divider {
-    position: absolute;
-    top: 0; bottom: 0;
-    left: 50%;
-    width: var(--space-mini);
-    background-color: transparent; /* Made completely transparent */
-    transform: translateX(-50%);
-    pointer-events: none;
-    z-index: var(--z-dropdown);
-  }
+    /* --- COMMENT: Style for the new INVISIBLE range slider that controls the effect --- */
+    .prod-diff-slider-range {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      margin: 0;
+      opacity: 0;
+      cursor: grab;
+      z-index: var(--z-fixed);
+    }
+    .prod-diff-slider-range:active { cursor: grabbing; }
 
-  /* --- COMMENT: The original handle style, now with a transition for the grab animation --- */
-  .prod-diff-slider-handle-chevron {
-    position: absolute;
-    top: 50%; left: 50%;
-    transform: translate(-50%, -50%);
-    pointer-events: none;
-    z-index: var(--z-sticky);
-    transition: transform 0.2s ease;
-  }
+    /* --- COMMENT: Style for the VISIBLE divider, now completely transparent --- */
+    .prod-diff-slider-divider {
+      position: absolute;
+      top: 0; bottom: 0;
+      left: 50%;
+      width: var(--space-mini);
+      background-color: transparent; /* Made completely transparent */
+      transform: translateX(-50%);
+      pointer-events: none;
+      z-index: var(--z-dropdown);
+    }
 
-  /* --- COMMENT: A new class added by JavaScript to create the grab animation --- */
-  .prod-diff-slider-handle-chevron.dragging {
-    transform: translate(-50%, -50%) scale(0.9);
-  }
+    /* --- COMMENT: The original handle style, now with a transition for the grab animation --- */
+    .prod-diff-slider-handle-chevron {
+      position: absolute;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      pointer-events: none;
+      z-index: var(--z-sticky);
+      transition: transform 0.2s ease;
+    }
 
-  .prod-diff-slider-handle-chevron svg { transition: all 0.2s ease; }
+    /* --- COMMENT: A new class added by JavaScript to create the grab animation --- */
+    .prod-diff-slider-handle-chevron.dragging {
+      transform: translate(-50%, -50%) scale(0.9);
+    }
 
-  /* --- COMMENT: Styles for the product info text boxes (background removed) --- */
-  .prod-diff-product-info {
-    position: absolute;
-    bottom: var(--space-3xl);
-    padding: var(--space-lg) var(--space-2xl);
-    max-width: 300px;
-    border-radius: var(--space-sm);
-  }
-  .prod-diff-product-info.left { left: var(--space-3xl); text-align: left; }
-  .prod-diff-product-info.right { right: var(--space-3xl); text-align: right; }
+    .prod-diff-slider-handle-chevron svg { transition: all 0.2s ease; }
 
-  /* --- COMMENT: Mobile responsive styles for product info --- */
-  @media (max-width: 768px) {
+    /* --- COMMENT: Styles for the product info text boxes (background removed) --- */
     .prod-diff-product-info {
-      padding: var(--space-md) var(--space-xl);
-      bottom: var(--space-2xl);
-      max-width: 200px; /* Key change from reference code to prevent overlap */
+      position: absolute;
+      bottom: var(--space-3xl);
+      padding: var(--space-lg) var(--space-2xl);
+      max-width: 300px;
+      border-radius: var(--space-sm);
     }
+    .prod-diff-product-info.left { left: var(--space-3xl); text-align: left; }
+    .prod-diff-product-info.right { right: var(--space-3xl); text-align: right; }
 
-    .prod-diff-product-info.left {
-      left: var(--space-lg);
-      bottom: 0vw; /* Consistent vertical positioning */
-    }
+    /* --- COMMENT: Mobile responsive styles for product info --- */
+    @media (max-width: 768px) {
+      .prod-diff-product-info {
+        padding: var(--space-md) var(--space-xl);
+        bottom: var(--space-2xl);
+        max-width: 200px; /* Key change from reference code to prevent overlap */
+      }
 
-    .prod-diff-product-info.right {
-      right: var(--space-lg);
-      bottom: 0vw; /* Consistent vertical positioning */
+      .prod-diff-product-info.left {
+        left: var(--space-lg);
+        bottom: 0vw; /* Consistent vertical positioning */
+      }
+
+      .prod-diff-product-info.right {
+        right: var(--space-lg);
+        bottom: 0vw; /* Consistent vertical positioning */
+      }
+
+      .prod-diff-product-name {
+        font-size: var(--tm-b-2-size);
+        line-height: var(--tm-b-2-line-height);
+      }
     }
 
     .prod-diff-product-name {
-      font-size: var(--tm-b-2-size);
-      line-height: var(--tm-b-2-line-height);
+      font-family: var(--font-body-family);
+      font-size: var(--t-b-2-size);
+      font-weight: var(--t-b-2-weight);
+      margin: 0 0 var(--space-sm) 0;
+      color: var(--text);
     }
+    .prod-diff-product-price .prod-diff-price {
+      font-family: var(--font-body-family);
+      color: var(--text);
   }
 
-  .prod-diff-product-name {
-    font-family: var(--font-body-family);
-    font-size: var(--t-b-2-size);
-    font-weight: var(--t-b-2-weight);
-    margin: 0 0 var(--space-sm) 0;
-    color: var(--text);
-  }
-  .prod-diff-product-price .prod-diff-price {
-    font-family: var(--font-body-family);
-    color: var(--text);
-  }
-
-  /* --- COMMENT: Hide hyphens in price ranges and price separators --- */
-  .prod-diff-price .price-separator {
-    display: none !important;
-  }
-
-  /* --- COMMENT: Styles for default Before/After labels when no products are selected --- */
-  .prod-diff-default-labels {
-    position: absolute;
-    top: 50%;
-    transform: translateY(-50%);
-    z-index: var(--z-content-elevated);
-    pointer-events: none;
-  }
-  .prod-diff-default-labels.before-label {
-    left: var(--space-3xl);
-  }
-  .prod-diff-default-labels.after-label {
-    right: var(--space-3xl);
-  }
-  .prod-diff-default-label {
-    font-family: var(--font-body-family);
-    font-size: var(--t-b-2-size);
-    font-weight: var(--t-b-2-weight);
-    color: var(--text);
-    background: rgba(255, 255, 255, 0.9);
-    padding: var(--space-xl) var(--space-3xl);
-    border-radius: var(--space-md);
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-    text-transform: uppercase;
-    letter-spacing: var(--space-tiny);
-  }
-  @media screen and (max-width: 749px) {
+    /* --- COMMENT: Styles for default Before/After labels when no products are selected --- */
+    .prod-diff-default-labels {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      z-index: var(--z-content-elevated);
+      pointer-events: none;
+    }
+    .prod-diff-default-labels.before-label {
+      left: var(--space-3xl);
+    }
+    .prod-diff-default-labels.after-label {
+      right: var(--space-3xl);
+    }
     .prod-diff-default-label {
-      font-size: var(--tm-b-2-size);
-      font-weight: var(--tm-b-2-weight);
-      padding: var(--space-md) var(--space-2xl);
+      font-family: var(--font-body-family);
+      font-size: var(--t-b-2-size);
+      font-weight: var(--t-b-2-weight);
+      color: var(--text);
+      background: rgba(255, 255, 255, 0.9);
+      padding: var(--space-xl) var(--space-3xl);
+      border-radius: var(--space-md);
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      text-transform: uppercase;
+      letter-spacing: var(--space-tiny);
     }
-  }
+    @media screen and (max-width: 749px) {
+      .prod-diff-default-label {
+        font-size: var(--tm-b-2-size);
+        font-weight: var(--tm-b-2-weight);
+        padding: var(--space-md) var(--space-2xl);
+      }
+
+    }
 </style>
 
 {%- comment -%} Assign product and image variables at the top for cleaner code {%- endcomment -%}
@@ -209,20 +205,11 @@
 
       {% if image_after != blank %}
         <img
-          srcset="
-            {%- if image_after.width >= 600 -%}{{ image_after | image_url: width: 600 }} 600w,{%- endif -%}
-            {%- if image_after.width >= 1200 -%}{{ image_after | image_url: width: 1200 }} 1200w,{%- endif -%}
-            {%- if image_after.width >= 1800 -%}{{ image_after | image_url: width: 1800 }} 1800w,{%- endif -%}
-            {%- if image_after.width >= 2400 -%}{{ image_after | image_url: width: 2400 }} 2400w,{%- endif -%}
-            {{ image_after | image_url }} {{ image_after.width }}w
-          "
-          sizes="100vw"
           src="{{ image_after | image_url: width: 1800 }}"
           class="prod-diff-img"
           alt="{{ image_after.alt | escape }}"
           width="{{ image_after.width }}"
           height="{{ image_after.width | divided_by: image_after.aspect_ratio | round }}"
-          loading="lazy"
         >
       {% else %}
         {{ 'image' | placeholder_svg_tag: 'prod-diff-img' }}
@@ -231,20 +218,11 @@
       <div id="BeforeImage-{{ section.id }}" class="prod-diff-img prod-diff-img--before">
         {% if image_before != blank %}
           <img
-            srcset="
-              {%- if image_before.width >= 600 -%}{{ image_before | image_url: width: 600 }} 600w,{%- endif -%}
-              {%- if image_before.width >= 1200 -%}{{ image_before | image_url: width: 1200 }} 1200w,{%- endif -%}
-              {%- if image_before.width >= 1800 -%}{{ image_before | image_url: width: 1800 }} 1800w,{%- endif -%}
-              {%- if image_before.width >= 2400 -%}{{ image_before | image_url: width: 2400 }} 2400w,{%- endif -%}
-              {{ image_before | image_url }} {{ image_before.width }}w
-            "
-            sizes="100vw"
             src="{{ image_before | image_url: width: 1800 }}"
             class="prod-diff-img"
             alt="{{ image_before.alt | escape }}"
             width="{{ image_before.width }}"
             height="{{ image_before.width | divided_by: image_before.aspect_ratio | round }}"
-            loading="lazy"
           >
         {% else %}
           {{ 'image' | placeholder_svg_tag: 'prod-diff-img' }}
