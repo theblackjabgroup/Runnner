@@ -18,39 +18,60 @@
       <div class="zoom-trigger">
         <div class="aspect-[5/3] overflow-hidden">
           {% if article.image != blank %}
-            <img src="{{ article.image | image_url: width: 600 }}"
-                 alt="{{ article.title | default: 'Blog image' | escape }}"
-                 width="25vw"
-                 height="24.17vw"
-                 loading="lazy"
-                 class="img1 object-cover transition-transform duration-300 ease-in-out"
-                 style="width: 24.9vw; height: auto; max-height: 49.5vh; transform-origin: center center;" />
+            <img
+              srcset="
+                {%- if article.image.width >= 375 -%}{{ article.image | image_url: width: 375 }} 375w,{%- endif -%}
+                {%- if article.image.width >= 600 -%}{{ article.image | image_url: width: 600 }} 600w,{%- endif -%}
+                {%- if article.image.width >= 900 -%}{{ article.image | image_url: width: 900 }} 900w,{%- endif -%}
+                {%- if article.image.width >= 1200 -%}{{ article.image | image_url: width: 1200 }} 1200w,{%- endif -%}
+                {{ article.image | image_url }} {{ article.image.width }}w
+              "
+              sizes="(max-width: 768px) 100vw, 25vw"
+              src="{{ article.image | image_url: width: 600 }}"
+              alt="{{ article.title | default: 'Blog image' | escape }}"
+              width="{{ article.image.width }}"
+              height="{{ article.image.height }}"
+              loading="lazy"
+              class="img1 object-cover transition-transform duration-300 ease-in-out"
+              style="width: 24.9vw; height: auto; max-height: 49.5vh; transform-origin: center center;"
+            >
           {% else %}
             {{ 'collection-1' | placeholder_svg_tag: 'w-full h-full bg-gray' }}
           {% endif %}
         </div>
         <div>
-          <p class="text-article-date-color" style="font-family: var(--font-body-family);margin-bottom:2.7vh; margin-top:2.7vh; font-size:var(--t-b-2-size); font-weight:var(--t-b-2-weight); line-height:var(--t-b-2-line-height);">
-            {{ article.published_at | date: "%m.%d.%y" }}
+          <p
+            class="text-article-date-color"
+            style="font-family: var(--font-body-family);margin-bottom:2.7vh; margin-top:2.7vh; font-size:var(--t-b-2-size); font-weight:var(--t-b-2-weight); line-height:var(--t-b-2-line-height);"
+          >
+            {{ article.published_at | date: '%m.%d.%y' }}
           </p>
-          <div class="subclass-header" id="article-title-{{ forloop.index0 }}" style="font-family: var(--font-heading-family);font-size:var(--t-h-4-size); font-weight:var(--t-h-4-weight); line-height:var(--t-h-4-line-height);">
-            <svg class="w-8 object-contain inline-block"
-                 style="height:22px; margin-top:-8px; margin-right:-4px;"
-                 viewBox="5.5 2 8.5 13"
-                 fill="currentColor"
-                 xmlns="http://www.w3.org/2000/svg"
-                 stroke="currentColor"
-                 aria-hidden="true">
+          <div
+            class="subclass-header"
+            id="article-title-{{ forloop.index0 }}"
+            style="font-family: var(--font-heading-family);font-size:var(--t-h-4-size); font-weight:var(--t-h-4-weight); line-height:var(--t-h-4-line-height);"
+          >
+            <svg
+              class="w-8 object-contain inline-block"
+              style="height:22px; margin-top:-8px; margin-right:-4px;"
+              viewBox="5.5 2 8.5 13"
+              fill="currentColor"
+              xmlns="http://www.w3.org/2000/svg"
+              stroke="currentColor"
+              aria-hidden="true"
+            >
               <path d="m12.14 8.753-5.482 4.796c-.646.566-1.658.106-1.658-.753V3.204a1 1 0 0 1 1.659-.753l5.48 4.796a1 1 0 0 1 0 1.506z"/>
             </svg>
             {{ article.title }}
           </div>
-          <span class="subclass-subheader font-medium tracking-tight" style="font-family: var(--font-body-family);font-size:var(--t-b-2-size); font-weight:var(--t-b-2-weight); line-height:var(--t-b-2-line-height);">
-            {{ article.content | strip_html | truncate: 50, "" }}
+          <span
+            class="subclass-subheader font-medium tracking-tight"
+            style="font-family: var(--font-body-family);font-size:var(--t-b-2-size); font-weight:var(--t-b-2-weight); line-height:var(--t-b-2-line-height);"
+          >
+            {{ article.content | strip_html | truncate: 50, '' }}
           </span>
         </div>
       </div>
     </a>
   {% endfor %}
 </div>
-
