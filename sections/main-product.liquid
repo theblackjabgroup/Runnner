@@ -31,12 +31,22 @@
             >
               {% if media.media_type == 'image' %}
                 <img
-                  src="{{ media | image_url: width: 1200 }}"
-                  alt="{{ media.alt | escape }}"
+                  srcset="
+                    {%- if media.width >= 375 -%}{{ media | image_url: width: 375 }} 375w,{%- endif -%}
+                    {%- if media.width >= 750 -%}{{ media | image_url: width: 750 }} 750w,{%- endif -%}
+                    {%- if media.width >= 1070 -%}{{ media | image_url: width: 1070 }} 1070w,{%- endif -%}
+                    {%- if media.width >= 1500 -%}{{ media | image_url: width: 1500 }} 1500w,{%- endif -%}
+                    {{ media | image_url }} {{ media.width }}w
+                  "
+                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 60vw, 50vw"
+                  src="{{ media | image_url: width: 1500 }}"
+                  alt="{{ media.alt | escape | default: product.title | append: ' - Image ' | append: forloop.index }}"
                   class="w-full h-full object-cover"
-                  loading="{% if forloop.first %}lazy{% else %}lazy{% endif %}"
-                  width="full"
-                  height="full"
+                  loading="{% if forloop.first %}eager{% else %}lazy{% endif %}"
+                  fetchpriority="{% if forloop.first %}high{% else %}auto{% endif %}"
+                  decode="async"
+                  width="{{ media.width }}"
+                  height="{{ media.height }}"
                 >
               {% elsif media.media_type == 'video' %}
                 {{
@@ -83,12 +93,20 @@
                 {% if media.media_type == 'video' %}
                   <div class="relative w-full h-full">
                     <img
+                      srcset="
+                        {%- if media.preview_image.width >= 75 -%}{{ media.preview_image | image_url: width: 75 }} 75w,{%- endif -%}
+                        {%- if media.preview_image.width >= 150 -%}{{ media.preview_image | image_url: width: 150 }} 150w,{%- endif -%}
+                        {%- if media.preview_image.width >= 300 -%}{{ media.preview_image | image_url: width: 300 }} 300w,{%- endif -%}
+                        {{ media.preview_image | image_url }} {{ media.preview_image.width }}w
+                      "
+                      sizes="150px"
                       src="{{ media.preview_image | image_url: width: 150 }}"
-                      alt=""
+                      alt="{{ media.alt | escape | default: product.title | append: ' thumbnail ' | append: forloop.index }}"
                       class="strip-image"
                       loading="lazy"
+                      decode="async"
                       width="150"
-                      height="full"
+                      height="{{ 150 | divided_by: media.preview_image.aspect_ratio | ceil }}"
                       aria-hidden="true"
                     >
                     <span
@@ -103,12 +121,20 @@
                   </div>
                 {% else %}
                   <img
+                    srcset="
+                      {%- if media.width >= 75 -%}{{ media | image_url: width: 75 }} 75w,{%- endif -%}
+                      {%- if media.width >= 150 -%}{{ media | image_url: width: 150 }} 150w,{%- endif -%}
+                      {%- if media.width >= 300 -%}{{ media | image_url: width: 300 }} 300w,{%- endif -%}
+                      {{ media | image_url }} {{ media.width }}w
+                    "
+                    sizes="150px"
                     src="{{ media | image_url: width: 150 }}"
-                    alt=""
+                    alt="{{ media.alt | escape | default: product.title | append: ' thumbnail ' | append: forloop.index }}"
                     class="strip-image"
                     loading="lazy"
+                    decode="async"
                     width="150"
-                    height="full"
+                    height="{{ 150 | divided_by: media.aspect_ratio | ceil }}"
                     aria-hidden="true"
                   >
                 {% endif %}
@@ -305,7 +331,7 @@
                   <div
                     id="size-chart-backdrop"
                     class="fixed inset-0 hidden z-[999]"
-                    style="background-color: rgba(0, 0, 0, 0.6);"
+                    style="background-color: rgba(0, 0, 0, 0.1);"
                     aria-hidden="true"
                   >
                     &nbsp;
@@ -575,12 +601,15 @@
                   {%- if media.width >= 1500 -%}{{ media | image_url: width: 1500 }} 1500w,{%- endif -%}
                   {{ media | image_url }} {{ media.width }}w
                 "
-                src="{{ media | image_url: width: 1200 }}"
+                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 60vw, 50vw"
+                src="{{ media | image_url: width: 1500 }}"
                 alt="{{ media.alt | escape | default: product.title | append: ' - Image ' | append: forloop.index }}"
                 class="w-full h-full object-cover"
-                loading="{% if forloop.first %}lazy{% else %}lazy{% endif %}"
-                width="full"
-                height="full"
+                loading="{% if forloop.first %}eager{% else %}lazy{% endif %}"
+                fetchpriority="{% if forloop.first %}high{% else %}auto{% endif %}"
+                decode="async"
+                width="{{ media.width }}"
+                height="{{ media.height }}"
                 role="img"
               >
             {% elsif media.media_type == 'video' %}
@@ -620,12 +649,20 @@
             {% if media.media_type == 'video' %}
               <div class="relative w-full h-full">
                 <img
+                  srcset="
+                    {%- if media.preview_image.width >= 75 -%}{{ media.preview_image | image_url: width: 75 }} 75w,{%- endif -%}
+                    {%- if media.preview_image.width >= 150 -%}{{ media.preview_image | image_url: width: 150 }} 150w,{%- endif -%}
+                    {%- if media.preview_image.width >= 300 -%}{{ media.preview_image | image_url: width: 300 }} 300w,{%- endif -%}
+                    {{ media.preview_image | image_url }} {{ media.preview_image.width }}w
+                  "
+                  sizes="150px"
                   src="{{ media.preview_image | image_url: width: 150 }}"
-                  alt=""
+                  alt="{{ media.alt | escape | default: product.title | append: ' thumbnail ' | append: forloop.index }}"
                   class="w-full h-full object-cover rounded"
                   loading="lazy"
-                  width="full"
-                  height="full"
+                  decode="async"
+                  width="150"
+                  height="{{ 150 | divided_by: media.preview_image.aspect_ratio | ceil }}"
                   aria-hidden="true"
                 >
                 <span
@@ -640,12 +677,20 @@
               </div>
             {% else %}
               <img
+                srcset="
+                  {%- if media.width >= 75 -%}{{ media | image_url: width: 75 }} 75w,{%- endif -%}
+                  {%- if media.width >= 150 -%}{{ media | image_url: width: 150 }} 150w,{%- endif -%}
+                  {%- if media.width >= 300 -%}{{ media | image_url: width: 300 }} 300w,{%- endif -%}
+                  {{ media | image_url }} {{ media.width }}w
+                "
+                sizes="150px"
                 src="{{ media | image_url: width: 150 }}"
-                alt=""
+                alt="{{ media.alt | escape | default: product.title | append: ' thumbnail ' | append: forloop.index }}"
                 class="w-full h-full object-cover rounded"
                 loading="lazy"
-                width="full"
-                height="full"
+                decode="async"
+                width="150"
+                height="{{ 150 | divided_by: media.aspect_ratio | ceil }}"
                 aria-hidden="true"
               >
             {% endif %}
@@ -1100,7 +1145,7 @@
               }
 
               #size-chart-drawer {
-                transition: transform 0.3s cubic-bezier(0.4,0,0.2,1);
+                transition: transform 0.6s cubic-bezier(0.4,0,0.2,1);
                 will-change: transform;
                 margin: 0 !important;
                 padding: 0 !important;
@@ -1235,7 +1280,7 @@
                 }
 
                 #mobile-size-chart-drawer {
-                  transition: transform 0.3s cubic-bezier(0.4,0,0.2,1);
+                  transition: transform 0.6s cubic-bezier(0.4,0,0.2,1);
                   will-change: transform;
                   margin: 0 !important;
                   padding: 0 !important;
@@ -2604,6 +2649,9 @@ document.addEventListener('DOMContentLoaded', () => {
   "name": "Product Details",
   "tag": "section",
   "class": "section",
+  "enabled_on": {
+    "templates": ["product"]
+  },
   "settings": [
     {
       "type": "color_scheme",
