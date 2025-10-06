@@ -11,14 +11,23 @@
         <div class="overflow-hidden">
           <picture>
             {% if article.image != blank %}
-                <img
-  src="{{ article.image | image_url: width: 600 }}"
-  alt="{{ article.title | default: 'Blog image' | escape }}"
-                    width="1120px"
-                    height="1400px"
-  loading="lazy"
-  class="img11 object-cover transition-transform duration-300 ease-in-out"
-  style="width: 1120px; height: 1400px; max-height: 1400px; transform-origin: center center;" />
+              <img
+                srcset="
+                  {%- if article.image.width >= 375 -%}{{ article.image | image_url: width: 375 }} 375w,{%- endif -%}
+                  {%- if article.image.width >= 750 -%}{{ article.image | image_url: width: 750 }} 750w,{%- endif -%}
+                  {%- if article.image.width >= 1120 -%}{{ article.image | image_url: width: 1120 }} 1120w,{%- endif -%}
+                  {%- if article.image.width >= 1680 -%}{{ article.image | image_url: width: 1680 }} 1680w,{%- endif -%}
+                  {{ article.image | image_url }} {{ article.image.width }}w
+                "
+                sizes="(max-width: 768px) 100vw, 1120px"
+                src="{{ article.image | image_url: width: 1120 }}"
+                alt="{{ article.title | default: 'Blog image' | escape }}"
+                width="1120"
+                height="1400"
+                loading="lazy"
+                class="img11 object-cover transition-transform duration-300 ease-in-out"
+                style="width: 1120px; height: 1400px; max-height: 1400px; transform-origin: center center;"
+              >
             {% else %}
               {{ 'collection-1' | placeholder_svg_tag: 'w-full h-full bg-gray' }}
             {% endif %}
@@ -28,22 +37,26 @@
 
       <div class="maindiv">
         <p class="text-article-date-color1" style="margin-bottom:2.7vh; font-size:2.8vh;font-weight:500;">
-          {{ article.published_at | date: "%m.%d.%y" }}
+          {{ article.published_at | date: '%m.%d.%y' }}
         </p>
-        <div class="subclass-header1" id="article-title-{{ forloop.index0 }}" style="line-height:var(--t-h-3-line-height); font-size:var(--t-h-3-size); font-weight:var(--t-h-3-weight);">
-        <svg
-                      class=" arrow-svgsubw-8 object-contain inline-block"
-                      style="height:22px; margin-top:-8px; margin-right:-4px;"
-                      viewBox="6 2 8 12"
-                      fill="var(--text)"
-                      xmlns="http://www.w3.org/2000/svg"
-                      stroke="var(--text)"
-                      aria-hidden="true"
-                    >
-                      <path d="m12.14 8.753-5.482 4.796c-.646.566-1.658.106-1.658-.753V3.204a1 1 0 0 1 1.659-.753l5.48 4.796a1 1 0 0 1 0 1.506z"/>
-                    </svg>
+        <div
+          class="subclass-header1"
+          id="article-title-{{ forloop.index0 }}"
+          style="line-height:var(--t-h-3-line-height); font-size:var(--t-h-3-size); font-weight:var(--t-h-3-weight);"
+        >
+          <svg
+            class=" arrow-svgsubw-8 object-contain inline-block"
+            style="height:22px; margin-top:-8px; margin-right:-4px;"
+            viewBox="6 2 8 12"
+            fill="var(--text)"
+            xmlns="http://www.w3.org/2000/svg"
+            stroke="var(--text)"
+            aria-hidden="true"
+          >
+            <path d="m12.14 8.753-5.482 4.796c-.646.566-1.658.106-1.658-.753V3.204a1 1 0 0 1 1.659-.753l5.48 4.796a1 1 0 0 1 0 1.506z"/>
+          </svg>
           {{ article.title }}
-                  </div>
+        </div>
         <span class="subclass-subheader1 font-medium tracking-tight" style="font-size:2.7vh;">
           {% assign first_sentence = article.content | strip_html | split: '.' | first %}
           {{ first_sentence }}.
@@ -54,71 +67,71 @@
 </div>
 
 <style>
-  p, div, img,a,span,picture{
-  padding:0;
+    p, div, img,a,span,picture{
+    padding:0;
+    }
+    .subclass-header1,
+    .subclass-subheader1,
+    .text-article-date-color1
+    .arrow-svgsub1 {
+      color: var(--text);
+    }
+    .subclass-header1{
+    font-size:42px;
   }
-  .subclass-header1,
-  .subclass-subheader1,
-  .text-article-date-color1
-  .arrow-svgsub1 {
-    color: var(--text);
+    .maindiv{
+    max-width:500px;
+    margin-right:2.65vw;
   }
-  .subclass-header1{
-  font-size:42px;
-}
-  .maindiv{
-  max-width:500px;
-  margin-right:2.65vw;
-} 
-.group:hover img,
-  .zoom-trigger1:hover img {
-    transform: scale(1.1);
-    transition: transform 0.3s;
+  .group:hover img,
+    .zoom-trigger1:hover img {
+      transform: scale(1.1);
+      transition: transform 0.3s;
+    }
+  .zoom-trigger1{
+    flex:1;
+  order:2;
+  height:1400px;
+  width:1120px;
   }
-.zoom-trigger1{
-  flex:1;
-order:2; 
-height:1400px;
-width:1120px;
-} 
-.c{
-padding: {{ settings.sections_spacing }}px {{ settings.side_space}}px;
-}
-.subclass-subheader1{
-line-height:0.9;
-  display:block;
-margin-top:20px;
-}
-@media (max-width:768px){
-  .maindiv{
-    max-width:119px !important;
+  .c{
+  padding: {{ settings.sections_spacing }}px {{ settings.side_space}}px;
   }
-  .text-article-date-color1{
+  .subclass-subheader1{
+  line-height:0.9;
+    display:block;
+  margin-top:20px;
+  }
+  @media (max-width:768px){
+    .maindiv{
+      max-width:119px !important;
+    }
+    .text-article-date-color1{
+    font-size:14px !important;
+  }
+  .subclass-subheader1{
+    line-height:1 !important;
+  margin-top:10px !important;
   font-size:14px !important;
-}
-.subclass-subheader1{
-  line-height:1 !important;
-margin-top:10px !important;
-font-size:14px !important;
-}
- .subclass-header1{
-  font-size:24px !important;
-}
-  .zoom-trigger1 {
-    width: 100% !important;
-    height: auto !important;
   }
-  .zoom-trigger1 img {
-    width: 100% !important;
-    height: auto !important;
-    display: block;
+   .subclass-header1{
+    font-size:24px !important;
   }
-  .arrow-svgsub1{
-    height:14px;
-    width:20px;
+    .zoom-trigger1 {
+      width: 100% !important;
+      height: auto !important;
+    }
+    .zoom-trigger1 img {
+      width: 100% !important;
+      height: auto !important;
+      display: block;
+    }
+    .arrow-svgsub1{
+      height:14px;
+      width:20px;
+    }
   }
-}
-</style>      
+</style>
 
 {% schema %}
 {
@@ -137,7 +150,7 @@ font-size:14px !important;
       "type": "blog",
       "id": "selected_blog",
       "label": "Select Blog"
-    },
+    }
   ],
   "presets": [
     {
