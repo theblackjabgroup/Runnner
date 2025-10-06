@@ -1,18 +1,17 @@
-<div
-  class="color-{{ section.settings.color_scheme }} px-8"
-  style="padding: {{ section.settings.padding }}px 0; margin-bottom: {{ section.settings.margin_bottom }}px;"
-  id="newsletter-section"
->
+{{ 'newsletter.css' | asset_url | stylesheet_tag }}
+{{ 'email-signup-banner.css' | asset_url | stylesheet_tag }}
+
+<div class="color-{{ section.settings.color_scheme }} px-8" style="padding: {{ section.settings.padding }}px 0; margin-bottom: {{ section.settings.margin_bottom }}px;" id="newsletter-section">
   <div class="flex flex-col md:flex-row items-center justify-between gap-6 md:gap-12" id="mainContainer">
     <!-- Text content with fixed width to prevent affecting layout -->
-    <div class="text-center md:text-left ml-8 md:w-1/2 flex-shrink-0">
-      <h2 class="custom-white-text !text-[20px] md:!text-[50px] font-extrabold uppercase tracking-wider block md:block flex md:inline-block justify-start md:justify-normal m-0 break-words leading-tight -ml-[60px] md:ml-0">
-        {{ section.settings.heading }}
-      </h2>
-      <p class="custom-white-text text-[15px] md:text-[35px] mt-1 break-words overflow-wrap-normal max-w-full -ml-[60px] md:ml-0 flex md:block justify-start md:justify-normal whitespace-nowrap md:whitespace-normal">
-        {{ section.settings.subheading }}
-      </p>
-    </div>
+  <div class="bb-newsletter-box md:text-left ml-8 md:w-1/2 flex-shrink-0">
+  <h2 class="bb-newsletter-heading custom-white-text !text-[20px] md:!text-[50px] font-extrabold uppercase tracking-wider block md:block flex md:inline-block justify-start md:justify-normal m-0 break-words leading-tight md:ml-0">
+    {{ section.settings.heading }}
+  </h2>
+  <p class="bb-newsletter-subheading custom-white-text text-[15px] md:text-[35px] mt-1 break-words overflow-wrap-normal max-w-full md:ml-0 flex md:block justify-start md:justify-normal whitespace-nowrap md:whitespace-normal">
+    {{ section.settings.subheading }}
+  </p>
+</div>
 
     <!-- Form Container with fixed width -->
     <div id="formContainer" class="w-full md:w-1/2 md:pr-8">
@@ -26,20 +25,18 @@
         </div>
       </div>
 
-      {%- form 'customer', class: 'flex flex-col gap-6 w-[95%] mx-auto' -%}
-        <input type="hidden" name="contact[tags]" value="{{ section.settings.customer_tag }}">
-        <input type="hidden" name="contact[accepts_marketing]" value="true">
-
-        <div class="form-fields-container relative">
+      {%- form 'customer', class: 'bb-newsletter-form flex flex-col gap-6 w-[95%] mx-auto' -%}
+        <input type="hidden" name="contact[tags]" value="{{ section.settings.customer_tag }}" />
+        <input type="hidden" name="contact[accepts_marketing]" value="true" />
+      
+        <div class="form-fields-container relative"> 
           <input
             type="email"
             id="custom-email-input"
             name="contact[email]"
             placeholder="EMAIL"
-            class="w-full px-4 text-[30px] md:text-[50px] text-left text-white bg-black border border-white placeholder-gray-400 focus:outline-none rounded-lg leading-none py-0"
-            {% if form.errors contains 'email' %}
-              class="error-state"
-            {% endif %}
+            class="bb-custom-newsletter-input w-full px-4 text-[30px] md:text-[50px] text-left text-white bg-white border border-white placeholder-gray-400 focus:outline-none rounded-lg leading-none py-0"
+            {% if form.errors contains 'email' %} class="error-state"{% endif %}
             value="{{ form.email }}"
             required
           >
@@ -47,31 +44,25 @@
 
         <div class="flex justify-end w-full">
           <button
-            type="submit"
-            id="custom-submitButton"
-            class="custom-submit-button w-full text-[30px] md:text-[50px] font-bold px-6 flex items-center justify-between hover:bg-red-700 transition-colors rounded-lg button-with-arrow"
-          >
-            <img
-              src="{{ 'arrow-down.png' | asset_url }}"
-              alt="Dropdown Icon"
-              width="100%"
-              height="auto"
-              class="rotate-arrow w-12 h-10 object-contain"
-              aria-hidden="true"
-            >
-            <span id="custom-buttonText">{{ section.settings.button_text }}</span>
-            <span id="custom-loadingSpinner" class="hidden">
-              <svg
-                class="animate-spin h-5 w-5 text-white"
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-              >
-                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-              </svg>
-            </span>
-          </button>
+          type="submit"
+          id="custom-submitButton"
+          class="
+            pass-newsletter w-full px-6 py-4 font-light flex items-center justify-between cursor-pointer h-16 ml-2 text-4xl leading-[50px] pt-2 md:h-16 md:mb-0 md:pt-0 md:pb-0
+            transition-colors button-with-arrow focus:outline-none focus:ring-1
+          "
+          style="font-size: var(--t-b-1-size); font-weight: var(--t-b-1-weight); line-height: var(--t-b-1-line-height); font-style: var(--font-body-style);
+                font-family: var(--font-body-family);"
+          aria-label="Subscribe to our email list"
+        >
+        <span id="buttonText-password">Subscribe</span>
+        {% render 'icon-playback', width: '16px', height: '16px',viewBox: '4.5 1.5 8.5 13'%}
+          <span id="loadingSpinner-password" class="hidden">
+            <svg class="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+          </span>
+        </button>
         </div>
       {%- endform -%}
     </div>
@@ -81,18 +72,18 @@
 <!-- Scroll-triggered popup newsletter -->
 <div
   id="popup-newsletter"
-  class="fixed bottom-0 left-0 right-0 border-t border-gray-800 z-50 color-{{ section.settings.color_scheme }}"
+  class="bb-popup-newsletter fixed bottom-0 left-0 right-0 border-t border-gray-800 z-50 color-{{ section.settings.color_scheme }}"
   style="transform: translateY(100%); transition: transform 0.5s ease;"
 >
-  <div class="container  w-full max-w-[1400px]  mx-auto px-4 py-4">
-    <div class="flex flex-col md:flex-row items-center justify-between gap-4">
+  <div class="bb-container  w-full max-w-[1400px]  mx-auto px-4 py-4">
+    <div class="bb-popup-container flex flex-col md:flex-row items-center justify-between gap-4">
       <!-- Text content -->
       <div class="md:text-left md:w-1/2 md:-ml-[42%]">
-        <h2 class="heading-text text-base md:text-[33px] font-extrabold uppercase tracking-wider custom-white-text">
+        <h2 class="bb-heading-text text-base md:text-[33px] font-extrabold uppercase tracking-wider custom-white-text">
           {{ section.settings.heading_text }}
         </h2>
 
-        <p class="text-lg md:text-xl mt-1 custom-white-text">{{ section.settings.subheading_text }}</p>
+        <p class="bb-popup-para text-lg md:text-xl mt-1 custom-white-text">{{ section.settings.subheading_text }}</p>
       </div>
 
       <!-- Form container -->
@@ -110,37 +101,37 @@
               id="popup-email-input"
               name="contact[email]"
               placeholder="EMAIL"
-              class="popup-email-input px-4 py-3 text-white bg-black border border-white placeholder-gray-400 focus:outline-none rounded-lg text-left {% if form.errors contains 'email' %} error-state{% endif %}"
+              class="popup-email-input px-4 py-3  bg-white border border-black placeholder-gray-400 focus:outline-none rounded-lg text-left {% if form.errors contains 'email' %} error-state{% endif %}"
               value="{{ form.email }}"
             >
           </div>
 
           <div class="md:w-[200px]">
             <button
-              <button
-              type="submit"
-              id="popup-submit-button"
-              class="popup-submit-button w-full md:w-auto font-bold px-6 py-3 flex items-center justify-center transition-colors rounded-lg custom-btn-bg custom-btn-text hover:custom-btn-bg-hover"
-            >
-              <span id="popup-button-text">{{ section.settings.button_text }}</span>
-              <span id="popup-loading-spinner" class="hidden ml-2">
-                <svg
-                  class="animate-spin h-5 w-5 text-white"
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                >
-                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                  <path class="opacity-75" fill="currentColor"
-                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                </svg>
-              </span>
-            </button>
+            type="submit"
+            id="popup-submit-button"
+            class="
+            popup-submit-button pass-newsletter w-full px-6 py-4 font-light flex items-center justify-between cursor-pointer h-16 ml-2 text-4xl leading-[50px] pt-2 md:h-16 md:mb-0 md:pt-0 md:pb-0
+              transition-colors button-with-arrow focus:outline-none focus:ring-1
+            "
+            style="font-size: var(--t-b-1-size); font-weight: var(--t-b-1-weight); line-height: var(--t-b-1-line-height); font-style: var(--font-body-style);
+                  font-family: var(--font-body-family);"
+            aria-label="Subscribe to our email list"
+          >
+          <span id="popup-button-text">{{ section.settings.button_text }}</span>
+          {% render 'icon-playback', width: '16px', height: '16px',viewBox: '4.5 1.5 8.5 13'%}
+            <span id="loadingSpinner-password" class="hidden">
+              <svg class="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+            </span>
+          </button>
           </div>
         {%- endform -%}
 
         <!-- Close button -->
-        <button id="close-popup" class="absolute top-2 right-2 text-white hover:text-gray-300">
+        <button id="close-popup" class="absolute top-2 right-2 hover:text-gray-300">
           <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
           </svg>
@@ -192,46 +183,31 @@
     transform: translateY(0) !important;
   }
 
-  /* Input and button height responsiveness */
-  #custom-email-input,
-  #custom-submitButton {
-    height: 50px;
-    line-height: 50px;
-  }
-
   .custom-submit-button {
     background-color: var(--button);
     color: var(--button_label);
   }
   .popup-submit-button {
-    width: 260px;
+    width: 324px;
     margin-left: 0;
   }
   .popup-email-input {
-    width: 310px;
+    width: 324px;
+    height: 48px;
     margin-left: 0;
+    color: var(--button_label);
   }
   .heading-text {
     font-weight: 500;
   }
 
-  @media (min-width: 768px) {
-    #custom-email-input,
-    #custom-submitButton {
-      height: 70px;
-      line-height: 70px;
-    }
-  }
-
   @media screen and (max-width: 480px) {
     .popup-email-input {
-      width: 300px;
-      margin-left: 20px;
+      width: 340px;
     }
 
     .popup-submit-button {
-      margin-left: 20px;
-      width: 300px;
+      width: 340px;
     }
     .heading-text {
       font-size: 30px;
@@ -552,7 +528,7 @@
         // Reset form state after a delay (but keep success message visible)
         setTimeout(() => {
           isPopupSubmitting = false;
-          popupButtonText.textContent = popupSubmitButton.getAttribute('data-original-text') || 'GET NOTIFIED';
+          popupButtonText.textContent = popupSubmitButton.getAttribute('data-original-text') || 'SUBSCRIBE';
           popupLoadingSpinner.classList.add('hidden');
           popupSubmitButton.disabled = false;
         }, 1000);
@@ -616,7 +592,7 @@
       "type": "text",
       "id": "subheading",
       "label": "Subheading",
-      "default": "Registration opens on Thursday, 5/8."
+      "default": "Subscribe for offers and all"
     },
     {
       "type": "text",
@@ -665,7 +641,7 @@
       "type": "text",
       "id": "subheading_text",
       "label": "Subheading Text",
-      "default": "Registration opens on Thursday, 5/8."
+      "default": "Subscribe for offers and all"
     }
   ],
   "presets": [
