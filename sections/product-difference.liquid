@@ -205,11 +205,20 @@
 
       {% if image_after != blank %}
         <img
+          srcset="
+            {%- if image_after.width >= 600 -%}{{ image_after | image_url: width: 600 }} 600w,{%- endif -%}
+            {%- if image_after.width >= 1200 -%}{{ image_after | image_url: width: 1200 }} 1200w,{%- endif -%}
+            {%- if image_after.width >= 1800 -%}{{ image_after | image_url: width: 1800 }} 1800w,{%- endif -%}
+            {%- if image_after.width >= 2400 -%}{{ image_after | image_url: width: 2400 }} 2400w,{%- endif -%}
+            {{ image_after | image_url }} {{ image_after.width }}w
+          "
+          sizes="100vw"
           src="{{ image_after | image_url: width: 1800 }}"
           class="prod-diff-img"
           alt="{{ image_after.alt | escape }}"
           width="{{ image_after.width }}"
           height="{{ image_after.width | divided_by: image_after.aspect_ratio | round }}"
+          loading="lazy"
         >
       {% else %}
         {{ 'image' | placeholder_svg_tag: 'prod-diff-img' }}
@@ -218,11 +227,20 @@
       <div id="BeforeImage-{{ section.id }}" class="prod-diff-img prod-diff-img--before">
         {% if image_before != blank %}
           <img
+            srcset="
+              {%- if image_before.width >= 600 -%}{{ image_before | image_url: width: 600 }} 600w,{%- endif -%}
+              {%- if image_before.width >= 1200 -%}{{ image_before | image_url: width: 1200 }} 1200w,{%- endif -%}
+              {%- if image_before.width >= 1800 -%}{{ image_before | image_url: width: 1800 }} 1800w,{%- endif -%}
+              {%- if image_before.width >= 2400 -%}{{ image_before | image_url: width: 2400 }} 2400w,{%- endif -%}
+              {{ image_before | image_url }} {{ image_before.width }}w
+            "
+            sizes="100vw"
             src="{{ image_before | image_url: width: 1800 }}"
             class="prod-diff-img"
             alt="{{ image_before.alt | escape }}"
             width="{{ image_before.width }}"
             height="{{ image_before.width | divided_by: image_before.aspect_ratio | round }}"
+            loading="lazy"
           >
         {% else %}
           {{ 'image' | placeholder_svg_tag: 'prod-diff-img' }}
