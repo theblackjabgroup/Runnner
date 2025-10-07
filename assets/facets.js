@@ -3,33 +3,11 @@ class FacetFiltersForm extends HTMLElement {
     super();
     this.onActiveFilterClick = this.onActiveFilterClick.bind(this);
 
-    this.debouncedOnSubmit = debounce((event) => {
-      this.onSubmitHandler(event);
-    }, 800);
-
     const facetForm = this.querySelector('form');
-    facetForm.addEventListener('input', this.debouncedOnSubmit.bind(this));
+    facetForm.addEventListener('input', this.onSubmitHandler.bind(this));
 
     const facetWrapper = this.querySelector('#FacetsWrapperDesktop');
     if (facetWrapper) facetWrapper.addEventListener('keyup', onKeyUpEscape);
-
-    // Add availability filter event listeners
-    this.initializeAvailabilityFilters();
-  }
-
-  initializeAvailabilityFilters() {
-    // Add event listeners to availability filter checkboxes
-    const availabilityCheckboxes = document.querySelectorAll('input[name="availability"]');
-
-    availabilityCheckboxes.forEach((checkbox) => {
-      checkbox.addEventListener('change', (event) => {
-        // Submit the form to reload the page with filters
-        const form = document.getElementById('FacetFiltersForm') || document.getElementById('FacetFiltersFormMobile');
-        if (form) {
-          form.submit();
-        }
-      });
-    });
   }
 
   static setListeners() {
@@ -123,6 +101,9 @@ class FacetFiltersForm extends HTMLElement {
       .forEach((element) => {
         element.classList.add('scroll-trigger--cancel');
       });
+
+    // Re-initialize product grid animations after AJAX update
+    FacetFiltersForm.initializeProductGridAnimations();
   }
 
   static renderProductCount(html) {
@@ -150,6 +131,45 @@ class FacetFiltersForm extends HTMLElement {
     loadingSpinners.forEach((spinner) => spinner.classList.add('hidden'));
   }
 
+  static initializeProductGridAnimations() {
+    const productGrid = document.querySelector('.product-grid');
+    if (!productGrid) return;
+
+    const productCards = productGrid.querySelectorAll('.product-card-item');
+
+    // Set initial state for all cards
+    productCards.forEach((card, index) => {
+      card.style.opacity = '0';
+      card.style.transform = 'translateY(50px)';
+      card.style.transition = `opacity 0.6s ease ${index * 0.1}s, transform 0.6s ease ${index * 0.1}s`;
+    });
+
+    // Create intersection observer
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            // Trigger fade-up animation
+            entry.target.style.opacity = '1';
+            entry.target.style.transform = 'translateY(0)';
+
+            // Stop observing this element
+            observer.unobserve(entry.target);
+          }
+        });
+      },
+      {
+        rootMargin: '0px 0px -100px 0px',
+        threshold: 0.1,
+      }
+    );
+
+    // Observe all product cards
+    productCards.forEach((card) => {
+      observer.observe(card);
+    });
+  }
+
   static renderFilters(html, event) {
     const parsedHTML = new DOMParser().parseFromString(html, 'text/html');
     const facetDetailsElementsFromFetch = parsedHTML.querySelectorAll(
@@ -159,12 +179,8 @@ class FacetFiltersForm extends HTMLElement {
       '#FacetFiltersForm .js-filter, #FacetFiltersFormMobile .js-filter, #FacetFiltersPillsForm .js-filter'
     );
 
-    // Remove facets that are no longer returned from the server
-    Array.from(facetDetailsElementsFromDom).forEach((currentElement) => {
-      if (!Array.from(facetDetailsElementsFromFetch).some(({ id }) => currentElement.id === id)) {
-        currentElement.remove();
-      }
-    });
+    // Don't remove any filters - keep them all to prevent price filter disappearing
+    // This ensures filters stay visible even when server doesn't return them temporarily
 
     const matchesId = (element) => {
       const jsFilter = event ? event.target.closest('.js-filter') : undefined;
@@ -308,25 +324,62 @@ class FacetFiltersForm extends HTMLElement {
   }
 
   onSubmitHandler(event) {
-    event.preventDefault();
-    const sortFilterForms = document.querySelectorAll('facet-filters-form form');
-    if (event.srcElement.className == 'mobile-facets__checkbox') {
-      const searchParams = this.createSearchParams(event.target.closest('form'));
-      this.onSubmitForm(searchParams, event);
-    } else {
-      const forms = [];
-      const isMobile = event.target.closest('form').id === 'FacetFiltersFormMobile';
+    // Preserve current filter state before submitting
+    this.preserveFilterState();
 
-      sortFilterForms.forEach((form) => {
-        if (!isMobile) {
-          if (form.id === 'FacetSortForm' || form.id === 'FacetFiltersForm' || form.id === 'FacetSortDrawerForm') {
-            forms.push(this.createSearchParams(form));
-          }
-        } else if (form.id === 'FacetFiltersFormMobile') {
-          forms.push(this.createSearchParams(form));
+    // Let the form submit naturally to trigger a page reload
+    // This will fix the animation issues
+    const form = event.target.closest('form');
+    if (form) {
+      form.submit();
+    }
+  }
+
+  preserveFilterState() {
+    // Store current filter values in sessionStorage to preserve them across page reloads
+    const filterData = {};
+
+    // Get all filter inputs
+    const filterInputs = document.querySelectorAll('facet-filters-form input, facet-filters-form select');
+    filterInputs.forEach((input) => {
+      if (input.type === 'checkbox' || input.type === 'radio') {
+        if (input.checked) {
+          if (!filterData[input.name]) filterData[input.name] = [];
+          filterData[input.name].push(input.value);
         }
+      } else if (input.type === 'text' && input.value) {
+        filterData[input.name] = input.value;
+      }
+    });
+
+    // Store in sessionStorage
+    sessionStorage.setItem('preservedFilters', JSON.stringify(filterData));
+  }
+
+  static restoreFilterState() {
+    // Restore filter state after page reload
+    const preservedFilters = sessionStorage.getItem('preservedFilters');
+    if (!preservedFilters) return;
+
+    try {
+      const filterData = JSON.parse(preservedFilters);
+
+      // Apply preserved filter values
+      Object.keys(filterData).forEach((name) => {
+        const values = Array.isArray(filterData[name]) ? filterData[name] : [filterData[name]];
+        values.forEach((value) => {
+          const input = document.querySelector(`[name="${name}"][value="${value}"]`);
+          if (input) {
+            input.checked = true;
+            input.dispatchEvent(new Event('change', { bubbles: true }));
+          }
+        });
       });
-      this.onSubmitForm(forms.join('&'), event);
+
+      // Clear the preserved state after restoring
+      sessionStorage.removeItem('preservedFilters');
+    } catch (error) {
+      console.warn('Failed to restore filter state:', error);
     }
   }
 
@@ -346,6 +399,11 @@ FacetFiltersForm.searchParamsInitial = window.location.search.slice(1);
 FacetFiltersForm.searchParamsPrev = window.location.search.slice(1);
 customElements.define('facet-filters-form', FacetFiltersForm);
 FacetFiltersForm.setListeners();
+
+// Restore filter state on page load
+document.addEventListener('DOMContentLoaded', () => {
+  FacetFiltersForm.restoreFilterState();
+});
 
 class PriceRange extends HTMLElement {
   constructor() {
