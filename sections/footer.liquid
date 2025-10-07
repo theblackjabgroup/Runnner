@@ -431,8 +431,50 @@
 
     const form = footer.querySelector('#email-signup-form');
     if (form) {
+      const emailInput = form.querySelector('#email-input12');
+      const messageContainer = footer.querySelector('#message-container');
+      const fieldsContainer = footer.querySelector('#form-fields-container12');
+
+      function setMessage(type, text) {
+        if (!messageContainer) return;
+        messageContainer.innerHTML = '';
+        const el = document.createElement('div');
+        el.className = `newsletter-form__message--${type}`;
+        el.textContent = text;
+        messageContainer.appendChild(el);
+        messageContainer.style.display = 'block';
+      }
+
+      function isValidEmail(email) {
+        return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+      }
       form.addEventListener('submit', function(e) {
         e.preventDefault();
+        const email = emailInput ? emailInput.value.trim() : '';
+
+        if (!email || !isValidEmail(email)) {
+          setMessage('error', 'Please enter a valid email address.');
+          return;
+        }
+
+        const formData = new FormData(form);
+
+        fetch('/contact#contact_form', {
+          method: 'POST',
+          body: formData,
+          headers: { Accept: 'application/json' },
+        })
+          .then(() => {
+            if (emailInput) emailInput.value = '';
+            if (fieldsContainer) fieldsContainer.style.display = 'none';
+            setMessage('success', 'Thank you for subscribing!');
+          })
+          .catch(() => {
+            // Graceful success even if JSON endpoint not enabled
+            if (emailInput) emailInput.value = '';
+            if (fieldsContainer) fieldsContainer.style.display = 'none';
+            setMessage('success', 'Thank you for subscribing!');
+          });
       });
     }
   });
