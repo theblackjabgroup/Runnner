@@ -283,58 +283,282 @@
                   {% endif %}
 
                 {% when 'tab_sizing' %}
-                  <button
-                    id="open-size-chart"
-                    class="px-4 py-2 rounded transition-colors focus:outline-none focus:ring-2"
-                    style="background-color: var(--text); color: var(--background); border: 1px solid var(--border);"
-                    aria-describedby="size-chart-description"
-                  >
-                    SIZE CHART
-                  </button>
-                  <span id="size-chart-description" class="sr-only">Opens size chart in a drawer</span>
-
-                  <div
-                    id="size-chart-drawer"
-                    class="fixed top-0 h-full shadow-lg hidden overflow-y-auto"
-                    style="width: 50vw; right: 0; z-index: 1001; transform: translateX(100%); background-color: var(--background);"
-                    role="dialog"
-                    aria-modal="true"
-                    aria-labelledby="size-chart-title"
-                    aria-hidden="true"
-                  >
-                    <div
-                      class="flex justify-end items-center"
-                      style="padding: var(--space-3xl) var(--space-3xl) 0 var(--space-3xl);"
-                    >
+                  <div class="sizing-items-container flex flex-col gap-8 flex-wrap py-8">
+                    <!-- Sizing Item 1 -->
+                    {%- if block.settings.item1_icon != blank or block.settings.item1_title != blank -%}
                       <button
-                        id="close-size-chart"
-                        class="underline transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        style="color: var(--secondary_text);"
-                        aria-label="Close size chart"
+                        class="sizing-item-btn flex items-center gap-4 cursor-pointer hover:opacity-80 transition-opacity focus:outline-none focus:ring-2 focus:ring-blue-500 p-3 rounded"
+                        data-drawer-id="sizing-drawer-1"
+                        aria-describedby="sizing-description-1"
                       >
-                        CLOSE
-                      </button>
-                    </div>
-                    <div style="padding: 0 var(--space-3xl) var(--space-3xl) var(--space-3xl);">
-                      <h2 id="size-chart-title" class="sr-only">Size Chart</h2>
-                      {% if block.settings.size_chart_page != blank %}
-                        <div class="prose max-w-none p-4">
-                          {{ block.settings.size_chart_page.content }}
+                        <div class="sizing-icon" style="width: 20px; height: 20px;">
+                          {%- if block.settings.item1_icon != blank -%}
+                            <img
+                              srcset="
+                                {%- if block.settings.item1_icon.width >= 20 -%}{{ block.settings.item1_icon | image_url: width: 20 }} 20w,{%- endif -%}
+                                {%- if block.settings.item1_icon.width >= 40 -%}{{ block.settings.item1_icon | image_url: width: 40 }} 40w,{%- endif -%}
+                                {%- if block.settings.item1_icon.width >= 80 -%}{{ block.settings.item1_icon | image_url: width: 80 }} 80w,{%- endif -%}
+                                {{ block.settings.item1_icon | image_url }} {{ block.settings.item1_icon.width }}w
+                              "
+                              sizes="20px"
+                              src="{{ block.settings.item1_icon | image_url: width: 80 }}"
+                              alt="{{ block.settings.item1_title }}"
+                              width="20"
+                              height="20"
+                              loading="lazy"
+                              style="width: 100%; height: 100%; object-fit: contain;"
+                            >
+                          {%- else -%}
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              width="20"
+                              height="20"
+                              viewBox="0 0 20 19"
+                              fill="none"
+                              style="width: 100%; height: 100%;"
+                            >
+                              <path fill-rule="evenodd" clip-rule="evenodd" d="M14 3.922V10.599C14 11.3245 13.726 11.899 13.2755 12.2805C12.836 12.652 12.269 12.8055 11.7265 12.7825C11.0995 12.7565 10.4445 12.484 10.0045 11.976C9.891 12.891 10.218 13.4995 10.3665 13.66L10.7065 14.0265L9.9735 14.7065L9.6335 14.34C9.2265 13.901 8.7895 12.8665 9.069 11.515C8.64124 11.6046 8.19967 11.6056 7.7715 11.518C7.323 11.423 6.882 11.2185 6.548 10.875C6.206 10.5235 6 10.05 6 9.48C6 8.658 6.2935 8.064 6.818 7.63C7.303 7.2285 7.9615 6.9875 8.6275 6.772C8.7835 6.722 8.94283 6.6715 9.1055 6.6205C10.375 6.222 11.8175 5.769 13.177 4.619L14 3.922ZM10.4805 10.568C10.691 10.182 10.9805 9.769 11.3715 9.3345L11.7065 8.963L10.963 8.294L10.628 8.6655C10.133 9.2155 9.772 9.7505 9.516 10.258C9.14 10.534 8.535 10.6575 7.9785 10.5395C7.677 10.4755 7.4305 10.348 7.2645 10.1775C7.1065 10.0155 7 9.7935 7 9.4795C7 8.9365 7.175 8.632 7.4555 8.3995C7.775 8.1355 8.2575 7.9425 8.9355 7.723C9.08317 7.67566 9.2375 7.62683 9.3985 7.5765C10.438 7.252 11.7285 6.849 13 6.001V10.599C13 11.0565 12.8365 11.342 12.63 11.5165C12.4125 11.7005 12.1035 11.7975 11.7685 11.7835C11.1045 11.756 10.5135 11.3215 10.4805 10.568Z" fill="black"/>
+                              <path fill-rule="evenodd" clip-rule="evenodd" d="M10 17.5L9.782 17.95L9.78 17.949L9.774 17.946L9.7525 17.9355L9.6725 17.8955C9.6035 17.8605 9.5035 17.8085 9.377 17.7405C7.87857 16.9295 6.46979 15.9628 5.174 14.8565C2.892 12.893 0.5 9.9815 0.5 6.362C0.5 4.7355 1.0385 3.16 1.9605 1.982C2.8855 0.8015 4.216 0 5.7815 0C7.6395 0 9.05 1.0535 10 2.539C10.9495 1.054 12.36 0 14.219 0C15.784 0 17.1145 0.8015 18.039 1.9825C18.962 3.16 19.5 4.735 19.5 6.3625C19.5 9.844 17.104 12.756 14.8295 14.7485C13.447 15.9498 11.9415 17.0016 10.338 17.8865L10.2585 17.929L10.237 17.9405L10.2315 17.9435L10.229 17.9445L10 17.5ZM2.748 2.5985C1.9705 3.5915 1.5 4.947 1.5 6.362C1.5 9.533 3.608 12.1905 5.826 14.0985C7.10823 15.1924 8.50561 16.1437 9.9935 16.9355L10.1405 16.8535C11.5749 16.0365 12.9248 15.0795 14.1705 13.9965C16.3955 12.0465 18.5 9.39 18.5 6.3615C18.5 4.9465 18.0295 3.5915 17.252 2.5985C16.477 1.609 15.417 1 14.219 1C12.562 1 11.279 2.0835 10.449 3.78L10 4.6985L9.551 3.781C8.721 2.0835 7.438 1 5.781 1C4.583 1 3.523 1.609 2.748 2.5985Z" fill="black"/>
+                              <path d="M9.99998 17.5L10.229 17.9445L10.007 18.0585L9.78198 17.95L9.99998 17.5Z" fill="black"/>
+                            </svg>
+                          {%- endif -%}
                         </div>
-                      {% else %}
-                        <p style="color: var(--secondary_text); padding: var(--space-4xl);">
-                          No size guide page selected.
-                        </p>
-                      {% endif %}
-                    </div>
-                  </div>
-                  <div
-                    id="size-chart-backdrop"
-                    class="fixed inset-0 hidden z-[999]"
-                    style="background-color: rgba(0, 0, 0, 0.1);"
-                    aria-hidden="true"
-                  >
-                    &nbsp;
+                        <span style="color: var(--text); font-size: var(--t-b-3-size); font-weight: var(--t-b-3-weight); text-align: center;">
+                          {{ block.settings.item1_title | default: 'Sizing Info' }}
+                        </span>
+                      </button>
+                      <span id="sizing-description-1" class="sr-only"
+                        >Opens {{ block.settings.item1_title }} in a drawer</span
+                      >
+
+                      <div
+                        id="sizing-drawer-1"
+                        class="sizing-drawer fixed top-0 h-full shadow-lg hidden overflow-y-auto"
+                        style="width: 50vw; right: 0; z-index: 1001; transform: translateX(100%); background-color: var(--background);"
+                        role="dialog"
+                        aria-modal="true"
+                        aria-labelledby="sizing-title-1"
+                        aria-hidden="true"
+                      >
+                        <div
+                          class="flex justify-end items-center"
+                          style="padding: var(--space-3xl) var(--space-3xl) 0 var(--space-3xl);"
+                        >
+                          <button
+                            class="close-sizing-drawer underline transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            style="color: var(--secondary_text);"
+                            data-drawer-id="sizing-drawer-1"
+                            aria-label="Close {{ block.settings.item1_title }}"
+                          >
+                            CLOSE
+                          </button>
+                        </div>
+                        <div style="padding: 0 var(--space-4xl);">
+                          <h2 id="sizing-title-1" class="sr-only">{{ block.settings.item1_title }}</h2>
+                          {% if block.settings.item1_content_page != blank %}
+                            <div class="prose max-w-none p-4">
+                              {{ block.settings.item1_content_page.content }}
+                            </div>
+                          {% else %}
+                            <p style="color: var(--secondary_text); padding: var(--space-4xl);">
+                              No content page selected for {{ block.settings.item1_title }}.
+                            </p>
+                          {% endif %}
+                        </div>
+                      </div>
+                      <div
+                        id="sizing-backdrop-1"
+                        class="sizing-backdrop fixed inset-0 hidden z-[999]"
+                        style="background-color: rgba(0, 0, 0, 0.1);"
+                        data-drawer-id="sizing-drawer-1"
+                        aria-hidden="true"
+                      >
+                        &nbsp;
+                      </div>
+                    {%- endif -%}
+
+                    <!-- Sizing Item 2 -->
+                    {%- if block.settings.item2_icon != blank or block.settings.item2_title != blank -%}
+                      <button
+                        class="sizing-item-btn flex items-center gap-4 cursor-pointer hover:opacity-80 transition-opacity focus:outline-none focus:ring-2 focus:ring-blue-500 p-3 rounded"
+                        data-drawer-id="sizing-drawer-2"
+                        aria-describedby="sizing-description-2"
+                      >
+                        <div class="sizing-icon" style="width: 20px; height: 20px;">
+                          {%- if block.settings.item2_icon != blank -%}
+                            <img
+                              srcset="
+                                {%- if block.settings.item2_icon.width >= 20 -%}{{ block.settings.item2_icon | image_url: width: 20 }} 20w,{%- endif -%}
+                                {%- if block.settings.item2_icon.width >= 40 -%}{{ block.settings.item2_icon | image_url: width: 40 }} 40w,{%- endif -%}
+                                {%- if block.settings.item2_icon.width >= 80 -%}{{ block.settings.item2_icon | image_url: width: 80 }} 80w,{%- endif -%}
+                                {{ block.settings.item2_icon | image_url }} {{ block.settings.item2_icon.width }}w
+                              "
+                              sizes="20px"
+                              src="{{ block.settings.item2_icon | image_url: width: 80 }}"
+                              alt="{{ block.settings.item2_title }}"
+                              width="20"
+                              height="20"
+                              loading="lazy"
+                              style="width: 100%; height: 100%; object-fit: contain;"
+                            >
+                          {%- else -%}
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              width="20"
+                              height="20"
+                              viewBox="0 0 20 14"
+                              fill="none"
+                              style="width: 100%; height: 100%;"
+                            >
+                              <path d="M1 4L8 0L19 4M1 4V9L12 13L19 9V4M1 4L12 8L19 4" fill="white"/>
+                              <path d="M1 4L8 0L19 4M1 4V9L12 13L19 9V4M1 4L12 8L19 4" stroke="black" stroke-linejoin="round"/>
+                            </svg>
+                          {%- endif -%}
+                        </div>
+                        <span style="color: var(--text); font-size: var(--t-b-3-size); font-weight: var(--t-b-3-weight); text-align: center;">
+                          {{ block.settings.item2_title | default: 'Sizing Info' }}
+                        </span>
+                      </button>
+                      <span id="sizing-description-2" class="sr-only"
+                        >Opens {{ block.settings.item2_title }} in a drawer</span
+                      >
+
+                      <div
+                        id="sizing-drawer-2"
+                        class="sizing-drawer fixed top-0 h-full shadow-lg hidden overflow-y-auto"
+                        style="width: 50vw; right: 0; z-index: 1001; transform: translateX(100%); background-color: var(--background);"
+                        role="dialog"
+                        aria-modal="true"
+                        aria-labelledby="sizing-title-2"
+                        aria-hidden="true"
+                      >
+                        <div
+                          class="flex justify-end items-center"
+                          style="padding: var(--space-3xl) var(--space-3xl) 0 var(--space-3xl);"
+                        >
+                          <button
+                            class="close-sizing-drawer underline transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            style="color: var(--secondary_text);"
+                            data-drawer-id="sizing-drawer-2"
+                            aria-label="Close {{ block.settings.item2_title }}"
+                          >
+                            CLOSE
+                          </button>
+                        </div>
+                        <div style="padding: 0 var(--space-4xl);">
+                          <h2 id="sizing-title-2" class="sr-only">{{ block.settings.item2_title }}</h2>
+                          {% if block.settings.item2_content_page != blank %}
+                            <div class="prose max-w-none p-4">
+                              {{ block.settings.item2_content_page.content }}
+                            </div>
+                          {% else %}
+                            <p style="color: var(--secondary_text); padding: var(--space-4xl);">
+                              No content page selected for {{ block.settings.item2_title }}.
+                            </p>
+                          {% endif %}
+                        </div>
+                      </div>
+                      <div
+                        id="sizing-backdrop-2"
+                        class="sizing-backdrop fixed inset-0 hidden z-[999]"
+                        style="background-color: rgba(0, 0, 0, 0.1);"
+                        data-drawer-id="sizing-drawer-2"
+                        aria-hidden="true"
+                      >
+                        &nbsp;
+                      </div>
+                    {%- endif -%}
+
+                    <!-- Sizing Item 3 -->
+                    {%- if block.settings.item3_icon != blank or block.settings.item3_title != blank -%}
+                      <button
+                        class="sizing-item-btn flex items-center gap-4 cursor-pointer hover:opacity-80 transition-opacity focus:outline-none focus:ring-2 focus:ring-blue-500 p-3 rounded"
+                        data-drawer-id="sizing-drawer-3"
+                        aria-describedby="sizing-description-3"
+                      >
+                        <div class="sizing-icon" style="width: 20px; height: 20px;">
+                          {%- if block.settings.item3_icon != blank -%}
+                            <img
+                              srcset="
+                                {%- if block.settings.item3_icon.width >= 20 -%}{{ block.settings.item3_icon | image_url: width: 20 }} 20w,{%- endif -%}
+                                {%- if block.settings.item3_icon.width >= 40 -%}{{ block.settings.item3_icon | image_url: width: 40 }} 40w,{%- endif -%}
+                                {%- if block.settings.item3_icon.width >= 80 -%}{{ block.settings.item3_icon | image_url: width: 80 }} 80w,{%- endif -%}
+                                {{ block.settings.item3_icon | image_url }} {{ block.settings.item3_icon.width }}w
+                              "
+                              sizes="20px"
+                              src="{{ block.settings.item3_icon | image_url: width: 80 }}"
+                              alt="{{ block.settings.item3_title }}"
+                              width="20"
+                              height="20"
+                              loading="lazy"
+                              style="width: 100%; height: 100%; object-fit: contain;"
+                            >
+                          {%- else -%}
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              width="20"
+                              height="29"
+                              viewBox="0 0 19 14"
+                              fill="none"
+                              style="width: 100%; height: 100%;"
+                            >
+                              <path d="M0 0.5625V1.75H11.2812V10.6562H7.62612C7.36131 9.63559 6.44338 8.875 5.34375 8.875C4.24412 8.875 3.32619 9.63559 3.06138 10.6562H2.375V7.6875H1.1875V11.8438H3.06138C3.32619 12.8644 4.24412 13.625 5.34375 13.625C6.44338 13.625 7.36131 12.8644 7.62612 11.8438H12.5614C12.8262 12.8644 13.7441 13.625 14.8438 13.625C15.9434 13.625 16.8613 12.8644 17.1261 11.8438H19V7.00112L18.9626 6.90791L17.7751 3.34541L17.6462 2.9375H12.4688V0.5625H0ZM0.59375 2.9375V4.125H5.9375V2.9375H0.59375ZM12.4688 4.125H16.7918L17.8125 7.16797V10.6562H17.1261C16.8613 9.63559 15.9434 8.875 14.8438 8.875C13.7441 8.875 12.8262 9.63559 12.5614 10.6562H12.4688V4.125ZM1.1875 5.3125V6.5H4.75V5.3125H1.1875ZM5.34375 10.0625C6.00697 10.0625 6.53125 10.5868 6.53125 11.25C6.53125 11.9132 6.00697 12.4375 5.34375 12.4375C4.68053 12.4375 4.15625 11.9132 4.15625 11.25C4.15625 10.5868 4.68053 10.0625 5.34375 10.0625ZM14.8438 10.0625C15.507 10.0625 16.0312 10.5868 16.0312 11.25C16.0312 11.9132 15.507 12.4375 14.8438 12.4375C14.1805 12.4375 13.6562 11.9132 13.6562 11.25C13.6562 10.5868 14.1805 10.0625 14.8438 10.0625Z" fill="black"/>
+                            </svg>
+                          {%- endif -%}
+                        </div>
+                        <span style="color: var(--text); font-size: var(--t-b-3-size); font-weight: var(--t-b-3-weight); text-align: center;">
+                          {{ block.settings.item3_title | default: 'Sizing Info' }}
+                        </span>
+                      </button>
+                      <span id="sizing-description-3" class="sr-only"
+                        >Opens {{ block.settings.item3_title }} in a drawer</span
+                      >
+
+                      <div
+                        id="sizing-drawer-3"
+                        class="sizing-drawer fixed top-0 h-full shadow-lg hidden overflow-y-auto"
+                        style="width: 50vw; right: 0; z-index: 1001; transform: translateX(100%); background-color: var(--background);"
+                        role="dialog"
+                        aria-modal="true"
+                        aria-labelledby="sizing-title-3"
+                        aria-hidden="true"
+                      >
+                        <div
+                          class="flex justify-end items-center"
+                          style="padding: var(--space-3xl) var(--space-3xl) 0 var(--space-3xl);"
+                        >
+                          <button
+                            class="close-sizing-drawer underline transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            style="color: var(--secondary_text);"
+                            data-drawer-id="sizing-drawer-3"
+                            aria-label="Close {{ block.settings.item3_title }}"
+                          >
+                            CLOSE
+                          </button>
+                        </div>
+                        <div style="padding: 0 var(--space-4xl);">
+                          <h2 id="sizing-title-3" class="sr-only">{{ block.settings.item3_title }}</h2>
+                          {% if block.settings.item3_content_page != blank %}
+                            <div class="prose max-w-none p-4">
+                              {{ block.settings.item3_content_page.content }}
+                            </div>
+                          {% else %}
+                            <p style="color: var(--secondary_text); padding: var(--space-4xl);">
+                              No content page selected for {{ block.settings.item3_title }}.
+                            </p>
+                          {% endif %}
+                        </div>
+                      </div>
+                      <div
+                        id="sizing-backdrop-3"
+                        class="sizing-backdrop fixed inset-0 hidden z-[999]"
+                        style="background-color: rgba(0, 0, 0, 0.1);"
+                        data-drawer-id="sizing-drawer-3"
+                        aria-hidden="true"
+                      >
+                        &nbsp;
+                      </div>
+                    {%- endif -%}
                   </div>
               {% endcase %}
             </div>
@@ -453,6 +677,7 @@
                 use_variant: true,
                 show_compare_at_price: true,
                 font_weight_desktop: section.settings.product_price_font_weight,
+                font_size_desktop: 'var(--t-b-1-size)',
                 price_class: 'main-product-price'
               %}
             </div>
@@ -829,56 +1054,282 @@
                 {% endif %}
 
               {% when 'tab_sizing' %}
-                <button
-                  id="open-mobile-size-chart"
-                  class="px-4 py-2 rounded transition-colors focus:outline-none focus:ring-2"
-                  style="background-color: var(--text); color: var(--background); border: 1px solid var(--border);"
-                  aria-describedby="mobile-size-chart-description"
-                >
-                  Size Chart
-                </button>
-                <span id="mobile-size-chart-description" class="sr-only">Opens size chart in a full-screen drawer</span>
-
-                <div
-                  id="mobile-size-chart-drawer"
-                  class="fixed top-0 w-full h-full shadow-lg hidden overflow-y-auto"
-                  style="right: 0; z-index: 1000; transform: translateX(100%); background-color: var(--background);"
-                  role="dialog"
-                  aria-modal="true"
-                  aria-labelledby="mobile-size-chart-title"
-                  aria-hidden="true"
-                >
-                  <div
-                    class="flex justify-end items-center"
-                    style="padding: var(--space-3xl) var(--space-3xl) 0 var(--space-3xl);"
-                  >
+                <div class="sizing-items-container flex flex-col gap-4 flex-wrap">
+                  <!-- Mobile Sizing Item 1 -->
+                  {%- if block.settings.item1_icon != blank or block.settings.item1_title != blank -%}
                     <button
-                      id="close-mobile-size-chart"
-                      class="underline transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      style="color: var(--secondary_text); margin-top: var(--space-lg);"
-                      aria-label="Close size chart"
+                      class="sizing-item-btn-mobile flex items-center gap-4 cursor-pointer hover:opacity-80 transition-opacity focus:outline-none focus:ring-2 focus:ring-blue-500 p-2 rounded"
+                      data-mobile-drawer-id="mobile-sizing-drawer-1"
+                      aria-describedby="mobile-sizing-description-1"
                     >
-                      CLOSE
-                    </button>
-                  </div>
-                  <div style="padding: 0 var(--space-3xl) var(--space-3xl) var(--space-3xl);">
-                    <h2 id="mobile-size-chart-title" class="sr-only">Size Chart</h2>
-                    {% if block.settings.size_chart_page != blank %}
-                      <div class="prose max-w-none">
-                        {{ block.settings.size_chart_page.content }}
+                      <div class="sizing-icon" style="width: 20px; height: 20px;">
+                        {%- if block.settings.item1_icon != blank -%}
+                          <img
+                            srcset="
+                              {%- if block.settings.item1_icon.width >= 20 -%}{{ block.settings.item1_icon | image_url: width: 20 }} 20w,{%- endif -%}
+                              {%- if block.settings.item1_icon.width >= 40 -%}{{ block.settings.item1_icon | image_url: width: 40 }} 40w,{%- endif -%}
+                              {%- if block.settings.item1_icon.width >= 64 -%}{{ block.settings.item1_icon | image_url: width: 64 }} 64w,{%- endif -%}
+                              {{ block.settings.item1_icon | image_url }} {{ block.settings.item1_icon.width }}w
+                            "
+                            sizes="20px"
+                            src="{{ block.settings.item1_icon | image_url: width: 64 }}"
+                            alt="{{ block.settings.item1_title }}"
+                            width="20"
+                            height="20"
+                            loading="lazy"
+                            style="width: 100%; height: 100%; object-fit: contain;"
+                          >
+                        {%- else -%}
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="20"
+                            height="20"
+                            viewBox="0 0 20 19"
+                            fill="none"
+                            style="width: 100%; height: 100%;"
+                          >
+                            <path fill-rule="evenodd" clip-rule="evenodd" d="M14 3.922V10.599C14 11.3245 13.726 11.899 13.2755 12.2805C12.836 12.652 12.269 12.8055 11.7265 12.7825C11.0995 12.7565 10.4445 12.484 10.0045 11.976C9.891 12.891 10.218 13.4995 10.3665 13.66L10.7065 14.0265L9.9735 14.7065L9.6335 14.34C9.2265 13.901 8.7895 12.8665 9.069 11.515C8.64124 11.6046 8.19967 11.6056 7.7715 11.518C7.323 11.423 6.882 11.2185 6.548 10.875C6.206 10.5235 6 10.05 6 9.48C6 8.658 6.2935 8.064 6.818 7.63C7.303 7.2285 7.9615 6.9875 8.6275 6.772C8.7835 6.722 8.94283 6.6715 9.1055 6.6205C10.375 6.222 11.8175 5.769 13.177 4.619L14 3.922ZM10.4805 10.568C10.691 10.182 10.9805 9.769 11.3715 9.3345L11.7065 8.963L10.963 8.294L10.628 8.6655C10.133 9.2155 9.772 9.7505 9.516 10.258C9.14 10.534 8.535 10.6575 7.9785 10.5395C7.677 10.4755 7.4305 10.348 7.2645 10.1775C7.1065 10.0155 7 9.7935 7 9.4795C7 8.9365 7.175 8.632 7.4555 8.3995C7.775 8.1355 8.2575 7.9425 8.9355 7.723C9.08317 7.67566 9.2375 7.62683 9.3985 7.5765C10.438 7.252 11.7285 6.849 13 6.001V10.599C13 11.0565 12.8365 11.342 12.63 11.5165C12.4125 11.7005 12.1035 11.7975 11.7685 11.7835C11.1045 11.756 10.5135 11.3215 10.4805 10.568Z" fill="black"/>
+                            <path fill-rule="evenodd" clip-rule="evenodd" d="M10 17.5L9.782 17.95L9.78 17.949L9.774 17.946L9.7525 17.9355L9.6725 17.8955C9.6035 17.8605 9.5035 17.8085 9.377 17.7405C7.87857 16.9295 6.46979 15.9628 5.174 14.8565C2.892 12.893 0.5 9.9815 0.5 6.362C0.5 4.7355 1.0385 3.16 1.9605 1.982C2.8855 0.8015 4.216 0 5.7815 0C7.6395 0 9.05 1.0535 10 2.539C10.9495 1.054 12.36 0 14.219 0C15.784 0 17.1145 0.8015 18.039 1.9825C18.962 3.16 19.5 4.735 19.5 6.3625C19.5 9.844 17.104 12.756 14.8295 14.7485C13.447 15.9498 11.9415 17.0016 10.338 17.8865L10.2585 17.929L10.237 17.9405L10.2315 17.9435L10.229 17.9445L10 17.5ZM2.748 2.5985C1.9705 3.5915 1.5 4.947 1.5 6.362C1.5 9.533 3.608 12.1905 5.826 14.0985C7.10823 15.1924 8.50561 16.1437 9.9935 16.9355L10.1405 16.8535C11.5749 16.0365 12.9248 15.0795 14.1705 13.9965C16.3955 12.0465 18.5 9.39 18.5 6.3615C18.5 4.9465 18.0295 3.5915 17.252 2.5985C16.477 1.609 15.417 1 14.219 1C12.562 1 11.279 2.0835 10.449 3.78L10 4.6985L9.551 3.781C8.721 2.0835 7.438 1 5.781 1C4.583 1 3.523 1.609 2.748 2.5985Z" fill="black"/>
+                            <path d="M9.99998 17.5L10.229 17.9445L10.007 18.0585L9.78198 17.95L9.99998 17.5Z" fill="black"/>
+                          </svg>
+                        {%- endif -%}
                       </div>
-                    {% else %}
-                      <p style="color: var(--secondary_text);">No size guide page selected.</p>
-                    {% endif %}
-                  </div>
-                </div>
-                <div
-                  id="mobile-size-chart-backdrop"
-                  class="fixed inset-0 hidden z-[999]"
-                  style="background-color: rgba(0, 0, 0, 0.6);"
-                  aria-hidden="true"
-                >
-                  &nbsp;
+                      <span style="color: var(--text); font-size: var(--tm-b-5-size); font-weight: var(--tm-b-5-weight); text-align: center;">
+                        {{ block.settings.item1_title | default: 'Sizing Info' }}
+                      </span>
+                    </button>
+                    <span id="mobile-sizing-description-1" class="sr-only"
+                      >Opens {{ block.settings.item1_title }} in a drawer</span
+                    >
+
+                    <div
+                      id="mobile-sizing-drawer-1"
+                      class="mobile-sizing-drawer fixed top-0 w-full h-full shadow-lg hidden overflow-y-auto"
+                      style="right: 0; z-index: 1000; transform: translateX(100%); background-color: var(--background);"
+                      role="dialog"
+                      aria-modal="true"
+                      aria-labelledby="mobile-sizing-title-1"
+                      aria-hidden="true"
+                    >
+                      <div
+                        class="flex justify-end items-center"
+                        style="padding: var(--space-3xl)"
+                      >
+                        <button
+                          class="close-mobile-sizing-drawer underline transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          style="color: var(--secondary_text); margin-top: var(--space-lg);"
+                          data-mobile-drawer-id="mobile-sizing-drawer-1"
+                          aria-label="Close {{ block.settings.item1_title }}"
+                        >
+                          CLOSE
+                        </button>
+                      </div>
+                      <div style="padding: 0 var(--space-3xl) var(--space-3xl) var(--space-3xl);">
+                        <h2 id="mobile-sizing-title-1" class="sr-only">{{ block.settings.item1_title }}</h2>
+                        {% if block.settings.item1_content_page != blank %}
+                          <div class="prose max-w-none">
+                            {{ block.settings.item1_content_page.content }}
+                          </div>
+                        {% else %}
+                          <p style="color: var(--secondary_text);">
+                            No content page selected for {{ block.settings.item1_title }}.
+                          </p>
+                        {% endif %}
+                      </div>
+                    </div>
+                    <div
+                      id="mobile-sizing-backdrop-1"
+                      class="mobile-sizing-backdrop fixed inset-0 hidden z-[999]"
+                      style="background-color: rgba(0, 0, 0, 0.6);"
+                      data-mobile-drawer-id="mobile-sizing-drawer-1"
+                      aria-hidden="true"
+                    >
+                      &nbsp;
+                    </div>
+                  {%- endif -%}
+
+                  <!-- Mobile Sizing Item 2 -->
+                  {%- if block.settings.item2_icon != blank or block.settings.item2_title != blank -%}
+                    <button
+                      class="sizing-item-btn-mobile flex items-center gap-4 cursor-pointer hover:opacity-80 transition-opacity focus:outline-none focus:ring-2 focus:ring-blue-500 p-2 rounded"
+                      data-mobile-drawer-id="mobile-sizing-drawer-2"
+                      aria-describedby="mobile-sizing-description-2"
+                    >
+                      <div class="sizing-icon" style="width: 20px; height: 20px;">
+                        {%- if block.settings.item2_icon != blank -%}
+                          <img
+                            srcset="
+                              {%- if block.settings.item2_icon.width >= 20 -%}{{ block.settings.item2_icon | image_url: width: 20 }} 20w,{%- endif -%}
+                              {%- if block.settings.item2_icon.width >= 40 -%}{{ block.settings.item2_icon | image_url: width: 40 }} 40w,{%- endif -%}
+                              {%- if block.settings.item2_icon.width >= 64 -%}{{ block.settings.item2_icon | image_url: width: 64 }} 64w,{%- endif -%}
+                              {{ block.settings.item2_icon | image_url }} {{ block.settings.item2_icon.width }}w
+                            "
+                            sizes="20px"
+                            src="{{ block.settings.item2_icon | image_url: width: 64 }}"
+                            alt="{{ block.settings.item2_title }}"
+                            width="20"
+                            height="20"
+                            loading="lazy"
+                            style="width: 100%; height: 100%; object-fit: contain;"
+                          >
+                        {%- else -%}
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="20"
+                            height="20"
+                            viewBox="0 0 20 14"
+                            fill="none"
+                            style="width: 100%; height: 100%;"
+                          >
+                            <path d="M1 4L8 0L19 4M1 4V9L12 13L19 9V4M1 4L12 8L19 4" fill="white"/>
+                            <path d="M1 4L8 0L19 4M1 4V9L12 13L19 9V4M1 4L12 8L19 4" stroke="black" stroke-linejoin="round"/>
+                          </svg>
+                        {%- endif -%}
+                      </div>
+                      <span style="color: var(--text); font-size: var(--tm-b-5-size); font-weight: var(--tm-b-5-weight); text-align: center;">
+                        {{ block.settings.item2_title | default: 'Sizing Info' }}
+                      </span>
+                    </button>
+                    <span id="mobile-sizing-description-2" class="sr-only"
+                      >Opens {{ block.settings.item2_title }} in a drawer</span
+                    >
+
+                    <div
+                      id="mobile-sizing-drawer-2"
+                      class="mobile-sizing-drawer fixed top-0 w-full h-full shadow-lg hidden overflow-y-auto"
+                      style="right: 0; z-index: 1000; transform: translateX(100%); background-color: var(--background);"
+                      role="dialog"
+                      aria-modal="true"
+                      aria-labelledby="mobile-sizing-title-2"
+                      aria-hidden="true"
+                    >
+                      <div
+                        class="flex justify-end items-center"
+                        style="padding: var(--space-3xl);"
+                      >
+                        <button
+                          class="close-mobile-sizing-drawer underline transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          style="color: var(--secondary_text); margin-top: var(--space-lg);"
+                          data-mobile-drawer-id="mobile-sizing-drawer-2"
+                          aria-label="Close {{ block.settings.item2_title }}"
+                        >
+                          CLOSE
+                        </button>
+                      </div>
+                      <div style="padding: 0 var(--space-3xl) var(--space-3xl) var(--space-3xl);">
+                        <h2 id="mobile-sizing-title-2" class="sr-only">{{ block.settings.item2_title }}</h2>
+                        {% if block.settings.item2_content_page != blank %}
+                          <div class="prose max-w-none">
+                            {{ block.settings.item2_content_page.content }}
+                          </div>
+                        {% else %}
+                          <p style="color: var(--secondary_text);">
+                            No content page selected for {{ block.settings.item2_title }}.
+                          </p>
+                        {% endif %}
+                      </div>
+                    </div>
+                    <div
+                      id="mobile-sizing-backdrop-2"
+                      class="mobile-sizing-backdrop fixed inset-0 hidden z-[999]"
+                      style="background-color: rgba(0, 0, 0, 0.6);"
+                      data-mobile-drawer-id="mobile-sizing-drawer-2"
+                      aria-hidden="true"
+                    >
+                      &nbsp;
+                    </div>
+                  {%- endif -%}
+
+                  <!-- Mobile Sizing Item 3 -->
+                  {%- if block.settings.item3_icon != blank or block.settings.item3_title != blank -%}
+                    <button
+                      class="sizing-item-btn-mobile flex items-center gap-4 cursor-pointer hover:opacity-80 transition-opacity focus:outline-none focus:ring-2 focus:ring-blue-500 p-2 rounded"
+                      data-mobile-drawer-id="mobile-sizing-drawer-3"
+                      aria-describedby="mobile-sizing-description-3"
+                    >
+                      <div class="sizing-icon" style="width: 20px; height: 20px;">
+                        {%- if block.settings.item3_icon != blank -%}
+                          <img
+                            srcset="
+                              {%- if block.settings.item3_icon.width >= 20 -%}{{ block.settings.item3_icon | image_url: width: 20 }} 20w,{%- endif -%}
+                              {%- if block.settings.item3_icon.width >= 40 -%}{{ block.settings.item3_icon | image_url: width: 40 }} 40w,{%- endif -%}
+                              {%- if block.settings.item3_icon.width >= 64 -%}{{ block.settings.item3_icon | image_url: width: 64 }} 64w,{%- endif -%}
+                              {{ block.settings.item3_icon | image_url }} {{ block.settings.item3_icon.width }}w
+                            "
+                            sizes="20px"
+                            src="{{ block.settings.item3_icon | image_url: width: 64 }}"
+                            alt="{{ block.settings.item3_title }}"
+                            width="20"
+                            height="20"
+                            loading="lazy"
+                            style="width: 100%; height: 100%; object-fit: contain;"
+                          >
+                        {%- else -%}
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="20"
+                            height="20"
+                            viewBox="0 0 19 14"
+                            fill="none"
+                            style="width: 100%; height: 100%;"
+                          >
+                            <path d="M0 0.5625V1.75H11.2812V10.6562H7.62612C7.36131 9.63559 6.44338 8.875 5.34375 8.875C4.24412 8.875 3.32619 9.63559 3.06138 10.6562H2.375V7.6875H1.1875V11.8438H3.06138C3.32619 12.8644 4.24412 13.625 5.34375 13.625C6.44338 13.625 7.36131 12.8644 7.62612 11.8438H12.5614C12.8262 12.8644 13.7441 13.625 14.8438 13.625C15.9434 13.625 16.8613 12.8644 17.1261 11.8438H19V7.00112L18.9626 6.90791L17.7751 3.34541L17.6462 2.9375H12.4688V0.5625H0ZM0.59375 2.9375V4.125H5.9375V2.9375H0.59375ZM12.4688 4.125H16.7918L17.8125 7.16797V10.6562H17.1261C16.8613 9.63559 15.9434 8.875 14.8438 8.875C13.7441 8.875 12.8262 9.63559 12.5614 10.6562H12.4688V4.125ZM1.1875 5.3125V6.5H4.75V5.3125H1.1875ZM5.34375 10.0625C6.00697 10.0625 6.53125 10.5868 6.53125 11.25C6.53125 11.9132 6.00697 12.4375 5.34375 12.4375C4.68053 12.4375 4.15625 11.9132 4.15625 11.25C4.15625 10.5868 4.68053 10.0625 5.34375 10.0625ZM14.8438 10.0625C15.507 10.0625 16.0312 10.5868 16.0312 11.25C16.0312 11.9132 15.507 12.4375 14.8438 12.4375C14.1805 12.4375 13.6562 11.9132 13.6562 11.25C13.6562 10.5868 14.1805 10.0625 14.8438 10.0625Z" fill="black"/>
+                          </svg>
+                        {%- endif -%}
+                      </div>
+                      <span style="color: var(--text); font-size: var(--tm-b-5-size); font-weight: var(--tm-b-5-weight); text-align: center;">
+                        {{ block.settings.item3_title | default: 'Sizing Info' }}
+                      </span>
+                    </button>
+                    <span id="mobile-sizing-description-3" class="sr-only"
+                      >Opens {{ block.settings.item3_title }} in a drawer</span
+                    >
+
+                    <div
+                      id="mobile-sizing-drawer-3"
+                      class="mobile-sizing-drawer fixed top-0 w-full h-full shadow-lg hidden overflow-y-auto"
+                      style="right: 0; z-index: 1000; transform: translateX(100%); background-color: var(--background);"
+                      role="dialog"
+                      aria-modal="true"
+                      aria-labelledby="mobile-sizing-title-3"
+                      aria-hidden="true"
+                    >
+                      <div
+                        class="flex justify-end items-center"
+                        style="padding: var(--space-3xl);"
+                      >
+                        <button
+                          class="close-mobile-sizing-drawer underline transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          style="color: var(--secondary_text); margin-top: var(--space-lg);"
+                          data-mobile-drawer-id="mobile-sizing-drawer-3"
+                          aria-label="Close {{ block.settings.item3_title }}"
+                        >
+                          CLOSE
+                        </button>
+                      </div>
+                      <div style="padding: 0 var(--space-3xl) var(--space-3xl) var(--space-3xl);">
+                        <h2 id="mobile-sizing-title-3" class="sr-only">{{ block.settings.item3_title }}</h2>
+                        {% if block.settings.item3_content_page != blank %}
+                          <div class="prose max-w-none">
+                            {{ block.settings.item3_content_page.content }}
+                          </div>
+                        {% else %}
+                          <p style="color: var(--secondary_text);">
+                            No content page selected for {{ block.settings.item3_title }}.
+                          </p>
+                        {% endif %}
+                      </div>
+                    </div>
+                    <div
+                      id="mobile-sizing-backdrop-3"
+                      class="mobile-sizing-backdrop fixed inset-0 hidden z-[999]"
+                      style="background-color: rgba(0, 0, 0, 0.6);"
+                      data-mobile-drawer-id="mobile-sizing-drawer-3"
+                      aria-hidden="true"
+                    >
+                      &nbsp;
+                    </div>
+                  {%- endif -%}
                 </div>
             {% endcase %}
           </div>
@@ -1154,6 +1605,14 @@
                 transform: translateX(0) !important;
               }
 
+              .sizing-drawer {
+                transition: transform 0.6s cubic-bezier(0.4,0,0.2,1);
+                will-change: transform;
+              }
+              .sizing-drawer.open {
+                transform: translateX(0) !important;
+              }
+
               .product-section {
                 display: flex;
                 position: relative;
@@ -1288,7 +1747,41 @@
                 #mobile-size-chart-drawer.open {
                   transform: translateX(0) !important;
                 }
+
+                .mobile-sizing-drawer {
+                  transition: transform 0.6s cubic-bezier(0.4,0,0.2,1);
+                  will-change: transform;
+                }
+                .mobile-sizing-drawer.open {
+                  transform: translateX(0) !important;
+                }
               }
+
+  /* Sizing item button underline animation - matches announcement bar */
+  .sizing-item-btn span,
+  .sizing-item-btn-mobile span {
+    position: relative !important;
+    display: inline-block !important;
+  }
+
+  .sizing-item-btn span::before,
+  .sizing-item-btn-mobile span::before {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: var(--space-tiny);
+    background-color: var(--text) !important;
+    transform-origin: left;
+    transition: transform var(--animation-duration, 600ms) ease-in-out;
+  }
+
+  .sizing-item-btn:hover span::before,
+  .sizing-item-btn-mobile:hover span::before {
+    transform-origin: right;
+    transform: scaleX(0);
+  }
 
   /* Price snippet styling for main product page */
   .main-product-price .price__regular,
@@ -1299,6 +1792,13 @@
     align-items: center;
     gap: 8px;
   }
+
+  /* Set price font size to 24px */
+  .main-product-price .price-item,
+  price-item {
+    font-size: var(--t-h-5-size) !important;
+  }
+
 
   /* Sale price styling - strikethrough for compare-at-price */
   .main-product-price .price__sale .price-item--regular,
@@ -2078,75 +2578,103 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Form submission handlers removed - buttons are now type 'button' so no form submission needed
 
-  // Mobile size chart functionality
-  const mobileOpenBtn = document.getElementById('open-mobile-size-chart');
-  const mobileCloseBtn = document.getElementById('close-mobile-size-chart');
-  const mobileDrawer = document.getElementById('mobile-size-chart-drawer');
-  const mobileBackdrop = document.getElementById('mobile-size-chart-backdrop');
-
-  if (mobileOpenBtn && mobileCloseBtn && mobileDrawer && mobileBackdrop) {
-    mobileOpenBtn.addEventListener('click', function() {
-      mobileDrawer.classList.remove('hidden');
-      mobileBackdrop.classList.remove('hidden');
-      setTimeout(() => {
-        mobileDrawer.classList.add('open');
-      }, 20);
-      lockBodyScroll();
-    });
-
-    const closeMobileDrawer = () => {
-      mobileDrawer.classList.remove('open');
-      mobileBackdrop.classList.add('hidden');
-      unlockBodyScroll();
-      setTimeout(() => {
-        mobileDrawer.classList.add('hidden');
-      }, 300);
-    };
-
-    mobileCloseBtn.addEventListener('click', closeMobileDrawer);
-    mobileBackdrop.addEventListener('click', closeMobileDrawer);
-
-    document.addEventListener('keydown', function(e) {
-      if (e.key === 'Escape' && !mobileDrawer.classList.contains('hidden')) {
-        closeMobileDrawer();
-      }
-    });
-  }
-
-  // Desktop size chart functionality
-  const openBtn = document.getElementById("open-size-chart");
-  const closeBtn = document.getElementById("close-size-chart");
-  const drawer = document.getElementById("size-chart-drawer");
-  const backdrop = document.getElementById("size-chart-backdrop");
+  // Mobile sizing items functionality
+  const mobileSizingBtns = document.querySelectorAll('.sizing-item-btn-mobile');
   
-  if (openBtn && drawer && backdrop && closeBtn) {
-    openBtn.addEventListener("click", () => {
-      drawer.classList.remove("hidden");
-      backdrop.classList.remove("hidden");
-      setTimeout(() => {
-        drawer.classList.add("open");
-      }, 20);
-      lockBodyScroll();
-    });
+  mobileSizingBtns.forEach(btn => {
+    const drawerId = btn.getAttribute('data-mobile-drawer-id');
+    const drawer = document.getElementById(drawerId);
+    const backdrop = document.getElementById(drawerId.replace('mobile-sizing-drawer-', 'mobile-sizing-backdrop-'));
+    
+    if (drawer && backdrop) {
+      btn.addEventListener('click', () => {
+        drawer.classList.remove('hidden');
+        backdrop.classList.remove('hidden');
+        setTimeout(() => {
+          drawer.classList.add('open');
+        }, 20);
+        lockBodyScroll();
+      });
+    }
+  });
+
+  // Close buttons for mobile sizing drawers
+  const mobileCloseBtns = document.querySelectorAll('.close-mobile-sizing-drawer');
   
-    const closeDrawer = () => {
-      drawer.classList.remove("open");
-      backdrop.classList.add("hidden");
-      unlockBodyScroll();
-      setTimeout(() => {
-        drawer.classList.add("hidden");
-      }, 300);
-    };
+  mobileCloseBtns.forEach(closeBtn => {
+    const drawerId = closeBtn.getAttribute('data-mobile-drawer-id');
+    const drawer = document.getElementById(drawerId);
+    const backdrop = document.getElementById(drawerId.replace('mobile-sizing-drawer-', 'mobile-sizing-backdrop-'));
+    
+    if (drawer && backdrop) {
+      const closeMobileDrawer = () => {
+        drawer.classList.remove('open');
+        backdrop.classList.add('hidden');
+        unlockBodyScroll();
+        setTimeout(() => {
+          drawer.classList.add('hidden');
+        }, 300);
+      };
+
+      closeBtn.addEventListener('click', closeMobileDrawer);
+      backdrop.addEventListener('click', closeMobileDrawer);
+
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && !drawer.classList.contains('hidden')) {
+          closeMobileDrawer();
+        }
+      });
+    }
+  });
+
+  // Desktop sizing items functionality
+  const sizingBtns = document.querySelectorAll('.sizing-item-btn');
   
-    closeBtn.addEventListener("click", closeDrawer);
-    backdrop.addEventListener("click", closeDrawer);
+  sizingBtns.forEach(btn => {
+    const drawerId = btn.getAttribute('data-drawer-id');
+    const drawer = document.getElementById(drawerId);
+    const backdrop = document.getElementById(drawerId.replace('sizing-drawer-', 'sizing-backdrop-'));
+    
+    if (drawer && backdrop) {
+      btn.addEventListener('click', () => {
+        drawer.classList.remove('hidden');
+        backdrop.classList.remove('hidden');
+        setTimeout(() => {
+          drawer.classList.add('open');
+        }, 20);
+        lockBodyScroll();
+      });
+    }
+  });
+
+  // Close buttons for desktop sizing drawers
+  const closeBtns = document.querySelectorAll('.close-sizing-drawer');
   
-    document.addEventListener("keydown", (e) => {
-      if (e.key === "Escape") {
-        closeDrawer();
-      }
-    });
-  }
+  closeBtns.forEach(closeBtn => {
+    const drawerId = closeBtn.getAttribute('data-drawer-id');
+    const drawer = document.getElementById(drawerId);
+    const backdrop = document.getElementById(drawerId.replace('sizing-drawer-', 'sizing-backdrop-'));
+    
+    if (drawer && backdrop) {
+      const closeDrawer = () => {
+        drawer.classList.remove('open');
+        backdrop.classList.add('hidden');
+        unlockBodyScroll();
+        setTimeout(() => {
+          drawer.classList.add('hidden');
+        }, 300);
+      };
+
+      closeBtn.addEventListener('click', closeDrawer);
+      backdrop.addEventListener('click', closeDrawer);
+
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && !drawer.classList.contains('hidden')) {
+          closeDrawer();
+        }
+      });
+    }
+  });
 
   // Quantity selector functionality is now handled by quantity-input.liquid snippet
 
@@ -2763,9 +3291,73 @@ document.addEventListener('DOMContentLoaded', () => {
           "default": "SIZING"
         },
         {
+          "type": "header",
+          "content": "Sizing Item 1"
+        },
+        {
+          "type": "image_picker",
+          "id": "item1_icon",
+          "label": "Icon 1",
+          "info": "Upload an icon (40x40px recommended)"
+        },
+        {
+          "type": "text",
+          "id": "item1_title",
+          "label": "Title 1",
+          "default": "Size Guide",
+          "info": "Text displayed below the icon"
+        },
+        {
           "type": "page",
-          "id": "size_chart_page",
-          "label": "Select a Size Chart Page"
+          "id": "item1_content_page",
+          "label": "Content Page 1",
+          "info": "Select a page to display when this item is clicked"
+        },
+        {
+          "type": "header",
+          "content": "Sizing Item 2"
+        },
+        {
+          "type": "image_picker",
+          "id": "item2_icon",
+          "label": "Icon 2",
+          "info": "Upload an icon (40x40px recommended)"
+        },
+        {
+          "type": "text",
+          "id": "item2_title",
+          "label": "Title 2",
+          "default": "Fit Guide",
+          "info": "Text displayed below the icon"
+        },
+        {
+          "type": "page",
+          "id": "item2_content_page",
+          "label": "Content Page 2",
+          "info": "Select a page to display when this item is clicked"
+        },
+        {
+          "type": "header",
+          "content": "Sizing Item 3"
+        },
+        {
+          "type": "image_picker",
+          "id": "item3_icon",
+          "label": "Icon 3",
+          "info": "Upload an icon (40x40px recommended)"
+        },
+        {
+          "type": "text",
+          "id": "item3_title",
+          "label": "Title 3",
+          "default": "Care Guide",
+          "info": "Text displayed below the icon"
+        },
+        {
+          "type": "page",
+          "id": "item3_content_page",
+          "label": "Content Page 3",
+          "info": "Select a page to display when this item is clicked"
         }
       ]
     },
