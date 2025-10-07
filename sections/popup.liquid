@@ -117,11 +117,23 @@
           <div class="imgdiv w-full md:w-1/2 aspect-[4/3] md:aspect-auto">
             {% if section.settings.image != blank %}
               <div class="h-full w-full">
-                {{
-                  section.settings.image
-                  | image_url: width: 1200
-                  | image_tag: class: 'imgdiv-img w-full h-full object-cover', alt: 'Offer Promo', loading: 'eager'
-                }}
+                <img
+                  srcset="
+                    {%- if section.settings.image.width >= 375 -%}{{ section.settings.image | image_url: width: 375 }} 375w,{%- endif -%}
+                    {%- if section.settings.image.width >= 600 -%}{{ section.settings.image | image_url: width: 600 }} 600w,{%- endif -%}
+                    {%- if section.settings.image.width >= 900 -%}{{ section.settings.image | image_url: width: 900 }} 900w,{%- endif -%}
+                    {%- if section.settings.image.width >= 1200 -%}{{ section.settings.image | image_url: width: 1200 }} 1200w,{%- endif -%}
+                    {{ section.settings.image | image_url }} {{ section.settings.image.width }}w
+                  "
+                  sizes="(max-width: 768px) 100vw, 50vw"
+                  src="{{ section.settings.image | image_url: width: 900 }}"
+                  alt="Offer Promo"
+                  class="imgdiv-img w-full h-full object-cover"
+                  loading="eager"
+                  decoding="async"
+                  width="{{ section.settings.image.width }}"
+                  height="{{ section.settings.image.height }}"
+                >
               </div>
             {% else %}
               <div class="w-full h-6/5 md:h-9/5 bg-black-200 flex items-center justify-center">
