@@ -79,7 +79,7 @@ document.addEventListener('DOMContentLoaded', function () {
       await new Promise((resolve) => setTimeout(resolve, 9000));
 
     } catch (error) {
-      buttonText.textContent = 'GET NOTIFIED';
+      buttonText.textContent = 'SUBSCRIBE';
       loadingSpinner.classList.add('hidden');
       emailInput.classList.add('border-red-500');
       emailError.textContent = 'An error occurred. Please try again.';
