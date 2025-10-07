@@ -630,7 +630,7 @@
       <div class="list-separator"></div>
 
       {% assign blog_handle = section.settings.blog %}
-      {% assign post_limit = section.settings.post_limit %}
+      {% assign post_limit = section.settings.post_limit | default: 3 %}
       {% if blog_handle != blank and blogs[blog_handle].articles.size > 0 %}
         {% for article in blogs[blog_handle].articles %}
           <article
@@ -719,9 +719,71 @@
             <div class="list-separator"></div>
           </article>
         {% endfor %}
+      {% else %}
+        {% comment %} Show placeholder blog articles when no blog is selected {% endcomment %}
+        {% for i in (1..post_limit) %}
+          {%- assign placeholder_image = 'collection-1' -%}
+          <article
+            aria-labelledby="placeholder-article-title-{{ forloop.index0 }}"
+            class="blog-article-fb"
+            style="opacity: 1; transform: translateY(0);"
+          >
+            <a
+              href="#"
+              class="featured-blog-card"
+              aria-describedby="placeholder-article-date-{{ forloop.index0 }}"
+            >
+              <div class="featured-blog-card-image-wrapper">
+                {{ placeholder_image | placeholder_svg_tag: 'featured-blog-card-image' }}
+              </div>
+              <div class="featured-blog-card-content">
+                <time
+                  class="featured-blog-card-date"
+                  id="placeholder-article-date-{{ forloop.index0 }}"
+                  datetime="2024-01-01"
+                  style="position: relative; padding: var(--space-3xl) 0; color: var(--text); white-space: nowrap; margin: 0; font-size: var(--t-b-2-size); font-weight: var(--t-b-2-weight); line-height: var(--t-b-2-line-height);"
+                >
+                  01.01.24
+                </time>
+                <h3
+                  class="featured-blog-card-title"
+                  id="placeholder-article-title-{{ forloop.index0 }}"
+                  style="line-height: 1; font-size: var(--t-h-4-size); font-weight: var(--t-h-4-weight); line-height: var(--t-h-4-line-height); font-family: var(--font-subheading-family); font-style: var(--font-subheading-style); text-transform: uppercase;"
+                >
+                  <div
+                    class="fb-arrow-svg-wrapper object-contain transition-transform duration-300 group-hover:-rotate-90 featured-blog-card-title-arrow inline-block align-baseline"
+                    alt="Dropdown Icon"
+                  >
+                    <svg
+                      class="fb-arrow-svg w-5 h-5 object-contain transition-transform duration-200 ease-in-out group-hover:-rotate-90 mx-1"
+                      viewBox="4.5 1.5 8.5 13"
+                      fill="currentColor"
+                      xmlns="http://www.w3.org/2000/svg"
+                      stroke="currentColor"
+                      aria-hidden="true"
+                    >
+                      <path d="m12.14 8.753-5.482 4.796c-.646.566-1.658.106-1.658-.753V3.204a1 1 0 0 1 1.659-.753l5.48 4.796a1 1 0 0 1 0 1.506z"/>
+                    </svg>
+                  </div>
+                  <span class="grid-view-title">SAMPLE BLOG {{ i }}</span>
+                  <span class="list-view-title">SAMPLE BLOG {{ i }}</span>
+                </h3>
+                <p
+                  class="featured-blog-card-desc"
+                  style="margin: 0; color: var(--text); flex-grow: 1; font-family: var(--font-body-family); font-style: var(--font-body-style); font-size: var(--t-b-2-size); font-weight: var(--t-b-2-weight); line-height: var(--t-b-2-line-height);"
+                >
+                  This is a sample blog post description that shows how the content will look when you add your own blog
+                  articles.
+                </p>
+              </div>
+            </a>
+            <!-- Separator after each card (only visible in list view) -->
+            <div class="list-separator"></div>
+          </article>
+        {% endfor %}
       {% endif %}
     </div>
-    {% if blogs[blog_handle].articles.size > section.settings.post_limit %}
+    {% if blog_handle != blank and blogs[blog_handle].articles.size > section.settings.post_limit %}
       <div class="load-more-btn-fb-container">
         {% render 'primary-button',
           button_text: 'LOAD MORE',
@@ -960,7 +1022,9 @@
     {
       "name": "Featured Blogs",
       "settings": {
-        "blog": "news"
+        "enabled": true,
+        "heading": "Featured Blogs",
+        "post_limit": 3
       }
     }
   ]
