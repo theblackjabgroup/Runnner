@@ -362,23 +362,36 @@
                     <ul class="!py-2 !m-0 facets-layout facets-layout-list list-unstyled" role="list">
                       {%- for option in results.sort_options -%}
                         <li class="list-menu__item facets__item">
-                          <label for="Sort-{{ option.value | escape }}" class="facet-checkbox hover:bg-gray-200 !px-4">
+                          <label
+                            for="Sort-{{ option.value | escape }}"
+                            class="items-center facet-checkbox hover:bg-gray-200 !px-4 !p-0 uppercase text-[16px]"
+                          >
                             <input
-                              type="radio"
+                              type="checkbox"
                               name="sort_by"
                               value="{{ option.value | escape }}"
                               id="Sort-{{ option.value | escape }}"
                               {% if option.value == sort_by %}
                                 checked
                               {% endif %}
-                              class="facet-checkbox__input"
+                              onchange="handleSortByChange(this)"
+                              style="position: absolute; opacity: 0; pointer-events: none;"
                             >
                             {{- 'square.svg' | inline_asset_content -}}
                             <div class="svg-wrapper translate-y-[5px]" style="transform: translateY(var(--space-xs));">
                               {{- 'icon-checkmark.svg' | inline_asset_content -}}
                             </div>
-                            <span class="text-[16px] text-nowrap" style="color: var(--text);">
-                              {{- option.name | escape -}}
+                            <span class="" aria-hidden="true">
+                              <span
+                                class="text-[16px] text-nowrap"
+                                style="color: var(--text);"
+                                onmouseout="this.style.backgroundColor='transparent'"
+                              >
+                                {{- option.name | escape -}}
+                              </span>
+                            </span>
+                            <span class="visually-hidden">
+                              {{- option.name | escape }}
                             </span>
                           </label>
                         </li>
@@ -571,24 +584,36 @@
         <ul class="!py-2 !m-0 facets-layout facets-layout-list list-unstyled" role="list">
           {%- for option in results.sort_options -%}
             <li class="list-menu__item facets__item">
-              <label for="MobileSort-{{ option.value | escape }}" class="facet-checkbox hover:bg-gray-200 !px-4">
+              <label
+                for="MobileSort-{{ option.value | escape }}"
+                class="items-center facet-checkbox hover:bg-gray-200 !px-4 !p-0 uppercase text-[14px]"
+              >
                 <input
-                  type="radio"
+                  type="checkbox"
                   name="sort_by"
                   value="{{ option.value | escape }}"
                   id="MobileSort-{{ option.value | escape }}"
                   {% if option.value == sort_by %}
                     checked
                   {% endif %}
-                  class="facet-checkbox__input"
-                  onchange="updateMobileSortFromRadio(this)"
+                  onchange="handleSortByChange(this)"
+                  style="position: absolute; opacity: 0; pointer-events: none;"
                 >
                 {{- 'square.svg' | inline_asset_content -}}
                 <div class="svg-wrapper translate-y-[5px]" style="transform: translateY(var(--space-xs));">
                   {{- 'icon-checkmark.svg' | inline_asset_content -}}
                 </div>
-                <span class="text-[16px] text-nowrap" style="color: var(--text);">
-                  {{- option.name | escape -}}
+                <span class="" aria-hidden="true">
+                  <span
+                    class="text-[14px] text-nowrap"
+                    style="color: var(--text);"
+                    onmouseout="this.style.backgroundColor='transparent'"
+                  >
+                    {{- option.name | escape -}}
+                  </span>
+                </span>
+                <span class="visually-hidden">
+                  {{- option.name | escape }}
                 </span>
               </label>
             </li>
@@ -1243,6 +1268,7 @@
     width: 100%;
     height: 32px;
     padding: 8px 10px 8px 25px;
+    border: none;
     border-radius: 3px;
     font-family: var(--font-body-family);
     font-style: var(--font-body-style);
@@ -1389,4 +1415,23 @@
       }
     });
   });
+
+  // Handle sort by checkbox changes (single selection behavior)
+  function handleSortByChange(selectedCheckbox) {
+    if (selectedCheckbox.checked) {
+      // Uncheck all other sort by checkboxes
+      const allSortCheckboxes = document.querySelectorAll('input[name="sort_by"][type="checkbox"]');
+      allSortCheckboxes.forEach((checkbox) => {
+        if (checkbox !== selectedCheckbox) {
+          checkbox.checked = false;
+        }
+      });
+
+      // Submit the form to apply the sort
+      const form = selectedCheckbox.closest('form');
+      if (form) {
+        form.submit();
+      }
+    }
+  }
 </script>

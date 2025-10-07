@@ -70,6 +70,15 @@ function initializeCartDrawerQuantitiesWithFallback() {
 }
 
 document.addEventListener('DOMContentLoaded', function () {
+  // Cart Drawer Checkout Button
+  const cartDrawerCheckoutBtn = document.querySelector('.cart-drawer-checkout-btn');
+  if (cartDrawerCheckoutBtn) {
+    cartDrawerCheckoutBtn.addEventListener('click', function (e) {
+      e.preventDefault();
+      window.location.href = '/checkout';
+    });
+  }
+
   // Order note functionality
   var orderNoteTextarea = document.getElementById('CartDrawer-Note');
   var saveNoteButton = document.getElementById('CartDrawer-SaveNote');

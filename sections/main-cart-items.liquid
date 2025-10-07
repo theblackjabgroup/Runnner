@@ -13,19 +13,21 @@
             <div class="cart-item">
               <img
                 class="item-image-cart-page"
-                src="{{ item.image | image_url: width: 400 }}"
+                src="{{ item.image | image_url: width: 600 }}"
                 alt="{{ item.product.title | escape }}"
-                width="186"
                 height="222"
+                width="186"
                 loading="lazy"
                 sizes="(max-width: 768px) 128px, (max-width: 1024px) 140px, 186px"
                 srcset="
-                  {{ item.image | image_url: width: 128 }} 128w,
-                  {{ item.image | image_url: width: 140 }} 140w,
                   {{ item.image | image_url: width: 186 }} 186w,
                   {{ item.image | image_url: width: 256 }} 256w,
                   {{ item.image | image_url: width: 372 }} 372w,
-                  {{ item.image | image_url: width: 400 }} 400w
+                  {{ item.image | image_url: width: 400 }} 400w,
+                  {{ item.image | image_url: width: 500 }} 500w,
+                  {{ item.image | image_url: width: 600 }} 600w,
+                  {{ item.image | image_url: width: 750 }} 750w,
+                  {{ item.image | image_url: width: 800 }} 800w
                 "
               >
 
@@ -239,25 +241,31 @@
             {{ cart.total_price | money }}
           </span>
         </div>
-        <button
-          type="button"
-          class="checkout-btn"
-          onclick="window.location.href='/checkout'"
-          {% if cart == empty %}
-            disabled
-          {% endif %}
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="32"
-            height="32"
-            fill="var(--secondary_button_text_color)"
-            viewBox="0 0 256 256"
-          >
-            <path d="M181.66,133.66l-80,80a8,8,0,0,1-11.32-11.32L164.69,128,90.34,53.66a8,8,0,0,1,11.32-11.32l80,80A8,8,0,0,1,181.66,133.66Z"></path>
-          </svg>
-          <span>Checkout</span>
-        </button>
+        {%- if cart == empty -%}
+          {%- assign checkout_disabled = 'disabled' -%}
+          {%- assign checkout_wrapper_class = 'checkout-btn-wrapper cart-empty' -%}
+        {%- else -%}
+          {%- assign checkout_disabled = '' -%}
+          {%- assign checkout_wrapper_class = 'checkout-btn-wrapper' -%}
+        {%- endif -%}
+
+        <div class="{{ checkout_wrapper_class }}">
+          {% render 'tertiary-button',
+            button_text: 'CHECKOUT',
+            button_font_size: 'var(--t-b-1-size)',
+            font_weight: 'var(--t-b-1-weight)',
+            button_line_height: 'var(--t-b-1-line-height)',
+            mobile_font_size: 'var(--tm-b-2-size)',
+            mobile_font_weight: 'var(--tm-b-2-weight)',
+            mobile_line_height: 'var(--tm-b-2-line-height)',
+            tertiary_class: 'add-to-cart-tertiary-btn cart-page-checkout-btn',
+            button_type: 'button',
+            button_width: '500px',
+            button_height: '50px',
+            mobile_button_width: '67vw',
+            data_attributes: 'aria-describedby="add-to-cart-description"'
+          %}
+        </div>
       </div>
     </div>
   </div>

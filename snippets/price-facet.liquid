@@ -3,7 +3,6 @@
   assign from_label = 'products.facets.from' | t | default: 'From'
   assign to_label = 'products.facets.to' | t | default: 'To'
   assign reset_label = 'products.facets.clear_all' | t | default: 'Clear All'
-  assign highest_price_label = 'products.facets.max_price' | t | default: 'The highest price is'
 -%}
 
 <div class="price-facet-container {% if filter_type == 'mobile' %}mobile-price-facet{% endif %}">
@@ -25,12 +24,9 @@
             {%- endif -%}
             type="text"
             inputmode="decimal"
-            placeholder=""
-            data-pattern="\d| |,|\."
-            data-min="0"
-            data-max="{{ filter.range_max | money_without_currency }}"
+            placeholder="{{ from_label }}"
+            onkeydown="handlePriceKeydown(event)"
           >
-          <label class="field__label" for="{{ id_prefix }}{{ filter.label | escape }}-GTE">{{ from_label }}</label>
         </div>
       </div>
     </div>
@@ -48,28 +44,12 @@
             {%- endif -%}
             type="text"
             inputmode="decimal"
-            placeholder=""
-            data-pattern="\d| |,|\."
-            data-min="0"
-            data-max="{{ filter.range_max | money_without_currency }}"
+            placeholder="{{ to_label }}"
+            onkeydown="handlePriceKeydown(event)"
           >
-          <label class="field__label" for="{{ id_prefix }}{{ filter.label | escape }}-LTE">{{ to_label }}</label>
         </div>
       </div>
     </div>
-  </div>
-
-  <div class="price-facet-info">
-    <span class="highest-price-text">
-      {{-
-        'products.facets.max_price'
-        | t: price: filter.range_max
-        | money
-        | default: 'The highest price is '
-        | append: filter.range_max
-        | money
-      -}}
-    </span>
   </div>
 </div>
 
@@ -116,6 +96,8 @@
     width: 100%;
     position: relative;
     margin-bottom: 10px;
+    outline: none;
+    border: none !important;
   }
 
   .price-input-wrapper {
@@ -136,139 +118,91 @@
     line-height: var(--tm-b-3-line-height);
     color: #999;
     pointer-events: none;
+    top: 50%;
+    transform: translateY(-50%);
   }
 
   .price-input {
     width: 100%;
-    height: 32px;
+    height: 40px;
     padding: 8px 10px 8px 25px;
-    border-radius: 3px;
+    border: 1px solid #e0e0e0 !important;
+    border-radius: 4px;
     font-family: var(--font-body-family);
-    font-style: var(--font-body-style);
-    font-weight: var(--font-body-weight);
-    font-size: var(--tm-b-3-size);
-    line-height: var(--tm-b-3-line-height);
-    background-color: white;
+    font-size: var(--font-body-size);
+    background-color: var(--background);
+    color: var(--text);
     box-sizing: border-box;
     outline: none;
-    transition: border-color 0.2s ease;
   }
 
   .price-input:focus {
     outline: none;
-    box-shadow: none;
-    margin-bottom: 10px;
+    border: 1px solid #999 !important;
   }
 
-  .price-input:active {
-    outline: none;
-    box-shadow: none;
-  }
-
-  .field__label {
-    position: absolute;
-    left: 20px;
-    top: 0;
-    transform: translateY(-70%);
-    font-family: var(--font-body-family);
-    font-style: var(--font-body-style);
-    font-weight: var(--font-body-weight);
-    font-size: var(--tm-b-3-size);
-    line-height: var(--tm-b-3-line-height);
+  .price-input::placeholder {
     color: #999;
-    pointer-events: none;
-    transition: all 0.3s ease;
-    background-color: white;
-    padding: 0 4px;
-    z-index: 10;
-  }
-
-  .price-input:focus + .field__label,
-  .price-input:not(:placeholder-shown) + .field__label,
-  .price-input[value]:not([value='']) + .field__label {
-    top: 0;
-    font-size: var(--tm-b-2-size);
-    color: #333;
-    transform: translateY(-50%);
-    background-color: white;
-    padding: 0 4px;
-  }
-
-  .price-facet-info {
-    font-family: var(--font-body-family);
-    font-style: var(--font-body-style);
-    font-weight: var(--font-body-weight);
-    font-size: var(--tm-b-2-size);
-    line-height: var(--tm-b-2-line-height);
-    color: var(--text);
-    margin-top: 4px;
-  }
-
-  .highest-price-text {
-    font-family: var(--font-body-family);
-    font-style: var(--font-body-style);
-    font-weight: var(--font-body-weight);
-    font-size: var(--tm-b-3-size);
-    line-height: var(--tm-b-3-line-height);
-    color: var(--text);
-  }
-
-  /* Mobile-specific styling */
-  .mobile-price-facet .price-facet-container {
-    width: 100%;
-    max-width: none;
-  }
-
-  .mobile-price-facet .price-input {
-    height: 48px;
-    padding: 12px 16px 12px 35px;
-    border-radius: 8px;
-  }
-
-  .mobile-price-facet .currency-symbol {
-    left: 16px;
-  }
-
-  .mobile-price-facet .field__label {
-    left: 40px;
-  }
-
-  .mobile-price-facet .price-input:focus + .field__label,
-  .mobile-price-facet .price-input:not(:placeholder-shown) + .field__label,
-  .mobile-price-facet .price-input[value]:not([value='']) + .field__label {
-    top: 0;
-    font-size: var(--tm-b-2-size);
-    color: #333;
-    transform: translateY(-50%);
-    background-color: white;
-    padding: 0 4px;
+    opacity: 1;
   }
 </style>
 
 <script>
   function resetPriceFilters(event) {
+    event.preventDefault();
+
+    console.log('Reset button clicked'); // Debug log
+
     // Find all price inputs in the current price facet container
     const container = event.target.closest('.price-facet-container');
-    if (!container) return;
+    if (!container) {
+      console.log('No container found'); // Debug log
+      return;
+    }
 
     // Clear min and max price inputs
     const minInput = container.querySelector('input[name*="GTE"]');
     const maxInput = container.querySelector('input[name*="LTE"]');
 
+    console.log('Min input found:', minInput); // Debug log
+    console.log('Max input found:', maxInput); // Debug log
+
     if (minInput) {
+      console.log('Clearing min input, current value:', minInput.value); // Debug log
       minInput.value = '';
+      minInput.setAttribute('value', '');
       minInput.dispatchEvent(new Event('input', { bubbles: true }));
+      minInput.dispatchEvent(new Event('change', { bubbles: true }));
+      console.log('Min input cleared, new value:', minInput.value); // Debug log
     }
 
     if (maxInput) {
+      console.log('Clearing max input, current value:', maxInput.value); // Debug log
       maxInput.value = '';
+      maxInput.setAttribute('value', '');
       maxInput.dispatchEvent(new Event('input', { bubbles: true }));
+      maxInput.dispatchEvent(new Event('change', { bubbles: true }));
+      console.log('Max input cleared, new value:', maxInput.value); // Debug log
     }
 
-    // Trigger form submission to apply the reset
+    // Submit the form to apply the reset
     const form = container.closest('form');
     if (form) {
+      console.log('Submitting form'); // Debug log
       form.submit();
+    } else {
+      console.log('No form found'); // Debug log
+    }
+  }
+
+  function handlePriceKeydown(event) {
+    // Submit form when Enter key is pressed
+    if (event.key === 'Enter') {
+      event.preventDefault();
+      const form = event.target.closest('form');
+      if (form) {
+        form.submit();
+      }
     }
   }
 </script>

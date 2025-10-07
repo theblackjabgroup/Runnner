@@ -580,6 +580,15 @@ function changeCartItemVariant(itemKey, newVariantId) {
 
 // Event Listeners
 document.addEventListener('DOMContentLoaded', function () {
+  // Cart Page Checkout Button
+  const cartPageCheckoutBtn = document.querySelector('.cart-page-checkout-btn');
+  if (cartPageCheckoutBtn) {
+    cartPageCheckoutBtn.addEventListener('click', function (e) {
+      e.preventDefault();
+      window.location.href = '/checkout';
+    });
+  }
+
   // Initialize quantity inputs with correct values from cart items
   initializeCartQuantities();
 
