@@ -1,53 +1,84 @@
 {%- liquid
   assign currency_symbol = cart.currency.symbol | default: '$'
-  assign from_label = 'products.facets.from' | t | default: 'From'
-  assign to_label = 'products.facets.to' | t | default: 'To'
-  assign reset_label = 'products.facets.clear_all' | t | default: 'Clear All'
+  assign from_label = 'products.facets.from' | t | default: 'FROM'
+  assign to_label = 'products.facets.to' | t | default: 'TO'
+  assign reset_label = 'products.facets.clear_all' | t | default: 'CLEAR'
+  assign min_price = filter.min_value.value | default: 0
+  assign max_price = filter.max_value.value | default: filter.range_max
+  assign range_min = filter.range_min | default: 0
+  assign range_max = filter.range_max | default: 10000
 -%}
 
 <div class="price-facet-container {% if filter_type == 'mobile' %}mobile-price-facet{% endif %}">
+  <!-- CLEAR button in top right -->
   <div class="price-facet-header">
     <span class="price-reset" onclick="resetPriceFilters(event)">{{ reset_label }}</span>
   </div>
 
-  <div class="price-facet-inputs">
-    <div class="price-facet-row">
-      <div class="field">
-        <div class="price-input-wrapper">
-          <span class="currency-symbol">{{ currency_symbol }}</span>
-          <input
-            class="field__input price-input"
-            name="{{ filter.min_value.param_name }}"
-            id="{{ id_prefix }}{{ filter.label | escape }}-GTE"
-            {%- if filter.min_value.value -%}
-              value="{{ filter.min_value.value | money_without_currency }}"
-            {%- endif -%}
-            type="text"
-            inputmode="decimal"
-            placeholder="{{ from_label }}"
-            onkeydown="handlePriceKeydown(event)"
-          >
-        </div>
+  <!-- Price Range Slider -->
+  <div class="price-slider-container">
+    <div class="price-slider-track">
+      <div class="price-slider-range" id="slider-range-{{ id_prefix }}"></div>
+      <div class="price-slider-wrapper">
+        <input
+          type="range"
+          class="price-slider-handle price-slider-min"
+          id="slider-min-{{ id_prefix }}"
+          min="{{ range_min }}"
+          max="10000"
+          value="{{ min_price }}"
+          oninput="updatePriceSlider('{{ id_prefix }}', this)"
+        >
+        <input
+          type="range"
+          class="price-slider-handle price-slider-max"
+          id="slider-max-{{ id_prefix }}"
+          min="{{ range_min }}"
+          max="10000"
+          value="{{ max_price }}"
+          oninput="updatePriceSlider('{{ id_prefix }}', this)"
+        >
       </div>
     </div>
+  </div>
 
-    <div class="price-facet-row">
-      <div class="field">
-        <div class="price-input-wrapper">
-          <span class="currency-symbol">{{ currency_symbol }}</span>
-          <input
-            class="field__input price-input"
-            name="{{ filter.max_value.param_name }}"
-            id="{{ id_prefix }}{{ filter.label | escape }}-LTE"
-            {%- if filter.max_value.value -%}
-              value="{{ filter.max_value.value | money_without_currency }}"
-            {%- endif -%}
-            type="text"
-            inputmode="decimal"
-            placeholder="{{ to_label }}"
-            onkeydown="handlePriceKeydown(event)"
-          >
-        </div>
+  <!-- Price Input Fields -->
+  <div class="price-facet-inputs">
+    <div class="price-input-row">
+      <div class="price-field">
+        <input
+          class="price-input price-input-min"
+          name="{{ filter.min_value.param_name }}"
+          id="{{ id_prefix }}{{ filter.label | escape }}-GTE"
+          {%- if filter.min_value.value -%}
+            value="{{ filter.min_value.value | money_without_currency | replace: ',', '' | split: '.' | first }}"
+          {%- endif -%}
+          type="number"
+          step="1"
+          inputmode="numeric"
+          placeholder="{{ currency_symbol }} {{ from_label }}"
+          onkeydown="handlePriceKeydown(event)"
+          oninput="updatePriceFromInput('{{ id_prefix }}', this.value, 'min')"
+        >
+      </div>
+
+      <span class="price-separator">-</span>
+
+      <div class="price-field">
+        <input
+          class="price-input price-input-max"
+          name="{{ filter.max_value.param_name }}"
+          id="{{ id_prefix }}{{ filter.label | escape }}-LTE"
+          {%- if filter.max_value.value -%}
+            value="{{ filter.max_value.value | money_without_currency | replace: ',', '' | split: '.' | first }}"
+          {%- endif -%}
+          type="number"
+          step="1"
+          inputmode="numeric"
+          placeholder="{{ currency_symbol }} {{ to_label }}"
+          onkeydown="handlePriceKeydown(event)"
+          oninput="updatePriceFromInput('{{ id_prefix }}', this.value, 'max')"
+        >
       </div>
     </div>
   </div>
@@ -55,95 +86,206 @@
 
 <style>
   .price-facet-container {
-    background-color: transparent;
+    background-color: white;
     border-radius: 6px;
-    padding: 12px;
-    width: 200px;
+    padding: 16px;
+    width: 280px;
     position: relative;
+    font-family: sans-serif;
   }
 
   .price-facet-header {
     display: flex;
     justify-content: flex-end;
-    margin-bottom: 10px;
+    margin-bottom: 16px;
   }
 
   .price-reset {
-    font-family: var(--font-body-family);
-    font-style: var(--font-body-style);
-    font-weight: var(--font-body-weight);
-    font-size: var(--tm-b-3-size);
-    line-height: var(--tm-b-3-line-height);
-    color: var(--text);
-    padding: 0 0 var(--space-md) 0;
+    font-family: sans-serif;
+    font-size: 12px;
+    color: #000;
+    text-decoration: underline;
     cursor: pointer;
     text-transform: uppercase;
+    font-weight: normal;
+    padding: 0;
+    margin: 0;
+    background: none;
+    border: none;
   }
 
-  .price-facet-inputs {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-    margin-bottom: 8px;
-  }
-
-  .price-facet-row {
-    display: flex;
-    width: 100%;
-  }
-
-  .field {
-    width: 100%;
+  /* Price Slider Styles - FIXED */
+  .price-slider-container {
+    margin-bottom: 16px;
     position: relative;
-    margin-bottom: 10px;
-    outline: none;
-    border: none !important;
+    height: 20px;
   }
 
-  .price-input-wrapper {
-    position: relative;
-    display: flex;
-    align-items: center;
-    width: 100%;
-  }
-
-  .currency-symbol {
+  .price-slider-track {
     position: absolute;
-    left: 10px;
-    z-index: 5;
-    font-family: var(--font-body-family);
-    font-style: var(--font-body-style);
-    font-weight: var(--font-body-weight);
-    font-size: var(--tm-b-3-size);
-    line-height: var(--tm-b-3-line-height);
-    color: #999;
-    pointer-events: none;
+    top: 50%;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background-color: #ccc;
+    border-radius: 2px;
+    transform: translateY(-50%);
+  }
+
+  .price-slider-wrapper {
+    position: relative;
+    width: 100%;
+    height: 100%;
+  }
+
+  .price-slider-range {
+    position: absolute;
+    height: 4px;
+    background-color: #000;
+    border-radius: 2px;
     top: 50%;
     transform: translateY(-50%);
+    pointer-events: none;
+    z-index: 1;
+  }
+
+  .price-slider-handle {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: transparent;
+    pointer-events: none;
+    -webkit-appearance: none;
+    appearance: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  /* Enable pointer events only on the thumb */
+  .price-slider-handle::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 16px;
+    height: 16px;
+    background-color: #000;
+    border: 2px solid #fff;
+    border-radius: 0;
+    cursor: pointer;
+    pointer-events: auto;
+    position: relative;
+    z-index: 4;
+  }
+
+  .price-slider-handle::-moz-range-thumb {
+    width: 16px;
+    height: 16px;
+    background-color: #000;
+    border: 2px solid #fff;
+    border-radius: 0;
+    cursor: pointer;
+    pointer-events: auto;
+    position: relative;
+    z-index: 4;
+  }
+
+  /* Ensure both sliders are interactive */
+  .price-slider-min {
+    z-index: 3;
+  }
+
+  .price-slider-max {
+    z-index: 2;
+  }
+
+  /* When min value is being adjusted, bring it to front */
+  .price-slider-min:active,
+  .price-slider-min:focus {
+    z-index: 5;
+  }
+
+  .price-slider-max:active,
+  .price-slider-max:focus {
+    z-index: 5;
+  }
+
+  /* Price Input Fields */
+  .price-facet-inputs {
+    margin-bottom: 0;
+  }
+
+  .price-input-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .price-field {
+    flex: 1;
+    position: relative;
   }
 
   .price-input {
     width: 100%;
-    height: 40px;
-    padding: 8px 10px 8px 25px;
-    border: 1px solid #e0e0e0 !important;
+    height: 32px;
+    padding: 8px 10px;
+    border: 1px solid #000;
     border-radius: 4px;
-    font-family: var(--font-body-family);
-    font-size: var(--font-body-size);
-    background-color: var(--background);
-    color: var(--text);
+    font-family: sans-serif;
+    font-size: 12px;
+    background-color: white;
+    color: #000;
     box-sizing: border-box;
     outline: none;
+    -moz-appearance: textfield; /* Remove arrows in Firefox */
+  }
+
+  /* Remove arrows in Chrome, Safari, Edge, Opera */
+  .price-input::-webkit-outer-spin-button,
+  .price-input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
   }
 
   .price-input:focus {
     outline: none;
-    border: 1px solid #999 !important;
+    border-color: #000;
   }
 
   .price-input::placeholder {
     color: #999;
     opacity: 1;
+    font-size: 12px;
+  }
+
+  .price-separator {
+    font-family: sans-serif;
+    font-size: 14px;
+    color: #000;
+    font-weight: normal;
+    flex-shrink: 0;
+  }
+
+  /* Mobile Responsive */
+  @media (max-width: 768px) {
+    .price-facet-container {
+      width: 100%;
+      max-width: 300px;
+    }
+
+    .price-slider-container {
+      margin-bottom: 12px;
+    }
+
+    .price-input-row {
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .price-separator {
+      display: none;
+    }
   }
 </style>
 
@@ -151,58 +293,213 @@
   function resetPriceFilters(event) {
     event.preventDefault();
 
-    console.log('Reset button clicked'); // Debug log
-
-    // Find all price inputs in the current price facet container
     const container = event.target.closest('.price-facet-container');
-    if (!container) {
-      console.log('No container found'); // Debug log
-      return;
-    }
+    if (!container) return;
 
-    // Clear min and max price inputs
-    const minInput = container.querySelector('input[name*="GTE"]');
-    const maxInput = container.querySelector('input[name*="LTE"]');
-
-    console.log('Min input found:', minInput); // Debug log
-    console.log('Max input found:', maxInput); // Debug log
+    const minInput = container.querySelector('.price-input-min');
+    const maxInput = container.querySelector('.price-input-max');
+    const minSlider = container.querySelector('.price-slider-min');
+    const maxSlider = container.querySelector('.price-slider-max');
 
     if (minInput) {
-      console.log('Clearing min input, current value:', minInput.value); // Debug log
       minInput.value = '';
-      minInput.setAttribute('value', '');
-      minInput.dispatchEvent(new Event('input', { bubbles: true }));
-      minInput.dispatchEvent(new Event('change', { bubbles: true }));
-      console.log('Min input cleared, new value:', minInput.value); // Debug log
     }
 
     if (maxInput) {
-      console.log('Clearing max input, current value:', maxInput.value); // Debug log
       maxInput.value = '';
-      maxInput.setAttribute('value', '');
-      maxInput.dispatchEvent(new Event('input', { bubbles: true }));
-      maxInput.dispatchEvent(new Event('change', { bubbles: true }));
-      console.log('Max input cleared, new value:', maxInput.value); // Debug log
     }
 
-    // Submit the form to apply the reset
-    const form = container.closest('form');
-    if (form) {
-      console.log('Submitting form'); // Debug log
-      form.submit();
-    } else {
-      console.log('No form found'); // Debug log
+    if (minSlider && maxSlider) {
+      minSlider.value = minSlider.min;
+      maxSlider.value = maxSlider.max;
+      updateSliderRange(container);
     }
+
+    // Trigger filter update
+    clearTimeout(window.priceResetTimeout);
+    window.priceResetTimeout = setTimeout(() => {
+      triggerFilterUpdate();
+    }, 100);
   }
 
   function handlePriceKeydown(event) {
-    // Submit form when Enter key is pressed
     if (event.key === 'Enter') {
       event.preventDefault();
-      const form = event.target.closest('form');
-      if (form) {
-        form.submit();
-      }
+      triggerFilterUpdate();
     }
   }
+
+  function updatePriceSlider(prefix, sliderElement) {
+    const container = sliderElement.closest('.price-facet-container');
+    const minSlider = container.querySelector('.price-slider-min');
+    const maxSlider = container.querySelector('.price-slider-max');
+    const minInput = container.querySelector('.price-input-min');
+    const maxInput = container.querySelector('.price-input-max');
+
+    let minVal = parseInt(minSlider.value);
+    let maxVal = parseInt(maxSlider.value);
+
+    // Ensure min doesn't exceed max
+    if (minVal > maxVal) {
+      const temp = maxVal;
+      maxVal = minVal;
+      minVal = temp;
+      minSlider.value = minVal;
+      maxSlider.value = maxVal;
+    }
+
+    // Update input fields
+    minInput.value = minVal;
+    maxInput.value = maxVal;
+
+    // Update visual range
+    updateSliderRange(container);
+
+    // Apply filters via AJAX after a short delay
+    clearTimeout(window.priceSliderTimeout);
+    window.priceSliderTimeout = setTimeout(() => {
+      triggerFilterUpdate();
+    }, 500);
+  }
+
+  function updatePriceFromInput(prefix, value, type) {
+    const container = document.querySelector(`#slider-min-${prefix}`).closest('.price-facet-container');
+    const minSlider = container.querySelector('.price-slider-min');
+    const maxSlider = container.querySelector('.price-slider-max');
+    const minInput = container.querySelector('.price-input-min');
+    const maxInput = container.querySelector('.price-input-max');
+
+    const numValue = parseInt(value) || parseInt(type === 'min' ? minSlider.min : maxSlider.max);
+
+    if (type === 'min') {
+      minSlider.value = Math.max(parseInt(minSlider.min), Math.min(numValue, parseInt(maxSlider.value) - 1));
+    } else {
+      maxSlider.value = Math.min(parseInt(maxSlider.max), Math.max(numValue, parseInt(minSlider.value) + 1));
+    }
+
+    updateSliderRange(container);
+
+    clearTimeout(window.priceInputTimeout);
+    window.priceInputTimeout = setTimeout(() => {
+      triggerFilterUpdate();
+    }, 800);
+  }
+
+  function updateSliderRange(container) {
+    const minSlider = container.querySelector('.price-slider-min');
+    const maxSlider = container.querySelector('.price-slider-max');
+    const rangeDisplay = container.querySelector('.price-slider-range');
+
+    if (!minSlider || !maxSlider || !rangeDisplay) return;
+
+    const min = parseInt(minSlider.min);
+    const max = parseInt(minSlider.max);
+    const minVal = parseInt(minSlider.value);
+    const maxVal = parseInt(maxSlider.value);
+
+    const leftPercent = ((minVal - min) / (max - min)) * 100;
+    const rightPercent = ((maxVal - min) / (max - min)) * 100;
+
+    rangeDisplay.style.left = leftPercent + '%';
+    rangeDisplay.style.width = rightPercent - leftPercent + '%';
+  }
+
+  function triggerFilterUpdate() {
+    const form = document.getElementById('FacetFiltersForm') || document.getElementById('FacetFiltersFormMobile');
+    if (!form) {
+      console.error('Filter form not found');
+      return;
+    }
+
+    // Build query parameters from form
+    const formData = new FormData(form);
+    const params = new URLSearchParams();
+
+    for (let [key, value] of formData.entries()) {
+      if (value) {
+        params.append(key, value);
+      }
+    }
+
+    const currentUrl = new URL(window.location);
+    const newUrl = `${currentUrl.pathname}?${params.toString()}`;
+    const currentScrollY = window.scrollY;
+
+    // Update URL without reload
+    window.history.pushState({}, '', newUrl);
+
+    // Fetch new results
+    fetch(newUrl, {
+      method: 'GET',
+      headers: {
+        'X-Requested-With': 'XMLHttpRequest',
+      },
+    })
+      .then((response) => response.text())
+      .then((html) => {
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(html, 'text/html');
+
+        // Update product grid - try multiple selectors
+        const selectors = [
+          '#ProductGridContainer',
+          '.product-grid-container',
+          '.product-grid',
+          '.collection-product-grid',
+          '[id*="product-grid"]',
+          '[class*="product-grid"]',
+        ];
+
+        let updated = false;
+        for (let selector of selectors) {
+          const newGrid = doc.querySelector(selector);
+          const currentGrid = document.querySelector(selector);
+
+          if (newGrid && currentGrid) {
+            currentGrid.innerHTML = newGrid.innerHTML;
+            updated = true;
+            console.log('Updated product grid using selector:', selector);
+            break;
+          }
+        }
+
+        if (!updated) {
+          console.warn(
+            'Could not find product grid. Available IDs:',
+            Array.from(doc.querySelectorAll('[id]'))
+              .map((el) => el.id)
+              .filter((id) => id.toLowerCase().includes('product'))
+          );
+        }
+
+        // Update product count
+        const newCount = doc.querySelector('.product-count, [class*="product-count"]');
+        const currentCount = document.querySelector('.product-count, [class*="product-count"]');
+        if (newCount && currentCount) {
+          currentCount.innerHTML = newCount.innerHTML;
+        }
+
+        // Update active facets pills (but NOT the filter form itself)
+        const newActiveFacets = doc.querySelector('.active-facets');
+        const currentActiveFacets = document.querySelector('.active-facets');
+        if (newActiveFacets && currentActiveFacets) {
+          currentActiveFacets.innerHTML = newActiveFacets.innerHTML;
+        }
+
+        // Maintain scroll position
+        window.scrollTo(0, currentScrollY);
+      })
+      .catch((error) => {
+        console.error('Filter update failed:', error);
+        // If AJAX fails, fall back to page reload
+        window.location.href = newUrl;
+      });
+  }
+
+  // Initialize slider ranges on page load
+  document.addEventListener('DOMContentLoaded', function () {
+    document.querySelectorAll('.price-facet-container').forEach((container) => {
+      updateSliderRange(container);
+    });
+  });
 </script>

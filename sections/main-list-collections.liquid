@@ -1,22 +1,13 @@
-{{ 'component-card.css' | asset_url | stylesheet_tag }}
-{{ 'section-collection-list.css' | asset_url | stylesheet_tag }}
-{{ 'scroll-animations.css' | asset_url | stylesheet_tag }}
-{{ 'main-list-collections.css' | asset_url | stylesheet_tag }}
+{{ 'collections-bundle.css' | asset_url | stylesheet_tag }}
 
 <script src="{{ 'scroll-animations.js' | asset_url }}" defer="defer"></script>
 <script src="{{ 'main-list-collections.js' | asset_url }}" defer="defer"></script>
 
-<div
-  class="!p-0 py-16"
-  style="background-color: var(--background);"
->
-  <div
-    class="breadcrumb-collections-list border-b mb-10 w-[95vw] flex items-center"
-    style="background-color: var(--background); border-color: var(--border); height: var(--space-7xl); margin-bottom: var(--space-lg);"
-  >
-    <h1 class="uppercase !font-light breadcrumb-text-size" style="color: var(--text);">Shop</h1>
-    <span class="mx-2" style="color: var(--text);">/</span>
-    <h1 class="breadcrumb-text-size !font-light uppercase" style="color: var(--text);">
+<div class="!p-0 py-16 collection-page-wrapper">
+  <div class="breadcrumb-collections-list border-b mb-10 w-[95vw] flex items-center">
+    <h1 class="uppercase !font-light breadcrumb-text-size breadcrumb-text">Shop</h1>
+    <span class="mx-2 breadcrumb-text">/</span>
+    <h1 class="breadcrumb-text-size !font-light uppercase breadcrumb-text">
       {{ section.settings.title | upcase }}
     </h1>
   </div>
@@ -41,257 +32,44 @@
       >
         {% if block.type == 'media' %}
           {% if block.settings.media_display_type == 'video' %}
-            {% if block.settings.video_url != blank or block.settings.video != blank %}
-              {% if block.settings.video_url contains 'youtube.com' or block.settings.video_url contains 'youtu.be' %}
-                {% if block.settings.video_url contains 'watch?v=' %}
-                  {% assign video_id = block.settings.video_url | split: 'watch?v=' | last | split: '&' | first %}
-                {% elsif block.settings.video_url contains 'youtu.be/' %}
-                  {% assign video_id = block.settings.video_url | split: 'youtu.be/' | last %}
-                {% endif %}
-                <div class="video-container relative w-full h-full">
-                  <iframe
-                    data-src="https://www.youtube.com/embed/{{ video_id }}?autoplay=1&mute=1&loop=1&playlist={{ video_id }}&controls=0"
-                    class="absolute inset-0 w-full h-full lazy-iframe"
-                    frameborder="0"
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                    allowfullscreen
-                  ></iframe>
-                  <div class="lazy-loader"></div>
-                </div>
-              {% elsif block.settings.video != blank %}
-                <div class="video-container relative aspect-video w-full">
-                  {{
-                    block.settings.video
-                    | video_tag: autoplay: true, loop: true, muted: true, controls: true, class: 'w-full h-full '
-                  }}
-                </div>
-              {% endif %}
-            {% elsif block.settings.image != blank %}
-              <div class="image-container relative aspect-video w-full">
-                <img
-                  data-srcset="
-                    {%- if block.settings.image.width >= 360 -%}{{ block.settings.image | image_url: width: 360 }} 360w,{%- endif -%}
-                    {%- if block.settings.image.width >= 535 -%}{{ block.settings.image | image_url: width: 535 }} 535w,{%- endif -%}
-                    {%- if block.settings.image.width >= 750 -%}{{ block.settings.image | image_url: width: 750 }} 750w,{%- endif -%}
-                    {%- if block.settings.image.width >= 1000 -%}{{ block.settings.image | image_url: width: 1000 }} 1000w,{%- endif -%}
-                    {%- if block.settings.image.width >= 1200 -%}{{ block.settings.image | image_url: width: 1200 }} 1200w,{%- endif -%}
-                    {%- if block.settings.image.width >= 1500 -%}{{ block.settings.image | image_url: width: 1500 }} 1500w,{%- endif -%}
-                    {%- if block.settings.image.width >= 1800 -%}{{ block.settings.image | image_url: width: 1800 }} 1800w,{%- endif -%}
-                  "
-                  data-src="{{ block.settings.image | image_url: width: 1200 }}"
-                  src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1 1'%3E%3C/svg%3E"
-                  class="w-full  lazy-image"
-                  loading="lazy"
-                  width="100"
-                  height="100"
-                  data-sizes="
-                    (min-width: 990px) {% if block.settings.span_two_columns %}66vw{% else %}33vw{% endif %},
-                    (min-width: 750px) {% if block.settings.span_two_columns %}50vw{% else %}33vw{% endif %},
-                    100vw
-                  "
-                  alt="{{ block.settings.image.alt | escape }}"
-                >
-                <div class="lazy-loader"></div>
-              </div>
-            {% else %}
-              <!-- Media block with no content - show placeholder image only -->
-              <div class="image-container relative aspect-video w-full">
-                <img
-                  src="{{ 'defaultproduct.svg' | asset_url }}"
-                  alt="Default Product"
-                  class="w-full h-full default-product-img {% if block.settings.span_two_columns %}{% else %}{% endif %}"
-                  loading="lazy"
-                  width="100"
-                  height="100"
-                >
-              </div>
-            {% endif %}
+            {% render 'collection-card-video',
+              video_url: block.settings.video_url,
+              video: block.settings.video,
+              autoplay: true,
+              loop: true,
+              controls: true
+            %}
+          {% elsif block.settings.image != blank %}
+            {% render 'collection-card-image',
+              image: block.settings.image,
+              span_two_columns: block.settings.span_two_columns
+            %}
+          {% elsif block.settings.video_url != blank or block.settings.video != blank %}
+            {% render 'collection-card-video',
+              video_url: block.settings.video_url,
+              video: block.settings.video,
+              autoplay: true,
+              loop: true,
+              controls: true
+            %}
           {% else %}
-            {% if block.settings.image != blank %}
-              <div class="image-container relative aspect-video w-full">
-                <img
-                  data-srcset="
-                    {%- if block.settings.image.width >= 360 -%}{{ block.settings.image | image_url: width: 360 }} 360w,{%- endif -%}
-                    {%- if block.settings.image.width >= 535 -%}{{ block.settings.image | image_url: width: 535 }} 535w,{%- endif -%}
-                    {%- if block.settings.image.width >= 750 -%}{{ block.settings.image | image_url: width: 750 }} 750w,{%- endif -%}
-                    {%- if block.settings.image.width >= 1000 -%}{{ block.settings.image | image_url: width: 1000 }} 1000w,{%- endif -%}
-                    {%- if block.settings.image.width >= 1200 -%}{{ block.settings.image | image_url: width: 1200 }} 1200w,{%- endif -%}
-                    {%- if block.settings.image.width >= 1500 -%}{{ block.settings.image | image_url: width: 1500 }} 1500w,{%- endif -%}
-                    {%- if block.settings.image.width >= 1800 -%}{{ block.settings.image | image_url: width: 1800 }} 1800w,{%- endif -%}
-                  "
-                  data-src="{{ block.settings.image | image_url: width: 1200 }}"
-                  src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1 1'%3E%3C/svg%3E"
-                  class="w-full  lazy-image"
-                  loading="lazy"
-                  width="100"
-                  height="100"
-                  data-sizes="
-                    (min-width: 990px) {% if block.settings.span_two_columns %}66vw{% else %}33vw{% endif %},
-                    (min-width: 750px) {% if block.settings.span_two_columns %}50vw{% else %}33vw{% endif %},
-                    100vw
-                  "
-                  alt="{{ block.settings.image.alt | escape }}"
-                >
-                <div class="lazy-loader"></div>
-              </div>
-            {% elsif block.settings.video_url != blank or block.settings.video != blank %}
-              {% if block.settings.video_url contains 'youtube.com' or block.settings.video_url contains 'youtu.be' %}
-                {% if block.settings.video_url contains 'watch?v=' %}
-                  {% assign video_id = block.settings.video_url | split: 'watch?v=' | last | split: '&' | first %}
-                {% elsif block.settings.video_url contains 'youtu.be/' %}
-                  {% assign video_id = block.settings.video_url | split: 'youtu.be/' | last %}
-                {% endif %}
-                <div class="video-container relative w-full h-full">
-                  <iframe
-                    data-src="https://www.youtube.com/embed/{{ video_id }}?autoplay=1&mute=1&loop=1&playlist={{ video_id }}&controls=0"
-                    class="absolute inset-0 w-full h-full lazy-iframe"
-                    frameborder="0"
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                    allowfullscreen
-                  ></iframe>
-                  <div class="lazy-loader"></div>
-                </div>
-              {% elsif block.settings.video != blank %}
-                <div class="video-container relative aspect-video w-full">
-                  {{
-                    block.settings.video
-                    | video_tag: autoplay: true, loop: true, muted: true, controls: true, class: 'w-full h-full '
-                  }}
-                </div>
-              {% endif %}
-            {% else %}
-              <!-- Media block with no content - show placeholder image only -->
-              <div class="image-container relative aspect-video w-full">
-                <img
-                  src="{{ 'defaultproduct.svg' | asset_url }}"
-                  alt="Default Product"
-                  class="w-full h-full default-product-img {% if block.settings.span_two_columns %}{% else %}{% endif %}"
-                  loading="lazy"
-                  width="100"
-                  height="100"
-                >
-              </div>
-            {% endif %}
-          {% endif %}
-        {% else %}
-          {% if block.settings.image != blank %}
+            <!-- Media block with no content - show placeholder image only -->
             <div class="image-container relative aspect-video w-full">
               <img
-                data-srcset="
-                  {%- if block.settings.image.width >= 165 -%}{{ block.settings.image | image_url: width: 165 }} 165w,{%- endif -%}
-                  {%- if block.settings.image.width >= 360 -%}{{ block.settings.image | image_url: width: 360 }} 360w,{%- endif -%}
-                  {%- if block.settings.image.width >= 535 -%}{{ block.settings.image | image_url: width: 535 }} 535w,{%- endif -%}
-                  {%- if block.settings.image.width >= 750 -%}{{ block.settings.image | image_url: width: 750 }} 750w,{%- endif -%}
-                "
-                data-src="{{ block.settings.image | image_url: width: 750 }}"
-                src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1 1'%3E%3C/svg%3E"
-                class="w-full  lazy-image"
+                src="{{ 'defaultproduct.svg' | asset_url }}"
+                alt="Default Product"
+                class="w-full h-full default-product-img"
                 loading="lazy"
                 width="100"
                 height="100"
-                data-sizes="
-                  (min-width: 990px) {% if block.settings.span_two_columns %}66vw{% else %}33vw{% endif %},
-                  (min-width: 750px) {% if block.settings.span_two_columns %}50vw{% else %}33vw{% endif %},
-                  100vw
-                "
-                alt="{{ block.settings.image.alt | escape }}"
               >
-              <div class="lazy-loader"></div>
             </div>
-          {% elsif block.settings.video_url != blank or block.settings.video != blank %}
-            {% if block.settings.video_url contains 'youtube.com' or block.settings.video_url contains 'youtu.be' %}
-              {% if block.settings.video_url contains 'watch?v=' %}
-                {% assign video_id = block.settings.video_url | split: 'watch?v=' | last | split: '&' | first %}
-              {% elsif block.settings.video_url contains 'youtu.be/' %}
-                {% assign video_id = block.settings.video_url | split: 'youtu.be/' | last %}
-              {% endif %}
-              <div class="video-container relative w-full h-full">
-                <iframe
-                  data-src="https://www.youtube.com/embed/{{ video_id }}?autoplay=1&mute=1&loop=1&playlist={{ video_id }}&controls=0"
-                  class="absolute inset-0 w-full h-full lazy-iframe"
-                  frameborder="0"
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                  allowfullscreen
-                ></iframe>
-                <div class="lazy-loader"></div>
-              </div>
-            {% elsif block.settings.video != blank %}
-              <div class="video-container relative aspect-video w-full">
-                {{
-                  block.settings.video
-                  | video_tag: autoplay: true, loop: true, muted: true, controls: true, class: 'w-full h-full '
-                }}
-              </div>
-            {% endif %}
-          {% else %}
-            {%- if block.settings.collection != blank -%}
-              {% assign collection = block.settings.collection %}
-              <a
-                href="{{ collection.url }}"
-                class="block h-full w-full group"
-                style="text-decoration:none;color:inherit;display:block;"
-              >
-                <div class="card-collection__content flex flex-col justify-end h-full">
-                  <div class="card-collection__media flex-1 relative">
-                    {% if collection.featured_image %}
-                      <img
-                        srcset="
-                          {%- if collection.featured_image.width >= 360 -%}{{ collection.featured_image | image_url: width: 360 }} 360w,{%- endif -%}
-                          {%- if collection.featured_image.width >= 535 -%}{{ collection.featured_image | image_url: width: 535 }} 535w,{%- endif -%}
-                          {%- if collection.featured_image.width >= 750 -%}{{ collection.featured_image | image_url: width: 750 }} 750w,{%- endif -%}
-                          {%- if collection.featured_image.width >= 1000 -%}{{ collection.featured_image | image_url: width: 1000 }} 1000w,{%- endif -%}
-                          {%- if collection.featured_image.width >= 1200 -%}{{ collection.featured_image | image_url: width: 1200 }} 1200w,{%- endif -%}
-                          {%- if collection.featured_image.width >= 1500 -%}{{ collection.featured_image | image_url: width: 1500 }} 1500w,{%- endif -%}
-                          {%- if collection.featured_image.width >= 1800 -%}{{ collection.featured_image | image_url: width: 1800 }} 1800w,{%- endif -%}
-                        "
-                        src="{{ collection.featured_image | image_url: width: 1200 }}"
-                        sizes="(min-width: 990px) {% if block.settings.span_two_columns %}66vw{% else %}33vw{% endif %}, (min-width: 750px) {% if block.settings.span_two_columns %}50vw{% else %}33vw{% endif %}, 100vw"
-                        alt="{{ collection.title | escape }}"
-                        class="w-full  {% if block.settings.span_two_columns %}{% else %}{% endif %}"
-                        loading="lazy"
-                        width="{{ collection.featured_image.width }}"
-                        height="{{ collection.featured_image.height }}"
-                      >
-                    {% else %}
-                      <img
-                        src="{{ 'defaultproduct.svg' | asset_url }}"
-                        alt="Default Product"
-                        class="w-full h-full default-product-img {% if block.settings.span_two_columns %}{% else %}{% endif %}"
-                        loading="lazy"
-                        width="100"
-                        height="100"
-                      >
-                    {% endif %}
-                  </div>
-                  <div class="card-collection__heading p-2">
-                    <div class="collection-title-custom" style="color: var(--text);">
-                      {{ collection.title | upcase }}
-                    </div>
-                    <div class="collection-count-custom" style="color: var(--text);">
-                      number of products {{ collection.products_count }}
-                    </div>
-                  </div>
-                </div>
-              </a>
-            {%- else -%}
-              <div class="card-collection__content flex flex-col justify-end h-full">
-                <div class="card-collection__media flex-1 relative">
-                  <img
-                    src="{{ 'defaultproduct.svg' | asset_url }}"
-                    alt="Default Product"
-                    class="w-full h-full default-product-img {% if block.settings.span_two_columns %}{% else %}{% endif %}"
-                    loading="lazy"
-                    width="100"
-                    height="100"
-                  >
-                </div>
-                <div class="card-collection__heading p-2">
-                  <div class="collection-title-custom" style="color: var(--text);">Collection Name</div>
-                  <div class="collection-count-custom" style="color: var(--text);">number of products 0</div>
-                </div>
-              </div>
-            {%- endif -%}
           {% endif %}
+        {% else %}
+          {% render 'collection-link',
+            collection: block.settings.collection,
+            span_two_columns: block.settings.span_two_columns
+          %}
         {% endif %}
       </li>
     {%- endfor -%}

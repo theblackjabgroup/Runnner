@@ -1,0 +1,58 @@
+{%- comment -%}
+  Renders YouTube video embed with proper error handling
+
+  Accepts:
+  - video_url: {String} YouTube URL
+  - autoplay: {Boolean} Auto-play video (optional, default: true)
+  - loop: {Boolean} Loop video (optional, default: true)
+  - controls: {Boolean} Show video controls (optional, default: false)
+
+  Usage:
+  {% render 'youtube-video-embed', video_url: block.settings.video_url, autoplay: true, loop: true %}
+{%- endcomment -%}
+
+{%- liquid
+  assign video_id = ''
+  assign autoplay = autoplay | default: true
+  assign loop = loop | default: true
+  assign controls = controls | default: false
+
+  # Parse YouTube URL safely
+  if video_url contains 'watch?v='
+    assign video_id = video_url | split: 'watch?v=' | last | split: '&' | first
+  elsif video_url contains 'youtu.be/'
+    assign video_id = video_url | split: 'youtu.be/' | last | split: '?' | first
+  elsif video_url contains 'embed/'
+    assign video_id = video_url | split: 'embed/' | last | split: '?' | first
+  endif
+
+  # Validate video_id (basic check)
+  if video_id == blank or video_id.size < 10 or video_id.size > 12
+    assign video_id = ''
+  endif
+-%}
+
+{%- if video_id != blank -%}
+  <div class="video-container relative w-full h-full">
+    <iframe
+      data-src="https://www.youtube.com/embed/{{ video_id | escape }}?autoplay={{ autoplay | default: 1 }}&mute=1&loop={{ loop | default: 1 }}&playlist={{ video_id | escape }}&controls={{ controls | default: 0 }}"
+      class="absolute inset-0 w-full h-full lazy-iframe"
+      frameborder="0"
+      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+      allowfullscreen
+    ></iframe>
+    <div class="lazy-loader"></div>
+  </div>
+{%- else -%}
+  {%- comment -%} Fallback if video URL is invalid {%- endcomment -%}
+  <div class="video-container relative aspect-video w-full">
+    <img
+      src="{{ 'defaultproduct.svg' | asset_url }}"
+      alt="Invalid video URL"
+      class="w-full h-full default-product-img"
+      loading="lazy"
+      width="100"
+      height="100"
+    >
+  </div>
+{%- endif -%}

@@ -1,0 +1,41 @@
+{%- comment -%}
+  Renders collection card video (YouTube or Shopify video)
+
+  Accepts:
+  - video_url: {String} YouTube URL (optional)
+  - video: {Object} Shopify video object (optional)
+  - autoplay: {Boolean} Auto-play video (optional, default: true)
+  - loop: {Boolean} Loop video (optional, default: true)
+  - controls: {Boolean} Show video controls (optional, default: true)
+
+  Usage:
+  {% render 'collection-card-video', video_url: block.settings.video_url, video: block.settings.video %}
+{%- endcomment -%}
+
+{%- liquid
+  assign autoplay = autoplay | default: true
+  assign loop = loop | default: true
+  assign controls = controls | default: true
+-%}
+
+{%- if video_url != blank -%}
+  {%- comment -%} YouTube video {%- endcomment -%}
+  {% render 'youtube-video-embed', video_url: video_url, autoplay: autoplay, loop: loop, controls: false %}
+{%- elsif video != blank -%}
+  {%- comment -%} Shopify video {%- endcomment -%}
+  <div class="video-container relative aspect-video w-full">
+    {{ video | video_tag: autoplay: autoplay, loop: loop, muted: true, controls: controls, class: 'w-full h-full' }}
+  </div>
+{%- else -%}
+  {%- comment -%} Fallback placeholder {%- endcomment -%}
+  <div class="image-container relative aspect-video w-full">
+    <img
+      src="{{ 'defaultproduct.svg' | asset_url }}"
+      alt="Default Product"
+      class="w-full h-full default-product-img"
+      loading="lazy"
+      width="100"
+      height="100"
+    >
+  </div>
+{%- endif -%}
