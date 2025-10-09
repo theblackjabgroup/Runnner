@@ -444,9 +444,14 @@
     // Fallback implementation
     const form = document.getElementById('FacetFiltersForm') || document.getElementById('FacetFiltersFormMobile');
     if (!form) {
-      console.error('Filter form not found');
-      // Last resort: reload the page
-      window.location.reload();
+      console.error('Filter form not found - cannot apply filters');
+      // Don't reload - it would lose user input
+      // Instead, show an error message to the user
+      const errorMsg = document.createElement('div');
+      errorMsg.style.cssText = 'position: fixed; top: 20px; left: 50%; transform: translateX(-50%); background: #f44336; color: white; padding: 12px 24px; border-radius: 4px; z-index: 9999;';
+      errorMsg.textContent = 'Unable to apply filters. Please refresh the page.';
+      document.body.appendChild(errorMsg);
+      setTimeout(() => errorMsg.remove(), 5000);
       return;
     }
 
@@ -455,7 +460,9 @@
     const params = new URLSearchParams();
 
     for (let [key, value] of formData.entries()) {
-      if (value) {
+      // Include zero values (important for price filters starting at $0)
+      // Only exclude truly empty values (empty strings, null, undefined)
+      if (value !== '' && value !== null && value !== undefined) {
         params.append(key, value);
       }
     }
