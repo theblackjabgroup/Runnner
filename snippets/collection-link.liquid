@@ -1,0 +1,74 @@
+{%- comment -%}
+  Renders collection link with image and details
+
+  Accepts:
+  - collection: {Object} Collection object
+  - span_two_columns: {Boolean} Whether collection spans two columns
+
+  Usage:
+  {% render 'collection-link', collection: block.settings.collection, span_two_columns: block.settings.span_two_columns %}
+{%- endcomment -%}
+
+{%- if collection != blank -%}
+  <a
+    href="{{ collection.url }}"
+    class="block h-full w-full group collection-link"
+  >
+    <div class="card-collection__content flex flex-col justify-end h-full">
+      <div class="card-collection__media flex-1 relative">
+        {% if collection.featured_image %}
+          <img
+            srcset="
+              {%- if collection.featured_image.width >= 360 -%}{{ collection.featured_image | image_url: width: 360 }} 360w,{%- endif -%}
+              {%- if collection.featured_image.width >= 535 -%}{{ collection.featured_image | image_url: width: 535 }} 535w,{%- endif -%}
+              {%- if collection.featured_image.width >= 750 -%}{{ collection.featured_image | image_url: width: 750 }} 750w,{%- endif -%}
+              {%- if collection.featured_image.width >= 1000 -%}{{ collection.featured_image | image_url: width: 1000 }} 1000w,{%- endif -%}
+              {%- if collection.featured_image.width >= 1200 -%}{{ collection.featured_image | image_url: width: 1200 }} 1200w,{%- endif -%}
+              {%- if collection.featured_image.width >= 1500 -%}{{ collection.featured_image | image_url: width: 1500 }} 1500w,{%- endif -%}
+              {%- if collection.featured_image.width >= 1800 -%}{{ collection.featured_image | image_url: width: 1800 }} 1800w,{%- endif -%}
+            "
+            src="{{ collection.featured_image | image_url: width: 1200 }}"
+            sizes="(min-width: 990px) {% if span_two_columns %}66vw{% else %}33vw{% endif %}, (min-width: 750px) {% if span_two_columns %}50vw{% else %}33vw{% endif %}, 100vw"
+            alt="{{ collection.title | escape }}"
+            class="w-full"
+            loading="lazy"
+            width="{{ collection.featured_image.width }}"
+            height="{{ collection.featured_image.height }}"
+          >
+        {% else %}
+          <img
+            src="{{ 'defaultproduct.svg' | asset_url }}"
+            alt="Default Product"
+            class="w-full h-full default-product-img"
+            loading="lazy"
+            width="100"
+            height="100"
+          >
+        {% endif %}
+      </div>
+      <div class="card-collection__heading p-2">
+        <div class="collection-title-custom">
+          {{ collection.title | upcase }}
+        </div>
+        <div class="collection-count-custom">number of products {{ collection.products_count }}</div>
+      </div>
+    </div>
+  </a>
+{%- else -%}
+  <div class="card-collection__content flex flex-col justify-end h-full">
+    <div class="card-collection__media flex-1 relative">
+      <img
+        src="{{ 'defaultproduct.svg' | asset_url }}"
+        alt="Default Product"
+        class="w-full h-full default-product-img"
+        loading="lazy"
+        width="100"
+        height="100"
+      >
+    </div>
+    <div class="card-collection__heading p-2">
+      <div class="collection-title-custom">Collection Name</div>
+      <div class="collection-count-custom">number of products 0</div>
+    </div>
+  </div>
+{%- endif -%}

@@ -1,0 +1,61 @@
+{%- comment -%}
+  Renders collection card image with responsive srcset
+
+  Accepts:
+  - image: {Object} Image object
+  - span_two_columns: {Boolean} Whether image spans two columns
+  - loading: {String} Loading attribute (optional, default: 'lazy')
+  - sizes: {String} Custom sizes attribute (optional)
+  - alt: {String} Alt text (optional)
+  - class: {String} Additional CSS classes (optional)
+
+  Usage:
+  {% render 'collection-card-image', image: block.settings.image, span_two_columns: block.settings.span_two_columns %}
+{%- endcomment -%}
+
+{%- liquid
+  assign loading = loading | default: 'lazy'
+  assign alt_text = alt | default: image.alt | default: 'Collection image'
+  assign additional_class = class | default: ''
+
+  # Default sizes if not provided
+  unless sizes
+    assign sizes = '(min-width: 990px) '
+    if span_two_columns
+      assign sizes = sizes | append: '66vw'
+    else
+      assign sizes = sizes | append: '33vw'
+    endif
+    assign sizes = sizes | append: ', (min-width: 750px) '
+    if span_two_columns
+      assign sizes = sizes | append: '50vw'
+    else
+      assign sizes = sizes | append: '33vw'
+    endif
+    assign sizes = sizes | append: ', 100vw'
+  endunless
+-%}
+
+<div class="image-container relative aspect-video w-full">
+  <img
+    data-srcset="
+      {%- if image.width >= 165 -%}{{ image | image_url: width: 165 }} 165w,{%- endif -%}
+      {%- if image.width >= 360 -%}{{ image | image_url: width: 360 }} 360w,{%- endif -%}
+      {%- if image.width >= 535 -%}{{ image | image_url: width: 535 }} 535w,{%- endif -%}
+      {%- if image.width >= 750 -%}{{ image | image_url: width: 750 }} 750w,{%- endif -%}
+      {%- if image.width >= 1000 -%}{{ image | image_url: width: 1000 }} 1000w,{%- endif -%}
+      {%- if image.width >= 1200 -%}{{ image | image_url: width: 1200 }} 1200w,{%- endif -%}
+      {%- if image.width >= 1500 -%}{{ image | image_url: width: 1500 }} 1500w,{%- endif -%}
+      {%- if image.width >= 1800 -%}{{ image | image_url: width: 1800 }} 1800w,{%- endif -%}
+    "
+    data-src="{{ image | image_url: width: 1200 }}"
+    src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1 1'%3E%3C/svg%3E"
+    class="w-full lazy-image {{ additional_class }}"
+    loading="{{ loading }}"
+    width="100"
+    height="100"
+    data-sizes="{{ sizes }}"
+    alt="{{ alt_text | escape }}"
+  >
+  <div class="lazy-loader"></div>
+</div>

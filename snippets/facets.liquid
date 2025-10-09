@@ -740,7 +740,12 @@
       form.appendChild(sortInput);
     }
     sortInput.value = value;
-    form.submit();
+    // Use AJAX instead of form submission
+    if (typeof window.applyFiltersAjax === 'function') {
+      window.applyFiltersAjax();
+    } else {
+      form.submit();
+    }
   }
 </script>
 
@@ -1388,7 +1393,7 @@
       });
     }
 
-    // Handle checkbox changes
+    // Handle checkbox changes for mobile filters
     const filterOptions = document.querySelectorAll('.mobile-filter-option');
     filterOptions.forEach((option) => {
       option.addEventListener('click', function (e) {
@@ -1414,6 +1419,34 @@
         option.classList.add('active');
       }
     });
+
+    // Handle regular filter checkboxes (desktop) with AJAX
+    const regularCheckboxes = document.querySelectorAll('.facet-checkbox input[type="checkbox"]');
+    regularCheckboxes.forEach((checkbox) => {
+      checkbox.addEventListener('change', function () {
+        // Add a small delay to allow for multiple checkbox changes
+        clearTimeout(window.filterTimeout);
+        window.filterTimeout = setTimeout(() => {
+          if (typeof window.applyFiltersAjax === 'function') {
+            window.applyFiltersAjax();
+          }
+        }, 300);
+      });
+    });
+
+    // Handle mobile filter checkboxes with AJAX
+    const mobileCheckboxes = document.querySelectorAll('.mobile-filter-option input[type="checkbox"]');
+    mobileCheckboxes.forEach((checkbox) => {
+      checkbox.addEventListener('change', function () {
+        // Add a small delay to allow for multiple checkbox changes
+        clearTimeout(window.mobileFilterTimeout);
+        window.mobileFilterTimeout = setTimeout(() => {
+          if (typeof window.applyFiltersAjax === 'function') {
+            window.applyFiltersAjax();
+          }
+        }, 300);
+      });
+    });
   });
 
   // Handle sort by checkbox changes (single selection behavior)
@@ -1427,11 +1460,49 @@
         }
       });
 
-      // Submit the form to apply the sort
-      const form = selectedCheckbox.closest('form');
-      if (form) {
-        form.submit();
+      // Use AJAX instead of form submission
+      if (typeof window.applyFiltersAjax === 'function') {
+        window.applyFiltersAjax();
+      } else {
+        const form = selectedCheckbox.closest('form');
+        if (form) {
+          form.submit();
+        }
       }
     }
   }
+
+  // Prevent all filter form submissions - force AJAX only
+  document.addEventListener('DOMContentLoaded', function () {
+    const filterForms = document.querySelectorAll('#FacetFiltersForm, #FacetFiltersFormMobile');
+    filterForms.forEach((form) => {
+      // Store handler in a named function to avoid arguments.callee
+      const submitHandler = function (event) {
+        event.preventDefault();
+        event.stopPropagation();
+        console.log('Filter form submission prevented, using AJAX instead');
+
+        // Try to use AJAX function, fallback to form submission if not available
+        if (typeof window.applyFiltersAjax === 'function') {
+          try {
+            window.applyFiltersAjax();
+          } catch (error) {
+            console.error('AJAX filter failed, allowing form submission:', error);
+            // Remove this event listener and resubmit
+            form.removeEventListener('submit', submitHandler);
+            form.submit();
+          }
+        } else {
+          console.warn('applyFiltersAjax not found, allowing form submission');
+          // Remove this event listener and resubmit
+          form.removeEventListener('submit', submitHandler);
+          form.submit();
+        }
+
+        return false;
+      };
+
+      form.addEventListener('submit', submitHandler);
+    });
+  });
 </script>
