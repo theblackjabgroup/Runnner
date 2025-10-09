@@ -33,7 +33,8 @@
         {% if block.type == 'media' %}
           {% if block.settings.media_display_type == 'video' %}
             {% comment %} User chose to display video {% endcomment %}
-            {% if block.settings.video_source == 'youtube' %}
+            {% assign video_source = block.settings.video_source | default: 'youtube' %}
+            {% if video_source == 'youtube' %}
               {% comment %} YouTube video has priority {% endcomment %}
               {% if block.settings.video_url != blank %}
                 {% render 'collection-card-video',
@@ -120,7 +121,8 @@
             %}
           {% elsif block.settings.video_url != blank or block.settings.video != blank %}
             {% comment %} No image available, fallback to video if available {% endcomment %}
-            {% if block.settings.video_source == 'youtube' and block.settings.video_url != blank %}
+            {% assign video_source = block.settings.video_source | default: 'youtube' %}
+            {% if video_source == 'youtube' and block.settings.video_url != blank %}
               {% render 'collection-card-video',
                 video_url: block.settings.video_url,
                 video: null,
@@ -128,7 +130,7 @@
                 loop: true,
                 controls: true
               %}
-            {% elsif block.settings.video_source == 'shopify' and block.settings.video != blank %}
+            {% elsif video_source == 'shopify' and block.settings.video != blank %}
               {% render 'collection-card-video',
                 video_url: null,
                 video: block.settings.video,

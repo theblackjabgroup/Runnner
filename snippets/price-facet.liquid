@@ -369,13 +369,13 @@
       console.error(`Slider element not found for prefix: ${prefix}`);
       return;
     }
-    
+
     const container = sliderElement.closest('.price-facet-container');
     if (!container) {
       console.error('Price facet container not found');
       return;
     }
-    
+
     const minSlider = container.querySelector('.price-slider-min');
     const maxSlider = container.querySelector('.price-slider-max');
     const minInput = container.querySelector('.price-input-min');
@@ -386,12 +386,20 @@
       return;
     }
 
-    const numValue = parseInt(value) || parseInt(type === 'min' ? minSlider.min : maxSlider.max);
+    // Parse value, allowing 0 as valid input
+    let numValue = parseInt(value);
+
+    // If value is empty or invalid (but not 0), use default
+    if (isNaN(numValue)) {
+      numValue = parseInt(type === 'min' ? minSlider.min : maxSlider.max);
+    }
 
     if (type === 'min') {
-      minSlider.value = Math.max(parseInt(minSlider.min), Math.min(numValue, parseInt(maxSlider.value) - 1));
+      // Allow min to equal max (removed -1 constraint)
+      minSlider.value = Math.max(parseInt(minSlider.min), Math.min(numValue, parseInt(maxSlider.value)));
     } else {
-      maxSlider.value = Math.min(parseInt(maxSlider.max), Math.max(numValue, parseInt(minSlider.value) + 1));
+      // Allow max to equal min (removed +1 constraint)
+      maxSlider.value = Math.min(parseInt(maxSlider.max), Math.max(numValue, parseInt(minSlider.value)));
     }
 
     updateSliderRange(container);
@@ -471,14 +479,15 @@
         const parser = new DOMParser();
         const doc = parser.parseFromString(html, 'text/html');
 
-        // Update product grid - try multiple selectors
+        // Update product grid - use most specific selector first
+        // Priority: specific ID > specific class > generic patterns
         const selectors = [
-          '#ProductGridContainer',
-          '.product-grid-container',
-          '.product-grid',
-          '.collection-product-grid',
-          '[id*="product-grid"]',
-          '[class*="product-grid"]',
+          '#ProductGridContainer', // Most common Shopify pattern
+          '#product-grid', // Alternative common pattern
+          '.product-grid-main', // Our custom pattern
+          '.collection-product-grid', // Collection specific
+          '.product-grid-container', // Generic container
+          '.product-grid', // Generic grid (might match multiple)
         ];
 
         let updated = false;
@@ -487,10 +496,17 @@
           const currentGrid = document.querySelector(selector);
 
           if (newGrid && currentGrid) {
-            currentGrid.innerHTML = newGrid.innerHTML;
-            updated = true;
-            console.log('Updated product grid using selector:', selector);
-            break;
+            // Verify this is actually a product grid container (not a nested element)
+            const hasProducts = newGrid.querySelector(
+              '[class*="product-card"], [class*="product-item"], .card-wrapper'
+            );
+
+            if (hasProducts || selector.includes('ProductGridContainer') || selector.includes('product-grid-main')) {
+              currentGrid.innerHTML = newGrid.innerHTML;
+              updated = true;
+              console.log('Updated product grid using selector:', selector);
+              break; // Stop at first valid match to avoid updating wrong elements
+            }
           }
         }
 

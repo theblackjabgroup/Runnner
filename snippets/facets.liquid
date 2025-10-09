@@ -1476,11 +1476,12 @@
   document.addEventListener('DOMContentLoaded', function () {
     const filterForms = document.querySelectorAll('#FacetFiltersForm, #FacetFiltersFormMobile');
     filterForms.forEach((form) => {
-      form.addEventListener('submit', function (event) {
+      // Store handler in a named function to avoid arguments.callee
+      const submitHandler = function (event) {
         event.preventDefault();
         event.stopPropagation();
         console.log('Filter form submission prevented, using AJAX instead');
-        
+
         // Try to use AJAX function, fallback to form submission if not available
         if (typeof window.applyFiltersAjax === 'function') {
           try {
@@ -1488,18 +1489,20 @@
           } catch (error) {
             console.error('AJAX filter failed, allowing form submission:', error);
             // Remove this event listener and resubmit
-            form.removeEventListener('submit', arguments.callee);
+            form.removeEventListener('submit', submitHandler);
             form.submit();
           }
         } else {
           console.warn('applyFiltersAjax not found, allowing form submission');
           // Remove this event listener and resubmit
-          form.removeEventListener('submit', arguments.callee);
+          form.removeEventListener('submit', submitHandler);
           form.submit();
         }
-        
+
         return false;
-      });
+      };
+
+      form.addEventListener('submit', submitHandler);
     });
   });
 </script>
