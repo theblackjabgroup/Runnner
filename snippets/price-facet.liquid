@@ -25,7 +25,7 @@
           class="price-slider-handle price-slider-min"
           id="slider-min-{{ id_prefix }}"
           min="{{ range_min }}"
-          max="10000"
+          max="{{ range_max }}"
           value="{{ min_price }}"
           oninput="updatePriceSlider('{{ id_prefix }}', this)"
         >
@@ -34,7 +34,7 @@
           class="price-slider-handle price-slider-max"
           id="slider-max-{{ id_prefix }}"
           min="{{ range_min }}"
-          max="10000"
+          max="{{ range_max }}"
           value="{{ max_price }}"
           oninput="updatePriceSlider('{{ id_prefix }}', this)"
         >
@@ -363,11 +363,28 @@
   }
 
   function updatePriceFromInput(prefix, value, type) {
-    const container = document.querySelector(`#slider-min-${prefix}`).closest('.price-facet-container');
+    // Find the slider element by ID
+    const sliderElement = document.querySelector(`#slider-min-${prefix}`);
+    if (!sliderElement) {
+      console.error(`Slider element not found for prefix: ${prefix}`);
+      return;
+    }
+    
+    const container = sliderElement.closest('.price-facet-container');
+    if (!container) {
+      console.error('Price facet container not found');
+      return;
+    }
+    
     const minSlider = container.querySelector('.price-slider-min');
     const maxSlider = container.querySelector('.price-slider-max');
     const minInput = container.querySelector('.price-input-min');
     const maxInput = container.querySelector('.price-input-max');
+
+    if (!minSlider || !maxSlider) {
+      console.error('Slider elements not found');
+      return;
+    }
 
     const numValue = parseInt(value) || parseInt(type === 'min' ? minSlider.min : maxSlider.max);
 
@@ -405,9 +422,23 @@
   }
 
   function triggerFilterUpdate() {
+    // Check if global AJAX function exists first
+    if (typeof window.applyFiltersAjax === 'function') {
+      try {
+        window.applyFiltersAjax();
+        return;
+      } catch (error) {
+        console.error('Error calling applyFiltersAjax:', error);
+        // Fall through to fallback implementation
+      }
+    }
+
+    // Fallback implementation
     const form = document.getElementById('FacetFiltersForm') || document.getElementById('FacetFiltersFormMobile');
     if (!form) {
       console.error('Filter form not found');
+      // Last resort: reload the page
+      window.location.reload();
       return;
     }
 

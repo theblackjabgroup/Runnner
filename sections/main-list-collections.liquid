@@ -32,28 +32,129 @@
       >
         {% if block.type == 'media' %}
           {% if block.settings.media_display_type == 'video' %}
-            {% render 'collection-card-video',
-              video_url: block.settings.video_url,
-              video: block.settings.video,
-              autoplay: true,
-              loop: true,
-              controls: true
-            %}
+            {% comment %} User chose to display video {% endcomment %}
+            {% if block.settings.video_source == 'youtube' %}
+              {% comment %} YouTube video has priority {% endcomment %}
+              {% if block.settings.video_url != blank %}
+                {% render 'collection-card-video',
+                  video_url: block.settings.video_url,
+                  video: null,
+                  autoplay: true,
+                  loop: true,
+                  controls: true
+                %}
+              {% elsif block.settings.video != blank %}
+                {% comment %} Fallback to Shopify video if YouTube not available {% endcomment %}
+                {% render 'collection-card-video',
+                  video_url: null,
+                  video: block.settings.video,
+                  autoplay: true,
+                  loop: true,
+                  controls: true
+                %}
+              {% else %}
+                {% comment %} No video available, show image or placeholder {% endcomment %}
+                {% if block.settings.image != blank %}
+                  {% render 'collection-card-image',
+                    image: block.settings.image,
+                    span_two_columns: block.settings.span_two_columns
+                  %}
+                {% else %}
+                  <div class="image-container relative aspect-video w-full">
+                    <img
+                      src="{{ 'defaultproduct.svg' | asset_url }}"
+                      alt="Default Product"
+                      class="w-full h-full default-product-img"
+                      loading="lazy"
+                      width="100"
+                      height="100"
+                    >
+                  </div>
+                {% endif %}
+              {% endif %}
+            {% else %}
+              {% comment %} Shopify video has priority {% endcomment %}
+              {% if block.settings.video != blank %}
+                {% render 'collection-card-video',
+                  video_url: null,
+                  video: block.settings.video,
+                  autoplay: true,
+                  loop: true,
+                  controls: true
+                %}
+              {% elsif block.settings.video_url != blank %}
+                {% comment %} Fallback to YouTube video if Shopify not available {% endcomment %}
+                {% render 'collection-card-video',
+                  video_url: block.settings.video_url,
+                  video: null,
+                  autoplay: true,
+                  loop: true,
+                  controls: true
+                %}
+              {% else %}
+                {% comment %} No video available, show image or placeholder {% endcomment %}
+                {% if block.settings.image != blank %}
+                  {% render 'collection-card-image',
+                    image: block.settings.image,
+                    span_two_columns: block.settings.span_two_columns
+                  %}
+                {% else %}
+                  <div class="image-container relative aspect-video w-full">
+                    <img
+                      src="{{ 'defaultproduct.svg' | asset_url }}"
+                      alt="Default Product"
+                      class="w-full h-full default-product-img"
+                      loading="lazy"
+                      width="100"
+                      height="100"
+                    >
+                  </div>
+                {% endif %}
+              {% endif %}
+            {% endif %}
           {% elsif block.settings.image != blank %}
+            {% comment %} User chose to display image {% endcomment %}
             {% render 'collection-card-image',
               image: block.settings.image,
               span_two_columns: block.settings.span_two_columns
             %}
           {% elsif block.settings.video_url != blank or block.settings.video != blank %}
-            {% render 'collection-card-video',
-              video_url: block.settings.video_url,
-              video: block.settings.video,
-              autoplay: true,
-              loop: true,
-              controls: true
-            %}
+            {% comment %} No image available, fallback to video if available {% endcomment %}
+            {% if block.settings.video_source == 'youtube' and block.settings.video_url != blank %}
+              {% render 'collection-card-video',
+                video_url: block.settings.video_url,
+                video: null,
+                autoplay: true,
+                loop: true,
+                controls: true
+              %}
+            {% elsif block.settings.video_source == 'shopify' and block.settings.video != blank %}
+              {% render 'collection-card-video',
+                video_url: null,
+                video: block.settings.video,
+                autoplay: true,
+                loop: true,
+                controls: true
+              %}
+            {% elsif block.settings.video_url != blank %}
+              {% render 'collection-card-video',
+                video_url: block.settings.video_url,
+                video: null,
+                autoplay: true,
+                loop: true,
+                controls: true
+              %}
+            {% elsif block.settings.video != blank %}
+              {% render 'collection-card-video',
+                video_url: null,
+                video: block.settings.video,
+                autoplay: true,
+                loop: true,
+                controls: true
+              %}
+            {% endif %}
           {% else %}
-            <!-- Media block with no content - show placeholder image only -->
+            {% comment %} No media available, show placeholder {% endcomment %}
             <div class="image-container relative aspect-video w-full">
               <img
                 src="{{ 'defaultproduct.svg' | asset_url }}"
@@ -165,25 +266,42 @@
           "content": "Media"
         },
         {
-          "type": "url",
-          "id": "video_url",
-          "label": "YouTube Video URL"
-        },
-        {
-          "type": "video",
-          "id": "video",
-          "label": "Shopify Video"
-        },
-        {
           "type": "image_picker",
           "id": "image",
           "label": "Image"
         },
         {
+          "type": "header",
+          "content": "Video Settings"
+        },
+        {
+          "type": "url",
+          "id": "video_url",
+          "label": "YouTube Video URL",
+          "info": "Enter a YouTube video URL (e.g., https://www.youtube.com/watch?v=...)"
+        },
+        {
+          "type": "video",
+          "id": "video",
+          "label": "Shopify Video",
+          "info": "Upload a video file directly to Shopify"
+        },
+        {
+          "type": "select",
+          "id": "video_source",
+          "label": "Video Source Priority",
+          "info": "Choose which video to display when both are provided",
+          "options": [
+            { "value": "youtube", "label": "YouTube Video" },
+            { "value": "shopify", "label": "Shopify Video" }
+          ],
+          "default": "youtube"
+        },
+        {
           "type": "select",
           "id": "media_display_type",
           "label": "Display Type",
-          "info": "Choose what to display when both image and video are uploaded",
+          "info": "Choose what to display",
           "options": [
             { "value": "image", "label": "Show Image" },
             { "value": "video", "label": "Show Video" }
