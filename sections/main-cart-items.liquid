@@ -71,15 +71,49 @@
                         %}
 
                         {% comment %} Show the current color swatch {% endcomment %}
-                        <div
-                          class="color-picker {{ color_class }} selected"
-                          data-variant-id="{{ item.variant.id }}"
-                          data-color="{{ current_color }}"
-                          data-item-key="{{ item.key }}"
-                          data-current-size="{{ size_option.value | default: '' }}"
-                          title="{{ current_color }}"
-                          onclick="changeItemColor(this)"
-                        ></div>
+                        {% comment %} Check if we have a CSS class for this color, otherwise use inline style {% endcomment %}
+                        {% assign has_css_class_current = false %}
+                        {% if color_class == 'black'
+                          or color_class == 'white'
+                          or color_class == 'red'
+                          or color_class == 'blue'
+                          or color_class == 'navy'
+                          or color_class == 'nynavy'
+                          or color_class == 'gray'
+                          or color_class == 'grey'
+                          or color_class == 'brown'
+                          or color_class == 'green'
+                          or color_class == 'yellow'
+                          or color_class == 'orange'
+                          or color_class == 'purple'
+                          or color_class == 'pink'
+                          or color_class == 'beige'
+                        %}
+                          {% assign has_css_class_current = true %}
+                        {% endif %}
+
+                        {% if has_css_class_current %}
+                          <div
+                            class="color-picker {{ color_class }} selected"
+                            data-variant-id="{{ item.variant.id }}"
+                            data-color="{{ current_color }}"
+                            data-item-key="{{ item.key }}"
+                            data-current-size="{{ size_option.value | default: '' }}"
+                            title="{{ current_color }}"
+                            onclick="changeItemColor(this)"
+                          ></div>
+                        {% else %}
+                          <div
+                            class="color-picker selected"
+                            data-variant-id="{{ item.variant.id }}"
+                            data-color="{{ current_color }}"
+                            data-item-key="{{ item.key }}"
+                            data-current-size="{{ size_option.value | default: '' }}"
+                            title="{{ current_color }}"
+                            onclick="changeItemColor(this)"
+                            style="background: {{ current_color | downcase }} !important;"
+                          ></div>
+                        {% endif %}
 
                         {% comment %} Show other available colors if they exist {% endcomment %}
                         {% comment %} PERFORMANCE: Pre-calculate color option index (do once, not per variant) {% endcomment %}
@@ -93,18 +127,15 @@
                             {% when 2 %}
                               {% assign check_option = item.product.options[2] %}
                           {% endcase %}
-                          {% if check_option and check_option != 'Title' %}
+                          {% if check_option and check_option != 'Title' and color_option_index == null %}
                             {% assign option_name_lower = check_option | downcase %}
                             {% if option_name_lower contains 'color' or option_name_lower contains 'colour' %}
                               {% assign color_option_index = i %}
-                              {% break %}
                             {% endif %}
                           {% endif %}
                         {% endfor %}
 
-                        {% comment %} PERFORMANCE: Use array instead of string for better performance {% endcomment %}
-                        {% assign displayed_colors = '' | split: '' %}
-                        {% assign displayed_colors = displayed_colors | push: current_color %}
+                        {% assign displayed_colors = current_color | append: ',' %}
 
                         {% comment %} PERFORMANCE: Optimized single loop (was O(n³), now O(n)) {% endcomment %}
                         {% if color_option_index != null %}
@@ -125,7 +156,7 @@
                               and variant_color != current_color
                             %}
                               {% unless displayed_colors contains variant_color %}
-                                {% assign displayed_colors = displayed_colors | push: variant_color %}
+                                {% assign displayed_colors = displayed_colors | append: variant_color | append: ',' %}
                                 {% assign color_class = variant_color
                                   | downcase
                                   | replace: ' ', ''
@@ -133,15 +164,49 @@
                                   | replace: '_', ''
                                 %}
 
-                                <div
-                                  class="color-picker {{ color_class }}"
-                                  data-variant-id="{{ variant.id }}"
-                                  data-color="{{ variant_color }}"
-                                  data-item-key="{{ item.key }}"
-                                  data-current-size="{{ size_option.value | default: '' }}"
-                                  title="{{ variant_color }}"
-                                  onclick="changeItemColor(this)"
-                                ></div>
+                                {% comment %} Check if we have a CSS class for this color, otherwise use inline style {% endcomment %}
+                                {% assign has_css_class = false %}
+                                {% if color_class == 'black'
+                                  or color_class == 'white'
+                                  or color_class == 'red'
+                                  or color_class == 'blue'
+                                  or color_class == 'navy'
+                                  or color_class == 'nynavy'
+                                  or color_class == 'gray'
+                                  or color_class == 'grey'
+                                  or color_class == 'brown'
+                                  or color_class == 'green'
+                                  or color_class == 'yellow'
+                                  or color_class == 'orange'
+                                  or color_class == 'purple'
+                                  or color_class == 'pink'
+                                  or color_class == 'beige'
+                                %}
+                                  {% assign has_css_class = true %}
+                                {% endif %}
+
+                                {% if has_css_class %}
+                                  <div
+                                    class="color-picker {{ color_class }}"
+                                    data-variant-id="{{ variant.id }}"
+                                    data-color="{{ variant_color }}"
+                                    data-item-key="{{ item.key }}"
+                                    data-current-size="{{ size_option.value | default: '' }}"
+                                    title="{{ variant_color }}"
+                                    onclick="changeItemColor(this)"
+                                  ></div>
+                                {% else %}
+                                  <div
+                                    class="color-picker"
+                                    data-variant-id="{{ variant.id }}"
+                                    data-color="{{ variant_color }}"
+                                    data-item-key="{{ item.key }}"
+                                    data-current-size="{{ size_option.value | default: '' }}"
+                                    title="{{ variant_color }}"
+                                    onclick="changeItemColor(this)"
+                                    style="background: {{ variant_color | downcase }} !important;"
+                                  ></div>
+                                {% endif %}
                               {% endunless %}
                             {% endif %}
                           {% endfor %}
