@@ -7,24 +7,124 @@
 {% endcomment %}
 {{ 'email-signup-banner.css' | asset_url | stylesheet_tag }}
 
-{%- form 'customer', id: 'email-signup-form-password', class: 'flex flex-col gap-4 w-full mb-[28px] max-w-[1000px] item-center' -%}
+<style>
+  /* Password page button - independent styling to match signup-with-image */
+  .password-subscribe-button {
+    width: 324px;
+    height: 48px;
+    font-weight: var(--font-heading-weight);
+    font-size: var(--t-b-1-size);
+    color: var(--secondary_button_text_color);
+    background-color: var(--secondary_button_label);
+    border-radius: 4px;
+    padding: 5px 10px;
+    line-height: 1;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 20px;
+    border: 1px solid var(--secondary_button_label);
+    position: relative;
+    overflow: hidden;
+    cursor: pointer;
+    box-sizing: border-box;
+    justify-content: space-between;
+  }
+
+  .password-subscribe-button::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: var(--hovered_secondary_button_label);
+    transition: left 0.6s ease;
+    z-index: 0;
+  }
+
+  .password-subscribe-button:hover::before {
+    left: 0;
+  }
+
+  .password-subscribe-button > * {
+    position: relative;
+    z-index: 1;
+  }
+
+  .password-subscribe-button:hover {
+    color: var(--hovered_secondary_button_text_color);
+    border: 1px solid var(--hovered_secondary_button_text_color);
+  }
+
+  .password-button-arrow {
+    stroke-linecap: round;
+    transition: transform 0.3s ease;
+    transform-origin: center;
+    color: inherit;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  @media (max-width: 768px) {
+    .password-subscribe-button {
+      width: 210px;
+      height: 40px;
+      font-size: var(--t-b-1-size);
+    }
+
+    .password-button-arrow {
+      width: 16px;
+      height: 16px;
+    }
+
+    /* Mobile styling for password page email input */
+    .password-page-email-input {
+      width: 210px !important;
+      height: 40px !important;
+      font-size: var(--t-b-2-size) !important;
+      text-align: left !important;
+      line-height: 1 !important;
+      padding: 10px 10px !important;
+      box-sizing: border-box !important;
+      margin-left: -1px !important;
+    }
+
+    /* Placeholder text styling - match button font size */
+    .password-page-email-input::placeholder {
+      font-size: var(--t-b-1-size) !important;
+      line-height: 1 !important;
+      position: relative !important;
+      top: 1px !important;
+    }
+  }
+</style>
+
+{%- form 'customer',
+  id: 'email-signup-form-password',
+  class: 'flex flex-col gap-4 w-full mb-[28px] max-w-[1000px] item-center'
+-%}
   <input type="hidden" name="contact[tags]" value="newsletter">
 
   <div class="form-fields-container relative">
     <div class="flex flex-col">
       <div class="flex justify-center">
         <label for="email-input-password" class="sr-only">Email address</label>
-        
+
         <input
           type="email"
           id="email-input-password"
           placeholder="EMAIL"
           name="contact[email]"
-          style="width: 324px; height: 48px; border: var(--inputs-border-width) solid var(--border); border-radius: 3px; opacity: var(--inputs-border-opacity); color:var(--button_label); padding: 0px var(--space-xl); font-size: var(--t-b-2-size); outline: none; box-sizing: border-box;"
-          class="pass-input w-full px-6 py-4 text-left border mt-4 ml-2 pt-2 pb-1 h-[55px] leading-[50px] md:pt-0 md:mt-0 md:pb-0 focus:outline-none focus:ring-1 leading-none peer mb-[13px]"
+          style="width: 324px; height: 48px; border: var(--inputs-border-width) solid var(--border); border-radius: 3px; opacity: var(--inputs-border-opacity); color:var(--button_label); padding: 0px var(--space-xl); font-size: var(--t-b-2-size); outline: none; box-sizing: border-box; background-color: var(--inputs-background);"
+          class="pass-input w-full px-6 py-4 text-left border mt-4 ml-2 pt-2 pb-1 h-[55px] leading-[50px] md:pt-0 md:mt-0 md:pb-0 focus:outline-none focus:ring-1 leading-none peer mb-[13px] password-page-email-input"
           aria-label="{{ placeholder | default: 'Enter your email' }}"
           required
-          pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$" 
+          pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$"
           value="{{ form.email }}"
         >
       </div>
@@ -34,10 +134,6 @@
           {{ form.errors | default_errors }}
         </div>
       {%- endif -%}
-
-      <div id="email-error-password" class="hidden text-red-500 text-sm mt-3 ml-2 peer-invalid:block">
-        Please enter a valid email address
-      </div>
     </div>
   </div>
 
@@ -45,22 +141,20 @@
     <button
       type="submit"
       id="submitButton-password"
-      class="
-        pass-subscribe w-full px-6 py-4 font-light flex items-center justify-between cursor-pointer h-16 ml-2 text-4xl leading-[50px] pt-2 md:h-16 md:mb-0 md:pt-0 md:pb-0
-        transition-colors button-with-arrow focus:outline-none focus:ring-1
-      "
-      style="font-size: var(--t-b-1-size); font-weight: var(--t-b-1-weight); line-height: var(--t-b-1-line-height); font-style: var(--font-body-style);
-            font-family: var(--font-body-family);"
+      class="password-subscribe-button"
       aria-label="Subscribe to our email list"
     >
-    <span id="buttonText-password">{{ button_text }}</span>
-    {% render 'icon-playback', width: '16px', height: '16px',viewBox: '4.5 1.5 8.5 13'%}
-      <span id="loadingSpinner-password" class="hidden">
-        <svg class="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-        </svg>
-      </span>
+      <svg
+        fill="none"
+        width="24"
+        height="24"
+        viewBox="5 8 14 8"
+        style="transform: rotate(-90deg); transform-origin: center; transform-box: fill-box;"
+        class="password-button-arrow"
+      >
+        <path d="M6 9L12 15L18 9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      <span id="buttonText-password">{{ button_text }}</span>
     </button>
   </div>
 {%- endform -%}
