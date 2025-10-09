@@ -520,12 +520,34 @@
               '[class*="product-card"], [class*="product-item"], .card-wrapper'
             );
 
-            if (hasProducts || selector.includes('ProductGridContainer') || selector.includes('product-grid-main')) {
+            // Check if this is a known container ID (more reliable than substring check)
+            const isKnownContainer =
+              selector === '#ProductGridContainer' || selector === '#product-grid' || selector === '.product-grid-main';
+
+            // Only update if:
+            // 1. It's a known/trusted container selector AND it has products in the new content
+            // 2. OR it's a generic selector but has products (validates it's the right element)
+            if (isKnownContainer && hasProducts) {
+              // Trusted container with products - safe to update
               currentGrid.innerHTML = newGrid.innerHTML;
               updated = true;
               console.log('Updated product grid using selector:', selector);
               break; // Stop at first valid match to avoid updating wrong elements
+            } else if (!isKnownContainer && hasProducts) {
+              // Generic selector - only update if it has products
+              currentGrid.innerHTML = newGrid.innerHTML;
+              updated = true;
+              console.log('Updated product grid using selector:', selector);
+              break;
+            } else if (isKnownContainer && !hasProducts) {
+              // Known container but no products in new content
+              // This might be an empty results page - still update to show "no results"
+              currentGrid.innerHTML = newGrid.innerHTML;
+              updated = true;
+              console.log('Updated product grid (empty results) using selector:', selector);
+              break;
             }
+            // If none of above conditions met, continue to next selector
           }
         }
 
