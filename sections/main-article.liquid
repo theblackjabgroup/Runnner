@@ -24,6 +24,30 @@
     opacity: 1;
     transform: translateY(0);
   }
+
+  @media (min-width: 768px) {
+    .sharebtn {
+      margin-right: 100px !important;
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .sharebtn {
+      margin-right: 261px !important;
+    }
+  }
+
+  @media (min-width: 768px) {
+    .colordiv {
+      padding-bottom: {{ section.settings.related_padding_desktop | default: 50 }}px !important;
+    }
+  }
+
+  @media (max-width: 768px) {
+    .overlay-content .flex {
+      width: 95vw !important;
+    }
+  }
 </style>
 <section
   id="parallax-section"
@@ -45,7 +69,7 @@
           {{ article.published_at | date: '%m.%d.%y' }} &nbsp;&nbsp;
         </div>
       {% endif %}
-      <div class="flex flex-row items-start px-2" style="width:66vw;">
+      <div class="flex flex-row items-start px-2" style="width:100%; max-width:66vw;">
         <div
           class="font-medium uppercase leading-none tracking-tighter text-left"
           style="color: {{ section.settings.color_scheme }};"
@@ -74,7 +98,7 @@
           "
           sizes="(max-width: 768px) 100vw, 49vw"
           src="{{ article.image | image_url: width: 1200 }}"
-          alt="{{ article.image.alt | escape | default: article.title }}"
+          alt="{{ article.image.alt | escape | default: article.title | default: 'Article featured image' }}"
           width="{{ article.image.width }}"
           height="{{ article.image.height }}"
           loading="eager"
@@ -131,7 +155,7 @@
 
         <div
           class="blog-article-section color-{{ section.settings.color_scheme }}"
-          style="font-family: var(--font-body-family);margin-left: auto; margin-right: auto; font-size:var(--t-b-2-size); font-weight:var(--t-b-2-weight); line-height:var(--t-b-2-line-height);width:1000px;"
+          style="font-family: var(--font-body-family);margin-left: auto; margin-right: auto; font-size:var(--t-b-2-size); font-weight:var(--t-b-2-weight); line-height:var(--t-b-2-line-height);max-width:1000px; width:100%; padding: 0 20px;"
         >
           {{ article.content }}
         </div>
@@ -151,14 +175,14 @@
     class="social-media items-center "
     style="color: var(--text); padding-top:13px; padding-bottom:20px; font-size:var(--tm-b-2-size);height: 7.8vh;"
   >
-    <span class="sharebtn text-xl md:text-2xl items-center;" style="margin-right:261px; margin-top:0.7vw">SHARE</span>
+    <span class="sharebtn text-xl md:text-2xl items-center;" style="margin-right:20px; margin-top:0.7vw">SHARE</span>
 
     {% if settings.social_facebook_link != blank %}
       <a
-        href="{{ settings.social_facebook_link }}"
+        href="https://www.facebook.com/sharer/sharer.php?u={{ shop.url }}{{ article.url | url_encode }}"
         target="_blank"
         rel="noopener"
-        aria-label="Facebook"
+        aria-label="Share on Facebook"
         class="fb text-xl md:text-2xl"
         style="margin-right:40px;"
       >
@@ -168,10 +192,10 @@
 
     {% if settings.social_twitter_link != blank %}
       <a
-        href="{{settings.social_twitter_link }}"
+        href="https://twitter.com/intent/tweet?url={{ shop.url }}{{ article.url | url_encode }}&text={{ article.title | url_encode }}"
         target="_blank"
         rel="noopener"
-        aria-label="Twitter"
+        aria-label="Share on Twitter"
         class="tw text-xl md:text-2xl"
         style="margin-right:40px;"
       >
@@ -181,9 +205,9 @@
 
     {% if settings.social_email_link != blank %}
       <a
-        href="{{ settings.social_email_link }}"
+        href="mailto:?subject={{ article.title | url_encode }}&body=Check out this article: {{ shop.url }}{{ article.url | url_encode }}"
         class="em text-xl md:text-2xl"
-        aria-label="Email"
+        aria-label="Share via Email"
         style="margin-right:40px;"
       >
         EMAIL
@@ -192,10 +216,10 @@
 
     {% if settings.social_linkedin_link != blank %}
       <a
-        href="{{ settings.social_linkedin_link }}"
+        href="https://www.linkedin.com/sharing/share-offsite/?url={{ shop.url }}{{ article.url | url_encode }}"
         target="_blank"
         rel="noopener"
-        aria-label="LinkedIn"
+        aria-label="Share on LinkedIn"
         class="linked text-xl md:text-2xl"
         style="margin-right:40px;"
       >
@@ -210,7 +234,7 @@
 >
 <div
   class="colordiv color-{{ section.settings.color_scheme }} related-articles-animated"
-  style="padding-left:{{ settings.side_space}}px; padding-right:{{ settings.side_space }}px; padding-bottom: {{ section.settings.related_padding_desktop | default: 50 }}px;"
+  style="padding-left:{{ settings.side_space}}px; padding-right:{{ settings.side_space }}px; padding-bottom: {{ section.settings.related_padding_mobile | default: 20 }}px;"
 >
   <div class="w-full uppercase">
     <div class="mainhead flex flex-col md:flex-row md:items-start" style="margin-top:6.9vh;">
@@ -303,9 +327,7 @@
 
     // Set initial state for all elements
     animatedElements.forEach((element, index) => {
-      element.style.opacity = '0';
-      element.style.transform = 'translateY(50px)';
-      element.style.transition = `opacity 0.8s ease ${index * 0.2}s, transform 0.8s ease ${index * 0.2}s`;
+      element.style.transitionDelay = `${index * 0.2}s`;
     });
 
     // Create intersection observer
@@ -313,9 +335,8 @@
       (entries) => {
         entries.forEach((entry) => {
           if (entry.isIntersecting) {
-            // Trigger fade-up animation
-            entry.target.style.opacity = '1';
-            entry.target.style.transform = 'translateY(0)';
+            // Trigger fade-up animation by adding animate class
+            entry.target.classList.add('animate');
 
             // Stop observing this element
             observer.unobserve(entry.target);
@@ -390,6 +411,22 @@
       "max": 100,
       "step": 1,
       "default": 50
+    },
+    {
+      "type": "blog",
+      "id": "selected_blog",
+      "label": "Select Blog for Related Articles",
+      "info": "Choose which blog to display related articles from"
+    },
+    {
+      "type": "range",
+      "id": "articles_per_page",
+      "label": "Number of Related Articles",
+      "min": 3,
+      "max": 9,
+      "step": 3,
+      "default": 3,
+      "info": "How many related articles to display"
     }
   ]
 }
