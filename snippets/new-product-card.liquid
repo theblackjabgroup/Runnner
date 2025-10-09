@@ -564,11 +564,54 @@
   }
 
   @media (max-width: 768px) {
+    /* ====================================================================
+       DISABLE HOVER EFFECTS ON MOBILE (Keep scroll animations)
+       ==================================================================== */
+
+    /* Disable hover-triggered transitions only */
+    .new-add-to-cart-btn,
+    .new-sold-out-btn,
+    .new-size-variants-container,
+    .new-size-option-btn,
+    .new-image-nav-arrow {
+      transition: none !important;
+    }
+
+    /* Disable all hover-triggered animations and effects */
+    .new-product-card:hover,
+    .new-product-card:active,
+    .new-product-image-wrapper:hover,
+    .new-add-to-cart-btn:hover,
+    .new-sold-out-btn:hover,
+    .new-size-option-btn:hover {
+      transform: none !important;
+    }
+
+    /* Disable scale effect on active */
+    .new-product-card:active {
+      transform: none !important;
+    }
+
+    /* Disable size option hover animations */
+    @keyframes sizeOptionAppear {
+      0%, 100% {
+        opacity: 0;
+        transform: translateY(10px);
+        visibility: hidden;
+      }
+    }
+
+    .new-size-option-btn.size-animate {
+      animation: none !important;
+    }
+
     /* Completely remove hover functionality on mobile - make it touch-friendly */
 
     /* Hide all hover-triggered elements by default */
     .new-image-nav-arrow {
       display: none !important;
+      opacity: 0 !important;
+      transition: none !important;
     }
 
     .new-product-cart-container {
@@ -586,6 +629,7 @@
 
     /* Remove all hover states */
     .new-product-image-wrapper:hover .new-image-nav-arrow,
+    .new-product-image-wrapper:hover .new-image-nav-arrow svg,
     .new-product-image-wrapper:hover .new-product-cart-container,
     .new-product-image-wrapper:hover .new-add-to-cart-btn,
     .new-product-image-wrapper:hover .new-sold-out-btn,
@@ -595,33 +639,49 @@
       visibility: hidden !important;
     }
 
+    /* Disable button hover effects */
+    .new-add-to-cart-btn:hover,
+    .new-sold-out-btn:hover {
+      background-color: rgb(var(--color-background)) !important;
+      color: var(--text) !important;
+      transform: none !important;
+    }
+
+    .new-size-option-btn:hover {
+      transform: none !important;
+      color: var(--text) !important;
+      background-color: transparent !important;
+    }
+
+    /* Disable all variant container hover animations */
+    .new-add-to-cart-btn:hover + .new-size-variants-container,
+    .new-size-variants-container:hover,
+    .new-size-variants-container.active {
+      opacity: 0 !important;
+      visibility: hidden !important;
+      transform: translateX(-50%) translateY(10px) !important;
+    }
+
+    .new-size-variants-container.active .new-size-option-btn,
+    .new-add-to-cart-btn:hover + .new-size-variants-container .new-size-option-btn,
+    .new-size-variants-container.active .unavailable-size,
+    .new-add-to-cart-btn:hover + .new-size-variants-container .unavailable-size {
+      animation: none !important;
+      opacity: 0 !important;
+      visibility: hidden !important;
+    }
+
     /* Make the product card a simple clickable link */
     .new-product-card {
       cursor: pointer;
-      transition: transform 0.2s ease;
     }
 
-    .new-product-card:active {
-      transform: scale(0.98);
-    }
-
-    /* Ensure the product link works properly */
+    /* Ensure the product link works properly - don't block scrolling */
     .new-product-card a {
       display: block;
-      width: 100%;
-      height: 100%;
       text-decoration: none;
       color: inherit;
-    }
-
-    /* Hide any remaining interactive elements */
-    .new-product-image-wrapper:hover * {
-      display: none !important;
-    }
-      visibility: hidden;
-      transform: translateY(10px);
-      animation: sizeOptionAppear 0.5s ease forwards;
-      animation-delay: calc(0.15s * var(--animation-order));
+      /* Remove width/height 100% to allow scrolling */
     }
 
     /* Keep buttons hidden by default on mobile */

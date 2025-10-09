@@ -14,9 +14,8 @@
 -%}
 
 <header
-  class="header-main relative color-{{ color_scheme }} {% unless section.settings.enable_sticky %}sticky-disabled{% endunless %}"
+  class="header-main relative color-{{ color_scheme }} header-z-index {% unless section.settings.enable_sticky %}sticky-disabled{% endunless %}"
   data-header-sticky
-  style="z-index: 999;"
 >
   <div class=" w-full flex items-center justify-between ">
     <!-- Left: Logo -->
@@ -25,16 +24,14 @@
         {% if section.settings.logo != blank %}
           <img
             src="{{ section.settings.logo | image_url }}"
-            class="fade-in"
+            class="fade-in header-logo-img"
             width="auto"
             height="auto"
             alt="Logo"
-            style="width: 100%; height: 100%; padding-right: var(--space-8xl)"
           >
         {% else %}
           <span
-            class="block font-semibold text-center mt-1 fade-in"
-            style="font-size: var(--t-h-3-size); line-height: 1; color: var(--header_text); margin-right:var(--space-8xl);"
+            class="block font-semibold text-center mt-1 fade-in header-logo-text"
           >
             {{- shop.name -}}
           </span>
@@ -49,14 +46,13 @@
       >
         <!-- Left: Menu Items -->
         <div class="menu-items hidden lg:!flex  flex-wrap w-2/3 ">
-          <ul class="flex-1 flex flex-wrap" style="column-gap: calc(var(--spacing) * 7);">
+          <ul class="flex-1 flex flex-wrap menu-items-list">
             {%- for link in section.settings.menu.links -%}
               <li class="group dropdown-group flex items-center justify-center ">
                 {% if link.links.size > 0 %}
                   <a
                     href="{{ link.url }}"
-                    class="cursor-pointer text-[16px] flex items-center group"
-                    style="gap: 2px;"
+                    class="cursor-pointer text-[16px] flex items-center group dropdown-link"
                     aria-expanded="false"
                     aria-controls="mega-menu-{{ forloop.index }}"
                     aria-haspopup="true"
@@ -78,8 +74,7 @@
                         viewBox="0 0 41 20"
                         fill="none"
                         xmlns="http://www.w3.org/2000/svg"
-                        class="w-5 h-5 object-contain transition-transform duration-300 group-hover:rotate-180 mx-1"
-                        style="color: var(--header_text);"
+                        class="w-5 h-5 object-contain transition-transform duration-300 group-hover:rotate-180 mx-1 header-text-color"
                         stroke="currentColor"
                       >
                         <path d="M20.3119 19.7659C20.7254 19.7298 21.1168 19.5625 21.4298 19.2881L39.5626 3.50455C39.7667 3.3376 39.9354 3.131 40.0586 2.89707C40.1818 2.66313 40.2569 2.40663 40.2795 2.14286C40.3022 1.87909 40.2718 1.61342 40.1903 1.3617C40.1088 1.10998 39.9778 0.877357 39.805 0.677661C39.6323 0.477966 39.4215 0.315286 39.185 0.199328C38.9485 0.0833695 38.6912 0.0164912 38.4285 0.0026841C38.1658 -0.011123 37.9031 0.0284416 37.6559 0.118979C37.4087 0.209515 37.1821 0.349193 36.9897 0.529697L20.1434 15.1881L3.29712 0.529697C3.10468 0.349193 2.87811 0.209515 2.63091 0.118979C2.38372 0.0284416 2.12095 -0.011123 1.85825 0.0026841C1.59555 0.0164912 1.3383 0.0833695 1.10182 0.199328C0.865337 0.315286 0.654461 0.477966 0.481748 0.677661C0.309036 0.877357 0.17802 1.10998 0.0965041 1.3617C0.0149883 1.61342 -0.0153602 1.87909 0.00726535 2.14286C0.0298909 2.40663 0.105028 2.66313 0.228202 2.89707C0.351376 3.131 0.520068 3.3376 0.72423 3.50455L18.8569 19.2881C19.0552 19.4619 19.2862 19.5937 19.5362 19.6758C19.7861 19.7579 20.0499 19.7885 20.3119 19.7659Z" fill="currentColor"/>
@@ -90,15 +85,13 @@
                   <!-- sub-menu dropdown -->
                   <div
                     id="mega-menu-{{ forloop.index }}"
-                    class="mega-menu-dropdown"
+                    class="mega-menu-dropdown mega-menu-hidden"
                     role="region"
                     aria-label="{{ link.title }} submenu"
-                    style="display: none; "
                   >
                     <div class="bb-mega-menu-first mx-auto p-2  flex">
                       <ul
-                        class="flex justify-start m-2  flex-wrap"
-                        style="width:60%; gap: calc(var(--spacing) * 15)"
+                        class="flex justify-start m-2 flex-wrap mega-menu-links"
                       >
                         {% for childlink in link.links %}
                           <li class="min-w-[100px] relative">
@@ -132,8 +125,7 @@
                       </ul>
                       <!-- Mega Menu Images -->
                       <div
-                        class="mega-menu-img flex items-center justify-end gap-x-8 py-4 px-4"
-                        style="column-gap: calc(var(--spacing) * 10); width: 40%;"
+                        class="mega-menu-img flex items-center justify-end gap-x-8 py-4 px-4 mega-menu-images"
                       >
                         {% for block in section.blocks %}
                           {% if block.type == 'mega_menu_images' and block.settings.menu_item_name == link.title %}
@@ -234,9 +226,9 @@
                     {% comment %} scrolling text start{% endcomment %}
 
                     <div
-                      class="scrolling-text-section"
+                      class="scrolling-text-section scrolling-text-borders"
                       id="scrolling-text-{{ section.id }}"
-                      style="border-top: 1px solid rgb(var(--color-foreground)); border-bottom: 1px solid rgb(var(--color-foreground)); margin-top: 25px;"
+                      data-responsive="true"
                     >
                       <div
                         class="scrolling-text-container"
@@ -309,16 +301,14 @@
               {{
                 'icon-search1.svg'
                 | inline_asset_content
-                | replace: '<svg',
-                  '<svg role="img" aria-hidden="true" style="width: 22px; height: 22px; transition: transform 0.2s ease; fill: var(--header_text);" onmouseover="this.style.transform=&quot;scale(1.25)&quot;" onmouseout="this.style.transform=&quot;none&quot;" class="w-8 h-8"'
+                | replace: '<svg', '<svg role="img" aria-hidden="true" class="w-8 h-8 search-toggle-icon"'
               }}
             </button>
 
             <!-- Search Container -->
             <div
               id="search-container"
-              class="fixed left-0 right-0 hidden opacity-0 shadow-lg py-8 color-{{ color_scheme }}"
-              style="background: var(--header_background); top: var(--header-height); padding: var(--space-xl) var(--space-6xl); z-index: 999;"
+              class="fixed left-0 right-0 hidden opacity-0 shadow-lg py-8 color-{{ color_scheme }} search-container-fixed"
               aria-hidden="true"
             >
               <div
@@ -340,15 +330,13 @@
                   </div>
                   <button
                     type="submit"
-                    class="text-white bg-black text-[24px] px-3 hover:text-black hover:bg-white hover:border-1 rounded-md transition-colors duration-200 "
-                    style="padding-top: var(--space-tiny); padding-bottom: var(--space-tiny); line-height: 1;"
+                    class="text-white bg-black text-[24px] px-3 hover:text-black hover:bg-white hover:border-1 rounded-md transition-colors duration-200 search-button-padding"
                   >
                     SEARCH
                   </button>
                   <button
                     id="close-search"
-                    class=" hover:text-gray-700 transition-colors duration-200"
-                    style="color: var(--header_text);"
+                    class="hover:text-gray-700 transition-colors duration-200 search-close-color"
                     aria-label="Close search"
                   >
                     <svg class="size-10" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
@@ -358,49 +346,33 @@
                 </form>
 
                 <div
-                  class="
-                    block
-                    search-bottom-bar
-                    w-full h-[2px]
-                  "
-                  style="background: var(--header_text);"
+                  class="block search-bottom-bar w-full h-[2px]"
                 >
                   &nbsp
                 </div>
 
                 <!-- Quick Links -->
                 <div
-                  class=" flex flex-col lg:flex-row items-center"
-                  style="padding: var(--space-3xl) 0;"
+                  class="flex flex-col lg:flex-row items-center search-top-searches"
                 >
                   <span
-                    class="inline-block lg:!block text-[14px] lg:text-[16px] uppercase m-4"
-                    style="color:var(--header_text);"
+                    class="inline-block lg:!block text-[14px] lg:text-[16px] uppercase m-4 search-top-searches-label"
                     >Top Searches</span
                   >
                   <div class="flex flex-wrap gap-6">
                     <a
                       href="{{ routes.search_url }}?q=new"
-                      class="px-1  hover:bg-black  hover:text-white transition-colors duration-200 rounded-md text-[16px] lg:text-[20px] font-medium "
-                      style="background-color: #DDDDDD;"
-                      onmouseover="this.style.backgroundColor='black';"
-                      onmouseleave="this.style.backgroundColor='#DDDDDD';"
+                      class="px-1 hover:bg-black hover:text-white transition-colors duration-200 rounded-md text-[16px] lg:text-[20px] font-medium search-chip no-inline-hover"
                       >New Arrivals</a
                     >
                     <a
                       href="{{ routes.search_url }}?q=sale"
-                      class="px-1 hover:bg-black hover:text-white transition-colors duration-200 rounded-md text-[16px] lg:text-[20px] font-medium"
-                      style="background-color: #DDDDDD;"
-                      onmouseover="this.style.backgroundColor='black';"
-                      onmouseleave="this.style.backgroundColor='#DDDDDD';"
+                      class="px-1 hover:bg-black hover:text-white transition-colors duration-200 rounded-md text-[16px] lg:text-[20px] font-medium search-chip no-inline-hover"
                       >Sale</a
                     >
                     <a
                       href="{{ routes.search_url }}?q=bestsellers"
-                      class="px-1  hover:bg-black hover:text-white transition-colors duration-200 rounded-md text-[16px] lg:text-[20px] font-medium"
-                      style="background-color: #DDDDDD;"
-                      onmouseover="this.style.backgroundColor='black';"
-                      onmouseleave="this.style.backgroundColor='#DDDDDD';"
+                      class="px-1 hover:bg-black hover:text-white transition-colors duration-200 rounded-md text-[16px] lg:text-[20px] font-medium search-chip no-inline-hover"
                       >Bestsellers</a
                     >
                   </div>
@@ -411,8 +383,7 @@
             <!-- Search Overlay -->
             <div
               id="search-overlay"
-              class="fixed left-0 right-0 w-full bg-black opacity-0 pointer-events-none"
-              style="height: 100vh; transition: opacity 0.2s ease-in-out; top: 0; z-index: 998;"
+              class="fixed left-0 right-0 w-full bg-black opacity-0 pointer-events-none search-overlay-fixed"
             >
               &nbsp;
             </div>
@@ -432,9 +403,7 @@
           <!-- Login -->
           <a
             href="{{routes.account_login_url }}"
-            class="hidden lg:!inline-flex items-center gap-2 rounded-xl px-2  text-[16px] text-[var(--header_text)]"
-            onmouseover="this.style.color='var(--hover)';"
-            onmouseleave="this.style.color='var(--header_text)';"
+            class="hidden lg:!inline-flex items-center gap-2 rounded-xl px-2 text-[16px] text-[var(--header_text)] login-link"
             aria-label="Login"
           >
             LOGIN
@@ -443,16 +412,12 @@
           <!-- Cart -->
           <a
             href="{{ routes.cart_url }}"
-            class="  focus-inset !flex items-center justify-center text-[var(--header_text)]"
+            class="focus-inset !flex items-center justify-center text-[var(--header_text)] cart-link"
             id="cart-icon-bubble"
             aria-label="Cart"
-            onmouseover="this.style.color='var(--hover)';"
-            onmouseleave="this.style.color='var(--header_text)';"
           >
             <span
-              <span
-              class="flex text-[16px]"
-              style="margin-right: 5px;"
+              class="flex text-[16px] cart-margin-right"
               >CART</span
             >
             <span
@@ -465,8 +430,7 @@
           <!-- Hamburger -->
           <button
             id="hamburger-menu"
-            class="md:hidden text-[var(--header_text)] hover:text-gray-700"
-            style="color: var(--header_text);"
+            class="md:hidden text-[var(--header_text)] hover:text-gray-700 hamburger-text-color"
             aria-label="Menu"
             aria-expanded="false"
             aria-controls="mobile-menu"
@@ -482,19 +446,13 @@
       >
         <span
           id="bottom-bar-indicator"
-          class=" absolute bottom-0 left-0 transition-all duration-300 ease-out"
-          style="width: 0; height: 1px; background: var(--header_text);"
+          class="absolute bottom-0 left-0 bottom-bar-indicator"
         ></span>
       </div>
     </div>
   </div>
   <div
-    class="
-          mobile-bottom-bar
-      lg:hidden
-      w-full bg-black
-    "
-    style="height: 1px;"
+    class="mobile-bottom-bar lg:hidden w-full bg-black"
   >
     &nbsp
   </div>
@@ -503,8 +461,7 @@
 <!-- Sub Menu Overlay -->
 <div
   id="mega-menu-overlay"
-  class="fixed top-1/5 w-full bg-black opacity-0 pointer-events-none"
-  style="height: 100vh; transition: opacity 0.2s ease-in-out; z-index: 997;"
+  class="fixed top-1/5 w-full bg-black opacity-0 pointer-events-none mega-menu-overlay-z"
 >
   &nbsp;
 </div>
@@ -512,8 +469,7 @@
 <!-- Mobile Menu Overlay -->
 <div
   id="menu-overlay"
-  class="fixed inset-0 bg-black opacity-0 pointer-events-none transition-opacity duration-300"
-  style="z-index: 990; "
+  class="fixed inset-0 bg-black opacity-0 pointer-events-none transition-opacity duration-300 menu-overlay-z"
 >
   &nbsp;
 </div>
@@ -521,78 +477,21 @@
 <!-- Mobile Menu -->
 <div
   id="mobile-menu"
-  class=" lg:hidden w-[90vw] h-[100vh] fixed top-0 right-0 color-{{ color_scheme }} flex"
-  style="transform: translateX(100%); transition: transform 0.3s ease-in-out; background: var(--header_background); z-index: 1000"
+  class="lg:hidden w-[90vw] h-[100vh] fixed top-0 right-0 color-{{ color_scheme }} flex mobile-menu-transform"
 >
-  <!-- Vertical Scrolling Text -->
-  <div
-    class="scrolling-text-section"
-    id="scrolling-text-{{ section.id }}"
-    style="border-top: 1px solid rgb(var(--color-foreground)); border-bottom: 1px solid rgb(var(--color-foreground)); "
-  >
-    <div
-      class="scrolling-text-container"
-      data-direction="{{ section.settings.direction }}"
-    >
-      <!-- First set of content -->
-      {% for i in (1..section.settings.repeat_count) %}
-        <span class="scrolling-text-item">{{ section.settings.scrolling_text }}</span>
-        {% if section.settings.separator_image %}
-          <img
-            class="scrolling-separator"
-            src="{{ section.settings.separator_image | image_url }}"
-            alt="separator"
-            height="100%"
-            width="100%"
-          >
-        {% else %}
-          {% render 'icon-playback',
-            class: 'bi bi-caret-right-fill scrolling-separator',
-            width: '16px',
-            height: '16px',
-            fill: 'currentColor'
-          %}
-        {% endif %}
-      {% endfor %}
-      <!-- Duplicate set for seamless infinite scrolling -->
-      {% for i in (1..section.settings.repeat_count) %}
-        <span class="scrolling-text-item">{{ section.settings.scrolling_text }}</span>
-        {% unless forloop.last %}
-          {% if section.settings.separator_image %}
-            <img
-              class="scrolling-separator"
-              src="{{ section.settings.separator_image | image_url }}"
-              alt="separator"
-              height="100%"
-              width="100%"
-            >
-          {% else %}
-            {% render 'icon-playback',
-              class: 'bi bi-caret-right-fill scrolling-separator',
-              width: '16px',
-              height: '16px',
-              fill: 'currentColor'
-            %}
-          {% endif %}
-        {% endunless %}
-      {% endfor %}
-    </div>
-  </div>
+  <!-- Mobile scrolling text removed - using single responsive instance -->
 
   <div
-    class="  flex flex-1 flex-col justify-between overflow-y-auto"
-    style="padding-left: var(--space-lg); padding-right: var(--space-xl);"
+    class="flex flex-1 flex-col justify-between overflow-y-auto mobile-menu-padding"
   >
     <nav
-      class="flex flex-col space-y-4 pt-10 w-full justify-between"
-      style="padding-top: var(--space-4xl);"
+      class="flex flex-col space-y-4 pt-10 w-full justify-between mobile-menu-section-padding"
     >
       <div class="upper-section">
         <div class="flex items-center justify-end">
           <button
             type="button"
-            class="text-[14px] pb-2 leading-none tracking-tight uppercase"
-            style="color: var(--header_text)"
+            class="text-[14px] pb-2 leading-none tracking-tight uppercase mobile-menu-close-color"
             aria-label="Close Menu"
           >
             Close
@@ -601,7 +500,7 @@
         {% if section.settings.menu.links != blank %}
           {% for link in section.settings.menu.links %}
             <div class="mobile-menu-item">
-              <div class="horizontal-line w-full h-0.5 my-2" style="background: var(--header_text)">&nbsp;</div>
+              <div class="horizontal-line w-full h-0.5 my-2 mobile-menu-divider">&nbsp;</div>
               <div class="!flex items-center justify-between">
                 <a href="{{ link.url }}" class="block text-[24px] text-[var(--header_text)] font-medium py-2">
                   {{ link.title }}
@@ -630,8 +529,7 @@
                         viewBox="0 0 41 20"
                         fill="none"
                         xmlns="http://www.w3.org/2000/svg"
-                        class="w-5 h-5 object-contain transition-transform duration-300 group-hover:-rotate-90 mx-1"
-                        style="color: var(--header_text);"
+                        class="w-5 h-5 object-contain transition-transform duration-300 group-hover:-rotate-90 mx-1 header-text-color"
                         stroke="currentColor"
                       >
                         <path d="M20.3119 19.7659C20.7254 19.7298 21.1168 19.5625 21.4298 19.2881L39.5626 3.50455C39.7667 3.3376 39.9354 3.131 40.0586 2.89707C40.1818 2.66313 40.2569 2.40663 40.2795 2.14286C40.3022 1.87909 40.2718 1.61342 40.1903 1.3617C40.1088 1.10998 39.9778 0.877357 39.805 0.677661C39.6323 0.477966 39.4215 0.315286 39.185 0.199328C38.9485 0.0833695 38.6912 0.0164912 38.4285 0.0026841C38.1658 -0.011123 37.9031 0.0284416 37.6559 0.118979C37.4087 0.209515 37.1821 0.349193 36.9897 0.529697L20.1434 15.1881L3.29712 0.529697C3.10468 0.349193 2.87811 0.209515 2.63091 0.118979C2.38372 0.0284416 2.12095 -0.011123 1.85825 0.0026841C1.59555 0.0164912 1.3383 0.0833695 1.10182 0.199328C0.865337 0.315286 0.654461 0.477966 0.481748 0.677661C0.309036 0.877357 0.17802 1.10998 0.0965041 1.3617C0.0149883 1.61342 -0.0153602 1.87909 0.00726535 2.14286C0.0298909 2.40663 0.105028 2.66313 0.228202 2.89707C0.351376 3.131 0.520068 3.3376 0.72423 3.50455L18.8569 19.2881C19.0552 19.4619 19.2862 19.5937 19.5362 19.6758C19.7861 19.7579 20.0499 19.7885 20.3119 19.7659Z" fill="currentColor"/>
@@ -747,11 +645,10 @@
                                 href="{{ block.settings.button_link_2 }}"
                                 class="block mt-4 transition-all duration-300"
                               >
-                                <div class="flex items-center justify-between  group-hover/card:font-bold">
+                                <div class="flex items-center justify-between group-hover/card:font-bold">
                                   <p
-                                    class="text-lg font-medium"
+                                    class="text-lg font-medium mega-menu-btn-text"
                                     style="color: {{ block.settings.btn_text_color }};"
-                                    onmouseover="this.style.color='var(--hover)';"
                                   >
                                     {{ block.settings.button_text_2 }}
                                   </p>
@@ -782,7 +679,7 @@
           {% endfor %}
         {% endif %}
       </div>
-      <div class="horizontal-line w-full h-0.5  my-2" style="background: var(--header_text)">&nbsp;</div>
+      <div class="horizontal-line w-full h-0.5 my-2 mobile-menu-divider">&nbsp;</div>
     </nav>
 
     <div class="flex flex-col w-full">
@@ -795,7 +692,7 @@
             aria-expanded="false"
           >
             {% assign current_country = localization.country %}
-            <span class="" style="color: var(--header_text);">
+            <span class="header-text-color">
               {{ current_country.name | upcase }}
             </span>
             {% render 'icon-playback',
@@ -808,16 +705,14 @@
 
           <!-- Dropdown -->
           <div
-            class="country-selector-dropdown absolute bottom-16 w-100 border border-gray-200 rounded-md shadow-lg opacity-0 invisible transition-all duration-300 z-[9999] color-{{ color_scheme }}"
-            style="background: var(--header_background); "
+            class="country-selector-dropdown absolute bottom-16 w-100 border border-gray-200 rounded-md shadow-lg opacity-0 invisible transition-all duration-300 z-[9999] color-{{ color_scheme }} country-selector-dropdown-bg"
           >
             <ul class="max-h-100 overflow-y-auto divide-y divide-gray-100 text-xl">
               {% for country in localization.available_countries %}
                 <li>
                   <a
                     href="{{ country.url }}"
-                    class="w-full flex items-center justify-between px-4 py-2 text-2xl  hover:bg-gray-100"
-                    style="color: var(--header_text);"
+                    class="w-full flex items-center justify-between px-4 py-2 text-2xl hover:bg-gray-100 header-text-color"
                   >
                     <span class="mx-2">{{ country.name }}</span>
                     <span class=" font-medium">
@@ -855,14 +750,14 @@
           </a>
         -->
       </div>
-      <div class="horizontal-line w-full h-0.5" style="background: var(--header_text)">&nbsp;</div>
+      <div class="horizontal-line w-full h-0.5 mobile-menu-divider">&nbsp;</div>
       <div id="social-link-container" class="flex flex-wrap items-center justify-between gap-4 m-4">
         {% if settings.social_facebook_link != blank %}
           <a href="{{ settings.social_facebook_link }}" aria-label="Facebook" target="_blank" rel="noopener">
             {{
               'icon-facebook.svg'
               | inline_asset_content
-              | replace: '<svg', '<svg role="img" aria-hidden="true" style="height: 30px; fill: '
+              | replace: '<svg', '<svg role="img" aria-hidden="true" class="social-icon-height-30" style="fill: '
               | append: settings.social_icon_color
               | remove: '_'
             }}
@@ -874,7 +769,7 @@
             {{
               'icon-instagram.svg'
               | inline_asset_content
-              | replace: '<svg', '<svg role="img" aria-hidden="true" style="height: 30px; fill: '
+              | replace: '<svg', '<svg role="img" aria-hidden="true" class="social-icon-height-30" style="fill: '
               | append: settings.social_icon_color
               | remove: '_'
             }}
@@ -886,7 +781,7 @@
             {{
               'icon-youtube.svg'
               | inline_asset_content
-              | replace: '<svg', '<svg role="img" aria-hidden="true" style="height: 25px; fill: '
+              | replace: '<svg', '<svg role="img" aria-hidden="true" class="social-icon-height-25" style="fill: '
               | append: settings.social_icon_color
               | remove: '_'
             }}
@@ -897,7 +792,7 @@
             {{
               'icon-twitter.svg'
               | inline_asset_content
-              | replace: '<svg', '<svg role="img" aria-hidden="true" style="height: 25px; fill: '
+              | replace: '<svg', '<svg role="img" aria-hidden="true" class="social-icon-height-25" style="fill: '
               | append: settings.social_icon_color
               | remove: "'"
             }}
@@ -908,7 +803,7 @@
             {{
               'icon-snapchat.svg'
               | inline_asset_content
-              | replace: '<svg', '<svg role="img" aria-hidden="true" style="height: 25px; fill: '
+              | replace: '<svg', '<svg role="img" aria-hidden="true" class="social-icon-height-25" style="fill: '
               | append: settings.social_icon_color
               | remove: "'"
             }}
@@ -1068,16 +963,7 @@
       }
     });
 
-    // Handle window resize - close menu if opened and window becomes large
-    let resizeTimer;
-    window.addEventListener('resize', function() {
-      clearTimeout(resizeTimer);
-      resizeTimer = setTimeout(() => {
-        if (window.innerWidth > 1024 && isMobileMenuOpen) {
-          closeMobileMenu();
-        }
-      }, 100);
-    });
+    // Mobile menu resize handler - will be managed by global resize manager
 
     // Initialize menu state
     if (mobileMenu) {
@@ -1166,9 +1052,12 @@
       const menu    = group.querySelector('.mega-menu-dropdown');
       if (!menu) return;
 
-      // track currently open menu
-      if (typeof window._currentOpenMenu === 'undefined') {
-        window._currentOpenMenu = null;
+      // Track currently open menu with namespaced global state
+      if (typeof window.BlackBytt === 'undefined') {
+        window.BlackBytt = {};
+      }
+      if (typeof window.BlackBytt.currentOpenMenu === 'undefined') {
+        window.BlackBytt.currentOpenMenu = null;
       }
 
       let closeTimer = null;
@@ -1178,7 +1067,7 @@
         if (e.propertyName === 'max-height' && !menu.classList.contains('open')) {
           menu.style.display        = 'none';
           menu.style.pointerEvents  = 'none';
-          window._currentOpenMenu   = null;
+          window.BlackBytt.currentOpenMenu = null;
         }
       });
 
@@ -1188,13 +1077,13 @@
         m.style.pointerEvents  = 'auto';
         m.offsetHeight; // force reflow
         m.classList.add('open');
-        window._currentOpenMenu = m;
+        window.BlackBytt.currentOpenMenu = m;
       }
 
       function openMenu() {
         clearTimeout(closeTimer);
 
-        const old = window._currentOpenMenu;
+        const old = window.BlackBytt.currentOpenMenu;
         if (old && old !== menu) {
           // close the old one first, then open ours
           old.classList.remove('open');
@@ -1237,6 +1126,7 @@
     if (bottomBarIndicator) {
       bottomBarIndicator.style.width = '100%';
       bottomBarIndicator.style.transform = 'translateX(0)';
+      bottomBarIndicator.style.opacity = '1';
     }
 
     menuItems.forEach((item) => {
@@ -1249,17 +1139,24 @@
         const left = rect.left - containerRect.left;
         const width = rect.width;
 
-        bottomBarIndicator.style.transform = `translateX(${left}px) translateY(-2px)`;
-        bottomBarIndicator.style.width = `${width}px`;
+
+        // Use requestAnimationFrame for smoother animation
+        requestAnimationFrame(() => {
+          bottomBarIndicator.style.transform = `translateX(${left}px) translateY(-5px)`;
+          bottomBarIndicator.style.width = `${width}px`;
+          
+        });
       });
 
       item.addEventListener('mouseleave', (e) => {
         const related = e.relatedTarget;
         if (!item.contains(related)) {
           indicatorTimeout = setTimeout(() => {
-            bottomBarIndicator.style.width = '100%';
-            bottomBarIndicator.style.transform = 'translateX(0) translateY(0px)';
-          }, 100);
+            requestAnimationFrame(() => {
+              bottomBarIndicator.style.width = '100%';
+              bottomBarIndicator.style.transform = 'translateX(0) translateY(0)';
+            });
+          }, 150);
         }
       });
     });
@@ -1269,15 +1166,41 @@
     if (scrollingSection) {
       const scrollingContainer = scrollingSection.querySelector('.scrolling-text-container');
 
-      // Check if we're on mobile
+      // Improved mobile detection using matchMedia
+      const mobileMediaQuery = window.matchMedia('(max-width: 768px)');
+      let cachedIsMobile = mobileMediaQuery.matches;
+      
       function isMobile() {
-        return window.innerWidth <= 768;
+        // Use cached value to avoid constant recalculation
+        return cachedIsMobile;
       }
+      
+      // Update cached value when media query changes
+      mobileMediaQuery.addEventListener('change', (e) => {
+        cachedIsMobile = e.matches;
+        // Only trigger resize if device type actually changed
+        if (currentDeviceType !== cachedIsMobile) {
+          setInitialPosition(true);
+        }
+      });
+
+      // Animation state management
+      let isAnimationInitialized = false;
+      let currentDeviceType = null;
+      let currentDirection = null;
 
       // Set initial position based on direction and device type
-      function setInitialPosition() {
+      function setInitialPosition(forceReset = false) {
         const direction = scrollingContainer.getAttribute('data-direction');
         const mobile = isMobile();
+        
+        // Only reset if device type or direction actually changed
+        if (!forceReset && currentDeviceType === mobile && currentDirection === direction && isAnimationInitialized) {
+          return; // No need to reset
+        }
+        
+        currentDeviceType = mobile;
+        currentDirection = direction;
         
         if (mobile) {
           // Mobile vertical scrolling
@@ -1295,15 +1218,19 @@
           }
         }
 
-        // Force a reflow and restart animation
-        scrollingContainer.style.animation = 'none';
-        scrollingContainer.offsetHeight; // Trigger reflow
-        
-        if (mobile) {
-          const animationName = direction === 'left' ? 'scroll-bottom-to-top' : 'scroll-top-to-bottom';
-          scrollingContainer.style.animation = `${animationName} {{ section.settings.speed }}s linear infinite`;
-        } else {
-          scrollingContainer.style.animation = `scroll-${direction} {{ section.settings.speed }}s linear infinite`;
+        // Only reset animation if necessary
+        if (forceReset || !isAnimationInitialized) {
+          scrollingContainer.style.animation = 'none';
+          scrollingContainer.offsetHeight; // Trigger reflow
+          
+          if (mobile) {
+            const animationName = direction === 'left' ? 'scroll-bottom-to-top' : 'scroll-top-to-bottom';
+            scrollingContainer.style.animation = `${animationName} {{ section.settings.speed }}s linear infinite`;
+          } else {
+            scrollingContainer.style.animation = `scroll-${direction} {{ section.settings.speed }}s linear infinite`;
+          }
+          
+          isAnimationInitialized = true;
         }
       }
 
@@ -1312,15 +1239,14 @@
 
       // Handle window resize to switch between mobile and desktop
       function handleResize() {
-        setInitialPosition();
+        const mobile = isMobile();
+        // Only reset if device type actually changed
+        if (currentDeviceType !== mobile) {
+          setInitialPosition(true);
+        }
       }
 
-      // Add resize listener with debounce
-      let resizeScrollTimeout;
-      window.addEventListener('resize', function() {
-        clearTimeout(resizeScrollTimeout);
-        resizeScrollTimeout = setTimeout(handleResize, 150);
-      });
+      // Scrolling text resize handler - will be managed by global resize manager
 
       // Calculate optimal repeat count based on text length and device type
       function calculateOptimalRepeats() {
@@ -1348,16 +1274,8 @@
       // Dynamic direction control
       function updateScrollDirection(direction) {
         scrollingContainer.setAttribute('data-direction', direction);
-        const mobile = isMobile();
-        
-        if (mobile) {
-          const animationName = direction === 'left' ? 'scroll-bottom-to-top' : 'scroll-top-to-bottom';
-          scrollingContainer.style.animationName = animationName;
-        } else {
-          scrollingContainer.style.animationName = 'scroll-' + direction;
-        }
-        
-        setInitialPosition();
+        // Force reset since direction changed
+        setInitialPosition(true);
       }
 
       // Pause/resume functionality
@@ -1386,9 +1304,12 @@
       // Initialize image optimization
       optimizeImageLoading();
 
-      // Add methods to global scope for external control
-      window.ScrollingText = window.ScrollingText || {};
-      window.ScrollingText['section-{{ section.id }}'] = {
+      // Add methods to global scope for external control (namespaced)
+      if (typeof window.BlackBytt === 'undefined') {
+        window.BlackBytt = {};
+      }
+      window.BlackBytt.ScrollingText = window.BlackBytt.ScrollingText || {};
+      window.BlackBytt.ScrollingText['section-{{ section.id }}'] = {
         updateSpeed: updateScrollSpeed,
         updateDirection: updateScrollDirection,
         pause: pauseScroll,
@@ -1448,7 +1369,7 @@
       };
 
       setHeaderHeight();
-      window.addEventListener('resize', setHeaderHeight, { passive: true });
+      // Header sticky resize handler - will be managed by global resize manager
       window.addEventListener('scroll', () => requestAnimationFrame(handleScroll), { passive: true });
     }
 
@@ -1557,6 +1478,78 @@
   button.addEventListener('click', () => {
     arrow.classList.toggle('rotate-180');
   });
+
+  /* ========================================================================
+     CONSOLIDATED RESIZE EVENT MANAGER
+     Prevents event listener stacking by managing all resize events in one place
+     ======================================================================== */
+  
+  (function initGlobalResizeManager() {
+    let resizeTimer;
+    let lastWidth = window.innerWidth;
+    
+    // All resize handlers in one place
+    const resizeHandlers = {
+      // Mobile menu handler
+      mobileMenu: () => {
+        if (window.innerWidth > 1024 && isMobileMenuOpen) {
+          closeMobileMenu();
+        }
+      },
+      
+      // Scrolling text handler
+      scrollingText: () => {
+        const scrollingSection = document.getElementById('scrolling-text-{{ section.id }}');
+        if (scrollingSection && typeof handleResize !== 'undefined') {
+          const mobile = window.innerWidth <= 768;
+          const currentDeviceType = scrollingSection.dataset.deviceType;
+          
+          // Only call handleResize if device type changed
+          if (currentDeviceType !== String(mobile)) {
+            scrollingSection.dataset.deviceType = mobile;
+            handleResize();
+          }
+        }
+      },
+      
+      // Header sticky handler
+      headerSticky: () => {
+        if (typeof setHeaderHeight !== 'undefined') {
+          setHeaderHeight();
+        }
+      }
+    };
+    
+    // Consolidated resize handler with debouncing
+    function handleGlobalResize() {
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(() => {
+        const currentWidth = window.innerWidth;
+        
+        // Only process if width actually changed (not just height)
+        if (currentWidth !== lastWidth) {
+          lastWidth = currentWidth;
+          
+          // Execute all handlers
+          Object.values(resizeHandlers).forEach(handler => {
+            try {
+              handler();
+            } catch (error) {
+              console.warn('Resize handler error:', error);
+            }
+          });
+        }
+      }, 150);
+    }
+    
+    // Single resize listener
+    window.addEventListener('resize', handleGlobalResize, { passive: true });
+    
+    // Cleanup on page unload
+    window.addEventListener('beforeunload', () => {
+      window.removeEventListener('resize', handleGlobalResize);
+    });
+  })();
 </script>
 
 {% schema %}
