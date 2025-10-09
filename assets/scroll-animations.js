@@ -475,4 +475,7 @@ if (typeof ScrollAnimations === 'undefined') {
     ScrollAnimations,
     ProductGridAnimations,
   };
+
+  // Make ScrollAnimations globally accessible
+  window.ScrollAnimations = ScrollAnimations;
 } // End of ScrollAnimations undefined check

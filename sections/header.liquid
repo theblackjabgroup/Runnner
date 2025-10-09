@@ -228,6 +228,7 @@
                     <div
                       class="scrolling-text-section scrolling-text-borders"
                       id="scrolling-text-{{ section.id }}"
+                      data-responsive="true"
                     >
                       <div
                         class="scrolling-text-container"
@@ -478,59 +479,7 @@
   id="mobile-menu"
   class="lg:hidden w-[90vw] h-[100vh] fixed top-0 right-0 color-{{ color_scheme }} flex mobile-menu-transform"
 >
-  <!-- Vertical Scrolling Text -->
-  <div
-    class="scrolling-text-section mobile-submenu-scrollbar-borders"
-    id="scrolling-text-{{ section.id }}"
-  >
-    <div
-      class="scrolling-text-container"
-      data-direction="{{ section.settings.direction }}"
-    >
-      <!-- First set of content -->
-      {% for i in (1..section.settings.repeat_count) %}
-        <span class="scrolling-text-item">{{ section.settings.scrolling_text }}</span>
-        {% if section.settings.separator_image %}
-          <img
-            class="scrolling-separator"
-            src="{{ section.settings.separator_image | image_url }}"
-            alt="separator"
-            height="100%"
-            width="100%"
-          >
-        {% else %}
-          {% render 'icon-playback',
-            class: 'bi bi-caret-right-fill scrolling-separator',
-            width: '16px',
-            height: '16px',
-            fill: 'currentColor'
-          %}
-        {% endif %}
-      {% endfor %}
-      <!-- Duplicate set for seamless infinite scrolling -->
-      {% for i in (1..section.settings.repeat_count) %}
-        <span class="scrolling-text-item">{{ section.settings.scrolling_text }}</span>
-        {% unless forloop.last %}
-          {% if section.settings.separator_image %}
-            <img
-              class="scrolling-separator"
-              src="{{ section.settings.separator_image | image_url }}"
-              alt="separator"
-              height="100%"
-              width="100%"
-            >
-          {% else %}
-            {% render 'icon-playback',
-              class: 'bi bi-caret-right-fill scrolling-separator',
-              width: '16px',
-              height: '16px',
-              fill: 'currentColor'
-            %}
-          {% endif %}
-        {% endunless %}
-      {% endfor %}
-    </div>
-  </div>
+  <!-- Mobile scrolling text removed - using single responsive instance -->
 
   <div
     class="flex flex-1 flex-col justify-between overflow-y-auto mobile-menu-padding"
@@ -1014,16 +963,7 @@
       }
     });
 
-    // Handle window resize - close menu if opened and window becomes large
-    let resizeTimer;
-    window.addEventListener('resize', function() {
-      clearTimeout(resizeTimer);
-      resizeTimer = setTimeout(() => {
-        if (window.innerWidth > 1024 && isMobileMenuOpen) {
-          closeMobileMenu();
-        }
-      }, 100);
-    });
+    // Mobile menu resize handler - will be managed by global resize manager
 
     // Initialize menu state
     if (mobileMenu) {
@@ -1112,9 +1052,12 @@
       const menu    = group.querySelector('.mega-menu-dropdown');
       if (!menu) return;
 
-      // track currently open menu
-      if (typeof window._currentOpenMenu === 'undefined') {
-        window._currentOpenMenu = null;
+      // Track currently open menu with namespaced global state
+      if (typeof window.BlackBytt === 'undefined') {
+        window.BlackBytt = {};
+      }
+      if (typeof window.BlackBytt.currentOpenMenu === 'undefined') {
+        window.BlackBytt.currentOpenMenu = null;
       }
 
       let closeTimer = null;
@@ -1124,7 +1067,7 @@
         if (e.propertyName === 'max-height' && !menu.classList.contains('open')) {
           menu.style.display        = 'none';
           menu.style.pointerEvents  = 'none';
-          window._currentOpenMenu   = null;
+          window.BlackBytt.currentOpenMenu = null;
         }
       });
 
@@ -1134,13 +1077,13 @@
         m.style.pointerEvents  = 'auto';
         m.offsetHeight; // force reflow
         m.classList.add('open');
-        window._currentOpenMenu = m;
+        window.BlackBytt.currentOpenMenu = m;
       }
 
       function openMenu() {
         clearTimeout(closeTimer);
 
-        const old = window._currentOpenMenu;
+        const old = window.BlackBytt.currentOpenMenu;
         if (old && old !== menu) {
           // close the old one first, then open ours
           old.classList.remove('open');
@@ -1180,14 +1123,10 @@
     const menuItems = document.querySelectorAll('.menu-items ul > li.dropdown-group');
     let indicatorTimeout = null;
 
-    console.log('Bottom bar indicator:', bottomBarIndicator);
-    console.log('Menu items found:', menuItems.length);
-
     if (bottomBarIndicator) {
       bottomBarIndicator.style.width = '100%';
-      bottomBarIndicator.style.transform = 'translateX(0) ';
+      bottomBarIndicator.style.transform = 'translateX(0)';
       bottomBarIndicator.style.opacity = '1';
-      console.log('Bottom bar initialized with width 100%');
     }
 
     menuItems.forEach((item) => {
@@ -1200,25 +1139,12 @@
         const left = rect.left - containerRect.left;
         const width = rect.width;
 
-        console.log('Hovering menu item:', link.textContent.trim());
-        console.log('Setting width to:', width, 'left to:', left);
 
         // Use requestAnimationFrame for smoother animation
         requestAnimationFrame(() => {
           bottomBarIndicator.style.transform = `translateX(${left}px) translateY(-5px)`;
           bottomBarIndicator.style.width = `${width}px`;
           
-          // Debug: Check computed styles after setting
-          setTimeout(() => {
-            const computedStyle = getComputedStyle(bottomBarIndicator);
-            console.log('After hover - Computed styles:');
-            console.log('- Width:', computedStyle.width);
-            console.log('- Transform:', computedStyle.transform);
-            console.log('- Opacity:', computedStyle.opacity);
-            console.log('- Display:', computedStyle.display);
-            console.log('- Height:', computedStyle.height);
-            console.log('- Element visible:', bottomBarIndicator.offsetWidth > 0);
-          }, 50);
         });
       });
 
@@ -1240,15 +1166,41 @@
     if (scrollingSection) {
       const scrollingContainer = scrollingSection.querySelector('.scrolling-text-container');
 
-      // Check if we're on mobile
+      // Improved mobile detection using matchMedia
+      const mobileMediaQuery = window.matchMedia('(max-width: 768px)');
+      let cachedIsMobile = mobileMediaQuery.matches;
+      
       function isMobile() {
-        return window.innerWidth <= 768;
+        // Use cached value to avoid constant recalculation
+        return cachedIsMobile;
       }
+      
+      // Update cached value when media query changes
+      mobileMediaQuery.addEventListener('change', (e) => {
+        cachedIsMobile = e.matches;
+        // Only trigger resize if device type actually changed
+        if (currentDeviceType !== cachedIsMobile) {
+          setInitialPosition(true);
+        }
+      });
+
+      // Animation state management
+      let isAnimationInitialized = false;
+      let currentDeviceType = null;
+      let currentDirection = null;
 
       // Set initial position based on direction and device type
-      function setInitialPosition() {
+      function setInitialPosition(forceReset = false) {
         const direction = scrollingContainer.getAttribute('data-direction');
         const mobile = isMobile();
+        
+        // Only reset if device type or direction actually changed
+        if (!forceReset && currentDeviceType === mobile && currentDirection === direction && isAnimationInitialized) {
+          return; // No need to reset
+        }
+        
+        currentDeviceType = mobile;
+        currentDirection = direction;
         
         if (mobile) {
           // Mobile vertical scrolling
@@ -1266,15 +1218,19 @@
           }
         }
 
-        // Force a reflow and restart animation
-        scrollingContainer.style.animation = 'none';
-        scrollingContainer.offsetHeight; // Trigger reflow
-        
-        if (mobile) {
-          const animationName = direction === 'left' ? 'scroll-bottom-to-top' : 'scroll-top-to-bottom';
-          scrollingContainer.style.animation = `${animationName} {{ section.settings.speed }}s linear infinite`;
-        } else {
-          scrollingContainer.style.animation = `scroll-${direction} {{ section.settings.speed }}s linear infinite`;
+        // Only reset animation if necessary
+        if (forceReset || !isAnimationInitialized) {
+          scrollingContainer.style.animation = 'none';
+          scrollingContainer.offsetHeight; // Trigger reflow
+          
+          if (mobile) {
+            const animationName = direction === 'left' ? 'scroll-bottom-to-top' : 'scroll-top-to-bottom';
+            scrollingContainer.style.animation = `${animationName} {{ section.settings.speed }}s linear infinite`;
+          } else {
+            scrollingContainer.style.animation = `scroll-${direction} {{ section.settings.speed }}s linear infinite`;
+          }
+          
+          isAnimationInitialized = true;
         }
       }
 
@@ -1283,15 +1239,14 @@
 
       // Handle window resize to switch between mobile and desktop
       function handleResize() {
-        setInitialPosition();
+        const mobile = isMobile();
+        // Only reset if device type actually changed
+        if (currentDeviceType !== mobile) {
+          setInitialPosition(true);
+        }
       }
 
-      // Add resize listener with debounce
-      let resizeScrollTimeout;
-      window.addEventListener('resize', function() {
-        clearTimeout(resizeScrollTimeout);
-        resizeScrollTimeout = setTimeout(handleResize, 150);
-      });
+      // Scrolling text resize handler - will be managed by global resize manager
 
       // Calculate optimal repeat count based on text length and device type
       function calculateOptimalRepeats() {
@@ -1319,16 +1274,8 @@
       // Dynamic direction control
       function updateScrollDirection(direction) {
         scrollingContainer.setAttribute('data-direction', direction);
-        const mobile = isMobile();
-        
-        if (mobile) {
-          const animationName = direction === 'left' ? 'scroll-bottom-to-top' : 'scroll-top-to-bottom';
-          scrollingContainer.style.animationName = animationName;
-        } else {
-          scrollingContainer.style.animationName = 'scroll-' + direction;
-        }
-        
-        setInitialPosition();
+        // Force reset since direction changed
+        setInitialPosition(true);
       }
 
       // Pause/resume functionality
@@ -1357,9 +1304,12 @@
       // Initialize image optimization
       optimizeImageLoading();
 
-      // Add methods to global scope for external control
-      window.ScrollingText = window.ScrollingText || {};
-      window.ScrollingText['section-{{ section.id }}'] = {
+      // Add methods to global scope for external control (namespaced)
+      if (typeof window.BlackBytt === 'undefined') {
+        window.BlackBytt = {};
+      }
+      window.BlackBytt.ScrollingText = window.BlackBytt.ScrollingText || {};
+      window.BlackBytt.ScrollingText['section-{{ section.id }}'] = {
         updateSpeed: updateScrollSpeed,
         updateDirection: updateScrollDirection,
         pause: pauseScroll,
@@ -1419,7 +1369,7 @@
       };
 
       setHeaderHeight();
-      window.addEventListener('resize', setHeaderHeight, { passive: true });
+      // Header sticky resize handler - will be managed by global resize manager
       window.addEventListener('scroll', () => requestAnimationFrame(handleScroll), { passive: true });
     }
 
@@ -1528,6 +1478,78 @@
   button.addEventListener('click', () => {
     arrow.classList.toggle('rotate-180');
   });
+
+  /* ========================================================================
+     CONSOLIDATED RESIZE EVENT MANAGER
+     Prevents event listener stacking by managing all resize events in one place
+     ======================================================================== */
+  
+  (function initGlobalResizeManager() {
+    let resizeTimer;
+    let lastWidth = window.innerWidth;
+    
+    // All resize handlers in one place
+    const resizeHandlers = {
+      // Mobile menu handler
+      mobileMenu: () => {
+        if (window.innerWidth > 1024 && isMobileMenuOpen) {
+          closeMobileMenu();
+        }
+      },
+      
+      // Scrolling text handler
+      scrollingText: () => {
+        const scrollingSection = document.getElementById('scrolling-text-{{ section.id }}');
+        if (scrollingSection && typeof handleResize !== 'undefined') {
+          const mobile = window.innerWidth <= 768;
+          const currentDeviceType = scrollingSection.dataset.deviceType;
+          
+          // Only call handleResize if device type changed
+          if (currentDeviceType !== String(mobile)) {
+            scrollingSection.dataset.deviceType = mobile;
+            handleResize();
+          }
+        }
+      },
+      
+      // Header sticky handler
+      headerSticky: () => {
+        if (typeof setHeaderHeight !== 'undefined') {
+          setHeaderHeight();
+        }
+      }
+    };
+    
+    // Consolidated resize handler with debouncing
+    function handleGlobalResize() {
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(() => {
+        const currentWidth = window.innerWidth;
+        
+        // Only process if width actually changed (not just height)
+        if (currentWidth !== lastWidth) {
+          lastWidth = currentWidth;
+          
+          // Execute all handlers
+          Object.values(resizeHandlers).forEach(handler => {
+            try {
+              handler();
+            } catch (error) {
+              console.warn('Resize handler error:', error);
+            }
+          });
+        }
+      }, 150);
+    }
+    
+    // Single resize listener
+    window.addEventListener('resize', handleGlobalResize, { passive: true });
+    
+    // Cleanup on page unload
+    window.addEventListener('beforeunload', () => {
+      window.removeEventListener('resize', handleGlobalResize);
+    });
+  })();
 </script>
 
 {% schema %}
