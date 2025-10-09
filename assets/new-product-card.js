@@ -136,25 +136,19 @@ class ProductCard {
       });
     }
 
-    // Touch handler for mobile devices
-    imageWrapper.addEventListener(
-      'touchstart',
-      (e) => {
-        e.preventDefault();
-        if (cartContainer.classList.contains('show-button')) {
-          cartContainer.classList.remove('show-button');
-          if (sizeContainer) {
-            sizeContainer.classList.remove('active');
-            sizeButtons.forEach((btn) => {
-              btn.classList.remove('size-animate');
-            });
-          }
-        } else {
-          cartContainer.classList.add('show-button');
-        }
-      },
-      { passive: false }
-    );
+    // Touch handler for mobile devices - DISABLED to allow scrolling
+    // Since hover effects are disabled on mobile via CSS, we don't need this touch handler
+    // Removing this allows natural scrolling behavior on mobile devices
+
+    // Original code disabled:
+    // imageWrapper.addEventListener(
+    //   'touchstart',
+    //   (e) => {
+    //     e.preventDefault();  // This was blocking scrolling!
+    //     ...
+    //   },
+    //   { passive: false }
+    // );
   }
 
   initCartFunctionality() {
