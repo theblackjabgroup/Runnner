@@ -363,14 +363,19 @@
   }
 
   function updatePriceFromInput(prefix, value, type) {
-    // Find the slider element by ID
-    const sliderElement = document.querySelector(`#slider-min-${prefix}`);
-    if (!sliderElement) {
-      console.error(`Slider element not found for prefix: ${prefix}`);
+    // Find the correct input element that triggered this function
+    // Use the type parameter to determine which input field was changed
+    const inputElement =
+      type === 'min'
+        ? document.querySelector(`#${prefix}Price-GTE, .price-input-min`)
+        : document.querySelector(`#${prefix}Price-LTE, .price-input-max`);
+
+    if (!inputElement) {
+      console.error(`Input element not found for type: ${type}`);
       return;
     }
 
-    const container = sliderElement.closest('.price-facet-container');
+    const container = inputElement.closest('.price-facet-container');
     if (!container) {
       console.error('Price facet container not found');
       return;
@@ -447,8 +452,15 @@
       console.error('Filter form not found - cannot apply filters');
       // Don't reload - it would lose user input
       // Instead, show an error message to the user
+
+      // Remove any existing error messages first to prevent accumulation
+      const existingErrors = document.querySelectorAll('.filter-error-message');
+      existingErrors.forEach((msg) => msg.remove());
+
       const errorMsg = document.createElement('div');
-      errorMsg.style.cssText = 'position: fixed; top: 20px; left: 50%; transform: translateX(-50%); background: #f44336; color: white; padding: 12px 24px; border-radius: 4px; z-index: 9999;';
+      errorMsg.className = 'filter-error-message'; // Add class for cleanup
+      errorMsg.style.cssText =
+        'position: fixed; top: 20px; left: 50%; transform: translateX(-50%); background: #f44336; color: white; padding: 12px 24px; border-radius: 4px; z-index: 9999;';
       errorMsg.textContent = 'Unable to apply filters. Please refresh the page.';
       document.body.appendChild(errorMsg);
       setTimeout(() => errorMsg.remove(), 5000);
