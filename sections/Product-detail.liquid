@@ -1,220 +1,212 @@
 {{ 'scroll-animations.css' | asset_url | stylesheet_tag }}
 <script src="{{ 'scroll-animations.js' | asset_url }}" defer></script>
 
-{% if section.settings.enabled %}
-  {% if section.settings.color_scheme %}
-    {% assign section_classes_pd = 'product-showcase-section' %}
-    {% assign section_classes_pd = section_classes_pd | append: ' color-' | append: section.settings.color_scheme %}
-    {% assign top_padding = settings.sections_spacing %}
-    {% assign side_padding = settings.side_space %}
+{% comment %} Set default values for preview {% endcomment %}
+{% assign section_classes_pd = 'product-showcase-section' %}
+{% if section.settings.color_scheme %}
+  {% assign section_classes_pd = section_classes_pd | append: ' color-' | append: section.settings.color_scheme %}
+{% endif %}
+{% assign top_padding = settings.sections_spacing | default: 20 %}
+{% assign side_padding = settings.side_space | default: 20 %}
 
-    {% if top_padding == blank or top_padding == 0 %}
-      {% assign top_padding = 20 %}
-    {% endif %}
-    {% if side_padding == blank or side_padding == 0 %}
-      {% assign side_padding = 20 %}
-    {% endif %}
+<section
+  class="product-showcase-page-width overflow-hidden {{ section_classes_pd }} scroll-fade-trigger scroll-fade-up"
+  aria-labelledby="product-showcase-heading-{{ section.id }}"
+  {% if section.settings.heading != blank %}
+    aria-describedby="product-showcase-description-{{ section.id }}"
+  {% endif %}
+  style="padding: {{ top_padding }}px {{ side_padding }}px;"
+>
+  {% if section.settings.heading != blank %}
+    <h2
+      id="product-showcase-heading-{{ section.id }}"
+      style="font-weight:500; color: var(--text);"
+      class="product-showcase-main-heading mb-[-10px]{% if section.settings.enable_letter_animation %} letter-animation{% endif %}"
+    >
+      {{ section.settings.heading }}
+    </h2>
   {% endif %}
 
-  <section
-    class="product-showcase-page-width overflow-hidden {{ section_classes_pd }} scroll-fade-trigger scroll-fade-up"
-    aria-labelledby="product-showcase-heading-{{ section.id }}"
-    {% if section.settings.heading != blank %}
-      aria-describedby="product-showcase-description-{{ section.id }}"
-    {% endif %}
-    style="padding: {{ top_padding }}px {{ side_padding }}px;"
+  <div
+    id="product-showcase-description-{{ section.id }}"
+    class="sr-only"
+    aria-hidden="true"
   >
-    {% if section.settings.heading != blank %}
-      <h2
-        id="product-showcase-heading-{{ section.id }}"
-        style="font-weight:500; color: var(--text);"
-        class="product-showcase-main-heading mb-[-10px]{% if section.settings.enable_letter_animation %} letter-animation{% endif %}"
+    Product gallery with {{ section.blocks.size | default: 4 }} items. Use arrow keys to navigate or scroll
+    horizontally.
+  </div>
+
+  <div class="product-showcase-container w-full mt-10" style="margin-top:18px;">
+    <div class="showcase-slider-container relative">
+      <!-- Skip link for keyboard users -->
+      <a
+        href="#product-showcase-end-{{ section.id }}"
+        class="sr-only focus:not-sr-only focus:absolute focus:top-0 focus:left-0 focus:z-50 focus:bg-white focus:text-black focus:px-4 focus:py-2"
+        tabindex="0"
       >
-        {{ section.settings.heading }}
-      </h2>
-    {% endif %}
+        Skip product gallery
+      </a>
 
-    <div
-      id="product-showcase-description-{{ section.id }}"
-      class="sr-only"
-      aria-hidden="true"
-    >
-      Product gallery with {{ section.blocks.size | default: 4 }} items. Use arrow keys to navigate or scroll
-      horizontally.
-    </div>
+      <div
+        id="product-showcase-slider-{{ section.id }}"
+        class="product-showcase-slider flex gap-2 md:gap-4 overflow-x-auto no-scrollbar"
+        role="region"
+        aria-label="Product gallery"
+        aria-describedby="showcase-slider-instructions-{{ section.id }}"
+        tabindex="0"
+        data-slider="true"
+      >
+        <div id="showcase-slider-instructions-{{ section.id }}" class="sr-only">
+          Use left and right arrow keys to navigate through products, or scroll horizontally with mouse or touch.
+        </div>
 
-    <div class="product-showcase-container w-full mt-10" style="margin-top:18px;">
-      <div class="showcase-slider-container relative">
-        <!-- Skip link for keyboard users -->
-        <a
-          href="#product-showcase-end-{{ section.id }}"
-          class="sr-only focus:not-sr-only focus:absolute focus:top-0 focus:left-0 focus:z-50 focus:bg-white focus:text-black focus:px-4 focus:py-2"
-          tabindex="0"
-        >
-          Skip product gallery
-        </a>
-
-        <div
-          id="product-showcase-slider-{{ section.id }}"
-          class="product-showcase-slider flex gap-2 md:gap-4 overflow-x-auto no-scrollbar"
-          role="region"
-          aria-label="Product gallery"
-          aria-describedby="showcase-slider-instructions-{{ section.id }}"
-          tabindex="0"
-          data-slider="true"
-        >
-          <div id="showcase-slider-instructions-{{ section.id }}" class="sr-only">
-            Use left and right arrow keys to navigate through products, or scroll horizontally with mouse or touch.
-          </div>
-
-          {% if section.blocks.size == 0 %}
-            {% comment %} Show 4 placeholder products by default when no blocks are added {% endcomment %}
-            {% for i in (1..4) %}
-              <article
-                class="product-showcase-card flex-none w-[600px] h-[672px]"
-                role="group"
-                aria-labelledby="product-showcase-{{ section.id }}-{{ i }}-title"
-                tabindex="0"
-              >
-                <div class="product-showcase-image-wrapper relative group w-[600px] h-[672px]">
-                  <div
-                    role="img"
-                    aria-label="Placeholder product image {{ i }}"
-                    class="w-full h-full flex items-center justify-center bg-gray-200"
-                  >
-                    {{ 'collection-1' | placeholder_svg_tag }}
-                  </div>
+        {% if section.blocks.size == 0 %}
+          {% comment %} Show 4 placeholder products by default when no blocks are added {% endcomment %}
+          {% for i in (1..4) %}
+            <article
+              class="product-showcase-card flex-none w-[600px] h-[672px]"
+              role="group"
+              aria-labelledby="product-showcase-{{ section.id }}-{{ i }}-title"
+              tabindex="0"
+            >
+              <div class="product-showcase-image-wrapper relative group w-[600px] h-[672px]">
+                <div
+                  role="img"
+                  aria-label="Placeholder product image {{ i }}"
+                  class="w-full h-full flex items-center justify-center bg-gray-200"
+                >
+                  {{ 'collection-1' | placeholder_svg_tag }}
                 </div>
-                <div class="product-showcase-details mt-3 h-[38px]" style="margin-top:20px; margin-bottom:8px;">
+              </div>
+              <div class="product-showcase-details mt-3 h-[38px]" style="margin-top:20px; margin-bottom:8px;">
+                <h3
+                  id="product-showcase-{{ section.id }}-{{ i }}-title"
+                  class="!text-[15px] uppercase font-medium leading-tight"
+                  style="margin-bottom: 5px; color: var(--text); font-size: var(--t-b-3-size) !important;"
+                >
+                  Product {{ i }}
+                </h3>
+                <div class="flex gap-2 items-baseline showcase-price white-text">
+                  <span class="!text-[1.6rem] uppercase font-medium">Add content in theme editor</span>
+                </div>
+              </div>
+            </article>
+          {% endfor %}
+        {% else %}
+          {% comment %} Show actual products (limited to first 10 blocks) {% endcomment %}
+          {% for block in section.blocks limit: 10 %}
+            <article
+              class="product-showcase-card flex-none w-[600px] h-[672px]"
+              role="group"
+              aria-labelledby="product-showcase-{{ section.id }}-{{ forloop.index }}-title"
+              {% if block.settings.description != blank %}
+                aria-describedby="product-showcase-{{ section.id }}-{{ forloop.index }}-desc"
+              {% endif %}
+              tabindex="0"
+              {{ block.shopify_attributes }}
+            >
+              <div class="product-showcase-image-wrapper relative group w-[600px] h-[672px]">
+                {% if block.settings.link_url != blank %}
+                  <a
+                    href="{{ block.settings.link_url }}"
+                    class="product-showcase-image-link block relative focus:outline-2 focus:outline-blue-500 focus:outline-offset-2"
+                    aria-labelledby="product-showcase-{{ section.id }}-{{ forloop.index }}-title"
+                    {% if block.settings.description != blank %}
+                      aria-describedby="product-showcase-{{ section.id }}-{{ forloop.index }}-desc"
+                    {% endif %}
+                    tabindex="0"
+                  >
+                {% endif %}
+                <div class="product-showcase-images-container relative">
+                  {% if block.settings.image != blank %}
+                    <img
+                      src="{{ block.settings.image | image_url: '600x672', crop: 'center' }}"
+                      alt="{{ block.settings.image.alt | default: block.settings.title | default: 'Product image' }}"
+                      class="showcase-product-image w-[600px] h-[672px] object-cover"
+                      loading="lazy"
+                      decoding="async"
+                      width="600"
+                      height="672"
+                    >
+                  {% else %}
+                    <div
+                      role="img"
+                      aria-label="Product image placeholder"
+                      class="w-full h-full flex items-center justify-center bg-gray-200"
+                    >
+                      {{ 'image' | placeholder_svg_tag }}
+                    </div>
+                  {% endif %}
+                </div>
+                {% if block.settings.link_url != blank %}
+                  </a>
+                {% endif %}
+              </div>
+
+              <div class="product-showcase-details mt-3" style="margin-top:20px; margin-bottom:8px;">
+                {% if block.settings.link_url != blank and block.settings.title != blank %}
+                  <a
+                    href="{{ block.settings.link_url }}"
+                    aria-labelledby="product-showcase-{{ section.id }}-{{ forloop.index }}-title"
+                    class="focus:outline-2 focus:outline-blue-500 focus:outline-offset-2"
+                    tabindex="0"
+                  >
+                {% endif %}
+                {% if block.settings.title != blank %}
                   <h3
-                    id="product-showcase-{{ section.id }}-{{ i }}-title"
-                    class="!text-[15px] uppercase font-medium leading-tight"
+                    id="product-showcase-{{ section.id }}-{{ forloop.index }}-title"
+                    class="!text-[1.6rem] uppercase font-medium leading-tight"
                     style="margin-bottom: 5px; color: var(--text); font-size: var(--t-b-3-size) !important;"
                   >
-                    Product {{ i }}
+                    {{ block.settings.title | escape }}
                   </h3>
-                  <div class="flex gap-2 items-baseline showcase-price white-text">
-                    <span class="!text-[1.6rem] uppercase font-medium">Add content in theme editor</span>
-                  </div>
-                </div>
-              </article>
-            {% endfor %}
-          {% else %}
-            {% comment %} Show actual products (limited to first 10 blocks) {% endcomment %}
-            {% for block in section.blocks limit: 10 %}
-              <article
-                class="product-showcase-card flex-none w-[600px] h-[672px]"
-                role="group"
-                aria-labelledby="product-showcase-{{ section.id }}-{{ forloop.index }}-title"
-                {% if block.settings.description != blank %}
-                  aria-describedby="product-showcase-{{ section.id }}-{{ forloop.index }}-desc"
                 {% endif %}
-                tabindex="0"
-                {{ block.shopify_attributes }}
-              >
-                <div class="product-showcase-image-wrapper relative group w-[600px] h-[672px]">
-                  {% if block.settings.link_url != blank %}
-                    <a
-                      href="{{ block.settings.link_url }}"
-                      class="product-showcase-image-link block relative focus:outline-2 focus:outline-blue-500 focus:outline-offset-2"
-                      aria-labelledby="product-showcase-{{ section.id }}-{{ forloop.index }}-title"
-                      {% if block.settings.description != blank %}
-                        aria-describedby="product-showcase-{{ section.id }}-{{ forloop.index }}-desc"
-                      {% endif %}
-                      tabindex="0"
-                    >
-                  {% endif %}
-                  <div class="product-showcase-images-container relative">
-                    {% if block.settings.image != blank %}
-                      <img
-                        src="{{ block.settings.image | img_url: '600x672', crop: 'center' }}"
-                        alt="{{ block.settings.image.alt | default: block.settings.title | default: 'Product image' }}"
-                        class="showcase-product-image w-[600px] h-[672px] object-cover"
-                        loading="lazy"
-                        decoding="async"
-                        width="600"
-                        height="672"
-                      >
-                    {% else %}
-                      <div
-                        role="img"
-                        aria-label="Product image placeholder"
-                        class="w-full h-full flex items-center justify-center bg-gray-200"
-                      >
-                        {{ 'image' | placeholder_svg_tag }}
-                      </div>
-                    {% endif %}
-                  </div>
-                  {% if block.settings.link_url != blank %}
-                    </a>
-                  {% endif %}
-                </div>
 
-                <div class="product-showcase-details mt-3" style="margin-top:20px; margin-bottom:8px;">
-                  {% if block.settings.link_url != blank and block.settings.title != blank %}
-                    <a
-                      href="{{ block.settings.link_url }}"
-                      aria-labelledby="product-showcase-{{ section.id }}-{{ forloop.index }}-title"
-                      class="focus:outline-2 focus:outline-blue-500 focus:outline-offset-2"
-                      tabindex="0"
-                    >
-                  {% endif %}
-                  {% if block.settings.title != blank %}
-                    <h3
-                      id="product-showcase-{{ section.id }}-{{ forloop.index }}-title"
-                      class="!text-[1.6rem] uppercase font-medium leading-tight"
-                      style="margin-bottom: 5px; color: var(--text); font-size: var(--t-b-3-size) !important;"
-                    >
-                      {{ block.settings.title | escape }}
-                    </h3>
-                  {% endif %}
+                {% if block.settings.description != blank %}
+                  <p
+                    id="product-showcase-{{ section.id }}-{{ forloop.index }}-desc"
+                    class="product-showcase-description"
+                    style="margin-top: 4px; color: var(--text); font-size: var(--t-b-4-size); line-height: 1.4; opacity: 0.8;"
+                  >
+                    {{ block.settings.description | escape }}
+                  </p>
+                {% endif %}
 
-                  {% if block.settings.description != blank %}
-                    <p
-                      id="product-showcase-{{ section.id }}-{{ forloop.index }}-desc"
-                      class="product-showcase-description"
-                      style="margin-top: 4px; color: var(--text); font-size: var(--t-b-4-size); line-height: 1.4; opacity: 0.8;"
-                    >
-                      {{ block.settings.description | escape }}
-                    </p>
-                  {% endif %}
-
-                  {% if block.settings.link_url != blank and block.settings.title != blank %}
-                    </a>
-                  {% endif %}
-                </div>
-              </article>
-            {% endfor %}
-          {% endif %}
-        </div>
-
-        <!-- Accessible custom scrollbar -->
-        <div class="custom-showcase-scrollbar-container" role="presentation">
-          <div
-            id="custom-showcase-scrollbar-{{ section.id }}"
-            class="custom-showcase-scrollbar-track"
-            role="scrollbar"
-            aria-controls="product-showcase-slider-{{ section.id }}"
-            aria-valuenow="0"
-            aria-valuemin="0"
-            aria-valuemax="100"
-            aria-label="Horizontal scroll position"
-            tabindex="0"
-          >
-            <div
-              id="custom-showcase-scrollbar-thumb-{{ section.id }}"
-              class="custom-showcase-scrollbar-thumb"
-              role="presentation"
-            ></div>
-          </div>
-        </div>
-
-        <!-- End marker for skip link -->
-        <div id="product-showcase-end-{{ section.id }}" tabindex="-1" aria-hidden="true"></div>
+                {% if block.settings.link_url != blank and block.settings.title != blank %}
+                  </a>
+                {% endif %}
+              </div>
+            </article>
+          {% endfor %}
+        {% endif %}
       </div>
+
+      <!-- Accessible custom scrollbar -->
+      <div class="custom-showcase-scrollbar-container" role="presentation">
+        <div
+          id="custom-showcase-scrollbar-{{ section.id }}"
+          class="custom-showcase-scrollbar-track"
+          role="scrollbar"
+          aria-controls="product-showcase-slider-{{ section.id }}"
+          aria-valuenow="0"
+          aria-valuemin="0"
+          aria-valuemax="100"
+          aria-label="Horizontal scroll position"
+          tabindex="0"
+        >
+          <div
+            id="custom-showcase-scrollbar-thumb-{{ section.id }}"
+            class="custom-showcase-scrollbar-thumb"
+            role="presentation"
+          ></div>
+        </div>
+      </div>
+
+      <!-- End marker for skip link -->
+      <div id="product-showcase-end-{{ section.id }}" tabindex="-1" aria-hidden="true"></div>
     </div>
-  </section>
-{% endif %}
+  </div>
+</section>
 
 <style>
   .product-showcase-page-width {
