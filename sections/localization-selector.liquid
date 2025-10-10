@@ -57,8 +57,9 @@
   ]
 }
 {% endschema %}
-
+{{ 'component-localization-form.css' | asset_url | stylesheet_tag }}
 {{ 'localiztion-selector.css' | asset_url | stylesheet_tag }}
+<script src="{{ 'localization-form.js' | asset_url }}" defer="defer"></script>
 
 <section class="color-{{ section.settings.color_scheme }} ">
   <!-- Footer Layout - Single Row -->
@@ -71,7 +72,13 @@
       <div class="footer-left">
         <div class="footer__localization isolate">
           {%- if section.settings.enable_country_selector and localization.available_countries.size > 1 -%}
-            {% render 'currency-dropdown', position: 'footer' %}
+            <localization-form class="footer__country-selector">
+              {%- form 'localization', id: 'FooterCountryForm', class: 'localization-form' -%}
+                <div class="localization-selector">
+                  {%- render 'currency-dropdown', localPosition: 'FooterCountry' -%}
+                </div>
+              {%- endform -%}
+            </localization-form>
           {%- endif -%}
 
           {%- if section.settings.enable_language_selector and localization.available_languages.size > 1 -%}
@@ -145,7 +152,6 @@
     display: grid;
     grid-template-columns: auto 1fr auto;
     align-items: center;
-    max-width: 1200px;
     padding: var(--space-md) var(--space-3xl) !important;
     margin: 0 auto !important;
     gap: 1rem;
@@ -186,6 +192,49 @@
     flex-wrap: nowrap;
     overflow: visible !important;
     min-height: 28px;
+  }
+
+  /* Ensure all child elements align on the same baseline */
+  .footer__localization > * {
+    display: flex;
+    align-items: center;
+  }
+
+  .footer__country-selector,
+  .footer__language-selector {
+    display: flex;
+    align-items: center;
+  }
+
+  .footer__country-selector .localization-form,
+  .footer__language-selector .localization-form {
+    display: flex;
+    align-items: center;
+    margin: 0;
+  }
+
+  .footer__country-selector .localization-selector,
+  .footer__language-selector .localization-selector {
+    display: flex;
+    align-items: center;
+  }
+
+  /* Ensure disclosure divs align properly */
+  .footer__localization .disclosure,
+  .footer__localization .group {
+    display: flex;
+    align-items: center;
+  }
+
+  /* Align buttons properly */
+  .footer__localization .disclosure__button,
+  .footer__localization .localization-form__select {
+    display: flex;
+    align-items: center;
+    padding: 0;
+    margin: 0;
+    min-height: auto;
+    height: auto;
   }
 
   /* Localization Form Styling */
@@ -278,10 +327,13 @@
       min-height: calc(var(--section-height, 40px) + 20px);
     }
 
+    .policies-inline {
+      display: none;
+    }
     .footer-left {
       justify-content: center;
       width: 100%;
-      order: 2;
+      order: 1;
       overflow: visible !important;
     }
 
@@ -385,6 +437,43 @@
   body.localization-form-open {
     overflow-x: hidden;
   }
+
+  /* Fix z-index to appear above product-difference slider and other sections */
+  .footer__localization,
+  .footer__country-selector,
+  .footer__language-selector {
+    position: relative;
+    z-index: 1000;
+  }
+
+  /* Ensure dropdowns have even higher z-index */
+  .disclosure__list-wrapper,
+  .bb-disclosure__list-wrapper {
+    position: absolute;
+    z-index: 10001 !important;
+  }
+
+  .bb-ls-disclosure__list-wrapper {
+    bottom: 120%;
+    display: block;
+    overflow: visible !important;
+    background: var(--header_background);
+    max-height: none !important;
+  }
+  /* Make sure parent containers don't clip dropdowns */
+  .shopify-section-localization,
+  .footer-bottom-section,
+  .footer-single-row,
+  .footer-left,
+  .footer__localization {
+    overflow: visible !important;
+  }
+
+  /* Override any parent overflow issues */
+  .bb-footer-container,
+  .footer-container {
+    overflow: visible !important;
+  }
 </style>
 
 <script>
@@ -468,6 +557,16 @@
       if (!isInsideLocalizationForm) {
         document.body.classList.remove('localization-form-open');
       }
+    });
+
+    const button = document.querySelector('.bb-disclosure__button');
+    const arrow = button.querySelector('.dropdown-arrow');
+
+    console.log("Nikhil button ", button);
+    console.log("Nikhil arrow ", arrow);
+
+    button.addEventListener('click', () => {
+      arrow.classList.toggle('rotate-180');
     });
   });
 
