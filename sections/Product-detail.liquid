@@ -1,5 +1,8 @@
-{{ 'scroll-animations.css' | asset_url | stylesheet_tag }}
-<script src="{{ 'scroll-animations.js' | asset_url }}" defer></script>
+{% comment %} Conditional loading of external assets - only load when section is actually used {% endcomment %}
+{% unless request.design_mode %}
+  {{ 'scroll-animations.css' | asset_url | stylesheet_tag }}
+  <script src="{{ 'scroll-animations.js' | asset_url }}" defer></script>
+{% endunless %}
 
 {% comment %} Set default values for preview {% endcomment %}
 {% assign section_classes_pd = 'product-showcase-section' %}
@@ -15,7 +18,7 @@
   {% if section.settings.heading != blank %}
     aria-describedby="product-showcase-description-{{ section.id }}"
   {% endif %}
-  style="padding: {{ top_padding }}px {{ side_padding }}px;"
+  style="padding: {{ top_padding }}px {{ side_padding }}px; margin: 0; overflow-y: hidden;"
 >
   {% if section.settings.heading != blank %}
     <h2
