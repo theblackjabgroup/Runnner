@@ -977,8 +977,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     variantGalleryLock = true;
     let found = false;
+
     galleryItems.forEach((item, idx) => {
-      item.style.display = '';
       if (
         variant &&
         variant.featured_media &&
@@ -1010,24 +1010,32 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
 
+    // If no variant-specific image found, show first image (desktop)
+    if (!found && galleryItems.length > 0) {
+      galleryItems[0].classList.add('is-active');
+      galleryItems[0].setAttribute('aria-current', 'true');
+      stripImages[0].classList.add('active');
+      stripImages[0].setAttribute('aria-selected', 'true');
+      stripImages[0].setAttribute('tabindex', '0');
+    }
+
     if (typeof mobileGalleryItems !== 'undefined' && typeof mobileThumbnails !== 'undefined') {
+      let mobileFound = false;
+
       mobileGalleryItems.forEach((img, idx) => {
-        img.style.display = '';
         if (
           variant &&
           variant.featured_media &&
           img.getAttribute('data-media-id') === variant.featured_media.id.toString()
         ) {
           img.classList.add('active');
-          img.classList.add('relative');
-          img.classList.remove('absolute', 'top-0', 'left-0');
-          img.style.opacity = '1';
-          img.style.zIndex = '2';
-          img.style.pointerEvents = 'auto';
-          mobileThumbnails[idx].classList.add('active');
-          mobileThumbnails[idx].setAttribute('aria-selected', 'true');
-          mobileThumbnails[idx].setAttribute('tabindex', '0');
-          mobileThumbnails[idx].style.opacity = '1';
+          img.setAttribute('aria-current', 'true');
+          if (mobileThumbnails[idx]) {
+            mobileThumbnails[idx].classList.add('active');
+            mobileThumbnails[idx].setAttribute('aria-selected', 'true');
+            mobileThumbnails[idx].setAttribute('tabindex', '0');
+          }
+          mobileFound = true;
 
           const mainImages = document.querySelector('.main-images');
           if (mainImages) {
@@ -1037,17 +1045,23 @@ document.addEventListener('DOMContentLoaded', () => {
           }
         } else {
           img.classList.remove('active');
-          img.classList.remove('relative');
-          img.classList.add('absolute', 'top-0', 'left-0');
-          img.style.opacity = '0';
-          img.style.zIndex = '1';
-          img.style.pointerEvents = 'none';
-          mobileThumbnails[idx].classList.remove('active');
-          mobileThumbnails[idx].setAttribute('aria-selected', 'false');
-          mobileThumbnails[idx].setAttribute('tabindex', '-1');
-          mobileThumbnails[idx].style.opacity = '0.6';
+          img.removeAttribute('aria-current');
+          if (mobileThumbnails[idx]) {
+            mobileThumbnails[idx].classList.remove('active');
+            mobileThumbnails[idx].setAttribute('aria-selected', 'false');
+            mobileThumbnails[idx].setAttribute('tabindex', '-1');
+          }
         }
       });
+
+      // If no variant-specific image found, show first image
+      if (!mobileFound && mobileGalleryItems.length > 0) {
+        mobileGalleryItems[0].classList.add('active');
+        mobileGalleryItems[0].setAttribute('aria-current', 'true');
+        mobileThumbnails[0].classList.add('active');
+        mobileThumbnails[0].setAttribute('aria-selected', 'true');
+        mobileThumbnails[0].setAttribute('tabindex', '0');
+      }
     }
 
     setTimeout(() => {
@@ -1212,49 +1226,36 @@ document.addEventListener('DOMContentLoaded', () => {
 
     mobileThumbnails.forEach((thumb, idx) => {
       thumb.addEventListener('click', function () {
+        // Update thumbnails
         mobileThumbnails.forEach((t, i) => {
           t.classList.toggle('active', i === idx);
           t.setAttribute('aria-selected', i === idx ? 'true' : 'false');
           t.setAttribute('tabindex', i === idx ? '0' : '-1');
         });
+
+        // Update gallery items - only toggle active class, let CSS handle the rest
         mobileGalleryItems.forEach((img, i) => {
           if (i === idx) {
             img.classList.add('active');
-            img.classList.add('relative');
-            img.classList.remove('absolute', 'top-0', 'left-0');
-            img.style.opacity = '1';
-            img.style.zIndex = '2';
-            img.style.pointerEvents = 'auto';
+            img.setAttribute('aria-current', 'true');
           } else {
             img.classList.remove('active');
-            img.classList.remove('relative');
-            img.classList.add('absolute', 'top-0', 'left-0');
-            img.style.opacity = '0';
-            img.style.zIndex = '1';
-            img.style.pointerEvents = 'none';
+            img.removeAttribute('aria-current');
           }
         });
       });
     });
 
     function initializeMobileGallery() {
-      // Ensure first image is active
+      // Ensure first image is active by default
       if (mobileGalleryItems.length > 0) {
         mobileGalleryItems.forEach((img, idx) => {
           if (idx === 0) {
             img.classList.add('active');
-            img.classList.add('relative');
-            img.classList.remove('absolute', 'top-0', 'left-0');
-            img.style.opacity = '1';
-            img.style.zIndex = '2';
-            img.style.pointerEvents = 'auto';
+            img.setAttribute('aria-current', 'true');
           } else {
             img.classList.remove('active');
-            img.classList.remove('relative');
-            img.classList.add('absolute', 'top-0', 'left-0');
-            img.style.opacity = '0';
-            img.style.zIndex = '1';
-            img.style.pointerEvents = 'none';
+            img.removeAttribute('aria-current');
           }
         });
       }

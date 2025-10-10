@@ -1,0 +1,65 @@
+{%- comment -%}
+  Product Header - Mobile Version
+
+  Product title, status badge, and color variants
+
+  Parameters:
+  - product: Product object (required)
+{%- endcomment -%}
+
+<div class="product-header w-[95%] space-y-8">
+  <div class="header-top flex flex-col gap-4">
+    <div class="product-status flex items-center gap-4" role="status" aria-live="polite">
+      {% if product.available != true %}
+        <span
+          class="inline-flex items-center px-3 py-1 tracking-wider uppercase rounded product-badge"
+          role="status"
+          aria-label="Product is sold out"
+          >Sold Out</span
+        >
+      {% endif %}
+    </div>
+    <h1
+      id="mobile-product-title"
+      class="product-mobile-heading"
+    >
+      {{ product.title }}
+    </h1>
+
+    {%- comment -%} Product Variant {%- endcomment -%}
+    {%- assign color_option = product.options_with_values | where: 'name', 'Color' | first -%}
+    {%- if color_option and color_option.values.size > 0 -%}
+      <fieldset class="product-variants my-4" role="group" aria-labelledby="mobile-color-legend">
+        <legend id="mobile-color-legend" class="flex items-center gap-2">
+          <span
+            class="product-mobile-text-small"
+            >SELECT COLOR:</span
+          >
+          <span
+            class="active-color product-mobile-text-small"
+            data-active-color
+            aria-live="polite"
+          >
+            {{- color_option.values | first -}}
+          </span>
+        </legend>
+        <div class="product-color-options flex gap-3 p-2" role="radiogroup" aria-labelledby="mobile-color-legend">
+          {%- for value in color_option.values -%}
+            <button
+              type="button"
+              class="color-swatch w-8 h-8 rounded-full hover:scale-110 transition-transform focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+              style="background-color: {{ value | handleize }};"
+              data-option-value="{{ value | escape }}"
+              role="radio"
+              aria-checked="{% if forloop.first %}true{% else %}false{% endif %}"
+              aria-label="Color: {{ value }}"
+              tabindex="{% if forloop.first %}0{% else %}-1{% endif %}"
+            >
+              <span class="sr-only">{{ value }}</span>
+            </button>
+          {%- endfor -%}
+        </div>
+      </fieldset>
+    {%- endif -%}
+  </div>
+</div>
