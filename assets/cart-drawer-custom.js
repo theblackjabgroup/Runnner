@@ -349,6 +349,32 @@ function initializeCartDrawer() {
     window.cartDrawerObserver = observer;
   }
 
+  // ===================================================================
+  // CART DRAWER CLOSE BUTTONS (CSP-compliant event listeners)
+  // ===================================================================
+
+  // Add event listeners for close buttons
+  const closeButtons = document.querySelectorAll('.drawer__close, .drawer__close2');
+  closeButtons.forEach(function (button) {
+    button.addEventListener('click', function () {
+      const cartDrawer = this.closest('cart-drawer');
+      if (cartDrawer && typeof cartDrawer.close === 'function') {
+        cartDrawer.close();
+      }
+    });
+
+    // Add keyboard accessibility
+    button.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        const cartDrawer = this.closest('cart-drawer');
+        if (cartDrawer && typeof cartDrawer.close === 'function') {
+          cartDrawer.close();
+        }
+      }
+    });
+  });
+
   // Add event listeners for size and color changes
   document.addEventListener('click', function (e) {
     if (e.target.classList.contains('size-option')) {
@@ -369,6 +395,8 @@ function initializeCartDrawer() {
       }
     }
   });
+
+  console.log('✅ Cart drawer event listeners initialized (CSP-compliant)');
 }
 
 // Initialize when DOM is loaded

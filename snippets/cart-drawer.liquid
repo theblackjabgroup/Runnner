@@ -45,8 +45,7 @@
   <div id="CartDrawer" class="cart-drawer">
     <div id="CartDrawer-Overlay" class="cart-drawer__overlay"></div>
     <div
-      class="drawer__inner !h-[100vh] !pl-[30px] md:!pl-[50px] md:!w-[52vw] !w-[90vw] gradient color-{{ settings.cart_color_scheme }}"
-      style="padding-inline-start: var(--space-6xl);"
+      class="drawer__inner !h-[100vh] !pl-[30px] md:!pl-[50px] md:!w-[52vw] !w-[90vw] gradient color-{{ settings.cart_color_scheme }} cart-drawer-padding"
       role="dialog"
       aria-modal="true"
       aria-label="{{ 'sections.cart.title' | t }}"
@@ -76,16 +75,12 @@
               {% for part in text_parts %}
                 {{ part | strip }}
                 {% unless forloop.last %}
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="16"
-                    height="16"
-                    fill="var(--text)"
-                    viewBox="0 0 256 256"
-                    class="separator-image"
-                  >
-                    <path d="M240,128a15.74,15.74,0,0,1-7.6,13.51L88.32,229.65a16,16,0,0,1-16.2.3A15.86,15.86,0,0,1,64,216.13V39.87a15.86,15.86,0,0,1,8.12-13.82,16,16,0,0,1,16.2.3L232.4,114.49A15.74,15.74,0,0,1,240,128Z"></path>
-                  </svg>
+                  {% render 'icon-playback',
+                    class: 'bi bi-caret-right-fill scrolling-separator',
+                    width: '16px',
+                    height: '16px',
+                    fill: 'currentColor'
+                  %}
                 {% endunless %}
               {% endfor %}
             {% endfor %}
@@ -115,17 +110,12 @@
               {% for part in text_parts %}
                 {{ part | strip }}
                 {% unless forloop.last %}
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="16"
-                    height="16"
-                    fill="var(--text)"
-                    viewBox="0 0 256 256"
-                    class="separator-image"
-                    style="transform: rotate({{ settings.vertical_scroll_image_rotation | default: 0 | plus: 90 }}deg);"
-                  >
-                    <path d="M240,128a15.74,15.74,0,0,1-7.6,13.51L88.32,229.65a16,16,0,0,1-16.2.3A15.86,15.86,0,0,1,64,216.13V39.87a15.86,15.86,0,0,1,8.12-13.82,16,16,0,0,1,16.2.3L232.4,114.49A15.74,15.74,0,0,1,240,128Z"></path>
-                  </svg>
+                  {% render 'icon-playback',
+                    class: 'bi bi-caret-right-fill scrolling-separator',
+                    width: '16px',
+                    height: '16px',
+                    fill: 'currentColor'
+                  %}
                 {% endunless %}
               {% endfor %}
             {% endfor %}
@@ -136,23 +126,20 @@
       {%- if cart == empty -%}
         <div class="drawer__inner-empty">
           <h2
-            class="empty-cart-number drawer__header2 uppercase  !font-medium !mb-0"
-            style="color: var(--text);"
+            class="empty-cart-number drawer__header2 uppercase !font-medium !mb-0 cart-drawer-text-color"
           >
             {{ 'sections.cart.title' | t }} [{{ cart.item_count }}]
           </h2>
           <div class="cart-drawer__warnings center{% if settings.cart_drawer_collection != blank %} cart-drawer__warnings--has-collection{% endif %}">
             <div class="cart-drawer__empty-content">
-              <h2 class="cart__empty-text" style="color: var(--text);">Your Cart is sad :(</h2>
+              <h2 class="cart__empty-text cart-drawer-text-color">Your Cart is sad :(</h2>
               <button
                 class="drawer__close2"
                 type="button"
-                onclick="this.closest('cart-drawer').close()"
                 aria-label="{{ 'accessibility.close' | t }}"
               >
                 <span
-                  class="svg-wrapper2 drawer__header2 uppercase !translate-x-[-100px]"
-                  style="color: var(--text); transform: translateX(calc(-1 * var(--space-8xl)));"
+                  class="svg-wrapper2 drawer__header2 uppercase !translate-x-[-100px] cart-drawer-text-color cart-drawer-header-transform"
                 >
                   close
                 </span>
@@ -166,20 +153,17 @@
           {%- endif -%}
         </div>
       {%- endif -%}
-      <div class="drawer__header2 drawer__header border-b !py-[16px]" style="padding-block: var(--space-xl);">
-        <h2 class="drawer__header2  uppercase  !font-medium !mb-0" style="color: var(--text); ">
+      <div class="drawer__header2 drawer__header border-b !py-[16px] cart-drawer-header-padding">
+        <h2 class="drawer__header2  uppercase  !font-medium !mb-0 cart-drawer-text-color">
           {{ 'sections.cart.title' | t }} [{{ cart.item_count }}]
         </h2>
         <button
           class="drawer__close  !text-[16px]"
           type="button"
-          onclick="this.closest('cart-drawer').close()"
           aria-label="{{ 'accessibility.close' | t }}"
         >
           <span
-            class="drawer__header2 uppercase !mr-[25px]  md:mb-3 mb-6 font-medium "
-            style="margin-inline-end: var(--space-4xl);"
-            style="color: var(--text);"
+            class="drawer__header2 uppercase !mr-[25px]  md:mb-3 mb-6 font-medium cart-drawer-margin-end cart-drawer-text-color"
           >
             close
           </span>
@@ -239,24 +223,22 @@
                           <div class="!flex !justify-between !items-start !mb-[auto]">
                             <div class="!flex !flex-col ml-4">
                               <div
-                                class=" "
-                                style="color: var(--text);"
+                                class="cart-drawer-text-color"
                               >
                                 {{ item.final_price | money }}
                               </div>
                               <div class="!flex-col !gap-2 ">
                                 <a
                                   href="{{ item.url }}"
-                                  class="item-title-cart-drawer !uppercase  !font-medium !mb-2"
-                                  style="color: var(--text);"
+                                  class="item-title-cart-drawer !uppercase !font-medium !mb-2 cart-drawer-text-color"
                                 >
                                   {{- item.product.title | escape -}}
                                 </a>
                                 {%- for option in item.options_with_values -%}
                                   {%- if option.name == 'Size' -%}
-                                    <div class=" !uppercase" style="color: var(--text); size-selector ">
+                                    <div class="!uppercase size-selector cart-drawer-text-color">
                                       SIZE:
-                                      <span style="background-color: var(--button); padding: var(--space-mini) var(--space-xs); border-radius: var(--space-sm);">
+                                      <span class="cart-drawer-size-bg">
                                         {{- option.value -}}
                                       </span>
                                     </div>
@@ -281,8 +263,7 @@
                                   {%- if option_name_lower contains 'color' or option_name_lower contains 'colour' -%}
                                     {%- assign current_color = option.value -%}
                                     <div
-                                      class="option-row !uppercase !mt-2 !flex !items-center"
-                                      style="color: var(--text);"
+                                      class="option-row !uppercase !mt-2 !flex !items-center cart-drawer-text-color"
                                     >
                                       <span class="option-label">COLOR:</span>
                                       <div class="color-options !ml-1">
@@ -335,14 +316,13 @@
                                                 {%- endif -%}
 
                                                 <button
-                                                  class="color-picker {{ color_key }} {% if color_value == current_color %}selected{% endif %}"
+                                                  class="color-picker {{ color_key }} {% if color_value == current_color %}selected{% endif %} cart-drawer-color-swatch"
                                                   type="button"
                                                   data-color="{{ color_value }}"
                                                   data-variant-id="{{ target_variant_id }}"
                                                   data-item-key="{{ item.key }}"
                                                   data-current-size="{{ current_size }}"
                                                   aria-label="Select {{ color_value }} color"
-                                                  style="width: var(--space-3xl); height: var(--space-3xl);"
                                                 ></button>
                                               {%- endunless -%}
                                             {%- endif -%}
@@ -361,8 +341,7 @@
                           <div class="!flex !justify-between !items-end ">
                             <!-- Quantity Controls -->
                             <div
-                              class="cart-item__quantity scale-[70%] -translate-x-[20px] {% if has_qty_rules or has_vol_pricing %} cart-item__quantity--info{% endif %}"
-                              style="transform: translateX(calc(-1 * var(--space-3xl)));"
+                              class="cart-item__quantity scale-[70%] -translate-x-[20px] {% if has_qty_rules or has_vol_pricing %} cart-item__quantity--info{% endif %} cart-drawer-quantity-transform"
                               role="cell"
                               headers="CartDrawer-ColumnQuantity"
                               data-item-key="{{ item.key }}"
@@ -480,9 +459,7 @@
                             >
                               <button
                                 type="button"
-                                class="item-price-cart-drawer -translate-x-[10px] mb-6"
-                                style="transform: translateX(calc(-1 * var(--space-lg))); margin-bottom: var(--space-sm);"
-                                style="color: var(--text);"
+                                class="item-price-cart-drawer -translate-x-[10px] mb-6 cart-drawer-price-transform cart-drawer-text-color"
                                 aria-label="{{ 'sections.cart.remove_title' | t: title: item.title }}"
                               >
                                 REMOVE
@@ -551,7 +528,7 @@
                           <!-- Top Row: Title and Price -->
                           <div class="!flex !justify-between !items-start !mb-[auto]">
                             <div class="!flex !flex-col">
-                              <div class=" item-price-cart-drawer" style="color: var(--text);">
+                              <div class="item-price-cart-drawer cart-drawer-text-color">
                                 {{ item.final_price | money }}
                               </div>
                             </div>
@@ -676,14 +653,13 @@
                             <div class="!flex-col !gap-2">
                               <a
                                 href="{{ item.url }}"
-                                class="!uppercase  !font-medium !mb-2 item-title-cart-drawer"
-                                style="color: var(--text);"
+                                class="!uppercase !font-medium !mb-2 item-title-cart-drawer cart-drawer-text-color"
                               >
                                 {{- item.product.title | escape -}}
                               </a>
                               {%- for option in item.options_with_values -%}
                                 {%- if option.name == 'Size' -%}
-                                  <div class=" !uppercase size-variant" style="color: var(--text);">
+                                  <div class="!uppercase size-variant cart-drawer-text-color">
                                     SIZE: {{ option.value }}
                                   </div>
                                   <div class="size-selector !flex !gap-2">
@@ -782,8 +758,7 @@
                             >
                               <button
                                 type="button"
-                                class="cursor-pointer"
-                                style="color: var(--text);"
+                                class="cursor-pointer cart-drawer-text-color"
                                 aria-label="{{ 'sections.cart.remove_title' | t: title: item.title }}"
                               >
                                 REMOVE
@@ -811,30 +786,27 @@
 
         <div class="cart-drawer__footer" {{ block.shopify_attributes }}>
           <div
-            class="totals  flex justify-between items-center"
+            class="totals flex justify-between items-center cart-drawer-status-padding"
             role="status"
-            style=" padding: 0px 0;"
           >
-            <h2 class="totals__total !text-normal" style="color: var(--text);">SUBTOTAL</h2>
-            <span class="!font-medium" style="color: var(--text);">{{ cart.total_price | money -}}</span>
+            <h2 class="totals__total !text-normal cart-drawer-text-color">SUBTOTAL</h2>
+            <span class="!font-medium cart-drawer-text-color">{{ cart.total_price | money -}}</span>
           </div>
 
-          <details class="border-t border-b" style="border-color: var(--border);">
-            <summary class="!font-medium cursor-pointer py-3" style="color: var(--text);">ORDER NOTE</summary>
+          <details class="border-t border-b cart-drawer-border">
+            <summary class="!font-medium cursor-pointer py-3 cart-drawer-text-color">ORDER NOTE</summary>
             <div class="pb-3">
               <textarea
                 name="note"
                 id="CartDrawer-Note"
-                class="w-full p-2 border rounded"
-                style="border-color: var(--border); background: var(--background); color: var(--text); min-height: 80px; resize: vertical;"
+                class="w-full p-2 border rounded cart-drawer-note-input"
                 placeholder="Add a note to your order..."
                 data-cart-note
               >{{ cart.note }}</textarea>
               <button
                 type="button"
                 id="CartDrawer-SaveNote"
-                class="mt-2 px-4 py-2 text-sm border rounded cursor-pointer"
-                style="border-color: var(--border); background: var(--background); color: var(--text);"
+                class="mt-2 px-4 py-2 text-sm border rounded cursor-pointer cart-drawer-note-button"
               >
                 Save Note
               </button>
@@ -844,10 +816,8 @@
 
         <div class="cart__ctas !ml-auto mt-5" {{ block.shopify_attributes }}>
           {%- if cart == empty -%}
-            {%- assign checkout_disabled = 'disabled' -%}
             {%- assign wrapper_class = 'checkout-button-wrapper cart-empty' -%}
           {%- else -%}
-            {%- assign checkout_disabled = '' -%}
             {%- assign wrapper_class = 'checkout-button-wrapper' -%}
           {%- endif -%}
 
