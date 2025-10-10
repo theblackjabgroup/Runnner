@@ -25,15 +25,18 @@ pickup-availability[available] {
 
 .pickup-availability-button {
   background-color: transparent;
-  color: rgba(var(--color-foreground), 0.75);
+  color: var(--secondary_text);
   letter-spacing: 0.06rem;
   padding: 0 0 0.2rem;
   text-align: left;
   text-decoration: underline;
+  cursor: pointer;
+  border: none;
+  font-size: inherit;
 }
 
 .pickup-availability-button:hover {
-  color: rgb(var(--color-foreground));
+  color: var(--text);
 }
 
 .pickup-availability-info * {
@@ -41,7 +44,7 @@ pickup-availability[available] {
 }
 
 pickup-availability-drawer {
-  background-color: rgb(var(--color-background));
+  background-color: var(--background);
   height: 100%;
   opacity: 0;
   overflow-y: auto;
@@ -49,17 +52,14 @@ pickup-availability-drawer {
   position: fixed;
   top: 0;
   right: 0;
-  z-index: 4;
-  transition: opacity var(--duration-default) ease, transform var(--duration-default) ease;
+  z-index: 1003;
+  transition: opacity 0.3s ease, transform 0.3s ease;
   transform: translateX(100%);
   width: 100%;
-  border-width: 0 0 0 var(--drawer-border-width);
-  border-color: rgba(var(--color-foreground), var(--drawer-border-opacity));
+  border-width: 0 0 0 1px;
+  border-color: rgba(var(--text), 0.1);
   border-style: solid;
-  filter: drop-shadow(
-    var(--drawer-shadow-horizontal-offset) var(--drawer-shadow-vertical-offset) var(--drawer-shadow-blur-radius)
-      rgba(var(--color-shadow), var(--drawer-shadow-opacity))
-  );
+  filter: drop-shadow(0 4px 12px rgba(var(--text), 0.1));
 }
 
 pickup-availability-drawer[open] {
@@ -76,7 +76,7 @@ pickup-availability-drawer[open] {
   pickup-availability-drawer[open] {
     opacity: 1;
     transform: translateX(0);
-    animation: animateDrawerOpen var(--duration-default) ease;
+    animation: animateDrawerOpen 0.3s ease;
   }
 }
 
@@ -88,7 +88,7 @@ pickup-availability-drawer[open] {
 }
 
 .pickup-availability-drawer-title {
-  margin: 0.5rem 0 0;
+  margin: var(--space-4xl) 0 0;
 }
 
 .pickup-availability-header .icon {
@@ -149,27 +149,33 @@ pickup-availability-drawer[open] {
 }
 
 @keyframes animateDrawerOpen {
-  @media screen and (max-width: 749px) {
-    0% {
-      opacity: 0;
-      transform: translateX(100%);
-    }
-
-    100% {
-      opacity: 1;
-      transform: translateX(0);
-    }
+  0% {
+    opacity: 0;
+    transform: translateX(100%);
   }
 
-  @media screen and (min-width: 750px) {
-    0% {
-      opacity: 0;
-      transform: translateX(100%);
-    }
-
-    100% {
-      opacity: 1;
-      transform: translateX(0);
-    }
+  100% {
+    opacity: 1;
+    transform: translateX(0);
   }
 }
+
+/* Mobile-specific fixes */
+@media (max-width: 749px) {
+  pickup-availability-drawer {
+    width: 100%;
+    z-index: 1003;
+  }
+  
+  .pickup-availability-preview {
+    padding: 1rem 0 0 0;
+  }
+  
+  .pickup-availability-button {
+    font-size: var(--t-b-4-size);
+    padding: 8px 0;
+    display: block;
+    width: 100%;
+  }
+}
+
