@@ -1,115 +1,130 @@
 {{ 'scroll-animations.css' | asset_url | stylesheet_tag }}
 <script src="{{ 'scroll-animations.js' | asset_url }}" defer></script>
 
-{% if section.settings.enabled %}
-  {% assign section_classes = 'cb-container-image-and-text' %}
-  {% if section.settings.color_scheme %}
-    {% assign section_classes = section_classes | append: ' color-' | append: section.settings.color_scheme %}
-    {% unless section.settings.color_scheme == '1' %}
-      {% assign section_classes = section_classes | append: ' invert-arrow' %}
-    {% endunless %}
-  {% endif %}
-  <section id="section-{{ section.id }}" class="{{ section_classes }} cb-fade-in">
-    <div class="cb-left scroll-fade-trigger scroll-fade-left">
-      <div class="cb-left-img" id="cb-left-img">
-        {% if section.settings.image %}
-          <img
-            srcset="
-              {%- if section.settings.image.width >= 165 -%}{{ section.settings.image | image_url: width: 165 }} 165w,{%- endif -%}
-              {%- if section.settings.image.width >= 360 -%}{{ section.settings.image | image_url: width: 360 }} 360w,{%- endif -%}
-              {%- if section.settings.image.width >= 535 -%}{{ section.settings.image | image_url: width: 535 }} 535w,{%- endif -%}
-              {%- if section.settings.image.width >= 750 -%}{{ section.settings.image | image_url: width: 750 }} 750w,{%- endif -%}
-              {%- if section.settings.image.width >= 1070 -%}{{ section.settings.image | image_url: width: 1070 }} 1070w,{%- endif -%}
-              {%- if section.settings.image.width >= 1500 -%}{{ section.settings.image | image_url: width: 1500 }} 1500w,{%- endif -%}
-              {{ section.settings.image | image_url }} {{ section.settings.image.width }}w
-            "
-            src="{{ section.settings.image | image_url: width: 750 }}"
-            alt="Image"
-            width="auto"
-            height="100%"
-            loading="lazy"
-          >
-        {% else %}
-          <div style="width: 500px; height: 100%;">
-            {{ 'collection-1' | placeholder_svg_tag }}
-          </div>
-        {% endif %}
-      </div>
-    </div>
-    <div class="cb-right" id="cb-right">
-      <div class="cb-right-data">
-        <h2 class="scroll-fade-trigger scroll-fade-up">{{ section.settings.main_heading }}</h2>
-        {% for block in section.blocks %}
-          {% if block.type == 'paragraph' %}
-            <p class="scroll-fade-trigger scroll-fade-up scroll-fade-delay-1">{{ block.settings.paragraph_text }}</p>
-          {% endif %}
-        {% endfor %}
-      </div>
-      <div class="cb-accordion scroll-fade-trigger scroll-fade-up scroll-fade-delay-2">
-        {% for block in section.blocks %}
-          {% if block.type == 'accordion_item' %}
-            <div class="cb-accordion-item">
-              <div class="cb-accordion-header">
-                <h3>{{ block.settings.heading }}</h3>
-                {% comment %}
-                  <svg class="cb-svg-arrow-down" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M13.3964 13.0312C12.1408 14.1889 10.9749 15.8451 9.89865 18L8.07175 18C6.99552 15.8504 5.8296 14.1941 4.57399 13.0312C3.96693 12.4629 3.25037 12.0168 2.46544 11.7183C1.68051 11.4199 0.842667 11.2751 1.90735e-06 11.2922V8.54366C2.07534 8.54366 3.73901 9.03094 4.99103 10.0055C6.26318 11.0123 7.17333 12.386 7.59013 13.9282L7.70045 13.9282L7.70045 -2.57632e-09L10.2834 -1.93022e-09L10.2834 13.9282L10.4368 13.9282C10.8363 12.3852 11.7386 11.0091 13.009 10.0055C14.2646 9.02919 15.9283 8.54192 18 8.54366V11.2922C17.1526 11.2725 16.3095 11.4161 15.5194 11.7146C14.7293 12.013 14.0078 12.4605 13.3964 13.0312Z" fill="currentColor"></path>
-                  </svg>
-                {% endcomment %}
-                {% comment %}
-                  <img
-                    src="{{ "arrow-down.png" | asset_url }}"
-                    alt="Dropdown Icon"
-                    class="w-12 h-6 object-contain transition-transform duration-300 group-hover:-rotate-90 cb-arrow-img"
-                    width="100%"
-                    height="auto"
-                    aria-hidden="true"
-                  >
-                {% endcomment %}
-                <div
-                  class="cb-arrow-img"
-                  alt="Dropdown Icon"
-                >
-                  <svg class="cb-plus-minus-icon" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <line x1="5" y1="10" x2="15" y2="10" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-                    <line class="cb-vertical-line" x1="10" y1="5" x2="10" y2="15" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-                  </svg>
-                  {% comment %}
-                    <svg
-                      class="cb-arrow-svg transition-transform duration-200 ease-in-out"
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="100%"
-                      height="auto"
-                      stroke-width="5"
-                      viewBox="0 0 20 20"
-                      style="transform: scale(1.5);"
-                    >
-                      <g transform="rotate(270 12 12)">
-                        <path stroke-width="5" d="M12 4c.552 0 1 .448 1 1v10.586l3.293-3.293a1 1 0 1 1 1.414 1.414l-5 5a1 1 0 0 1-1.414 0l-5-5a1 1 0 0 1 1.414-1.414L11 15.586V5c0-.552.448-1 1-1z"/>
-                      </g>
-                    </svg>
-                  {% endcomment %}
-                </div>
-              </div>
-              <div class="cb-accordion-content">
-                {% if block.settings.subheading != blank %}
-                  <h4>{{ block.settings.subheading }}</h4>
-                {% endif %}
-                {% assign paragraphs = block.settings.content | split: '||' %}
-                {% comment %} <p>{{ block.settings.content }}</p> {% endcomment %}
-                {% for paragraph in paragraphs %}
-                  <p style="padding-bottom: var(--space-lg);">{{ paragraph }}</p>
-                {% endfor %}
-              </div>
-            </div>
-          {% endif %}
-        {% endfor %}
-      </div>
-    </div>
-  </section>
+{% assign section_classes = 'cb-container-image-and-text' %}
+{% if section.settings.color_scheme %}
+  {% assign section_classes = section_classes | append: ' color-' | append: section.settings.color_scheme %}
+  {% unless section.settings.color_scheme == '1' %}
+    {% assign section_classes = section_classes | append: ' invert-arrow' %}
+  {% endunless %}
 {% endif %}
 
+<section id="section-{{ section.id }}" class="{{ section_classes }}" data-section-type="content-block">
+  <div class="cb-left scroll-fade-trigger scroll-fade-left animate">
+    <div class="cb-left-img" id="cb-left-img">
+      {% if section.settings.image %}
+        <img
+          srcset="
+            {%- if section.settings.image.width >= 165 -%}{{ section.settings.image | image_url: width: 165 }} 165w,{%- endif -%}
+            {%- if section.settings.image.width >= 360 -%}{{ section.settings.image | image_url: width: 360 }} 360w,{%- endif -%}
+            {%- if section.settings.image.width >= 535 -%}{{ section.settings.image | image_url: width: 535 }} 535w,{%- endif -%}
+            {%- if section.settings.image.width >= 750 -%}{{ section.settings.image | image_url: width: 750 }} 750w,{%- endif -%}
+            {%- if section.settings.image.width >= 1070 -%}{{ section.settings.image | image_url: width: 1070 }} 1070w,{%- endif -%}
+            {%- if section.settings.image.width >= 1500 -%}{{ section.settings.image | image_url: width: 1500 }} 1500w,{%- endif -%}
+            {{ section.settings.image | image_url }} {{ section.settings.image.width }}w
+          "
+          src="{{ section.settings.image | image_url: width: 750 }}"
+          alt="Image"
+          width="auto"
+          height="100%"
+          loading="lazy"
+        >
+      {% else %}
+        <div style="width: 500px; height: 100%;">
+          {{ 'collection-1' | placeholder_svg_tag }}
+        </div>
+      {% endif %}
+    </div>
+  </div>
+  <div class="cb-right" id="cb-right">
+    <div class="cb-right-data">
+      <h2 class="scroll-fade-trigger scroll-fade-up animate">{{ section.settings.main_heading }}</h2>
+      {% for block in section.blocks %}
+        {% if block.type == 'paragraph' %}
+          <p class="scroll-fade-trigger scroll-fade-up scroll-fade-delay-1 animate">
+            {{ block.settings.paragraph_text }}
+          </p>
+        {% endif %}
+      {% endfor %}
+    </div>
+    <div class="cb-accordion scroll-fade-trigger scroll-fade-up scroll-fade-delay-2 animate">
+      {% for block in section.blocks %}
+        {% if block.type == 'accordion_item' %}
+          <div class="cb-accordion-item">
+            <div class="cb-accordion-header">
+              <h3>{{ block.settings.heading }}</h3>
+              {% comment %}
+                <svg class="cb-svg-arrow-down" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M13.3964 13.0312C12.1408 14.1889 10.9749 15.8451 9.89865 18L8.07175 18C6.99552 15.8504 5.8296 14.1941 4.57399 13.0312C3.96693 12.4629 3.25037 12.0168 2.46544 11.7183C1.68051 11.4199 0.842667 11.2751 1.90735e-06 11.2922V8.54366C2.07534 8.54366 3.73901 9.03094 4.99103 10.0055C6.26318 11.0123 7.17333 12.386 7.59013 13.9282L7.70045 13.9282L7.70045 -2.57632e-09L10.2834 -1.93022e-09L10.2834 13.9282L10.4368 13.9282C10.8363 12.3852 11.7386 11.0091 13.009 10.0055C14.2646 9.02919 15.9283 8.54192 18 8.54366V11.2922C17.1526 11.2725 16.3095 11.4161 15.5194 11.7146C14.7293 12.013 14.0078 12.4605 13.3964 13.0312Z" fill="currentColor"></path>
+                </svg>
+              {% endcomment %}
+              {% comment %}
+                <img
+                  src="{{ "arrow-down.png" | asset_url }}"
+                  alt="Dropdown Icon"
+                  class="w-12 h-6 object-contain transition-transform duration-300 group-hover:-rotate-90 cb-arrow-img"
+                  width="100%"
+                  height="auto"
+                  aria-hidden="true"
+                >
+              {% endcomment %}
+              <div
+                class="cb-arrow-img"
+                alt="Dropdown Icon"
+              >
+                <svg class="cb-plus-minus-icon" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <line x1="5" y1="10" x2="15" y2="10" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                  <line class="cb-vertical-line" x1="10" y1="5" x2="10" y2="15" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                </svg>
+                {% comment %}
+                  <svg
+                    class="cb-arrow-svg transition-transform duration-200 ease-in-out"
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="100%"
+                    height="auto"
+                    stroke-width="5"
+                    viewBox="0 0 20 20"
+                    style="transform: scale(1.5);"
+                  >
+                    <g transform="rotate(270 12 12)">
+                      <path stroke-width="5" d="M12 4c.552 0 1 .448 1 1v10.586l3.293-3.293a1 1 0 1 1 1.414 1.414l-5 5a1 1 0 0 1-1.414 0l-5-5a1 1 0 0 1 1.414-1.414L11 15.586V5c0-.552.448-1 1-1z"/>
+                    </g>
+                  </svg>
+                {% endcomment %}
+              </div>
+            </div>
+            <div class="cb-accordion-content">
+              {% if block.settings.subheading != blank %}
+                <h4>{{ block.settings.subheading }}</h4>
+              {% endif %}
+              {% assign paragraphs = block.settings.content | split: '||' %}
+              {% comment %} <p>{{ block.settings.content }}</p> {% endcomment %}
+              {% for paragraph in paragraphs %}
+                <p style="padding-bottom: var(--space-lg);">{{ paragraph }}</p>
+              {% endfor %}
+            </div>
+          </div>
+        {% endif %}
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
 <style>
+  /* Fix for theme editor: Override scroll-animations.css opacity to show preview immediately */
+  {% if request.design_mode %}
+    .cb-container-image-and-text .scroll-fade-trigger,
+    .cb-container-image-and-text .scroll-fade-up,
+    .cb-container-image-and-text .scroll-fade-left,
+    .cb-container-image-and-text .scroll-fade-right,
+    .cb-container-image-and-text .scroll-fade-delay-1,
+    .cb-container-image-and-text .scroll-fade-delay-2 {
+      opacity: 1 !important;
+      transform: none !important;
+      transition: none !important;
+    }
+  {% endif %}
+
   /* Use Shopify color scheme variables, scoped to section */
   section.cb-container-image-and-text {
     margin-bottom: 50px 0px;
@@ -124,18 +139,6 @@
     align-items: stretch;
     height: 100%;
     padding: {{ settings.sections_spacing }}px {{ settings.side_space}}px;
-  }
-
-  /* Fade-in animation styles */
-  section.cb-container-image-and-text.cb-fade-in {
-    opacity: 0;
-    transform: translateY(30px);
-    transition: opacity 0.8s ease-out, transform 0.8s ease-out;
-  }
-
-  section.cb-container-image-and-text.cb-fade-in.cb-visible {
-    opacity: 1;
-    transform: translateY(0);
   }
 
   section.cb-container-image-and-text .cb-right {
@@ -447,24 +450,6 @@
 
     if (!sectionEl) return;
 
-    // Intersection Observer for fade-in animation
-    const observerOptions = {
-      threshold: 0.1,
-      rootMargin: '0px 0px -50px 0px',
-    };
-
-    const observer = new IntersectionObserver((entries) => {
-      entries.forEach((entry) => {
-        if (entry.isIntersecting) {
-          entry.target.classList.add('cb-visible');
-          observer.unobserve(entry.target); // Stop observing once animated
-        }
-      });
-    }, observerOptions);
-
-    // Start observing the section
-    observer.observe(sectionEl);
-
     // Accordion functionality
     sectionEl.querySelectorAll('.cb-accordion-header').forEach((header) => {
       header.addEventListener('click', () => {
@@ -507,12 +492,6 @@
     "groups": ["header", "footer"]
   },
   "settings": [
-    {
-      "type": "checkbox",
-      "id": "enabled",
-      "label": "Enable section",
-      "default": true
-    },
     {
       "type": "color_scheme",
       "id": "color_scheme",
@@ -574,7 +553,10 @@
       "name": "Content Block",
       "blocks": [
         {
-          "type": "paragraph"
+          "type": "paragraph",
+          "settings": {
+            "paragraph_text": "Use this section to introduce your store, collection highlights, or a special promotion. Share details that inspire customers to explore your products."
+          }
         },
         {
           "type": "accordion_item",
