@@ -1,0 +1,195 @@
+{%- comment -%}
+  Product Purchase Section - Mobile Version
+
+  Delivery, quantity, pricing, and add to cart for mobile
+
+  Parameters:
+  - product: Product object (required)
+  - section: Section object for settings and blocks (required)
+{%- endcomment -%}
+
+<div
+  class="size-price-selector flex flex-col gap-6 product-mobile-text-medium"
+  role="region"
+  aria-label="Mobile product options and purchase"
+>
+  <!-- DELIVERY SECTION -->
+  {%- for block in section.blocks -%}
+    {%- if block.type == 'delivery_address' -%}
+      <div
+        class="flex justify-between items-start py-4 details-border-bottom"
+        {{ block.shopify_attributes }}
+      >
+        {% if customer and customer.default_address %}
+          <div role="group" aria-labelledby="mobile-delivery-heading">
+            <div id="mobile-delivery-heading" class="uppercase">DELIVER TO</div>
+            <div class="text-sm leading-relaxed" aria-describedby="mobile-delivery-heading">
+              {{ customer.default_address | format_address }}
+            </div>
+          </div>
+          <button
+            class="delivery-change-btn px-2 py-1 rounded transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            class="details-summary-border"
+            aria-label="Change delivery address"
+            aria-describedby="mobile-current-address"
+          >
+            CHANGE
+          </button>
+          <span id="mobile-current-address" class="sr-only"
+            >Current address: {{ customer.default_address | format_address -}}
+          </span>
+        {% else %}
+          <div role="group" aria-labelledby="mobile-delivery-heading-guest">
+            <div id="mobile-delivery-heading-guest" class="uppercase">DELIVER TO</div>
+            <div class="secondary-text-color">
+              Please
+              <a
+                href="{{ routes.account_login_url }}"
+                class="underline !text-blue-900"
+                aria-describedby="mobile-login-help"
+                >log in</a
+              >
+              to set your delivery address.
+            </div>
+            <span id="mobile-login-help" class="sr-only">Login required to save and manage delivery addresses</span>
+          </div>
+          <button
+            class="delivery-change-btn py-0 rounded transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            aria-label="Set delivery address"
+          >
+            CHANGE
+          </button>
+        {% endif %}
+      </div>
+    {%- endif -%}
+  {%- endfor -%}
+
+  <!-- QUANTITY SELECTOR -->
+  {%- for block in section.blocks -%}
+    {%- if block.type == 'quantity_selector' -%}
+      <div class="flex flex-col pb-4 details-border-both" {{ block.shopify_attributes }}>
+        <label
+          for="Quantity-{{ product.selected_or_first_available_variant.id }}-mobile"
+          class="uppercase margin-bottom-xl"
+          >QUANTITY SELECTOR</label
+        >
+        <div class="flex justify-start">
+          {% render 'quantity-input',
+            variant: product.selected_or_first_available_variant,
+            mobile: true,
+            min: 1,
+            for_cart: false
+          %}
+        </div>
+      </div>
+    {%- endif -%}
+  {%- endfor -%}
+
+  <!-- SIZE/DENOMINATION SELECTOR -->
+  {% render 'size-variant-picker', product: product, mobile: true %}
+  {% if product.gift_card? %}
+    <div class="border-top-padding">
+      {% render 'gift-card-recipient-form', product: product, form: form, section: section %}
+    </div>
+  {% endif %}
+
+  <!-- PRICE + ACTIONS -->
+  <div class="flex flex-col justify-evenly pt-4 mobile-price-border">
+    <div class="text-[18px] flex flex-col justify-between" role="region" aria-labelledby="mobile-price-heading">
+      <span id="mobile-price-heading" class="sr-only">Product pricing</span>
+      <div class="flex items-center pb-4 price-gap">
+        {% render 'price',
+          product: product,
+          use_variant: true,
+          show_compare_at_price: true,
+          font_size_mobile: 'var(--tm-h-3-size)',
+          line_height_mobile: 'var(--tm-b-1-line-height)',
+          price_class: 'mobile-main-product-price'
+        %}
+      </div>
+      <div
+        class="mobile-savings-info {% unless product.selected_or_first_available_variant.compare_at_price and product.selected_or_first_available_variant.compare_at_price > product.selected_or_first_available_variant.price %}hidden{% endunless %}"
+        role="status"
+        aria-live="polite"
+      >
+        {% if product.selected_or_first_available_variant.compare_at_price
+          and product.selected_or_first_available_variant.compare_at_price
+            > product.selected_or_first_available_variant.price
+        %}
+          Save
+          {{
+            product.selected_or_first_available_variant.compare_at_price
+            | minus: product.selected_or_first_available_variant.price
+            | money
+          }}
+          (
+          {{-
+            product.selected_or_first_available_variant.compare_at_price
+            | minus: product.selected_or_first_available_variant.price
+            | times: 100
+            | divided_by: product.selected_or_first_available_variant.compare_at_price
+          -}}
+          % off)
+        {% endif %}
+      </div>
+    </div>
+    <div class="flex justify-evenly w-full gap-2">
+      {% if product.available %}
+        <form
+          method="post"
+          action="{{ routes.cart_add_url }}"
+          class="mobile-add-to-cart-form mobile-price-text"
+          role="form"
+          aria-labelledby="mobile-add-to-cart-heading"
+        >
+          <span id="mobile-add-to-cart-heading" class="sr-only">Add product to cart</span>
+          <input
+            type="hidden"
+            name="id"
+            class="mobile-variant-id"
+            value="{{ product.selected_or_first_available_variant.id }}"
+            aria-label="Selected variant ID"
+          >
+          <input type="hidden" name="quantity" value="1" aria-label="Quantity">
+          <div class="mobile-add-to-cart-btn">
+            {% render 'tertiary-button',
+              button_text: 'ADD TO CART',
+              button_font_size: 'var(--tm-b-2-size)',
+              font_weight: 'var(--tm-b-2-weight)',
+              button_line_height: 'var(--tm-b-2-line-height)',
+              mobile_font_size: 'var(--tm-b-2-size)',
+              mobile_font_weight: 'var(--tm-b-2-weight)',
+              mobile_line_height: 'var(--tm-b-2-line-height)',
+              tertiary_class: 'mobile-add-to-cart-tertiary-btn',
+              button_type: 'button',
+              button_width: '370px',
+              button_height: '50px',
+              mobile_button_width: '95vw',
+              data_attributes: 'aria-describedby="mobile-add-to-cart-description"'
+            %}
+          </div>
+          <span id="mobile-add-to-cart-description" class="sr-only">Add this product to your shopping cart</span>
+        </form>
+      {% else %}
+        <button
+          class="text-4xl px-4 py-2 rounded cursor-not-allowed mobile-sold-out-button"
+          type="button"
+          disabled
+          aria-label="Product is sold out"
+          aria-describedby="mobile-sold-out-description"
+        >
+          SOLD OUT
+        </button>
+        <span id="mobile-sold-out-description" class="sr-only">This product is currently out of stock</span>
+      {% endif %}
+    </div>
+  </div>
+  {%- for block in section.blocks -%}
+    {%- if block.type == 'pickup_availability' -%}
+      <div class="pickup-availability-container mt-4 mobile-full-width" role="region" aria-label="Pickup availability">
+        {% render 'pickup-availability', product_variant: product.selected_or_first_available_variant %}
+        {{ 'component-pickup-availability.css' | asset_url | stylesheet_tag }}
+      </div>
+    {%- endif -%}
+  {%- endfor -%}
+</div>

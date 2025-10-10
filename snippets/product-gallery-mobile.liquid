@@ -1,0 +1,136 @@
+{%- comment -%}
+  Product Gallery - Mobile Version
+
+  Parameters:
+  - product: Product object (required)
+{%- endcomment -%}
+
+<div class="mobile-gallery" role="region" aria-label="Product images">
+  <!-- Main Image Stack -->
+  <div class="main-images relative h-[60vh] overflow-hidden" role="img" aria-live="polite">
+    {%- if product.media.size > 0 -%}
+      {%- for media in product.media -%}
+        <div
+          class="mobile-gallery-item {% if forloop.first %}active{% endif %}"
+          data-mobile-index="{{ forloop.index0 }}"
+          data-media-id="{{ media.id }}"
+          {%- assign variant_tags = '' -%}
+          {%- if media.alt contains 'variant:' -%}
+            {%- assign variant_part = media.alt | split: 'variant:' | last -%}
+            {%- assign variant_tags = variant_part | split: ',' -%}
+            data-variant-options="{{ variant_tags | join: '|' | downcase }}"
+          {%- endif -%}
+          id="mobile-gallery-item-{{ forloop.index0 }}"
+          {% if forloop.first %}
+            aria-current="true"
+          {% endif %}
+        >
+          {% if media.media_type == 'image' %}
+            <img
+              srcset="
+                {%- if media.width >= 165 -%}{{ media | image_url: width: 165 }} 165w,{%- endif -%}
+                {%- if media.width >= 360 -%}{{ media | image_url: width: 360 }} 360w,{%- endif -%}
+                {%- if media.width >= 535 -%}{{ media | image_url: width: 535 }} 535w,{%- endif -%}
+                {%- if media.width >= 750 -%}{{ media | image_url: width: 750 }} 750w,{%- endif -%}
+                {%- if media.width >= 1070 -%}{{ media | image_url: width: 1070 }} 1070w,{%- endif -%}
+                {%- if media.width >= 1500 -%}{{ media | image_url: width: 1500 }} 1500w,{%- endif -%}
+                {{ media | image_url }} {{ media.width }}w
+              "
+              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 60vw, 50vw"
+              src="{{ media | image_url: width: 1500 }}"
+              alt="{{ media.alt | escape | default: product.title | append: ' - Image ' | append: forloop.index }}"
+              class="w-full h-full object-cover"
+              loading="{% if forloop.first %}eager{% else %}lazy{% endif %}"
+              fetchpriority="{% if forloop.first %}high{% else %}auto{% endif %}"
+              decode="async"
+              width="{{ media.width }}"
+              height="{{ media.height }}"
+              role="img"
+            >
+          {% elsif media.media_type == 'video' %}
+            {{
+              media
+              | video_tag:
+                autoplay: true,
+                loop: true,
+                muted: true,
+                playsinline: true,
+                controls: true,
+                class: 'w-full h-full object-cover'
+            }}
+          {% endif %}
+        </div>
+      {%- endfor -%}
+    {%- endif -%}
+  </div>
+
+  <!-- Mobile Thumbnail Strip -->
+  <div
+    class="thumbnail-strip mt-2 pb-2 overflow-x-auto mx-auto w-fit"
+    role="tablist"
+    aria-label="Product image thumbnails"
+  >
+    <div class="flex gap-2 snap-x p-4">
+      {%- for media in product.media -%}
+        <button
+          class="thumbnail-item flex-shrink-0 w-20 h-20 p-2 {% if forloop.first %} active{% endif %} focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+          data-thumb-index="{{ forloop.index0 }}"
+          role="tab"
+          aria-selected="{% if forloop.first %}true{% else %}false{% endif %}"
+          aria-controls="mobile-gallery-item-{{ forloop.index0 }}"
+          aria-label="View {{ media.alt | escape | default: 'product image' }} {{ forloop.index }}"
+          tabindex="{% if forloop.first %}0{% else %}-1{% endif %}"
+        >
+          {% if media.media_type == 'video' %}
+            <div class="relative w-full h-full">
+              <img
+                srcset="
+                  {%- if media.preview_image.width >= 75 -%}{{ media.preview_image | image_url: width: 75 }} 75w,{%- endif -%}
+                  {%- if media.preview_image.width >= 150 -%}{{ media.preview_image | image_url: width: 150 }} 150w,{%- endif -%}
+                  {%- if media.preview_image.width >= 300 -%}{{ media.preview_image | image_url: width: 300 }} 300w,{%- endif -%}
+                  {{ media.preview_image | image_url }} {{ media.preview_image.width }}w
+                "
+                sizes="150px"
+                src="{{ media.preview_image | image_url: width: 150 }}"
+                alt="{{ media.alt | escape | default: product.title | append: ' thumbnail ' | append: forloop.index }}"
+                class="w-full h-full object-cover rounded"
+                loading="lazy"
+                decode="async"
+                width="150"
+                height="{{ 150 | divided_by: media.preview_image.aspect_ratio | ceil }}"
+                aria-hidden="true"
+              >
+              <span
+                class="video-play-icon absolute inset-0 flex items-center justify-center pointer-events-none"
+                aria-hidden="true"
+              >
+                <svg width="32" height="32" fill="none" viewBox="0 0 32 32">
+                  <circle cx="16" cy="16" r="16" fill="rgba(0,0,0,0.5)"/>
+                  <polygon points="13,10 24,16 13,22" fill="white"/>
+                </svg>
+              </span>
+            </div>
+          {% else %}
+            <img
+              srcset="
+                {%- if media.width >= 75 -%}{{ media | image_url: width: 75 }} 75w,{%- endif -%}
+                {%- if media.width >= 150 -%}{{ media | image_url: width: 150 }} 150w,{%- endif -%}
+                {%- if media.width >= 300 -%}{{ media | image_url: width: 300 }} 300w,{%- endif -%}
+                {{ media | image_url }} {{ media.width }}w
+              "
+              sizes="150px"
+              src="{{ media | image_url: width: 150 }}"
+              alt="{{ media.alt | escape | default: product.title | append: ' thumbnail ' | append: forloop.index }}"
+              class="w-full h-full object-cover rounded"
+              loading="lazy"
+              decode="async"
+              width="150"
+              height="{{ 150 | divided_by: media.aspect_ratio | ceil }}"
+              aria-hidden="true"
+            >
+          {% endif %}
+        </button>
+      {%- endfor -%}
+    </div>
+  </div>
+</div>
