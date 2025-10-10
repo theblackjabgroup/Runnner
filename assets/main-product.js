@@ -679,6 +679,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
     updateSizeAvailability();
 
+    // Update pickup availability for new variant
+    if (variant && variant.id) {
+      const pickupAvailability = document.querySelector('pickup-availability');
+      if (pickupAvailability && typeof pickupAvailability.fetchAvailability === 'function') {
+        pickupAvailability.fetchAvailability(variant.id);
+      }
+    }
+
     // Update URL with new variant
     if (variant && variant.available) {
       updateURLWithVariant(variant);
@@ -1403,14 +1411,12 @@ document.addEventListener('DOMContentLoaded', () => {
   setTimeout(initializePickupAvailability, 500);
 
   initializePage();
-});
 
-// Export functions for global access if needed
-window.MainProductJS = {
-  formatMoney: function (cents) {
-    return formatMoney(cents);
-  },
-  updateCartCount: function () {
-    return updateCartCount();
-  },
-};
+  // Export functions for global access if needed
+  window.MainProductJS = {
+    formatMoney: formatMoney,
+    updateCartCount: updateCartCount,
+    findMatchingVariant: findMatchingVariant,
+    updateVariant: updateVariant,
+  };
+});
