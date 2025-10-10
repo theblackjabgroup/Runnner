@@ -12,7 +12,7 @@
 <div class="price-facet-container {% if filter_type == 'mobile' %}mobile-price-facet{% endif %}">
   <!-- CLEAR button in top right -->
   <div class="price-facet-header">
-    <span class="price-reset" onclick="resetPriceFilters(event)">{{ reset_label }}</span>
+    <span class="price-reset" role="button" tabindex="0" aria-label="Reset price filters">{{ reset_label }}</span>
   </div>
 
   <!-- Price Range Slider -->
@@ -27,7 +27,7 @@
           min="{{ range_min }}"
           max="{{ range_max }}"
           value="{{ min_price }}"
-          oninput="updatePriceSlider('{{ id_prefix }}', this)"
+          data-prefix="{{ id_prefix }}"
         >
         <input
           type="range"
@@ -36,7 +36,7 @@
           min="{{ range_min }}"
           max="{{ range_max }}"
           value="{{ max_price }}"
-          oninput="updatePriceSlider('{{ id_prefix }}', this)"
+          data-prefix="{{ id_prefix }}"
         >
       </div>
     </div>
@@ -57,8 +57,8 @@
           step="1"
           inputmode="numeric"
           placeholder="{{ currency_symbol }} {{ from_label }}"
-          onkeydown="handlePriceKeydown(event)"
-          oninput="updatePriceFromInput('{{ id_prefix }}', this.value, 'min')"
+          data-prefix="{{ id_prefix }}"
+          data-type="min"
         >
       </div>
 
@@ -76,8 +76,8 @@
           step="1"
           inputmode="numeric"
           placeholder="{{ currency_symbol }} {{ to_label }}"
-          onkeydown="handlePriceKeydown(event)"
-          oninput="updatePriceFromInput('{{ id_prefix }}', this.value, 'max')"
+          data-prefix="{{ id_prefix }}"
+          data-type="max"
         >
       </div>
     </div>
@@ -589,5 +589,50 @@
     document.querySelectorAll('.price-facet-container').forEach((container) => {
       updateSliderRange(container);
     });
+
+    // ===================================================================
+    // PRICE FACET EVENT LISTENERS (CSP-compliant, replaces inline handlers)
+    // ===================================================================
+
+    // Reset button click handlers
+    document.querySelectorAll('.price-reset').forEach(function (resetBtn) {
+      resetBtn.addEventListener('click', function (event) {
+        resetPriceFilters(event);
+      });
+
+      // Keyboard accessibility
+      resetBtn.addEventListener('keydown', function (event) {
+        if (event.key === 'Enter' || event.key === ' ') {
+          event.preventDefault();
+          resetPriceFilters(event);
+        }
+      });
+    });
+
+    // Price slider input handlers
+    document.querySelectorAll('.price-slider-handle').forEach(function (slider) {
+      slider.addEventListener('input', function () {
+        const prefix = this.dataset.prefix;
+        updatePriceSlider(prefix, this);
+      });
+    });
+
+    // Price input field handlers
+    document.querySelectorAll('.price-input').forEach(function (input) {
+      // Keydown handler for Enter key
+      input.addEventListener('keydown', function (event) {
+        handlePriceKeydown(event);
+      });
+
+      // Input handler for real-time updates
+      input.addEventListener('input', function () {
+        const prefix = this.dataset.prefix;
+        const type = this.dataset.type;
+        const value = this.value;
+        updatePriceFromInput(prefix, value, type);
+      });
+    });
+
+    console.log('✅ Price facet event listeners initialized (CSP-compliant)');
   });
 </script>
