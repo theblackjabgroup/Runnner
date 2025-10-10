@@ -16,6 +16,10 @@ function toggleSection(header) {
     s.classList.remove('expanded');
     const icon = s.querySelector('.pmorph__icon');
     if (icon) icon.classList.remove('expanded');
+
+    // Update aria-expanded for all headers
+    const sectionHeader = s.querySelector('.sidebar-header');
+    if (sectionHeader) sectionHeader.setAttribute('aria-expanded', 'false');
   });
 
   // Open clicked section and animate icon
@@ -23,6 +27,9 @@ function toggleSection(header) {
     section.classList.add('expanded');
     const icon = section.querySelector('.pmorph__icon');
     if (icon) icon.classList.add('expanded');
+
+    // Update aria-expanded for the opened section
+    header.setAttribute('aria-expanded', 'true');
   }
 }
 
@@ -709,4 +716,54 @@ document.addEventListener('DOMContentLoaded', function () {
     },
     true
   );
+
+  // ===================================================================
+  // COLOR PICKER EVENT LISTENERS (replaces inline onclick handlers)
+  // ===================================================================
+
+  // Attach click handlers to all color pickers
+  const colorPickers = document.querySelectorAll('.color-picker');
+
+  colorPickers.forEach(function (picker) {
+    picker.addEventListener('click', function () {
+      changeItemColor(this);
+    });
+
+    // Add keyboard accessibility
+    picker.setAttribute('role', 'button');
+    picker.setAttribute('tabindex', '0');
+
+    picker.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        changeItemColor(this);
+      }
+    });
+  });
+
+  // ===================================================================
+  // SIDEBAR SECTION TOGGLE EVENT LISTENERS (replaces inline onclick)
+  // ===================================================================
+
+  const sidebarHeaders = document.querySelectorAll('.sidebar-header');
+
+  sidebarHeaders.forEach(function (header) {
+    header.addEventListener('click', function () {
+      toggleSection(this);
+    });
+
+    // Add keyboard accessibility
+    header.setAttribute('role', 'button');
+    header.setAttribute('tabindex', '0');
+    header.setAttribute('aria-expanded', 'false');
+
+    header.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        toggleSection(this);
+      }
+    });
+  });
+
+  console.log('✅ Cart event listeners initialized (CSP-compliant)');
 });

@@ -147,7 +147,6 @@
                     <summary
                       class="facets__summary caption-large focus-offset !p-0"
                       aria-label="{{ filter.label | escape }} ({{ 'products.facets.filters_selected.one' | t: count: filter.active_values.size | default: 'selected' }})"
-                      onclick="toggleArrow(this)"
                     >
                       <div class="flex items-center">
                         <h1
@@ -204,7 +203,7 @@
 
                             {%- capture text_value -%}
                               <span class="" aria-hidden="true">
-                                <span class="text-[16px] text-nowrap facets-text-color" onmouseout="this.style.backgroundColor='transparent'">{{- value.label | escape }}</span>
+                                <span class="text-[16px] text-nowrap facets-text-color">{{- value.label | escape }}</span>
                               </span>
                               <span class="visually-hidden">
                                 {{- value.label | escape }}
@@ -300,7 +299,7 @@
                   >
                     <summary
                       class="facets__summary caption-large focus-offset"
-                      onclick="this.closest('details').querySelector('.pmorph__icon').classList.toggle('expanded')"
+                      data-facet-summary="price"
                     >
                       <div class="flex items-center">
                         <h1
@@ -339,7 +338,7 @@
               >
                 <summary
                   class="facets__summary caption-large focus-offset -translate-y-[10px] !p-0"
-                  onclick="this.closest('details').querySelector('.pmorph__icon').classList.toggle('expanded')"
+                  data-facet-summary="sort"
                 >
                   <div class="flex items-center">
                     <h1 class="uppercase !text-[16px] w-[75px] !font-[500] facets-text-color">Sort By</h1>
@@ -366,8 +365,7 @@
                               {% if option.value == sort_by %}
                                 checked
                               {% endif %}
-                              onchange="handleSortByChange(this)"
-                              class="facets-hidden-input"
+                              class="facets-hidden-input sort-by-checkbox"
                             >
                             {{- 'square.svg' | inline_asset_content -}}
                             <div class="svg-wrapper translate-y-[5px] facets-svg-transform">
@@ -376,7 +374,6 @@
                             <span class="" aria-hidden="true">
                               <span
                                 class="text-[16px] text-nowrap facets-text-color"
-                                onmouseout="this.style.backgroundColor='transparent'"
                               >
                                 {{- option.name | escape -}}
                               </span>
@@ -407,9 +404,7 @@
       <div class="mobile-filter-header">
         <h2 class="!text-[30px] uppercase facets-mobile-header">FILTERS</h2>
         <div class="mobile-filter-apply">
-          <button type="button" class="mobile-filter-close facets-mobile-close" onclick="closeMobileFilters()">
-            Close
-          </button>
+          <button type="button" class="mobile-filter-close facets-mobile-close">Close</button>
         </div>
       </div>
 
@@ -505,7 +500,7 @@
           </div>
 
           <div class="mobile-filter-footer">
-            <button type="button" class="mobile-apply-btn" onclick="closeMobileFilters()">CLOSE</button>
+            <button type="button" class="mobile-apply-btn">CLOSE</button>
           </div>
         </form>
       </facet-filters-form>
@@ -553,7 +548,6 @@
 >
   <button
     class="mobile-facets-trigger flex items-center gap-2 px-4 py-2 w-1/2 justify-center facets-mobile-trigger"
-    onclick="openMobileFilters()"
   >
     <span class="uppercase filters-tabs facets-filters-tabs">Filters</span>
   </button>
@@ -561,7 +555,6 @@
   <div class="mobile-sort-dropdown relative w-1/2">
     <button
       class="mobile-sort-trigger flex items-center gap-2 px-4 py-2 w-full justify-center"
-      onclick="this.nextElementSibling.classList.toggle('hidden')"
     >
       <span class="uppercase filters-tabs facets-filters-tabs">Sort</span>
     </button>
@@ -584,8 +577,7 @@
                   {% if option.value == sort_by %}
                     checked
                   {% endif %}
-                  onchange="handleSortByChange(this)"
-                  class="facets-hidden-input"
+                  class="facets-hidden-input sort-by-checkbox"
                 >
                 {{- 'square.svg' | inline_asset_content -}}
                 <div class="svg-wrapper translate-y-[5px] facets-svg-transform">
@@ -594,7 +586,6 @@
                 <span class="" aria-hidden="true">
                   <span
                     class="text-[14px] text-nowrap facets-text-color"
-                    onmouseout="this.style.backgroundColor='transparent'"
                   >
                     {{- option.name | escape -}}
                   </span>
@@ -648,6 +639,55 @@
 
   // Add event listeners to all filter summaries
   document.addEventListener('DOMContentLoaded', function () {
+    // ===================================================================
+    // FACETS EVENT LISTENERS (CSP-compliant, replaces inline handlers)
+    // ===================================================================
+
+    // Toggle arrow for facet summaries (replaces onclick="toggleArrow(this)")
+    document.querySelectorAll('.facets__summary').forEach(function (summary) {
+      summary.addEventListener('click', function () {
+        toggleArrow(this);
+      });
+    });
+
+    // Handle price and sort summary icon toggles (replaces inline onclick)
+    document.querySelectorAll('[data-facet-summary]').forEach(function (summary) {
+      summary.addEventListener('click', function () {
+        this.closest('details').querySelector('.pmorph__icon').classList.toggle('expanded');
+      });
+    });
+
+    // Handle sort by checkbox changes (replaces onchange="handleSortByChange(this)")
+    document.querySelectorAll('.sort-by-checkbox').forEach(function (checkbox) {
+      checkbox.addEventListener('change', function () {
+        handleSortByChange(this);
+      });
+    });
+
+    // Mobile filter buttons
+    const mobileFilterTrigger = document.querySelector('.mobile-facets-trigger');
+    if (mobileFilterTrigger) {
+      mobileFilterTrigger.addEventListener('click', function () {
+        openMobileFilters();
+      });
+    }
+
+    // Mobile filter close buttons
+    document.querySelectorAll('.mobile-filter-close, .mobile-apply-btn').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        closeMobileFilters();
+      });
+    });
+
+    // Mobile sort trigger (replaces onclick to toggle dropdown)
+    document.querySelectorAll('.mobile-sort-trigger').forEach(function (trigger) {
+      trigger.addEventListener('click', function () {
+        this.nextElementSibling.classList.toggle('hidden');
+      });
+    });
+
+    console.log('✅ Facets event listeners initialized (CSP-compliant)');
+
     // Close dropdowns when clicking outside
     document.addEventListener('click', function (e) {
       if (
