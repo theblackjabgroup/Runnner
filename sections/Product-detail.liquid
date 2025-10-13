@@ -56,7 +56,7 @@
 
         <div
           id="product-showcase-slider-{{ section.id }}"
-          class="product-showcase-slider flex gap-2 md:gap-4 overflow-x-auto no-scrollbar scroll-fade-stagger"
+          class="product-showcase-slider flex gap-2 md:gap-4 overflow-x-auto custom-scrollbar featured-collection-cursor-grab scroll-fade-stagger"
           role="region"
           aria-label="Product gallery"
           aria-describedby="showcase-slider-instructions-{{ section.id }}"
@@ -188,26 +188,11 @@
           {% endif %}
         </div>
 
-        <!-- Accessible custom scrollbar -->
-        <div class="custom-showcase-scrollbar-container" role="presentation">
-          <div
-            id="custom-showcase-scrollbar-{{ section.id }}"
-            class="custom-showcase-scrollbar-track"
-            role="scrollbar"
-            aria-controls="product-showcase-slider-{{ section.id }}"
-            aria-valuenow="0"
-            aria-valuemin="0"
-            aria-valuemax="100"
-            aria-label="Horizontal scroll position"
-            tabindex="0"
-          >
-            <div
-              id="custom-showcase-scrollbar-thumb-{{ section.id }}"
-              class="custom-showcase-scrollbar-thumb"
-              role="presentation"
-            ></div>
-          </div>
-        </div>
+        <!-- Custom scrollbar using snippet (same as featured-collection) -->
+        {% render 'horizontal-scrollbar',
+          container_selector: '.showcase-slider-container',
+          slider_selector: '.product-showcase-slider'
+        %}
 
         <!-- End marker for skip link -->
         <div id="product-showcase-end-{{ section.id }}" tabindex="-1" aria-hidden="true"></div>
@@ -252,8 +237,7 @@
   /* Improved focus styles */
   .product-showcase-card:focus,
   .product-showcase-image-link:focus,
-  .product-showcase-details a:focus,
-  .custom-showcase-scrollbar-track:focus {
+  .product-showcase-details a:focus {
     outline: 3px solid #2563eb;
     outline-offset: 2px;
     border-radius: 4px;
@@ -536,77 +520,16 @@
     margin: 0 !important;
   }
 
-  .showcase-cursor-grab {
-    cursor: grab;
-    padding-bottom: 12px;
-  }
+  /* Scrollbar styles and drag functionality moved to horizontal-scrollbar snippet */
 
-  .showcase-cursor-grabbing {
-    cursor: grabbing;
-  }
-
-  /* Hide default scrollbar */
-  .no-scrollbar {
-    -ms-overflow-style: none;
-    scrollbar-width: none;
-  }
-
-  .no-scrollbar::-webkit-scrollbar {
-    display: none;
-  }
-
-  /* Custom scrollbar container */
-  .custom-showcase-scrollbar-container {
-    display: flex;
-    justify-content: center;
-    width: 100%;
-    margin-top: 16px;
-    opacity: 1 !important;
-    visibility: visible !important;
-  }
-
-  .custom-showcase-scrollbar-track {
-    width: 70%;
-    height: 8px;
-    background-color: transparent !important;
-    background-image: linear-gradient(to right, var(--text), var(--text)) !important;
-    background-size: 100% 2px !important;
-    background-repeat: no-repeat !important;
-    background-position: center !important;
-    position: relative;
-    cursor: pointer;
-    border-radius: 4px;
-    opacity: 1 !important;
-    visibility: visible !important;
-    display: block !important;
-    transform: none !important;
-    transition: none !important;
-  }
-
-  .custom-showcase-scrollbar-thumb {
-    height: 4px !important;
-    background-color: var(--text) !important;
-    position: absolute;
-    top: 50%;
-    width: 300px !important;
-    transform: translateY(-50%) !important;
-    transition: left 0.1s ease !important;
-    min-width: 20px;
-    cursor: pointer;
-    border-radius: 1px;
-    opacity: 1 !important;
-    visibility: visible !important;
-    display: block !important;
+  .showcase-slider-container {
+    padding-bottom: var(--space-3xl);
   }
 
   /* Reduced motion support */
   @media (prefers-reduced-motion: reduce) {
     .product-showcase-slider {
       scroll-behavior: auto;
-    }
-
-    .custom-showcase-scrollbar-thumb {
-      transition: none;
     }
 
     .showcase-detail-btn {
@@ -621,13 +544,6 @@
       justify-content: flex-start;
     }
 
-    .custom-showcase-scrollbar-container {
-      display: flex;
-      justify-content: center;
-      width: 100%;
-      margin-top: 16px;
-    }
-
     .showcase-slider-container {
       overflow-x: auto;
     }
@@ -638,11 +554,6 @@
       gap: 8px;
       overflow-x: auto;
       -webkit-overflow-scrolling: touch;
-      scrollbar-width: none;
-    }
-
-    .product-showcase-slider::-webkit-scrollbar {
-      display: none;
     }
 
     .showcase-slider-container {
@@ -657,8 +568,8 @@
       margin-top: -6px;
     }
 
-    .showcase-cursor-grab {
-      padding-bottom: 0px;
+    .showcase-slider-container {
+      padding-bottom: var(--space-3xl);
     }
 
     .product-showcase-cart-container,
@@ -666,24 +577,6 @@
       display: none !important;
       opacity: 0 !important;
       visibility: hidden !important;
-    }
-
-    /* Show custom scrollbar on mobile */
-    .custom-showcase-scrollbar-container {
-      display: flex;
-      margin-top: 12px;
-    }
-
-    .custom-showcase-scrollbar-track {
-      width: 100%;
-      height: 6px;
-      opacity: 1 !important;
-    }
-
-    .custom-showcase-scrollbar-thumb {
-      height: 6px !important;
-      width: 70px !important;
-      opacity: 1 !important;
     }
   }
 
@@ -716,230 +609,9 @@
   .hidden {
     display: none !important;
   }
-
-  /* Override any scroll animation effects on scrollbar elements */
-  .custom-showcase-scrollbar-container,
-  .custom-showcase-scrollbar-track,
-  .custom-showcase-scrollbar-thumb {
-    opacity: 1 !important;
-    visibility: visible !important;
-    transform: none !important;
-  }
-
-  .custom-showcase-scrollbar-thumb {
-    transform: translateY(-50%) !important;
-  }
 </style>
 
-<script>
-  document.addEventListener('DOMContentLoaded', function () {
-    const slider = document.getElementById('product-showcase-slider-{{ section.id }}');
-    const scrollbarThumb = document.getElementById('custom-showcase-scrollbar-thumb-{{ section.id }}');
-    const scrollbarTrack = document.querySelector('#custom-showcase-scrollbar-{{ section.id }}');
-
-    if (!slider || !scrollbarThumb || !scrollbarTrack) {
-      return;
-    }
-
-    // Keyboard navigation for slider
-    slider.addEventListener('keydown', function (e) {
-      const scrollAmount = slider.clientWidth * 0.8; // Scroll by 80% of visible width
-
-      switch (e.key) {
-        case 'ArrowLeft':
-          e.preventDefault();
-          slider.scrollBy({ left: -scrollAmount, behavior: 'smooth' });
-          break;
-        case 'ArrowRight':
-          e.preventDefault();
-          slider.scrollBy({ left: scrollAmount, behavior: 'smooth' });
-          break;
-        case 'Home':
-          e.preventDefault();
-          slider.scrollTo({ left: 0, behavior: 'smooth' });
-          break;
-        case 'End':
-          e.preventDefault();
-          slider.scrollTo({ left: slider.scrollWidth, behavior: 'smooth' });
-          break;
-      }
-    });
-
-    // Keyboard navigation for scrollbar
-    scrollbarTrack.addEventListener('keydown', function (e) {
-      const scrollAmount = slider.clientWidth * 0.1; // Smaller increments for scrollbar
-
-      switch (e.key) {
-        case 'ArrowLeft':
-          e.preventDefault();
-          slider.scrollBy({ left: -scrollAmount, behavior: 'smooth' });
-          break;
-        case 'ArrowRight':
-          e.preventDefault();
-          slider.scrollBy({ left: scrollAmount, behavior: 'smooth' });
-          break;
-        case 'Home':
-          e.preventDefault();
-          slider.scrollTo({ left: 0, behavior: 'smooth' });
-          break;
-        case 'End':
-          e.preventDefault();
-          slider.scrollTo({ left: slider.scrollWidth, behavior: 'smooth' });
-          break;
-      }
-    });
-
-    function updateScrollbar() {
-      // Check if slider has scrollable content
-      if (slider.scrollWidth <= slider.clientWidth) {
-        // Hide scrollbar if no scrolling needed
-        scrollbarThumb.style.display = 'none';
-        scrollbarTrack.setAttribute('aria-hidden', 'true');
-        scrollbarTrack.setAttribute('tabindex', '-1');
-        return;
-      }
-
-      // Show scrollbar if scrolling is needed
-      scrollbarThumb.style.display = 'block';
-      scrollbarTrack.setAttribute('aria-hidden', 'false');
-      scrollbarTrack.setAttribute('tabindex', '0');
-
-      const scrollPercent = slider.scrollLeft / (slider.scrollWidth - slider.clientWidth);
-      const trackWidth = scrollbarTrack.clientWidth;
-      const thumbWidth = Math.max(20, (slider.clientWidth / slider.scrollWidth) * trackWidth);
-      const thumbLeft = scrollPercent * (trackWidth - thumbWidth);
-
-      scrollbarThumb.style.width = thumbWidth + 'px';
-      scrollbarThumb.style.left = thumbLeft + 'px';
-
-      // Update aria-valuenow for screen readers
-      scrollbarTrack.setAttribute('aria-valuenow', Math.round(scrollPercent * 100));
-    }
-
-    // Update scrollbar when slider scrolls
-    slider.addEventListener('scroll', updateScrollbar);
-
-    // Handle scrollbar track clicks
-    scrollbarTrack.addEventListener('click', function (e) {
-      const trackRect = scrollbarTrack.getBoundingClientRect();
-      const clickX = e.clientX - trackRect.left;
-      const clickPercent = clickX / trackRect.width;
-      const scrollTo = clickPercent * (slider.scrollWidth - slider.clientWidth);
-
-      slider.scrollTo({
-        left: scrollTo,
-        behavior: 'smooth',
-      });
-    });
-
-    // Handle scrollbar thumb dragging
-    let isDragging = false;
-    let startX = 0;
-    let startScrollLeft = 0;
-
-    scrollbarThumb.addEventListener('mousedown', function (e) {
-      isDragging = true;
-      startX = e.clientX;
-      startScrollLeft = slider.scrollLeft;
-      e.preventDefault();
-    });
-
-    document.addEventListener('mousemove', function (e) {
-      if (!isDragging) return;
-
-      const deltaX = e.clientX - startX;
-      const trackWidth = scrollbarTrack.clientWidth;
-      const thumbWidth = scrollbarThumb.clientWidth;
-      const maxThumbLeft = trackWidth - thumbWidth;
-      const scrollRatio = (slider.scrollWidth - slider.clientWidth) / maxThumbLeft;
-      const newScrollLeft = startScrollLeft + deltaX * scrollRatio;
-
-      slider.scrollLeft = Math.max(0, Math.min(newScrollLeft, slider.scrollWidth - slider.clientWidth));
-    });
-
-    document.addEventListener('mouseup', function () {
-      isDragging = false;
-    });
-
-    // Touch support for mobile
-    let isTouch = false;
-    let touchStartX = 0;
-
-    slider.addEventListener(
-      'touchstart',
-      function (e) {
-        isTouch = true;
-        touchStartX = e.touches[0].clientX;
-      },
-      { passive: true }
-    );
-
-    slider.addEventListener(
-      'touchend',
-      function () {
-        isTouch = false;
-      },
-      { passive: true }
-    );
-
-    // Announce changes to screen readers
-    let announceTimeout;
-    slider.addEventListener('scroll', function () {
-      clearTimeout(announceTimeout);
-      announceTimeout = setTimeout(function () {
-        const currentPercent = Math.round((slider.scrollLeft / (slider.scrollWidth - slider.clientWidth)) * 100);
-
-        // Create or update live region for announcements
-        let liveRegion = document.getElementById('showcase-slider-live-region-{{ section.id }}');
-        if (!liveRegion) {
-          liveRegion = document.createElement('div');
-          liveRegion.id = 'showcase-slider-live-region-{{ section.id }}';
-          liveRegion.setAttribute('aria-live', 'polite');
-          liveRegion.setAttribute('aria-atomic', 'true');
-          liveRegion.className = 'sr-only';
-          document.body.appendChild(liveRegion);
-        }
-
-        liveRegion.textContent = `Gallery scrolled to ${currentPercent}%`;
-      }, 150);
-    });
-
-    // Initialize scrollbar with a small delay to ensure layout is complete
-    setTimeout(updateScrollbar, 100);
-
-    // Update scrollbar after animations might have triggered
-    setTimeout(updateScrollbar, 1000);
-
-    // Update scrollbar on window resize
-    window.addEventListener('resize', function () {
-      setTimeout(updateScrollbar, 100);
-    });
-
-    // Also update when images load (in case they change the layout)
-    const images = slider.querySelectorAll('img');
-    images.forEach((img) => {
-      img.addEventListener('load', updateScrollbar);
-    });
-
-    // Add focus management for product cards
-    const productCards = slider.querySelectorAll('.product-showcase-card');
-    productCards.forEach(function (card, index) {
-      card.addEventListener('focus', function () {
-        // Ensure the focused card is visible
-        const cardRect = card.getBoundingClientRect();
-        const sliderRect = slider.getBoundingClientRect();
-
-        if (cardRect.left < sliderRect.left || cardRect.right > sliderRect.right) {
-          card.scrollIntoView({
-            behavior: 'smooth',
-            block: 'nearest',
-            inline: 'center',
-          });
-        }
-      });
-    });
-  });
-</script>
+{% comment %} Scrollbar functionality provided by horizontal-scrollbar snippet {% endcomment %}
 
 {% schema %}
 {

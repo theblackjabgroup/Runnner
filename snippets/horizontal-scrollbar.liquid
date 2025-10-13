@@ -1,0 +1,155 @@
+{% comment %}
+  Horizontal Scrollbar Snippet
+
+  Usage:
+  {% render 'horizontal-scrollbar',
+    container_selector: '.your-container-class',
+    slider_selector: '.your-slider-class'
+  %}
+
+  This snippet provides:
+  - Custom scrollbar styling with thin horizontal scrollbar
+  - Drag-to-scroll functionality (mouse)
+  - Touch-friendly scrolling on mobile
+{% endcomment %}
+
+<style>
+  /* Custom Horizontal Scrollbar Styling */
+  .custom-scrollbar::-webkit-scrollbar {
+    height: 6px;
+    background: transparent;
+    transform: translateY(-50%);
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-track {
+    background-color: transparent;
+    background-image: linear-gradient(to right, var(--text), var(--text));
+    background-size: 100% 1px;
+    background-repeat: no-repeat;
+    background-position: center;
+    border: none;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    background-color: var(--text);
+    height: 3px;
+    border: none;
+    margin-top: -1px;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-button:single-button {
+    display: none;
+    width: 0;
+    height: 0;
+  }
+
+  /* Cursor states for drag functionality */
+  .featured-collection-cursor-grab {
+    cursor: grab;
+  }
+
+  .featured-collection-cursor-grabbing {
+    cursor: grabbing;
+  }
+
+  /* Mobile scrollbar visibility */
+  @media (max-width: 768px) {
+    .custom-scrollbar {
+      /* Force scrollbar to be visible on mobile */
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .custom-scrollbar::-webkit-scrollbar {
+      height: 4px;
+      display: block !important;
+    }
+
+    .custom-scrollbar::-webkit-scrollbar-track {
+      background-image: linear-gradient(to right, var(--text), var(--text));
+      background-size: 100% 1px;
+      display: block !important;
+    }
+
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background-color: var(--text);
+      height: 4px;
+      display: block !important;
+    }
+  }
+</style>
+
+<script>
+  (function() {
+    // Initialize horizontal scrollbar drag functionality
+    function initializeHorizontalScrollbar(containerSelector, sliderSelector) {
+      const containers = document.querySelectorAll(containerSelector);
+
+      containers.forEach(container => {
+        // Check if already initialized to prevent duplicates
+        if (container.hasAttribute('data-scrollbar-initialized')) {
+          return;
+        }
+        container.setAttribute('data-scrollbar-initialized', 'true');
+
+        const slider = container.querySelector(sliderSelector);
+        if (!slider) return;
+
+        let isDown = false;
+        let startX;
+        let scrollLeft;
+
+        slider.addEventListener('mousedown', (e) => {
+          // Allow interaction with specific elements inside the slider
+          if (e.target.closest('.image-nav-arrow') || e.target.closest('.size-option-btn')) {
+            return;
+          }
+
+          isDown = true;
+          slider.classList.add('featured-collection-cursor-grabbing');
+          startX = e.pageX - slider.offsetLeft;
+          scrollLeft = slider.scrollLeft;
+        });
+
+        slider.addEventListener('mouseleave', () => {
+          isDown = false;
+          slider.classList.remove('featured-collection-cursor-grabbing');
+        });
+
+        slider.addEventListener('mouseup', () => {
+          isDown = false;
+          slider.classList.remove('featured-collection-cursor-grabbing');
+        });
+
+        slider.addEventListener('mousemove', (e) => {
+          if (!isDown) return;
+          e.preventDefault();
+          const x = e.pageX - slider.offsetLeft;
+          const walk = (x - startX) * 2; // Scroll speed multiplier
+          slider.scrollLeft = scrollLeft - walk;
+        });
+      });
+    }
+
+    // Initialize on DOM ready
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', function() {
+        {% if container_selector and slider_selector %}
+          initializeHorizontalScrollbar('{{ container_selector }}', '{{ slider_selector }}');
+        {% else %}
+          // Default selectors for featured collection
+          initializeHorizontalScrollbar('.collection-products-container', '.featured-collection-product-slider');
+        {% endif %}
+      });
+    } else {
+      {% if container_selector and slider_selector %}
+        initializeHorizontalScrollbar('{{ container_selector }}', '{{ slider_selector }}');
+      {% else %}
+        // Default selectors for featured collection
+        initializeHorizontalScrollbar('.collection-products-container', '.featured-collection-product-slider');
+      {% endif %}
+    }
+
+    // Make the initialization function globally available for dynamic content
+    window.initializeHorizontalScrollbar = initializeHorizontalScrollbar;
+  })();
+</script>
