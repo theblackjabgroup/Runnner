@@ -11,13 +11,21 @@ document.addEventListener('DOMContentLoaded', function () {
     if (window.initializeHorizontalScrollbar && container) {
       // Re-run initialization for this specific container
       // The snippet's function will check if already initialized
-      const parentClass = container.classList.contains('collection-products-container')
-        ? '.collection-products-container'
-        : container.className.split(' ')[0];
-      window.initializeHorizontalScrollbar(
-        `[data-collection-id="${container.dataset.collectionId}"]`,
-        '.featured-collection-product-slider'
-      );
+
+      // Build a valid selector for the specific container
+      let containerSelector;
+      if (container.dataset.collectionId) {
+        // Use data attribute if available for specific targeting
+        containerSelector = `[data-collection-id="${container.dataset.collectionId}"]`;
+      } else {
+        // Fall back to using the container's primary class
+        const parentClass = container.classList.contains('collection-products-container')
+          ? '.collection-products-container'
+          : `.${container.className.split(' ')[0]}`;
+        containerSelector = parentClass;
+      }
+
+      window.initializeHorizontalScrollbar(containerSelector, '.featured-collection-product-slider');
     }
   }
 
