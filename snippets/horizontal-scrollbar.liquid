@@ -11,6 +11,10 @@
   - Custom scrollbar styling with thin horizontal scrollbar
   - Drag-to-scroll functionality (mouse)
   - Touch-friendly scrolling on mobile
+  - Full keyboard navigation (arrow keys, Home, End)
+  - Screen reader announcements
+  - Focus management for scrollable items
+  - ARIA attributes for accessibility
 {% endcomment %}
 
 <style>
@@ -80,7 +84,7 @@
 
 <script>
   (function() {
-    // Initialize horizontal scrollbar drag functionality
+    // Initialize horizontal scrollbar with full accessibility support
     function initializeHorizontalScrollbar(containerSelector, sliderSelector) {
       const containers = document.querySelectorAll(containerSelector);
 
@@ -94,13 +98,23 @@
         const slider = container.querySelector(sliderSelector);
         if (!slider) return;
 
+        // Generate unique ID for this slider instance
+        const sliderId = slider.id || 'slider-' + Math.random().toString(36).substr(2, 9);
+        if (!slider.id) {
+          slider.id = sliderId;
+        }
+
+        // === Mouse Drag Functionality ===
         let isDown = false;
         let startX;
         let scrollLeft;
 
         slider.addEventListener('mousedown', (e) => {
           // Allow interaction with specific elements inside the slider
-          if (e.target.closest('.image-nav-arrow') || e.target.closest('.size-option-btn')) {
+          if (e.target.closest('.image-nav-arrow') || 
+              e.target.closest('.size-option-btn') ||
+              e.target.closest('a') ||
+              e.target.closest('button')) {
             return;
           }
 
@@ -127,6 +141,112 @@
           const walk = (x - startX) * 2; // Scroll speed multiplier
           slider.scrollLeft = scrollLeft - walk;
         });
+
+        // === Keyboard Navigation ===
+        // Ensure slider is focusable if not already
+        if (!slider.hasAttribute('tabindex')) {
+          slider.setAttribute('tabindex', '0');
+        }
+
+        slider.addEventListener('keydown', function(e) {
+          const scrollAmount = slider.clientWidth * 0.8; // Scroll by 80% of visible width
+
+          switch(e.key) {
+            case 'ArrowLeft':
+              e.preventDefault();
+              slider.scrollBy({ left: -scrollAmount, behavior: 'smooth' });
+              break;
+            case 'ArrowRight':
+              e.preventDefault();
+              slider.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+              break;
+            case 'Home':
+              e.preventDefault();
+              slider.scrollTo({ left: 0, behavior: 'smooth' });
+              break;
+            case 'End':
+              e.preventDefault();
+              slider.scrollTo({ left: slider.scrollWidth, behavior: 'smooth' });
+              break;
+          }
+        });
+
+        // === Screen Reader Announcements ===
+        let announceTimeout;
+        const liveRegionId = 'slider-live-region-' + sliderId;
+        
+        // Create live region for announcements if it doesn't exist
+        let liveRegion = document.getElementById(liveRegionId);
+        if (!liveRegion) {
+          liveRegion = document.createElement('div');
+          liveRegion.id = liveRegionId;
+          liveRegion.setAttribute('aria-live', 'polite');
+          liveRegion.setAttribute('aria-atomic', 'true');
+          liveRegion.className = 'sr-only';
+          liveRegion.style.cssText = 'position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0;';
+          document.body.appendChild(liveRegion);
+        }
+
+        slider.addEventListener('scroll', function() {
+          clearTimeout(announceTimeout);
+          announceTimeout = setTimeout(function() {
+            const currentPercent = Math.round((slider.scrollLeft / (slider.scrollWidth - slider.clientWidth)) * 100);
+            
+            // Only announce if there's actual scrollable content
+            if (slider.scrollWidth > slider.clientWidth) {
+              liveRegion.textContent = `Gallery scrolled to ${currentPercent}%`;
+            }
+          }, 150);
+        });
+
+        // === Focus Management for Scrollable Items ===
+        // Find all focusable items within the slider
+        const focusableItems = slider.querySelectorAll(
+          '.product-showcase-card, .featured-collection-product-card, [role="group"], article'
+        );
+
+        focusableItems.forEach(function(item) {
+          // Ensure items are focusable
+          if (!item.hasAttribute('tabindex')) {
+            item.setAttribute('tabindex', '0');
+          }
+
+          item.addEventListener('focus', function() {
+            // Ensure the focused item is visible
+            const itemRect = item.getBoundingClientRect();
+            const sliderRect = slider.getBoundingClientRect();
+
+            if (itemRect.left < sliderRect.left || itemRect.right > sliderRect.right) {
+              item.scrollIntoView({
+                behavior: 'smooth',
+                block: 'nearest',
+                inline: 'center'
+              });
+            }
+          });
+        });
+
+        // === ARIA Attributes ===
+        // Ensure proper ARIA attributes are set
+        if (!slider.hasAttribute('role')) {
+          slider.setAttribute('role', 'region');
+        }
+        if (!slider.hasAttribute('aria-label') && !slider.hasAttribute('aria-labelledby')) {
+          slider.setAttribute('aria-label', 'Scrollable gallery');
+        }
+
+        // === Touch Support ===
+        let isTouch = false;
+        let touchStartX = 0;
+
+        slider.addEventListener('touchstart', function(e) {
+          isTouch = true;
+          touchStartX = e.touches[0].clientX;
+        }, { passive: true });
+
+        slider.addEventListener('touchend', function() {
+          isTouch = false;
+        }, { passive: true });
       });
     }
 
