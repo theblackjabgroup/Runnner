@@ -74,7 +74,7 @@
     padding: 0px;
     color: var(--button_label);
     background-color: var(--button);
-    border-radius: {{ settings.buttons_radius | default: 0 }}px;
+    border-radius: {{ settings.primary_button_radius | default: settings.buttons_radius | default: 5 }}px;
     overflow: hidden;
     transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
     text-decoration: none;
@@ -117,7 +117,7 @@
     align-items: center;
     justify-content: space-between;
     line-height: 1;
-    text-transform: uppercase;
+    text-transform: {{ settings.primary_button_text_transform | default: 'uppercase' }};
     letter-spacing: 0;
     transition: transform 0.6s ease-in-out;
     width: 100%;
@@ -138,7 +138,7 @@
     align-items: center;
     justify-content: space-between;
     line-height: 1;
-    text-transform: uppercase;
+    text-transform: {{ settings.primary_button_text_transform | default: 'uppercase' }};
     letter-spacing: 0;
     transform: translateX(100%);
     transition: transform 0.6s ease-in-out;
@@ -158,16 +158,32 @@
   }
 
   .primary-slide-button-arrow {
-    display: inline-block;
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
   }
 
-  .primary-slide-button-arrow svg {
+  {% if settings.primary_button_show_icon == false %}
+  .primary-slide-button-arrow {
+    display: none !important;
+  }
+  {% endif %}
+
+  .primary-slide-button-arrow svg,
+  .primary-slide-button-arrow img {
     width: 16px;
     height: 16px;
+    min-width: 16px;
+    min-height: 16px;
+    max-width: 16px;
+    max-height: 16px;
     transition: transform 0.2s ease;
     display: block;
     fill: currentColor;
     margin-left: 10px;
+    object-fit: contain;
+    flex-shrink: 0;
   }
 
   @media screen and (max-width: 750px) {
@@ -184,9 +200,14 @@
       {% if mobile_button_width != blank %}width: {{ mobile_button_width }} !important;{% endif %}
     }
 
-    .primary-slide-button-arrow svg {
+    .primary-slide-button-arrow svg,
+    .primary-slide-button-arrow img {
       width: 14px;
       height: 14px;
+      min-width: 14px;
+      min-height: 14px;
+      max-width: 14px;
+      max-height: 14px;
     }
   }
 </style>
@@ -206,7 +227,17 @@
       >
         {{ button_text | escape }}
         <span class="primary-slide-button-arrow" aria-hidden="true">
-          {% render 'icon-playback', width: '16', height: '16', viewBox: '4.5 1.5 8.5 13', stoke: 'currentColor' %}
+          {% if settings.primary_button_custom_icon != blank %}
+            <img
+              src="{{ settings.primary_button_custom_icon | image_url: width: 16 }}"
+              alt="icon"
+              width="16"
+              height="16"
+              style="display: block;"
+            >
+          {% else %}
+            {% render 'icon-playback', width: '16', height: '16', viewBox: '4.5 1.5 8.5 13', stoke: 'currentColor' %}
+          {% endif %}
         </span>
       </div>
       <div
@@ -215,13 +246,31 @@
       >
         {{ button_text | escape }}
         <span class="primary-slide-button-arrow" aria-hidden="true">
-          {% render 'icon-playback',
-            width: '16',
-            height: '16',
-            viewBox: '4.5 1.5 8.5 13',
-            stoke: 'currentColor',
-            fill: 'currentColor'
-          %}
+          {% if settings.primary_button_custom_icon_hover != blank %}
+            <img
+              src="{{ settings.primary_button_custom_icon_hover | image_url: width: 16 }}"
+              alt="icon"
+              width="16"
+              height="16"
+              style="display: block;"
+            >
+          {% elsif settings.primary_button_custom_icon != blank %}
+            <img
+              src="{{ settings.primary_button_custom_icon | image_url: width: 16 }}"
+              alt="icon"
+              width="16"
+              height="16"
+              style="display: block;"
+            >
+          {% else %}
+            {% render 'icon-playback',
+              width: '16',
+              height: '16',
+              viewBox: '4.5 1.5 8.5 13',
+              stoke: 'currentColor',
+              fill: 'currentColor'
+            %}
+          {% endif %}
         </span>
       </div>
     </div>
@@ -240,13 +289,23 @@
       >
         {{ button_text | escape }}
         <span class="primary-slide-button-arrow" aria-hidden="true">
-          {% render 'icon-playback',
-            width: '16',
-            height: '16px',
-            viewBox: '4.5 1.5 8.5 13',
-            stoke: 'currentColor',
-            fill: 'currentColor'
-          %}
+          {% if settings.primary_button_custom_icon != blank %}
+            <img
+              src="{{ settings.primary_button_custom_icon | image_url: width: 16 }}"
+              alt="icon"
+              width="16"
+              height="16"
+              style="display: block;"
+            >
+          {% else %}
+            {% render 'icon-playback',
+              width: '16',
+              height: '16',
+              viewBox: '4.5 1.5 8.5 13',
+              stoke: 'currentColor',
+              fill: 'currentColor'
+            %}
+          {% endif %}
         </span>
       </div>
       <div
@@ -255,13 +314,31 @@
       >
         {{ button_text | escape }}
         <span class="primary-slide-button-arrow" aria-hidden="true">
-          {% render 'icon-playback',
-            width: '16',
-            height: '16',
-            viewBox: '4.5 1.5 8.5 13',
-            stoke: 'currentColor',
-            fill: 'currentColor'
-          %}
+          {% if settings.primary_button_custom_icon_hover != blank %}
+            <img
+              src="{{ settings.primary_button_custom_icon_hover | image_url: width: 16 }}"
+              alt="icon"
+              width="16"
+              height="16"
+              style="display: block;"
+            >
+          {% elsif settings.primary_button_custom_icon != blank %}
+            <img
+              src="{{ settings.primary_button_custom_icon | image_url: width: 16 }}"
+              alt="icon"
+              width="16"
+              height="16"
+              style="display: block;"
+            >
+          {% else %}
+            {% render 'icon-playback',
+              width: '16',
+              height: '16',
+              viewBox: '4.5 1.5 8.5 13',
+              stoke: 'currentColor',
+              fill: 'currentColor'
+            %}
+          {% endif %}
         </span>
       </div>
     </div>
