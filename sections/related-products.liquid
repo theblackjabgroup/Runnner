@@ -38,7 +38,7 @@
       <div class="slider-container relative">
         <div
           id="related-product-slider"
-          class="product-slider related-products-grid scroll-fade-stagger flex gap-2 md:gap-4 cursor-grab overflow-x-auto no-scrollbar"
+          class="product-slider related-products-grid scroll-fade-stagger flex gap-2 md:gap-4 custom-scrollbar featured-collection-cursor-grab overflow-x-auto"
           role="list"
           aria-label="Related Products"
         >
@@ -85,12 +85,11 @@
           {% endif %}
         </div>
 
-        <!-- Separate centered scrollbar -->
-        <div class="custom-scrollbar-container" aria-hidden="true">
-          <div id="custom-scrollbar" class="custom-scrollbar-track">
-            <div id="custom-scrollbar-thumb" class="custom-scrollbar-thumb"></div>
-          </div>
-        </div>
+        <!-- Horizontal scrollbar using snippet (same as featured-collection and product-detail) -->
+        {% render 'horizontal-scrollbar',
+          container_selector: '.slider-container',
+          slider_selector: '.product-slider'
+        %}
       </div>
     </main>
   </div>
@@ -236,53 +235,11 @@
     display: none;
   }
 
-  .cursor-grab {
-    cursor: grab;
-    padding-bottom: var(--space-xl);
-  }
-
-  .cursor-grabbing {
-    cursor: grabbing;
-  }
-
-  .no-scrollbar {
-    -ms-overflow-style: none;
-    scrollbar-width: none;
-  }
-
-  .no-scrollbar::-webkit-scrollbar {
-    display: none;
-  }
-
-  .custom-scrollbar-container {
-    display: flex;
-    justify-content: center;
-    width: 100%;
-    margin-top: 16px;
-  }
-
-  .custom-scrollbar-track {
-    width: 50%;
-    height: 8px;
-    background-color: transparent;
-    background-image: linear-gradient(to right, var(--text), var(--text));
-    background-size: 100% 2px;
-    background-repeat: no-repeat;
-    background-position: center;
-    position: relative;
-    cursor: pointer;
-  }
-
-  .custom-scrollbar-thumb {
-    height: 4px;
-    background-color: var(--text);
-    position: absolute;
-    top: 50%;
-    transform: translateY(-50%);
-    transition: left 0.1s ease;
-    min-width: 20px;
-    cursor: pointer;
-    border-radius: 1px;
+  /* Scrollbar styles and drag functionality moved to horizontal-scrollbar snippet */
+  
+  /* Add spacing between product grid and scrollbar */
+  .featured-collection-cursor-grab {
+    padding-bottom: var(--space-2xl);
   }
 
   #rp-waitlist-modal-overlay {
@@ -314,13 +271,6 @@
       justify-content: flex-start;
     }
 
-    .custom-scrollbar-container {
-      display: flex;
-      justify-content: center;
-      width: 100%;
-      margin-top: 16px;
-    }
-
     .slider-container {
       overflow-x: auto;
     }
@@ -331,11 +281,6 @@
       gap: 8px;
       overflow-x: auto;
       -webkit-overflow-scrolling: touch;
-      scrollbar-width: none;
-    }
-
-    .product-slider::-webkit-scrollbar {
-      display: none;
     }
 
     .slider-container {
@@ -346,23 +291,9 @@
       padding-top: var(--space-2xl);
     }
 
-    .cursor-grab {
-      padding-bottom: 0px;
-    }
-
-    .custom-scrollbar-container {
-      display: flex;
-      margin-top: 12px;
-    }
-
-    .custom-scrollbar-track {
-      width: 100%;
-      height: 6px;
-    }
-
-    .custom-scrollbar-thumb {
-      height: 6px;
-      width: 35px !important;
+    /* Mobile spacing between product grid and scrollbar */
+    .featured-collection-cursor-grab {
+      padding-bottom: var(--space-lg);
     }
   }
 
@@ -511,87 +442,7 @@
   }
 </style>
 
-<script>
-  document.addEventListener('DOMContentLoaded', function () {
-    const slider = document.getElementById('related-product-slider');
-    const scrollbarThumb = document.getElementById('custom-scrollbar-thumb');
-    const scrollbarTrack = document.querySelector('.custom-scrollbar-track');
-
-    if (!slider || !scrollbarThumb || !scrollbarTrack) {
-      return;
-    }
-
-    function updateScrollbar() {
-      if (slider.scrollWidth <= slider.clientWidth) {
-        scrollbarThumb.style.display = 'none';
-        return;
-      }
-
-      scrollbarThumb.style.display = 'block';
-
-      const scrollPercent = slider.scrollLeft / (slider.scrollWidth - slider.clientWidth);
-      const trackWidth = scrollbarTrack.clientWidth;
-      const thumbWidth = Math.max(20, (slider.clientWidth / slider.scrollWidth) * trackWidth);
-      const thumbLeft = scrollPercent * (trackWidth - thumbWidth);
-
-      scrollbarThumb.style.width = thumbWidth + 'px';
-      scrollbarThumb.style.left = thumbLeft + 'px';
-    }
-
-    slider.addEventListener('scroll', updateScrollbar);
-
-    scrollbarTrack.addEventListener('click', function (e) {
-      const trackRect = scrollbarTrack.getBoundingClientRect();
-      const clickX = e.clientX - trackRect.left;
-      const clickPercent = clickX / trackRect.width;
-      const scrollTo = clickPercent * (slider.scrollWidth - slider.clientWidth);
-
-      slider.scrollTo({
-        left: scrollTo,
-        behavior: 'smooth',
-      });
-    });
-
-    let isDragging = false;
-    let startX = 0;
-    let startScrollLeft = 0;
-
-    scrollbarThumb.addEventListener('mousedown', function (e) {
-      isDragging = true;
-      startX = e.clientX;
-      startScrollLeft = slider.scrollLeft;
-      e.preventDefault();
-    });
-
-    document.addEventListener('mousemove', function (e) {
-      if (!isDragging) return;
-
-      const deltaX = e.clientX - startX;
-      const trackWidth = scrollbarTrack.clientWidth;
-      const thumbWidth = scrollbarThumb.clientWidth;
-      const maxThumbLeft = trackWidth - thumbWidth;
-      const scrollRatio = (slider.scrollWidth - slider.clientWidth) / maxThumbLeft;
-      const newScrollLeft = startScrollLeft + deltaX * scrollRatio;
-
-      slider.scrollLeft = Math.max(0, Math.min(newScrollLeft, slider.scrollWidth - slider.clientWidth));
-    });
-
-    document.addEventListener('mouseup', function () {
-      isDragging = false;
-    });
-
-    setTimeout(updateScrollbar, 100);
-
-    window.addEventListener('resize', function () {
-      setTimeout(updateScrollbar, 100);
-    });
-
-    const images = slider.querySelectorAll('img');
-    images.forEach((img) => {
-      img.addEventListener('load', updateScrollbar);
-    });
-  });
-</script>
+{% comment %} Scrollbar functionality provided by horizontal-scrollbar snippet {% endcomment %}
 
 <script>
   // Custom Related Products Fade-Up Animation
