@@ -396,7 +396,6 @@ function initializeCartDrawer() {
     }
   });
 
-  console.log('✅ Cart drawer event listeners initialized (CSP-compliant)');
 }
 
 // Initialize when DOM is loaded

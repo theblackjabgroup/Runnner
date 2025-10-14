@@ -141,5 +141,4 @@ document.addEventListener('DOMContentLoaded', function () {
   });
 
   // Log successful initialization
-  console.log('✅ Email signup and password modal event listeners initialized (CSP-compliant)');
 });
