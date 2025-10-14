@@ -357,22 +357,23 @@
                 >
                   <span
                     class="inline-block lg:!block text-[14px] lg:text-[16px] uppercase m-4 search-top-searches-label"
-                    >Top Searches</span
+                    >Recent Searches</span
                   >
-                  <div class="flex flex-wrap gap-6">
+                  <div class="flex flex-wrap gap-6" id="recent-searches-container">
+                    <!-- Default searches (fallback) -->
                     <a
                       href="{{ routes.search_url }}?q=new"
-                      class="px-1 hover:bg-black hover:text-white transition-colors duration-200 rounded-md text-[16px] lg:text-[20px] font-medium search-chip no-inline-hover"
+                      class="px-1 hover:bg-black hover:text-white transition-colors duration-200 rounded-md text-[16px] lg:text-[20px] font-medium search-chip no-inline-hover default-search-chip"
                       >New Arrivals</a
                     >
                     <a
                       href="{{ routes.search_url }}?q=sale"
-                      class="px-1 hover:bg-black hover:text-white transition-colors duration-200 rounded-md text-[16px] lg:text-[20px] font-medium search-chip no-inline-hover"
+                      class="px-1 hover:bg-black hover:text-white transition-colors duration-200 rounded-md text-[16px] lg:text-[20px] font-medium search-chip no-inline-hover default-search-chip"
                       >Sale</a
                     >
                     <a
                       href="{{ routes.search_url }}?q=bestsellers"
-                      class="px-1 hover:bg-black hover:text-white transition-colors duration-200 rounded-md text-[16px] lg:text-[20px] font-medium search-chip no-inline-hover"
+                      class="px-1 hover:bg-black hover:text-white transition-colors duration-200 rounded-md text-[16px] lg:text-[20px] font-medium search-chip no-inline-hover default-search-chip"
                       >Bestsellers</a
                     >
                   </div>
@@ -1478,6 +1479,122 @@
   button.addEventListener('click', () => {
     arrow.classList.toggle('rotate-180');
   });
+
+  // Recent Searches Functionality
+  class RecentSearches {
+    constructor() {
+      this.storageKey = 'shopify_recent_searches';
+      this.maxSearches = 3;
+      this.init();
+    }
+
+    init() {
+      this.trackSearchSubmissions();
+      this.displayRecentSearches();
+    }
+
+    // Track when user submits a search
+    trackSearchSubmissions() {
+      const searchForms = document.querySelectorAll('form[action*="search"]');
+      searchForms.forEach(form => {
+        form.addEventListener('submit', (e) => {
+          const searchInput = form.querySelector('input[name="q"]');
+          if (searchInput && searchInput.value.trim()) {
+            this.addSearch(searchInput.value.trim());
+          }
+        });
+      });
+
+      // Also track search from URL parameters
+      const urlParams = new URLSearchParams(window.location.search);
+      const searchQuery = urlParams.get('q');
+      if (searchQuery && window.location.pathname.includes('/search')) {
+        this.addSearch(searchQuery.trim());
+      }
+    }
+
+    // Add a search to recent searches
+    addSearch(searchTerm) {
+      if (!searchTerm || searchTerm.length < 2) return;
+
+      let recentSearches = this.getRecentSearches();
+      
+      // Remove if already exists (to move to top)
+      recentSearches = recentSearches.filter(term => term.toLowerCase() !== searchTerm.toLowerCase());
+      
+      // Add to beginning
+      recentSearches.unshift(searchTerm);
+      
+      // Keep only max number of searches
+      recentSearches = recentSearches.slice(0, this.maxSearches);
+      
+      // Save to localStorage
+      localStorage.setItem(this.storageKey, JSON.stringify(recentSearches));
+      
+      // Update display
+      this.displayRecentSearches();
+    }
+
+    // Get recent searches from localStorage
+    getRecentSearches() {
+      try {
+        const stored = localStorage.getItem(this.storageKey);
+        return stored ? JSON.parse(stored) : [];
+      } catch (e) {
+        return [];
+      }
+    }
+
+    // Display recent searches in the header
+    displayRecentSearches() {
+      const container = document.getElementById('recent-searches-container');
+      if (!container) return;
+
+      const recentSearches = this.getRecentSearches();
+      
+      // Always remove existing recent search chips first to prevent duplicates
+      const existingRecentChips = container.querySelectorAll('.recent-search-chip');
+      existingRecentChips.forEach(chip => chip.remove());
+      
+      if (recentSearches.length > 0) {
+        // Hide default searches
+        const defaultChips = container.querySelectorAll('.default-search-chip');
+        defaultChips.forEach(chip => chip.style.display = 'none');
+        
+        // Create recent search chips
+        recentSearches.forEach(searchTerm => {
+          const chip = document.createElement('a');
+          chip.href = `{{ routes.search_url }}?q=${encodeURIComponent(searchTerm)}`;
+          chip.className = 'px-1 hover:bg-black hover:text-white transition-colors duration-200 rounded-md text-[16px] lg:text-[20px] font-medium search-chip no-inline-hover recent-search-chip';
+          chip.textContent = searchTerm;
+          chip.title = `Search for "${searchTerm}"`;
+          container.appendChild(chip);
+        });
+      } else {
+        // Show default searches if no recent searches
+        const defaultChips = container.querySelectorAll('.default-search-chip');
+        defaultChips.forEach(chip => chip.style.display = 'inline-block');
+      }
+    }
+
+    // Clear recent searches (optional utility method)
+    clearRecentSearches() {
+      localStorage.removeItem(this.storageKey);
+      this.displayRecentSearches();
+    }
+
+    // Debug method to check current searches
+    debugSearches() {
+      console.log('Current recent searches:', this.getRecentSearches());
+    }
+  }
+
+  // Initialize recent searches when DOM is ready (only once)
+  if (!window.recentSearchesInstance) {
+    document.addEventListener('DOMContentLoaded', () => {
+      window.recentSearchesInstance = new RecentSearches();
+    });
+  }
 
   /* ========================================================================
      CONSOLIDATED RESIZE EVENT MANAGER
