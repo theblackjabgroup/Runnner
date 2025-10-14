@@ -482,7 +482,7 @@
           {%- endfor -%}
 
           {%- if has_active_filters or results.sort_by -%}
-            <button class="clear-all-filters-btn mobile-clear-all" onclick="clearAllFiltersMobile()">CLEAR ALL</button>
+            <button class="clear-all-filters-btn mobile-clear-all" data-action="clear-all-mobile">CLEAR ALL</button>
           {%- endif -%}
         </div>
       </div>
@@ -693,7 +693,7 @@
     {%- endfor -%}
 
     {%- if has_active_filters or results.sort_by -%}
-      <button class="clear-all-filters-btn" onclick="clearAllFilters()">CLEAR ALL</button>
+      <button class="clear-all-filters-btn" data-action="clear-all">CLEAR ALL</button>
     {%- endif -%}
   </div>
 </div>
@@ -1838,5 +1838,24 @@
         mobileTagsContainer.style.display = 'none';
       }
     }
+
+    // Add event listeners for clear all buttons (CSP compliant)
+    document.querySelectorAll('[data-action="clear-all"]').forEach((button) => {
+      button.addEventListener('click', function (event) {
+        event.preventDefault();
+        if (typeof window.clearAllFilters === 'function') {
+          window.clearAllFilters();
+        }
+      });
+    });
+
+    document.querySelectorAll('[data-action="clear-all-mobile"]').forEach((button) => {
+      button.addEventListener('click', function (event) {
+        event.preventDefault();
+        if (typeof window.clearAllFiltersMobile === 'function') {
+          window.clearAllFiltersMobile();
+        }
+      });
+    });
   });
 </script>
