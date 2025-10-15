@@ -1114,17 +1114,41 @@ if (prefersReducedMotion) {
             container.appendChild(spaceSpan);
           };
 
-          originalNodes.forEach((node) => {
+          originalNodes.forEach((node, nodeIndex) => {
             if (node.nodeType === Node.TEXT_NODE) {
-              const words = (node.textContent || '').split(/\s+/).filter(Boolean);
+              const nodeText = node.textContent || '';
+              
+              // Handle leading whitespace
+              if (nodeText.match(/^\s+/) && nodeIndex > 0) {
+                appendSpace();
+              }
+              
+              const words = nodeText.split(/\s+/).filter(Boolean);
               words.forEach((word, i) => {
                 appendWord(word);
+                // Add space after each word except the last one in this node
                 if (i < words.length - 1) {
                   appendSpace();
                 }
               });
+              
+              // Handle trailing whitespace - add space if this node ends with whitespace
+              // and there's a next node that contains text
+              if (nodeText.match(/\s+$/) && nodeIndex < originalNodes.length - 1) {
+                const nextNode = originalNodes[nodeIndex + 1];
+                if (nextNode && (
+                  (nextNode.nodeType === Node.TEXT_NODE && nextNode.textContent.trim()) ||
+                  (nextNode.nodeType === Node.ELEMENT_NODE && nextNode.tagName !== 'BR')
+                )) {
+                  appendSpace();
+                }
+              }
             } else if (node.nodeType === Node.ELEMENT_NODE && node.tagName === 'BR') {
               container.appendChild(document.createElement('br'));
+            } else if (node.nodeType === Node.ELEMENT_NODE) {
+              // Handle other HTML elements by preserving them
+              const clonedElement = node.cloneNode(true);
+              container.appendChild(clonedElement);
             }
           });
         });
@@ -1133,47 +1157,80 @@ if (prefersReducedMotion) {
         const textContentElements = entry.target.querySelectorAll('.image-with-text-text-content p.image-with-text-letter-animation, .image-with-text-text-content p.image-with-text-image-with-text-letter-animation');
         
         textContentElements.forEach(element => {
-          const text = element.textContent.trim();
+          const accessibleText = element.textContent.trim();
+          element.setAttribute('aria-label', accessibleText);
+          
+          // Capture original nodes to preserve formatting
+          const originalNodes = Array.from(element.childNodes);
+          
           element.textContent = '';
           element.classList.add('image-with-text-letter-animation-container', 'animation-ready');
-          element.setAttribute('aria-label', text);
-          element.style.opacity = '1'; // Make container visible
-          
-          // Split the text into words first
-          const words = text.split(' ');
+          element.style.opacity = '1';
           
           let letterIndex = 0;
-          words.forEach((word, wordIndex) => {
-            // Create a word container span
+          
+          const appendWord = (word) => {
             const wordSpan = document.createElement('span');
             wordSpan.classList.add('animated-word');
             wordSpan.style.display = 'inline-block';
-            wordSpan.style.whiteSpace = 'nowrap'; // Prevent word breaking
-            
+            wordSpan.style.whiteSpace = 'nowrap';
             for (let i = 0; i < word.length; i++) {
               const letterSpan = document.createElement('span');
               letterSpan.classList.add('animated-letter');
               letterSpan.textContent = word[i];
               letterSpan.setAttribute('aria-hidden', 'true');
-              
               letterSpan.style.animation = `letterAppear 1s forwards`;
               letterSpan.style.animationDelay = `${letterIndex * 0.07}s`;
               letterIndex++;
-              
               wordSpan.appendChild(letterSpan);
             }
-            
             element.appendChild(wordSpan);
-            
-            // Add space between words (except for the last word)
-            if (wordIndex < words.length - 1) {
-              const spaceSpan = document.createElement('span');
-              spaceSpan.classList.add('animated-space');
-              spaceSpan.innerHTML = '&nbsp;';
-              spaceSpan.style.animation = `letterAppear 1s forwards`;
-              spaceSpan.style.animationDelay = `${letterIndex * 0.07}s`;
-              letterIndex++;
-              element.appendChild(spaceSpan);
+          };
+          
+          const appendSpace = () => {
+            const spaceSpan = document.createElement('span');
+            spaceSpan.classList.add('animated-space');
+            spaceSpan.innerHTML = '&nbsp;';
+            spaceSpan.style.animation = `letterAppear 1s forwards`;
+            spaceSpan.style.animationDelay = `${letterIndex * 0.07}s`;
+            letterIndex++;
+            element.appendChild(spaceSpan);
+          };
+          
+          originalNodes.forEach((node, nodeIndex) => {
+            if (node.nodeType === Node.TEXT_NODE) {
+              const nodeText = node.textContent || '';
+              
+              // Handle leading whitespace
+              if (nodeText.match(/^\s+/) && nodeIndex > 0) {
+                appendSpace();
+              }
+              
+              const words = nodeText.split(/\s+/).filter(Boolean);
+              words.forEach((word, i) => {
+                appendWord(word);
+                // Add space after each word except the last one in this node
+                if (i < words.length - 1) {
+                  appendSpace();
+                }
+              });
+              
+              // Handle trailing whitespace
+              if (nodeText.match(/\s+$/) && nodeIndex < originalNodes.length - 1) {
+                const nextNode = originalNodes[nodeIndex + 1];
+                if (nextNode && (
+                  (nextNode.nodeType === Node.TEXT_NODE && nextNode.textContent.trim()) ||
+                  (nextNode.nodeType === Node.ELEMENT_NODE && nextNode.tagName !== 'BR')
+                )) {
+                  appendSpace();
+                }
+              }
+            } else if (node.nodeType === Node.ELEMENT_NODE && node.tagName === 'BR') {
+              element.appendChild(document.createElement('br'));
+            } else if (node.nodeType === Node.ELEMENT_NODE) {
+              // Preserve other HTML elements
+              const clonedElement = node.cloneNode(true);
+              element.appendChild(clonedElement);
             }
           });
         });
