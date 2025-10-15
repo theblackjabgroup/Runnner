@@ -426,6 +426,15 @@
       z-index: 3;
     }
 
+    @media (max-width: 749px) {
+      .image-with-text-text-content-wrapper-{{ section.id }} {
+        left: {{ settings.side_space }}px;
+        width: calc(100% - {{ settings.side_space | times: 2 }}px);
+        height: calc({{ section.settings.img_height_mobile }}px - calc({{ settings.sections_spacing }}px * 2));
+        margin-top: {{ settings.sections_spacing }}px;
+      }
+    }
+
     .image-with-text-text-content-container-{{ section.id }} {
       width: 100%;
       max-width: {{ section.settings.content_width }}px;
@@ -850,7 +859,7 @@
                   {% assign heading_classes = heading_classes | append: ' image-with-text-letter-animation' %}
                 {% endif %}
 
-                {% assign inline_styles = 'font-weight: var(--t-h-2-weight); margin-bottom: 20px; font-style: var(--font-heading-style); font-family: var(--font-heading-family); font-size: var(--t-h-2-size); line-height: var(--t-h-2-line-height); color: ' | append: block.settings.text_color | append: ';' %}
+                {% assign inline_styles = 'font-weight: var(--t-h-2-weight); margin-bottom: 20px; font-style: var(--font-heading-style); font-family: var(--font-heading-family); color: ' | append: block.settings.text_color | append: ';' %}
 
                 <h2
                   id="Heading-{{ section.id }}-{{ forloop.index }}"
@@ -1023,11 +1032,11 @@ if (sectionElement) {
   } else {
     // For elements that should be animated, ensure they start hidden
     {% if section.settings.enable_text_animation %}
-    sectionElement.querySelectorAll('.image-with-text-image-with-text-letter-animation, .date-animation, .text-animation').forEach(element => {
+    sectionElement.querySelectorAll('.image-with-text-letter-animation, .image-with-text-image-with-text-letter-animation, .date-animation, .text-animation').forEach(element => {
       element.style.opacity = '0';
     });
     {% else %}
-    sectionElement.querySelectorAll('.image-with-text-image-with-text-letter-animation, .date-animation, .text-animation').forEach(element => {
+    sectionElement.querySelectorAll('.image-with-text-letter-animation, .image-with-text-image-with-text-letter-animation, .date-animation, .text-animation').forEach(element => {
       element.style.opacity = '1';
     });
     {% endif %}
@@ -1046,7 +1055,7 @@ if (sectionElement) {
 
 if (prefersReducedMotion) {
   // For reduced motion, make everything visible immediately
-  document.querySelectorAll('.image-with-text-image-with-text-letter-animation, .date-animation, .text-animation, .button-animation').forEach(element => {
+  document.querySelectorAll('.image-with-text-letter-animation, .image-with-text-image-with-text-letter-animation, .date-animation, .text-animation, .button-animation').forEach(element => {
     element.style.opacity = '1';
   });
 } else {
@@ -1055,56 +1064,73 @@ if (prefersReducedMotion) {
       if (entry.isIntersecting) {
         {% if section.settings.enable_text_animation %}
         // Handle heading animations
-        const headingElements = entry.target.querySelectorAll('.image-with-text-image-with-text-letter-animation');
+        const headingElements = entry.target.querySelectorAll('.image-with-text-letter-animation, .image-with-text-image-with-text-letter-animation');
         
         headingElements.forEach(element => {
-          const text = element.textContent.trim();
-          element.textContent = '';
-          element.classList.add('image-with-text-letter-animation-container', 'animation-ready');
-          element.setAttribute('aria-label', text);
-          element.style.opacity = '1'; // Make container visible
-          
-          // Split the text into words first
-          const words = text.split(' ');
-          
+          // Preserve heading background wrapper if present and animate inside it
+          const accessibleText = element.textContent.trim();
+          element.setAttribute('aria-label', accessibleText);
+
+          const backgroundSpan = element.querySelector('.heading-background-block-style');
+          const container = backgroundSpan || element;
+
+          // Capture original nodes to preserve <br> line breaks
+          const originalNodes = Array.from(container.childNodes);
+
+          // Clear only the target container, not the whole heading when background exists
+          container.textContent = '';
+          container.classList.add('image-with-text-letter-animation-container', 'animation-ready');
+          container.style.opacity = '1';
+          // Ensure the parent heading becomes visible as well
+          element.style.opacity = '1';
+
           let letterIndex = 0;
-          words.forEach((word, wordIndex) => {
-            // Create a word container span
+
+          const appendWord = (word) => {
             const wordSpan = document.createElement('span');
             wordSpan.classList.add('animated-word');
             wordSpan.style.display = 'inline-block';
-            wordSpan.style.whiteSpace = 'nowrap'; // Prevent word breaking
-            
+            wordSpan.style.whiteSpace = 'nowrap';
             for (let i = 0; i < word.length; i++) {
               const letterSpan = document.createElement('span');
               letterSpan.classList.add('animated-letter');
               letterSpan.textContent = word[i];
               letterSpan.setAttribute('aria-hidden', 'true');
-              
               letterSpan.style.animation = `letterAppear 1s forwards`;
               letterSpan.style.animationDelay = `${letterIndex * 0.07}s`;
               letterIndex++;
-              
               wordSpan.appendChild(letterSpan);
             }
-            
-            element.appendChild(wordSpan);
-            
-            // Add space between words (except for the last word)
-            if (wordIndex < words.length - 1) {
-              const spaceSpan = document.createElement('span');
-              spaceSpan.classList.add('animated-space');
-              spaceSpan.innerHTML = '&nbsp;';
-              spaceSpan.style.animation = `letterAppear 1s forwards`;
-              spaceSpan.style.animationDelay = `${letterIndex * 0.07}s`;
-              letterIndex++;
-              element.appendChild(spaceSpan);
+            container.appendChild(wordSpan);
+          };
+
+          const appendSpace = () => {
+            const spaceSpan = document.createElement('span');
+            spaceSpan.classList.add('animated-space');
+            spaceSpan.innerHTML = '&nbsp;';
+            spaceSpan.style.animation = `letterAppear 1s forwards`;
+            spaceSpan.style.animationDelay = `${letterIndex * 0.07}s`;
+            letterIndex++;
+            container.appendChild(spaceSpan);
+          };
+
+          originalNodes.forEach((node) => {
+            if (node.nodeType === Node.TEXT_NODE) {
+              const words = (node.textContent || '').split(/\s+/).filter(Boolean);
+              words.forEach((word, i) => {
+                appendWord(word);
+                if (i < words.length - 1) {
+                  appendSpace();
+                }
+              });
+            } else if (node.nodeType === Node.ELEMENT_NODE && node.tagName === 'BR') {
+              container.appendChild(document.createElement('br'));
             }
           });
         });
 
         // Handle text content animations - similar approach for paragraph text
-        const textContentElements = entry.target.querySelectorAll('.image-with-text-text-content p.image-with-text-image-with-text-letter-animation');
+        const textContentElements = entry.target.querySelectorAll('.image-with-text-text-content p.image-with-text-letter-animation, .image-with-text-text-content p.image-with-text-image-with-text-letter-animation');
         
         textContentElements.forEach(element => {
           const text = element.textContent.trim();
@@ -1171,7 +1197,7 @@ if (prefersReducedMotion) {
         });
         {% else %}
         // If text animation is disabled, make text visible immediately
-        const textElements = entry.target.querySelectorAll('.image-with-text-image-with-text-letter-animation, .date-animation, .text-animation');
+        const textElements = entry.target.querySelectorAll('.image-with-text-letter-animation, .image-with-text-image-with-text-letter-animation, .date-animation, .text-animation');
         textElements.forEach(element => {
           element.style.opacity = '1';
         });
