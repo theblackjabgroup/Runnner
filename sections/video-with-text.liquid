@@ -551,22 +551,22 @@
 
   /* Responsive video display control */
   .video-desktop-only {
-    display: block;
+    display: block !important;
   }
   
   .video-mobile-only {
-    display: none;
+    display: none !important;
   }
 
   @media (max-width: 750px) {
     .video-desktop-only {
-      display: none;
+      display: none !important;
     }
     
     .video-mobile-only {
-      display: block;
+      display: block !important;
     }
-
+    
     .video-with-text-iframe iframe[src*="vimeo"] {
       width: 200% !important;
       height: 200% !important;
@@ -601,17 +601,17 @@
     aria-label="Video with text section"
   >
     <div class="video-with-text-media-container-{{ section.id }}">
-        {%- comment -%} Determine if we have mobile-specific video {%- endcomment -%}
+        {%- comment -%} Check if mobile video is configured {%- endcomment -%}
         {% assign has_mobile_video = false %}
-        {% if section.settings.video_source_mobile != 'same_as_desktop' %}
-          {% if section.settings.video_source_mobile == 'external' and section.settings.video_url_mobile != blank %}
-            {% assign has_mobile_video = true %}
-          {% elsif section.settings.video_source_mobile == 'shopify' and section.settings.shopify_video_mobile != blank %}
-            {% assign has_mobile_video = true %}
-          {% endif %}
+        {% assign mobile_source = section.settings.video_source_mobile | default: 'same_as_desktop' %}
+        
+        {% if mobile_source == 'external' and section.settings.video_url_mobile != blank %}
+          {% assign has_mobile_video = true %}
+        {% elsif mobile_source == 'shopify' and section.settings.shopify_video_mobile != blank %}
+          {% assign has_mobile_video = true %}
         {% endif %}
 
-        {%- comment -%} DESKTOP VIDEO {%- endcomment -%}
+        {%- comment -%} DESKTOP VIDEO - shown on screens > 750px {%- endcomment -%}
         {% if section.settings.video_source == 'external' and section.settings.video_url != blank %}
           <div class="video-with-text-iframe {% if has_mobile_video %}video-desktop-only{% endif %}" style="position:relative;">
             {% if section.settings.video_url.type == 'youtube' %}
@@ -1319,12 +1319,12 @@ document.addEventListener('DOMContentLoaded', function() {
     },
     {
       "type": "header",
-      "content": "Media Settings"
+      "content": "Desktop Video Settings"
     },
     {
       "type": "select",
       "id": "video_source",
-      "label": "Desktop Video Source",
+      "label": "Video Source",
       "options": [
         {
           "value": "external",
@@ -1335,27 +1335,38 @@ document.addEventListener('DOMContentLoaded', function() {
           "label": "Shopify video"
         }
       ],
-      "default": "external",
-      "info": "Video source for desktop and tablet screens"
+      "default": "external"
     },
     {
       "type": "video_url",
       "id": "video_url",
-      "label": "Desktop YouTube/Vimeo URL",
+      "label": "YouTube/Vimeo URL",
       "accept": ["youtube", "vimeo"],
-      "info": "Video shown on desktop (751px and wider)"
+      "info": "For screens 751px and wider"
     },
     {
       "type": "video",
       "id": "shopify_video",
-      "label": "Desktop Shopify Video",
-      "info": "Upload video for desktop directly to Shopify"
+      "label": "Shopify Video",
+      "info": "For screens 751px and wider"
+    },
+    {
+      "type": "header",
+      "content": "Mobile Video Settings (Optional)"
+    },
+    {
+      "type": "paragraph",
+      "content": "Leave empty to use the same video on mobile as desktop."
     },
     {
       "type": "select",
       "id": "video_source_mobile",
-      "label": "Mobile Video Source",
+      "label": "Video Source",
       "options": [
+        {
+          "value": "same_as_desktop",
+          "label": "Same as Desktop"
+        },
         {
           "value": "external",
           "label": "YouTube/Vimeo"
@@ -1363,27 +1374,22 @@ document.addEventListener('DOMContentLoaded', function() {
         {
           "value": "shopify",
           "label": "Shopify video"
-        },
-        {
-          "value": "same_as_desktop",
-          "label": "Same as Desktop"
         }
       ],
-      "default": "same_as_desktop",
-      "info": "Video source for mobile screens (750px and below)"
+      "default": "same_as_desktop"
     },
     {
       "type": "video_url",
       "id": "video_url_mobile",
-      "label": "Mobile YouTube/Vimeo URL",
+      "label": "YouTube/Vimeo URL",
       "accept": ["youtube", "vimeo"],
-      "info": "Video shown on mobile (750px and below). Uses desktop video if not set."
+      "info": "For screens 750px and below"
     },
     {
       "type": "video",
       "id": "shopify_video_mobile",
-      "label": "Mobile Shopify Video",
-      "info": "Upload video for mobile directly to Shopify. Uses desktop video if not set."
+      "label": "Shopify Video",
+      "info": "For screens 750px and below"
     },
     {
       "type": "header",
