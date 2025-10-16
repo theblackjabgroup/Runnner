@@ -1,0 +1,119 @@
+{% comment %}
+  ================================================================================
+  SOLD OUT BADGE - GLOBAL SETTINGS GUIDE
+  ================================================================================
+
+  IMPORTANT: This applies ONLY to the small "SOLD OUT" badge labels that appear
+  on product images. The large "SOLD OUT" buttons maintain their original styling.
+
+  The sold out badge now uses global theme settings that can be configured in:
+  Theme Settings > Sold Out Badge
+
+    GLOBAL SETTINGS AVAILABLE:
+    --------------------------
+    1. Badge Style: Choose between "Filled Background" or "Transparent Background"
+    2. Filled Background Color: Color when filled style is selected
+    3. Filled Text Color: Text color when filled style is selected
+    4. Transparent Border Color: Border color when transparent style is selected
+    5. Transparent Text Color: Text color when transparent style is selected
+    6. Border Thickness: Border thickness for transparent style (1-5px)
+    7. Badge Border Radius: Corner radius for all badges (0-20px)
+
+    CSS VARIABLES:
+    --------------
+    The following CSS custom properties are available globally:
+    - --sold-out-filled-bg: Background color for filled style
+    - --sold-out-filled-text: Text color for filled style
+    - --sold-out-transparent-border: Border color for transparent style
+    - --sold-out-transparent-text: Text color for transparent style
+    - --sold-out-badge-border-thickness: Border thickness for transparent style
+    - --sold-out-badge-radius: Border radius for all badges
+
+    HOW TO USE IN LIQUID:
+    --------------------
+    Method 1: Using the sold-out-badge snippet (Recommended)
+    {% render 'sold-out-badge' %}
+    {% render 'sold-out-badge', class: 'your-additional-classes' %}
+    {% render 'sold-out-badge', text: 'CUSTOM TEXT' %}
+
+    Method 2: Using CSS classes directly
+    <span class="sold-out-badge-filled">SOLD OUT</span>  (for filled style)
+    <span class="sold-out-badge-transparent">SOLD OUT</span>  (for transparent style)
+
+  Method 3: For custom elements with conditional styling
+  NOTE: This is for badge labels only. Large action buttons should NOT use these settings.
+
+  <div
+    {% if settings.sold_out_badge_style == 'filled' %}
+      style="background-color: var(--sold-out-filled-bg); color: var(--sold-out-filled-text); border-radius: var(--sold-out-badge-radius);"
+    {% else %}
+      style="background-color: transparent; color: var(--sold-out-transparent-text); border: var(--sold-out-badge-border-thickness) solid var(--sold-out-transparent-border); border-radius: var(--sold-out-badge-radius);"
+    {% endif %}
+  >
+    SOLD OUT
+  </div>
+
+    FILES UPDATED WITH GLOBAL SETTINGS:
+    -----------------------------------
+    - snippets/product-section-desktop.liquid
+    - snippets/product-header-mobile.liquid
+    - snippets/product-purchase-mobile.liquid
+    - snippets/card-product.liquid
+    - snippets/new-product-card.liquid
+    - assets/main-product.css
+    - layout/theme.liquid
+    - config/settings_schema.json
+
+    EXAMPLE SCENARIOS:
+    -----------------
+    1. To change all sold out badges to have a red filled background:
+       - Go to Theme Settings > Sold Out Badge
+       - Set "Badge Style" to "Filled Background"
+       - Set "Filled Background Color" to red (#FF0000)
+       - Set "Filled Text Color" to white (#FFFFFF)
+
+    2. To change all sold out badges to have a transparent background with black border:
+       - Go to Theme Settings > Sold Out Badge
+       - Set "Badge Style" to "Transparent Background"
+       - Set "Transparent Border Color" to black (#000000)
+       - Set "Transparent Text Color" to black (#000000)
+       - Set "Border Thickness" to desired value (e.g., 2px)
+
+  BENEFITS:
+  ---------
+  ✓ One place to control all sold out badge labels across the entire theme
+  ✓ Consistent styling across all product pages and cards
+  ✓ Easy to switch between filled and transparent styles
+  ✓ No need to edit multiple files to change badge appearance
+  ✓ Maintains accessibility with proper ARIA labels
+  ✓ Buttons remain separate with their own styling (gray background)
+
+    ================================================================================
+  Renders a globally styled sold out badge
+
+  Usage:
+  {% render 'sold-out-badge' %}
+
+  Accepts:
+  - class: {String} Additional CSS classes to add (optional)
+  - text: {String} Custom badge text (optional, defaults to "SOLD OUT")
+{% endcomment %}
+
+{%- liquid
+  assign badge_text = text | default: 'SOLD OUT'
+  assign badge_style = settings.sold_out_badge_style | default: 'transparent'
+
+  if badge_style == 'filled'
+    assign badge_class = 'sold-out-badge-filled'
+  else
+    assign badge_class = 'sold-out-badge-transparent'
+  endif
+
+  if class != blank
+    assign badge_class = badge_class | append: ' ' | append: class
+  endif
+-%}
+
+<span class="{{ badge_class }}" role="status" aria-label="Product is sold out">
+  {{ badge_text }}
+</span>
