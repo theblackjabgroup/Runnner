@@ -906,15 +906,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
           // Only toggle if the state actually needs to change
           if (isActive && !currentlyActive) {
-            item.classList.add('is-active');
-            item.setAttribute('aria-current', 'true');
-
-            // Preserve 3D model state - don't reinitialize if it's already loaded
+            // Preserve 3D model state - check before making any changes
             const modelViewer = item.querySelector('model-viewer');
             if (modelViewer && modelViewer.loaded) {
-              // Model is already loaded, don't interfere with its state
+              // Model is already loaded and user might be interacting with it
+              // Skip all state updates to preserve the interaction state
               return;
             }
+
+            // Safe to update state for non-model items or unloaded models
+            item.classList.add('is-active');
+            item.setAttribute('aria-current', 'true');
           } else if (!isActive && currentlyActive) {
             item.classList.remove('is-active');
             item.removeAttribute('aria-current');
