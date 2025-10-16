@@ -408,85 +408,6 @@
         </div>
       </div>
 
-      <!-- Active Filters Tags Section (Mobile) -->
-      <div class="active-filters-tags-container-mobile">
-        <div class="active-filters-tags-wrapper">
-          <div class="active-filters-tags">
-            {%- for filter in results.filters -%}
-              {%- for value in filter.active_values -%}
-                <div class="active-filter-tag">
-                  <span class="active-filter-tag-text">{{ value.label | escape }}</span>
-                  <button
-                    class="active-filter-tag-remove mobile-tag-remove"
-                    data-filter-param="{{ filter.param_name }}"
-                    data-filter-value="{{ value.value }}"
-                  >
-                    <span class="svg-wrapper">
-                      {{- 'icon-close-small.svg' | inline_asset_content -}}
-                    </span>
-                  </button>
-                </div>
-              {%- endfor -%}
-              {% if filter.type == 'price_range' %}
-                {% assign min = filter.min_value.value %}
-                {% assign max = filter.max_value.value %}
-                {%- if min != null or max != null -%}
-                  <div class="active-filter-tag">
-                    <span class="active-filter-tag-text">
-                      {{- min | default: 0 | money }} - {{ max | default: filter.range_max | money -}}
-                    </span>
-                    <button
-                      class="active-filter-tag-remove mobile-tag-remove"
-                      data-filter-param="{{ filter.param_name }}"
-                    >
-                      <span class="svg-wrapper">
-                        {{- 'icon-close-small.svg' | inline_asset_content -}}
-                      </span>
-                    </button>
-                  </div>
-                {%- endif -%}
-              {% endif %}
-            {%- endfor -%}
-
-            <!-- Sort by tag -->
-            {%- if results.sort_by -%}
-              {%- for option in results.sort_options -%}
-                {%- if option.value == results.sort_by -%}
-                  <div class="active-filter-tag">
-                    <span class="active-filter-tag-text">{{ option.name | escape }}</span>
-                    <button class="active-filter-tag-remove mobile-tag-remove" data-sort-remove="true">
-                      <span class="svg-wrapper">
-                        {{- 'icon-close-small.svg' | inline_asset_content -}}
-                      </span>
-                    </button>
-                  </div>
-                {%- endif -%}
-              {%- endfor -%}
-            {%- endif -%}
-          </div>
-
-          {%- assign has_active_filters = false -%}
-          {%- for filter in results.filters -%}
-            {%- if filter.active_values.size > 0 -%}
-              {%- assign has_active_filters = true -%}
-              {%- break -%}
-            {%- endif -%}
-            {%- if filter.type == 'price_range' -%}
-              {%- assign min = filter.min_value.value -%}
-              {%- assign max = filter.max_value.value -%}
-              {%- if min != null or max != null -%}
-                {%- assign has_active_filters = true -%}
-                {%- break -%}
-              {%- endif -%}
-            {%- endif -%}
-          {%- endfor -%}
-
-          {%- if has_active_filters or results.sort_by -%}
-            <button class="clear-all-filters-btn mobile-clear-all" data-action="clear-all-mobile">CLEAR ALL</button>
-          {%- endif -%}
-        </div>
-      </div>
-
       <facet-filters-form>
         <form id="FacetFiltersFormMobile" class="mobile-filter-form">
           {%- if results.terms -%}
@@ -576,6 +497,85 @@
                 {% endcase %}
               {%- endfor -%}
             {%- endif -%}
+          </div>
+
+          <!-- Active Filters Tags Section (Mobile) - Above Footer -->
+          <div class="active-filters-tags-container-mobile">
+            <div class="active-filters-tags-wrapper">
+              <div class="active-filters-tags">
+                {%- for filter in results.filters -%}
+                  {%- for value in filter.active_values -%}
+                    <div class="active-filter-tag">
+                      <span class="active-filter-tag-text">{{ value.label | escape }}</span>
+                      <button
+                        class="active-filter-tag-remove mobile-tag-remove"
+                        data-filter-param="{{ filter.param_name }}"
+                        data-filter-value="{{ value.value }}"
+                      >
+                        <span class="svg-wrapper">
+                          {{- 'icon-close-small.svg' | inline_asset_content -}}
+                        </span>
+                      </button>
+                    </div>
+                  {%- endfor -%}
+                  {% if filter.type == 'price_range' %}
+                    {% assign min = filter.min_value.value %}
+                    {% assign max = filter.max_value.value %}
+                    {%- if min != null or max != null -%}
+                      <div class="active-filter-tag">
+                        <span class="active-filter-tag-text">
+                          {{- min | default: 0 | money }} - {{ max | default: filter.range_max | money -}}
+                        </span>
+                        <button
+                          class="active-filter-tag-remove mobile-tag-remove"
+                          data-filter-param="{{ filter.param_name }}"
+                        >
+                          <span class="svg-wrapper">
+                            {{- 'icon-close-small.svg' | inline_asset_content -}}
+                          </span>
+                        </button>
+                      </div>
+                    {%- endif -%}
+                  {% endif %}
+                {%- endfor -%}
+
+                <!-- Sort by tag -->
+                {%- if results.sort_by -%}
+                  {%- for option in results.sort_options -%}
+                    {%- if option.value == results.sort_by -%}
+                      <div class="active-filter-tag">
+                        <span class="active-filter-tag-text">{{ option.name | escape }}</span>
+                        <button class="active-filter-tag-remove mobile-tag-remove" data-sort-remove="true">
+                          <span class="svg-wrapper">
+                            {{- 'icon-close-small.svg' | inline_asset_content -}}
+                          </span>
+                        </button>
+                      </div>
+                    {%- endif -%}
+                  {%- endfor -%}
+                {%- endif -%}
+              </div>
+
+              {%- assign has_active_filters = false -%}
+              {%- for filter in results.filters -%}
+                {%- if filter.active_values.size > 0 -%}
+                  {%- assign has_active_filters = true -%}
+                  {%- break -%}
+                {%- endif -%}
+                {%- if filter.type == 'price_range' -%}
+                  {%- assign min = filter.min_value.value -%}
+                  {%- assign max = filter.max_value.value -%}
+                  {%- if min != null or max != null -%}
+                    {%- assign has_active_filters = true -%}
+                    {%- break -%}
+                  {%- endif -%}
+                {%- endif -%}
+              {%- endfor -%}
+
+              {%- if has_active_filters or results.sort_by -%}
+                <button class="clear-all-filters-btn mobile-clear-all" data-action="clear-all-mobile">CLEAR ALL</button>
+              {%- endif -%}
+            </div>
           </div>
 
           <div class="mobile-filter-footer">
@@ -932,6 +932,9 @@
 </script>
 
 <style>
+  .facets-container-height {
+    z-index: 0 !important;
+  }
   .field__label {
     top: 6px;
   }
@@ -1206,7 +1209,7 @@
   .mobile-filter-drawer {
     position: relative;
     height: 100vh;
-    width: 100%;
+    width: 90%;
     max-width: 400px;
     background: white;
     transform: translateX(100%);
@@ -1219,19 +1222,18 @@
   }
 
   .mobile-filter-overlay.active .mobile-filter-drawer {
-    transform: translateX(0);
+    transform: translateX(0%);
   }
 
   .mobile-filter-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 20px;
+    padding: 20px 20px 40px 20px;
     background: white;
     position: sticky;
     top: 0;
     z-index: 100001 !important; /* Highest z-index for header */
-    border-bottom: 1px solid var(--border);
     flex-shrink: 0;
   }
 
@@ -1286,7 +1288,7 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 20px 0;
+    padding: 10px 0;
     font-family: var(--font-body-family);
     font-style: var(--font-body-style);
     font-weight: var(--font-body-weight);
@@ -1295,7 +1297,7 @@
     cursor: pointer;
     list-style: none;
     background: white;
-    border-bottom: 1px solid rgba(var(--color-foreground), 0.1);
+    border-top: 1px solid var(--border);
   }
 
   .mobile-filter-summary::-webkit-details-marker {
@@ -1319,9 +1321,8 @@
   .mobile-filter-option {
     display: flex;
     align-items: center;
-    padding: 16px 0;
+    padding: 8px 0;
     cursor: pointer;
-    border-bottom: 1px solid rgba(var(--color-foreground), 0.1);
   }
 
   .mobile-filter-option:last-child {
@@ -1336,7 +1337,7 @@
     width: 16px;
     height: 16px;
     border: 1px solid var(--border);
-    margin-right: 0.75rem;
+    margin-right: 0.5rem;
     position: relative;
     flex-shrink: 0;
     border-radius: 2px;
@@ -1362,8 +1363,8 @@
     font-family: var(--font-body-family);
     font-style: var(--font-body-style);
     font-weight: var(--font-body-weight);
-    font-size: var(--tm-b-3-size);
-    line-height: var(--tm-b-3-line-height);
+    font-size: var(--tm-b-4-size);
+    line-height: var(--tm-b-4-line-height);
     text-transform: uppercase;
     color: var(--text);
   }
@@ -1384,15 +1385,17 @@
     z-index: 1000001 !important;
     flex-shrink: 0;
     margin-top: auto;
+    padding: 20px;
+    box-sizing: border-box;
   }
 
   .mobile-apply-btn {
     flex: 1;
-    padding: 18px 24px !important;
+    padding: 12px 24px !important;
     background: var(--button);
     color: var(--button_label);
     border: none;
-    border-radius: 6px !important;
+    border-radius: 5px !important;
     text-transform: uppercase;
     font-family: var(--font-body-family);
     font-style: var(--font-body-style);
@@ -1402,7 +1405,7 @@
     cursor: pointer;
     transition: all 0.3s ease;
     letter-spacing: 0.5px;
-    width: 100% !important;
+    max-width: 100%;
   }
 
   .mobile-apply-btn:hover {
@@ -1507,6 +1510,13 @@
     if (overlay) {
       overlay.classList.add('active');
       document.body.style.overflow = 'hidden';
+
+      // Calculate and set mobile footer height for proper tags positioning
+      const footer = document.querySelector('.mobile-filter-footer');
+      if (footer) {
+        const footerHeight = footer.offsetHeight;
+        document.documentElement.style.setProperty('--mobile-footer-height', `${footerHeight}px`);
+      }
     }
   }
 
