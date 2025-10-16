@@ -28,13 +28,7 @@
   <div class="new-product-image-wrapper" aria-label="Product images for {{ product_title }}">
     {% unless product_available %}
       <div class="absolute top-3 z-2" style="left: 10px;">
-        <span
-          class="tracking-wide font-medium sold-out"
-          style="background-color: transparent; color: var(--text);"
-          aria-live="polite"
-        >
-          SOLD OUT
-        </span>
+        {% render 'sold-out-badge', class: 'tracking-wide font-medium sold-out' %}
       </div>
     {% endunless %}
 
@@ -507,12 +501,27 @@
 
   .sold-out {
     font-weight: var(--t-b-3-weight);
-    padding: 0px 6px;
-    border-radius: {{ settings.buttons_radius | minus: 2 }}px;
     line-height: var(--t-b-3-line-height);
     display: inline-block;
     font-size: var(--t-b-3-size);
-    border: {{ settings.buttons_border_thickness }}px solid var(--text);
+    text-align: center;
+  }
+
+  /* Ensure sold-out badge uses global settings */
+  .sold-out-badge-filled.sold-out {
+    background-color: var(--sold-out-filled-bg, #000000);
+    color: var(--sold-out-filled-text, #FFFFFF);
+    border-radius: var(--sold-out-badge-radius, 5px);
+    padding: 0px 6px;
+    border: none;
+  }
+
+  .sold-out-badge-transparent.sold-out {
+    background-color: transparent;
+    color: var(--sold-out-transparent-text, #000000);
+    border: var(--sold-out-badge-border-thickness, 1px) solid var(--sold-out-transparent-border, #000000);
+    border-radius: var(--sold-out-badge-radius, 5px);
+    padding: 0px 6px;
   }
 
   .new-product-cart-container.show-button .new-sold-out-btn[data-has-variants='true'] {
