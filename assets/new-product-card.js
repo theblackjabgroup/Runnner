@@ -177,11 +177,24 @@ class ProductCard {
   }
 
   initSizeButtons() {
-    const sizeButtons = this.card.querySelectorAll('.new-size-option-btn');
+    // Handle both .new-size-option-btn (custom buttons) and .size-btn (from size-variant-picker)
+    const sizeButtons = this.card.querySelectorAll('.new-size-option-btn, .size-btn');
     sizeButtons.forEach((button) => {
       button.addEventListener('click', (e) => {
         e.preventDefault();
         e.stopPropagation();
+
+        // Remove active state from all size buttons in this card
+        sizeButtons.forEach((btn) => {
+          btn.classList.remove('active', 'bg-black', 'text-white');
+          btn.style.backgroundColor = '';
+          btn.style.color = '';
+        });
+
+        // Add active state to clicked button
+        button.classList.add('active', 'bg-black', 'text-white');
+        button.style.backgroundColor = 'var(--text)';
+        button.style.color = 'rgb(var(--color-background))';
 
         if (button.hasAttribute('data-waitlist')) {
           // Popup disabled for waitlist - no action taken

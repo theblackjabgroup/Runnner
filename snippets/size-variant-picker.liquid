@@ -15,16 +15,18 @@
 
     if size_only == true
       # For product cards, only show Size variants
-      if option.name == 'Size' or option.name == 'size'
+      assign option_name_lower = option.name | downcase
+      if option_name_lower == 'size' or option_name_lower contains 'size'
         assign variant_option = option
-        assign variant_option_index = forloop.index0
+        assign variant_option_index = option.position
         break
       endif
     else
       # For main product page, show any non-color variant
-      unless option.name == 'Color' or option.name == 'Colour'
+      assign option_name_lower = option.name | downcase
+      unless option_name_lower contains 'color' or option_name_lower contains 'colour'
         assign variant_option = option
-        assign variant_option_index = forloop.index0
+        assign variant_option_index = option.position
         break
       endunless
     endif
@@ -43,9 +45,11 @@
         {% for value in variant_option.values %}
           {% assign variant_available = false %}
           {% assign variant_id = null %}
+          {% assign value_normalized = value | strip %}
           {% for variant in product.variants %}
-            {% assign option_key = 'option' | append: variant_option_index | plus: 1 %}
-            {% if variant[option_key] == value %}
+            {% assign option_key = 'option' | append: variant_option_index %}
+            {% assign variant_option_value = variant[option_key] | strip %}
+            {% if variant_option_value == value_normalized %}
               {% if variant.available %}
                 {% assign variant_available = true %}
                 {% assign variant_id = variant.id %}
@@ -63,7 +67,10 @@
             "
             data-mobile="true"
             data-option-index="{{ variant_option_index }}"
+            data-option-key="{{ option_key }}"
             data-value="{{ value | escape }}"
+            data-variant-available="{{ variant_available }}"
+            data-total-variants="{{ product.variants.size }}"
             role="radio"
             aria-checked="{% if forloop.first and variant_available %}true{% else %}false{% endif %}"
             style="--animation-order: {{ forloop.index0 }};"
@@ -95,9 +102,11 @@
         {% for value in variant_option.values %}
           {% assign variant_available = false %}
           {% assign variant_id = null %}
+          {% assign value_normalized = value | strip %}
           {% for variant in product.variants %}
-            {% assign option_key = 'option' | append: variant_option_index | plus: 1 %}
-            {% if variant[option_key] == value %}
+            {% assign option_key = 'option' | append: variant_option_index %}
+            {% assign variant_option_value = variant[option_key] | strip %}
+            {% if variant_option_value == value_normalized %}
               {% if variant.available %}
                 {% assign variant_available = true %}
                 {% assign variant_id = variant.id %}
@@ -114,7 +123,10 @@
             "
             data-desktop="true"
             data-option-index="{{ variant_option_index }}"
+            data-option-key="{{ option_key }}"
             data-value="{{ value | escape }}"
+            data-variant-available="{{ variant_available }}"
+            data-total-variants="{{ product.variants.size }}"
             style="--animation-order: {{ forloop.index0 }};"
             {% if variant_available %}
               data-variant-id="{{ variant_id }}"

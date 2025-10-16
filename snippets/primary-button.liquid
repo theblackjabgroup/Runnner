@@ -31,6 +31,7 @@
   - button_width: String - Custom button width (e.g., '370px')
   - button_height: String - Custom button height (e.g., '50px')
   - mobile_button_width: String - Custom mobile button width (e.g., '95vw')
+  - enable_border: Boolean - Enable or disable button border (default: true)
 {% endcomment %}
 
 {%- assign button_text = button_text | default: 'Button' -%}
@@ -47,6 +48,17 @@
 {%- assign button_width = button_width | default: '' -%}
 {%- assign button_height = button_height | default: '' -%}
 {%- assign mobile_button_width = mobile_button_width | default: '' -%}
+{%- comment -%} Handle enable_border: if explicitly set to false, disable border, otherwise enable {%- endcomment -%}
+{%- assign show_border = true -%}
+{%- if enable_border == false -%}
+  {%- assign show_border = false -%}
+{%- endif -%}
+
+{%- comment -%} Create a unique class for borderless buttons {%- endcomment -%}
+{%- assign unique_class = '' -%}
+{%- if show_border == false -%}
+  {%- assign unique_class = 'primary-button-no-border' -%}
+{%- endif -%}
 
 {%- comment -%} Check if we should render as anchor or button {%- endcomment -%}
 {%- assign render_as_anchor = false -%}
@@ -58,11 +70,11 @@
   .primary-slide-button {
     position: relative;
     display: inline-block;
+    border: {{ settings.primary_button_border_thickness | default: 1 }}px solid var(--button_label);
     padding: 0px;
-    border: {{ settings.buttons_border_thickness | default: 1 }}px solid var(--secondary_button_text_color);
-    color: var(--secondary_button_text_color);
-    background-color: var(--secondary_button_label);
-    border-radius: {{ settings.buttons_radius | default: 0 }}px;
+    color: var(--button_label);
+    background-color: var(--button);
+    border-radius: {{ settings.primary_button_radius | default: 5 }}px;
     overflow: hidden;
     transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
     text-decoration: none;
@@ -73,11 +85,21 @@
 
   .primary-slide-button:hover,
   .primary-slide-button:focus {
-    background-color: var(--hovered_secondary_button_label);
-    color: var(--hovered_secondary_button_text_color);
-    border-color: var(--hovered_secondary_button_text_color);
+    background-color: var(--hovered_button_label);
+    color: var(--hovered_button_text_color);
+    border-color: var(--hovered_button_text_color);
     outline: none;
     text-decoration: none;
+  }
+
+  /* Specific style for buttons without borders */
+  .primary-button-no-border.primary-slide-button {
+    border: none !important;
+  }
+
+  .primary-button-no-border.primary-slide-button:hover,
+  .primary-button-no-border.primary-slide-button:focus {
+    border: none !important;
   }
 
   .primary-slide-button-text-container {
@@ -95,12 +117,12 @@
     align-items: center;
     justify-content: space-between;
     line-height: 1;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
+    text-transform: {{ settings.primary_button_text_transform | default: 'uppercase' }};
+    letter-spacing: 0;
     transition: transform 0.6s ease-in-out;
     width: 100%;
-    height: 100%;
-    padding: 0 10px;
+    height: 26px;
+    padding: 0 5px;
   }
 
   .primary-slide-button:hover .primary-slide-button-text,
@@ -116,13 +138,13 @@
     align-items: center;
     justify-content: space-between;
     line-height: 1;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
+    text-transform: {{ settings.primary_button_text_transform | default: 'uppercase' }};
+    letter-spacing: 0;
     transform: translateX(100%);
     transition: transform 0.6s ease-in-out;
     width: 100%;
-    height: 100%;
-    padding: 0 10px;
+    height: 26px;
+    padding: 0 5px;
   }
 
   .primary-slide-button:hover .primary-slide-button-text-hover,
@@ -136,16 +158,32 @@
   }
 
   .primary-slide-button-arrow {
-    display: inline-block;
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
   }
 
-  .primary-slide-button-arrow svg {
+  {% if settings.primary_button_show_icon == false %}
+  .primary-slide-button-arrow {
+    display: none !important;
+  }
+  {% endif %}
+
+  .primary-slide-button-arrow svg,
+  .primary-slide-button-arrow img {
     width: 16px;
     height: 16px;
+    min-width: 16px;
+    min-height: 16px;
+    max-width: 16px;
+    max-height: 16px;
     transition: transform 0.2s ease;
     display: block;
     fill: currentColor;
-    margin-left: 15px;
+    margin-left: 10px;
+    object-fit: contain;
+    flex-shrink: 0;
   }
 
   @media screen and (max-width: 750px) {
@@ -154,16 +192,22 @@
       font-size: {{ mobile_font_size }} !important;
       font-weight: {{ mobile_font_weight }} !important;
       line-height: {{ mobile_line_height }} !important;
+      height: 20px;
     }
 
-    .primary-slide-button{
-      padding: 1px 5px;
+    .primary-slide-button {
+      padding: 0;
       {% if mobile_button_width != blank %}width: {{ mobile_button_width }} !important;{% endif %}
     }
 
-    .primary-slide-button-arrow svg {
+    .primary-slide-button-arrow svg,
+    .primary-slide-button-arrow img {
       width: 14px;
       height: 14px;
+      min-width: 14px;
+      min-height: 14px;
+      max-width: 14px;
+      max-height: 14px;
     }
   }
 </style>
@@ -171,7 +215,7 @@
 {% if render_as_anchor %}
   <a
     href="{{ button_url }}"
-    class="primary-slide-button {{ primary_class }}"
+    class="primary-slide-button {{ unique_class }} {{ primary_class }}"
     aria-label="{{ button_text | escape }}"
     role="button"
     tabindex="0"
@@ -183,7 +227,17 @@
       >
         {{ button_text | escape }}
         <span class="primary-slide-button-arrow" aria-hidden="true">
-          {% render 'icon-playback', width: '16', height: '16', viewBox: '4.5 1.5 8.5 13', stoke: 'currentColor' %}
+          {% if settings.primary_button_custom_icon != blank %}
+            <img
+              src="{{ settings.primary_button_custom_icon | image_url: width: 16 }}"
+              alt="icon"
+              width="16"
+              height="16"
+              style="display: block;"
+            >
+          {% else %}
+            {% render 'icon-playback', width: '16', height: '16', viewBox: '4.5 1.5 8.5 13', stoke: 'currentColor' %}
+          {% endif %}
         </span>
       </div>
       <div
@@ -192,7 +246,31 @@
       >
         {{ button_text | escape }}
         <span class="primary-slide-button-arrow" aria-hidden="true">
-          {% render 'icon-playback', width: '16', height: '16', viewBox: '4.5 1.5 8.5 13', stoke: 'currentColor', fill: 'currentColor' %}
+          {% if settings.primary_button_custom_icon_hover != blank %}
+            <img
+              src="{{ settings.primary_button_custom_icon_hover | image_url: width: 16 }}"
+              alt="icon"
+              width="16"
+              height="16"
+              style="display: block;"
+            >
+          {% elsif settings.primary_button_custom_icon != blank %}
+            <img
+              src="{{ settings.primary_button_custom_icon | image_url: width: 16 }}"
+              alt="icon"
+              width="16"
+              height="16"
+              style="display: block;"
+            >
+          {% else %}
+            {% render 'icon-playback',
+              width: '16',
+              height: '16',
+              viewBox: '4.5 1.5 8.5 13',
+              stoke: 'currentColor',
+              fill: 'currentColor'
+            %}
+          {% endif %}
         </span>
       </div>
     </div>
@@ -200,7 +278,7 @@
 {% else %}
   <button
     type="{{ button_type }}"
-    class="primary-slide-button {{ primary_class }}"
+    class="primary-slide-button {{ unique_class }} {{ primary_class }}"
     aria-label="{{ button_text | escape }}"
     {{ data_attributes }}
   >
@@ -211,7 +289,23 @@
       >
         {{ button_text | escape }}
         <span class="primary-slide-button-arrow" aria-hidden="true">
-          {% render 'icon-playback', width: '16', height: '16px', viewBox: '4.5 1.5 8.5 13', stoke: 'currentColor', fill: 'currentColor' %}
+          {% if settings.primary_button_custom_icon != blank %}
+            <img
+              src="{{ settings.primary_button_custom_icon | image_url: width: 16 }}"
+              alt="icon"
+              width="16"
+              height="16"
+              style="display: block;"
+            >
+          {% else %}
+            {% render 'icon-playback',
+              width: '16',
+              height: '16',
+              viewBox: '4.5 1.5 8.5 13',
+              stoke: 'currentColor',
+              fill: 'currentColor'
+            %}
+          {% endif %}
         </span>
       </div>
       <div
@@ -220,7 +314,31 @@
       >
         {{ button_text | escape }}
         <span class="primary-slide-button-arrow" aria-hidden="true">
-          {% render 'icon-playback', width: '16', height: '16', viewBox: '4.5 1.5 8.5 13', stoke: 'currentColor', fill: 'currentColor' %}
+          {% if settings.primary_button_custom_icon_hover != blank %}
+            <img
+              src="{{ settings.primary_button_custom_icon_hover | image_url: width: 16 }}"
+              alt="icon"
+              width="16"
+              height="16"
+              style="display: block;"
+            >
+          {% elsif settings.primary_button_custom_icon != blank %}
+            <img
+              src="{{ settings.primary_button_custom_icon | image_url: width: 16 }}"
+              alt="icon"
+              width="16"
+              height="16"
+              style="display: block;"
+            >
+          {% else %}
+            {% render 'icon-playback',
+              width: '16',
+              height: '16',
+              viewBox: '4.5 1.5 8.5 13',
+              stoke: 'currentColor',
+              fill: 'currentColor'
+            %}
+          {% endif %}
         </span>
       </div>
     </div>

@@ -1,0 +1,81 @@
+{%- comment -%}
+  Product Tabs - Desktop Version
+
+  Complete tab system with Description, Details, and Sizing tabs including drawers
+
+  Parameters:
+  - product: Product object (required)
+  - blocks: Section blocks array (required)
+{%- endcomment -%}
+
+<div
+  class="product-tabs w-[100%] flex-1 overflow-hidden scroll-fade-trigger scroll-fade-up scroll-fade-delay-4"
+  role="region"
+  aria-label="Product information"
+>
+  <!-- Tab Navigation -->
+  <div
+    class="tabs-nav tab-buttons-container flex justify-evenly space-x-3 h-auto mt-2 w-full"
+    role="tablist"
+    aria-label="Product details"
+  >
+    {%- assign tab_index = 0 -%}
+    {%- for block in blocks -%}
+      {% if block.type == 'tab_description' or block.type == 'tab_details' or block.type == 'tab_sizing' %}
+        {%- assign tab_index = tab_index | plus: 1 -%}
+        <button
+          class="tab-btn group text-[16px] text-left w-full transition-colors duration-300 relative {% if tab_index == 1 %}active-tab tab-button-active{% else %}tab-button-inactive{% endif %} tab-button focus:outline-none focus:ring-2 focus:ring-blue-500"
+          data-tab="tab-{{ block.id }}"
+          role="tab"
+          aria-selected="{% if tab_index == 1 %}true{% else %}false{% endif %}"
+          aria-controls="tab-content-{{ block.id }}"
+          tabindex="{% if tab_index == 1 %}0{% else %}-1{% endif %}"
+          id="tab-{{ block.id }}-button"
+          {{ block.shopify_attributes }}
+        >
+          <!-- Div acting as top border -->
+          <div
+            class="tab-top-bar absolute top-0 left-0 right-0 rounded transition-colors duration-300 tab-indicator {% if tab_index == 1 %}tab-indicator-active{% else %}tab-indicator-inactive{% endif %}"
+            aria-hidden="true"
+          >
+            &nbsp;
+          </div>
+          {{ block.settings.title }}
+        </button>
+      {% endif %}
+    {%- endfor -%}
+  </div>
+
+  <!-- Tab Content -->
+  <div class="tab-content mt-6 overflow-y-auto">
+    {% for block in blocks %}
+      <div
+        class="tab-pane {% if forloop.first %}active{% else %}hidden{% endif %} tracking-normal leading-none product-text-medium"
+        data-content="tab-{{ block.id }}"
+        role="tabpanel"
+        aria-labelledby="tab-{{ block.id }}-button"
+        id="tab-content-{{ block.id }}"
+        {% unless forloop.first %}
+          tabindex="0"
+        {% endunless %}
+      >
+        {% case block.type %}
+          {% when 'tab_description' %}
+            {{ product.description }}
+
+          {% when 'tab_details' %}
+            {% if block.settings.metafield_namespace_key != blank %}
+              <div class="prose prose-lg max-w-none">
+                {{ block.settings.metafield_namespace_key }}
+              </div>
+            {% else %}
+              <p class="secondary-text-color">No details available for this product.</p>
+            {% endif %}
+
+          {% when 'tab_sizing' %}
+            {% render 'product-sizing-items-desktop', block: block %}
+        {% endcase %}
+      </div>
+    {% endfor %}
+  </div>
+</div>

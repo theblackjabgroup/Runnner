@@ -765,5 +765,4 @@ document.addEventListener('DOMContentLoaded', function () {
     });
   });
 
-  console.log('✅ Cart event listeners initialized (CSP-compliant)');
 });

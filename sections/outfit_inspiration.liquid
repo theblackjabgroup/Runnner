@@ -131,11 +131,7 @@
                             <div class="flex items-center justify-between gap-2 mt-auto">
                               <div>
                                 {% if paired_product.available == false %}
-                                  <span
-                                    class="outfit-sold-out"
-                                  >
-                                    SOLD OUT
-                                  </span>
+                                  {% render 'sold-out-badge', class: 'outfit-sold-out' %}
                                 {% endif %}
                               </div>
                               <button
@@ -473,7 +469,7 @@
      font-size: 14px;
     }
     .outfit-size{
-      padding-bottom: 36px;
+      padding-bottom: 30px;
     }
     .main-product-title{
       font-size: var(--t-b-3-size);
@@ -491,6 +487,12 @@
     .outfit-paired-title .new-product-price .price-item {
       font-size: 14px !important;
     }
+    /* Desktop gap for outfit wrapper */
+    @media (min-width: 768px) {
+      .outfit-wrapper {
+        gap: 20px;
+      }
+    }
 
     /* Hide price in mobile view for paired products */
     @media (max-width: 767px) {
@@ -506,7 +508,7 @@
       }
     }
     .outfit-wrapper{
-      gap: 20px;
+      gap: 12px;
     }
     .outfit-section-title {
       font-size: var(--t-h-2-size);
@@ -514,15 +516,7 @@
       color: var(--header_text, var(--color-foreground));
       margin-bottom: 45px;
     }
-    .outfit-sold-out {
-      font-size: 13px;
-      font-weight: 500;
-      padding: 2px 4px;
-      border-radius: 4px;
-      color: var(--text);
-      background-color: var(--background);
-      border: 1px solid var(--border);
-    }
+
 
   .outfit-add-to-cart-btn-{{ section.id }} {
     display: flex !important;
@@ -623,7 +617,7 @@
       height: 40px;
       min-width: 48px;
       padding: 0 7px;
-      border-radius: 4px;
+      border-radius: var(--sold-out-badge-radius);
       font-size: 16px;
       font-weight: 500;
       background-color: var(--button);
@@ -663,7 +657,7 @@
       transform: scale(1.1);
     }
     .main-product-card, .paired-product-card {
-      border-radius: {{ section.settings.buttons_radius | default: 4 }}px ;
+      border-radius: var(--sold-out-badge-radius) !important;
     }
 
     .paired-product-img {
@@ -678,7 +672,7 @@
     }
 
     .expanded-product-card {
-      border-radius: {{ section.settings.buttons_radius | default: 8 }}px;
+      border-radius: var(--sold-out-badge-radius) !important;
       border: 1px solid;
       position: absolute;
       left: 0;
@@ -783,14 +777,11 @@
       width: 170px;
       padding: 1px 0;
     }
-       .outfit-wrapper{
-      gap: 20px;
-    }
       .outfit-section-title {
         font-size: 36px !important;
       }
       .outfit-sold-out {
-      display: none;
+        display: none;
       }
       .desktop-arrows {
         display: none !important;
@@ -1559,15 +1550,6 @@
       "id": "border_color",
       "label": "Border Color",
       "default": "#000000"
-    },
-    {
-      "type": "range",
-      "id": "buttons_radius",
-      "label": "Border Radius (px)",
-      "min": 0,
-      "max": 25,
-      "step": 1,
-      "default": 4
     }
   ],
   "blocks": [

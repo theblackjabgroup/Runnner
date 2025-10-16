@@ -1,0 +1,78 @@
+{%- comment -%}
+  Product Tabs - Mobile Version
+
+  Mobile tab system with Description, Details, and Sizing tabs
+
+  Parameters:
+  - product: Product object (required)
+  - blocks: Section blocks array (required)
+{%- endcomment -%}
+
+<div class="product-tabs flex-1 overflow-hidden" role="region" aria-label="Mobile product information">
+  <!-- Tab Navigation -->
+  <div
+    class="tabs-nav tab-buttons-container flex justify-evenly space-x-3 h-auto mt-2 w-full"
+    role="tablist"
+    aria-label="Mobile product details"
+  >
+    {%- assign tab_index = 0 -%}
+    {%- for block in blocks -%}
+      {% if block.type == 'tab_description' or block.type == 'tab_details' or block.type == 'tab_sizing' %}
+        {%- assign tab_index = tab_index | plus: 1 -%}
+        <button
+          class="mobile-tab-btn group text-left mr-3 w-full transition-colors duration-300 relative {% if tab_index == 1 %}active-tab{% endif %} {% if tab_index == 1 %}mobile-tab-button-active{% else %}mobile-tab-button-inactive{% endif %} focus:outline-none focus:ring-2 focus:ring-blue-500"
+          data-tab="tab-{{ block.id }}"
+          role="tab"
+          aria-selected="{% if tab_index == 1 %}true{% else %}false{% endif %}"
+          aria-controls="mobile-tab-content-{{ block.id }}"
+          tabindex="{% if tab_index == 1 %}0{% else %}-1{% endif %}"
+          id="mobile-tab-{{ block.id }}-button"
+          {{ block.shopify_attributes }}
+        >
+          <div
+            class="tab-top-bar mobile-tab-indicator absolute top-0 left-0 right-0 rounded transition-colors duration-300 {% if tab_index == 1 %}tab-indicator-active{% else %}tab-indicator-inactive{% endif %}"
+            aria-hidden="true"
+          >
+            &nbsp;
+          </div>
+          {{ block.settings.title }}
+        </button>
+      {% endif %}
+    {%- endfor -%}
+  </div>
+
+  <!-- Tab Content -->
+  <div
+    class="tab-content mt-6 overflow-y-auto max-h-[50vh] product-mobile-text-medium"
+  >
+    {% for block in blocks %}
+      <div
+        class="mobile-tab-pane tab-pane {% if forloop.first %}active{% else %}hidden{% endif %} tracking-normal leading-1"
+        data-content="tab-{{ block.id }}"
+        role="tabpanel"
+        aria-labelledby="mobile-tab-{{ block.id }}-button"
+        id="mobile-tab-content-{{ block.id }}"
+        {% unless forloop.first %}
+          tabindex="0"
+        {% endunless %}
+      >
+        {% case block.type %}
+          {% when 'tab_description' %}
+            {{ product.description }}
+
+          {% when 'tab_details' %}
+            {% if block.settings.metafield_namespace_key != blank %}
+              <div class="prose prose-lg max-w-none">
+                {{ block.settings.metafield_namespace_key }}
+              </div>
+            {% else %}
+              <p class="secondary-text-color">No details available for this product.</p>
+            {% endif %}
+
+          {% when 'tab_sizing' %}
+            {% render 'product-sizing-items-mobile', block: block %}
+        {% endcase %}
+      </div>
+    {% endfor %}
+  </div>
+</div>

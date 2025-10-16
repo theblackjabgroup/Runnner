@@ -8,15 +8,14 @@
 {% assign product_url = product.url %}
 {% assign product_available = product.available %}
 {% assign product_images = product.images %}
-{% assign product_variants = product.variants %}
 
 {% comment %} Check for size variants {% endcomment %}
 {% assign has_size_variants = false %}
 {% unless product.has_only_default_variant %}
   {% for option in product.options_with_values %}
-    {% if option.name == 'Size' or option.name == 'size' %}
+    {% assign option_name_lower = option.name | downcase %}
+    {% if option_name_lower == 'size' or option_name_lower contains 'size' %}
       {% assign has_size_variants = true %}
-      {% assign size_option_index = forloop.index0 %}
       {% break %}
     {% endif %}
   {% endfor %}
@@ -29,13 +28,7 @@
   <div class="new-product-image-wrapper" aria-label="Product images for {{ product_title }}">
     {% unless product_available %}
       <div class="absolute top-3 z-2" style="left: 10px;">
-        <span
-          class="tracking-wide font-medium sold-out"
-          style="background-color: transparent; color: var(--text);"
-          aria-live="polite"
-        >
-          SOLD OUT
-        </span>
+        {% render 'sold-out-badge', class: 'tracking-wide font-medium sold-out' %}
       </div>
     {% endunless %}
 
@@ -308,10 +301,10 @@
     left: 50%;
     transform: translateX(-50%) translateY(10px);
     height: 50px;
-    border-radius: {{ settings.buttons_radius }}px;
-    font-size: var(--t-b-2-size);
-    font-weight: var(--t-b-2-weight);
-    line-height: var(--t-b-2-line-height);
+    border-radius: var(--sold-out-badge-radius);
+    font-size: var(--t-b-1-size);
+    font-weight: var(--t-b-1-weight);
+    line-height: var(--t-b-1-line-height);
     position: relative;
     z-index: var(--z-content);
     cursor: pointer;
@@ -419,14 +412,26 @@
     }
   }
 
+  /* Override size-btn from size-variant-picker snippet within new-product-card */
+  .new-product-card .size-btn {
+    width: 30px !important;
+    height: 30px !important;
+    min-width: 30px !important;
+    padding: 0 !important;
+    border-radius: var(--sold-out-badge-radius) !important;
+    font-size: var(--t-b-2-size);
+    font-weight: var(--t-b-2-weight);
+    line-height: var(--t-b-2-line-height);
+  }
+
   .new-size-option-btn {
-    width: 23px;
-    height: 22px;
-    border-radius: {{ settings.buttons_radius }}px;
+    width: 30px;
+    height: 30px;
+    border-radius: var(--sold-out-badge-radius);
     color: var(--text);
-    font-size: var(--t-b-4-size);
-    font-weight: var(--t-b-4-weight);
-    line-height: var(--t-b-4-line-height);
+    font-size: var(--t-b-2-size);
+    font-weight: var(--t-b-2-weight);
+    line-height: var(--t-b-2-line-height);
     border: {{ settings.buttons_border_thickness }}px solid var(--disabled_text);
     padding: 2px;
     display: flex;
@@ -508,12 +513,27 @@
 
   .sold-out {
     font-weight: var(--t-b-3-weight);
-    padding: 0px 6px;
-    border-radius: {{ settings.buttons_radius | minus: 2 }}px;
     line-height: var(--t-b-3-line-height);
     display: inline-block;
     font-size: var(--t-b-3-size);
-    border: {{ settings.buttons_border_thickness }}px solid var(--text);
+    text-align: center;
+  }
+
+  /* Ensure sold-out badge uses global settings */
+  .sold-out-badge-filled.sold-out {
+    background-color: var(--sold-out-filled-bg, #000000);
+    color: var(--sold-out-filled-text, #FFFFFF);
+    border-radius: var(--sold-out-badge-radius, 5px);
+    padding: 0px 6px;
+    border: none;
+  }
+
+  .sold-out-badge-transparent.sold-out {
+    background-color: transparent;
+    color: var(--sold-out-transparent-text, #000000);
+    border: var(--sold-out-badge-border-thickness, 1px) solid var(--sold-out-transparent-border, #000000);
+    border-radius: var(--sold-out-badge-radius, 5px);
+    padding: 0px 6px;
   }
 
   .new-product-cart-container.show-button .new-sold-out-btn[data-has-variants='true'] {
