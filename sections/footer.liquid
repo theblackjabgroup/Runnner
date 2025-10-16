@@ -6,48 +6,56 @@
 <script src="{{ 'scroll-animations.js' | asset_url }}" defer="defer"></script>
 
 {% style %}
-:root {
-  --footer-menu-item-color: {{ section.settings.menu_item_color }};
-  --footer-email-input-color: {{ section.settings.email_input_color | default: '#FFFFFF'}};
-  --footer-bg-color: {{ section.settings.footer_bg_color | default: '#000000' }};
-  --footer-hover-color: {{ section.settings.hover_color | default: '#808080' }};
-  --footer-email-signup-hover-text-color: {{ section.settings.email_signup_hover_text_color | default: '#FFFFFF' }};
-}
+  :root {
+    --footer-menu-item-color: {{ section.settings.menu_item_color }};
+    --footer-email-input-color: {{ section.settings.email_input_color | default: '#FFFFFF'}};
+    --footer-bg-color: {{ section.settings.footer_bg_color | default: '#000000' }};
+    --footer-hover-color: {{ section.settings.hover_color | default: '#808080' }};
+    --footer-email-signup-hover-text-color: {{ section.settings.email_signup_hover_text_color | default: '#FFFFFF' }};
+  }
 {% endstyle %}
 
 <footer
-  class="color-{{ section.settings.color_scheme }}p-4 sm:px-6 md:px-8 md:py-8 relative overflow-hidden scroll-fade-trigger scroll-fade-up"
+  class="bb-footer-container color-{{ section.settings.color_scheme }} p-4 sm:px-6 md:px-8 md:py-8 relative overflow-hidden scroll-fade-trigger scroll-fade-up footer-container"
   style="
     padding-top: {{ section.settings.padding_top }}px;
     padding-bottom: {{ section.settings.padding_bottom }}px;
     margin-top: {{ section.settings.margin_top }}px;
     margin-bottom: {{ section.settings.margin_bottom }}px;
-    background: {{ section.settings.footer_bg_color | default: '#000000' }};
   "
   role="contentinfo"
 >
   <div
     class="animated-footer-background {% if section.settings.background_image == blank %}no-image{% elsif section.settings.enable_bg_animation == false %}paused{% endif %}"
     {% if section.settings.background_image != blank %}
-      style="background-image: url('{{ section.settings.background_image | img_url: 'master' }}');"
+      style="background-image: url('{{ section.settings.background_image | image_url: width: 1920 }}');"
     {% endif %}
-  ></div>
+  >
+    &nbsp;
+  </div>
 
   <div class="animated-grain"></div>
 
   <!-- Footer Content -->
   <div class="footer-content">
+    {% assign menu_blocks = section.blocks | where: 'type', 'menu' %}
+
     {% for block in section.blocks %}
       <div class="w-full footer-section scroll-fade-trigger scroll-fade-up" data-animation-index="{{ forloop.index0 }}">
         {% case block.type %}
           {% when 'email_signup' %}
             <div class="email-signup-section footer-block" {{ block.shopify_attributes }}>
-
               {% form 'customer', id: 'email-signup-form', class: 'email-signup-container newsletter-form' %}
-                <input type="hidden" name="contact[tags]" value="newsletter"> 
-                <input type="hidden" name="form_type" value="customer"> 
+                <input type="hidden" name="contact[tags]" value="newsletter">
+                <input type="hidden" name="form_type" value="customer">
 
-                <div id="message-container" class="message-container" style="display: none;" aria-live="polite" role="status">
+                <div
+                  id="message-container"
+                  class="message-container"
+                  style="display: none;"
+                  aria-live="polite"
+                  role="status"
+                >
                   <div class="newsletter-form__message--success">
                     {{ 'newsletter.success' | t | default: 'Thanks for signing up!' }}
                   </div>
@@ -76,10 +84,10 @@
                     <div class="arrow-hover">
                       <div class="arrow-wrapper">
                         <span class="arrow-wrapper">
-  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
-    <path d="M9 6l6 6-6 6" />
-  </svg>
-</span>
+                          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+                            <path d="M9 6l6 6-6 6" />
+                          </svg>
+                        </span>
                       </div>
                     </div>
                     <span>{{ block.settings.button_text | default: 'SIGN ME UP' }}</span>
@@ -89,56 +97,90 @@
             </div>
 
           {% when 'support' %}
-            <div class="w-1/2 md:w-full flex pr-1 md:pr-2 mt-[0px] md:mt-[1%] justify-end desktop-ml-15 footer-block">
-              <div style="margin-left: 10px;" class="mb-6 w-[350px] md:max-w-[50%] custom-mr-25 md:ml-0" {{ block.shopify_attributes }}>
-                <p class="uppercase md:normal-case font-medium text-[14px] md:text-[24px] break-words text-left heading-font"
-                   style="word-wrap: break-word; overflow-wrap: break-word; margin-bottom: 5px; margin-top: 2px; color: {{ section.settings.menu_item_color }}; line-height: normal;">
+            <div class="bb-support-section support-section mt-[0px] md:mt-[1%] justify-end desktop-ml-15 footer-block">
+              <div
+                class="bb-support-content-wrapper support-content-wrapper w-[350px] md:max-w-[50%] custom-mr-25 md:ml-0"
+                {{ block.shopify_attributes }}
+              >
+                <p
+                  class="uppercase md:normal-case font-medium text-[14px] md:text-[24px] break-words text-left heading-font"
+                  style="margin-bottom: 5px; margin-top: 2px; color: {{ section.settings.menu_item_color }}; line-height: normal;"
+                >
                   {{ block.settings.support_heading }}
                 </p>
 
-                <p class="md:normal-case mt-1 text-[14px] md:text-[24px] break-words text-left leading-tight body-font"
-                   style="word-wrap: break-word; overflow-wrap: break-word; line-height: 1.2; width: auto; color: {{ section.settings.menu_item_color }};">
+                <p
+                  class="md:normal-case mt-1 text-[14px] md:text-[24px] break-words text-left leading-tight body-font"
+                  style="line-height: 1.2; width: auto; color: {{ section.settings.menu_item_color }};"
+                >
                   {{ block.settings.support_text }}
                 </p>
 
-               <a href="mailto:{{ block.settings.email_address }}"
-   class="relative mt-2 inline-block text-[16px] md:text-[24px] uppercase md:normal-case animated-underline break-words group body-font"
-   style="word-wrap: break-word; overflow-wrap: break-word; margin-top: 15px; color: {{ section.settings.menu_item_color }};">
+                <a
+                  href="mailto:{{ block.settings.email_address }}"
+                  class="relative mt-2 inline-block text-[16px] md:text-[24px] uppercase md:normal-case animated-underline break-words group body-font"
+                  style="margin-top: 15px; color: {{ section.settings.menu_item_color }};"
+                >
+                  {{ block.settings.email_link_text }}
 
-  {{ block.settings.email_link_text }}
-
-  {{ 'icon-email.svg'
-     | inline_asset_content
-     | replace: '<svg', '<svg class="email-icon" role="img" aria-hidden="true" style="height: 20px; fill: '
-     | remove: "'" }}
-</a>
-
+                  {% render 'icon-playback', width: '20px', height: '20px', class: 'email-icon' %}
+                </a>
 
                 <div class="support-social-icons social-icons-hover" aria-labelledby="social-heading-support">
                   <h4 id="social-heading-support" class="sr-only">Follow Us</h4>
                   {%- if settings.social_instagram_link != blank -%}
                     <a href="{{ settings.social_instagram_link }}" class="social-icon" aria-label="Instagram">
-                      {{ 'icon-instagram1.svg' | inline_asset_content | replace: '<svg', '<svg role="img" aria-hidden="true" style="height: 25px; fill: ' | append: settings.social_icon_color | remove: "'" }}
+                      {{
+                        'icon-instagram.svg'
+                        | inline_asset_content
+                        | replace: '<svg', '<svg role="img" aria-hidden="true" style="height: 25px; fill: '
+                        | append: settings.social_icon_color
+                        | remove: "'"
+                      }}
                     </a>
                   {%- endif -%}
                   {%- if settings.social_youtube_link != blank -%}
                     <a href="{{ settings.social_youtube_link }}" class="social-icon" aria-label="YouTube">
-                      {{ 'icon-youtube1.svg' | inline_asset_content | replace: '<svg', '<svg role="img" aria-hidden="true" style="height: 25px; fill: ' | append: settings.social_icon_color | remove: "'" }}
+                      {{
+                        'icon-youtube.svg'
+                        | inline_asset_content
+                        | replace: '<svg', '<svg role="img" aria-hidden="true" style="height: 25px; fill: '
+                        | append: settings.social_icon_color
+                        | remove: "'"
+                      }}
                     </a>
                   {%- endif -%}
                   {%- if settings.social_twitter_link != blank -%}
                     <a href="{{ settings.social_twitter_link }}" class="social-icon" aria-label="Twitter">
-                      {{ 'icon-twitter1.svg' | inline_asset_content | replace: '<svg', '<svg role="img" aria-hidden="true" style="height: 25px; fill: ' | append: settings.social_icon_color | remove: "'" }}
+                      {{
+                        'icon-twitter.svg'
+                        | inline_asset_content
+                        | replace: '<svg', '<svg role="img" aria-hidden="true" style="height: 25px; fill: '
+                        | append: settings.social_icon_color
+                        | remove: "'"
+                      }}
                     </a>
                   {%- endif -%}
                   {%- if settings.social_facebook_link != blank -%}
                     <a href="{{ settings.social_facebook_link }}" class="social-icon" aria-label="Facebook">
-                      {{ 'icon-facebook1.svg' | inline_asset_content | replace: '<svg', '<svg role="img" aria-hidden="true" style="height: 30px; fill: ' | append: settings.social_icon_color | remove: "'" }}
+                      {{
+                        'icon-facebook.svg'
+                        | inline_asset_content
+                        | replace: '<svg', '<svg role="img" aria-hidden="true" style="height: 30px; fill: '
+                        | append: settings.social_icon_color
+                        | remove: "'"
+                      }}
                     </a>
                   {%- endif -%}
                   {%- if settings.social_snapchat_link != blank -%}
                     <a href="{{ settings.social_snapchat_link }}" class="social-icon" aria-label="Snapchat">
-                      {{ 'icon-snapchat1.svg' | inline_asset_content | replace: '<svg', '<svg role="img" aria-hidden="true" style="height: 25px; fill: ' | append: settings.social_icon_color | remove: "'" }}
+                      {{
+                        'icon-snapchat.svg'
+                        | inline_asset_content
+                        | replace: '<svg', '<svg role="img" aria-hidden="true" style="height: 25px; fill: '
+                        | append: settings.social_icon_color
+                        | remove: "'"
+                      }}
                     </a>
                   {%- endif -%}
                 </div>
@@ -146,26 +188,33 @@
             </div>
             <div class="hidden" {{ block.shopify_attributes }}></div>
 
-            <div class="flex flex-col md:flex-row justify-between items-start w-full" style="margin-left:15px">
+            <div class="bb-footer-main-row footer-main-row footer-container-wrapper">
               <!-- Menu Section -->
-              <nav class="menu-section w-full md:w-2/5 order-1 md:order-2 custom-nav-mr-25 footer-block" aria-label="Footer Navigation">
-                <div class="flex flex-wrap justify-start md:justify-end" style="margin-left:-10px;">
-                  <div style="padding-left: 10px;" class="flex flex-row flex-wrap justify-start md:justify-end custom-gap w-full mr-[20px] md:ml-0" {{ block.shopify_attributes }}>
-                    {% for block in section.blocks %}
-                      {% case block.type %}
-                        {% when 'menu' %}
-                          <div class="menu-block" {{ block.shopify_attributes }}>
-                            <div class="flex flex-col w-auto">
-                              <div class="flex flex-col space-y-1">
-                                {% for link in linklists[block.settings.menu_links].links %}
-                                  <a href="{{ link.url }}" class="text-[16px] body-font" style="color: {{ section.settings.menu_item_color }}; line-height: 20px;">
-                                    {{- link.title -}}
-                                  </a>
-                                {% endfor %}
-                              </div>
-                            </div>
+              <nav
+                class="menu-section custom-nav-mr-25 footer-block"
+                aria-label="Footer Navigation"
+              >
+                <div class="bb-inner-footer-main-row flex flex-wrap justify-start md:justify-end footer-main-row">
+                  <div
+                    class="flex flex-row flex-wrap justify-start md:justify-end custom-gap w-full mr-[20px] md:ml-0 menu-content-wrapper"
+                    {{ block.shopify_attributes }}
+                  >
+                    {% for menu_block in menu_blocks %}
+                      <div class="menu-block" {{ menu_block.shopify_attributes }}>
+                        <div class="flex flex-col w-auto">
+                          <div class="flex flex-col space-y-1">
+                            {% for link in linklists[menu_block.settings.menu_links].links %}
+                              <a
+                                href="{{ link.url }}"
+                                class="text-[16px] body-font"
+                                style="color: {{ section.settings.menu_item_color }}; line-height: 20px;"
+                              >
+                                {{- link.title -}}
+                              </a>
+                            {% endfor %}
                           </div>
-                      {% endcase %}
+                        </div>
+                      </div>
                     {% endfor %}
                   </div>
                 </div>
@@ -174,32 +223,68 @@
                   <h4 id="mobile-social-heading" class="sr-only">Follow Us</h4>
                   {%- if settings.social_instagram_link != blank -%}
                     <a href="{{ settings.social_instagram_link }}" class="social-icon" aria-label="Instagram">
-                      {{ 'icon-instagram.svg' | inline_asset_content | replace: '<svg', '<svg role="img" aria-hidden="true" style="height: 30px; fill: ' | append: settings.social_icon_color | remove: "'" }}
+                      {{
+                        'icon-instagram.svg'
+                        | inline_asset_content
+                        | replace: '<svg', '<svg role="img" aria-hidden="true" style="height: 30px; fill: '
+                        | append: settings.social_icon_color
+                        | remove: "'"
+                      }}
                     </a>
                   {%- endif -%}
                   {%- if settings.social_youtube_link != blank -%}
                     <a href="{{ settings.social_youtube_link }}" class="social-icon" aria-label="YouTube">
-                      {{ 'icon-youtube.svg' | inline_asset_content | replace: '<svg', '<svg role="img" aria-hidden="true" style="height: 25px; fill: ' | append: settings.social_icon_color | remove: "'" }}
+                      {{
+                        'icon-youtube.svg'
+                        | inline_asset_content
+                        | replace: '<svg', '<svg role="img" aria-hidden="true" style="height: 25px; fill: '
+                        | append: settings.social_icon_color
+                        | remove: "'"
+                      }}
                     </a>
                   {%- endif -%}
                   {%- if settings.social_twitter_link != blank -%}
                     <a href="{{ settings.social_twitter_link }}" class="social-icon" aria-label="Twitter">
-                      {{ 'icon-twitter.svg' | inline_asset_content | replace: '<svg', '<svg role="img" aria-hidden="true" style="height: 25px; fill: ' | append: settings.social_icon_color | remove: "'" }}
+                      {{
+                        'icon-twitter.svg'
+                        | inline_asset_content
+                        | replace: '<svg', '<svg role="img" aria-hidden="true" style="height: 25px; fill: '
+                        | append: settings.social_icon_color
+                        | remove: "'"
+                      }}
                     </a>
                   {%- endif -%}
                   {%- if settings.social_facebook_link != blank -%}
                     <a href="{{ settings.social_facebook_link }}" class="social-icon" aria-label="Facebook">
-                      {{ 'icon-facebook.svg' | inline_asset_content | replace: '<svg', '<svg role="img" aria-hidden="true" style="height: 30px; fill: ' | append: settings.social_icon_color | remove: "'" }}
+                      {{
+                        'icon-facebook.svg'
+                        | inline_asset_content
+                        | replace: '<svg', '<svg role="img" aria-hidden="true" style="height: 30px; fill: '
+                        | append: settings.social_icon_color
+                        | remove: "'"
+                      }}
                     </a>
                   {%- endif -%}
                   {%- if settings.social_tiktok_link != blank -%}
                     <a href="{{ settings.social_tiktok_link }}" class="social-icon" aria-label="TikTok">
-                      {{ 'icon-tiktok.svg' | inline_asset_content | replace: '<svg', '<svg role="img" aria-hidden="true" style="height: 25px; fill: ' | append: settings.social_icon_color | remove: "'" }}
+                      {{
+                        'icon-tiktok.svg'
+                        | inline_asset_content
+                        | replace: '<svg', '<svg role="img" aria-hidden="true" style="height: 25px; fill: '
+                        | append: settings.social_icon_color
+                        | remove: "'"
+                      }}
                     </a>
                   {%- endif -%}
                   {%- if settings.social_snapchat_link != blank -%}
                     <a href="{{ settings.social_snapchat_link }}" class="social-icon" aria-label="Snapchat">
-                      {{ 'icon-snapchat.svg' | inline_asset_content | replace: '<svg', '<svg role="img" aria-hidden="true" style="height: 25px; fill: ' | append: settings.social_icon_color | remove: "'" }}
+                      {{
+                        'icon-snapchat.svg'
+                        | inline_asset_content
+                        | replace: '<svg', '<svg role="img" aria-hidden="true" style="height: 25px; fill: '
+                        | append: settings.social_icon_color
+                        | remove: "'"
+                      }}
                     </a>
                   {%- endif -%}
                 </div>
@@ -207,15 +292,30 @@
 
               <!-- Logo Section -->
               {% if section.settings.logo != blank %}
-                <div class="bb-logo-container logo-container footer-block">
-                  <img src="{{ section.settings.logo | img_url: 'master' }}" alt="{{ shop.name }}" width="760" height="150" loading="lazy">
+                {% assign logo_width = 380 %}
+                {% assign logo_height = logo_width | divided_by: section.settings.logo.aspect_ratio | round %}
+                <div class="logo-section bb-logo-container logo-container footer-block">
+                  <img
+                    srcset="
+                      {%- if section.settings.logo.width >= 190 -%}{{ section.settings.logo | image_url: width: 190 }} 190w,{%- endif -%}
+                      {%- if section.settings.logo.width >= 380 -%} {{ section.settings.logo | image_url: width: 380 }} 380w,{%- endif -%}
+                      {%- if section.settings.logo.width >= 760 -%} {{ section.settings.logo | image_url: width: 760 }} 760w,{%- endif -%}
+                      {%- if section.settings.logo.width >= 1140 -%} {{ section.settings.logo | image_url: width: 1140 }} 1140w,{%- endif -%} {{ section.settings.logo | image_url }} {{ section.settings.logo.width }}w
+                    "
+                    sizes="(max-width: 768px) 200px, 380px"
+                    src="{{ section.settings.logo | image_url: width: 380 }}"
+                    alt="{{ shop.name }}"
+                    width="{{ logo_width }}"
+                    height="{{ logo_height }}"
+                    loading="lazy"
+                    decoding="async"
+                  >
                 </div>
               {% else %}
-                <div class="logo-container footer-block">
+                <div class="logo-section logo-container footer-block">
                   <div class="text-logo font-bold heading-font">{{ shop.name }}</div>
                 </div>
               {% endif %}
-              </div>
             </div>
         {% endcase %}
       </div>
@@ -224,6 +324,41 @@
 </footer>
 
 <style>
+  /* --- TABLET/MEDIUM SCREEN SIZING --- */
+  @media (min-width: 769px) and (max-width: 1023px) {
+    .email-input12,
+    .signup-button {
+      height: 55px !important;
+      min-height: 55px !important;
+      max-height: 55px !important;
+      font-size: 18px !important;
+      line-height: 55px !important;
+      padding: 12px 18px !important;
+      box-sizing: border-box !important;
+      margin: 0 !important;
+      border-width: 1px !important;
+      border-radius: 4px !important;
+      text-transform: uppercase !important;
+      font-weight: 500 !important;
+      letter-spacing: 0.5px !important;
+    }
+
+    .signup-button {
+      display: flex !important;
+      align-items: center !important;
+      justify-content: space-between !important;
+    }
+
+    .signup-button span {
+      line-height: 1 !important;
+    }
+
+    .signup-button svg {
+      height: 1em !important;
+      width: 1em !important;
+    }
+  }
+
   /* Footer Fade-Up Animations */
   .footer-section.scroll-fade-trigger {
     opacity: 0;
@@ -277,106 +412,70 @@
 </style>
 
 <script>
-  // Custom Footer Fade-Up Animation
   document.addEventListener('DOMContentLoaded', function() {
-    const footer = document.querySelector('.footer-animated');
+    const footer = document.querySelector('.footer-container');
     if (!footer) return;
 
-    const footerSections = footer.querySelectorAll('.footer-section');
-
-    // Set initial state for all sections
-    footerSections.forEach((section, index) => {
-      section.style.opacity = '0';
-      section.style.transform = 'translateY(50px)';
-      section.style.transition = `opacity 0.8s ease ${index * 0.2}s, transform 0.8s ease ${index * 0.2}s`;
-    });
-
-    // Create intersection observer
     const observer = new IntersectionObserver((entries) => {
-      entries.forEach(entry => {
+      entries.forEach((entry) => {
         if (entry.isIntersecting) {
-          // Trigger fade-up animation
-          entry.target.style.opacity = '1';
-          entry.target.style.transform = 'translateY(0)';
-
-          // Stop observing this element
+          entry.target.classList.add('animate');
           observer.unobserve(entry.target);
         }
       });
-    }, {
-      rootMargin: '0px 0px -50px 0px',
-      threshold: 0.1
-    const newsletterForm = document.getElementById('email-signup-form');
+    }, { threshold: 0.1 });
 
-    if (newsletterForm) {
-      const messageContainer = document.getElementById('message-container');
-      const formFieldsContainer = document.getElementById('form-fields-container12');
+    footer.querySelectorAll('.footer-section').forEach((section) => {
+      observer.observe(section);
+    });
 
-      if (messageContainer) {
-        messageContainer.style.padding = '10px';
-        messageContainer.style.margin = '15px 0';
-        messageContainer.style.textAlign = 'center';
+    const form = footer.querySelector('#email-signup-form');
+    if (form) {
+      const emailInput = form.querySelector('#email-input12');
+      const messageContainer = footer.querySelector('#message-container');
+      const fieldsContainer = footer.querySelector('#form-fields-container12');
+
+      function setMessage(type, text) {
+        if (!messageContainer) return;
+        messageContainer.innerHTML = '';
+        const el = document.createElement('div');
+        el.className = `newsletter-form__message--${type}`;
+        el.textContent = text;
+        messageContainer.appendChild(el);
+        messageContainer.style.display = 'block';
       }
 
-      newsletterForm.addEventListener('submit', function (e) {
+      function isValidEmail(email) {
+        return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+      }
+      form.addEventListener('submit', function(e) {
         e.preventDefault();
-
-        const emailInput = document.getElementById('email-input12');
-        if (!emailInput) return;
-
-        const email = emailInput.value;
+        const email = emailInput ? emailInput.value.trim() : '';
 
         if (!email || !isValidEmail(email)) {
-          showErrorMessage('Please enter a valid email address.');
+          setMessage('error', 'Please enter a valid email address.');
           return;
         }
 
-        const formData = new FormData(newsletterForm);
+        const formData = new FormData(form);
 
         fetch('/contact#contact_form', {
           method: 'POST',
           body: formData,
           headers: { Accept: 'application/json' },
         })
-          .then(() => handleSuccessfulSubmission(emailInput))
-          .catch(() => handleSuccessfulSubmission(emailInput));
-
-        return false;
+          .then(() => {
+            if (emailInput) emailInput.value = '';
+            if (fieldsContainer) fieldsContainer.style.display = 'none';
+            setMessage('success', 'Thank you for subscribing!');
+          })
+          .catch(() => {
+            // Graceful success even if JSON endpoint not enabled
+            if (emailInput) emailInput.value = '';
+            if (fieldsContainer) fieldsContainer.style.display = 'none';
+            setMessage('success', 'Thank you for subscribing!');
+          });
       });
-
-      function handleSuccessfulSubmission(emailInput) {
-        if (emailInput) emailInput.value = '';
-        if (formFieldsContainer) formFieldsContainer.style.display = 'none';
-
-        if (messageContainer) {
-          messageContainer.innerHTML = '';
-          const successElement = document.createElement('div');
-          successElement.className = 'newsletter-form__message--success';
-          successElement.textContent = 'Thank you for subscribing!';
-          successElement.style.cssText = 'font-size: 20px; font-weight: bold; color: #FFFFFF;';
-          messageContainer.appendChild(successElement);
-          messageContainer.style.display = 'block';
-        }
-      }
-
-      function isValidEmail(email) {
-        return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-      }
-
-      function showErrorMessage(message) {
-        if (!messageContainer) return;
-        messageContainer.innerHTML = '';
-        const errorMessage = document.createElement('div');
-        errorMessage.className = 'newsletter-form__message--error';
-        errorMessage.textContent = message;
-        errorMessage.style.cssText = 'color: #FFFFFF; font-weight: bold;';
-        messageContainer.appendChild(errorMessage);
-        messageContainer.style.display = 'block';
-        setTimeout(() => {
-          messageContainer.style.display = 'none';
-          messageContainer.innerHTML = '';
-        }, 7000);
-      }
     }
   });
 </script>
@@ -520,7 +619,7 @@
           "type": "text",
           "id": "email_address",
           "label": "Email Address",
-          "default": "support@bandit.com"
+          "default": "support@[yourdomain].com"
         },
         {
           "type": "text",

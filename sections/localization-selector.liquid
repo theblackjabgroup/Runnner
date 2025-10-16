@@ -2,6 +2,10 @@
 {
   "name": "Localization Selector",
   "class": "shopify-section-localization",
+  "disabled_on": {
+    "groups": ["header"],
+    "templates": ["index", "product", "collection", "page", "blog", "article", "cart", "search", "404"]
+  },
   "settings": [
     {
       "type": "header",
@@ -57,18 +61,28 @@
   ]
 }
 {% endschema %}
-
+{{ 'component-localization-form.css' | asset_url | stylesheet_tag }}
 {{ 'localiztion-selector.css' | asset_url | stylesheet_tag }}
+<script src="{{ 'localization-form.js' | asset_url }}" defer="defer"></script>
 
 <section class="color-{{ section.settings.color_scheme }} ">
   <!-- Footer Layout - Single Row -->
-  <div class="footer-margin-class footer-bottom-section " style="--section-height: {{ section.settings.section_height }}px;">
+  <div
+    class="footer-margin-class footer-bottom-section "
+    style="--section-height: {{ section.settings.section_height }}px;"
+  >
     <div class="footer-single-row">
       <!-- Left: Localization Selectors -->
       <div class="footer-left">
         <div class="footer__localization isolate">
           {%- if section.settings.enable_country_selector and localization.available_countries.size > 1 -%}
-            {% render 'currency-dropdown' , position: "footer" %}
+            <localization-form class="footer__country-selector">
+              {%- form 'localization', id: 'FooterCountryForm', class: 'localization-form' -%}
+                <div class="localization-selector">
+                  {%- render 'currency-dropdown', localPosition: 'FooterCountry' -%}
+                </div>
+              {%- endform -%}
+            </localization-form>
           {%- endif -%}
 
           {%- if section.settings.enable_language_selector and localization.available_languages.size > 1 -%}
@@ -96,7 +110,7 @@
                   {%- if policy != blank -%}
                     <span class="policy-separator"> | </span>
                     <a href="{{ policy.url }}">
-                       {{ policy.title | escape }}
+                      {{ policy.title | escape }}
                     </a>
                   {%- endif -%}
                 {%- endfor -%}
@@ -113,7 +127,7 @@
           {% unless shop.enabled_payment_types == empty %}
             <ul class="footer__payment payment-icons">
               {% for type in shop.enabled_payment_types %}
-                <li>{{ type | payment_type_svg_tag: class:'payment-icon' }}</li>
+                <li>{{ type | payment_type_svg_tag: class: 'payment-icon' }}</li>
               {% endfor %}
             </ul>
           {% endunless %}
@@ -124,361 +138,449 @@
 </section>
 
 <style>
-/* Section Container */
-.shopify-section-localization {
-  width: 100%;
-  font-family: var(--font-body-family);
-  margin: 0 !important;
-  padding: 0 !important;
-  overflow: visible !important;
-}
+  /* Section Container */
+  .shopify-section-localization {
+    width: 100%;
+    font-family: var(--font-body-family);
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: visible !important;
+  }
 
-/* Footer Bottom Layout */
-.footer-bottom-section { 
-  min-height: var(--section-height, 40px);
-}
+  /* Footer Bottom Layout */
+  .footer-bottom-section {
+    min-height: var(--section-height, 40px);
+  }
 
-.footer-single-row {
-  display: grid;
-  grid-template-columns: auto 1fr auto;
-  align-items: center;
-  max-width: 1200px;
-  padding: 0.75rem 2rem !important;
-  margin: 0 auto !important;
-  gap: 1rem;
-  overflow: visible !important;
-  min-height: var(--section-height, 40px);
-  box-sizing: border-box;
-}
-
-.footer-left,
-.footer-center,
-.footer-right {
-  overflow: visible !important;
-  min-height: 28px;
-  display: flex;
-  align-items: center;
-  color:var(--text);
-}
-
-.footer-left {
-  justify-content: flex-start;
-}
-
-.footer-center {
-  justify-content: center;
-  text-align: center;
-  flex-grow: 1;
-}
-
-.footer-right {
-  justify-content: flex-end;
-}
-
-
-/* Localization Container */
-.footer__localization {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  flex-wrap: nowrap;
-  overflow: visible !important;
-  min-height: 28px;
-}
-
-/* Localization Form Styling */
-.footer__country-selector,
-.footer__language-selector {
-  font-family: var(--font-body-family);
-  font-weight: var(--font-body-weight);
-  position: relative;
-  overflow: visible !important;
-}
-
-.localization-form {
-  position: relative;
-  overflow: visible !important;
-}
-
-.localization-selector {
-  position: relative;
-  overflow: visible !important;
-  z-index: 10;
-}
-
-/* Ensure dropdowns are properly positioned */
-.localization-form .localization-selector select,
-.localization-form .localization-selector .disclosure {
-  position: relative;
-  overflow: visible !important;
-}
-
-/* Copyright Section */
-.footer__copyright {
-  width: 100%;
-  max-width: 100%;
-  padding: 0.25rem 0;
-}
-
-.copyright-line {
-  display: inline-block;
-  white-space: nowrap;
-  line-height: 1.4;
-}
-
-.policies-inline {
-  display: inline;
-}
-
-.policies-inline a {
-  color: rgba(var(--color-foreground));
-  text-decoration: none;
-}
-
-.policies-inline a:hover {
-  text-decoration: underline;
-}
-
-.policy-separator {
-  color: rgba(var(--color-foreground));
-  margin: 0 0.5rem;
-}
-
-/* Payment Icons */
-.payments-icons {
-  padding: 0.25rem 0;
-}
-
-.payments-icons .footer__payment {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-  align-items: center;
-  list-style: none;
-  margin: 0;
-  padding: 0;
-}
-
-.payments-icons .payment-icon {
-  height: 20px;
-  width: auto;
-}
-
-/* Mobile Responsive */
-@media (max-width: 749px) {
   .footer-single-row {
-    display: flex;
-    flex-direction: column;
-    gap: 1.5rem;
-    text-align: center;
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: center;
+    padding: var(--space-md) var(--space-3xl) !important;
+    margin: 0 auto !important;
+    gap: 1rem;
     overflow: visible !important;
-    padding: 1.5rem 1rem !important;
-    min-height: calc(var(--section-height, 40px) + 20px);
+    min-height: var(--section-height, 40px);
+    box-sizing: border-box;
   }
-  
-  .footer-left {
-    justify-content: center;
-    width: 100%;
-    order: 2;
-    overflow: visible !important;
-  }
-  
-  .footer-center {
-    order: 1;
-    width: 100%;
-  }
-  
+
+  .footer-left,
+  .footer-center,
   .footer-right {
-    justify-content: center;
-    width: 100%;
-    order: 3;
+    overflow: visible !important;
+    min-height: 28px;
+    display: flex;
+    align-items: center;
+    color: var(--text);
   }
-  
-  .footer__localization {
+
+  .footer-left {
+    justify-content: flex-start;
+  }
+
+  .footer-center {
     justify-content: center;
-    flex-direction: row;
+    text-align: center;
+    flex-grow: 1;
+  }
+
+  .footer-right {
+    justify-content: flex-end;
+  }
+
+  /* Localization Container */
+  .footer__localization {
+    display: flex;
     align-items: center;
     gap: 1rem;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
+    overflow: visible !important;
+    min-height: 28px;
+  }
+
+  /* Ensure all child elements align on the same baseline */
+  .footer__localization > * {
+    display: flex;
+    align-items: center;
+  }
+
+  .footer__country-selector,
+  .footer__language-selector {
+    display: flex;
+    align-items: center;
+  }
+
+  .footer__country-selector .localization-form,
+  .footer__language-selector .localization-form {
+    display: flex;
+    align-items: center;
+    margin: 0;
+  }
+
+  .footer__country-selector .localization-selector,
+  .footer__language-selector .localization-selector {
+    display: flex;
+    align-items: center;
+  }
+
+  /* Ensure disclosure divs align properly */
+  .footer__localization .disclosure,
+  .footer__localization .group {
+    display: flex;
+    align-items: center;
+  }
+
+  /* Align buttons properly */
+  .footer__localization .disclosure__button,
+  .footer__localization .localization-form__select {
+    display: flex;
+    align-items: center;
+    padding: 0;
+    margin: 0;
+    min-height: auto;
+    height: auto;
+  }
+
+  /* Localization Form Styling */
+  .footer__country-selector,
+  .footer__language-selector {
+    font-family: var(--font-body-family);
+    font-weight: var(--font-body-weight);
+    position: relative;
     overflow: visible !important;
   }
-  
+
+  .localization-form {
+    position: relative;
+    overflow: visible !important;
+  }
+
+  .localization-selector {
+    position: relative;
+    overflow: visible !important;
+    z-index: 10;
+  }
+
+  /* Ensure dropdowns are properly positioned */
+  .localization-form .localization-selector select,
+  .localization-form .localization-selector .disclosure {
+    position: relative;
+    overflow: visible !important;
+  }
+
+  /* Copyright Section */
+  .footer__copyright {
+    width: 100%;
+    max-width: 100%;
+    padding: var(--space-mini) 0;
+  }
+
   .copyright-line {
-    white-space: normal;
-    text-align: center;
+    display: inline-block;
+    white-space: nowrap;
     line-height: 1.4;
   }
-}
 
-/* Tablet */
-@media (min-width: 750px) and (max-width: 989px) {
-  .footer__localization {
-    gap: 1rem;
+  .policies-inline {
+    display: inline;
+  }
+
+  .policies-inline a {
+    color: rgba(var(--color-foreground));
+    text-decoration: none;
+  }
+
+  .policies-inline a:hover {
+    text-decoration: underline;
+  }
+
+  .policy-separator {
+    color: rgba(var(--color-foreground));
+    margin: 0 0.5rem;
+  }
+
+  /* Payment Icons */
+  .payments-icons {
+    padding: var(--space-mini) 0;
+  }
+
+  .payments-icons .footer__payment {
+    display: flex;
     flex-wrap: wrap;
-    overflow: visible !important;
+    gap: 0.5rem;
+    align-items: center;
+    list-style: none;
+    margin: 0;
+    padding: 0;
   }
-  
-  .footer-single-row {
-    gap: 1rem;
-    overflow: visible !important;
-    padding: 1rem 1.5rem !important;
-  }
-}
 
-/* Desktop */
-@media (min-width: 990px) {
+  .payments-icons .payment-icon {
+    height: 20px;
+    width: auto;
+  }
+
+  /* Mobile Responsive */
+  @media (max-width: 749px) {
+    .footer-single-row {
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+      text-align: center;
+      overflow: visible !important;
+      padding: var(--space-2xl) var(--space-lg) !important;
+      min-height: calc(var(--section-height, 40px) + 20px);
+    }
+
+    .policies-inline {
+      display: none;
+    }
+    .footer-left {
+      justify-content: center;
+      width: 100%;
+      order: 1;
+      overflow: visible !important;
+    }
+
+    .footer-center {
+      order: 1;
+      width: 100%;
+    }
+
+    .footer-right {
+      justify-content: center;
+      width: 100%;
+      order: 3;
+    }
+
+    .footer__localization {
+      justify-content: center;
+      flex-direction: row;
+      align-items: center;
+      gap: 1rem;
+      flex-wrap: wrap;
+      overflow: visible !important;
+    }
+
+    .copyright-line {
+      white-space: normal;
+      text-align: center;
+      line-height: 1.4;
+    }
+  }
+
+  /* Tablet */
+  @media (min-width: 750px) and (max-width: 989px) {
+    .footer__localization {
+      gap: 1rem;
+      flex-wrap: wrap;
+      overflow: visible !important;
+    }
+
+    .footer-single-row {
+      gap: 1rem;
+      overflow: visible !important;
+      padding: var(--space-lg) var(--space-2xl) !important;
+    }
+  }
+
+  /* Desktop */
+  @media (min-width: 990px) {
+    .footer__localization {
+      gap: 1.5rem;
+      overflow: visible !important;
+    }
+
+    .footer-single-row {
+      gap: 2rem;
+      overflow: visible !important;
+    }
+  }
+
+  /* Isolate stacking context */
+  .isolate {
+    isolation: isolate;
+  }
+
+  /* Utility classes */
+  .caption-large {
+    font-size: var(--t-b-3-size);
+    line-height: calc(1 + 0.5 / var(--font-body-scale));
+    letter-spacing: 0.04rem;
+  }
+
+  .text-body {
+    color: rgb(var(--color-foreground));
+    font-style: var(--font-body-style);
+    font-weight: var(--font-body-weight);
+  }
+
+  .caption {
+    font-size: var(--tm-b-4-size);
+    line-height: calc(1 + 0.8 / var(--font-body-scale));
+    letter-spacing: 0.04rem;
+  }
+
+  /* Ensure proper z-index for dropdowns */
+  localization-form {
+    position: relative;
+    z-index: 10;
+  }
+
+  /* Additional styling for better UX */
+  .footer__localization localization-form + localization-form {
+    margin-left: 0;
+  }
+
+  /* Fix any potential overflow issues */
+  .footer-bottom-section,
+  .footer-bottom-section * {
+    box-sizing: border-box;
+  }
+
+  /* Ensure body doesn't get extra scroll when dropdown is open */
+  body.localization-form-open {
+    overflow-x: hidden;
+  }
+
+  /* Fix z-index to appear above product-difference slider and other sections */
+  .footer__localization,
+  .footer__country-selector,
+  .footer__language-selector {
+    position: relative;
+    z-index: 1000;
+  }
+
+  /* Ensure dropdowns have even higher z-index */
+  .disclosure__list-wrapper,
+  .bb-disclosure__list-wrapper {
+    position: absolute;
+    z-index: 10001 !important;
+  }
+
+  .bb-ls-disclosure__list-wrapper {
+    bottom: 120%;
+    display: block;
+    overflow: visible !important;
+    background: var(--header_background);
+    max-height: none !important;
+  }
+  /* Make sure parent containers don't clip dropdowns */
+  .shopify-section-localization,
+  .footer-bottom-section,
+  .footer-single-row,
+  .footer-left,
   .footer__localization {
-    gap: 1.5rem;
     overflow: visible !important;
   }
-  
-  .footer-single-row {
-    gap: 2rem;
+
+  /* Override any parent overflow issues */
+  .bb-footer-container,
+  .footer-container {
     overflow: visible !important;
   }
-}
-
-/* Isolate stacking context */
-.isolate {
-  isolation: isolate;
-}
-
-/* Utility classes */
-.caption-large {
-  font-size: 1.6rem;
-  line-height: calc(1 + 0.5 / var(--font-body-scale));
-  letter-spacing: 0.04rem;
-}
-
-.text-body {
-  color: rgb(var(--color-foreground));
-  font-style: var(--font-body-style);
-  font-weight: var(--font-body-weight);
-}
-
-.caption {
-  font-size: 1.2rem;
-  line-height: calc(1 + 0.8 / var(--font-body-scale));
-  letter-spacing: 0.04rem;
-}
-
-/* Ensure proper z-index for dropdowns */
-localization-form {
-  position: relative;
-  z-index: 10;
-}
-
-/* Additional styling for better UX */
-.footer__localization localization-form + localization-form {
-  margin-left: 0;
-}
-
-/* Fix any potential overflow issues */
-.footer-bottom-section,
-.footer-bottom-section * {
-  box-sizing: border-box;
-}
-
-/* Ensure body doesn't get extra scroll when dropdown is open */
-body.localization-form-open {
-  overflow-x: hidden;
-}
 </style>
 
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-  // Enhanced localization form component for Shopify
-  class LocalizationForm extends HTMLElement {
-    constructor() {
-      super();
-      this.elements = {
-        input: this.querySelector('input[name="language_code"], input[name="country_code"]'),
-        button: this.querySelector('button'),
-        form: this.querySelector('form')
-      };
-    }
-    
-    connectedCallback() {
-      if (this.elements.form) {
-        this.elements.form.addEventListener('submit', this.onSubmitHandler.bind(this));
+  document.addEventListener('DOMContentLoaded', function () {
+    // Enhanced localization form component for Shopify
+    class LocalizationForm extends HTMLElement {
+      constructor() {
+        super();
+        this.elements = {
+          input: this.querySelector('input[name="language_code"], input[name="country_code"]'),
+          button: this.querySelector('button'),
+          form: this.querySelector('form'),
+        };
       }
-    }
-    
-    disconnectedCallback() {
-      if (this.elements.form) {
-        this.elements.form.removeEventListener('submit', this.onSubmitHandler.bind(this));
-      }
-    }
-    
-    onSubmitHandler(event) {
-      event.preventDefault();
-      
-      const form = event.target;
-      const formData = new FormData(form);
-      
-      // Get current URL parameters
-      const currentUrl = new URL(window.location.href);
-      
-      // Update URL with new localization parameters
-      for (let [key, value] of formData.entries()) {
-        currentUrl.searchParams.set(key, value);
-      }
-      
-      // Redirect with proper Shopify localization
-      window.location.href = currentUrl.toString();
-    }
-  }
-  
-  // Register the custom element if not already defined
-  if (!customElements.get('localization-form')) {
-    customElements.define('localization-form', LocalizationForm);
-  }
-  
-  // Additional event handling for better UX
-  const localizationForms = document.querySelectorAll('localization-form');
-  
-  localizationForms.forEach(form => {
-    const button = form.querySelector('button');
-    const disclosure = form.querySelector('[aria-expanded]');
-    
-    if (button) {
-      button.addEventListener('click', function(e) {
-        // Add class to body for any special styling during dropdown
-        document.body.classList.add('localization-form-open');
-      });
-    }
-    
-    if (disclosure) {
-      disclosure.addEventListener('focusout', function(e) {
-        // Small delay to allow for clicks on dropdown items
-        setTimeout(() => {
-          if (!form.contains(document.activeElement)) {
-            document.body.classList.remove('localization-form-open');
-          }
-        }, 100);
-      });
-    }
-  });
-  
-  // Close dropdown when clicking outside
-  document.addEventListener('click', function(e) {
-    const isInsideLocalizationForm = e.target.closest('localization-form');
-    if (!isInsideLocalizationForm) {
-      document.body.classList.remove('localization-form-open');
-    }
-  });
-});
 
-// Shopify theme events handling
-document.addEventListener('shopify:section:load', function(event) {
-  // Reinitialize localization forms when section is loaded/reloaded
-  const localizationForms = event.target.querySelectorAll('localization-form');
-  
-  localizationForms.forEach(form => {
-    // Trigger connectedCallback manually if needed
-    if (form.connectedCallback && typeof form.connectedCallback === 'function') {
-      form.connectedCallback();
+      connectedCallback() {
+        if (this.elements.form) {
+          this.elements.form.addEventListener('submit', this.onSubmitHandler.bind(this));
+        }
+      }
+
+      disconnectedCallback() {
+        if (this.elements.form) {
+          this.elements.form.removeEventListener('submit', this.onSubmitHandler.bind(this));
+        }
+      }
+
+      onSubmitHandler(event) {
+        event.preventDefault();
+
+        const form = event.target;
+        const formData = new FormData(form);
+
+        // Get current URL parameters
+        const currentUrl = new URL(window.location.href);
+
+        // Update URL with new localization parameters
+        for (let [key, value] of formData.entries()) {
+          currentUrl.searchParams.set(key, value);
+        }
+
+        // Redirect with proper Shopify localization
+        window.location.href = currentUrl.toString();
+      }
     }
+
+    // Register the custom element if not already defined
+    if (!customElements.get('localization-form')) {
+      customElements.define('localization-form', LocalizationForm);
+    }
+
+    // Additional event handling for better UX
+    const localizationForms = document.querySelectorAll('localization-form');
+
+    localizationForms.forEach((form) => {
+      const button = form.querySelector('button');
+      const disclosure = form.querySelector('[aria-expanded]');
+
+      if (button) {
+        button.addEventListener('click', function (e) {
+          // Add class to body for any special styling during dropdown
+          document.body.classList.add('localization-form-open');
+        });
+      }
+
+      if (disclosure) {
+        disclosure.addEventListener('focusout', function (e) {
+          // Small delay to allow for clicks on dropdown items
+          setTimeout(() => {
+            if (!form.contains(document.activeElement)) {
+              document.body.classList.remove('localization-form-open');
+            }
+          }, 100);
+        });
+      }
+    });
+
+    // Close dropdown when clicking outside
+    document.addEventListener('click', function (e) {
+      const isInsideLocalizationForm = e.target.closest('localization-form');
+      if (!isInsideLocalizationForm) {
+        document.body.classList.remove('localization-form-open');
+      }
+    });
+
+    const button = document.querySelector('.bb-disclosure__button');
+    const arrow = button.querySelector('.dropdown-arrow');
+
+    button.addEventListener('click', () => {
+      arrow.classList.toggle('rotate-180');
+    });
   });
-});
+
+  // Shopify theme events handling
+  document.addEventListener('shopify:section:load', function (event) {
+    // Reinitialize localization forms when section is loaded/reloaded
+    const localizationForms = event.target.querySelectorAll('localization-form');
+
+    localizationForms.forEach((form) => {
+      // Trigger connectedCallback manually if needed
+      if (form.connectedCallback && typeof form.connectedCallback === 'function') {
+        form.connectedCallback();
+      }
+    });
+  });
 </script>

@@ -8,15 +8,14 @@
 {% assign product_url = product.url %}
 {% assign product_available = product.available %}
 {% assign product_images = product.images %}
-{% assign product_variants = product.variants %}
 
 {% comment %} Check for size variants {% endcomment %}
 {% assign has_size_variants = false %}
 {% unless product.has_only_default_variant %}
   {% for option in product.options_with_values %}
-    {% if option.name == 'Size' or option.name == 'size' %}
+    {% assign option_name_lower = option.name | downcase %}
+    {% if option_name_lower == 'size' or option_name_lower contains 'size' %}
       {% assign has_size_variants = true %}
-      {% assign size_option_index = forloop.index0 %}
       {% break %}
     {% endif %}
   {% endfor %}
@@ -29,13 +28,7 @@
   <div class="new-product-image-wrapper" aria-label="Product images for {{ product_title }}">
     {% unless product_available %}
       <div class="absolute top-3 z-2" style="left: 10px;">
-        <span
-          class="tracking-wide font-medium sold-out"
-          style="background-color: transparent; color: var(--text);"
-          aria-live="polite"
-        >
-          SOLD OUT
-        </span>
+        {% render 'sold-out-badge', class: 'tracking-wide font-medium sold-out' %}
       </div>
     {% endunless %}
 
@@ -241,7 +234,7 @@
     position: absolute;
     top: 50%;
     transform: translateY(-50%);
-    z-index: 15;
+    z-index: var(--z-content-elevated);
     width: 44px;
     height: 44px;
     display: flex;
@@ -286,7 +279,7 @@
     bottom: 10px !important;
     left: 50%;
     transform: translateX(-50%);
-    z-index: 10;
+    z-index: var(--z-dropdown);
     width: 307px;
   }
 
@@ -308,12 +301,12 @@
     left: 50%;
     transform: translateX(-50%) translateY(10px);
     height: 50px;
-    border-radius: {{ settings.buttons_radius }}px;
-    font-size: var(--t-b-2-size);
-    font-weight: var(--t-b-2-weight);
-    line-height: var(--t-b-2-line-height);
+    border-radius: var(--sold-out-badge-radius);
+    font-size: var(--t-b-1-size);
+    font-weight: var(--t-b-1-weight);
+    line-height: var(--t-b-1-line-height);
     position: relative;
-    z-index: 5;
+    z-index: var(--z-content);
     cursor: pointer;
     opacity: 0;
     visibility: hidden;
@@ -337,8 +330,8 @@
     left: 50%;
     transform: translateX(-50%) translateY(10px);
     width: min(381px, calc(255px + 0.1835 * (100vw - 425px) - 60px));
-    height: 50px;
-    z-index: 10;
+    min-height: 50px;
+    z-index: var(--z-dropdown);
     transition: all 0.3s ease;
     display: flex;
     justify-content: center;
@@ -393,6 +386,16 @@
     transform: translateX(-50%) translateY(0);
   }
 
+  /* Override hover effects on mobile devices */
+  @media (max-width: 768px) {
+    .new-product-image-wrapper:hover .new-add-to-cart-btn[data-has-variants='false'],
+    .new-product-image-wrapper:hover .new-sold-out-btn {
+      opacity: 0 !important;
+      visibility: hidden !important;
+      transform: translateX(-50%) translateY(10px) !important;
+    }
+  }
+
   .new-add-to-cart-btn:hover + .new-size-variants-container,
   .new-size-variants-container.active {
     opacity: 1 !important;
@@ -400,14 +403,35 @@
     transform: translateX(-50%) translateY(0);
   }
 
+  /* Additional mobile hover overrides */
+  @media (max-width: 768px) {
+    .new-add-to-cart-btn:hover + .new-size-variants-container,
+    .new-size-variants-container:hover {
+      opacity: 0 !important;
+      visibility: hidden !important;
+    }
+  }
+
+  /* Override size-btn from size-variant-picker snippet within new-product-card */
+  .new-product-card .size-btn {
+    width: 30px !important;
+    height: 30px !important;
+    min-width: 30px !important;
+    padding: 0 !important;
+    border-radius: var(--sold-out-badge-radius) !important;
+    font-size: var(--t-b-2-size);
+    font-weight: var(--t-b-2-weight);
+    line-height: var(--t-b-2-line-height);
+  }
+
   .new-size-option-btn {
-    width: 23px;
-    height: 22px;
-    border-radius: {{ settings.buttons_radius }}px;
+    width: 30px;
+    height: 30px;
+    border-radius: var(--sold-out-badge-radius);
     color: var(--text);
-    font-size: var(--t-b-4-size);
-    font-weight: var(--t-b-4-weight);
-    line-height: var(--t-b-4-line-height);
+    font-size: var(--t-b-2-size);
+    font-weight: var(--t-b-2-weight);
+    line-height: var(--t-b-2-line-height);
     border: {{ settings.buttons_border_thickness }}px solid var(--disabled_text);
     padding: 2px;
     display: flex;
@@ -489,12 +513,27 @@
 
   .sold-out {
     font-weight: var(--t-b-3-weight);
-    padding: 0px 6px;
-    border-radius: {{ settings.buttons_radius | minus: 2 }}px;
     line-height: var(--t-b-3-line-height);
     display: inline-block;
     font-size: var(--t-b-3-size);
-    border: {{ settings.buttons_border_thickness }}px solid var(--text);
+    text-align: center;
+  }
+
+  /* Ensure sold-out badge uses global settings */
+  .sold-out-badge-filled.sold-out {
+    background-color: var(--sold-out-filled-bg, #000000);
+    color: var(--sold-out-filled-text, #FFFFFF);
+    border-radius: var(--sold-out-badge-radius, 5px);
+    padding: 0px 6px;
+    border: none;
+  }
+
+  .sold-out-badge-transparent.sold-out {
+    background-color: transparent;
+    color: var(--sold-out-transparent-text, #000000);
+    border: var(--sold-out-badge-border-thickness, 1px) solid var(--sold-out-transparent-border, #000000);
+    border-radius: var(--sold-out-badge-radius, 5px);
+    padding: 0px 6px;
   }
 
   .new-product-cart-container.show-button .new-sold-out-btn[data-has-variants='true'] {
@@ -545,25 +584,124 @@
   }
 
   @media (max-width: 768px) {
-    .new-product-image-wrapper:hover .new-add-to-cart-btn[data-has-variants='false'],
-    .new-product-image-wrapper:hover .new-sold-out-btn,
-    .new-product-cart-container.show-button .new-add-to-cart-btn,
-    .new-product-cart-container.show-button .new-sold-out-btn,
-    .new-add-to-cart-btn:hover + .new-size-variants-container,
-    .new-size-variants-container.active {
-      opacity: 1 !important;
-      visibility: visible !important;
-      transform: translateX(-50%) translateY(0);
+    /* ====================================================================
+       DISABLE HOVER EFFECTS ON MOBILE (Keep scroll animations)
+       ==================================================================== */
+
+    /* Disable hover-triggered transitions only */
+    .new-add-to-cart-btn,
+    .new-sold-out-btn,
+    .new-size-variants-container,
+    .new-size-option-btn,
+    .new-image-nav-arrow {
+      transition: none !important;
     }
 
-    /* Ensure size buttons still animate in on mobile */
+    /* Disable all hover-triggered animations and effects */
+    .new-product-card:hover,
+    .new-product-card:active,
+    .new-product-image-wrapper:hover,
+    .new-add-to-cart-btn:hover,
+    .new-sold-out-btn:hover,
+    .new-size-option-btn:hover {
+      transform: none !important;
+    }
+
+    /* Disable scale effect on active */
+    .new-product-card:active {
+      transform: none !important;
+    }
+
+    /* Disable size option hover animations */
+    @keyframes sizeOptionAppear {
+      0%, 100% {
+        opacity: 0;
+        transform: translateY(10px);
+        visibility: hidden;
+      }
+    }
+
+    .new-size-option-btn.size-animate {
+      animation: none !important;
+    }
+
+    /* Completely remove hover functionality on mobile - make it touch-friendly */
+
+    /* Hide all hover-triggered elements by default */
+    .new-image-nav-arrow {
+      display: none !important;
+      opacity: 0 !important;
+      transition: none !important;
+    }
+
+    .new-product-cart-container {
+      display: none !important;
+    }
+
+    .new-add-to-cart-btn,
+    .new-sold-out-btn {
+      display: none !important;
+    }
+
+    .new-size-variants-container {
+      display: none !important;
+    }
+
+    /* Remove all hover states */
+    .new-product-image-wrapper:hover .new-image-nav-arrow,
+    .new-product-image-wrapper:hover .new-image-nav-arrow svg,
+    .new-product-image-wrapper:hover .new-product-cart-container,
+    .new-product-image-wrapper:hover .new-add-to-cart-btn,
+    .new-product-image-wrapper:hover .new-sold-out-btn,
+    .new-product-image-wrapper:hover .new-size-variants-container {
+      display: none !important;
+      opacity: 0 !important;
+      visibility: hidden !important;
+    }
+
+    /* Disable button hover effects */
+    .new-add-to-cart-btn:hover,
+    .new-sold-out-btn:hover {
+      background-color: rgb(var(--color-background)) !important;
+      color: var(--text) !important;
+      transform: none !important;
+    }
+
+    .new-size-option-btn:hover {
+      transform: none !important;
+      color: var(--text) !important;
+      background-color: transparent !important;
+    }
+
+    /* Disable all variant container hover animations */
+    .new-add-to-cart-btn:hover + .new-size-variants-container,
+    .new-size-variants-container:hover,
+    .new-size-variants-container.active {
+      opacity: 0 !important;
+      visibility: hidden !important;
+      transform: translateX(-50%) translateY(10px) !important;
+    }
+
     .new-size-variants-container.active .new-size-option-btn,
-    .new-size-variants-container.active .unavailable-size {
-      opacity: 0;
-      visibility: hidden;
-      transform: translateY(10px);
-      animation: sizeOptionAppear 0.5s ease forwards;
-      animation-delay: calc(0.15s * var(--animation-order));
+    .new-add-to-cart-btn:hover + .new-size-variants-container .new-size-option-btn,
+    .new-size-variants-container.active .unavailable-size,
+    .new-add-to-cart-btn:hover + .new-size-variants-container .unavailable-size {
+      animation: none !important;
+      opacity: 0 !important;
+      visibility: hidden !important;
+    }
+
+    /* Make the product card a simple clickable link */
+    .new-product-card {
+      cursor: pointer;
+    }
+
+    /* Ensure the product link works properly - don't block scrolling */
+    .new-product-card a {
+      display: block;
+      text-decoration: none;
+      color: inherit;
+      /* Remove width/height 100% to allow scrolling */
     }
 
     /* Keep buttons hidden by default on mobile */

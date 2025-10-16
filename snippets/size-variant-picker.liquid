@@ -15,16 +15,18 @@
 
     if size_only == true
       # For product cards, only show Size variants
-      if option.name == 'Size' or option.name == 'size'
+      assign option_name_lower = option.name | downcase
+      if option_name_lower == 'size' or option_name_lower contains 'size'
         assign variant_option = option
-        assign variant_option_index = forloop.index0
+        assign variant_option_index = option.position
         break
       endif
     else
       # For main product page, show any non-color variant
-      unless option.name == 'Color' or option.name == 'Colour'
+      assign option_name_lower = option.name | downcase
+      unless option_name_lower contains 'color' or option_name_lower contains 'colour'
         assign variant_option = option
-        assign variant_option_index = forloop.index0
+        assign variant_option_index = option.position
         break
       endunless
     endif
@@ -34,7 +36,7 @@
 {% if variant_option %}
   {% if mobile %}
     <!-- Mobile Version -->
-    <fieldset class="flex justify-between items-center gap-2" style="padding: 10px 0;" role="group">
+    <fieldset class="flex justify-between items-center gap-2" style="padding: 10px 0 0 0;" role="group">
       <legend style="font-size: var(--tm-b-4-size); line-height: var(--tm-b-4-line-height);">
         SELECT {{ variant_option.name | upcase }}
       </legend>
@@ -43,9 +45,11 @@
         {% for value in variant_option.values %}
           {% assign variant_available = false %}
           {% assign variant_id = null %}
+          {% assign value_normalized = value | strip %}
           {% for variant in product.variants %}
-            {% assign option_key = 'option' | append: variant_option_index | plus: 1 %}
-            {% if variant[option_key] == value %}
+            {% assign option_key = 'option' | append: variant_option_index %}
+            {% assign variant_option_value = variant[option_key] | strip %}
+            {% if variant_option_value == value_normalized %}
               {% if variant.available %}
                 {% assign variant_available = true %}
                 {% assign variant_id = variant.id %}
@@ -58,17 +62,22 @@
             class="
               size-btn relative px-3 h-10 min-w-[2.5rem] flex items-center justify-center border-transparent rounded border
               focus:outline-none focus:ring-2 focus:ring-blue-500
-              {% if forloop.first and variant_available %}bg-black text-white{% endif %}
+              {% if forloop.first and variant_available %}bg-black text-white active{% endif %}
               {% unless variant_available %} cursor-not-allowed unavailable-size{% endunless %}
             "
+            data-mobile="true"
             data-option-index="{{ variant_option_index }}"
+            data-option-key="{{ option_key }}"
             data-value="{{ value | escape }}"
+            data-variant-available="{{ variant_available }}"
+            data-total-variants="{{ product.variants.size }}"
             role="radio"
             aria-checked="{% if forloop.first and variant_available %}true{% else %}false{% endif %}"
             style="--animation-order: {{ forloop.index0 }};"
             {% if variant_available %}
               data-variant-id="{{ variant_id }}"
               tabindex="{% if forloop.first %}0{% else %}-1{% endif %}"
+              {% if forloop.first %}data-default-selected="true"{% endif %}
             {% else %}
               disabled aria-disabled="true"
               tabindex="-1"
@@ -93,9 +102,11 @@
         {% for value in variant_option.values %}
           {% assign variant_available = false %}
           {% assign variant_id = null %}
+          {% assign value_normalized = value | strip %}
           {% for variant in product.variants %}
-            {% assign option_key = 'option' | append: variant_option_index | plus: 1 %}
-            {% if variant[option_key] == value %}
+            {% assign option_key = 'option' | append: variant_option_index %}
+            {% assign variant_option_value = variant[option_key] | strip %}
+            {% if variant_option_value == value_normalized %}
               {% if variant.available %}
                 {% assign variant_available = true %}
                 {% assign variant_id = variant.id %}
@@ -107,14 +118,19 @@
             type="button"
             class="
               size-btn relative px-3 h-10 min-w-[2.5rem] flex items-center justify-center border-transparent border
-              {% if forloop.first and variant_available %}bg-black text-white{% endif %}
+              {% if forloop.first and variant_available %}bg-black text-white active{% endif %}
               {% unless variant_available %}cursor-not-allowed unavailable-size{% endunless %}
             "
+            data-desktop="true"
             data-option-index="{{ variant_option_index }}"
+            data-option-key="{{ option_key }}"
             data-value="{{ value | escape }}"
+            data-variant-available="{{ variant_available }}"
+            data-total-variants="{{ product.variants.size }}"
             style="--animation-order: {{ forloop.index0 }};"
             {% if variant_available %}
               data-variant-id="{{ variant_id }}"
+              {% if forloop.first %}data-default-selected="true"{% endif %}
             {% else %}
               disabled aria-disabled="true"
             {% endif %}
@@ -148,7 +164,9 @@
     transition: all 0.3s ease;
     background-color: var(--button);
     color: var(--button_label);
-    border: 1px solid var(--disabled_text);
+    border: 1px solid var(--text);
+    height: 40px;
+    min-width: 48px;
   }
 
   .size-btn:not(:disabled):hover,
@@ -160,7 +178,7 @@
   .size-btn:disabled {
     opacity: 0.8;
     cursor: not-allowed;
-    border: 1px solid var(--disabled_text);
+    border: 1px solid var(--text);
   }
 
   .size-btn.unavailable-size {

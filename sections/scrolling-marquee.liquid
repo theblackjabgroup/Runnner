@@ -17,25 +17,18 @@
       "type": "image_picker",
       "id": "marquee_icon",
       "label": "Upload Icon (SVG or Image)",
-      "info": "Upload an SVG or image from media (optional - defaults to arrow icon)"
+      "info": "Upload an SVG or image from media (optional - defaults to arrow icon). Icon will be 30px x 30px on desktop and 20px x 20px on mobile."
     },
     {
       "type": "range",
-      "id": "icon_width",
-      "label": "Icon Width (px)",
-      "min": 10,
-      "max": 200,
-      "step": 5,
-      "default": 30
-    },
-    {
-      "type": "range",
-      "id": "icon_height",
-      "label": "Icon Height (px)",
-      "min": 10,
-      "max": 200,
-      "step": 5,
-      "default": 15
+      "id": "icon_spacing",
+      "label": "Icon Spacing (px)",
+      "min": 0,
+      "max": 50,
+      "step": 2,
+      "default": 16,
+      "unit": "px",
+      "info": "Space between text and icon/separator"
     },
     {
       "type": "color_scheme",
@@ -63,8 +56,7 @@
   ],
   "presets": [
     {
-      "name": "Scrolling Marquee",
-      "category": "Footer"
+      "name": "Scrolling Marquee"
     }
   ]
 }
@@ -73,8 +65,7 @@
 {%- liquid
   assign marquee_text = section.settings.marquee_text | strip | default: 'SUBSCRIBE FOR EMAILS'
   assign marquee_icon = section.settings.marquee_icon
-  assign icon_width = section.settings.icon_width | default: 20
-  assign icon_height = section.settings.icon_height | default: 20
+  assign icon_spacing = section.settings.icon_spacing | default: 16
   assign scroll_speed = section.settings.scroll_speed | default: 230
   assign color_scheme = section.settings.color_scheme | default: 'scheme-1'
   assign pause_on_hover = section.settings.pause_on_hover | default: false
@@ -89,30 +80,24 @@
 {% capture icon_output %}
   {% if marquee_icon != blank %}
     <img
-      src="{{ marquee_icon | image_url: width: icon_width }}"
+      src="{{ marquee_icon | image_url: width: 40 }}"
       alt="Marquee icon"
-      height="{{ icon_height }}"
-      width="{{ icon_width }}"
-      style="height: {{ icon_height }}px; width: {{ icon_width }}px;"
-      class="inline-block ml-1"
+      class="marquee-separator-image"
+      width="100"
+      height="100"
     />
   {% else %}
-    <svg
-      class="inline-block ml-1 transition-transform duration-200 ease-in-out"
-      style="height: {{ icon_height }}px; width: {{ icon_width }}px;"
-      viewBox="4.5 1.5 8.5 13"
-      fill="currentColor"
-      xmlns="http://www.w3.org/2000/svg"
-      stroke="currentColor"
-      aria-hidden="true"
-    >
-      <path d="m12.14 8.753-5.482 4.796c-.646.566-1.658.106-1.658-.753V3.204a1 1 0 0 1 1.659-.753l5.48 4.796a1 1 0 0 1 0 1.506z"/>
-    </svg>
+    {% render 'icon-playback',
+      class: 'bi bi-caret-right-fill scrolling-separator',
+      width: '50px',
+      height: '50px',
+      fill: 'currentColor'
+    %}
   {% endif %}
 {% endcapture %}
 
 <section
-  class="marquee-wrapper w-full overflow-hidden color-{{ color_scheme }} border-t border-black"
+  class="marquee-wrapper w-full overflow-hidden color-{{ color_scheme }}"
   role="banner"
   aria-label="Scrolling announcement"
   {{ section.shopify_attributes }}
@@ -155,28 +140,45 @@
 
 <style>
   .marquee-wrapper {
-    padding: 0.5rem 0;
+    padding: 0;
     display: flex;
     align-items: center;
-    border-top: 1px solid black;
-    border-bottom: 1px solid black;
+    border-top: 1px solid var(--text);
+    border-bottom: 1px solid var(--text);
     position: relative;
+    height: 30px;
+    overflow: hidden;
   }
 
   .marquee-container {
     display: flex;
     animation: scroll-x {{ scroll_speed }}s linear infinite;
-    height: auto;
+    height: 100%;
     will-change: transform;
+    align-items: center;
   }
 
   .marquee-content {
     color: var(--text);
-    font-size: 20px;
-    line-height: 0.1;
+    font-size: 24px;
+    line-height: 1.2;
     font-weight: 500;
-    margin-top: 10px;
-    margin-bottom: 10px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    height: 100%;
+  }
+
+  .marquee-content span {
+    display: flex;
+    align-items: center;
+  }
+
+  .marquee-content img,
+  .marquee-content svg {
+    width: 25px;
+    height: 25px;
+    margin: 0 {{ icon_spacing }}px;
     flex-shrink: 0;
   }
 
@@ -192,6 +194,24 @@
     }
     100% {
       transform: translateX(0);
+    }
+  }
+
+  /* Mobile styles - match cart drawer dimensions */
+  @media only screen and (max-width: 600px) {
+    .marquee-wrapper {
+      height: 25px;
+    }
+
+    .marquee-content {
+      font-size: 15px;
+    }
+
+    .marquee-content img,
+    .marquee-content svg {
+      width: 20px;
+      height: 20px;
+      margin: 0 {{ icon_spacing | divided_by: 2 }}px;
     }
   }
 

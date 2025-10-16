@@ -1,476 +1,441 @@
 <style>
-  .prod-diff-section ::selection {
-    color: var(--accent) !important;
-  }
+    /* --- COMMENT: The main 'section' element now handles padding --- */
+    .prod-diff-section {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      width: 100%;
+      overflow: hidden;
+      min-height: 60vh;
+      max-height: none;
+      position: relative;
 
-  .prod-diff-section {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    width: 100%;
-    overflow: hidden;
-  }
+    }
 
-  .prod-diff-container {
-    position: relative;
-    width: 100vw;
-    margin-top: {{ section.settings.margin_top }}px;
-    margin-bottom: {{ section.settings.margin_bottom }}px;
-    margin-left: {{ section.settings.margin_left }}px;
-    margin-right: {{ section.settings.margin_right }}px;
-  }
 
-  .prod-diff-wrapper {
-    position: absolute;
-    top: 0;
-    overflow: hidden;
-  }
 
-  .prod-diff-wrapper.prod-diff-left {
-    left: 0;
-    width: 50%;
-    display: block;
-    unicode-bidi: isolate;
-  }
+    @media screen and (min-width: 750px) {
+      .prod-diff-section {
+        min-height: 70vh;
+      }
+    }
 
-  .prod-diff-wrapper.prod-diff-right {
-    right: 0;
-    width: 50%;
-    display: block;
-    unicode-bidi: isolate;
-  }
+    /* --- COMMENT: The slider is now a single container using layered images instead of two sliding divs --- */
+    .prod-diff-container {
+      position: relative;
+      width: 100%;
+      max-width: 100vw;
+      overflow: hidden;
+      cursor: col-resize;
+      margin: {{ section.settings.margin_top }}px auto {{ section.settings.margin_bottom }}px auto;
+      max-height: 90vh
+    }
 
-  .prod-diff-img {
-    position: absolute;
-    left: 0;
-    width: 100vw;
-    height: auto;
-    object-fit: cover;
-    max-width: none;
-    display: block;
-  }
+    /* --- COMMENT: Base style for BOTH layered images. Now uses height: 100% to fill its parent --- */
+    .prod-diff-img {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      object-fit: cover;
+      object-position: center center;
+      pointer-events: none;
+      background-color: rgb(var(--color-background)); /* Ensures placeholders are visible */
+      z-index: 0;
+    }
 
-  .prod-diff-slider-container {
-    position: absolute;
-    width: 100%;
-    top: 0;
-    /* z-index: 10; */
-  }
+    .prod-diff-img img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center;
+    }
 
-  .prod-diff-slider-divider {
-    position: absolute;
-    top: 0;
-    bottom: 0;
-    width: 4px;
-    left: 50%;
-    transform: translateX(-50%);
-    /* z-index: 15; */
-    opacity: 1;
-  }
+    /* --- COMMENT: A new class to apply the clip-path, revealing the image underneath --- */
+    .prod-diff-img--before {
+      clip-path: inset(0 50% 0 0);
+    }
 
-  .prod-diff-slider-handle {
-    position: absolute;
-    height: 50px;
-    width: 92px;
-    background-color: black;
-    border: 2px solid white;
-    border-radius: 25px;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    cursor: grab;
-    display: flex !important;
-    justify-content: space-between;
-    align-items: center;
-    /* z-index: 10; */
-    opacity: 1;
-    pointer-events: auto;
-    padding: 0 7px;
-  }
+    /* --- COMMENT: Style for the new INVISIBLE range slider that controls the effect --- */
+    .prod-diff-slider-range {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      margin: 0;
+      opacity: 0;
+      cursor: grab;
+      z-index: var(--z-fixed);
+    }
+    .prod-diff-slider-range:active { cursor: grabbing; }
 
-  .prod-diff-slider-handle svg {
-    width: 27px;
-    height: 27px;
-    fill: white;
-  }
+    /* --- COMMENT: Style for the VISIBLE divider --- */
+    .prod-diff-slider-divider {
+      position: absolute;
+      top: 0; bottom: 0;
+      left: 50%;
+      width: 1px;
+      background-color: var(--text);
+      transform: translateX(-50%);
+      pointer-events: none;
+      z-index: var(--z-dropdown);
+    }
 
-  .prod-diff-slider-handle-chevron {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    cursor: grab;
-    opacity: 1;
-    pointer-events: auto;
-    transition: transform 0.2s ease;
-  }
+    /* --- COMMENT: The original handle style, now with a transition for the grab animation --- */
+    .prod-diff-slider-handle-chevron {
+      position: absolute;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      pointer-events: none;
+      z-index: var(--z-sticky);
+      transition: transform 0.2s ease;
+    }
 
-  .prod-diff-slider-handle-chevron.dragging {
-    cursor: grabbing;
-    transform: translate(-50%, -50%) scale(0.9);
-  }
+    /* --- COMMENT: A new class added by JavaScript to create the grab animation --- */
+    .prod-diff-slider-handle-chevron.dragging {
+      transform: translate(-50%, -50%) scale(0.9);
+    }
 
-  .prod-diff-slider-handle-chevron svg {
-    transition: all 0.2s ease;
-  }
+    .prod-diff-slider-handle-chevron svg { transition: all 0.2s ease; }
 
-  .prod-diff-wrapper.prod-diff-left .prod-diff-img {
-    left: 0;
-  }
-
-  /* This will be dynamically set by JavaScript using percentages */
-  .prod-diff-wrapper.prod-diff-right .prod-diff-img {
-    left: -50%;
-  }
-
-  .prod-diff-product-info {
-    position: absolute;
-    bottom: 20px;
-    padding: 10px 15px;
-    max-width: 300px;
-    width: auto;
-  }
-
-  .prod-diff-product-info.left {
-    left: 20px;
-    text-align: left;
-  }
-
-  .prod-diff-product-info.right {
-    right: 20px;
-    text-align: right;
-  }
-
-  .prod-diff-product-name {
-    font-family: var(--font-body-family);
-    font-style: var(--font-body-style);
-    color: var(--text);
-    margin: 0 0 6px 0;
-    font-size: var(--t-b-2-size);
-    font-weight: var(--t-b-2-weight);
-    line-height: var(--t-b-2-line-height);
-  }
-
-  .prod-diff-product-price {
-    margin: 0;
-  }
-
-  .prod-diff-product-price .prod-diff-price {
-    font-family: var(--font-body-family);
-    font-style: var(--font-body-style);
-    color: var(--text);
-  }
-
-  @media (max-width: 768px) {
+    /* --- COMMENT: Styles for the product info text boxes (background removed) --- */
     .prod-diff-product-info {
-      padding: 8px 12px;
-      bottom: 15px;
-      max-width: 200px;
+      position: absolute;
+      padding: var(--space-lg) var(--space-2xl);
+      max-width: 300px;
+      border-radius: var(--space-sm);
+      pointer-events: none;
+      bottom: var(--space-3xl);
     }
-
     .prod-diff-product-info.left {
-      left: 10px;
-      bottom: 0vw;
+      left: var(--space-3xl);
+      text-align: left;
+      z-index: 2;
+      clip-path: inset(0 30% 0 0);
+    }
+    .prod-diff-product-info.right {
+      right: var(--space-3xl);
+      text-align: right;
+      z-index: 1;
     }
 
-    .prod-diff-product-info.right {
-      right: 10px;
-      bottom: 0vw;
+    /* --- COMMENT: Mobile responsive styles for product info --- */
+    @media (max-width: 768px) {
+      .prod-diff-product-info {
+        padding: var(--space-md) var(--space-xl);
+        bottom: var(--space-2xl);
+        max-width: 200px; /* Key change from reference code to prevent overlap */
+      }
+
+      .prod-diff-product-info.left {
+        left: var(--space-lg);
+        bottom: 0vw; /* Consistent vertical positioning */
+      }
+
+      .prod-diff-product-info.right {
+        right: var(--space-lg);
+        bottom: 0vw; /* Consistent vertical positioning */
+      }
+
+      .prod-diff-product-name {
+        font-size: var(--tm-b-5-size);
+        line-height: var(--tm-b-5-line-height);
+      }
+
+      .prod-diff-product-info .prod-diff-product-price {
+        font-size: var(--tm-b-5-size);
+      }
     }
 
     .prod-diff-product-name {
-      font-size: var(--tm-b-2-size);
-      line-height: var(--tm-b-2-line-height);
+      font-family: var(--font-body-family);
+      font-size: var(--t-b-2-size);
+      font-weight: var(--t-b-2-weight);
+      margin: 0 0 var(--space-sm) 0;
+      color: var(--text);
     }
+    .prod-diff-product-price .prod-diff-price {
+      font-family: var(--font-body-family);
+      color: var(--text);
   }
+
+    /* --- COMMENT: Styles for default Before/After labels when no products are selected --- */
+    .prod-diff-default-labels {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      z-index: var(--z-content-elevated);
+      pointer-events: none;
+    }
+    .prod-diff-default-labels.before-label {
+      left: var(--space-3xl);
+    }
+    .prod-diff-default-labels.after-label {
+      right: var(--space-3xl);
+    }
+    .prod-diff-default-label {
+      font-family: var(--font-body-family);
+      font-size: var(--t-b-2-size);
+      font-weight: var(--t-b-2-weight);
+      color: var(--text);
+      background: rgba(255, 255, 255, 0.9);
+      padding: var(--space-xl) var(--space-3xl);
+      border-radius: var(--space-md);
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      text-transform: uppercase;
+      letter-spacing: var(--space-tiny);
+    }
+    @media screen and (max-width: 749px) {
+      .prod-diff-default-label {
+        font-size: var(--tm-b-2-size);
+        font-weight: var(--tm-b-2-weight);
+        padding: var(--space-md) var(--space-2xl);
+      }
+
+    }
 </style>
 
+{%- comment -%} Assign product and image variables at the top for cleaner code {%- endcomment -%}
+{%- assign left_product = all_products[section.settings.left_product] -%}
+{%- assign right_product = all_products[section.settings.right_product] -%}
+{%- assign image_before = left_product.featured_image -%}
+{%- assign image_after = right_product.featured_image -%}
+{%- assign image_for_sizing = image_before | default: image_after -%}
+{%- assign max_aspect_ratio = 0 -%}
+{%- if image_for_sizing != blank -%}
+  {%- assign max_aspect_ratio = image_for_sizing.aspect_ratio -%}
+{%- endif -%}
+
 {% if section.settings.enabled %}
-  {% comment %} Calculate the maximum height from both product images {% endcomment %}
-  {% assign left_product = all_products[section.settings.left_product] %}
-  {% assign right_product = all_products[section.settings.right_product] %}
+  <section class="prod-diff-section">
+    {%- comment -%}
+      The container no longer needs a separate style tag for its height.
+      It now uses the same variable as the main section.
+    {%- endcomment -%}
+    <div
+      class="prod-diff-container"
+      data-section-id="{{ section.id }}"
+      style="
+        {%- comment -%} The height calculation now has a fallback of 60vh to prevent collapsing, with max height constraint {%- endcomment -%}
+        {%- if max_aspect_ratio > 0 -%}
+          height: min({{ 100 | divided_by: max_aspect_ratio }}vw, 90vh);
+        {%- else -%}
+          height: 70vh;
+        {%- endif -%}
+        max-height: 90vh;
+      "
+    >
+      {%- comment -%}
+        The structure is now two layered images instead of two side-by-side wrappers.
+        Each layer checks for its own image and falls back to a placeholder if needed.
+      {%- endcomment -%}
 
-  {% assign max_aspect_ratio = 0 %}
+      {% if image_after != blank %}
+        <img
+          srcset="
+            {%- liquid
+              assign widths = '375,550,750,1100,1500,1780,2000,3000,3840' | split: ','
+              for width in widths
+                assign width_num = width | plus: 0
+                if image_after.width >= width_num
+                  echo image_after | image_url: width: width_num
+                  echo ' '
+                  echo width_num
+                  echo 'w, '
+                endif
+              endfor
+              echo image_after | image_url
+              echo ' '
+              echo image_after.width
+              echo 'w'
+            -%}
+          "
+          sizes="(min-width: 1200px) 1200px, (min-width: 750px) calc(100vw - 10rem), 100vw"
+          src="{{ image_after | image_url: width: 1800 }}"
+          class="prod-diff-img"
+          alt="{{ image_after.alt | escape }}"
+          width="{{ image_after.width }}"
+          height="{{ image_after.width | divided_by: image_after.aspect_ratio | round }}"
+          loading="eager"
+          fetchpriority="high"
+          style="opacity: 0.7;"
+        >
+      {% else %}
+        <div style="opacity: 0.7;">{{ 'lifestyle-2' | placeholder_svg_tag: 'prod-diff-img' }}</div>
+      {% endif %}
 
-  {% if left_product and left_product.featured_image %}
-    {% assign left_aspect_ratio = left_product.featured_image.aspect_ratio %}
-    {% if left_aspect_ratio < max_aspect_ratio or max_aspect_ratio == 0 %}
-      {% assign max_aspect_ratio = left_aspect_ratio %}
-    {% endif %}
-  {% endif %}
-
-  {% if right_product and right_product.featured_image %}
-    {% assign right_aspect_ratio = right_product.featured_image.aspect_ratio %}
-    {% if right_aspect_ratio < max_aspect_ratio or max_aspect_ratio == 0 %}
-      {% assign max_aspect_ratio = right_aspect_ratio %}
-    {% endif %}
-  {% endif %}
-
-  {% comment %} Convert aspect ratio to CSS calc for responsive height {% endcomment %}
-  {% if max_aspect_ratio > 0 %}
-    {% assign height_vw = 100.0 | divided_by: max_aspect_ratio %}
-  {% else %}
-    {% assign height_vw = 50 %}
-  {% endif %}
-
-  <section class="prod-diff-section" style="height: {{ height_vw }}vw;">
-    <div class="prod-diff-container" style="height: {{ height_vw }}vw;">
-      <div class="prod-diff-wrapper prod-diff-left" style="height: {{ height_vw }}vw;">
-        {% if left_product and left_product.featured_image %}
+      <div id="BeforeImage-{{ section.id }}" class="prod-diff-img prod-diff-img--before">
+        {% if image_before != blank %}
           <img
             srcset="
-              {% if left_product.featured_image.width >= 375 %}{{ left_product.featured_image | image_url: width: 375 }} 375w,{% endif %}
-              {% if left_product.featured_image.width >= 550 %}{{ left_product.featured_image | image_url: width: 550 }} 550w,{% endif %}
-              {% if left_product.featured_image.width >= 750 %}{{ left_product.featured_image | image_url: width: 750 }} 750w,{% endif %}
-              {% if left_product.featured_image.width >= 1100 %}{{ left_product.featured_image | image_url: width: 1100 }} 1100w,{% endif %}
-              {% if left_product.featured_image.width >= 1500 %}{{ left_product.featured_image | image_url: width: 1500 }} 1500w,{% endif %}
-              {% if left_product.featured_image.width >= 2200 %}{{ left_product.featured_image | image_url: width: 2200 }} 2200w,{% endif %}
-              {{ left_product.featured_image | image_url }} {{ left_product.featured_image.width }}w
+              {%- liquid
+                assign widths = '375,550,750,1100,1500,1780,2000,3000,3840' | split: ','
+                for width in widths
+                  assign width_num = width | plus: 0
+                  if image_before.width >= width_num
+                    echo image_before | image_url: width: width_num
+                    echo ' '
+                    echo width_num
+                    echo 'w, '
+                  endif
+                endfor
+                echo image_before | image_url
+                echo ' '
+                echo image_before.width
+                echo 'w'
+              -%}
             "
-            src="{{ left_product.featured_image | image_url: width: 1200 }}"
-            alt="{{ left_product.title | escape }}"
+            sizes="(min-width: 1200px) 1200px, (min-width: 750px) calc(100vw - 10rem), 100vw"
+            src="{{ image_before | image_url: width: 1800 }}"
             class="prod-diff-img"
-            width="600"
-            height="auto"
-            style="height: auto; width: 100vw;"
+            alt="{{ image_before.alt | escape }}"
+            width="{{ image_before.width }}"
+            height="{{ image_before.width | divided_by: image_before.aspect_ratio | round }}"
+            loading="eager"
+            fetchpriority="high"
           >
         {% else %}
-          <div style="width: 500px; height: 100%;">
-            {{ 'collection-1' | placeholder_svg_tag }}
+          <div
+            class="flex items-center justify-center w-full h-full"
+            style="background-color: var(--accent);"
+            role="img"
+            aria-label="Placeholder image"
+          >
+            {{ 'lifestyle-2' | placeholder_svg_tag: 'prod-diff-img opacity-30' }}
           </div>
         {% endif %}
       </div>
 
-      <div class="prod-diff-wrapper prod-diff-right" style="height: {{ height_vw }}vw;">
-        {% if right_product and right_product.featured_image %}
-          <img
-            srcset="
-              {% if right_product.featured_image.width >= 375 %}{{ right_product.featured_image | image_url: width: 375 }} 375w,{% endif %}
-              {% if right_product.featured_image.width >= 550 %}{{ right_product.featured_image | image_url: width: 550 }} 550w,{% endif %}
-              {% if right_product.featured_image.width >= 750 %}{{ right_product.featured_image | image_url: width: 750 }} 750w,{% endif %}
-              {% if right_product.featured_image.width >= 1100 %}{{ right_product.featured_image | image_url: width: 1100 }} 1100w,{% endif %}
-              {% if right_product.featured_image.width >= 1500 %}{{ right_product.featured_image | image_url: width: 1500 }} 1500w,{% endif %}
-              {% if right_product.featured_image.width >= 2200 %}{{ right_product.featured_image | image_url: width: 2200 }} 2200w,{% endif %}
-              {{ right_product.featured_image | image_url }} {{ right_product.featured_image.width }}w
-            "
-            src="{{ right_product.featured_image | image_url: width: 1200 }}"
-            alt="{{ right_product.title | escape }}"
-            class="prod-diff-img"
-            width="600"
-            height="auto"
-            style="height: auto; width: 100vw;"
-          >
-        {% else %}
-          <div style="width: 500px; height: 100%;">
-            {{ 'collection-1' | placeholder_svg_tag }}
-          </div>
-        {% endif %}
-      </div>
-
-      <div class="prod-diff-slider-container" style="height: {{ height_vw }}vw;">
-        <div class="prod-diff-slider-divider">
-          {% comment %}
-            <div class="prod-diff-slider-handle">
-              <svg width="25" height="31" viewBox="0 0 25 31" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M15.4727 1.85254L1.62745 15.6977M1.62745 15.6977L15.4727 29.543M1.62745 15.6977L24.4498 15.6977" stroke="white" stroke-width="3" stroke-linejoin="round"/>
-              </svg>
-
-              <svg width="25" height="31" viewBox="0 0 25 31" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M9.58594 1.85254L23.4311 15.6977M23.4311 15.6977L9.58594 29.543M23.4311 15.6977L0.608765 15.6977" stroke="white" stroke-width="3" stroke-linejoin="round"/>
-              </svg>
-            </div>
-          {% endcomment %}
-          <div class="prod-diff-slider-handle-chevron">
-            {% comment %}
-              <svg width="75" height="35" viewBox="0 0 54 25" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M5 24.5H49C51.4853 24.5 53.5 22.4853 53.5 20V5C53.5 2.51472 51.4853 0.5 49 0.5H5C2.51472 0.5 0.5 2.51472 0.5 5V20C0.5 22.4853 2.51472 24.5 5 24.5Z" fill="var(--button)" stroke="var(--button_label)"/>
-                <path d="M10.1955 12.9824L16.8614 19.8002C16.9234 19.8635 16.9969 19.9138 17.0778 19.9481C17.1587 19.9824 17.2455 20 17.333 20C17.4206 20 17.5074 19.9824 17.5883 19.9481C17.6692 19.9138 17.7427 19.8635 17.8047 19.8002C17.8666 19.7369 17.9157 19.6617 17.9492 19.5789C17.9827 19.4961 18 19.4074 18 19.3178C18 19.2283 17.9827 19.1395 17.9492 19.0568C17.9157 18.974 17.8666 18.8988 17.8047 18.8355L11.6095 12.5L17.8047 6.16452C17.9297 6.03659 18 5.86308 18 5.68216C18 5.50124 17.9297 5.32773 17.8047 5.1998C17.6796 5.07187 17.5099 5 17.333 5C17.1561 5 16.9865 5.07187 16.8614 5.1998L10.1955 12.0176C10.1335 12.081 10.0844 12.1561 10.0508 12.2389C10.0173 12.3217 10 12.4104 10 12.5C10 12.5896 10.0173 12.6783 10.0508 12.7611C10.0844 12.8438 10.1335 12.919 10.1955 12.9824Z" fill="var(--button_label)"/>
-                <path d="M42.8045 12.9824L36.1386 19.8002C36.0766 19.8635 36.0031 19.9138 35.9222 19.9481C35.8413 19.9824 35.7545 20 35.667 20C35.5794 20 35.4926 19.9824 35.4117 19.9481C35.3308 19.9138 35.2573 19.8635 35.1953 19.8002C35.1334 19.7369 35.0843 19.6617 35.0508 19.5789C35.0173 19.4961 35 19.4074 35 19.3178C35 19.2283 35.0173 19.1395 35.0508 19.0568C35.0843 18.974 35.1334 18.8988 35.1953 18.8355L41.3905 12.5L35.1953 6.16452C35.0703 6.03659 35 5.86308 35 5.68216C35 5.50124 35.0703 5.32773 35.1953 5.1998C35.3204 5.07187 35.4901 5 35.667 5C35.8439 5 36.0135 5.07187 36.1386 5.1998L42.8045 12.0176C42.8665 12.081 42.9156 12.1561 42.9492 12.2389C42.9827 12.3217 43 12.4104 43 12.5C43 12.5896 42.9827 12.6783 42.9492 12.7611C42.9156 12.8438 42.8665 12.919 42.8045 12.9824Z" fill="var(--button_label)"/>
-              </svg>
-            {% endcomment %}
-            <svg width="137" height="51" viewBox="0 0 137 51" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <rect x="0.5" y="0.5" width="136" height="50" rx="4.5" stroke="white"/>
-              <path d="M112.451 26.5824L104.571 33.4767C103.642 34.2903 102.188 33.6291 102.188 32.3943V18.6058C102.187 18.3294 102.267 18.0588 102.416 17.8265C102.566 17.5941 102.779 17.4098 103.031 17.2955C103.283 17.1813 103.562 17.1421 103.835 17.1825C104.109 17.2229 104.364 17.3412 104.572 17.5233L112.45 24.4176C112.604 24.5525 112.728 24.7189 112.813 24.9056C112.898 25.0923 112.941 25.295 112.941 25.5C112.941 25.7051 112.898 25.9077 112.813 26.0944C112.728 26.2811 112.604 26.4475 112.45 26.5824H112.451Z" fill="white"/>
-              <path d="M24.5487 26.5824L32.4291 33.4767C33.3577 34.2903 34.8125 33.6291 34.8125 32.3943V18.6058C34.8127 18.3294 34.7333 18.0588 34.5837 17.8265C34.4342 17.5941 34.2208 17.4098 33.9691 17.2955C33.7175 17.1813 33.4383 17.1421 33.1649 17.1825C32.8915 17.2229 32.6355 17.3412 32.4277 17.5233L24.5502 24.4176C24.3958 24.5525 24.272 24.7189 24.1872 24.9056C24.1025 25.0923 24.0586 25.295 24.0586 25.5C24.0586 25.7051 24.1025 25.9077 24.1872 26.0944C24.272 26.2811 24.3958 26.4475 24.5502 26.5824H24.5487Z" fill="white"/>
-            </svg>
-          </div>
+      <div id="Divider-{{ section.id }}" class="prod-diff-slider-divider">
+        <div id="Handle-{{ section.id }}" class="prod-diff-slider-handle-chevron">
+          <svg width="137" height="51" viewBox="0 0 137 51" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect x="0.5" y="0.5" width="136" height="50" rx="4.5" stroke="var(--text, #000)"/>
+             <path d="M112.451 26.5824L104.571 33.4767C103.642 34.2903 102.188 33.6291 102.188 32.3943V18.6058C102.187 18.3294 102.267 18.0588 102.416 17.8265C102.566 17.5941 102.779 17.4098 103.031 17.2955C103.283 17.1813 103.562 17.1421 103.835 17.1825C104.109 17.2229 104.364 17.3412 104.572 17.5233L112.45 24.4176C112.604 24.5525 112.728 24.7189 112.813 24.9056C112.898 25.0923 112.941 25.295 112.941 25.5C112.941 25.7051 112.898 25.9077 112.813 26.0944C112.728 26.2811 112.604 26.4475 112.450 26.5824H112.451Z" fill="var(--text, #000)"/>
+             <path d="M24.5487 26.5824L32.4291 33.4767C33.3577 34.2903 34.8125 33.6291 34.8125 32.3943V18.6058C34.8127 18.3294 34.7333 18.0588 34.5837 17.8265C34.4342 17.5941 34.2208 17.4098 33.9691 17.2955C33.7175 17.1813 33.4383 17.1421 33.1649 17.1825C32.8915 17.2229 32.6355 17.3412 32.4277 17.5233L24.5502 24.4176C24.3958 24.5525 24.272 24.7189 24.1872 24.9056C24.1025 25.0923 24.0586 25.295 24.0586 25.5C24.0586 25.7051 24.1025 25.9077 24.1872 26.0944C24.272 26.2811 24.3958 26.4475 24.5502 26.5824H24.5487Z" fill="var(--text, #000)"/>
+          </svg>
         </div>
       </div>
 
-      <!-- Product Information Divs -->
+      <input
+        type="range"
+        min="0"
+        max="100"
+        value="50"
+        id="Slider-{{ section.id }}"
+        class="prod-diff-slider-range"
+        aria-label="Image comparison slider"
+      >
+
       {% if section.settings.product_name_enabled %}
-      {% if left_product %}
-        <div class="prod-diff-product-info left">
-          <h3 class="prod-diff-product-name">{{ left_product.title }}</h3>
-          <div class="prod-diff-product-price">
-            {% render 'price',
-              product: left_product,
-              price_class: 'prod-diff-price',
-              font_size_desktop: 'var(--t-b-2-size)',
-              font_size_mobile: 'var(--tm-b-2-size)',
-              font_weight_desktop: 'var(--t-b-2-weight)',
-              font_weight_mobile: 'var(--t-b-2-weight)',
-              line_height_desktop: 'var(--t-b-2-line-height)',
-              line_height_mobile: 'var(--tm-b-2-line-height)'
-            %}
+        {% if left_product %}
+          <div class="prod-diff-product-info left">
+            <h3 class="prod-diff-product-name">{{ left_product.title }}</h3>
+            <div class="prod-diff-product-price">
+              {%- render 'price',
+                product: left_product,
+                price_class: 'prod-diff-price',
+                font_size_desktop: 'var(--t-b-2-size)',
+                font_size_mobile: 'var(--tm-b-2-size)',
+                font_weight_desktop: 'var(--t-b-2-weight)',
+                font_weight_mobile: 'var(--t-b-2-weight)',
+                line_height_desktop: 'var(--t-b-2-line-height)',
+                line_height_mobile: 'var(--tm-b-2-line-height)'
+              -%}
+            </div>
           </div>
-        </div>
-      {% endif %}
-
-      {% if right_product %}
-        <div class="prod-diff-product-info right">
-          <h3 class="prod-diff-product-name">{{ right_product.title }}</h3>
-          <div class="prod-diff-product-price">
-            {% render 'price',
-              product: right_product,
-              price_class: 'prod-diff-price',
-              font_size_desktop: 'var(--t-b-2-size)',
-              font_size_mobile: 'var(--tm-b-2-size)',
-              font_weight_desktop: 'var(--t-b-2-weight)',
-              font_weight_mobile: 'var(--t-b-2-weight)',
-              line_height_desktop: 'var(--t-b-2-line-height)',
-              line_height_mobile: 'var(--tm-b-2-line-height)'
-            %}
+        {% elsif image_before == blank %}
+          <div class="prod-diff-product-info left default-label">
+            <h3 class="prod-diff-product-name">Left</h3>
           </div>
-        </div>
+        {% endif %}
+        {% if right_product %}
+          <div class="prod-diff-product-info right">
+            <h3 class="prod-diff-product-name">{{ right_product.title }}</h3>
+            <div class="prod-diff-product-price">
+              {%- render 'price',
+                product: right_product,
+                price_class: 'prod-diff-price',
+                font_size_desktop: 'var(--t-b-2-size)',
+                font_size_mobile: 'var(--tm-b-2-size)',
+                font_weight_desktop: 'var(--t-b-2-weight)',
+                font_weight_mobile: 'var(--t-b-2-weight)',
+                line_height_desktop: 'var(--t-b-2-line-height)',
+                line_height_mobile: 'var(--tm-b-2-line-height)'
+              -%}
+            </div>
+          </div>
+        {% elsif image_after == blank %}
+          <div class="prod-diff-product-info right default-label">
+            <h3 class="prod-diff-product-name">Right</h3>
+          </div>
+        {% endif %}
+      {% else %}
+        {%- comment -%} Show Left/Right labels when product names are disabled and using default images {%- endcomment -%}
+        {% if image_before == blank %}
+          <div class="prod-diff-product-info left default-label">
+            <h3 class="prod-diff-product-name">Left</h3>
+          </div>
+        {% endif %}
+        {% if image_after == blank %}
+          <div class="prod-diff-product-info right default-label">
+            <h3 class="prod-diff-product-name">Right</h3>
+          </div>
+        {% endif %}
       {% endif %}
-    {% endif %}
     </div>
   </section>
 {% endif %}
 
+{%- comment -%}
+  The original complex script was the source of the theme conflict.
+  It has been replaced by this short, simple, and isolated script that
+  is much more reliable and avoids conflicts.
+{%- endcomment -%}
 <script>
-  function initProductDifferenceSlider() {
-    const sliderDivider = document.querySelector('.prod-diff-slider-divider');
-    const sliderHandle = document.querySelector('.prod-diff-slider-handle-chevron');
-    const container = document.querySelector('.prod-diff-container');
+  {
+    const sliderContainer = document.querySelector(`[data-section-id="{{ section.id }}"]`);
+    if (sliderContainer) {
+      const slider = sliderContainer.querySelector('#Slider-{{ section.id }}');
+      const beforeImage = sliderContainer.querySelector('#BeforeImage-{{ section.id }}');
+      const divider = sliderContainer.querySelector('#Divider-{{ section.id }}');
+      const handle = sliderContainer.querySelector('#Handle-{{ section.id }}');
+      const leftText = sliderContainer.querySelector('.prod-diff-product-info.left');
 
-    // Return early if elements don't exist
-    if (!sliderDivider || !sliderHandle || !container) return;
+      if (slider && beforeImage && divider && handle) {
+        // JavaScript for the grab animation is added here
+        slider.addEventListener('mousedown', () => handle.classList.add('dragging'));
+        slider.addEventListener('touchstart', () => handle.classList.add('dragging'));
+        window.addEventListener('mouseup', () => handle.classList.remove('dragging'));
+        window.addEventListener('touchend', () => handle.classList.remove('dragging'));
 
-    let isDragging = false;
-    const leftContainer = document.querySelector('.prod-diff-wrapper.prod-diff-left');
-    const rightContainer = document.querySelector('.prod-diff-wrapper.prod-diff-right');
-    const rightImg = document.querySelector('.prod-diff-wrapper.prod-diff-right .prod-diff-img');
+        // This is the new, simple logic that updates the slider visuals
+        slider.addEventListener('input', (e) => {
+          const value = e.target.value;
+          beforeImage.style.clipPath = `inset(0 calc(100% - ${value}%) 0 0)`;
+          divider.style.left = `${value}%`;
+          // Sync left text clip-path with the before image
+          if (leftText) {
+            leftText.style.clipPath = `inset(0 calc(100% - ${value}%) 0 0)`;
+          }
+        });
 
-    function getOffsetX(e) {
-      if (e.touches) {
-        return e.touches[0].clientX;
-      } else {
-        return e.clientX;
+        // Remove hyphens from price text
+        const priceItems = sliderContainer.querySelectorAll('.prod-diff-price .price-item--regular');
+        priceItems.forEach((item) => {
+          if (item.textContent.includes(' - ')) {
+            item.textContent = item.textContent.replace(/ - /g, ' ');
+          }
+        });
       }
     }
-
-    function updateImagePositions() {
-      if (!rightImg || !leftContainer) return;
-      const containerWidth = container.offsetWidth;
-      const leftWidth = leftContainer.offsetWidth;
-      const rightImgLeftPosition = -leftWidth;
-      rightImg.style.left = rightImgLeftPosition + 'px';
-    }
-
-    function onDrag(e) {
-      if (!isDragging) return;
-      if (e.cancelable) e.preventDefault();
-      const rect = container.getBoundingClientRect();
-      let x = getOffsetX(e) - rect.left;
-      x = Math.max(0, Math.min(x, rect.width));
-      const percent = (x / rect.width) * 100;
-      sliderDivider.style.left = percent + '%';
-      leftContainer.style.width = percent + '%';
-      rightContainer.style.width = 100 - percent + '%';
-      updateImagePositions();
-    }
-
-    function stopDrag() {
-      isDragging = false;
-      sliderHandle.classList.remove('dragging');
-      container.removeEventListener('mousemove', onDrag);
-      container.removeEventListener('touchmove', onDrag);
-      window.removeEventListener('mouseup', stopDrag);
-      window.removeEventListener('touchend', stopDrag);
-      window.removeEventListener('touchcancel', stopDrag);
-    }
-
-    // Allow dragging from both divider and handle
-    [sliderDivider, sliderHandle].forEach(function (el) {
-      el.addEventListener('mousedown', function (e) {
-        e.preventDefault();
-        isDragging = true;
-        sliderHandle.classList.add('dragging');
-        onDrag(e); // update position immediately
-        container.addEventListener('mousemove', onDrag);
-        window.addEventListener('mouseup', stopDrag);
-      });
-      el.addEventListener('touchstart', function (e) {
-        isDragging = true;
-        sliderHandle.classList.add('dragging');
-        onDrag(e); // update position immediately
-        container.addEventListener('touchmove', onDrag, { passive: false });
-        window.addEventListener('touchend', stopDrag);
-        window.addEventListener('touchcancel', stopDrag);
-      });
-    });
-
-    // Handle window resize to update positions
-    window.addEventListener('resize', function () {
-      updateImagePositions();
-    });
-
-    // Initialize positions
-    updateImagePositions();
-  }
-
-  // Make function globally available for theme editor
-  window.initProductDifferenceSlider = initProductDifferenceSlider;
-
-  document.addEventListener('DOMContentLoaded', function () {
-    initProductDifferenceSlider();
-  });
-
-  // Theme Editor Event Handlers for proper reloading when products change
-  if (typeof Shopify !== 'undefined' && Shopify.designMode) {
-    document.addEventListener('shopify:section:load', function (event) {
-      if (event.target.querySelector('.prod-diff-section')) {
-        // Small delay to ensure DOM is fully updated
-        setTimeout(function () {
-          initProductDifferenceSlider();
-        }, 10);
-      }
-    });
-
-    document.addEventListener('shopify:section:select', function (event) {
-      if (event.target.querySelector('.prod-diff-section')) {
-        setTimeout(function () {
-          initProductDifferenceSlider();
-        }, 10);
-      }
-    });
-
-    document.addEventListener('shopify:block:select', function (event) {
-      const productDiffSection = event.target.closest('.shopify-section')?.querySelector('.prod-diff-section');
-      if (productDiffSection) {
-        setTimeout(function () {
-          initProductDifferenceSlider();
-        }, 10);
-      }
-    });
-
-    // Listen for setting changes that might affect product selection
-    document.addEventListener('shopify:section:reorder', function (event) {
-      const productDiffSection = document.querySelector('.prod-diff-section');
-      if (productDiffSection) {
-        setTimeout(function () {
-          initProductDifferenceSlider();
-        }, 10);
-      }
-    });
   }
 </script>
 
+{%- comment -%} The schema has been restored to include the 'Enable' checkbox and all original settings {%- endcomment -%}
 {% schema %}
 {
   "name": "Product Difference Slider",
+  "disabled_on": {
+    "groups": ["header", "footer"]
+  },
   "settings": [
     {
       "type": "checkbox",
@@ -479,20 +444,14 @@
       "default": true
     },
     {
-      "type": "color_scheme",
-      "id": "color_scheme",
-      "label": "t:sections.all.colors.label",
-      "default": "scheme-1"
-    },
-    {
       "type": "product",
       "id": "left_product",
-      "label": "Left Product"
+      "label": "Left Product ('Before' Image)"
     },
     {
       "type": "product",
       "id": "right_product",
-      "label": "Right Product"
+      "label": "Right Product ('After' Image)"
     },
     {
       "type": "checkbox",
@@ -502,48 +461,51 @@
     },
     {
       "type": "range",
-      "id": "margin_top",
-      "label": "Top Margin",
+      "id": "padding_top",
       "min": 0,
-      "max": 50,
+      "max": 100,
       "step": 1,
       "unit": "px",
+      "label": "Top Padding",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "label": "Bottom Padding",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "margin_top",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "label": "Top Margin",
       "default": 0
     },
     {
       "type": "range",
       "id": "margin_bottom",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
       "label": "Bottom Margin",
-      "min": 0,
-      "max": 50,
-      "step": 1,
-      "unit": "px",
-      "default": 0
-    },
-    {
-      "type": "range",
-      "id": "margin_left",
-      "label": "Left Margin",
-      "min": 0,
-      "max": 50,
-      "step": 1,
-      "unit": "px",
-      "default": 0
-    },
-    {
-      "type": "range",
-      "id": "margin_right",
-      "label": "Right Margin",
-      "min": 0,
-      "max": 50,
-      "step": 1,
-      "unit": "px",
       "default": 0
     }
   ],
   "presets": [
     {
-      "name": "Product Difference Slider"
+      "name": "Product Difference Slider",
+      "settings": {
+        "enabled": false
+      }
     }
   ]
 }

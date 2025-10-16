@@ -87,16 +87,18 @@
             {% for media in card_product.media %}
               <img
                 srcset="
-                  {%- if media.width >= 165 -%}{{ media | image_url: width: 165 }} 165w,{%- endif -%}
                   {%- if media.width >= 360 -%}{{ media | image_url: width: 360 }} 360w,{%- endif -%}
                   {%- if media.width >= 533 -%}{{ media | image_url: width: 533 }} 533w,{%- endif -%}
                   {%- if media.width >= 720 -%}{{ media | image_url: width: 720 }} 720w,{%- endif -%}
                   {%- if media.width >= 940 -%}{{ media | image_url: width: 940 }} 940w,{%- endif -%}
                   {%- if media.width >= 1066 -%}{{ media | image_url: width: 1066 }} 1066w,{%- endif -%}
+                  {%- if media.width >= 1200 -%}{{ media | image_url: width: 1200 }} 1200w,{%- endif -%}
+                  {%- if media.width >= 1500 -%}{{ media | image_url: width: 1500 }} 1500w,{%- endif -%}
+                  {%- if media.width >= 1800 -%}{{ media | image_url: width: 1800 }} 1800w,{%- endif -%}
                   {{ media | image_url }} {{ media.width }}w
                 "
                 sizes="(max-width: 600px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                src="{{ media | image_url: width: 720 }}"
+                src="{{ media | image_url: width: 1200 }}"
                 class="w-full h-full card-inner-wrapper-product p-0 absolute inset-0 opacity-0 image-config"
                 {% if forloop.first %}
                   loading="eager"
@@ -145,12 +147,7 @@
 
         {% if card_product.available == false %}
           <div class="">
-            <span
-              class="sold-out-tag text-[14px] font-medium rounded px-1"
-              style="background-color: transparent; color: var(--text); border: 1px solid var(--text);"
-            >
-              SOLD OUT
-            </span>
+            {% render 'sold-out-badge', class: 'sold-out-tag text-[14px] font-medium' %}
           </div>
           <div class="absolute inset-x-0 bottom-0 p-4 opacity-0 translate-y-10 transition-all duration-300 group-hover:opacity-100 group-hover:-translate-y-0">
             <div class="w-[93%] mx-auto text-center" style="background-color: var(--background);">
@@ -187,7 +184,7 @@
 
               <button
                 type="button"
-                class="add-to-cart-btn w-full py-4 z-[100] !text-[1.6rem] font-medium transition-colors duration-200 uppercase tracking-wider quick-add-button"
+                class="add-to-cart-btn new-add-to-cart-btn {% if has_size_variant %}no-hover-css-product-card{% endif %} w-full py-4 z-[100] !text-[1.6rem] font-medium transition-colors duration-200 uppercase tracking-wider quick-add-button"
                 style="color:var(--button_label); background-color: var(--button);"
 
                 onmouseout="this.style.backgroundColor='var(--button)'; this.style.color='var(--button_label)';"
@@ -204,43 +201,16 @@
               </button>
 
               {% if has_size_variant %}
-                <div class="quick-add-modal hidden">
-                  <div class="quick-add-modal__content">
-                    <div class="quick-add-modal__header">
-                      <h3 class="select-size-option !font-medium !uppercase">Select Size</h3>
-                      <div class="quick-add-modal__options">
-                        {% for option in card_product.options_with_values %}
-                          {% if option.name contains 'Size' or option.name contains 'size' %}
-                            {% for value in option.values %}
-                              {% assign variant_exists = false %}
-                              {% assign variant_id = null %}
-                              {% for variant in card_product.variants %}
-                                {% comment %} Changed to check only if variant option contains the size value {% endcomment %}
-                                {% if variant.available and variant.title contains value %}
-                                  {% assign variant_exists = true %}
-                                  {% assign variant_id = variant.id %}
-                                  {% break %}
-                                {% endif %}
-                              {% endfor %}
-
-                              <span
-                                style="color: var(--button_label); background-color: var(--button);"
-                                onmouseover="this.style.backgroundColor='var(--hovered_button_label)'; this.style.color='var(--hovered_button_text_color)';"
-                                onmouseout="this.style.backgroundColor='var(--button)'; this.style.color='var(--button_label)';"
-                                class="quick-add__submit  !text-[1.5rem]  {% unless variant_exists %} opacity-50{% endunless %}"
-                                {% if variant_exists %}
-                                  data-variant-id="{{ variant_id }}"
-                                  form="quick-add-{{ card_product.id }}"
-                                {% else %}
-                                  disabled
-                                {% endif %}
-                              >
-                                {{ value }}
-                              </span>
-                            {% endfor %}
-                          {% endif %}
-                        {% endfor %}
-                      </div>
+                <div class="new-size-variants-container hidden">
+                  <div class="new-size-label-wrapper">
+                    <span class="new-size-label">Select Size</span>
+                    <div class="new-size-options-wrapper" style="display: flex; gap: 5px;">
+                      {% render 'size-variant-picker',
+                        product: card_product,
+                        mobile: false,
+                        show_label: false,
+                        size_only: true
+                      %}
                     </div>
                   </div>
                 </div>
@@ -365,6 +335,21 @@
     padding: 0 8px;
     font-size: 16px;
   }
+
+  /* Ensure sold-out badge uses global settings */
+  .sold-out-badge-filled.sold-out-tag {
+    background-color: var(--sold-out-filled-bg, #000000) !important;
+    color: var(--sold-out-filled-text, #FFFFFF) !important;
+    border-radius: var(--sold-out-badge-radius, 5px) !important;
+    border: none !important;
+  }
+
+  .sold-out-badge-transparent.sold-out-tag {
+    background-color: transparent !important;
+    color: var(--sold-out-transparent-text, #000000) !important;
+    border: var(--sold-out-badge-border-thickness, 1px) solid var(--sold-out-transparent-border, #000000) !important;
+    border-radius: var(--sold-out-badge-radius, 5px) !important;
+  }
   .image-config {
     object-fit: cover;
   }
@@ -411,8 +396,20 @@
       font-size: 12px;
     }
 
-    /* Disable all hover effects on mobile */
-    .group:hover .opacity-0 {
+    /* Disable all hover effects on mobile except images */
+    
+    /* Keep images always visible on mobile */
+    .group:hover .image-config {
+      opacity: 1 !important;
+    }
+
+    /* Keep first image visible */
+    .image-config[style*="opacity: 1"] {
+      opacity: 1 !important;
+    }
+
+    /* Hide slider arrows on mobile hover */
+    .group:hover .slider-arrow {
       opacity: 0 !important;
     }
 
@@ -421,7 +418,7 @@
     }
 
     /* Keep add to cart button hidden on mobile hover */
-    .group:hover .group-hover\:opacity-100 {
+    .group:hover .group-hover\:opacity-100:not(.image-config) {
       opacity: 0 !important;
     }
 
@@ -429,10 +426,119 @@
       transform: translateY(2.5rem) !important;
     }
 
-    /* Disable slider arrow hover effects on mobile */
-    .slider-arrow:hover {
-      background: transparent !important;
-      box-shadow: none !important;
+  /* Disable slider arrow hover effects on mobile */
+  .slider-arrow:hover {
+    background: transparent !important;
+    box-shadow: none !important;
+  }
+
+  /* Disable all hover animations on mobile devices */
+  .card-wrapper:hover .product-card-height {
+    height: 270px !important;
+  }
+
+  /* Ensure images stay visible */
+  .group:hover .image-config {
+    opacity: 1 !important;
+  }
+
+  .group:hover .translate-y-10 {
+    transform: translateY(2.5rem) !important;
+  }
+
+  .group:hover .group-hover\:opacity-100:not(.image-config) {
+    opacity: 0 !important;
+  }
+
+  .group:hover .group-hover\:-translate-y-0 {
+    transform: translateY(2.5rem) !important;
+  }
+
+  .slider-arrow:hover {
+    background: transparent !important;
+    box-shadow: none !important;
+  }
+
+  .new-size-variants-container .size-btn:hover {
+    transform: none !important;
+  }
+
+  .new-add-to-cart-btn:hover,
+  .new-sold-out-btn:hover {
+    background-color: var(--button) !important;
+    color: var(--button_label) !important;
+  }
+
+  .no-hover-css-product-card:hover {
+    color: var(--button_label) !important;
+    background-color: var(--button) !important;
+  }
+
+  .new-add-to-cart-btn:hover + .new-size-variants-container,
+  .new-size-variants-container:hover {
+    opacity: 0 !important;
+    visibility: hidden !important;
+  }
+  }
+
+  /* Additional mobile-only hover disabling using touch detection */
+  @media (hover: none) and (pointer: coarse) {
+    /* Completely disable height changes on touch devices */
+    .card-wrapper:hover .product-card-height,
+    .group:hover .product-card-height {
+      height: 270px !important;
+    }
+
+    /* CRITICAL: Keep ONLY first image visible, hide all others */
+    .image-config {
+      opacity: 0 !important;
+    }
+
+    /* Show only the first image */
+    .image-config[style*="opacity: 1"],
+    .image-config:first-of-type {
+      opacity: 1 !important;
+    }
+
+    /* Prevent hover from changing any image opacity */
+    .group:hover .image-config,
+    .card-wrapper:hover .image-config {
+      opacity: 0 !important;
+    }
+
+    /* But keep first image visible even on hover */
+    .group:hover .image-config[style*="opacity: 1"],
+    .group:hover .image-config:first-of-type,
+    .card-wrapper:hover .image-config[style*="opacity: 1"],
+    .card-wrapper:hover .image-config:first-of-type {
+      opacity: 1 !important;
+    }
+
+    /* Disable all image transforms */
+    .group:hover .image-config,
+    .card-wrapper:hover .image-config {
+      transform: none !important;
+      scale: 1 !important;
+    }
+
+    /* Hide all interactive elements on mobile */
+    .slider-arrow,
+    .group:hover .slider-arrow,
+    .card-wrapper:hover .slider-arrow {
+      display: none !important;
+      opacity: 0 !important;
+    }
+
+    /* Disable all transform effects */
+    .group:hover *:not(.image-config),
+    .card-wrapper:hover *:not(.image-config) {
+      transform: none !important;
+    }
+
+    /* Keep buttons hidden */
+    .group:hover .group-hover\:opacity-100:not(.image-config),
+    .card-wrapper:hover .opacity-0:not(.image-config) {
+      opacity: 0 !important;
     }
   }
 
@@ -452,118 +558,180 @@
     transition: opacity 0.3s;
   }
 
-  .quick-add-modal {
+  /* Size variant picker container for card products - same size as add to cart button */
+  .new-size-variants-container {
+    border-radius: 5px;
     position: absolute;
     bottom: 10px;
     right: 21px;
-    left: 21px;
-    background: var(--button);
-    padding: 0 10px;
-    z-index: 20;
-    opacity: 1;
-    height: 50px !important;
-    visibility: visible;
-    overflow: hidden;
-    clip-path: inset(0);
-    border-radius: 5px; /* Add border radius */
+    left: 26px;
+    width: calc(100% - 52px);
+    min-height: 50px;
+    z-index: 10;
+    transition: all 0.3s ease;
+    display: flex;
+    justify-content: center;
+    padding: 5px 10px;
+    font-size: 20px;
+    color: var(--text);
+    background-color: var(--background);
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(10px);
   }
 
   .product-sizes-container.variant-selector-active .add-to-cart-btn {
     display: none !important;
   }
+
   .product-sizes-container {
     border-radius: 5px;
   }
 
-  .quick-add-modal__header {
+  .new-size-label-wrapper {
     display: flex;
-    justify-content: space-between;
-    height: 50px;
+    width: 100%;
     align-items: center;
+    justify-content: space-between;
+    border-radius: {{ settings.buttons_radius }}px;
   }
-  .quick-add-modal__header h3 {
+
+  .new-size-label {
+    margin-right: auto;
+    border-radius: {{ settings.buttons_radius }}px;
     color: var(--text);
+
   }
 
-  .quick-add-modal__options {
-    margin-left: auto;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 5px;
-    justify-content: center;
+  .new-size-options-wrapper {
+    display: flex !important;
+    flex-direction: row !important;
+    gap: 5px !important;
+    align-items: center;
+    justify-content: flex-end;
   }
 
-  @keyframes sizeOptionFade {
-    from {
+  /* Hide the fieldset legend since we're using custom label */
+  .new-size-variants-container fieldset {
+    padding: 0 !important;
+    border: none !important;
+    margin: 0 !important;
+  }
+
+  .new-size-variants-container legend {
+    display: none !important;
+  }
+
+  /* Style size buttons to match new-product-card */
+  .new-size-variants-container .size-btn {
+
+    transform: translateY(10px);
+  }
+
+  .new-size-variants-container .size-btn:hover {
+    transform: translateY(-2px);
+
+    transition: background-color 0.3s ease, color 0.3s ease, transform 0.3s ease;
+  }
+
+  /* Animation for size buttons */
+  .new-size-variants-container .size-btn.size-animate {
+    animation: sizeOptionAppear 0.5s ease forwards;
+    animation-delay: calc(0.15s * var(--animation-order));
+  }
+
+  @keyframes sizeOptionAppear {
+    0% {
       opacity: 0;
       transform: translateY(10px);
+      visibility: hidden;
     }
-    to {
+    100% {
       opacity: 1;
       transform: translateY(0);
+      visibility: visible;
     }
   }
 
-  .quick-add__submit {
+  .new-size-variants-container:not(.active) .size-btn {
+    animation: none;
     opacity: 0;
-    transform: translateY(100px);
-
-    animation: sizeOptionFade 0.3s ease forwards;
-    min-width: 26px;
-    padding: 0px !important;
-    border: 1px solid var(--button_label);
-    background: var(--button);
-    color: var(--button_label);
-    cursor: pointer;
-    transition: all 0.2s;
-    font-size: 14px;
-    font-weight: 800;
-    border-radius: 5px !important;
+    visibility: hidden;
+    transform: translateY(10px);
   }
 
-  .quick-add-modal.visible .quick-add__submit:nth-child(1) {
+  .new-size-variants-container.active .size-btn,
+  .new-add-to-cart-btn:hover + .new-size-variants-container .size-btn {
+    animation: sizeOptionAppear 0.5s ease forwards;
+    animation-delay: calc(0.15s * var(--animation-order));
+  }
+
+  /* Make unavailable sizes also animate in */
+  .new-size-variants-container.active .unavailable-size,
+  .new-add-to-cart-btn:hover + .new-size-variants-container .unavailable-size {
+    animation: sizeOptionAppear 0.5s ease forwards;
+    animation-delay: calc(0.15s * var(--animation-order));
+  }
+
+  .new-size-variants-container.active .size-btn:nth-child(1),
+  .new-add-to-cart-btn:hover + .new-size-variants-container .size-btn:nth-child(1) {
     animation-delay: 0s;
   }
-  .quick-add-modal.visible .quick-add__submit:nth-child(2) {
+  .new-size-variants-container.active .size-btn:nth-child(2),
+  .new-add-to-cart-btn:hover + .new-size-variants-container .size-btn:nth-child(2) {
     animation-delay: 0.1s;
   }
-  .quick-add-modal.visible .quick-add__submit:nth-child(3) {
+  .new-size-variants-container.active .size-btn:nth-child(3),
+  .new-add-to-cart-btn:hover + .new-size-variants-container .size-btn:nth-child(3) {
     animation-delay: 0.2s;
   }
-  .quick-add-modal.visible .quick-add__submit:nth-child(4) {
+  .new-size-variants-container.active .size-btn:nth-child(4),
+  .new-add-to-cart-btn:hover + .new-size-variants-container .size-btn:nth-child(4) {
     animation-delay: 0.3s;
   }
-  .quick-add-modal.visible .quick-add__submit:nth-child(5) {
+  .new-size-variants-container.active .size-btn:nth-child(5),
+  .new-add-to-cart-btn:hover + .new-size-variants-container .size-btn:nth-child(5) {
     animation-delay: 0.4s;
   }
 
-  .quick-add__submit:hover:not([disabled]) {
-    background: var(--hovered_button_label);
+  .new-add-to-cart-btn:hover + .new-size-variants-container,
+  .new-size-variants-container:hover,
+  .new-size-variants-container.active {
+    opacity: 1 !important;
+    visibility: visible !important;
+    transform: translateY(0) !important;
+    transition: opacity 0.3s ease, visibility 0.3s ease !important;
   }
 
-  .quick-add__submit[disabled] {
-    opacity: 0.5;
-    cursor: not-allowed;
-    background: var(--disabled_text);
-    position: relative;
-    text-decoration: none; /* Remove default line-through */
+  /* Remove transition when hiding - instant disappearance */
+  .new-size-variants-container:not(.active):not(:hover) {
+    transition: none !important;
   }
 
-  .quick-add__submit[disabled]::after {
-    content: '';
-    position: absolute;
-    left: 0;
-    right: 0;
-    top: 50%;
-    border-top: 1px solid #999;
-    transform: rotate(-45deg);
+  /* Button hover states matching new-product-card */
+  .new-add-to-cart-btn:hover,
+  .new-sold-out-btn:hover {
+    background-color: var(--text) !important;
+    color: rgb(var(--color-background)) !important;
   }
 
-  .quick-add-modal__close {
-    padding: 5px;
-    cursor: pointer;
-    font-size: 20px;
-    line-height: 1;
+  .no-hover-css-product-card:hover{
+    color: var(--text) !important;
+    background-color: rgb(var(--color-background)) !important;
+  }
+
+  /* Hide add to cart button when size variants are shown */
+  .product-sizes-container:hover .new-add-to-cart-btn[data-has-sizes='true'],
+  .product-sizes-container.variant-selector-active .new-add-to-cart-btn[data-has-sizes='true'] {
+    opacity: 0 !important;
+    visibility: hidden !important;
+  }
+
+  /* Show add to cart button instantly when size variants are hidden */
+  .product-sizes-container:not(:hover):not(.variant-selector-active) .new-add-to-cart-btn[data-has-sizes='true'] {
+    opacity: 1 !important;
+    visibility: visible !important;
+    transition: none !important;
   }
 </style>
 
@@ -596,9 +764,9 @@
   document.addEventListener('DOMContentLoaded', function () {
     const containers = document.querySelectorAll('.product-sizes-container');
 
-    // Check if device is mobile
+    // Check if device is mobile or touch device
     function isMobile() {
-      return window.innerWidth <= 600;
+      return window.innerWidth <= 600 || window.matchMedia("(hover: none)").matches || ('ontouchstart' in window);
     }
 
     function updateButtonState(button, state) {
@@ -637,56 +805,49 @@
         if (!response.ok) throw new Error('Network response was not ok');
         return await response.json();
       } catch (error) {
-        console.error('Error:', error);
         throw error;
       }
     }
 
     containers.forEach((container) => {
       const addToCartBtn = container.querySelector('.add-to-cart-btn');
-      const modal = container.querySelector('.quick-add-modal');
+      const sizeVariantsContainer = container.querySelector('.new-size-variants-container');
       const form = container.querySelector('.quick-add__form');
       const singleVariantId = addToCartBtn?.dataset.singleVariant;
       const hasSizes = addToCartBtn?.dataset.hasSizes === 'true';
 
-      if (hasSizes && modal && form) {
+      if (hasSizes && sizeVariantsContainer && form) {
         // For products with size variants - disable hover on mobile
         if (!isMobile()) {
           addToCartBtn.addEventListener('mouseenter', () => {
             container.classList.add('variant-selector-active');
-            modal.classList.add('visible');
-            modal.classList.remove('hidden');
+            sizeVariantsContainer.classList.remove('hidden');
+            // Add active class to trigger staggering animation
+            sizeVariantsContainer.classList.add('active');
           });
 
           container.addEventListener('mouseleave', () => {
-            modal.classList.remove('visible');
-            setTimeout(() => {
-              modal.classList.add('hidden');
-              container.classList.remove('variant-selector-active');
-            }, 300);
+            // Remove active class and hide instantly - no delay
+            sizeVariantsContainer.classList.remove('active');
+            sizeVariantsContainer.classList.add('hidden');
+            container.classList.remove('variant-selector-active');
           });
         }
 
-        modal.querySelector('.quick-add-modal__close')?.addEventListener('click', (e) => {
-          e.preventDefault();
-          modal.classList.remove('visible');
-          setTimeout(() => {
-            modal.classList.add('hidden');
-            container.classList.remove('variant-selector-active');
-          }, 300);
-        });
+        // Handle size button clicks
+        sizeVariantsContainer.querySelectorAll('.size-btn').forEach((sizeBtn) => {
+          sizeBtn.addEventListener('click', async () => {
+            if (sizeBtn.disabled) return;
 
-        modal.querySelectorAll('.quick-add__submit').forEach((submitBtn) => {
-          submitBtn.addEventListener('click', async () => {
             updateButtonState(addToCartBtn, 'adding');
-            const variantId = submitBtn.dataset.variantId;
+            const variantId = sizeBtn.dataset.variantId;
             const formData = new FormData(form);
             formData.set('id', variantId);
 
             try {
               await addToCart(formData);
               updateButtonState(addToCartBtn, 'added');
-              modal.classList.add('hidden');
+              sizeVariantsContainer.classList.add('hidden');
               container.classList.remove('variant-selector-active');
             } catch (error) {
               updateButtonState(addToCartBtn, 'default');
@@ -746,9 +907,6 @@
       // For now, we'll simulate an API call
       return new Promise((resolve) => {
         setTimeout(() => {
-          console.log(
-            `Notification request submitted for product: ${productTitle} (ID: ${productId}) for email: ${email}`
-          );
           resolve({ success: true });
         }, 1000);
       });
@@ -776,7 +934,6 @@
           await submitNotifyRequest(productId, productTitle, email);
           updateNotifyButtonState(button, 'submitted');
         } catch (error) {
-          console.error('Error submitting notification request:', error);
           updateNotifyButtonState(button, 'default');
           alert('Sorry, there was an error. Please try again later.');
         }
@@ -824,29 +981,6 @@
       });
     });
 
-    // Add quick add functionality
-    document.querySelectorAll('.quick-add-button').forEach((button) => {
-      const container = button.closest('.product-sizes-container');
-      const modal = container?.querySelector('.quick-add-modal');
-      const form = container?.querySelector('.quick-add__form');
-
-      if (!container || !modal || !form) return;
-
-      button.addEventListener('click', () => {
-        modal.classList.remove('hidden');
-      });
-
-      modal.querySelector('.quick-add-modal__close')?.addEventListener('click', () => {
-        modal.classList.add('hidden');
-      });
-
-      modal.querySelectorAll('.quick-add__submit').forEach((submitBtn) => {
-        submitBtn.addEventListener('click', () => {
-          const variantId = submitBtn.dataset.variantId;
-          form.querySelector('input[name="id"]').value = variantId;
-          form.submit();
-        });
-      });
-    });
+    // Quick add functionality is now handled above in the main container loop
   });
 </script>

@@ -27,7 +27,7 @@
     {% if section.settings.heading != blank %}
       <h2
         id="related-products-heading"
-        style="font-weight:500; color: var(--text); font-size:24px; margin:0px 20 50px;"
+        style="font-weight:500; color: var(--text); font-size:var(--t-h-5-size); margin:0px 20 50px;"
         class="related-products-main-heading mb-[-10px]{% if section.settings.enable_letter_animation %} letter-animation{% endif %}"
       >
         {{ section.settings.heading }}
@@ -38,13 +38,16 @@
       <div class="slider-container relative">
         <div
           id="related-product-slider"
-          class="product-slider related-products-grid scroll-fade-stagger flex gap-2 md:gap-4 cursor-grab overflow-x-auto no-scrollbar"
+          class="product-slider related-products-grid scroll-fade-stagger flex gap-2 md:gap-4 custom-scrollbar featured-collection-cursor-grab overflow-x-auto"
           role="list"
           aria-label="Related Products"
         >
           {% if collections.all.products.size == 0 %}
             {% for i in (1..5) %}
-              <div class="flex-none related-product-item scroll-fade-trigger scroll-fade-up" data-animation-index="{{ forloop.index0 }}">
+              <div
+                class="flex-none related-product-item scroll-fade-trigger scroll-fade-up"
+                data-animation-index="{{ forloop.index0 }}"
+              >
                 <div class="new-product-card" style="width: min(441px, calc(255px + 0.1835 * (100vw - 425px)));">
                   <div class="new-product-image-wrapper">
                     <div class="new-product-images-container">
@@ -53,14 +56,17 @@
                       </div>
                     </div>
                   </div>
-                  <div class="new-product-details" style="padding-top: 10px;">
+                  <div class="new-product-details" style="padding-top: var(--space-lg);">
                     <div
                       class="new-product-title"
-                      style="text-decoration: none; color: var(--text); display: block; font-size: 15px;"
+                      style="text-decoration: none; color: var(--text); display: block; font-size: var(--tm-h-5-size);"
                     >
                       No products found
                     </div>
-                    <div class="new-product-price" style="color: var(--text); padding-top: 5px; font-size: 15px;">
+                    <div
+                      class="new-product-price"
+                      style="color: var(--text); padding-top: var(--space-xs); font-size: var(--tm-h-5-size);"
+                    >
                       —
                     </div>
                   </div>
@@ -69,19 +75,21 @@
             {% endfor %}
           {% else %}
             {% for product in collections.all.products limit: section.settings.products_to_show %}
-              <div class="flex-none related-product-item scroll-fade-trigger scroll-fade-up" data-animation-index="{{ forloop.index0 }}">
+              <div
+                class="flex-none related-product-item scroll-fade-trigger scroll-fade-up"
+                data-animation-index="{{ forloop.index0 }}"
+              >
                 {% render 'new-product-card', product: product, collection: collections.all %}
               </div>
             {% endfor %}
           {% endif %}
         </div>
 
-        <!-- Separate centered scrollbar -->
-        <div class="custom-scrollbar-container" aria-hidden="true">
-          <div id="custom-scrollbar" class="custom-scrollbar-track">
-            <div id="custom-scrollbar-thumb" class="custom-scrollbar-thumb"></div>
-          </div>
-        </div>
+        <!-- Horizontal scrollbar using snippet (same as featured-collection and product-detail) -->
+        {% render 'horizontal-scrollbar',
+          container_selector: '.slider-container',
+          slider_selector: '.product-slider'
+        %}
       </div>
     </main>
   </div>
@@ -141,10 +149,6 @@
 {% endif %}
 
 <style>
-  .related-products-page-width ::selection {
-    color: var(--cr-yellow-2) !important;
-  }
-
   .related-products-page-width {
     margin: 0;
     overflow-y: hidden;
@@ -160,7 +164,7 @@
     line-height: 40% !important;
     font-size: 3.5rem;
     left: -3px;
-    padding-top: 20px;
+    padding-top: var(--space-3xl);
   }
 
   @media (min-width: 500px) {
@@ -171,9 +175,9 @@
 
   @media (max-width: 480px) {
     div.related-products-main-heading {
-      font-size: 16px !important;
-      padding-top: 10px !important;
-      padding-bottom: 10px !important;
+      font-size: var(--tm-h-4-size) !important;
+      padding-top: var(--space-lg) !important;
+      padding-bottom: var(--space-lg) !important;
     }
 
     #related-products-heading {
@@ -183,15 +187,15 @@
 
   @media (min-width: 768px) {
     div.related-products-main-heading {
-      padding-top: 20px;
+      padding-top: var(--space-3xl);
       font-size: 40px;
-      padding-bottom: 25px;
-      padding-left: 12px;
+      padding-bottom: var(--space-4xl);
+      padding-left: var(--space-xl);
     }
 
     .related-products-container {
-      padding-left: 10px;
-      padding-right: 10px;
+      padding-left: var(--space-lg);
+      padding-right: var(--space-lg);
       overflow: hidden;
     }
 
@@ -201,7 +205,7 @@
     }
 
     .product-slider {
-      padding-right: 1.5rem;
+      padding-right: var(--space-2xl);
     }
 
     #related-products-heading {
@@ -216,7 +220,7 @@
     overflow-y: hidden;
     -webkit-overflow-scrolling: touch;
     height: auto;
-    padding-bottom: 24px;
+    padding-bottom: var(--space-4xl);
   }
 
   .product-slider {
@@ -231,53 +235,11 @@
     display: none;
   }
 
-  .cursor-grab {
-    cursor: grab;
-    padding-bottom: 12px;
-  }
-
-  .cursor-grabbing {
-    cursor: grabbing;
-  }
-
-  .no-scrollbar {
-    -ms-overflow-style: none;
-    scrollbar-width: none;
-  }
-
-  .no-scrollbar::-webkit-scrollbar {
-    display: none;
-  }
-
-  .custom-scrollbar-container {
-    display: flex;
-    justify-content: center;
-    width: 100%;
-    margin-top: 16px;
-  }
-
-  .custom-scrollbar-track {
-    width: 50%;
-    height: 8px;
-    background-color: transparent;
-    background-image: linear-gradient(to right, var(--text), var(--text));
-    background-size: 100% 2px;
-    background-repeat: no-repeat;
-    background-position: center;
-    position: relative;
-    cursor: pointer;
-  }
-
-  .custom-scrollbar-thumb {
-    height: 4px;
-    background-color: var(--text);
-    position: absolute;
-    top: 50%;
-    transform: translateY(-50%);
-    transition: left 0.1s ease;
-    min-width: 20px;
-    cursor: pointer;
-    border-radius: 1px;
+  /* Scrollbar styles and drag functionality moved to horizontal-scrollbar snippet */
+  
+  /* Add spacing between product grid and scrollbar */
+  .featured-collection-cursor-grab {
+    padding-bottom: var(--space-2xl);
   }
 
   #rp-waitlist-modal-overlay {
@@ -309,13 +271,6 @@
       justify-content: flex-start;
     }
 
-    .custom-scrollbar-container {
-      display: flex;
-      justify-content: center;
-      width: 100%;
-      margin-top: 16px;
-    }
-
     .slider-container {
       overflow-x: auto;
     }
@@ -326,11 +281,6 @@
       gap: 8px;
       overflow-x: auto;
       -webkit-overflow-scrolling: touch;
-      scrollbar-width: none;
-    }
-
-    .product-slider::-webkit-scrollbar {
-      display: none;
     }
 
     .slider-container {
@@ -338,26 +288,12 @@
     }
 
     .related-products-main-heading {
-      padding-top: 15px;
+      padding-top: var(--space-2xl);
     }
 
-    .cursor-grab {
-      padding-bottom: 0px;
-    }
-
-    .custom-scrollbar-container {
-      display: flex;
-      margin-top: 12px;
-    }
-
-    .custom-scrollbar-track {
-      width: 100%;
-      height: 6px;
-    }
-
-    .custom-scrollbar-thumb {
-      height: 6px;
-      width: 35px !important;
+    /* Mobile spacing between product grid and scrollbar */
+    .featured-collection-cursor-grab {
+      padding-bottom: var(--space-lg);
     }
   }
 
@@ -434,7 +370,7 @@
     transition-delay: 0.9s;
   }
   .related-products-grid .related-product-item:nth-child(11) {
-    transition-delay: 1.0s;
+    transition-delay: 1s;
   }
   .related-products-grid .related-product-item:nth-child(12) {
     transition-delay: 1.1s;
@@ -448,94 +384,69 @@
       transition: none !important;
     }
   }
+
+  /* Completely remove hover functionality on mobile - make it touch-friendly */
+  @media (max-width: 768px) {
+    /* Hide all hover-triggered elements by default */
+    .new-image-nav-arrow {
+      display: none !important;
+    }
+
+    .new-product-cart-container {
+      display: none !important;
+    }
+
+    .new-add-to-cart-btn,
+    .new-sold-out-btn {
+      display: none !important;
+    }
+
+    .new-size-variants-container {
+      display: none !important;
+    }
+
+    /* Remove all hover states */
+    .new-product-image-wrapper:hover .new-image-nav-arrow,
+    .new-product-image-wrapper:hover .new-product-cart-container,
+    .new-product-image-wrapper:hover .new-add-to-cart-btn,
+    .new-product-image-wrapper:hover .new-sold-out-btn,
+    .new-product-image-wrapper:hover .new-size-variants-container {
+      display: none !important;
+      opacity: 0 !important;
+      visibility: hidden !important;
+    }
+
+    /* Make the product card a simple clickable link */
+    .new-product-card {
+      cursor: pointer;
+      transition: transform 0.2s ease;
+    }
+
+    .new-product-card:active {
+      transform: scale(0.98);
+    }
+
+    /* Ensure the product link works properly */
+    .new-product-card a {
+      display: block;
+      width: 100%;
+      height: 100%;
+      text-decoration: none;
+      color: inherit;
+    }
+
+    /* Hide any remaining interactive elements */
+    .new-product-image-wrapper:hover * {
+      display: none !important;
+    }
+  }
 </style>
 
-<script>
-  document.addEventListener('DOMContentLoaded', function () {
-    const slider = document.getElementById('related-product-slider');
-    const scrollbarThumb = document.getElementById('custom-scrollbar-thumb');
-    const scrollbarTrack = document.querySelector('.custom-scrollbar-track');
-
-    if (!slider || !scrollbarThumb || !scrollbarTrack) {
-      console.log('Scrollbar elements not found');
-      return;
-    }
-
-    function updateScrollbar() {
-      if (slider.scrollWidth <= slider.clientWidth) {
-        scrollbarThumb.style.display = 'none';
-        return;
-      }
-
-      scrollbarThumb.style.display = 'block';
-
-      const scrollPercent = slider.scrollLeft / (slider.scrollWidth - slider.clientWidth);
-      const trackWidth = scrollbarTrack.clientWidth;
-      const thumbWidth = Math.max(20, (slider.clientWidth / slider.scrollWidth) * trackWidth);
-      const thumbLeft = scrollPercent * (trackWidth - thumbWidth);
-
-      scrollbarThumb.style.width = thumbWidth + 'px';
-      scrollbarThumb.style.left = thumbLeft + 'px';
-    }
-
-    slider.addEventListener('scroll', updateScrollbar);
-
-    scrollbarTrack.addEventListener('click', function (e) {
-      const trackRect = scrollbarTrack.getBoundingClientRect();
-      const clickX = e.clientX - trackRect.left;
-      const clickPercent = clickX / trackRect.width;
-      const scrollTo = clickPercent * (slider.scrollWidth - slider.clientWidth);
-
-      slider.scrollTo({
-        left: scrollTo,
-        behavior: 'smooth',
-      });
-    });
-
-    let isDragging = false;
-    let startX = 0;
-    let startScrollLeft = 0;
-
-    scrollbarThumb.addEventListener('mousedown', function (e) {
-      isDragging = true;
-      startX = e.clientX;
-      startScrollLeft = slider.scrollLeft;
-      e.preventDefault();
-    });
-
-    document.addEventListener('mousemove', function (e) {
-      if (!isDragging) return;
-
-      const deltaX = e.clientX - startX;
-      const trackWidth = scrollbarTrack.clientWidth;
-      const thumbWidth = scrollbarThumb.clientWidth;
-      const maxThumbLeft = trackWidth - thumbWidth;
-      const scrollRatio = (slider.scrollWidth - slider.clientWidth) / maxThumbLeft;
-      const newScrollLeft = startScrollLeft + deltaX * scrollRatio;
-
-      slider.scrollLeft = Math.max(0, Math.min(newScrollLeft, slider.scrollWidth - slider.clientWidth));
-    });
-
-    document.addEventListener('mouseup', function () {
-      isDragging = false;
-    });
-
-    setTimeout(updateScrollbar, 100);
-
-    window.addEventListener('resize', function () {
-      setTimeout(updateScrollbar, 100);
-    });
-
-    const images = slider.querySelectorAll('img');
-    images.forEach((img) => {
-      img.addEventListener('load', updateScrollbar);
-    });
-  });
-</script>
+{% comment %} Scrollbar functionality provided by horizontal-scrollbar snippet {% endcomment %}
 
 <script>
   // Custom Related Products Fade-Up Animation
-  document.addEventListener('DOMContentLoaded', function() {
+  document.addEventListener('DOMContentLoaded', function () {
     const relatedProductsGrid = document.querySelector('.related-products-grid');
     if (!relatedProductsGrid) return;
 
@@ -549,24 +460,27 @@
     });
 
     // Create intersection observer
-    const observer = new IntersectionObserver((entries) => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          // Trigger fade-up animation
-          entry.target.style.opacity = '1';
-          entry.target.style.transform = 'translateY(0)';
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            // Trigger fade-up animation
+            entry.target.style.opacity = '1';
+            entry.target.style.transform = 'translateY(0)';
 
-          // Stop observing this element
-          observer.unobserve(entry.target);
-        }
-      });
-    }, {
-      rootMargin: '0px 0px -100px 0px',
-      threshold: 0.1
-    });
+            // Stop observing this element
+            observer.unobserve(entry.target);
+          }
+        });
+      },
+      {
+        rootMargin: '0px 0px -100px 0px',
+        threshold: 0.1,
+      }
+    );
 
     // Observe all product cards
-    productCards.forEach(card => {
+    productCards.forEach((card) => {
       observer.observe(card);
     });
   });
@@ -580,6 +494,9 @@
   "name": "Related Products",
   "tag": "section",
   "class": "section",
+  "enabled_on": {
+    "templates": ["product"]
+  },
   "settings": [
     {
       "type": "checkbox",

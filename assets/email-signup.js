@@ -15,16 +15,67 @@ document.addEventListener('DOMContentLoaded', function () {
 
   let isSubmitting = false;
 
-  // Password modal functionality
-  enterPasswordBtn.onclick = function () {
-    passwordModal.classList.remove('hidden');
-    mainContainer.style.display = 'none';
-  };
+  // ===================================================================
+  // PASSWORD MODAL FUNCTIONALITY (CSP-compliant with event listeners)
+  // ===================================================================
 
-  closeModalBtn.onclick = function () {
-    passwordModal.classList.add('hidden');
-    mainContainer.style.display = 'flex';
-  };
+  // Function to open password modal
+  function openPasswordModal() {
+    if (passwordModal && mainContainer) {
+      passwordModal.classList.remove('hidden');
+      mainContainer.style.display = 'none';
+
+      // Update ARIA attribute
+      if (enterPasswordBtn) {
+        enterPasswordBtn.setAttribute('aria-expanded', 'true');
+      }
+
+      // Focus on password input for better UX
+      const passwordInput = passwordModal.querySelector('input[type="password"]');
+      if (passwordInput) {
+        setTimeout(() => passwordInput.focus(), 100);
+      }
+    }
+  }
+
+  // Function to close password modal
+  function closePasswordModal() {
+    if (passwordModal && mainContainer) {
+      passwordModal.classList.add('hidden');
+      mainContainer.style.display = 'flex';
+
+      // Update ARIA attribute
+      if (enterPasswordBtn) {
+        enterPasswordBtn.setAttribute('aria-expanded', 'false');
+      }
+    }
+  }
+
+  // Add click event listener to password button
+  if (enterPasswordBtn) {
+    enterPasswordBtn.addEventListener('click', openPasswordModal);
+
+    // Add keyboard accessibility
+    enterPasswordBtn.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        openPasswordModal();
+      }
+    });
+  }
+
+  // Add click event listener to close button
+  if (closeModalBtn) {
+    closeModalBtn.addEventListener('click', closePasswordModal);
+
+    // Add keyboard accessibility
+    closeModalBtn.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        closePasswordModal();
+      }
+    });
+  }
 
   // Email validation functionality
   function validateEmail() {
@@ -77,9 +128,8 @@ document.addEventListener('DOMContentLoaded', function () {
       submitButton.disabled = true;
 
       await new Promise((resolve) => setTimeout(resolve, 9000));
-
     } catch (error) {
-      buttonText.textContent = 'GET NOTIFIED';
+      buttonText.textContent = 'SUBSCRIBE';
       loadingSpinner.classList.add('hidden');
       emailInput.classList.add('border-red-500');
       emailError.textContent = 'An error occurred. Please try again.';
@@ -89,4 +139,6 @@ document.addEventListener('DOMContentLoaded', function () {
       isSubmitting = false;
     }
   });
+
+  // Log successful initialization
 });

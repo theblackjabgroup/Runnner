@@ -136,25 +136,19 @@ class ProductCard {
       });
     }
 
-    // Touch handler for mobile devices
-    imageWrapper.addEventListener(
-      'touchstart',
-      (e) => {
-        e.preventDefault();
-        if (cartContainer.classList.contains('show-button')) {
-          cartContainer.classList.remove('show-button');
-          if (sizeContainer) {
-            sizeContainer.classList.remove('active');
-            sizeButtons.forEach((btn) => {
-              btn.classList.remove('size-animate');
-            });
-          }
-        } else {
-          cartContainer.classList.add('show-button');
-        }
-      },
-      { passive: false }
-    );
+    // Touch handler for mobile devices - DISABLED to allow scrolling
+    // Since hover effects are disabled on mobile via CSS, we don't need this touch handler
+    // Removing this allows natural scrolling behavior on mobile devices
+
+    // Original code disabled:
+    // imageWrapper.addEventListener(
+    //   'touchstart',
+    //   (e) => {
+    //     e.preventDefault();  // This was blocking scrolling!
+    //     ...
+    //   },
+    //   { passive: false }
+    // );
   }
 
   initCartFunctionality() {
@@ -183,11 +177,24 @@ class ProductCard {
   }
 
   initSizeButtons() {
-    const sizeButtons = this.card.querySelectorAll('.new-size-option-btn');
+    // Handle both .new-size-option-btn (custom buttons) and .size-btn (from size-variant-picker)
+    const sizeButtons = this.card.querySelectorAll('.new-size-option-btn, .size-btn');
     sizeButtons.forEach((button) => {
       button.addEventListener('click', (e) => {
         e.preventDefault();
         e.stopPropagation();
+
+        // Remove active state from all size buttons in this card
+        sizeButtons.forEach((btn) => {
+          btn.classList.remove('active', 'bg-black', 'text-white');
+          btn.style.backgroundColor = '';
+          btn.style.color = '';
+        });
+
+        // Add active state to clicked button
+        button.classList.add('active', 'bg-black', 'text-white');
+        button.style.backgroundColor = 'var(--text)';
+        button.style.color = 'rgb(var(--color-background))';
 
         if (button.hasAttribute('data-waitlist')) {
           // Popup disabled for waitlist - no action taken
@@ -202,8 +209,6 @@ class ProductCard {
   }
 
   addToCart(variantId, quantity) {
-    console.log('Adding to cart:', variantId, quantity);
-
     const formData = {
       items: [
         {
@@ -221,22 +226,18 @@ class ProductCard {
       body: JSON.stringify(formData),
     })
       .then((response) => {
-        console.log('Response status:', response.status);
-
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
 
         const contentType = response.headers.get('content-type');
         if (!contentType || !contentType.includes('application/json')) {
-          console.warn('Response is not JSON, treating as success');
           return { success: true };
         }
 
         return response.json();
       })
       .then((data) => {
-        console.log('Cart add success:', data);
         this.showNotification('Added to cart successfully!', 'success');
         this.updateCartCount();
         this.refreshCartDrawer()
@@ -244,16 +245,12 @@ class ProductCard {
             this.openCartDrawer();
           })
           .catch((error) => {
-            console.error('Cart drawer refresh failed:', error);
             this.updateCartCount();
             this.openCartDrawer();
           });
       })
       .catch((error) => {
-        console.error('Error adding to cart:', error);
-
         if (error.message.includes('Unexpected') || error.message.includes('JSON')) {
-          console.log('Likely JSON parsing error, but cart add may have succeeded');
           setTimeout(() => this.updateCartCount(), 500);
           this.showNotification('Item may have been added - please check cart', 'warning');
           return;
@@ -273,7 +270,6 @@ class ProductCard {
         return response.text();
       })
       .then((responseText) => {
-        console.log('Cart drawer refreshed');
         const html = new DOMParser().parseFromString(responseText, 'text/html');
 
         const cartDrawerElement = document.querySelector('cart-drawer');
@@ -303,7 +299,6 @@ class ProductCard {
         this.updateCartCount();
       })
       .catch((error) => {
-        console.error('Error refreshing cart drawer:', error);
         return this.updateCartCount();
       });
   }
@@ -335,8 +330,6 @@ class ProductCard {
         return res.json();
       })
       .then((cart) => {
-        console.log('Cart updated:', cart);
-
         const cartCountSelectors = [
           '.cart-count',
           '[data-cart-count]',
@@ -371,9 +364,7 @@ class ProductCard {
           })
         );
       })
-      .catch((error) => {
-        console.error('Error updating cart count:', error);
-      });
+      .catch((error) => {});
   }
 
   showNotification(message, type = 'success') {

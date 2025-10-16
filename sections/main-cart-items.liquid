@@ -15,17 +15,15 @@
                 class="item-image-cart-page"
                 src="{{ item.image | image_url: width: 400 }}"
                 alt="{{ item.product.title | escape }}"
-                width="186"
                 height="222"
+                width="186"
                 loading="lazy"
-                sizes="(max-width: 768px) 128px, (max-width: 1024px) 140px, 186px"
+                sizes="(max-width: 768px) 128px, 186px"
                 srcset="
                   {{ item.image | image_url: width: 128 }} 128w,
-                  {{ item.image | image_url: width: 140 }} 140w,
                   {{ item.image | image_url: width: 186 }} 186w,
                   {{ item.image | image_url: width: 256 }} 256w,
-                  {{ item.image | image_url: width: 372 }} 372w,
-                  {{ item.image | image_url: width: 400 }} 400w
+                  {{ item.image | image_url: width: 372 }} 372w
                 "
               >
 
@@ -73,77 +71,142 @@
                         %}
 
                         {% comment %} Show the current color swatch {% endcomment %}
-                        <div
-                          class="color-picker {{ color_class }} selected"
-                          data-variant-id="{{ item.variant.id }}"
-                          data-color="{{ current_color }}"
-                          data-item-key="{{ item.key }}"
-                          data-current-size="{{ size_option.value | default: '' }}"
-                          title="{{ current_color }}"
-                          onclick="changeItemColor(this)"
-                          style="width: 20px !important; height: 20px !important; border-radius: 50% !important; border: 2px solid #000 !important; cursor: pointer !important; display: inline-block !important; margin-right: 4px !important; background: {% if color_class == 'black' %}#000{% elsif color_class == 'white' %}#fff{% elsif color_class == 'red' %}#ff0000{% elsif color_class == 'blue' %}#0000ff{% elsif color_class == 'navy' or color_class == 'nynavy' %}#000080{% elsif color_class == 'gray' or color_class == 'grey' %}#808080{% elsif color_class == 'brown' %}#8b4513{% elsif color_class == 'green' %}#008000{% elsif color_class == 'yellow' %}#ffff00{% elsif color_class == 'orange' %}#ffa500{% elsif color_class == 'purple' %}#800080{% elsif color_class == 'pink' %}#ffc0cb{% elsif color_class == 'beige' %}#f5f5dc{% else %}#ccc{% endif %} !important;"
-                        ></div>
+                        {% comment %} Check if we have a CSS class for this color, otherwise use inline style {% endcomment %}
+                        {% assign has_css_class_current = false %}
+                        {% if color_class == 'black'
+                          or color_class == 'white'
+                          or color_class == 'red'
+                          or color_class == 'blue'
+                          or color_class == 'navy'
+                          or color_class == 'nynavy'
+                          or color_class == 'gray'
+                          or color_class == 'grey'
+                          or color_class == 'brown'
+                          or color_class == 'green'
+                          or color_class == 'yellow'
+                          or color_class == 'orange'
+                          or color_class == 'purple'
+                          or color_class == 'pink'
+                          or color_class == 'beige'
+                        %}
+                          {% assign has_css_class_current = true %}
+                        {% endif %}
+
+                        {% if has_css_class_current %}
+                          <div
+                            class="color-picker {{ color_class }} selected"
+                            data-variant-id="{{ item.variant.id }}"
+                            data-color="{{ current_color }}"
+                            data-item-key="{{ item.key }}"
+                            data-current-size="{{ size_option.value | default: '' }}"
+                            title="{{ current_color }}"
+                          ></div>
+                        {% else %}
+                          <div
+                            class="color-picker selected"
+                            data-variant-id="{{ item.variant.id }}"
+                            data-color="{{ current_color }}"
+                            data-item-key="{{ item.key }}"
+                            data-current-size="{{ size_option.value | default: '' }}"
+                            title="{{ current_color }}"
+                            style="background: {{ current_color | downcase }} !important;"
+                          ></div>
+                        {% endif %}
 
                         {% comment %} Show other available colors if they exist {% endcomment %}
-                        {% assign displayed_colors = current_color | append: ',' %}
-                        {% for variant in item.product.variants %}
-                          {% assign variant_color = null %}
-
-                          {% comment %} Check all option positions for color {% endcomment %}
-                          {% if item.product.options[0] and item.product.options[0] != 'Title' %}
-                            {% assign option_name_lower = item.product.options[0] | downcase %}
+                        {% comment %} PERFORMANCE: Pre-calculate color option index (do once, not per variant) {% endcomment %}
+                        {% assign color_option_index = null %}
+                        {% for i in (0..2) %}
+                          {% case i %}
+                            {% when 0 %}
+                              {% assign check_option = item.product.options[0] %}
+                            {% when 1 %}
+                              {% assign check_option = item.product.options[1] %}
+                            {% when 2 %}
+                              {% assign check_option = item.product.options[2] %}
+                          {% endcase %}
+                          {% if check_option and check_option != 'Title' and color_option_index == null %}
+                            {% assign option_name_lower = check_option | downcase %}
                             {% if option_name_lower contains 'color' or option_name_lower contains 'colour' %}
-                              {% assign variant_color = variant.option1 %}
+                              {% assign color_option_index = i %}
                             {% endif %}
-                          {% endif %}
-
-                          {% if variant_color == null
-                            and item.product.options[1]
-                            and item.product.options[1] != 'Title'
-                          %}
-                            {% assign option_name_lower = item.product.options[1] | downcase %}
-                            {% if option_name_lower contains 'color' or option_name_lower contains 'colour' %}
-                              {% assign variant_color = variant.option2 %}
-                            {% endif %}
-                          {% endif %}
-
-                          {% if variant_color == null
-                            and item.product.options[2]
-                            and item.product.options[2] != 'Title'
-                          %}
-                            {% assign option_name_lower = item.product.options[2] | downcase %}
-                            {% if option_name_lower contains 'color' or option_name_lower contains 'colour' %}
-                              {% assign variant_color = variant.option3 %}
-                            {% endif %}
-                          {% endif %}
-
-                          {% if variant_color
-                            and variant_color != blank
-                            and variant_color != 'Default Title'
-                            and variant_color != current_color
-                          %}
-                            {% unless displayed_colors contains variant_color %}
-                              {% assign displayed_colors = displayed_colors | append: variant_color | append: ',' %}
-                              {% assign color_class = variant_color
-                                | downcase
-                                | replace: ' ', ''
-                                | replace: '-', ''
-                                | replace: '_', ''
-                              %}
-
-                              <div
-                                class="color-picker {{ color_class }}"
-                                data-variant-id="{{ variant.id }}"
-                                data-color="{{ variant_color }}"
-                                data-item-key="{{ item.key }}"
-                                data-current-size="{{ size_option.value | default: '' }}"
-                                title="{{ variant_color }}"
-                                onclick="changeItemColor(this)"
-                                style="width: 20px !important; height: 20px !important; border-radius: 50% !important; border: 1px solid #000 !important; cursor: pointer !important; display: inline-block !important; margin-right: 4px !important; background: {% if color_class == 'black' %}#000{% elsif color_class == 'white' %}#fff{% elsif color_class == 'red' %}#ff0000{% elsif color_class == 'blue' %}#0000ff{% elsif color_class == 'navy' or color_class == 'nynavy' %}#000080{% elsif color_class == 'gray' or color_class == 'grey' %}#808080{% elsif color_class == 'brown' %}#8b4513{% elsif color_class == 'green' %}#008000{% elsif color_class == 'yellow' %}#ffff00{% elsif color_class == 'orange' %}#ffa500{% elsif color_class == 'purple' %}#800080{% elsif color_class == 'pink' %}#ffc0cb{% elsif color_class == 'beige' %}#f5f5dc{% else %}#ccc{% endif %} !important;"
-                              ></div>
-                            {% endunless %}
                           {% endif %}
                         {% endfor %}
+
+                        {% assign displayed_colors = current_color | append: ',' %}
+
+                        {% comment %} PERFORMANCE: Optimized single loop (was O(n³), now O(n)) {% endcomment %}
+                        {% if color_option_index != null %}
+                          {% for variant in item.product.variants %}
+                            {% comment %} Get color based on pre-calculated index {% endcomment %}
+                            {% assign variant_color = null %}
+                            {% if color_option_index == 0 %}
+                              {% assign variant_color = variant.option1 %}
+                            {% elsif color_option_index == 1 %}
+                              {% assign variant_color = variant.option2 %}
+                            {% elsif color_option_index == 2 %}
+                              {% assign variant_color = variant.option3 %}
+                            {% endif %}
+
+                            {% comment %} Only process if color is valid and new {% endcomment %}
+                            {% if variant_color != blank
+                              and variant_color != 'Default Title'
+                              and variant_color != current_color
+                            %}
+                              {% unless displayed_colors contains variant_color %}
+                                {% assign displayed_colors = displayed_colors | append: variant_color | append: ',' %}
+                                {% assign color_class = variant_color
+                                  | downcase
+                                  | replace: ' ', ''
+                                  | replace: '-', ''
+                                  | replace: '_', ''
+                                %}
+
+                                {% comment %} Check if we have a CSS class for this color, otherwise use inline style {% endcomment %}
+                                {% assign has_css_class = false %}
+                                {% if color_class == 'black'
+                                  or color_class == 'white'
+                                  or color_class == 'red'
+                                  or color_class == 'blue'
+                                  or color_class == 'navy'
+                                  or color_class == 'nynavy'
+                                  or color_class == 'gray'
+                                  or color_class == 'grey'
+                                  or color_class == 'brown'
+                                  or color_class == 'green'
+                                  or color_class == 'yellow'
+                                  or color_class == 'orange'
+                                  or color_class == 'purple'
+                                  or color_class == 'pink'
+                                  or color_class == 'beige'
+                                %}
+                                  {% assign has_css_class = true %}
+                                {% endif %}
+
+                                {% if has_css_class %}
+                                  <div
+                                    class="color-picker {{ color_class }}"
+                                    data-variant-id="{{ variant.id }}"
+                                    data-color="{{ variant_color }}"
+                                    data-item-key="{{ item.key }}"
+                                    data-current-size="{{ size_option.value | default: '' }}"
+                                    title="{{ variant_color }}"
+                                  ></div>
+                                {% else %}
+                                  <div
+                                    class="color-picker"
+                                    data-variant-id="{{ variant.id }}"
+                                    data-color="{{ variant_color }}"
+                                    data-item-key="{{ item.key }}"
+                                    data-current-size="{{ size_option.value | default: '' }}"
+                                    title="{{ variant_color }}"
+                                    style="background: {{ variant_color | downcase }} !important;"
+                                  ></div>
+                                {% endif %}
+                              {% endunless %}
+                            {% endif %}
+                          {% endfor %}
+                        {% endif %}
                       </div>
                     </div>
                   {% endif %}
@@ -165,29 +228,8 @@
               </div>
 
               <div class="item-controls">
-                <div class="quantity-controls">
-                  <button
-                    class="qty-btn decrease-qty"
-                    data-item-key="{{ item.key }}"
-                    {% if item.quantity <= 1 or cart.item_count == 1 %}
-                      disabled
-                    {% endif %}
-                  >
-                    -
-                  </button>
-                  <input
-                    class="qty-input"
-                    type="text"
-                    value="{{ item.quantity }}"
-                    readonly
-                    data-item-key="{{ item.key }}"
-                  >
-                  <button
-                    class="qty-btn increase-qty"
-                    data-item-key="{{ item.key }}"
-                  >
-                    +
-                  </button>
+                <div class="quantity-controls" data-item-key="{{ item.key }}" data-item-quantity="{{ item.quantity }}">
+                  {% render 'quantity-input', item: item, variant: item.variant, mobile: false, for_cart: true %}
                 </div>
                 <button class="remove-btn" data-item-key="{{ item.key }}">[Remove]</button>
               </div>
@@ -202,7 +244,7 @@
     <div class="cart-sidebar">
       <div class="sidebar-sections">
         <div class="sidebar-section">
-          <div class="sidebar-header" onclick="toggleSection(this)">
+          <div class="sidebar-header">
             <span class="sidebar-title"
               >Add a Note to<br>
               Your Order:</span
@@ -218,7 +260,7 @@
         </div>
 
         <div class="sidebar-section">
-          <div class="sidebar-header" onclick="toggleSection(this)">
+          <div class="sidebar-header">
             <span class="sidebar-title"
               >Receive Special Offers and<br>
               First Look at New Products.</span
@@ -234,7 +276,7 @@
         </div>
 
         <div class="sidebar-section">
-          <div class="sidebar-header" onclick="toggleSection(this)">
+          <div class="sidebar-header">
             <span class="sidebar-title">Estimate Shipping Rates</span>
             <span class="expand-icon"><span class="pmorph__icon"></span></span>
           </div>
@@ -257,28 +299,32 @@
         <div class="cart-total">
           <span class="total-label">Total:</span>
           <span class="total-amount">
-            {{ cart.total_price | money_without_trailing_zeros }}
+            {{ cart.total_price | money }}
           </span>
         </div>
-        <button
-          type="button"
-          class="checkout-btn"
-          onclick="window.location.href='/checkout'"
-          {% if cart == empty %}
-            disabled
-          {% endif %}
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="32"
-            height="32"
-            fill="var(--secondary_button_text_color)"
-            viewBox="0 0 256 256"
-          >
-            <path d="M181.66,133.66l-80,80a8,8,0,0,1-11.32-11.32L164.69,128,90.34,53.66a8,8,0,0,1,11.32-11.32l80,80A8,8,0,0,1,181.66,133.66Z"></path>
-          </svg>
-          <span>Checkout</span>
-        </button>
+        {%- if cart == empty -%}
+          {%- assign checkout_wrapper_class = 'checkout-btn-wrapper cart-empty' -%}
+        {%- else -%}
+          {%- assign checkout_wrapper_class = 'checkout-btn-wrapper' -%}
+        {%- endif -%}
+
+        <div class="{{ checkout_wrapper_class }}">
+          {% render 'tertiary-button',
+            button_text: 'CHECKOUT',
+            button_font_size: 'var(--t-b-1-size)',
+            font_weight: 'var(--t-b-1-weight)',
+            button_line_height: 'var(--t-b-1-line-height)',
+            mobile_font_size: 'var(--tm-b-2-size)',
+            mobile_font_weight: 'var(--tm-b-2-weight)',
+            mobile_line_height: 'var(--tm-b-2-line-height)',
+            tertiary_class: 'add-to-cart-tertiary-btn cart-page-checkout-btn',
+            button_type: 'button',
+            button_width: '500px',
+            button_height: '50px',
+            mobile_button_width: '67vw',
+            data_attributes: 'aria-describedby="add-to-cart-description"'
+          %}
+        </div>
       </div>
     </div>
   </div>

@@ -16,6 +16,10 @@ function toggleSection(header) {
     s.classList.remove('expanded');
     const icon = s.querySelector('.pmorph__icon');
     if (icon) icon.classList.remove('expanded');
+
+    // Update aria-expanded for all headers
+    const sectionHeader = s.querySelector('.sidebar-header');
+    if (sectionHeader) sectionHeader.setAttribute('aria-expanded', 'false');
   });
 
   // Open clicked section and animate icon
@@ -23,6 +27,9 @@ function toggleSection(header) {
     section.classList.add('expanded');
     const icon = section.querySelector('.pmorph__icon');
     if (icon) icon.classList.add('expanded');
+
+    // Update aria-expanded for the opened section
+    header.setAttribute('aria-expanded', 'true');
   }
 }
 
@@ -31,7 +38,6 @@ function toggleSection(header) {
  */
 function closeCart() {
   // Add your close cart logic here
-  console.log('Close cart');
 }
 
 /**
@@ -40,8 +46,6 @@ function closeCart() {
  * @param {number} quantity - The new quantity
  */
 function updateQuantity(itemKey, quantity) {
-  console.log('Updating quantity:', itemKey, quantity);
-
   fetch('/cart/change.js', {
     method: 'POST',
     headers: {
@@ -54,18 +58,15 @@ function updateQuantity(itemKey, quantity) {
     }),
   })
     .then((response) => {
-      console.log('Response status:', response.status);
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
       return response.json();
     })
     .then((data) => {
-      console.log('Cart data received:', data);
       updateCartDisplay(data);
     })
     .catch((error) => {
-      console.error('Error updating cart:', error);
       // Optionally reload the page if cart update fails
       // window.location.reload();
     });
@@ -254,7 +255,6 @@ function getShippingRates(zipCode) {
         if (!response.ok) {
           // If the modern API fails, try alternative approach
           if (response.status === 422) {
-            console.log('Modern API failed, trying alternative approach...');
             return getShippingRatesAlternative(zipCode);
           }
           throw new Error(`HTTP error! status: ${response.status}`);
@@ -269,7 +269,6 @@ function getShippingRates(zipCode) {
         }
       })
       .catch((error) => {
-        console.error('Error fetching shipping rates:', error);
         // Try alternative approach as fallback
         getShippingRatesAlternative(zipCode).then(resolve).catch(reject);
       });
@@ -310,7 +309,6 @@ function getShippingRatesAlternative(zipCode) {
       .then((response) => response.json())
       .then((data) => {
         // If this approach doesn't work, provide mock data for testing
-        console.log('Alternative API response:', data);
 
         // Provide mock shipping rates for testing
         const mockRates = [
@@ -322,7 +320,6 @@ function getShippingRatesAlternative(zipCode) {
         resolve(mockRates);
       })
       .catch((error) => {
-        console.error('Alternative API also failed:', error);
         reject(new Error('Unable to calculate shipping rates. Please try again later.'));
       });
   });
@@ -413,7 +410,6 @@ async function updateCartNote(note, button) {
 
     if (response.ok) {
       const data = await response.json();
-      console.log('Cart note updated successfully');
 
       // Show success feedback
       if (button) {
@@ -430,8 +426,6 @@ async function updateCartNote(note, button) {
       throw new Error('Failed to update cart note');
     }
   } catch (error) {
-    console.error('Error updating cart note:', error);
-
     // Show error feedback
     if (button) {
       const originalText = button.textContent;
@@ -456,8 +450,6 @@ function changeItemColor(colorPicker) {
   const currentSize = colorPicker.dataset.currentSize;
   const newVariantId = colorPicker.dataset.variantId;
 
-  console.log('Changing color:', { itemKey, newColor, currentSize, newVariantId });
-
   // First, find the correct variant for the new color and current size
   findVariantForOptions(itemKey, newColor, currentSize)
     .then((targetVariantId) => {
@@ -473,7 +465,6 @@ function changeItemColor(colorPicker) {
       window.location.reload();
     })
     .catch((error) => {
-      console.error('Error changing item color:', error);
       alert('Unable to change color. Please try again.');
     });
 }
@@ -503,15 +494,66 @@ function findVariantForOptions(itemKey, newColor, currentSize) {
 }
 
 /**
+ * Initialize cart quantity inputs with correct values from cart items
+ * This is needed because the quantity-input snippet doesn't have access to item data
+ */
+function initializeCartQuantities() {
+  // Find all quantity input wrappers that have item data
+  const wrappers = document.querySelectorAll('[data-item-key][data-item-quantity]');
+
+  wrappers.forEach((wrapper) => {
+    const itemQuantity = parseInt(wrapper.dataset.itemQuantity);
+    const quantityInput = wrapper.querySelector('.quantity__input');
+
+    if (quantityInput && itemQuantity) {
+      // Set the correct quantity value
+      quantityInput.value = itemQuantity;
+
+      // Disable minus button if quantity is 1
+      const minusButton = wrapper.querySelector('.quantity__button[name="minus"]');
+      if (minusButton) {
+        if (itemQuantity <= 1) {
+          minusButton.disabled = true;
+        } else {
+          minusButton.disabled = false;
+        }
+      }
+    }
+  });
+}
+
+/**
  * Change cart item variant
  * @param {string} itemKey - The current item key
  * @param {string} newVariantId - The new variant ID
  * @returns {Promise} Promise for the cart update
  */
 function changeCartItemVariant(itemKey, newVariantId) {
-  // Get current quantity
-  const qtyInput = document.querySelector(`[data-item-key="${itemKey}"]`);
-  const currentQty = parseInt(qtyInput.value);
+  // Get current quantity - find the wrapper element and then the input within it
+  const wrapper = document.querySelector(`[data-item-key="${itemKey}"]`);
+  let currentQty = 1; // Default fallback
+
+  if (wrapper) {
+    // Try to get quantity from the dataset first (most reliable)
+    const datasetQty = parseInt(wrapper.dataset.itemQuantity);
+    if (!isNaN(datasetQty) && datasetQty > 0) {
+      currentQty = datasetQty;
+    } else {
+      // Fallback: find the quantity input within the wrapper
+      const quantityInput = wrapper.querySelector('.quantity__input');
+      if (quantityInput) {
+        const inputQty = parseInt(quantityInput.value);
+        if (!isNaN(inputQty) && inputQty > 0) {
+          currentQty = inputQty;
+        }
+      }
+    }
+  }
+
+  // Validate quantity and fallback to safe default
+  if (isNaN(currentQty) || currentQty < 1) {
+    currentQty = 1;
+  }
 
   // Remove the current item and add the new variant
   return fetch('/cart/change.js', {
@@ -545,8 +587,21 @@ function changeCartItemVariant(itemKey, newVariantId) {
 
 // Event Listeners
 document.addEventListener('DOMContentLoaded', function () {
+  // Cart Page Checkout Button
+  const cartPageCheckoutBtn = document.querySelector('.cart-page-checkout-btn');
+  if (cartPageCheckoutBtn) {
+    cartPageCheckoutBtn.addEventListener('click', function (e) {
+      e.preventDefault();
+      window.location.href = '/checkout';
+    });
+  }
+
+  // Initialize quantity inputs with correct values from cart items
+  initializeCartQuantities();
+
   // Quantity controls event listeners
   document.addEventListener('click', function (e) {
+    // Handle legacy quantity buttons
     if (e.target.classList.contains('decrease-qty')) {
       e.preventDefault();
       const itemKey = e.target.dataset.itemKey;
@@ -562,8 +617,64 @@ document.addEventListener('DOMContentLoaded', function () {
       const itemKey = e.target.dataset.itemKey;
       const input = document.querySelector(`input[data-item-key="${itemKey}"]`);
       const currentQty = parseInt(input.value);
-      console.log('Increasing quantity from', currentQty, 'to', currentQty + 1);
       updateQuantity(itemKey, currentQty + 1);
+    }
+
+    // Handle quantity-input snippet buttons for cart items only
+    if (e.target.classList.contains('quantity__button') || e.target.closest('.quantity__button')) {
+      const button = e.target.classList.contains('quantity__button') ? e.target : e.target.closest('.quantity__button');
+
+      // Check if this button is within a cart context by looking for data-item-key
+      const wrapper = button.closest('[data-item-key]');
+
+      // Only handle this event if we're in a cart context (have itemKey)
+      if (!wrapper) {
+        return; // Not a cart quantity button, let other handlers deal with it
+      }
+
+      // Skip if button is disabled
+      if (button.disabled) {
+        return;
+      }
+
+      // This is a cart quantity button, handle it here
+      e.preventDefault();
+
+      const itemKey = wrapper.dataset.itemKey;
+      const quantityInput = button.closest('quantity-input');
+
+      if (!quantityInput) {
+        return;
+      }
+
+      const input = quantityInput.querySelector('.quantity__input');
+      if (!input) {
+        return;
+      }
+
+      const currentQty = parseInt(input.value);
+      if (isNaN(currentQty) || currentQty < 0) {
+        return;
+      }
+
+      // Determine if this is increment or decrement - check button name attribute
+      const buttonName = button.getAttribute('name');
+
+      if (!buttonName) {
+        return;
+      }
+
+      const isDecrement = buttonName === 'minus';
+      const isIncrement = buttonName === 'plus';
+
+      // Update cart quantity
+      if (isDecrement && currentQty > 1) {
+        updateQuantity(itemKey, currentQty - 1);
+      } else if (isIncrement) {
+        updateQuantity(itemKey, currentQty + 1);
+      }
+      // Note: If quantity is 1 and user clicks minus, we do nothing (don't remove item)
+      // The remove button should be used for removing items
     }
 
     if (e.target.classList.contains('remove-btn')) {
@@ -576,7 +687,6 @@ document.addEventListener('DOMContentLoaded', function () {
   // Form submissions
   document.addEventListener('submit', function (e) {
     e.preventDefault();
-    console.log('Form submitted:', e.target);
 
     // Handle shipping estimate form
     if (e.target.id === 'shipping-estimate-form') {
@@ -606,4 +716,53 @@ document.addEventListener('DOMContentLoaded', function () {
     },
     true
   );
+
+  // ===================================================================
+  // COLOR PICKER EVENT LISTENERS (replaces inline onclick handlers)
+  // ===================================================================
+
+  // Attach click handlers to all color pickers
+  const colorPickers = document.querySelectorAll('.color-picker');
+
+  colorPickers.forEach(function (picker) {
+    picker.addEventListener('click', function () {
+      changeItemColor(this);
+    });
+
+    // Add keyboard accessibility
+    picker.setAttribute('role', 'button');
+    picker.setAttribute('tabindex', '0');
+
+    picker.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        changeItemColor(this);
+      }
+    });
+  });
+
+  // ===================================================================
+  // SIDEBAR SECTION TOGGLE EVENT LISTENERS (replaces inline onclick)
+  // ===================================================================
+
+  const sidebarHeaders = document.querySelectorAll('.sidebar-header');
+
+  sidebarHeaders.forEach(function (header) {
+    header.addEventListener('click', function () {
+      toggleSection(this);
+    });
+
+    // Add keyboard accessibility
+    header.setAttribute('role', 'button');
+    header.setAttribute('tabindex', '0');
+    header.setAttribute('aria-expanded', 'false');
+
+    header.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        toggleSection(this);
+      }
+    });
+  });
+
 });

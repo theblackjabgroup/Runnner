@@ -1,12 +1,14 @@
+{{ 'newsletter.css' | asset_url | stylesheet_tag }}
+{{ 'email-signup-banner.css' | asset_url | stylesheet_tag }}
+
 <div class="color-{{ section.settings.color_scheme }} px-8" style="padding: {{ section.settings.padding }}px 0; margin-bottom: {{ section.settings.margin_bottom }}px;" id="newsletter-section">
   <div class="flex flex-col md:flex-row items-center justify-between gap-6 md:gap-12" id="mainContainer">
-    
     <!-- Text content with fixed width to prevent affecting layout -->
-  <div class="text-center md:text-left ml-8 md:w-1/2 flex-shrink-0">
-  <h2 class="custom-white-text !text-[20px] md:!text-[50px] font-extrabold uppercase tracking-wider block md:block flex md:inline-block justify-start md:justify-normal m-0 break-words leading-tight -ml-[60px] md:ml-0">
+  <div class="bb-newsletter-box md:text-left ml-8 md:w-1/2 flex-shrink-0">
+  <h2 class="bb-newsletter-heading custom-white-text !text-[20px] md:!text-[50px] font-extrabold uppercase tracking-wider block md:block flex md:inline-block justify-start md:justify-normal m-0 break-words leading-tight md:ml-0">
     {{ section.settings.heading }}
   </h2>
-  <p class="custom-white-text text-[15px] md:text-[35px] mt-1 break-words overflow-wrap-normal max-w-full -ml-[60px] md:ml-0 flex md:block justify-start md:justify-normal whitespace-nowrap md:whitespace-normal">
+  <p class="bb-newsletter-subheading custom-white-text text-[15px] md:text-[35px] mt-1 break-words overflow-wrap-normal max-w-full md:ml-0 flex md:block justify-start md:justify-normal whitespace-nowrap md:whitespace-normal">
     {{ section.settings.subheading }}
   </p>
 </div>
@@ -23,33 +25,44 @@
         </div>
       </div>
 
-      {%- form 'customer', class: 'flex flex-col gap-6 w-[95%] mx-auto' -%}
+      {%- form 'customer', class: 'bb-newsletter-form flex flex-col gap-6 w-[95%] mx-auto' -%}
         <input type="hidden" name="contact[tags]" value="{{ section.settings.customer_tag }}" />
         <input type="hidden" name="contact[accepts_marketing]" value="true" />
       
-        <div class="form-fields-container relative"> 
+        <div class="relative"> 
           <input
             type="email"
             id="custom-email-input"
             name="contact[email]"
             placeholder="EMAIL"
-            class="w-full px-4 text-[30px] md:text-[50px] text-left text-white bg-black border border-white placeholder-gray-400 focus:outline-none rounded-lg leading-none py-0"
+            class="bb-custom-newsletter-input w-full px-4 text-[30px] md:text-[50px] text-left bg-white border border-white placeholder-gray-400 focus:outline-none rounded-lg leading-none py-0"
             {% if form.errors contains 'email' %} class="error-state"{% endif %}
             value="{{ form.email }}"
             required
-          />
+          >
         </div>
-      
+
         <div class="flex justify-end w-full">
-          <button type="submit" id="custom-submitButton" class="custom-submit-button w-full text-[30px] md:text-[50px] font-bold px-6 flex items-center justify-between hover:bg-red-700 transition-colors rounded-lg button-with-arrow">
-            <img src="{{ 'arrow-down.png' | asset_url }}" alt="Dropdown Icon" width="100%" height="auto" class="rotate-arrow w-12 h-10 object-contain" aria-hidden="true" />            <span id="custom-buttonText">{{ section.settings.button_text }}</span>
-            <span id="custom-loadingSpinner" class="hidden">
-              <svg class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-              </svg>
-            </span>
-          </button>
+          <button
+          type="submit"
+          id="custom-submitButton"
+          class="
+            pass-newsletter w-full px-6 py-4 font-light flex items-center justify-between cursor-pointer h-16 ml-2 text-4xl leading-[50px] pt-2 md:h-16 md:mb-0 md:pt-0 md:pb-0
+            transition-colors button-with-arrow focus:outline-none focus:ring-1
+          "
+          style="font-size: var(--t-b-1-size); font-weight: var(--t-b-1-weight); line-height: var(--t-b-1-line-height); font-style: var(--font-body-style);
+                font-family: var(--font-body-family);"
+          aria-label="Subscribe to our email list"
+        >
+        <span id="buttonText-password">Subscribe</span>
+        {% render 'icon-playback', width: '16px', height: '16px',viewBox: '4.5 1.5 8.5 13'%}
+          <span id="popup-loading-spinner" class="hidden">
+            <svg class="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+          </span>
+        </button>
         </div>
       {%- endform -%}
     </div>
@@ -57,63 +70,68 @@
 </div>
 
 <!-- Scroll-triggered popup newsletter -->
-<div id="popup-newsletter" class="fixed bottom-0 left-0 right-0 border-t border-gray-800 z-50 color-{{ section.settings.color_scheme }}" style="transform: translateY(100%); transition: transform 0.5s ease;">
-  <div class="container  w-full max-w-[1400px]  mx-auto px-4 py-4">
-    <div class="flex flex-col md:flex-row items-center justify-between gap-4">
+<div
+  id="popup-newsletter"
+  class="bb-popup-newsletter fixed bottom-0 left-0 right-0 border-t border-gray-800 z-50 color-{{ section.settings.color_scheme }}"
+  style="transform: translateY(100%); transition: transform 0.5s ease;"
+>
+  <div class="bb-container  w-full max-w-[1400px]  mx-auto px-4 py-4">
+    <div class="bb-popup-container flex flex-col md:flex-row items-center justify-between gap-4">
       <!-- Text content -->
       <div class="md:text-left md:w-1/2 md:-ml-[42%]">
-      <h2 class="heading-text text-base md:text-[33px] font-extrabold uppercase tracking-wider custom-white-text">
-  {{ section.settings.heading_text }}
-</h2>
+        <h2 class="bb-heading-text text-base md:text-[33px] font-extrabold uppercase tracking-wider custom-white-text">
+          {{ section.settings.heading_text }}
+        </h2>
 
-
-        <p class="text-lg md:text-xl mt-1 custom-white-text">{{ section.settings.subheading_text }}</p>
-
+        <p class="bb-popup-para text-lg md:text-xl mt-1 custom-white-text">{{ section.settings.subheading_text }}</p>
       </div>
-      
+
       <!-- Form container -->
       <div class="w-full md:w-2/3 ml-auto">
-        {%- form 'customer', id: 'popup-email-form', class: 'flex flex-col sm:flex-row gap-4 justify-end md:ml-[850px]' -%}
-          <input type="hidden" name="contact[tags]" value="{{ section.settings.customer_tag }}" />
-          <input type="hidden" name="contact[accepts_marketing]" value="true" />
-          
-         <div>
-  <input
-    type="email"
-    id="popup-email-input"
-    name="contact[email]"
-    placeholder="EMAIL"
-    class="popup-email-input px-4 py-3 text-white bg-black border border-white placeholder-gray-400 focus:outline-none rounded-lg text-left {% if form.errors contains 'email' %} error-state{% endif %}"
-    value="{{ form.email }}"
-  />
-</div>
+        {%- form 'customer',
+          id: 'popup-email-form',
+          class: 'flex flex-col sm:flex-row gap-4 justify-end md:ml-[850px]'
+        -%}
+          <input type="hidden" name="contact[tags]" value="{{ section.settings.customer_tag }}">
+          <input type="hidden" name="contact[accepts_marketing]" value="true">
 
-          
+          <div>
+            <input
+              type="email"
+              id="popup-email-input"
+              name="contact[email]"
+              placeholder="EMAIL"
+              class="popup-email-input px-4 py-3  bg-white border border-black placeholder-gray-400 focus:outline-none rounded-lg text-left {% if form.errors contains 'email' %} error-state{% endif %}"
+              value="{{ form.email }}"
+            >
+          </div>
+
           <div class="md:w-[200px]">
-  <button
-    <button
-  type="submit"
-  id="popup-submit-button"
-  class="popup-submit-button w-full md:w-auto font-bold px-6 py-3 flex items-center justify-center transition-colors rounded-lg custom-btn-bg custom-btn-text hover:custom-btn-bg-hover">
-
-
-  
-   
-    <span id="popup-button-text">{{ section.settings.button_text }}</span>
-    <span id="popup-loading-spinner" class="hidden ml-2">
-      <svg class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-        <path class="opacity-75" fill="currentColor"
-          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-      </svg>
-    </span>
-  </button>
-</div>
-
+            <button
+            type="submit"
+            id="popup-submit-button"
+            class="
+            popup-submit-button pass-newsletter w-full px-6 py-4 font-light flex items-center justify-between cursor-pointer h-16 ml-2 text-4xl leading-[50px] pt-2 md:h-16 md:mb-0 md:pt-0 md:pb-0
+              transition-colors button-with-arrow focus:outline-none focus:ring-1
+            "
+            style="font-size: var(--t-b-1-size); font-weight: var(--t-b-1-weight); line-height: var(--t-b-1-line-height); font-style: var(--font-body-style);
+                  font-family: var(--font-body-family);"
+            aria-label="Subscribe to our email list"
+          >
+          <span id="popup-button-text">{{ section.settings.button_text }}</span>
+          {% render 'icon-playback', width: '16px', height: '16px',viewBox: '4.5 1.5 8.5 13'%}
+            <span id="popup-loading-spinner" class="hidden">
+              <svg class="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+            </span>
+          </button>
+          </div>
         {%- endform -%}
-        
+
         <!-- Close button -->
-        <button id="close-popup" class="absolute top-2 right-2 text-white hover:text-gray-300">
+        <button id="close-popup" class="absolute top-2 right-2 hover:text-gray-300">
           <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
           </svg>
@@ -135,8 +153,6 @@
     color: var(--text);
   }
 
-
-
   /* Updated arrow rotation behavior to work when hovering the button */
   .rotate-arrow {
     transition: transform 0.3s ease;
@@ -148,91 +164,76 @@
   .button-with-arrow:hover .rotate-arrow {
     transform: rotate(-90deg); /* On hover: Upward */
   }
-  
+
   #custom-email-input:focus,
   #popup-email-input:focus {
     outline: none !important;
     box-shadow: none !important;
   }
-  
+
   /* Make sure text container doesn't grow beyond allocated space */
   @media (min-width: 768px) {
     #mainContainer {
       align-items: flex-start;
     }
   }
-  
+
   /* Popup display when active */
   #popup-newsletter.show-popup {
     transform: translateY(0) !important;
   }
 
-  /* Input and button height responsiveness */
-  #custom-email-input, #custom-submitButton {
-    height: 50px;
-    line-height: 50px;
-  }
-  
   .custom-submit-button {
     background-color: var(--button);
     color: var(--button_label);
   }
   .popup-submit-button {
-  width: 260px;
-  margin-left: 0;
-}
-  .popup-email-input {
-  width: 310px;
-  margin-left: 0;
-}
-.heading-text
-  {
-    font-weight:500;
+    width: 324px;
+    margin-left: 0;
   }
-  
-  @media (min-width: 768px) {
-    #custom-email-input, #custom-submitButton {
-      height: 70px;
-      line-height: 70px;
-    }
+  .popup-email-input {
+    width: 324px;
+    height: 48px;
+    margin-left: 0;
+    color: var(--button_label);
+  }
+  .heading-text {
+    font-weight: 500;
   }
 
   @media screen and (max-width: 480px) {
-  .popup-email-input {
-    width: 300px;
-    margin-left: 20px;
-  }
+    .popup-email-input {
+      width: 340px;
+    }
 
-     .popup-submit-button {
-    margin-left: 20px;
-       width: 300px;
-  }
+    .popup-submit-button {
+      width: 340px;
+    }
     .heading-text {
-    font-size: 30px;
-      font-weight:450;
+      font-size: var(--tm-h-2-size);
+      font-weight: 450;
+    }
   }
-}
   .custom-btn-bg {
-  background-color: var(--button);
-}
+    background-color: var(--button);
+  }
 
-.custom-btn-bg-hover:hover {
-  background-color: #b91c1c; /* Tailwind red-700 */
-}
+  .custom-btn-bg-hover:hover {
+    background-color: #b91c1c; /* Tailwind red-700 */
+  }
 
-.custom-btn-text {
-  color:  var(--button_label);
-}
-
+  .custom-btn-text {
+    color: var(--button_label);
+  }
 </style>
 
 <script>
-    /*
+  /*
   if (customEmailSignupForm) {
     const customEmailInput = document.getElementById('custom-email-input');
     const customSubmitButton = document.getElementById('custom-submitButton');
-    const customButtonText = document.getElementById('custom-buttonText');
-    const customLoadingSpinner = document.getElementById('custom-loadingSpinner');
+    const customButtonText = document.getElementById('buttonText-password');
+    const customLoadingSpinner = document.getElementById('popup-loading-spinner');
     
     // Flag to track if submission is in progress
     let isSubmitting = false;
@@ -320,9 +321,7 @@
           }
         }).then(response => {
           // Form submitted successfully
-          console.log('Form submitted successfully');
         }).catch(error => {
-          console.error('Error submitting form:', error);
         });
         
         // Reset form state after a delay (but keep success message visible)
@@ -351,84 +350,84 @@
     }
   }
   */
-document.addEventListener('DOMContentLoaded', function() {
-  // Original form functionality - Using unique IDs to avoid conflicts
-  //const customEmailSignupForm = document.getElementById('custom-email-signup-form');
-  const formContainer = document.getElementById('formContainer');
-  const successMessageContainer = document.getElementById('successMessageContainer');
+  document.addEventListener('DOMContentLoaded', function () {
+    // Original form functionality - Using unique IDs to avoid conflicts
+    //const customEmailSignupForm = document.getElementById('custom-email-signup-form');
+    const formContainer = document.getElementById('formContainer');
+    const successMessageContainer = document.getElementById('successMessageContainer');
 
-  // Popup Newsletter Functionality
-  const popupNewsletter = document.getElementById('popup-newsletter');
-  const newsletterSection = document.getElementById('newsletter-section');
-  const closePopupBtn = document.getElementById('close-popup');
-  const popupEmailForm = document.getElementById('popup-email-form');
-  const popupEmailInput = document.getElementById('popup-email-input');
-  const popupSubmitButton = document.getElementById('popup-submit-button');
-  const popupButtonText = document.getElementById('popup-button-text');
-  const popupLoadingSpinner = document.getElementById('popup-loading-spinner');
-  
-  // Track if user has closed the popup manually in this session
-  let userClosedPopup = false;
-  // Track if form is being submitted
-  let isPopupSubmitting = false;
-  
-  // Create popup error message function
-  const createPopupErrorMessage = (message) => {
-    // Remove any existing error messages first
-    const existingError = popupEmailInput.parentNode.querySelector('.popup-error-message');
-    if (existingError) existingError.remove();
-    
-    const errorElement = document.createElement('div');
-    errorElement.className = 'popup-error-message text-red-500 text-lg font-bold mt-2';
-    errorElement.textContent = message;
-    popupEmailInput.parentNode.appendChild(errorElement);
-    
-    // Auto remove after 5 seconds
-    setTimeout(() => {
-      if (errorElement.parentNode) {
-        errorElement.remove();
-      }
-    }, 5000);
-  };
-  
-  // Handle scroll to show/hide popup based on newsletter position
-  function handleScroll() {
-    if (userClosedPopup || !popupNewsletter || !newsletterSection) return;
-    
-    // Get current scroll position
-    const scrollPosition = window.scrollY || document.documentElement.scrollTop;
-    
-    // Get newsletter position relative to the document
-    const newsletterRect = newsletterSection.getBoundingClientRect();
-    const newsletterTop = newsletterRect.top + scrollPosition;
-    
-    // Show popup when above newsletter, hide when at or below
-    if (scrollPosition < newsletterTop) {
-      popupNewsletter.classList.add('show-popup');
-    } else {
-      popupNewsletter.classList.remove('show-popup');
-    }
-  }
-  
-  // Close button handler
-  if (closePopupBtn) {
-    closePopupBtn.addEventListener('click', function() {
-      if (popupNewsletter) {
+    // Popup Newsletter Functionality
+    const popupNewsletter = document.getElementById('popup-newsletter');
+    const newsletterSection = document.getElementById('newsletter-section');
+    const closePopupBtn = document.getElementById('close-popup');
+    const popupEmailForm = document.getElementById('popup-email-form');
+    const popupEmailInput = document.getElementById('popup-email-input');
+    const popupSubmitButton = document.getElementById('popup-submit-button');
+    const popupButtonText = document.getElementById('popup-button-text');
+    const popupLoadingSpinner = document.getElementById('popup-loading-spinner');
+
+    // Track if user has closed the popup manually in this session
+    let userClosedPopup = false;
+    // Track if form is being submitted
+    let isPopupSubmitting = false;
+
+    // Create popup error message function
+    const createPopupErrorMessage = (message) => {
+      // Remove any existing error messages first
+      const existingError = popupEmailInput.parentNode.querySelector('.popup-error-message');
+      if (existingError) existingError.remove();
+
+      const errorElement = document.createElement('div');
+      errorElement.className = 'popup-error-message text-red-500 text-lg font-bold mt-2';
+      errorElement.textContent = message;
+      popupEmailInput.parentNode.appendChild(errorElement);
+
+      // Auto remove after 5 seconds
+      setTimeout(() => {
+        if (errorElement.parentNode) {
+          errorElement.remove();
+        }
+      }, 5000);
+    };
+
+    // Handle scroll to show/hide popup based on newsletter position
+    function handleScroll() {
+      if (userClosedPopup || !popupNewsletter || !newsletterSection) return;
+
+      // Get current scroll position
+      const scrollPosition = window.scrollY || document.documentElement.scrollTop;
+
+      // Get newsletter position relative to the document
+      const newsletterRect = newsletterSection.getBoundingClientRect();
+      const newsletterTop = newsletterRect.top + scrollPosition;
+
+      // Show popup when above newsletter, hide when at or below
+      if (scrollPosition < newsletterTop) {
+        popupNewsletter.classList.add('show-popup');
+      } else {
         popupNewsletter.classList.remove('show-popup');
-        userClosedPopup = true;
       }
-    });
-  }
-  
-  // Function to show popup success message
-  window.showPopupSuccessMessage = function(popupContainer) {
-    // Store original content to restore later if needed
-    if (!popupContainer.hasAttribute('data-original-content')) {
-      popupContainer.setAttribute('data-original-content', popupContainer.innerHTML);
     }
-    
-    // Create success message
-    popupContainer.innerHTML = `
+
+    // Close button handler
+    if (closePopupBtn) {
+      closePopupBtn.addEventListener('click', function () {
+        if (popupNewsletter) {
+          popupNewsletter.classList.remove('show-popup');
+          userClosedPopup = true;
+        }
+      });
+    }
+
+    // Function to show popup success message
+    window.showPopupSuccessMessage = function (popupContainer) {
+      // Store original content to restore later if needed
+      if (!popupContainer.hasAttribute('data-original-content')) {
+        popupContainer.setAttribute('data-original-content', popupContainer.innerHTML);
+      }
+
+      // Create success message
+      popupContainer.innerHTML = `
       <div class="container mx-auto px-4 py-6">
         <div class="flex justify-center items-center">
           <div class="text-center">
@@ -441,140 +440,139 @@ document.addEventListener('DOMContentLoaded', function() {
         </div>
       </div>
     `;
-    
-    // Add close button to success message
-    const closeBtn = document.createElement('button');
-    closeBtn.innerHTML = `
+
+      // Add close button to success message
+      const closeBtn = document.createElement('button');
+      closeBtn.innerHTML = `
       <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
       </svg>
     `;
-    closeBtn.className = 'absolute top-2 right-2 text-white hover:text-gray-300';
-    closeBtn.addEventListener('click', function() {
-      popupContainer.classList.remove('show-popup');
-      userClosedPopup = true;
-    });
-    
-    popupContainer.querySelector('.container').appendChild(closeBtn);
-    
-    // Make sure popup is visible
-    popupContainer.classList.add('show-popup');
-    
-    // DO NOT hide popup automatically - let it stay visible until manual refresh
-  };
-  
-  // Popup form submission handler
-  if (popupEmailForm && popupEmailInput) {
-    popupEmailInput.addEventListener('input', function() {
-      if (this.value.trim()) {
-        this.classList.remove('error-state');
-        
-        // Remove any error messages
-        const existingError = this.parentNode.querySelector('.popup-error-message');
-        if (existingError) existingError.remove();
-      }
-    });
-    
-    // Handle popup submit button click
-    popupSubmitButton.addEventListener('click', function(e) {
-      e.preventDefault(); // Prevent button default action
-      
-      // Prevent multiple submissions
-      if (isPopupSubmitting) {
-        return;
-      }
-      
-      const email = popupEmailInput.value.trim();
-      
-      // Show error if empty
-      if (!email) {
-        popupEmailInput.classList.add('error-state');
-        popupEmailInput.focus();
-        createPopupErrorMessage("Please enter your email address");
-        return;
-      }
-      
-      // Validate email format
-      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-        popupEmailInput.classList.add('error-state');
-        popupEmailInput.focus();
-        createPopupErrorMessage("Please enter a valid email address");
-        return;
-      }
-      
-      // Set submitting state
-      isPopupSubmitting = true;
-      
-      // Show loading state
-      popupButtonText.textContent = "SUBMITTING...";
-      popupLoadingSpinner.classList.remove('hidden');
-      popupSubmitButton.disabled = true;
-      
-      // Show success message immediately
-      window.showPopupSuccessMessage(popupNewsletter);
-      
-      // Submit the form via AJAX to prevent page refresh
-      fetch(popupEmailForm.action, {
-        method: 'POST',
-        body: new FormData(popupEmailForm),
-        headers: {
-          'Accept': 'application/json'
-        }
-      }).then(response => {
-        // Form submitted successfully
-        console.log('Popup form submitted successfully');
-      }).catch(error => {
-        console.error('Error submitting popup form:', error);
+      closeBtn.className = 'absolute top-2 right-2 text-white hover:text-gray-300';
+      closeBtn.addEventListener('click', function () {
+        popupContainer.classList.remove('show-popup');
+        userClosedPopup = true;
       });
-      
-      // Reset form state after a delay (but keep success message visible)
-      setTimeout(() => {
-        isPopupSubmitting = false;
-        popupButtonText.textContent = popupSubmitButton.getAttribute('data-original-text') || "GET NOTIFIED";
-        popupLoadingSpinner.classList.add('hidden');
-        popupSubmitButton.disabled = false;
-      }, 1000);
-    });
-    
-    // Also handle the native form submission as a fallback
-    popupEmailForm.addEventListener('submit', function(e) {
-      e.preventDefault(); // Always prevent traditional form submission
-      
-      // Trigger the button click handler if not already submitting
-      if (!isPopupSubmitting) {
-        popupSubmitButton.click();
+
+      popupContainer.querySelector('.container').appendChild(closeBtn);
+
+      // Make sure popup is visible
+      popupContainer.classList.add('show-popup');
+
+      // DO NOT hide popup automatically - let it stay visible until manual refresh
+    };
+
+    // Popup form submission handler
+    if (popupEmailForm && popupEmailInput) {
+      popupEmailInput.addEventListener('input', function () {
+        if (this.value.trim()) {
+          this.classList.remove('error-state');
+
+          // Remove any error messages
+          const existingError = this.parentNode.querySelector('.popup-error-message');
+          if (existingError) existingError.remove();
+        }
+      });
+
+      // Handle popup submit button click
+      popupSubmitButton.addEventListener('click', function (e) {
+        e.preventDefault(); // Prevent button default action
+
+        // Prevent multiple submissions
+        if (isPopupSubmitting) {
+          return;
+        }
+
+        const email = popupEmailInput.value.trim();
+
+        // Show error if empty
+        if (!email) {
+          popupEmailInput.classList.add('error-state');
+          popupEmailInput.focus();
+          createPopupErrorMessage('Please enter your email address');
+          return;
+        }
+
+        // Validate email format
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+          popupEmailInput.classList.add('error-state');
+          popupEmailInput.focus();
+          createPopupErrorMessage('Please enter a valid email address');
+          return;
+        }
+
+        // Set submitting state
+        isPopupSubmitting = true;
+
+        // Show loading state
+        popupButtonText.textContent = 'SUBMITTING...';
+        popupLoadingSpinner.classList.remove('hidden');
+        popupSubmitButton.disabled = true;
+
+        // Show success message immediately
+        window.showPopupSuccessMessage(popupNewsletter);
+
+        // Submit the form via AJAX to prevent page refresh
+        fetch(popupEmailForm.action, {
+          method: 'POST',
+          body: new FormData(popupEmailForm),
+          headers: {
+            Accept: 'application/json',
+          },
+        })
+          .then((response) => {
+            // Form submitted successfully
+          })
+          .catch((error) => {});
+
+        // Reset form state after a delay (but keep success message visible)
+        setTimeout(() => {
+          isPopupSubmitting = false;
+          popupButtonText.textContent = popupSubmitButton.getAttribute('data-original-text') || 'SUBSCRIBE';
+          popupLoadingSpinner.classList.add('hidden');
+          popupSubmitButton.disabled = false;
+        }, 1000);
+      });
+
+      // Also handle the native form submission as a fallback
+      popupEmailForm.addEventListener('submit', function (e) {
+        e.preventDefault(); // Always prevent traditional form submission
+
+        // Trigger the button click handler if not already submitting
+        if (!isPopupSubmitting) {
+          popupSubmitButton.click();
+        }
+      });
+
+      // Store original button text for later reset
+      if (popupButtonText) {
+        popupSubmitButton.setAttribute('data-original-text', popupButtonText.textContent);
+      }
+    }
+
+    // Add scroll event listener with throttling for performance
+    let scrollTimeout;
+    window.addEventListener('scroll', function () {
+      if (!scrollTimeout) {
+        scrollTimeout = setTimeout(function () {
+          handleScroll();
+          scrollTimeout = null;
+        }, 100);
       }
     });
-    
-    // Store original button text for later reset
-    if (popupButtonText) {
-      popupSubmitButton.setAttribute('data-original-text', popupButtonText.textContent);
-    }
-  }
-  
-  // Add scroll event listener with throttling for performance
-  let scrollTimeout;
-  window.addEventListener('scroll', function() {
-    if (!scrollTimeout) {
-      scrollTimeout = setTimeout(function() {
-        handleScroll();
-        scrollTimeout = null;
-      }, 100);
-    }
+
+    // Check on window resize
+    window.addEventListener('resize', handleScroll);
+
+    // Initial check on page load
+    setTimeout(handleScroll, 500);
   });
-  
-  // Check on window resize
-  window.addEventListener('resize', handleScroll);
-  
-  // Initial check on page load
-  setTimeout(handleScroll, 500);
-});
 </script>
 
 {% schema %}
 {
   "name": "Newsletter",
-    "disabled_on": {
+  "disabled_on": {
     "groups": ["header", "footer"]
   },
   "settings": [
@@ -582,7 +580,7 @@ document.addEventListener('DOMContentLoaded', function() {
       "type": "text",
       "id": "heading",
       "label": "Heading",
-      "default": "Bandit Grand Prix"
+      "default": "Aurelia Newsletter"
     },
     {
       "type": "color_scheme",
@@ -594,7 +592,7 @@ document.addEventListener('DOMContentLoaded', function() {
       "type": "text",
       "id": "subheading",
       "label": "Subheading",
-      "default": "Registration opens on Thursday, 5/8."
+      "default": "Subscribe for offers and all"
     },
     {
       "type": "text",
@@ -637,18 +635,18 @@ document.addEventListener('DOMContentLoaded', function() {
       "type": "text",
       "id": "heading_text",
       "label": "Heading Text",
-      "default": "Bandit Grand Prix"
+      "default": "Aurelia Newsletter"
     },
     {
       "type": "text",
       "id": "subheading_text",
       "label": "Subheading Text",
-      "default": "Registration opens on Thursday, 5/8."
+      "default": "Subscribe for offers and all"
     }
   ],
   "presets": [
     {
-      "name": "Newsletter",
+      "name": "Newsletter"
     }
   ]
 }

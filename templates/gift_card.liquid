@@ -51,7 +51,6 @@
           --font-body-scale: {{ settings.body_scale | divided_by: 100.0 }};
           --font-heading-scale: {{ settings.heading_scale | times: 1.0 | divided_by: settings.body_scale }};
 
-          --selection-color: #c97900;
 
           {% assign scheme = settings.color_schemes | first %}
           --color-background: {{ scheme.settings.background.red }},{{ scheme.settings.background.green }},{{ scheme.settings.background.blue }};
@@ -108,11 +107,7 @@
           text-align: center;
         }
 
-        .container *::selection {
-          text-shadow: none;
-          color: var(--selection-color);
-          background-color: transparent;
-        }
+
 
         .store-name {
           font-size: 32px;
@@ -192,12 +187,11 @@
           background: rgb(var(--color-foreground));
           color: rgb(var(--color-background));
           border: {{ settings.buttons_border_thickness }}px solid transparent;
-          border-radius: {{ settings.buttons_radius }}px;
-          padding: 2px 2px;
-          width: 193px;
-          font-size: 20px;
-          font-weight: 500;
-          letter-spacing: 1px;
+          border-radius: {{ settings.buttons_radius | minus: 1 }}px;
+          padding: 8px 0px;
+          font-size: var(--t-b-2-size);
+          font-weight: var(--t-b-2-weight);
+          letter-spacing: 0.05em;
           margin-bottom: 14px;
           cursor: pointer;
           overflow: hidden;
@@ -207,7 +201,6 @@
         .button-main:hover {
           color: rgb(var(--color-foreground));
           background: rgb(var(--color-background));
-          padding: 2px 2px;
           border: {{ settings.buttons_border_thickness }}px solid black;
         }
 
@@ -215,10 +208,10 @@
           background: rgb(var(--color-background));
           color: rgb(var(--color-foreground));
           border: {{ settings.buttons_border_thickness }}px solid black;
-          border-radius: {{ settings.buttons_radius }}px;
-          padding: 2px 2px;
-          font-size: 20px;
-          font-weight: 500;
+          border-radius: {{ settings.buttons_radius | minus: 1 }}px;
+          padding: 8px 0px;
+          font-size: var(--t-b-2-size);
+          font-weight: var(--t-b-2-weight);
           cursor: pointer;
           overflow: hidden;
           transition: background-color 0.3s, color 0.3s;
@@ -245,8 +238,10 @@
           justify-content: center;
           text-transform: uppercase;
           letter-spacing: 0.05em;
-          transition: transform 0.5s ease;
-          width: 100%;
+          transition: transform 0.6s ease;
+          height: 100%;
+          padding: 0 10px;
+          box-sizing: border-box;
         }
 
         .button-main:hover .main-button-text,
@@ -267,8 +262,10 @@
           text-transform: uppercase;
           letter-spacing: 0.05em;
           transform: translateX(100%);
-          transition: transform 0.5s ease;
-          width: 100%;
+          transition: transform 0.6s ease;
+          height: 100%;
+          padding: 0 10px;
+          box-sizing: border-box;
         }
 
         .button-main:hover .main-button-text-hover,
@@ -281,6 +278,17 @@
         .button-outline:not(:hover) .main-button-text,
         .button-outline:not(:hover) .main-button-text-hover {
           transition: none;
+        }
+
+        .gift-card-button-arrow {
+          display: inline-block;
+          margin-left: 15px;
+        }
+
+        .gift-card-arrow-svg {
+          transition: transform 0.6s ease;
+          display: block;
+          fill: currentColor;
         }
 
       .divider {
@@ -348,13 +356,32 @@
           font-size: var(--tm-b-4-size);
           line-height: var(--tm-b-4-line-height);
         }
+        .button-main {
+          font-size: var(--tm-b-3-size);
+          font-weight: var(--t-b-3-weight);
+          padding: 6px 5px;
+        }
+
+        .button-outline {
+          font-size: var(--tm-b-3-size);
+          font-weight: var(--t-b-3-weight);
+          padding: 6px 5px;
+        }
+
         .main-button-text{
-          font-size: var(--tm-b-1-size);
-          line-height: var(--tm-b-1-line-height);
+          font-size: var(--tm-b-3-size);
+          line-height: var(--tm-b-3-line-height);
+          padding: 0 10px;
         }
         .main-button-text-hover{
-          font-size: var(--tm-b-1-size);
-          line-height: var(--tm-b-1-line-height);
+          font-size: var(--tm-b-3-size);
+          line-height: var(--tm-b-3-line-height);
+          padding: 0 10px;
+        }
+
+        .gift-card-arrow-svg {
+          width: 12px;
+          height: 12px;
         }
       }
 
@@ -408,26 +435,70 @@
       </div>
       <div class="gift-card-instructions">{{ 'gift_cards.issued.how_to_use_gift_card' | t }}</div>
 
-      <button class="button-main text-center" onclick="window.open('{{ shop.url }}', '_blank')">
+      <button class="button-main text-center" id="shopNowButton">
         <div class="main-button-text-container">
           <div class="main-button-text">
             {{ 'gift_cards.issued.shop_link' | t }}
+            <span class="gift-card-button-arrow" aria-hidden="true">
+              {% render 'icon-playback',
+                width: 16,
+                height: 14,
+                fill: 'none',
+                viewBox: '4.5 1.5 8.5 13',
+                class: 'gift-card-arrow-svg',
+                stroke: 'currentColor',
+                style: 'width: 16px; height: 14px;'
+              %}
+            </span>
           </div>
           <div class="main-button-text-hover">
             {{ 'gift_cards.issued.shop_link' | t }}
+            <span class="gift-card-button-arrow" aria-hidden="true">
+              {% render 'icon-playback',
+                width: 16,
+                height: 14,
+                fill: 'none',
+                viewBox: '4.5 1.5 8.5 13',
+                class: 'gift-card-arrow-svg',
+                stroke: 'currentColor',
+                style: 'width: 16px; height: 14px;'
+              %}
+            </span>
           </div>
         </div>
       </button>
 
       <br>
 
-      <button class="button-outline" onclick="printGiftCard()">
+      <button class="button-outline" id="printButton">
         <div class="main-button-text-container">
           <div class="main-button-text">
             {{ 'gift_cards.issued.print_gift_card' | t }}
+            <span class="gift-card-button-arrow" aria-hidden="true">
+              {% render 'icon-playback',
+                width: 16,
+                height: 14,
+                fill: 'none',
+                viewBox: '4.5 1.5 8.5 13',
+                class: 'gift-card-arrow-svg',
+                stroke: 'currentColor',
+                style: 'width: 16px; height: 14px;'
+              %}
+            </span>
           </div>
           <div class="main-button-text-hover">
             {{ 'gift_cards.issued.print_gift_card' | t }}
+            <span class="gift-card-button-arrow" aria-hidden="true">
+              {% render 'icon-playback',
+                width: 16,
+                height: 14,
+                fill: 'none',
+                viewBox: '4.5 1.5 8.5 13',
+                class: 'gift-card-arrow-svg',
+                stroke: 'currentColor',
+                style: 'width: 16px; height: 14px;'
+              %}
+            </span>
           </div>
         </div>
       </button>
@@ -445,6 +516,26 @@
     </div>
 
     <script>
+      // Gift Card Functions - CSP Compliant
+      document.addEventListener('DOMContentLoaded', function () {
+        // Shop Now Button - Opens store in new tab
+        var shopNowBtn = document.getElementById('shopNowButton');
+        if (shopNowBtn) {
+          shopNowBtn.addEventListener('click', function () {
+            window.open('{{ shop.url }}', '_blank');
+          });
+        }
+
+        // Print Button - Prints the gift card
+        var printBtn = document.getElementById('printButton');
+        if (printBtn) {
+          printBtn.addEventListener('click', function () {
+            window.print();
+          });
+        }
+      });
+
+      // QR Code functionality (currently commented out)
       // var string = { qrImageAlt: {{ 'gift_cards.issued.qr_image_alt' | t | json }} };
       // document.addEventListener('DOMContentLoaded', function() {
       //   new QRCode(document.querySelector('.gift-card__qr-code'), {
@@ -454,10 +545,6 @@
       //     imageAltText: string.qrImageAlt
       //   });
       // });
-
-      function printGiftCard() {
-        window.print();
-      }
     </script>
   </body>
 </html>
