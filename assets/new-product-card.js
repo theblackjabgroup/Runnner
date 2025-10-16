@@ -194,7 +194,7 @@ class ProductCard {
         // Add active state to clicked button
         button.classList.add('active', 'bg-black', 'text-white');
         button.style.backgroundColor = 'var(--text)';
-        button.style.color = 'var(--background)';
+        button.style.color = 'rgb(var(--color-background))';
 
         if (button.hasAttribute('data-waitlist')) {
           // Popup disabled for waitlist - no action taken
