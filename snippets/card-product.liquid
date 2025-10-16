@@ -386,8 +386,20 @@
       font-size: 12px;
     }
 
-    /* Disable all hover effects on mobile */
-    .group:hover .opacity-0 {
+    /* Disable all hover effects on mobile except images */
+    
+    /* Keep images always visible on mobile */
+    .group:hover .image-config {
+      opacity: 1 !important;
+    }
+
+    /* Keep first image visible */
+    .image-config[style*="opacity: 1"] {
+      opacity: 1 !important;
+    }
+
+    /* Hide slider arrows on mobile hover */
+    .group:hover .slider-arrow {
       opacity: 0 !important;
     }
 
@@ -396,7 +408,7 @@
     }
 
     /* Keep add to cart button hidden on mobile hover */
-    .group:hover .group-hover\:opacity-100 {
+    .group:hover .group-hover\:opacity-100:not(.image-config) {
       opacity: 0 !important;
     }
 
@@ -415,15 +427,16 @@
     height: 270px !important;
   }
 
-  .group:hover .opacity-0 {
-    opacity: 0 !important;
+  /* Ensure images stay visible */
+  .group:hover .image-config {
+    opacity: 1 !important;
   }
 
   .group:hover .translate-y-10 {
     transform: translateY(2.5rem) !important;
   }
 
-  .group:hover .group-hover\:opacity-100 {
+  .group:hover .group-hover\:opacity-100:not(.image-config) {
     opacity: 0 !important;
   }
 
@@ -456,6 +469,67 @@
     opacity: 0 !important;
     visibility: hidden !important;
   }
+  }
+
+  /* Additional mobile-only hover disabling using touch detection */
+  @media (hover: none) and (pointer: coarse) {
+    /* Completely disable height changes on touch devices */
+    .card-wrapper:hover .product-card-height,
+    .group:hover .product-card-height {
+      height: 270px !important;
+    }
+
+    /* CRITICAL: Keep ONLY first image visible, hide all others */
+    .image-config {
+      opacity: 0 !important;
+    }
+
+    /* Show only the first image */
+    .image-config[style*="opacity: 1"],
+    .image-config:first-of-type {
+      opacity: 1 !important;
+    }
+
+    /* Prevent hover from changing any image opacity */
+    .group:hover .image-config,
+    .card-wrapper:hover .image-config {
+      opacity: 0 !important;
+    }
+
+    /* But keep first image visible even on hover */
+    .group:hover .image-config[style*="opacity: 1"],
+    .group:hover .image-config:first-of-type,
+    .card-wrapper:hover .image-config[style*="opacity: 1"],
+    .card-wrapper:hover .image-config:first-of-type {
+      opacity: 1 !important;
+    }
+
+    /* Disable all image transforms */
+    .group:hover .image-config,
+    .card-wrapper:hover .image-config {
+      transform: none !important;
+      scale: 1 !important;
+    }
+
+    /* Hide all interactive elements on mobile */
+    .slider-arrow,
+    .group:hover .slider-arrow,
+    .card-wrapper:hover .slider-arrow {
+      display: none !important;
+      opacity: 0 !important;
+    }
+
+    /* Disable all transform effects */
+    .group:hover *:not(.image-config),
+    .card-wrapper:hover *:not(.image-config) {
+      transform: none !important;
+    }
+
+    /* Keep buttons hidden */
+    .group:hover .group-hover\:opacity-100:not(.image-config),
+    .card-wrapper:hover .opacity-0:not(.image-config) {
+      opacity: 0 !important;
+    }
   }
 
   /* Make images fill the card completely */
@@ -680,9 +754,9 @@
   document.addEventListener('DOMContentLoaded', function () {
     const containers = document.querySelectorAll('.product-sizes-container');
 
-    // Check if device is mobile
+    // Check if device is mobile or touch device
     function isMobile() {
-      return window.innerWidth <= 600;
+      return window.innerWidth <= 600 || window.matchMedia("(hover: none)").matches || ('ontouchstart' in window);
     }
 
     function updateButtonState(button, state) {
