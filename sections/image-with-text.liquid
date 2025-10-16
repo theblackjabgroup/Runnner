@@ -327,23 +327,14 @@
   .image-with-text-button-arrow {
     margin-left: 20px;
   }
-    /* For videos: use custom height settings */
-    .image-with-text-media-section-{{ section.id }}[data-video="true"] {
-      width: 100vw;
-      height: {{ section.settings.img_height_mobile }}px;
-    }
-
-    /* For images: use the old section height settings */
-    .image-with-text-media-section-{{ section.id }}[data-video="false"] {
+    /* Section height settings */
+    .image-with-text-media-section-{{ section.id }} {
       width: 100vw;
       height: {{ section.settings.img_height_mobile }}px;
     }
 
     @media (min-width: 750px) {
-      .image-with-text-media-section-{{ section.id }}[data-video="false"] {
-        height: {{ section.settings.img_height }}px;
-      }
-      .image-with-text-media-section-{{ section.id }}[data-video="true"] {
+      .image-with-text-media-section-{{ section.id }} {
         height: {{ section.settings.img_height }}px;
       }
     }
@@ -606,24 +597,6 @@
     min-height: 100%;
   }
 
-  /* Ensure video fills container completely for Vimeo */
-  .image-with-text-iframe iframe[src*="vimeo"] {
-    width: 100% !important;
-    height: 100% !important;
-    min-width: 100% !important;
-    min-height: 100% !important;
-    transform: translate(-50%, -50%) scale(1);
-    transform-origin: center center;
-  }
-
-  /* For YouTube videos */
-  .image-with-text-iframe iframe[src*="youtube"] {
-    width: 100% !important;
-    height: 100% !important;
-    min-width: 100% !important;
-    min-height: 100% !important;
-    transform: translate(-50%, -50%);
-  }
 
   .image-with-text-media-section-{{ section.id }}{
     padding: {{ settings.sections_spacing }}px {{ settings.side_space}}px;
@@ -633,29 +606,9 @@
     display: none !important;
   }
 
-  @media (max-width: 749px) {
-
-    .image-with-text-iframe iframe[src*="vimeo"] {
-      width: 200% !important;
-      height: 200% !important;
-      min-width: 200% !important;
-      min-height: 200% !important;
-      transform: translate(-50%, -50%) scale(1);
-      transform-origin: center center;
-    }
-
-    .image-with-text-iframe iframe[src*="youtube"] {
-      width: 200% !important;
-      height: 200% !important;
-      min-width: 200% !important;
-      min-height: 200% !important;
-      transform: translate(-50%, -50%);
-    }
-  }
 {%- endstyle -%}
 
-{% if section.settings.enabled %}
-  {% assign section_classes = '' %}
+{% assign section_classes = '' %}
   {% if section.settings.color_scheme %}
     {% assign section_classes = section_classes | append: ' color-' | append: section.settings.color_scheme %}
     {% unless section.settings.color_scheme == '1' %}
@@ -665,7 +618,6 @@
   <section
     id="ImageWithText-{{ section.id }}"
     class="image-with-text-media-section-{{ section.id }} relative w-full overflow-hidden image-with-text-section-{{ section.id }}-padding{{ section_classes }}"
-    data-video="false"
     role="region"
     aria-label="Image with text section"
   >
@@ -839,7 +791,6 @@
       </div>
     </div>
   </section>
-{% endif %}
 
 <script>
 
@@ -1176,12 +1127,6 @@ button.addEventListener('keydown', function(event) {
   },
   "settings": [
     {
-      "type": "checkbox",
-      "id": "enabled",
-      "label": "Enable section",
-      "default": true
-    },
-    {
       "type": "color_scheme",
       "id": "color_scheme",
       "label": "t:sections.all.colors.label",
@@ -1486,7 +1431,7 @@ button.addEventListener('keydown', function(event) {
           "type": "richtext",
           "id": "text",
           "label": "Text",
-          "default": "<p>Add your description or promotional text here to accompany your featured image or video.</p>"
+          "default": "<p>Add your description or promotional text here to accompany your featured image.</p>"
         },
         {
           "type": "select",

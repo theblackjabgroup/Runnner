@@ -152,82 +152,12 @@
       }
     }
 
-    /* Heading background color - separate blocks per line like the image */
-    {% if section.settings.enable_heading_background %}
-      /* Base styles for heading container: Set the look */
-      .video-with-text-heading {
-        font-weight: bold; 
-        text-transform: uppercase; 
-        line-height: 1.2;
-      }
-      
-      /* Class to apply the inline background/padding wrap */
-      .heading-background-block-style {
-        display: inline; /* CRITICAL: Allows background to wrap lines */
-        padding: 0 var(--space-xs); /* 5px padding left and right */
-        background: linear-gradient(to bottom, transparent 22%, {{ section.settings.heading_background_color | default: '#000000' }} 22%);
-        background-size: 100% 100%;
-        background-origin: border-box;
-        -webkit-box-decoration-break: clone;
-        box-decoration-break: clone; 
-        color: inherit !important; /* Inherit color from parent h2 */
-      }
-
-      /* Ensure the inner animation container respects the inline display */
-      .video-with-text-heading > .video-with-text-letter-animation-container.animation-ready {
-          display: inline; 
-      }
-
-    {% endif %}
 
     @media screen and (min-width: 750px) {
       .video-with-text-section-{{ section.id }}-padding {
         padding-top: {{ section.settings.padding_top }}px;
         padding-bottom: {{ section.settings.padding_bottom }}px;
       }
-    }
-    @keyframes letterAppear {
-      0% {
-        transform: translateX(10000%);
-        opacity: 0;
-      }
-      100% {
-        transform: translateX(0);
-        opacity: 1;
-      }
-    }
-
-    /* Animation styling for word-level control */
-    .video-with-text-video-with-text-letter-animation-container {
-      display: inline-block;
-      width: 100%;
-      /* max-width: 550px; */
-      overflow: visible;
-      position: relative;
-    }
-
-    /* Style for each word container */
-    .animated-word {
-      display: inline-block;
-      white-space: nowrap; /* Ensure words don't break */
-      margin-right: 0.2em; /* Optional: slight spacing between words */
-    }
-
-    /* Style for individual letters */
-    .animated-letter {
-      display: inline-block;
-      opacity: 0;
-      transform: translateX(500%);
-      position: relative;
-    }
-
-    /* Style for spaces between words */
-    .animated-space {
-      display: inline-block;
-      opacity: 0;
-      transform: translateX(500%);
-      position: relative;
-      /* Adjust this if needed for proper spacing */
     }
 
     /* Ensure headings don't break words at boundaries */
@@ -254,52 +184,13 @@
     font-size: var(--t-b-1-size);
   }
 
-    .animated-letter {
-      display: inline-block;
-      opacity: 0;
-      transform: translateX(500%);
-      position: relative;
-    }
-
-    /* Animation ready states for all blocks */
-    .video-with-text-video-with-text-letter-animation {
-      opacity: 0;
-    }
-
-    .video-with-text-video-with-text-letter-animation.animation-ready {
-      opacity: 1;
-    }
-
+    /* Button animation classes */
     .button-animation {
       opacity: 0;
     }
 
     .button-animation.animation-ready {
       opacity: 1;
-    }
-
-    .date-animation {
-      opacity: 0;
-    }
-
-    .date-animation.animation-ready {
-      opacity: 1;
-    }
-
-    .text-animation {
-      opacity: 0;
-    }
-
-    .text-animation.animation-ready {
-      opacity: 1;
-    }
-
-    /* Non-animated states */
-    .no-animation .video-with-text-video-with-text-letter-animation,
-    .no-animation .button-animation,
-    .no-animation .date-animation,
-    .no-animation .text-animation {
-      opacity: 1 !important;
     }
 
   .video-with-text-custom-button-css {
@@ -549,24 +440,6 @@
       }
     }
 
-    @media (prefers-reduced-motion: reduce) {
-      .animated-letter {
-        animation: none !important;
-        opacity: 1 !important;
-        transform: none !important;
-      }
-
-      .button-animation {
-        animation: none !important;
-        opacity: 1 !important;
-        transform: none !important;
-      }
-
-      .video-with-text-button-text,
-      .video-with-text-button-text-hover {
-        transition: none !important;
-      }
-    }
 
     /* New styles for dual headings */
     .dual-heading-container {
@@ -697,8 +570,7 @@
   }
 {%- endstyle -%}
 
-{% if section.settings.enabled %}
-  {% assign section_classes = '' %}
+{% assign section_classes = '' %}
   {% if section.settings.color_scheme %}
     {% assign section_classes = section_classes | append: ' color-' | append: section.settings.color_scheme %}
     {% unless section.settings.color_scheme == '1' %}
@@ -857,9 +729,6 @@
             {% case block.type %}
               {% when 'heading' %}
                 {% assign heading_classes = 'video-with-text-heading mb-4' %}
-                {% if section.settings.enable_text_animation %}
-                  {% assign heading_classes = heading_classes | append: ' video-with-text-letter-animation' %}
-                {% endif %}
 
                 {% assign inline_styles = 'font-weight: var(--t-h-2-weight); margin-bottom: 20px; font-style: var(--font-heading-style); font-family: var(--font-heading-family); font-size: var(--t-h-2-size); line-height: var(--t-h-2-line-height); color: ' | append: block.settings.text_color | append: ';' %}
 
@@ -868,18 +737,12 @@
                   class="{{ heading_classes }}"
                   style="{{ inline_styles }}"
                 >
-                  {% if section.settings.enable_heading_background %}
-                    <span class="heading-background-block-style">
-                      {{ block.settings.heading | replace: '||', '<br>' }}
-                    </span>
-                  {% else %}
-                    {{ block.settings.heading | replace: '||', '<br>' }}
-                  {% endif %}
+                  {{ block.settings.heading | replace: '||', '<br>' }}
                 </h2>
               {% when 'date' %}
                 <div
                   id="TextContent-{{ section.id }}-{{ forloop.index }}"
-                  class="video-with-text-date mb-3 {% if section.settings.enable_text_animation %}date-animation{% endif %}"
+                  class="video-with-text-date mb-3"
                   style="color: {{ block.settings.text_color }}; font-weight: {{ block.settings.font_weight }}; font-style: var(--font-subheading-style); font-family: var(--font-subheading-family);"
                 >
                   {{ block.settings.date }}
@@ -887,14 +750,10 @@
               {% when 'text' %}
                 <div
                   id="TextContent-{{ section.id }}-{{ forloop.index }}"
-                  class="video-with-text-text-content mb-6 {% if section.settings.enable_text_animation %}text-animation{% endif %}"
+                  class="video-with-text-text-content mb-6"
                   style="color: {{ block.settings.text_color }}; font-weight: {{ block.settings.font_weight }}; font-style: var(--font-body-style); font-family: var(--font-body-family);"
                 >
-                  {% if section.settings.enable_text_animation %}
-                    {{ block.settings.text | replace: '<p>', '<p class="video-with-text-letter-animation">' }}
-                  {% else %}
-                    {{ block.settings.text }}
-                  {% endif %}
+                  {{ block.settings.text }}
                 </div>
               {% when 'dual_headings' %}
                 <div class="dual-heading-container">
@@ -911,7 +770,7 @@
                     <div class="dual-heading-top {% if block.settings.top_alignment == 'center' %}text-center{% elsif block.settings.top_alignment == 'right' %}text-right{% else %}text-left{% endif %}">
                       <h2
                         id="TopHeading-{{ section.id }}-{{ forloop.index }}"
-                        class="video-with-text-heading {{ top_heading_class }} {% if section.settings.enable_text_animation %}video-with-text-letter-animation{% endif %}"
+                        class="video-with-text-heading {{ top_heading_class }}"
                         style="color:{{ block.settings.top_text_color }}; font-weight: {{ block.settings.top_font_weight }}; font-style: var(--font-subheading-style); font-family: var(--font-subheading-family);"
                       >
                         {{ block.settings.top_heading }}
@@ -932,7 +791,7 @@
                     <div class="dual-heading-bottom {% if block.settings.bottom_alignment == 'center' %}text-center{% elsif block.settings.bottom_alignment == 'right' %}text-right{% else %}text-left{% endif %}">
                       <h2
                         id="BottomHeading-{{ section.id }}-{{ forloop.index }}"
-                        class="video-with-text-heading {{ bottom_heading_class }} {% if section.settings.enable_text_animation %}video-with-text-letter-animation{% endif %}"
+                        class="video-with-text-heading {{ bottom_heading_class }}"
                         style="color:{{ block.settings.bottom_text_color }}; font-weight: {{ block.settings.bottom_font_weight }}; font-style: var(--font-subheading-style); font-family: var(--font-subheading-family);"
                       >
                         {{ block.settings.bottom_heading }}
@@ -975,7 +834,6 @@
       </div>
     </div>
   </section>
-{% endif %}
 
 <script>
 
@@ -991,21 +849,10 @@ window.addEventListener('load', function() {
   });
 
 document.addEventListener('DOMContentLoaded', function() {
-const buttonAnimationDelay = {{ section.settings.button_animation_delay }};
+const buttonAnimationDelay = {{ section.settings.button_animation_delay | default: 1.5 }};
 
 const styleElement = document.createElement('style');
 styleElement.textContent = `
-@keyframes letterAppear {
-  0% {
-    transform: translateX(10000%);
-    opacity: 0;
-  }
-  100% {
-    transform: translateX(0);
-    opacity: 1;
-  }
-}
-
 @keyframes buttonAppear {
   0% {
     transform: translateY(100px);
@@ -1026,242 +873,31 @@ document.head.appendChild(styleElement);
 
 const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-// Set initial states based on animation settings
+// Set initial states for button animation
 const sectionElement = document.querySelector('.video-with-text-media-section-{{ section.id }}');
 if (sectionElement) {
-  if (prefersReducedMotion || (!{{ section.settings.enable_text_animation }} && !{{ section.settings.enable_button_animation }})) {
-    sectionElement.classList.add('no-animation');
-  } else {
-    // For elements that should be animated, ensure they start hidden
-    {% if section.settings.enable_text_animation %}
-    sectionElement.querySelectorAll('.video-with-text-letter-animation, .video-with-text-video-with-text-letter-animation, .date-animation, .text-animation').forEach(element => {
-      element.style.opacity = '0';
-    });
-    {% else %}
-    sectionElement.querySelectorAll('.video-with-text-letter-animation, .video-with-text-video-with-text-letter-animation, .date-animation, .text-animation').forEach(element => {
-      element.style.opacity = '1';
-    });
-    {% endif %}
-
-    {% if section.settings.enable_button_animation %}
+  {% if section.settings.enable_button_animation %}
+  if (!prefersReducedMotion) {
     sectionElement.querySelectorAll('.button-animation').forEach(button => {
       button.style.opacity = '0';
     });
-    {% else %}
-    sectionElement.querySelectorAll('.button-animation').forEach(button => {
-      button.style.opacity = '1';
-    });
-    {% endif %}
   }
+  {% else %}
+  sectionElement.querySelectorAll('.button-animation').forEach(button => {
+    button.style.opacity = '1';
+  });
+  {% endif %}
 }
 
 if (prefersReducedMotion) {
-  // For reduced motion, make everything visible immediately
-  document.querySelectorAll('.video-with-text-letter-animation, .video-with-text-video-with-text-letter-animation, .date-animation, .text-animation, .button-animation').forEach(element => {
+  // For reduced motion, make buttons visible immediately
+  document.querySelectorAll('.button-animation').forEach(element => {
     element.style.opacity = '1';
   });
 } else {
   const observer = new IntersectionObserver((entries, observer) => {
     entries.forEach(entry => {
       if (entry.isIntersecting) {
-        {% if section.settings.enable_text_animation %}
-        // Handle heading animations
-        const headingElements = entry.target.querySelectorAll('.video-with-text-letter-animation, .video-with-text-video-with-text-letter-animation');
-        
-        headingElements.forEach(element => {
-          // Preserve heading background wrapper if present and animate inside it
-          const accessibleText = element.textContent.trim();
-          element.setAttribute('aria-label', accessibleText);
-
-          const backgroundSpan = element.querySelector('.heading-background-block-style');
-          const container = backgroundSpan || element;
-
-          // Capture original nodes to preserve <br> line breaks
-          const originalNodes = Array.from(container.childNodes);
-
-          // Clear only the target container, not the whole heading when background exists
-          container.textContent = '';
-          container.classList.add('video-with-text-letter-animation-container', 'animation-ready');
-          container.style.opacity = '1';
-          // Ensure the parent heading becomes visible as well
-          element.style.opacity = '1';
-
-          let letterIndex = 0;
-
-          const appendWord = (word) => {
-            const wordSpan = document.createElement('span');
-            wordSpan.classList.add('animated-word');
-            wordSpan.style.display = 'inline-block';
-            wordSpan.style.whiteSpace = 'nowrap';
-            for (let i = 0; i < word.length; i++) {
-              const letterSpan = document.createElement('span');
-              letterSpan.classList.add('animated-letter');
-              letterSpan.textContent = word[i];
-              letterSpan.setAttribute('aria-hidden', 'true');
-              letterSpan.style.animation = `letterAppear 1s forwards`;
-              letterSpan.style.animationDelay = `${letterIndex * 0.07}s`;
-              letterIndex++;
-              wordSpan.appendChild(letterSpan);
-            }
-            container.appendChild(wordSpan);
-          };
-
-          const appendSpace = () => {
-            const spaceSpan = document.createElement('span');
-            spaceSpan.classList.add('animated-space');
-            spaceSpan.innerHTML = '&nbsp;';
-            spaceSpan.style.animation = `letterAppear 1s forwards`;
-            spaceSpan.style.animationDelay = `${letterIndex * 0.07}s`;
-            letterIndex++;
-            container.appendChild(spaceSpan);
-          };
-
-          originalNodes.forEach((node, nodeIndex) => {
-            if (node.nodeType === Node.TEXT_NODE) {
-              const nodeText = node.textContent || '';
-              
-              // Handle leading whitespace
-              if (nodeText.match(/^\s+/) && nodeIndex > 0) {
-                appendSpace();
-              }
-              
-              const words = nodeText.split(/\s+/).filter(Boolean);
-              words.forEach((word, i) => {
-                appendWord(word);
-                // Add space after each word except the last one in this node
-                if (i < words.length - 1) {
-                  appendSpace();
-                }
-              });
-              
-              // Handle trailing whitespace - add space if this node ends with whitespace
-              // and there's a next node that contains text
-              if (nodeText.match(/\s+$/) && nodeIndex < originalNodes.length - 1) {
-                const nextNode = originalNodes[nodeIndex + 1];
-                if (nextNode && (
-                  (nextNode.nodeType === Node.TEXT_NODE && nextNode.textContent.trim()) ||
-                  (nextNode.nodeType === Node.ELEMENT_NODE && nextNode.tagName !== 'BR')
-                )) {
-                  appendSpace();
-                }
-              }
-            } else if (node.nodeType === Node.ELEMENT_NODE && node.tagName === 'BR') {
-              container.appendChild(document.createElement('br'));
-            } else if (node.nodeType === Node.ELEMENT_NODE) {
-              // Handle other HTML elements by preserving them
-              const clonedElement = node.cloneNode(true);
-              container.appendChild(clonedElement);
-            }
-          });
-        });
-
-        // Handle text content animations - similar approach for paragraph text
-        const textContentElements = entry.target.querySelectorAll('.video-with-text-text-content p.video-with-text-letter-animation, .video-with-text-text-content p.video-with-text-video-with-text-letter-animation');
-        
-        textContentElements.forEach(element => {
-          const accessibleText = element.textContent.trim();
-          element.setAttribute('aria-label', accessibleText);
-          
-          // Capture original nodes to preserve formatting
-          const originalNodes = Array.from(element.childNodes);
-          
-          element.textContent = '';
-          element.classList.add('video-with-text-letter-animation-container', 'animation-ready');
-          element.style.opacity = '1';
-          
-          let letterIndex = 0;
-          
-          const appendWord = (word) => {
-            const wordSpan = document.createElement('span');
-            wordSpan.classList.add('animated-word');
-            wordSpan.style.display = 'inline-block';
-            wordSpan.style.whiteSpace = 'nowrap';
-            for (let i = 0; i < word.length; i++) {
-              const letterSpan = document.createElement('span');
-              letterSpan.classList.add('animated-letter');
-              letterSpan.textContent = word[i];
-              letterSpan.setAttribute('aria-hidden', 'true');
-              letterSpan.style.animation = `letterAppear 1s forwards`;
-              letterSpan.style.animationDelay = `${letterIndex * 0.07}s`;
-              letterIndex++;
-              wordSpan.appendChild(letterSpan);
-            }
-            element.appendChild(wordSpan);
-          };
-          
-          const appendSpace = () => {
-            const spaceSpan = document.createElement('span');
-            spaceSpan.classList.add('animated-space');
-            spaceSpan.innerHTML = '&nbsp;';
-            spaceSpan.style.animation = `letterAppear 1s forwards`;
-            spaceSpan.style.animationDelay = `${letterIndex * 0.07}s`;
-            letterIndex++;
-            element.appendChild(spaceSpan);
-          };
-          
-          originalNodes.forEach((node, nodeIndex) => {
-            if (node.nodeType === Node.TEXT_NODE) {
-              const nodeText = node.textContent || '';
-              
-              // Handle leading whitespace
-              if (nodeText.match(/^\s+/) && nodeIndex > 0) {
-                appendSpace();
-              }
-              
-              const words = nodeText.split(/\s+/).filter(Boolean);
-              words.forEach((word, i) => {
-                appendWord(word);
-                // Add space after each word except the last one in this node
-                if (i < words.length - 1) {
-                  appendSpace();
-                }
-              });
-              
-              // Handle trailing whitespace
-              if (nodeText.match(/\s+$/) && nodeIndex < originalNodes.length - 1) {
-                const nextNode = originalNodes[nodeIndex + 1];
-                if (nextNode && (
-                  (nextNode.nodeType === Node.TEXT_NODE && nextNode.textContent.trim()) ||
-                  (nextNode.nodeType === Node.ELEMENT_NODE && nextNode.tagName !== 'BR')
-                )) {
-                  appendSpace();
-                }
-              }
-            } else if (node.nodeType === Node.ELEMENT_NODE && node.tagName === 'BR') {
-              element.appendChild(document.createElement('br'));
-            } else if (node.nodeType === Node.ELEMENT_NODE) {
-              // Preserve other HTML elements
-              const clonedElement = node.cloneNode(true);
-              element.appendChild(clonedElement);
-            }
-          });
-        });
-
-        // Handle date animations
-        const dateElements = entry.target.querySelectorAll('.date-animation');
-        dateElements.forEach((element, index) => {
-          element.classList.add('animation-ready');
-          element.style.opacity = '1';
-          element.style.animation = 'buttonAppear 0.8s forwards';
-          element.style.animationDelay = `${index * 0.2}s`;
-        });
-
-        // Handle text block animations
-        const textElements = entry.target.querySelectorAll('.text-animation');
-        textElements.forEach((element, index) => {
-          element.classList.add('animation-ready');
-          element.style.opacity = '1';
-          element.style.animation = 'buttonAppear 0.8s forwards';
-          element.style.animationDelay = `${index * 0.3}s`;
-        });
-        {% else %}
-        // If text animation is disabled, make text visible immediately
-        const textElements = entry.target.querySelectorAll('.video-with-text-letter-animation, .video-with-text-video-with-text-letter-animation, .date-animation, .text-animation');
-        textElements.forEach(element => {
-          element.style.opacity = '1';
-        });
-        {% endif %}
-
         {% if section.settings.enable_button_animation %}
         const buttons = entry.target.querySelectorAll('.button-animation');
         buttons.forEach(button => {
@@ -1293,12 +929,12 @@ if (prefersReducedMotion) {
 
 const buttons = document.querySelectorAll('.video-with-text-custom-button-css');
 buttons.forEach(button => {
-button.addEventListener('keydown', function(event) {
-  if (event.key === 'Enter' || event.key === ' ') {
-    event.preventDefault();
-    this.click();
-  }
-});
+  button.addEventListener('keydown', function(event) {
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      this.click();
+    }
+  });
 });
 });
 
@@ -1419,12 +1055,6 @@ document.addEventListener('DOMContentLoaded', function() {
   },
   "settings": [
     {
-      "type": "checkbox",
-      "id": "enabled",
-      "label": "Enable section",
-      "default": true
-    },
-    {
       "type": "color_scheme",
       "id": "color_scheme",
       "label": "t:sections.all.colors.label",
@@ -1465,14 +1095,7 @@ document.addEventListener('DOMContentLoaded', function() {
     },
     {
       "type": "header",
-      "content": "Animation Settings"
-    },
-    {
-      "type": "checkbox",
-      "id": "enable_text_animation",
-      "label": "Enable text animation",
-      "default": false,
-      "info": "Animate text with letter-by-letter appearance effect"
+      "content": "Button Animation Settings"
     },
     {
       "type": "checkbox",
@@ -1491,24 +1114,6 @@ document.addEventListener('DOMContentLoaded', function() {
       "label": "Button animation delay",
       "default": 1.5,
       "info": "Time to wait before showing the button animation"
-    },
-    {
-      "type": "checkbox",
-      "id": "enable_overlay_animation",
-      "label": "Enable overlay fade animation",
-      "default": false,
-      "info": "Show black overlay that fades out on page load"
-    },
-    {
-      "type": "range",
-      "id": "overlay_duration",
-      "min": 0.5,
-      "max": 10,
-      "step": 0.1,
-      "unit": "s",
-      "label": "Overlay fade duration",
-      "default": 2.5,
-      "info": "How long the black overlay stays before fading out (in seconds)"
     },
     {
       "type": "header",
@@ -1642,22 +1247,6 @@ document.addEventListener('DOMContentLoaded', function() {
       "unit": "px",
       "label": "Section height (mobile)",
       "default": 500
-    },
-    {
-      "type": "header",
-      "content": "Heading Background"
-    },
-    {
-      "type": "checkbox",
-      "id": "enable_heading_background",
-      "label": "Enable heading background color",
-      "default": false
-    },
-    {
-      "type": "color",
-      "id": "heading_background_color",
-      "label": "Heading background color",
-      "default": "#000000"
     },
     {
       "type": "header",
@@ -1979,10 +1568,8 @@ document.addEventListener('DOMContentLoaded', function() {
         "horizontal_position": "center",
         "vertical_content_position": "center",
         "text_alignment": "center",
-        "enable_text_animation": false,
         "enable_button_animation": false,
-        "button_animation_delay": 1.5,
-        "enable_overlay_animation": false
+        "button_animation_delay": 1.5
       }
     }
   ]
