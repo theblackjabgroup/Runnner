@@ -870,6 +870,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const stripImages = Array.from(document.querySelectorAll('.strip-image-wrapper'));
     let lastScrollActiveIdx = 0;
     let variantGalleryLock = false;
+    let scrollThrottleTimeout = null;
 
     // Fast scroll logic for desktop gallery
     function updateActiveImageOnScroll() {
@@ -898,19 +899,44 @@ document.addEventListener('DOMContentLoaded', () => {
       const clampedIdx = Math.max(0, Math.min(activeIdx, galleryItems.length - 1));
 
       if (clampedIdx !== lastScrollActiveIdx) {
+        // Only update classes if the active item actually changed
         galleryItems.forEach((item, idx) => {
-          item.classList.toggle('is-active', idx === clampedIdx);
-          if (idx === clampedIdx) {
+          const isActive = idx === clampedIdx;
+          const currentlyActive = item.classList.contains('is-active');
+
+          // Only toggle if the state actually needs to change
+          if (isActive && !currentlyActive) {
+            item.classList.add('is-active');
             item.setAttribute('aria-current', 'true');
-          } else {
+
+            // Preserve 3D model state - don't reinitialize if it's already loaded
+            const modelViewer = item.querySelector('model-viewer');
+            if (modelViewer && modelViewer.loaded) {
+              // Model is already loaded, don't interfere with its state
+              return;
+            }
+          } else if (!isActive && currentlyActive) {
+            item.classList.remove('is-active');
             item.removeAttribute('aria-current');
           }
         });
+
         stripImages.forEach((btn, idx) => {
-          btn.classList.toggle('active', idx === clampedIdx);
-          btn.setAttribute('aria-selected', idx === clampedIdx ? 'true' : 'false');
-          btn.setAttribute('tabindex', idx === clampedIdx ? '0' : '-1');
+          const isActive = idx === clampedIdx;
+          const currentlyActive = btn.classList.contains('active');
+
+          // Only toggle if the state actually needs to change
+          if (isActive && !currentlyActive) {
+            btn.classList.add('active');
+            btn.setAttribute('aria-selected', 'true');
+            btn.setAttribute('tabindex', '0');
+          } else if (!isActive && currentlyActive) {
+            btn.classList.remove('active');
+            btn.setAttribute('aria-selected', 'false');
+            btn.setAttribute('tabindex', '-1');
+          }
         });
+
         lastScrollActiveIdx = clampedIdx;
       }
     }
@@ -922,7 +948,17 @@ document.addEventListener('DOMContentLoaded', () => {
         item.style.width = '100%';
         item.style.height = '100%';
       });
-      galleryWrapper.addEventListener('scroll', updateActiveImageOnScroll, { passive: true });
+      // Throttled scroll handler to prevent excessive updates and preserve 3D model state
+      galleryWrapper.addEventListener(
+        'scroll',
+        function () {
+          if (scrollThrottleTimeout) {
+            clearTimeout(scrollThrottleTimeout);
+          }
+          scrollThrottleTimeout = setTimeout(updateActiveImageOnScroll, 50); // Reduced frequency to preserve 3D model state
+        },
+        { passive: true }
+      );
       galleryWrapper.addEventListener(
         'wheel',
         function (e) {
@@ -1246,6 +1282,20 @@ document.addEventListener('DOMContentLoaded', () => {
           if (i === idx) {
             img.classList.add('active');
             img.setAttribute('aria-current', 'true');
+
+            // Initialize 3D model if it's a model type
+            const modelViewer = img.querySelector('model-viewer');
+            if (modelViewer) {
+              // Force model viewer to load on mobile
+              modelViewer.setAttribute('reveal', 'interaction');
+              modelViewer.setAttribute('interaction-prompt-threshold', '0');
+              modelViewer.setAttribute('touch-action', 'manipulation');
+
+              // Trigger model load
+              if (modelViewer.load) {
+                modelViewer.load();
+              }
+            }
           } else {
             img.classList.remove('active');
             img.removeAttribute('aria-current');
@@ -1261,6 +1311,14 @@ document.addEventListener('DOMContentLoaded', () => {
           if (idx === 0) {
             img.classList.add('active');
             img.setAttribute('aria-current', 'true');
+
+            // Initialize 3D model for first item if it's a model
+            const modelViewer = img.querySelector('model-viewer');
+            if (modelViewer) {
+              modelViewer.setAttribute('reveal', 'interaction');
+              modelViewer.setAttribute('interaction-prompt-threshold', '0');
+              modelViewer.setAttribute('touch-action', 'manipulation');
+            }
           } else {
             img.classList.remove('active');
             img.removeAttribute('aria-current');
@@ -1409,6 +1467,27 @@ document.addEventListener('DOMContentLoaded', () => {
   initializePickupAvailability();
   setTimeout(initializePickupAvailability, 100);
   setTimeout(initializePickupAvailability, 500);
+
+  // Initialize mobile 3D models
+  function initializeMobile3DModels() {
+    if (window.innerWidth <= 768) {
+      const mobileModelViewers = document.querySelectorAll('.mobile-gallery-item model-viewer');
+      mobileModelViewers.forEach((viewer) => {
+        viewer.setAttribute('reveal', 'interaction');
+        viewer.setAttribute('interaction-prompt-threshold', '0');
+        viewer.setAttribute('touch-action', 'manipulation');
+
+        // Force load the model
+        if (viewer.load) {
+          viewer.load();
+        }
+      });
+    }
+  }
+
+  // Initialize mobile 3D models after a delay to ensure they're rendered
+  setTimeout(initializeMobile3DModels, 500);
+  setTimeout(initializeMobile3DModels, 1000);
 
   initializePage();
 
