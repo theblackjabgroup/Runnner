@@ -11,6 +11,96 @@
 </script>
 <script src="{{ 'main-product.js' | asset_url }}" defer></script>
 
+<!-- 3D Model Viewer Support -->
+<script type="module" src="https://unpkg.com/@shopify/model-viewer-ui@1/dist/model-viewer-ui.en.js"></script>
+<link rel="stylesheet" href="https://unpkg.com/@shopify/model-viewer-ui@1/dist/model-viewer-ui.css">
+<style>
+  .product-model-viewer {
+    width: 100%;
+    height: 100%;
+  }
+  model-viewer {
+    width: 100%;
+    height: 100%;
+    --poster-color: transparent;
+  }
+  .model-viewer-icon {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    width: 32px;
+    height: 32px;
+    z-index: 10;
+  }
+
+  /* Mobile-specific 3D model styles */
+  @media (max-width: 768px) {
+    .product-model-viewer {
+      min-height: 300px;
+      position: relative;
+    }
+    model-viewer {
+      --poster-color: #f5f5f5;
+      background-color: #f5f5f5;
+      touch-action: manipulation;
+      width: 100% !important;
+      height: 100% !important;
+      min-height: 300px;
+    }
+    .model-viewer-icon {
+      width: 24px;
+      height: 24px;
+      top: 8px;
+      right: 8px;
+    }
+
+    /* Ensure mobile gallery items with 3D models display properly */
+    .mobile-gallery-item {
+      position: relative;
+    }
+
+    .mobile-gallery-item model-viewer {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+    }
+  }
+
+  /* Ensure model viewer loads on mobile */
+  model-viewer {
+    --poster-color: transparent;
+    --progress-bar-color: #000;
+    --progress-mask: #fff;
+  }
+
+  /* Preserve 3D model state during scroll transitions */
+  .gallery-item model-viewer {
+    transition: none !important;
+    transform: none !important;
+  }
+
+  /* Prevent 3D model zoom reset on scroll */
+  .gallery-item.is-active model-viewer {
+    will-change: auto;
+  }
+</style>
+
+<!-- Mobile 3D Model Initialization Script -->
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    // Initialize model viewers on mobile
+    const modelViewers = document.querySelectorAll('model-viewer');
+
+    modelViewers.forEach(function (viewer) {
+      // Add mobile-specific attributes
+      viewer.setAttribute('touch-action', 'manipulation');
+      viewer.setAttribute('interaction-prompt-threshold', '0');
+    });
+  });
+</script>
+
 <!-- Desktop Product Section -->
 {% render 'product-section-desktop', product: product, section: section %}
 
