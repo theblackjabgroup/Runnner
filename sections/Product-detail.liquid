@@ -1,211 +1,220 @@
-{{ 'scroll-animations.css' | asset_url | stylesheet_tag }}
-<script src="{{ 'scroll-animations.js' | asset_url }}" defer></script>
+{% comment %} Conditional loading of external assets - only load when section is actually used {% endcomment %}
+{% unless request.design_mode %}
+  {{ 'scroll-animations.css' | asset_url | stylesheet_tag }}
+  <script src="{{ 'scroll-animations.js' | asset_url }}" defer></script>
+{% endunless %}
 
-{% if section.settings.enabled %}
-  {% if section.settings.color_scheme %}
-    {% assign section_classes_pd = 'product-showcase-section' %}
-    {% assign section_classes_pd = section_classes_pd | append: ' color-' | append: section.settings.color_scheme %}
-    {% assign top_padding = settings.sections_spacing %}
-    {% assign side_padding = settings.side_space %}
+{% comment %} Set default values for preview {% endcomment %}
+{% assign section_classes_pd = 'product-showcase-section' %}
+{% if section.settings.color_scheme %}
+  {% assign section_classes_pd = section_classes_pd | append: ' color-' | append: section.settings.color_scheme %}
+{% endif %}
+{% assign top_padding = settings.sections_spacing | default: 20 %}
+{% assign side_padding = settings.side_space | default: 20 %}
 
-    {% if top_padding == blank or top_padding == 0 %}
-      {% assign top_padding = 20 %}
-    {% endif %}
-    {% if side_padding == blank or side_padding == 0 %}
-      {% assign side_padding = 20 %}
-    {% endif %}
+<section
+  class="product-showcase-page-width overflow-hidden {{ section_classes_pd }} scroll-fade-trigger scroll-fade-up"
+  aria-labelledby="product-showcase-heading-{{ section.id }}"
+  {% if section.settings.heading != blank %}
+    aria-describedby="product-showcase-description-{{ section.id }}"
+  {% endif %}
+  style="padding: {{ top_padding }}px {{ side_padding }}px; margin: 0; overflow-y: hidden;"
+>
+  {% if section.settings.heading != blank %}
+    <h2
+      id="product-showcase-heading-{{ section.id }}"
+      style="font-weight:500; color: var(--text);"
+      class="product-showcase-main-heading mb-[-10px]{% if section.settings.enable_letter_animation %} letter-animation{% endif %}"
+    >
+      {{ section.settings.heading }}
+    </h2>
   {% endif %}
 
-  <section
-    class="product-showcase-page-width overflow-hidden {{ section_classes_pd }}"
-    aria-labelledby="product-showcase-heading-{{ section.id }}"
-    {% if section.settings.heading != blank %}
-      aria-describedby="product-showcase-description-{{ section.id }}"
-    {% endif %}
-    style="padding: {{ top_padding }}px {{ side_padding }}px;"
+  <div
+    id="product-showcase-description-{{ section.id }}"
+    class="sr-only"
+    aria-hidden="true"
   >
-    {% if section.settings.heading != blank %}
-      <h2
-        id="product-showcase-heading-{{ section.id }}"
-        style="font-weight:500; color: var(--text);"
-        class="product-showcase-main-heading mb-[-10px]{% if section.settings.enable_letter_animation %} letter-animation{% endif %}"
+    Product gallery with {{ section.blocks.size | default: 4 }} items. Use arrow keys to navigate or scroll
+    horizontally.
+  </div>
+
+  <div class="product-showcase-container w-full mt-10" style="margin-top:18px;">
+    <div class="showcase-slider-container relative">
+      <!-- Skip link for keyboard users -->
+      <a
+        href="#product-showcase-end-{{ section.id }}"
+        class="sr-only focus:not-sr-only focus:absolute focus:top-0 focus:left-0 focus:z-50 focus:bg-white focus:text-black focus:px-4 focus:py-2"
+        tabindex="0"
       >
-        {{ section.settings.heading }}
-      </h2>
-    {% endif %}
+        Skip product gallery
+      </a>
 
-    <div
-      id="product-showcase-description-{{ section.id }}"
-      class="sr-only"
-      aria-hidden="true"
-    >
-      Product gallery with {{ section.blocks.size | default: 4 }} items. Use arrow keys to navigate or scroll
-      horizontally.
-    </div>
-
-    <div class="product-showcase-container w-full mt-10" style="margin-top:18px;">
-      <div class="showcase-slider-container relative">
-        <!-- Skip link for keyboard users -->
-        <a
-          href="#product-showcase-end-{{ section.id }}"
-          class="sr-only focus:not-sr-only focus:absolute focus:top-0 focus:left-0 focus:z-50 focus:bg-white focus:text-black focus:px-4 focus:py-2"
-          tabindex="0"
-        >
-          Skip product gallery
-        </a>
-
-        <div
-          id="product-showcase-slider-{{ section.id }}"
-          class="product-showcase-slider flex gap-2 md:gap-4 overflow-x-auto custom-scrollbar featured-collection-cursor-grab scroll-fade-stagger"
-          role="region"
-          aria-label="Product gallery"
-          aria-describedby="showcase-slider-instructions-{{ section.id }}"
-          tabindex="0"
-          data-slider="true"
-        >
-          <div id="showcase-slider-instructions-{{ section.id }}" class="sr-only">
-            Use left and right arrow keys to navigate through products, or scroll horizontally with mouse or touch.
-          </div>
-
-          {% if section.blocks.size == 0 %}
-            {% comment %} Show 4 placeholder products by default when no blocks are added {% endcomment %}
-            {% for i in (1..4) %}
-              <article
-                class="product-showcase-card flex-none w-[600px] h-[672px] scroll-fade-trigger scroll-fade-up"
-                role="group"
-                aria-labelledby="product-showcase-{{ section.id }}-{{ i }}-title"
-                tabindex="0"
-              >
-                <div class="product-showcase-image-wrapper relative group w-[600px] h-[672px]">
-                  <div
-                    role="img"
-                    aria-label="Placeholder product image {{ i }}"
-                    class="w-full h-full flex items-center justify-center bg-gray-200"
-                  >
-                    {{ 'collection-1' | placeholder_svg_tag }}
-                  </div>
-                </div>
-                <div class="product-showcase-details mt-3 h-[38px]" style="margin-top:0px; margin-bottom:8px;">
-                  <h3
-                    id="product-showcase-{{ section.id }}-{{ i }}-title"
-                    class="!text-[15px] uppercase font-medium leading-tight"
-                    style="margin-bottom: 5px; color: var(--text); font-size: var(--t-b-3-size) !important;"
-                  >
-                    Product {{ i }}
-                  </h3>
-                  <div class="flex gap-2 items-baseline showcase-price white-text">
-                    <span class="!text-[1.6rem] uppercase font-medium">Add content in theme editor</span>
-                  </div>
-                </div>
-              </article>
-            {% endfor %}
-          {% else %}
-            {% comment %} Show actual products (limited to first 10 blocks) {% endcomment %}
-            {% for block in section.blocks limit: 10 %}
-              <article
-                class="product-showcase-card flex-none w-[600px] h-[672px] scroll-fade-trigger scroll-fade-up"
-                role="group"
-                aria-labelledby="product-showcase-{{ section.id }}-{{ forloop.index }}-title"
-                {% if block.settings.description != blank %}
-                  aria-describedby="product-showcase-{{ section.id }}-{{ forloop.index }}-desc"
-                {% endif %}
-                tabindex="0"
-                {{ block.shopify_attributes }}
-              >
-                <div class="product-showcase-image-wrapper relative group w-[600px] h-[672px]">
-                  {% if block.settings.link_url != blank %}
-                    <a
-                      href="{{ block.settings.link_url }}"
-                      class="product-showcase-image-link block relative focus:outline-2 focus:outline-blue-500 focus:outline-offset-2"
-                      aria-labelledby="product-showcase-{{ section.id }}-{{ forloop.index }}-title"
-                      {% if block.settings.description != blank %}
-                        aria-describedby="product-showcase-{{ section.id }}-{{ forloop.index }}-desc"
-                      {% endif %}
-                      tabindex="0"
-                    >
-                  {% endif %}
-                  <div class="product-showcase-images-container relative">
-                    {% if block.settings.image != blank %}
-                      <img
-                        src="{{ block.settings.image | img_url: '600x672', crop: 'center' }}"
-                        alt="{{ block.settings.image.alt | default: block.settings.title | default: 'Product image' }}"
-                        class="showcase-product-image w-[600px] h-[672px] object-cover"
-                        loading="lazy"
-                        decoding="async"
-                        width="600"
-                        height="672"
-                      >
-                    {% else %}
-                      <div
-                        role="img"
-                        aria-label="Product image placeholder"
-                        class="w-full h-full flex items-center justify-center bg-gray-200"
-                      >
-                        {{ 'image' | placeholder_svg_tag }}
-                      </div>
-                    {% endif %}
-                  </div>
-                  {% if block.settings.link_url != blank %}
-                    </a>
-                  {% endif %}
-                </div>
-
-                <div class="product-showcase-details mt-3" style="margin-top:0px; margin-bottom:8px;">
-                  {% if block.settings.link_url != blank and block.settings.title != blank %}
-                    <a
-                      href="{{ block.settings.link_url }}"
-                      aria-labelledby="product-showcase-{{ section.id }}-{{ forloop.index }}-title"
-                      class="focus:outline-2 focus:outline-blue-500 focus:outline-offset-2"
-                      tabindex="0"
-                    >
-                  {% endif %}
-                  {% if block.settings.title != blank %}
-                    <h3
-                      id="product-showcase-{{ section.id }}-{{ forloop.index }}-title"
-                      class="!text-[1.6rem] uppercase font-medium leading-tight"
-                      style="margin-bottom: 2px; color: var(--text); font-size: var(--t-b-3-size) !important;"
-                    >
-                      {{ block.settings.title | escape }}
-                    </h3>
-                  {% endif %}
-
-                  {% if block.settings.description != blank %}
-                    <p
-                      id="product-showcase-{{ section.id }}-{{ forloop.index }}-desc"
-                      class="product-showcase-description"
-                      style="margin-top: 1px; color: var(--text); font-size: var(--t-b-4-size); line-height: 1.4; opacity: 0.8;"
-                    >
-                      {{ block.settings.description | escape }}
-                    </p>
-                  {% endif %}
-
-                  {% if block.settings.link_url != blank and block.settings.title != blank %}
-                    </a>
-                  {% endif %}
-                </div>
-              </article>
-            {% endfor %}
-          {% endif %}
+      <div
+        id="product-showcase-slider-{{ section.id }}"
+        class="product-showcase-slider flex gap-2 md:gap-4 overflow-x-auto no-scrollbar"
+        role="region"
+        aria-label="Product gallery"
+        aria-describedby="showcase-slider-instructions-{{ section.id }}"
+        tabindex="0"
+        data-slider="true"
+      >
+        <div id="showcase-slider-instructions-{{ section.id }}" class="sr-only">
+          Use left and right arrow keys to navigate through products, or scroll horizontally with mouse or touch.
         </div>
 
-        <!-- Custom scrollbar using snippet (same as featured-collection) -->
-        {% render 'horizontal-scrollbar',
-          container_selector: '.showcase-slider-container',
-          slider_selector: '.product-showcase-slider'
-        %}
+        {% if section.blocks.size == 0 %}
+          {% comment %} Show 4 placeholder products by default when no blocks are added {% endcomment %}
+          {% for i in (1..4) %}
+            <article
+              class="product-showcase-card flex-none w-[600px] h-[672px]"
+              role="group"
+              aria-labelledby="product-showcase-{{ section.id }}-{{ i }}-title"
+              tabindex="0"
+            >
+              <div class="product-showcase-image-wrapper relative group w-[600px] h-[672px]">
+                <div
+                  role="img"
+                  aria-label="Placeholder product image {{ i }}"
+                  class="w-full h-full flex items-center justify-center bg-gray-200"
+                >
+                  {{ 'collection-1' | placeholder_svg_tag }}
+                </div>
+              </div>
+              <div class="product-showcase-details mt-3 h-[38px]" style="margin-top:20px; margin-bottom:8px;">
+                <h3
+                  id="product-showcase-{{ section.id }}-{{ i }}-title"
+                  class="!text-[15px] uppercase font-medium leading-tight"
+                  style="margin-bottom: 5px; color: var(--text); font-size: var(--t-b-3-size) !important;"
+                >
+                  Product {{ i }}
+                </h3>
+                <div class="flex gap-2 items-baseline showcase-price white-text">
+                  <span class="!text-[1.6rem] uppercase font-medium">Add content in theme editor</span>
+                </div>
+              </div>
+            </article>
+          {% endfor %}
+        {% else %}
+          {% comment %} Show actual products (limited to first 10 blocks) {% endcomment %}
+          {% for block in section.blocks limit: 10 %}
+            <article
+              class="product-showcase-card flex-none w-[600px] h-[672px]"
+              role="group"
+              aria-labelledby="product-showcase-{{ section.id }}-{{ forloop.index }}-title"
+              {% if block.settings.description != blank %}
+                aria-describedby="product-showcase-{{ section.id }}-{{ forloop.index }}-desc"
+              {% endif %}
+              tabindex="0"
+              {{ block.shopify_attributes }}
+            >
+              <div class="product-showcase-image-wrapper relative group w-[600px] h-[672px]">
+                {% if block.settings.link_url != blank %}
+                  <a
+                    href="{{ block.settings.link_url }}"
+                    class="product-showcase-image-link block relative focus:outline-2 focus:outline-blue-500 focus:outline-offset-2"
+                    aria-labelledby="product-showcase-{{ section.id }}-{{ forloop.index }}-title"
+                    {% if block.settings.description != blank %}
+                      aria-describedby="product-showcase-{{ section.id }}-{{ forloop.index }}-desc"
+                    {% endif %}
+                    tabindex="0"
+                  >
+                {% endif %}
+                <div class="product-showcase-images-container relative">
+                  {% if block.settings.image != blank %}
+                    <img
+                      src="{{ block.settings.image | image_url: '600x672', crop: 'center' }}"
+                      alt="{{ block.settings.image.alt | default: block.settings.title | default: 'Product image' }}"
+                      class="showcase-product-image w-[600px] h-[672px] object-cover"
+                      loading="lazy"
+                      decoding="async"
+                      width="600"
+                      height="672"
+                    >
+                  {% else %}
+                    <div
+                      role="img"
+                      aria-label="Product image placeholder"
+                      class="w-full h-full flex items-center justify-center bg-gray-200"
+                    >
+                      {{ 'image' | placeholder_svg_tag }}
+                    </div>
+                  {% endif %}
+                </div>
+                {% if block.settings.link_url != blank %}
+                  </a>
+                {% endif %}
+              </div>
 
-        <!-- End marker for skip link -->
-        <div id="product-showcase-end-{{ section.id }}" tabindex="-1" aria-hidden="true"></div>
+              <div class="product-showcase-details mt-3" style="margin-top:20px; margin-bottom:8px;">
+                {% if block.settings.link_url != blank and block.settings.title != blank %}
+                  <a
+                    href="{{ block.settings.link_url }}"
+                    aria-labelledby="product-showcase-{{ section.id }}-{{ forloop.index }}-title"
+                    class="focus:outline-2 focus:outline-blue-500 focus:outline-offset-2"
+                    tabindex="0"
+                  >
+                {% endif %}
+                {% if block.settings.title != blank %}
+                  <h3
+                    id="product-showcase-{{ section.id }}-{{ forloop.index }}-title"
+                    class="!text-[1.6rem] uppercase font-medium leading-tight"
+                    style="margin-bottom: 5px; color: var(--text); font-size: var(--t-b-3-size) !important;"
+                  >
+                    {{ block.settings.title | escape }}
+                  </h3>
+                {% endif %}
+
+                {% if block.settings.description != blank %}
+                  <p
+                    id="product-showcase-{{ section.id }}-{{ forloop.index }}-desc"
+                    class="product-showcase-description"
+                    style="margin-top: 4px; color: var(--text); font-size: var(--t-b-4-size); line-height: 1.4; opacity: 0.8;"
+                  >
+                    {{ block.settings.description | escape }}
+                  </p>
+                {% endif %}
+
+                {% if block.settings.link_url != blank and block.settings.title != blank %}
+                  </a>
+                {% endif %}
+              </div>
+            </article>
+          {% endfor %}
+        {% endif %}
       </div>
+
+      <!-- Accessible custom scrollbar -->
+      <div class="custom-showcase-scrollbar-container" role="presentation">
+        <div
+          id="custom-showcase-scrollbar-{{ section.id }}"
+          class="custom-showcase-scrollbar-track"
+          role="scrollbar"
+          aria-controls="product-showcase-slider-{{ section.id }}"
+          aria-valuenow="0"
+          aria-valuemin="0"
+          aria-valuemax="100"
+          aria-label="Horizontal scroll position"
+          tabindex="0"
+        >
+          <div
+            id="custom-showcase-scrollbar-thumb-{{ section.id }}"
+            class="custom-showcase-scrollbar-thumb"
+            role="presentation"
+          ></div>
+        </div>
+      </div>
+
+      <!-- End marker for skip link -->
+      <div id="product-showcase-end-{{ section.id }}" tabindex="-1" aria-hidden="true"></div>
     </div>
-  </section>
-{% endif %}
+  </div>
+</section>
 
 <style>
   .product-showcase-page-width {
     margin: 0;
     padding: 50px 20px;
-    padding-top: 80px;
     overflow-y: hidden;
   }
 
@@ -237,7 +246,8 @@
   /* Improved focus styles */
   .product-showcase-card:focus,
   .product-showcase-image-link:focus,
-  .product-showcase-details a:focus {
+  .product-showcase-details a:focus,
+  .custom-showcase-scrollbar-track:focus {
     outline: 3px solid #2563eb;
     outline-offset: 2px;
     border-radius: 4px;
@@ -260,12 +270,10 @@
     border-radius: 4px;
   }
 
-  div.product-showcase-main-heading,
-  h2.product-showcase-main-heading {
+  div.product-showcase-main-heading {
     line-height: 40% !important;
-    font-size: var(--t-h-3-size) !important;
+    font-size: var(--tm-h-3-size);
     margin-left: -10px;
-    margin-top: 30px !important;
     padding-bottom: 20px;
     letter-spacing:0.03em!important;
     font-weight:500;
@@ -283,44 +291,32 @@
   .product-showcase-card {
     flex-shrink: 0;
     width: 600px !important;
-    height: 620px !important;
+    height: 672px !important;
     display: flex;
     flex-direction: column;
     justify-content: flex-start;
     overflow: hidden;
     scroll-snap-align: start;
-    margin: 0;
-    padding: 0;
   }
 
   .product-showcase-image-wrapper {
     position: relative;
     overflow: hidden;
     width: 600px !important;
-    height: 600px !important;
-    margin: 0 !important;
-    padding: 0 !important;
-    line-height: 0 !important;
-    display: block !important;
+    height: 762px !important;
   }
 
   .showcase-product-image {
     width: 600px !important;
-    height: 600px !important;
+    height: 672px !important;
     object-fit: cover;
-    display: block !important;
-    margin: 0 !important;
-    padding: 0 !important;
-    vertical-align: top !important;
-    border: 0 !important;
-    outline: none !important;
+    display: block;
   }
 
-  /* Updated product details styling with 10px padding above */
+  /* Updated product details styling with 50px gap */
   .product-showcase-details {
-    margin-top: 0px !important;
+    margin-top: 50px !important;
     margin-bottom: 8px;
-    padding-top: 10px !important;
   }
 
   /* Product description styling */
@@ -336,61 +332,44 @@
   }
 
   @media (min-width: 500px) {
-    div.product-showcase-main-heading,
-    h2.product-showcase-main-heading {
-      font-size: var(--t-h-3-size) !important;
+    div.product-showcase-main-heading {
+      font-size: 5rem;
     }
   }
 
   @media (max-width: 480px) {
     .product-showcase-page-width {
       padding: 10px 10px;
-      padding-top: 40px;
     }
 
-    div.product-showcase-main-heading,
-    h2.product-showcase-main-heading {
-      font-size: var(--tm-h-3-size) !important;
+    div.product-showcase-main-heading {
+      font-size: var(--t-b-3-size) !important;
       letter-spacing:0.03em!important;
       padding-top: 10px !important;
       padding-bottom: 10px !important;
       margin-left:1px !important;
-      margin-top: 0 !important;
     }
 
-    /* Mobile dimensions: 344x344 */
+    /* Mobile dimensions: 344x434 */
     .product-showcase-card {
       width: 344px !important;
-      height: 384px !important;
-      margin: 0;
-      padding: 0;
+      height: 434px !important;
     }
 
     .product-showcase-image-wrapper {
       width: 344px !important;
-      height: 344px !important;
-      margin: 0 !important;
-      padding: 0 !important;
-      line-height: 0 !important;
-      display: block !important;
+      height: 434px !important;
     }
 
     .showcase-product-image {
       width: 344px !important;
-      height: 344px !important;
+      height: 434px !important;
       object-fit: cover;
-      display: block !important;
-      margin: 0 !important;
-      padding: 0 !important;
-      vertical-align: top !important;
-      border: 0 !important;
-      outline: none !important;
     }
 
-    /* Mobile product details with 10px padding above */
+    /* Mobile product details with 50px gap */
     .product-showcase-details {
-      margin-top: 0px !important;
-      padding-top: 10px !important;
+      margin-top: 50px !important;
     }
 
     .product-showcase-description {
@@ -401,11 +380,9 @@
   }
 
   @media (min-width: 768px) {
-    div.product-showcase-main-heading,
-    h2.product-showcase-main-heading {
-      font-size: var(--t-h-3-size) !important;
+    div.product-showcase-main-heading {
+      font-size: var(--t-h-5-size);
       padding-left: 12px;
-      margin-top: 30px !important;
       letter-spacing:0.03em!important;
     }
   }
@@ -439,36 +416,6 @@
 
   .product-showcase-images-container {
     position: relative;
-    margin: 0;
-    padding: 0;
-    line-height: 0;
-    font-size: 0;
-  }
-
-  .product-showcase-image-link {
-    display: block;
-    margin: 0;
-    padding: 0;
-    line-height: 0;
-  }
-
-  .product-showcase-image-wrapper img,
-  .product-showcase-images-container img,
-  .product-showcase-card img {
-    display: block !important;
-    margin: 0 !important;
-    padding: 0 !important;
-    border: 0 !important;
-    vertical-align: top !important;
-    max-width: 100% !important;
-    height: auto !important;
-    line-height: 0 !important;
-  }
-
-  .product-showcase-image-wrapper *,
-  .product-showcase-images-container * {
-    margin: 0 !important;
-    padding: 0 !important;
   }
 
   .showcase-price {
@@ -520,16 +467,67 @@
     margin: 0 !important;
   }
 
-  /* Scrollbar styles and drag functionality moved to horizontal-scrollbar snippet */
+  .showcase-cursor-grab {
+    cursor: grab;
+    padding-bottom: 12px;
+  }
 
-  .showcase-slider-container {
-    padding-bottom: var(--space-3xl);
+  .showcase-cursor-grabbing {
+    cursor: grabbing;
+  }
+
+  /* Hide default scrollbar */
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Custom scrollbar container */
+  .custom-showcase-scrollbar-container {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+    margin-top: 16px;
+  }
+
+  .custom-showcase-scrollbar-track {
+    width: 70%;
+    height: 8px;
+    background-color: transparent;
+    background-image: linear-gradient(to right, var(--text), var(--text));
+    background-size: 100% 2px;
+    background-repeat: no-repeat;
+    background-position: center;
+    position: relative;
+    cursor: pointer;
+    border-radius: 4px;
+  }
+
+  .custom-showcase-scrollbar-thumb {
+    height: 4px;
+    background-color: var(--text);
+    position: absolute;
+    top: 50%;
+    width:300px !important;
+    transform: translateY(-50%);
+    transition: left 0.1s ease;
+    min-width: 20px;
+    cursor: pointer;
+    border-radius: 1px;
   }
 
   /* Reduced motion support */
   @media (prefers-reduced-motion: reduce) {
     .product-showcase-slider {
       scroll-behavior: auto;
+    }
+
+    .custom-showcase-scrollbar-thumb {
+      transition: none;
     }
 
     .showcase-detail-btn {
@@ -544,6 +542,13 @@
       justify-content: flex-start;
     }
 
+    .custom-showcase-scrollbar-container {
+      display: flex;
+      justify-content: center;
+      width: 100%;
+      margin-top: 16px;
+    }
+
     .showcase-slider-container {
       overflow-x: auto;
     }
@@ -554,6 +559,11 @@
       gap: 8px;
       overflow-x: auto;
       -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+    }
+
+    .product-showcase-slider::-webkit-scrollbar {
+      display: none;
     }
 
     .showcase-slider-container {
@@ -568,8 +578,8 @@
       margin-top: -6px;
     }
 
-    .showcase-slider-container {
-      padding-bottom: var(--space-3xl);
+    .showcase-cursor-grab {
+      padding-bottom: 0px;
     }
 
     .product-showcase-cart-container,
@@ -577,6 +587,22 @@
       display: none !important;
       opacity: 0 !important;
       visibility: hidden !important;
+    }
+
+    /* Show custom scrollbar on mobile */
+    .custom-showcase-scrollbar-container {
+      display: flex;
+      margin-top: 12px;
+    }
+
+    .custom-showcase-scrollbar-track {
+      width: 100%;
+      height: 6px;
+    }
+
+    .custom-showcase-scrollbar-thumb {
+      height: 6px;
+      width: 70px !important;
     }
   }
 
@@ -611,7 +637,212 @@
   }
 </style>
 
-{% comment %} Scrollbar functionality provided by horizontal-scrollbar snippet {% endcomment %}
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const slider = document.getElementById('product-showcase-slider-{{ section.id }}');
+    const scrollbarThumb = document.getElementById('custom-showcase-scrollbar-thumb-{{ section.id }}');
+    const scrollbarTrack = document.querySelector('#custom-showcase-scrollbar-{{ section.id }}');
+
+    if (!slider || !scrollbarThumb || !scrollbarTrack) {
+      return;
+    }
+
+    // Keyboard navigation for slider
+    slider.addEventListener('keydown', function (e) {
+      const scrollAmount = slider.clientWidth * 0.8; // Scroll by 80% of visible width
+
+      switch (e.key) {
+        case 'ArrowLeft':
+          e.preventDefault();
+          slider.scrollBy({ left: -scrollAmount, behavior: 'smooth' });
+          break;
+        case 'ArrowRight':
+          e.preventDefault();
+          slider.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+          break;
+        case 'Home':
+          e.preventDefault();
+          slider.scrollTo({ left: 0, behavior: 'smooth' });
+          break;
+        case 'End':
+          e.preventDefault();
+          slider.scrollTo({ left: slider.scrollWidth, behavior: 'smooth' });
+          break;
+      }
+    });
+
+    // Keyboard navigation for scrollbar
+    scrollbarTrack.addEventListener('keydown', function (e) {
+      const scrollAmount = slider.clientWidth * 0.1; // Smaller increments for scrollbar
+
+      switch (e.key) {
+        case 'ArrowLeft':
+          e.preventDefault();
+          slider.scrollBy({ left: -scrollAmount, behavior: 'smooth' });
+          break;
+        case 'ArrowRight':
+          e.preventDefault();
+          slider.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+          break;
+        case 'Home':
+          e.preventDefault();
+          slider.scrollTo({ left: 0, behavior: 'smooth' });
+          break;
+        case 'End':
+          e.preventDefault();
+          slider.scrollTo({ left: slider.scrollWidth, behavior: 'smooth' });
+          break;
+      }
+    });
+
+    function updateScrollbar() {
+      // Check if slider has scrollable content
+      if (slider.scrollWidth <= slider.clientWidth) {
+        // Hide scrollbar if no scrolling needed
+        scrollbarThumb.style.display = 'none';
+        scrollbarTrack.setAttribute('aria-hidden', 'true');
+        scrollbarTrack.setAttribute('tabindex', '-1');
+        return;
+      }
+
+      // Show scrollbar if scrolling is needed
+      scrollbarThumb.style.display = 'block';
+      scrollbarTrack.setAttribute('aria-hidden', 'false');
+      scrollbarTrack.setAttribute('tabindex', '0');
+
+      const scrollPercent = slider.scrollLeft / (slider.scrollWidth - slider.clientWidth);
+      const trackWidth = scrollbarTrack.clientWidth;
+      const thumbWidth = Math.max(20, (slider.clientWidth / slider.scrollWidth) * trackWidth);
+      const thumbLeft = scrollPercent * (trackWidth - thumbWidth);
+
+      scrollbarThumb.style.width = thumbWidth + 'px';
+      scrollbarThumb.style.left = thumbLeft + 'px';
+
+      // Update aria-valuenow for screen readers
+      scrollbarTrack.setAttribute('aria-valuenow', Math.round(scrollPercent * 100));
+    }
+
+    // Update scrollbar when slider scrolls
+    slider.addEventListener('scroll', updateScrollbar);
+
+    // Handle scrollbar track clicks
+    scrollbarTrack.addEventListener('click', function (e) {
+      const trackRect = scrollbarTrack.getBoundingClientRect();
+      const clickX = e.clientX - trackRect.left;
+      const clickPercent = clickX / trackRect.width;
+      const scrollTo = clickPercent * (slider.scrollWidth - slider.clientWidth);
+
+      slider.scrollTo({
+        left: scrollTo,
+        behavior: 'smooth',
+      });
+    });
+
+    // Handle scrollbar thumb dragging
+    let isDragging = false;
+    let startX = 0;
+    let startScrollLeft = 0;
+
+    scrollbarThumb.addEventListener('mousedown', function (e) {
+      isDragging = true;
+      startX = e.clientX;
+      startScrollLeft = slider.scrollLeft;
+      e.preventDefault();
+    });
+
+    document.addEventListener('mousemove', function (e) {
+      if (!isDragging) return;
+
+      const deltaX = e.clientX - startX;
+      const trackWidth = scrollbarTrack.clientWidth;
+      const thumbWidth = scrollbarThumb.clientWidth;
+      const maxThumbLeft = trackWidth - thumbWidth;
+      const scrollRatio = (slider.scrollWidth - slider.clientWidth) / maxThumbLeft;
+      const newScrollLeft = startScrollLeft + deltaX * scrollRatio;
+
+      slider.scrollLeft = Math.max(0, Math.min(newScrollLeft, slider.scrollWidth - slider.clientWidth));
+    });
+
+    document.addEventListener('mouseup', function () {
+      isDragging = false;
+    });
+
+    // Touch support for mobile
+    let isTouch = false;
+    let touchStartX = 0;
+
+    slider.addEventListener(
+      'touchstart',
+      function (e) {
+        isTouch = true;
+        touchStartX = e.touches[0].clientX;
+      },
+      { passive: true }
+    );
+
+    slider.addEventListener(
+      'touchend',
+      function () {
+        isTouch = false;
+      },
+      { passive: true }
+    );
+
+    // Announce changes to screen readers
+    let announceTimeout;
+    slider.addEventListener('scroll', function () {
+      clearTimeout(announceTimeout);
+      announceTimeout = setTimeout(function () {
+        const currentPercent = Math.round((slider.scrollLeft / (slider.scrollWidth - slider.clientWidth)) * 100);
+
+        // Create or update live region for announcements
+        let liveRegion = document.getElementById('showcase-slider-live-region-{{ section.id }}');
+        if (!liveRegion) {
+          liveRegion = document.createElement('div');
+          liveRegion.id = 'showcase-slider-live-region-{{ section.id }}';
+          liveRegion.setAttribute('aria-live', 'polite');
+          liveRegion.setAttribute('aria-atomic', 'true');
+          liveRegion.className = 'sr-only';
+          document.body.appendChild(liveRegion);
+        }
+
+        liveRegion.textContent = `Gallery scrolled to ${currentPercent}%`;
+      }, 150);
+    });
+
+    // Initialize scrollbar with a small delay to ensure layout is complete
+    setTimeout(updateScrollbar, 100);
+
+    // Update scrollbar on window resize
+    window.addEventListener('resize', function () {
+      setTimeout(updateScrollbar, 100);
+    });
+
+    // Also update when images load (in case they change the layout)
+    const images = slider.querySelectorAll('img');
+    images.forEach((img) => {
+      img.addEventListener('load', updateScrollbar);
+    });
+
+    // Add focus management for product cards
+    const productCards = slider.querySelectorAll('.product-showcase-card');
+    productCards.forEach(function (card, index) {
+      card.addEventListener('focus', function () {
+        // Ensure the focused card is visible
+        const cardRect = card.getBoundingClientRect();
+        const sliderRect = slider.getBoundingClientRect();
+
+        if (cardRect.left < sliderRect.left || cardRect.right > sliderRect.right) {
+          card.scrollIntoView({
+            behavior: 'smooth',
+            block: 'nearest',
+            inline: 'center',
+          });
+        }
+      });
+    });
+  });
+</script>
 
 {% schema %}
 {
