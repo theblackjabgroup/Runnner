@@ -603,12 +603,11 @@
     <div class="video-with-text-media-container-{{ section.id }}">
         {%- comment -%} Check if mobile video is configured {%- endcomment -%}
         {% assign has_mobile_video = false %}
-        {% assign mobile_source = section.settings.video_source_mobile | default: 'same_as_desktop' %}
         
-        {% if mobile_source == 'external' and section.settings.video_url_mobile != blank %}
-          {% assign has_mobile_video = true %}
-        {% elsif mobile_source == 'shopify' and section.settings.shopify_video_mobile != blank %}
-          {% assign has_mobile_video = true %}
+        {% if section.settings.use_different_mobile_video %}
+          {% if section.settings.video_url_mobile != blank or section.settings.shopify_video_mobile != blank %}
+            {% assign has_mobile_video = true %}
+          {% endif %}
         {% endif %}
 
         {%- comment -%} DESKTOP VIDEO - shown on screens > 750px {%- endcomment -%}
@@ -731,9 +730,9 @@
           </div>
         {% endif %}
 
-        {%- comment -%} MOBILE VIDEO (only if different from desktop) {%- endcomment -%}
+        {%- comment -%} MOBILE VIDEO (only if use_different_mobile_video is enabled) {%- endcomment -%}
         {% if has_mobile_video %}
-          {% if section.settings.video_source_mobile == 'external' and section.settings.video_url_mobile != blank %}
+          {% if section.settings.video_url_mobile != blank %}
             <div class="video-with-text-iframe video-mobile-only" style="position:relative;">
               {% if section.settings.video_url_mobile.type == 'youtube' %}
                 <iframe
@@ -799,7 +798,7 @@
                 </svg>
               </button>
             </div>
-          {% elsif section.settings.video_source_mobile == 'shopify' and section.settings.shopify_video_mobile != blank %}
+          {% elsif section.settings.shopify_video_mobile != blank %}
             <div class="video-with-text-iframe video-mobile-only" style="position:relative;">
               {{
                 section.settings.shopify_video_mobile
@@ -1319,7 +1318,7 @@ document.addEventListener('DOMContentLoaded', function() {
     },
     {
       "type": "header",
-      "content": "Desktop Video Settings"
+      "content": "Video Settings"
     },
     {
       "type": "select",
@@ -1342,54 +1341,33 @@ document.addEventListener('DOMContentLoaded', function() {
       "id": "video_url",
       "label": "YouTube/Vimeo URL",
       "accept": ["youtube", "vimeo"],
-      "info": "For screens 751px and wider"
+      "info": "Video for desktop and tablet"
     },
     {
       "type": "video",
       "id": "shopify_video",
       "label": "Shopify Video",
-      "info": "For screens 751px and wider"
+      "info": "Video for desktop and tablet"
     },
     {
-      "type": "header",
-      "content": "Mobile Video Settings (Optional)"
-    },
-    {
-      "type": "paragraph",
-      "content": "Leave empty to use the same video on mobile as desktop."
-    },
-    {
-      "type": "select",
-      "id": "video_source_mobile",
-      "label": "Video Source",
-      "options": [
-        {
-          "value": "same_as_desktop",
-          "label": "Same as Desktop"
-        },
-        {
-          "value": "external",
-          "label": "YouTube/Vimeo"
-        },
-        {
-          "value": "shopify",
-          "label": "Shopify video"
-        }
-      ],
-      "default": "same_as_desktop"
+      "type": "checkbox",
+      "id": "use_different_mobile_video",
+      "label": "Use different video for mobile",
+      "default": false,
+      "info": "Enable to show a different video on mobile devices"
     },
     {
       "type": "video_url",
       "id": "video_url_mobile",
-      "label": "YouTube/Vimeo URL",
+      "label": "Mobile YouTube/Vimeo URL",
       "accept": ["youtube", "vimeo"],
-      "info": "For screens 750px and below"
+      "info": "Video for mobile (750px and below). Only used if 'Use different mobile video' is enabled."
     },
     {
       "type": "video",
       "id": "shopify_video_mobile",
-      "label": "Shopify Video",
-      "info": "For screens 750px and below"
+      "label": "Mobile Shopify Video",
+      "info": "Video for mobile (750px and below). Only used if 'Use different mobile video' is enabled."
     },
     {
       "type": "header",
