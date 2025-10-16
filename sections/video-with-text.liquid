@@ -43,6 +43,22 @@
       }
     }
 
+    /* Responsive video display classes */
+    .video-desktop-only {
+      display: block !important;
+    }
+    .video-mobile-only {
+      display: none !important;
+    }
+    @media (max-width: 750px) {
+      .video-desktop-only {
+        display: none !important;
+      }
+      .video-mobile-only {
+        display: block !important;
+      }
+    }
+
     /* Heading size based on selection */
     {% if section.settings.heading_size == 'small' %}
       @media screen and (max-width: 750px){
@@ -549,8 +565,24 @@
     display: none !important;
   }
 
-  @media (max-width: 749px) {
+  /* Responsive video display control */
+  .video-desktop-only {
+    display: block !important;
+  }
+  
+  .video-mobile-only {
+    display: none !important;
+  }
 
+  @media (max-width: 750px) {
+    .video-desktop-only {
+      display: none !important;
+    }
+    
+    .video-mobile-only {
+      display: block !important;
+    }
+    
     .video-with-text-iframe iframe[src*="vimeo"] {
       width: 200% !important;
       height: 200% !important;
@@ -585,8 +617,18 @@
     aria-label="Video with text section"
   >
     <div class="video-with-text-media-container-{{ section.id }}">
+        {%- comment -%} Check if mobile video is configured {%- endcomment -%}
+        {% assign has_mobile_video = false %}
+        
+        {% if section.settings.use_different_mobile_video %}
+          {% if section.settings.video_url_mobile != blank or section.settings.shopify_video_mobile != blank %}
+            {% assign has_mobile_video = true %}
+          {% endif %}
+        {% endif %}
+
+        {%- comment -%} DESKTOP VIDEO - shown on screens > 750px {%- endcomment -%}
         {% if section.settings.video_source == 'external' and section.settings.video_url != blank %}
-          <div class="video-with-text-iframe" style="position:relative;">
+          <div class="video-with-text-iframe {% if has_mobile_video %}video-desktop-only{% endif %}" style="position:relative;">
             {% if section.settings.video_url.type == 'youtube' %}
               <iframe
                 id="youtube-player-{{ section.id }}"
@@ -618,7 +660,7 @@
               class="video-mute-button"
               id="video-mute-button-{{ section.id }}"
               aria-label="Toggle sound"
-              style="z-index: 10;"
+              style="z-index: 20;"
               title="Unmute"
             >
               <svg
@@ -652,7 +694,7 @@
             </button>
           </div>
         {% elsif section.settings.video_source == 'shopify' and section.settings.shopify_video != blank %}
-          <div class="video-with-text-iframe" style="position:relative;">
+          <div class="video-with-text-iframe {% if has_mobile_video %}video-desktop-only{% endif %}" style="position:relative;">
             {{
               section.settings.shopify_video
               | video_tag:
@@ -669,7 +711,7 @@
               class="video-mute-button"
               id="video-mute-button-{{ section.id }}"
               aria-label="Toggle sound"
-              style="z-index: 10;"
+              style="z-index: 20;"
               title="Unmute"
             >
               <svg
@@ -702,22 +744,152 @@
               </svg>
             </button>
           </div>
-        {% else %}
+        {% endif %}
+
+        {%- comment -%} MOBILE VIDEO (only if use_different_mobile_video is enabled) {%- endcomment -%}
+        {% if has_mobile_video %}
+          {% if section.settings.video_url_mobile != blank %}
+            <div class="video-with-text-iframe video-mobile-only" style="position:relative;">
+              {% if section.settings.video_url_mobile.type == 'youtube' %}
+                <iframe
+                  id="youtube-player-mobile-{{ section.id }}"
+                  class="w-full h-full object-cover"
+                  src="https://www.youtube.com/embed/{{ section.settings.video_url_mobile.id }}?autoplay=1&controls=0&mute=1&loop=1&playlist={{ section.settings.video_url_mobile.id }}&playsinline=1&rel=0&enablejsapi=1"
+                  frameborder="0"
+                  allow="autoplay; encrypted-media"
+                  allowfullscreen
+                  title="Background video"
+                  aria-label="Background video"
+                ></iframe>
+              {% elsif section.settings.video_url_mobile.type == 'vimeo' %}
+                <iframe
+                  id="vimeo-player-mobile-{{ section.id }}"
+                  class="w-full h-full object-cover"
+                  src="https://player.vimeo.com/video/{{ section.settings.video_url_mobile.id }}?controls=false&loop=true&muted=true&playsinline=true&background=1"
+                  frameborder="0"
+                  allow="autoplay; fullscreen; picture-in-picture"
+                  allowfullscreen
+                  allowtransparency="true"
+                  title="Background video"
+                  aria-label="Background video"
+                  loading="lazy"
+                  data-ready="true"
+                  data-gtm-yt-inspected-9="true"
+                ></iframe>
+              {% endif %}
+              <button
+                class="video-mute-button"
+                id="video-mute-button-mobile-{{ section.id }}"
+                aria-label="Toggle sound"
+                style="z-index: 20;"
+                title="Unmute"
+              >
+                <svg
+                  class="mute-icon"
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
+                  <line x1="23" y1="9" x2="17" y2="15" />
+                  <line x1="17" y1="9" x2="23" y2="15" />
+                </svg>
+                <svg
+                  class="unmute-icon"
+                  style="display: none;"
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
+                  <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07" />
+                </svg>
+              </button>
+            </div>
+          {% elsif section.settings.shopify_video_mobile != blank %}
+            <div class="video-with-text-iframe video-mobile-only" style="position:relative;">
+              {{
+                section.settings.shopify_video_mobile
+                | video_tag:
+                  autoplay: true,
+                  loop: true,
+                  muted: true,
+                  playsinline: true,
+                  controls: false,
+                  class: 'w-full h-full object-cover',
+                  id: 'shopify-video-mobile-'
+                | append: section.id
+              }}
+              <button
+                class="video-mute-button"
+                id="video-mute-button-mobile-{{ section.id }}"
+                aria-label="Toggle sound"
+                style="z-index: 20;"
+                title="Unmute"
+              >
+                <svg
+                  class="mute-icon"
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
+                  <line x1="23" y1="9" x2="17" y2="15" />
+                  <line x1="17" y1="9" x2="23" y2="15" />
+                </svg>
+                <svg
+                  class="unmute-icon"
+                  style="display: none;"
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
+                  <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07" />
+                </svg>
+              </button>
+            </div>
+          {% endif %}
+        {% endif %}
+
+        {%- comment -%} FALLBACK: No video selected {%- endcomment -%}
+        {% assign has_desktop_video = false %}
+        {% if section.settings.video_source == 'external' and section.settings.video_url != blank %}
+          {% assign has_desktop_video = true %}
+        {% elsif section.settings.video_source == 'shopify' and section.settings.shopify_video != blank %}
+          {% assign has_desktop_video = true %}
+        {% endif %}
+        
+        {% unless has_desktop_video or has_mobile_video %}
           <div
             class="flex bg-gray-400 items-center justify-center w-full h-full"
             role="img"
-            aria-label="No video selected"
+            aria-label="Placeholder video"
           >
-            <div class="text-center text-white">
-              <p>Please select a video source</p>
-            </div>
+            {{ 'lifestyle-2' | placeholder_svg_tag: 'w-auto h-auto opacity-30' }}
           </div>
-        {% endif %}
+        {% endunless %}
       {% if section.settings.enable_overlay_animation %}
         <div class="video-with-text-media-overlay-{{ section.id }}"></div>
       {% endif %}
     </div>
-    <div class="absolute inset-0 video-with-text-text-content-wrapper-{{ section.id }}" style="z-index:3;">
+    <div class="absolute inset-0 video-with-text-text-content-wrapper-{{ section.id }}" style="z-index:0;">
       <div
         class="
           video-with-text-text-content-container-{{ section.id }}
@@ -938,31 +1110,47 @@ buttons.forEach(button => {
 });
 });
 
-// Mute/Unmute Button Functionality (robust, supports multiple sections and avoids global conflicts)
+// Mute/Unmute Button Functionality (supports desktop and mobile videos)
 document.addEventListener('DOMContentLoaded', function() {
   var sectionId = '{{ section.id }}';
+  
+  // Desktop video elements
   var muteBtn = document.getElementById('video-mute-button-' + sectionId);
-  if (!muteBtn) return;
   var ytFrame = document.getElementById('youtube-player-' + sectionId);
   var vimeoFrame = document.getElementById('vimeo-player-' + sectionId);
   var shopifyVideo = document.getElementById('shopify-video-' + sectionId);
+  
+  // Mobile video elements
+  var muteBtnMobile = document.getElementById('video-mute-button-mobile-' + sectionId);
+  var ytFrameMobile = document.getElementById('youtube-player-mobile-' + sectionId);
+  var vimeoFrameMobile = document.getElementById('vimeo-player-mobile-' + sectionId);
+  var shopifyVideoMobile = document.getElementById('shopify-video-mobile-' + sectionId);
+  
   var isMuted = true;
-  function toggleIcon(muted) {
-    var muteIcon = muteBtn.querySelector('.mute-icon');
-    var unmuteIcon = muteBtn.querySelector('.unmute-icon');
+  
+  function toggleIcon(button, muted) {
+    if (!button) return;
+    var muteIcon = button.querySelector('.mute-icon');
+    var unmuteIcon = button.querySelector('.unmute-icon');
     if (muted) {
       muteIcon.style.display = 'block';
       unmuteIcon.style.display = 'none';
-      muteBtn.setAttribute('title', 'Unmute');
-      muteBtn.setAttribute('aria-label', 'Unmute');
+      button.setAttribute('title', 'Unmute');
+      button.setAttribute('aria-label', 'Unmute');
     } else {
       muteIcon.style.display = 'none';
       unmuteIcon.style.display = 'block';
-      muteBtn.setAttribute('title', 'Mute');
-      muteBtn.setAttribute('aria-label', 'Mute');
+      button.setAttribute('title', 'Mute');
+      button.setAttribute('aria-label', 'Mute');
     }
   }
-  // YouTube
+  
+  function toggleAllVideos(mute) {
+    isMuted = mute;
+    toggleIcon(muteBtn, isMuted);
+    toggleIcon(muteBtnMobile, isMuted);
+  }
+  // YouTube Desktop
   if (ytFrame) {
     if (!window._ytApiLoading) {
       var tag = document.createElement('script');
@@ -975,16 +1163,17 @@ document.addEventListener('DOMContentLoaded', function() {
       var ytPlayer = new YT.Player('youtube-player-' + sectionId, {
         events: {
           'onReady': function(event) {
-            muteBtn.addEventListener('click', function() {
-              if (isMuted) {
-                ytPlayer.unMute();
-                isMuted = false;
-              } else {
-                ytPlayer.mute();
-                isMuted = true;
-              }
-              toggleIcon(isMuted);
-            });
+            if (muteBtn) {
+              muteBtn.addEventListener('click', function() {
+                if (isMuted) {
+                  ytPlayer.unMute();
+                  toggleAllVideos(false);
+                } else {
+                  ytPlayer.mute();
+                  toggleAllVideos(true);
+                }
+              });
+            }
           }
         }
       });
@@ -995,7 +1184,37 @@ document.addEventListener('DOMContentLoaded', function() {
       };
     }
   }
-  // Vimeo
+  
+  // YouTube Mobile
+  if (ytFrameMobile) {
+    if (!window._ytApiLoading) {
+      var tag = document.createElement('script');
+      tag.src = 'https://www.youtube.com/iframe_api';
+      document.head.appendChild(tag);
+      window._ytApiLoading = true;
+    }
+    window._ytMuteReady = window._ytMuteReady || [];
+    window._ytMuteReady.push(function() {
+      var ytPlayerMobile = new YT.Player('youtube-player-mobile-' + sectionId, {
+        events: {
+          'onReady': function(event) {
+            if (muteBtnMobile) {
+              muteBtnMobile.addEventListener('click', function() {
+                if (isMuted) {
+                  ytPlayerMobile.unMute();
+                  toggleAllVideos(false);
+                } else {
+                  ytPlayerMobile.mute();
+                  toggleAllVideos(true);
+                }
+              });
+            }
+          }
+        }
+      });
+    });
+  }
+  // Vimeo Desktop
   if (vimeoFrame) {
     if (!window._vimeoApiLoading) {
       var vimeoScript = document.createElement('script');
@@ -1005,16 +1224,17 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     function vimeoReady() {
       var vimeoPlayer = new Vimeo.Player(vimeoFrame);
-      muteBtn.addEventListener('click', function() {
-        if (isMuted) {
-          vimeoPlayer.setVolume(1);
-          isMuted = false;
-        } else {
-          vimeoPlayer.setVolume(0);
-          isMuted = true;
-        }
-        toggleIcon(isMuted);
-      });
+      if (muteBtn) {
+        muteBtn.addEventListener('click', function() {
+          if (isMuted) {
+            vimeoPlayer.setVolume(1);
+            toggleAllVideos(false);
+          } else {
+            vimeoPlayer.setVolume(0);
+            toggleAllVideos(true);
+          }
+        });
+      }
     }
     if (window.Vimeo && window.Vimeo.Player) {
       vimeoReady();
@@ -1027,22 +1247,77 @@ document.addEventListener('DOMContentLoaded', function() {
       }, 100);
     }
   }
-  // Shopify video
-  if (shopifyVideo) {
+  
+  // Vimeo Mobile
+  if (vimeoFrameMobile) {
+    if (!window._vimeoApiLoading) {
+      var vimeoScript = document.createElement('script');
+      vimeoScript.src = 'https://player.vimeo.com/api/player.js';
+      document.head.appendChild(vimeoScript);
+      window._vimeoApiLoading = true;
+    }
+    function vimeoMobileReady() {
+      var vimeoPlayerMobile = new Vimeo.Player(vimeoFrameMobile);
+      if (muteBtnMobile) {
+        muteBtnMobile.addEventListener('click', function() {
+          if (isMuted) {
+            vimeoPlayerMobile.setVolume(1);
+            toggleAllVideos(false);
+          } else {
+            vimeoPlayerMobile.setVolume(0);
+            toggleAllVideos(true);
+          }
+        });
+      }
+    }
+    if (window.Vimeo && window.Vimeo.Player) {
+      vimeoMobileReady();
+    } else {
+      var checkVimeo = setInterval(function() {
+        if (window.Vimeo && window.Vimeo.Player) {
+          clearInterval(checkVimeo);
+          vimeoMobileReady();
+        }
+      }, 100);
+    }
+  }
+  
+  // Shopify video Desktop
+  if (shopifyVideo && muteBtn) {
     muteBtn.addEventListener('click', function() {
       if (isMuted) {
         shopifyVideo.muted = false;
-        isMuted = false;
+        if (shopifyVideoMobile) shopifyVideoMobile.muted = false;
+        toggleAllVideos(false);
       } else {
         shopifyVideo.muted = true;
-        isMuted = true;
+        if (shopifyVideoMobile) shopifyVideoMobile.muted = true;
+        toggleAllVideos(true);
       }
-      toggleIcon(isMuted);
     });
   }
-  // Hide button if no video
-  if (!ytFrame && !vimeoFrame && !shopifyVideo) {
+  
+  // Shopify video Mobile
+  if (shopifyVideoMobile && muteBtnMobile) {
+    muteBtnMobile.addEventListener('click', function() {
+      if (isMuted) {
+        shopifyVideoMobile.muted = false;
+        if (shopifyVideo) shopifyVideo.muted = false;
+        toggleAllVideos(false);
+      } else {
+        shopifyVideoMobile.muted = true;
+        if (shopifyVideo) shopifyVideo.muted = true;
+        toggleAllVideos(true);
+      }
+    });
+  }
+  
+  // Hide buttons if no video
+  if (!ytFrame && !vimeoFrame && !shopifyVideo && muteBtn) {
     muteBtn.style.display = 'none';
+  }
+  if (!ytFrameMobile && !vimeoFrameMobile && !shopifyVideoMobile && muteBtnMobile) {
+    muteBtnMobile.style.display = 'none';
   }
 });
 </script>
@@ -1062,12 +1337,12 @@ document.addEventListener('DOMContentLoaded', function() {
     },
     {
       "type": "header",
-      "content": "Media Settings"
+      "content": "Video Settings"
     },
     {
       "type": "select",
       "id": "video_source",
-      "label": "Video source",
+      "label": "Video Source",
       "options": [
         {
           "value": "external",
@@ -1085,13 +1360,33 @@ document.addEventListener('DOMContentLoaded', function() {
       "id": "video_url",
       "label": "YouTube/Vimeo URL",
       "accept": ["youtube", "vimeo"],
-      "info": "YouTube or Vimeo URL"
+      "info": "Video for desktop and tablet"
     },
     {
       "type": "video",
       "id": "shopify_video",
-      "label": "Shopify video",
-      "info": "Upload video directly to Shopify"
+      "label": "Shopify Video",
+      "info": "Video for desktop and tablet"
+    },
+    {
+      "type": "checkbox",
+      "id": "use_different_mobile_video",
+      "label": "Use different video for mobile",
+      "default": false,
+      "info": "Enable to show a different video on mobile devices"
+    },
+    {
+      "type": "video_url",
+      "id": "video_url_mobile",
+      "label": "Mobile YouTube/Vimeo URL",
+      "accept": ["youtube", "vimeo"],
+      "info": "Video for mobile (750px and below). Only used if 'Use different mobile video' is enabled."
+    },
+    {
+      "type": "video",
+      "id": "shopify_video_mobile",
+      "label": "Mobile Shopify Video",
+      "info": "Video for mobile (750px and below). Only used if 'Use different mobile video' is enabled."
     },
     {
       "type": "header",
