@@ -1505,11 +1505,22 @@
 </style>
 
 <script>
+  // Utility function to manage header z-index
+  function setHeaderZIndex(zIndex) {
+    const headerElements = document.querySelectorAll('.header-main, .header-z-index, [class*="header"]');
+    headerElements.forEach((element) => {
+      element.style.zIndex = zIndex;
+    });
+  }
+
   function openMobileFilters() {
     const overlay = document.getElementById('mobile-filter-overlay');
     if (overlay) {
       overlay.classList.add('active');
       document.body.style.overflow = 'hidden';
+
+      // Change header z-index to 1 when mobile filters are open
+      setHeaderZIndex('1');
 
       // Calculate and set mobile footer height for proper tags positioning
       const footer = document.querySelector('.mobile-filter-footer');
@@ -1525,8 +1536,22 @@
     if (overlay) {
       overlay.classList.remove('active');
       document.body.style.overflow = '';
+
+      // Reset header z-index back to 2 when mobile filters are closed
+      setHeaderZIndex('2');
     }
   }
+
+  // Initialize header z-index on page load
+  document.addEventListener('DOMContentLoaded', function () {
+    // Ensure header starts with correct z-index
+    setHeaderZIndex('2');
+
+    // Add cleanup on page unload to reset z-index
+    window.addEventListener('beforeunload', function () {
+      setHeaderZIndex('2');
+    });
+  });
 
   // Close on overlay click
   document.addEventListener('DOMContentLoaded', function () {
