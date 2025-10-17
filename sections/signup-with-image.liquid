@@ -34,6 +34,12 @@
     </div>
     <!-- Form Column -->
     <div class="signup-with-image-form-container">
+      {% if section.settings.form_bg_overlay and section.settings.form_bg_image %}
+        <div
+          class="signup-with-image-overlay"
+          style="opacity: {{ section.settings.form_bg_overlay_opacity | divided_by: 100.0 }};"
+        ></div>
+      {% endif %}
       <div
         class="signup-with-image-form-box"
         style="max-width: 45rem; padding: var(--space-5xl) var(--space-3xl); display: flex; flex-direction: column; align-items: center; text-align: center;"
@@ -154,6 +160,12 @@
 
       .signup-with-image-form-container {
         background-color: {{ section.settings.form_bg_color }};
+        {% if section.settings.form_bg_image %}
+          background-image: url('{{ section.settings.form_bg_image | image_url: width: 1920 }}');
+          background-position: {{ section.settings.form_bg_position }};
+          background-size: {{ section.settings.form_bg_size }};
+          background-repeat: {{ section.settings.form_bg_repeat }};
+        {% endif %}
         margin-left: 9px;
         display: flex;
         flex-direction: column;
@@ -166,6 +178,19 @@
 
       .signup-with-image-form-box {
         width: 100%;
+        position: relative;
+        z-index: 3;
+      }
+
+      .signup-with-image-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        z-index: 2;
+        pointer-events: none;
       }
 
       .signup-with-image-slider {
@@ -297,7 +322,24 @@
         .signup-with-image-heading{
           width: 95% !important;
         }
-    }
+      }
+
+      /* Responsive background image */
+      @media (max-width: 768px) {
+        .signup-with-image-form-container {
+          {% if section.settings.form_bg_image %}
+            background-image: url('{{ section.settings.form_bg_image | image_url: width: 768 }}');
+          {% endif %}
+        }
+      }
+
+      @media (max-width: 480px) {
+        .signup-with-image-form-container {
+          {% if section.settings.form_bg_image %}
+            background-image: url('{{ section.settings.form_bg_image | image_url: width: 480 }}');
+          {% endif %}
+        }
+      }
   </style>
 </section>
 
@@ -355,6 +397,115 @@
       "id": "form_bg_color",
       "label": "t:sections.signup-with-image.settings.form_bg_color.label",
       "default": "#f2f2f2"
+    },
+    {
+      "type": "image_picker",
+      "id": "form_bg_image",
+      "label": "Form Background Image"
+    },
+    {
+      "type": "select",
+      "id": "form_bg_position",
+      "label": "Background Position",
+      "options": [
+        {
+          "value": "center",
+          "label": "Center"
+        },
+        {
+          "value": "top",
+          "label": "Top"
+        },
+        {
+          "value": "bottom",
+          "label": "Bottom"
+        },
+        {
+          "value": "left",
+          "label": "Left"
+        },
+        {
+          "value": "right",
+          "label": "Right"
+        },
+        {
+          "value": "top left",
+          "label": "Top Left"
+        },
+        {
+          "value": "top right",
+          "label": "Top Right"
+        },
+        {
+          "value": "bottom left",
+          "label": "Bottom Left"
+        },
+        {
+          "value": "bottom right",
+          "label": "Bottom Right"
+        }
+      ],
+      "default": "center"
+    },
+    {
+      "type": "select",
+      "id": "form_bg_size",
+      "label": "Background Size",
+      "options": [
+        {
+          "value": "cover",
+          "label": "Cover"
+        },
+        {
+          "value": "contain",
+          "label": "Contain"
+        },
+        {
+          "value": "auto",
+          "label": "Auto"
+        }
+      ],
+      "default": "cover"
+    },
+    {
+      "type": "select",
+      "id": "form_bg_repeat",
+      "label": "Background Repeat",
+      "options": [
+        {
+          "value": "no-repeat",
+          "label": "No Repeat"
+        },
+        {
+          "value": "repeat",
+          "label": "Repeat"
+        },
+        {
+          "value": "repeat-x",
+          "label": "Repeat Horizontally"
+        },
+        {
+          "value": "repeat-y",
+          "label": "Repeat Vertically"
+        }
+      ],
+      "default": "no-repeat"
+    },
+    {
+      "type": "checkbox",
+      "id": "form_bg_overlay",
+      "label": "Add Dark Overlay for Better Text Readability",
+      "default": false
+    },
+    {
+      "type": "range",
+      "id": "form_bg_overlay_opacity",
+      "label": "Overlay Opacity",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "unit": "%",
+      "default": 50
     }
   ],
   "presets": [
