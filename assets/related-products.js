@@ -81,8 +81,14 @@ if (typeof window.ProductRecommendations === 'undefined') {
         this.announceToScreenReader();
 
         // Re-initialize scroll animations after content loads
-        if (typeof initScrollAnimations === 'function') {
-          initScrollAnimations();
+        if (
+          typeof window.ScrollAnimationUtils !== 'undefined' &&
+          typeof window.ScrollAnimationUtils.initScrollAnimations === 'function'
+        ) {
+          window.ScrollAnimationUtils.initScrollAnimations();
+        } else if (window.scrollAnimations && typeof window.scrollAnimations.refresh === 'function') {
+          // Fallback: refresh existing animations
+          window.scrollAnimations.refresh();
         }
 
         // Re-initialize featured collection carousel if exists
