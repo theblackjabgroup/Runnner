@@ -77,7 +77,8 @@ class ProductCard {
     const cartContainer = this.card.querySelector('.new-product-cart-container');
     const sizeContainer = this.card.querySelector('.new-size-variants-container');
     const addToCartBtn = this.card.querySelector('.new-add-to-cart-btn');
-    const sizeButtons = this.card.querySelectorAll('.new-size-option-btn');
+    // Get both custom size buttons and size-variant-picker buttons
+    const sizeButtons = this.card.querySelectorAll('.new-size-variants-container .size-btn, .new-size-option-btn');
 
     if (!imageWrapper || !cartContainer) return;
 
