@@ -1,0 +1,180 @@
+{% comment %}theme-check-disable ImgLazyLoading{% endcomment %}
+{{ 'collection-banner.css' | asset_url | stylesheet_tag }}
+
+{% if section.settings.enabled %}
+  <section
+    class="collection-banner-simple"
+    style="
+      --banner-height: {{ section.settings.banner_height }}px;
+      --side-space: {{ settings.side_space }}px;
+      --padding-top: {{ section.settings.padding_top }}px;
+      --padding-bottom: {{ section.settings.padding_bottom }}px;
+      --object-fit: {{ section.settings.object_fit }};
+      --object-position: {{ section.settings.object_position }};
+    "
+  >
+    {% if collection.image %}
+      <div class="collection-banner-image">
+        <img
+          srcset="
+            {%- if collection.image.width >= 480 -%}{{ collection.image | image_url: width: 480, format: 'webp' }} 480w,{%- endif -%}
+            {%- if collection.image.width >= 768 -%}{{ collection.image | image_url: width: 768, format: 'webp' }} 768w,{%- endif -%}
+            {%- if collection.image.width >= 1024 -%}{{ collection.image | image_url: width: 1024, format: 'webp' }} 1024w,{%- endif -%}
+            {%- if collection.image.width >= 1200 -%}{{ collection.image | image_url: width: 1200, format: 'webp' }} 1200w,{%- endif -%}
+            {%- if collection.image.width >= 1600 -%}{{ collection.image | image_url: width: 1600, format: 'webp' }} 1600w,{%- endif -%}
+            {%- if collection.image.width >= 1920 -%}{{ collection.image | image_url: width: 1920, format: 'webp' }} 1920w,{%- endif -%}
+            {%- if collection.image.width >= 2400 -%}{{ collection.image | image_url: width: 2400, format: 'webp' }} 2400w,{%- endif -%}
+            {%- if collection.image.width >= 3200 -%}{{ collection.image | image_url: width: 3200, format: 'webp' }} 3200w,{%- endif -%}
+            {%- if collection.image.width >= 480 -%}{{ collection.image | image_url: width: 480 }} 480w,{%- endif -%}
+            {%- if collection.image.width >= 768 -%}{{ collection.image | image_url: width: 768 }} 768w,{%- endif -%}
+            {%- if collection.image.width >= 1024 -%}{{ collection.image | image_url: width: 1024 }} 1024w,{%- endif -%}
+            {%- if collection.image.width >= 1200 -%}{{ collection.image | image_url: width: 1200 }} 1200w,{%- endif -%}
+            {%- if collection.image.width >= 1600 -%}{{ collection.image | image_url: width: 1600 }} 1600w,{%- endif -%}
+            {%- if collection.image.width >= 1920 -%}{{ collection.image | image_url: width: 1920 }} 1920w,{%- endif -%}
+            {%- if collection.image.width >= 2400 -%}{{ collection.image | image_url: width: 2400 }} 2400w,{%- endif -%}
+            {%- if collection.image.width >= 3200 -%}{{ collection.image | image_url: width: 3200 }} 3200w,{%- endif -%}
+          "
+          sizes="100vw"
+          src="{{ collection.image | image_url: width: 1920, format: 'webp' }}"
+          alt="{{ collection.title | escape }}"
+          width="{{ collection.image.width }}"
+          height="{{ collection.image.height }}"
+          loading="eager"
+          fetchpriority="high"
+        >
+      </div>
+    {% else %}
+      <div class="collection-banner-placeholder">
+        {{ 'lifestyle-2' | placeholder_svg_tag: 'w-full h-full' }}
+      </div>
+    {% endif %}
+  </section>
+{% endif %}
+
+{% schema %}
+{
+  "name": "Collection Banner",
+  "disabled_on": {
+    "groups": ["header", "footer"]
+  },
+  "settings": [
+    {
+      "type": "checkbox",
+      "id": "enabled",
+      "label": "Enable section",
+      "default": true
+    },
+    {
+      "type": "range",
+      "id": "banner_height",
+      "min": 200,
+      "max": 800,
+      "step": 50,
+      "unit": "px",
+      "label": "Banner height",
+      "default": 800
+    },
+    {
+      "type": "header",
+      "content": "Padding Settings"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "unit": "px",
+      "label": "Top padding",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "unit": "px",
+      "label": "Bottom padding",
+      "default": 0
+    },
+    {
+      "type": "header",
+      "content": "Image Settings"
+    },
+    {
+      "type": "select",
+      "id": "object_fit",
+      "label": "Image fit type",
+      "options": [
+        {
+          "value": "cover",
+          "label": "Cover (fill container)"
+        },
+        {
+          "value": "contain",
+          "label": "Contain (fit within container)"
+        },
+        {
+          "value": "fill",
+          "label": "Fill (stretch to fit)"
+        },
+        {
+          "value": "scale-down",
+          "label": "Scale down"
+        }
+      ],
+      "default": "cover"
+    },
+    {
+      "type": "select",
+      "id": "object_position",
+      "label": "Image position",
+      "options": [
+        {
+          "value": "center",
+          "label": "Center"
+        },
+        {
+          "value": "top",
+          "label": "Top"
+        },
+        {
+          "value": "bottom",
+          "label": "Bottom"
+        },
+        {
+          "value": "left",
+          "label": "Left"
+        },
+        {
+          "value": "right",
+          "label": "Right"
+        },
+        {
+          "value": "top left",
+          "label": "Top Left"
+        },
+        {
+          "value": "top right",
+          "label": "Top Right"
+        },
+        {
+          "value": "bottom left",
+          "label": "Bottom Left"
+        },
+        {
+          "value": "bottom right",
+          "label": "Bottom Right"
+        }
+      ],
+      "default": "top"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Collection Banner"
+    }
+  ]
+}
+{% endschema %}
