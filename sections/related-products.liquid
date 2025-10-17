@@ -1,491 +1,84 @@
-{{ 'scroll-animations.css' | asset_url | stylesheet_tag }}
-<script src="{{ 'scroll-animations.js' | asset_url }}" defer></script>
+{{ 'section-related-products.css' | asset_url | stylesheet_tag }}
 
-{% if section.settings.enabled %}
-  {% assign section_classes_rp = 'related-products-section' %}
-  {% if section.settings.color_scheme %}
-    {% assign section_classes_rp = section_classes_rp | append: ' color-' | append: section.settings.color_scheme %}
-  {% endif %}
-  {% assign top_padding = settings.sections_spacing %}
-  {% assign side_padding = settings.side_space %}
+{%- if section.settings.enable_animations -%}
+  {{ 'scroll-animations.css' | asset_url | stylesheet_tag }}
+  <script src="{{ 'scroll-animations.js' | asset_url }}" defer></script>
+{%- endif -%}
 
-  {% if top_padding == blank or top_padding == 0 %}
-    {% assign top_padding = 20 %}
-  {% endif %}
+{% comment %}
+  Related Products Section using Shopify Product Recommendations API
+  Must be rendered on a product page template
+{% endcomment %}
 
-  {% if side_padding == blank or side_padding == 0 %}
-    {% assign side_padding = 20 %}
-  {% endif %}
+<product-recommendations
+  class="product-recommendations"
+  data-url="{{ routes.product_recommendations_url }}?section_id={{ section.id }}&product_id={{ product.id }}&limit={{ section.settings.products_to_show }}&intent=related"
+  data-product-id="{{ product.id }}"
+>
+  {% if recommendations.performed and recommendations.products_count > 0 %}
+    {% assign top_padding = section.settings.padding_top %}
+    {% assign side_padding = settings.side_space %}
 
-  <div
-    class="related-products-page-width overflow-hidden {{ section_classes_rp }}"
-    role="region"
-    aria-labelledby="related-products-heading"
-    aria-describedby="related-products-description"
-    style="padding: {{ top_padding }}px {{ side_padding }}px;"
-  >
-    {% if section.settings.heading != blank %}
-      <h2
-        id="related-products-heading"
-        style="font-weight:500; color: var(--text); font-size:var(--t-h-5-size); margin:0px 20 50px;"
-        class="related-products-main-heading mb-[-10px]{% if section.settings.enable_letter_animation %} letter-animation{% endif %}"
-      >
-        {{ section.settings.heading }}
-      </h2>
+    {% if top_padding == blank or top_padding == 0 %}
+      {% assign top_padding = 36 %}
     {% endif %}
 
-    <main class="related-products-container w-full mt-10" style="margin-top:18px;">
-      <div class="slider-container relative">
-        <div
-          id="related-product-slider"
-          class="product-slider related-products-grid scroll-fade-stagger flex gap-2 md:gap-4 custom-scrollbar featured-collection-cursor-grab overflow-x-auto"
-          role="list"
-          aria-label="Related Products"
-        >
-          {% if collections.all.products.size == 0 %}
-            {% for i in (1..5) %}
-              <div
-                class="flex-none related-product-item scroll-fade-trigger scroll-fade-up"
-                data-animation-index="{{ forloop.index0 }}"
-              >
-                <div class="new-product-card" style="width: min(441px, calc(255px + 0.1835 * (100vw - 425px)));">
-                  <div class="new-product-image-wrapper">
-                    <div class="new-product-images-container">
-                      <div style="width: min(441px, calc(255px + 0.1835 * (100vw - 425px))); height: min(530px, calc(306px + 0.2207 * (100vw - 425px))); display: flex; align-items: center; justify-content: center; background-color: #f5f5f5; color: #999;">
-                        {{ 'collection-1' | placeholder_svg_tag }}
-                      </div>
-                    </div>
-                  </div>
-                  <div class="new-product-details" style="padding-top: var(--space-lg);">
-                    <div
-                      class="new-product-title"
-                      style="text-decoration: none; color: var(--text); display: block; font-size: var(--tm-h-5-size);"
-                    >
-                      No products found
-                    </div>
-                    <div
-                      class="new-product-price"
-                      style="color: var(--text); padding-top: var(--space-xs); font-size: var(--tm-h-5-size);"
-                    >
-                      —
-                    </div>
-                  </div>
-                </div>
-              </div>
-            {% endfor %}
-          {% else %}
-            {% for product in collections.all.products limit: section.settings.products_to_show %}
-              <div
-                class="flex-none related-product-item scroll-fade-trigger scroll-fade-up"
-                data-animation-index="{{ forloop.index0 }}"
-              >
-                {% render 'new-product-card', product: product, collection: collections.all %}
-              </div>
-            {% endfor %}
-          {% endif %}
-        </div>
+    {% if side_padding == blank or side_padding == 0 %}
+      {% assign side_padding = 20 %}
+    {% endif %}
 
-        <!-- Horizontal scrollbar using snippet (same as featured-collection and product-detail) -->
-        {% render 'horizontal-scrollbar',
-          container_selector: '.slider-container',
-          slider_selector: '.product-slider'
-        %}
-      </div>
-    </main>
-  </div>
-
-  <div
-    id="rp-waitlist-modal-overlay"
-    class="fixed inset-0 z-50 bg-(--text) hidden items-center justify-center"
-    aria-modal="true"
-    aria-labelledby="rp-waitlist-product-title"
-    aria-describedby="rp-waitlist-product-variant"
-  >
     <div
-      class="!w-auto md:!w-[50vw] max-w-[90vw] rounded p-4 md:p-10 shadow-lg mx-4"
-      style="background-color: rgb(var(--color-background));"
+      class="related-products-page-width related-products-section overflow-hidden color-{{ section.settings.color_scheme }} gradient"
+      role="region"
+      aria-labelledby="related-products-heading"
+      style="padding: {{ top_padding }}px {{ side_padding }}px {{ section.settings.padding_bottom }}px;"
     >
-      <div class="flex justify-end p-2 md:p-4">
-        <button
-          id="close-rp-waitlist-modal"
-          class="text-(--text) hover:text-gray-700 font-medium"
-          aria-label="Close waitlist form"
+      {%- if section.settings.heading != blank -%}
+        <h2
+          id="related-products-heading"
+          class="related-products-main-heading mb-[-10px]"
         >
-          CLOSE
-        </button>
-      </div>
+          {{ section.settings.heading }}
+        </h2>
+      {%- endif -%}
 
-      <h2 class="text-xl md:text-2xl font-bold mb-2" id="rp-waitlist-product-title">PRODUCT TITLE</h2>
+      {%- comment -%} Accessibility: Live region for screen readers {%- endcomment -%}
+      <div class="visually-hidden" role="status" aria-live="polite" aria-atomic="true"></div>
 
-      <div class="text-gray-600 mb-4" id="rp-waitlist-product-variant">XS / PORT</div>
-
-      <hr class="border-gray-300 mx-2 md:mx-6" aria-hidden="true">
-
-      <div class="my-4 md:my-6">
-        <p class="font-medium mb-4 text-sm md:text-base">
-          Waitlist: Enter your email to get notified when this product becomes available again.
-        </p>
-
-        <div class="flex flex-col sm:flex-row gap-3 mb-4" aria-label="Waitlist notification form">
-          <input
-            type="email"
-            id="rp-waitlist-email"
-            placeholder="Your email"
-            class="flex-grow border border-gray-300 p-2 md:p-3 rounded text-sm md:text-base"
-            aria-label="Your email address"
+      <main
+        class="related-products-container w-full mt-10 color-{{ section.settings.color_scheme }}"
+        style="margin-top:18px;"
+      >
+        <div class="slider-container relative">
+          <div
+            id="related-products-slider"
+            class="product-slider related-products-grid scroll-fade-stagger flex gap-2 md:gap-4 custom-scrollbar featured-collection-cursor-grab overflow-x-auto"
+            role="list"
+            aria-labelledby="related-products-heading"
           >
-          <button
-            id="rp-get-notified-btn"
-            class="bg-(--text) py-2 md:py-3 px-4 md:px-6 font-medium hover:bg-gray-800 rounded text-sm md:text-base"
-            aria-label="Submit waitlist request"
-            style="color: rgb(var(--color-background));"
-          >
-            GET NOTIFIED
-          </button>
+            {% for recommendation in recommendations.products %}
+              <div
+                class="flex-none related-products-item scroll-fade-trigger scroll-fade-up"
+                data-animation-index="{{ forloop.index0 }}"
+              >
+                {% render 'new-product-card', product: recommendation %}
+              </div>
+            {% endfor %}
+          </div>
+
+          <!-- Horizontal scrollbar using snippet -->
+          {% render 'horizontal-scrollbar',
+            container_selector: '.slider-container',
+            slider_selector: '.product-slider'
+          %}
         </div>
-      </div>
+      </main>
     </div>
-  </div>
-{% endif %}
+  {% endif %}
+</product-recommendations>
 
-<style>
-  .related-products-page-width {
-    margin: 0;
-    overflow-y: hidden;
-    width: 100vw;
-    position: relative;
-    left: 50%;
-    right: 50%;
-    margin-left: -50vw;
-    margin-right: -50vw;
-  }
-
-  div.related-products-main-heading {
-    line-height: 40% !important;
-    font-size: 3.5rem;
-    left: -3px;
-    padding-top: var(--space-3xl);
-  }
-
-  @media (min-width: 500px) {
-    div.related-products-main-heading {
-      font-size: 5rem;
-    }
-  }
-
-  @media (max-width: 480px) {
-    div.related-products-main-heading {
-      font-size: var(--tm-h-4-size) !important;
-      padding-top: var(--space-lg) !important;
-      padding-bottom: var(--space-lg) !important;
-    }
-
-    #related-products-heading {
-      margin: 0 7.5px 20px !important;
-    }
-  }
-
-  @media (min-width: 768px) {
-    div.related-products-main-heading {
-      padding-top: var(--space-3xl);
-      font-size: 40px;
-      padding-bottom: var(--space-4xl);
-      padding-left: var(--space-xl);
-    }
-
-    .related-products-container {
-      padding-left: var(--space-lg);
-      padding-right: var(--space-lg);
-      overflow: hidden;
-    }
-
-    .slider-container {
-      margin-right: 0;
-      overflow-x: hidden;
-    }
-
-    .product-slider {
-      padding-right: var(--space-2xl);
-    }
-
-    #related-products-heading {
-      margin: 0 7.5px 20px !important;
-    }
-  }
-
-  .slider-container {
-    position: relative;
-    width: 100%;
-    overflow-x: hidden;
-    overflow-y: hidden;
-    -webkit-overflow-scrolling: touch;
-    height: auto;
-    padding-bottom: var(--space-4xl);
-  }
-
-  .product-slider {
-    display: flex;
-    gap: 18px;
-    overflow-y: hidden;
-    width: 100%;
-    max-width: 100%;
-  }
-
-  .product-slider::-webkit-scrollbar:vertical {
-    display: none;
-  }
-
-  /* Scrollbar styles and drag functionality moved to horizontal-scrollbar snippet */
-  
-  /* Add spacing between product grid and scrollbar */
-  .featured-collection-cursor-grab {
-    padding-bottom: var(--space-2xl);
-  }
-
-  #rp-waitlist-modal-overlay {
-    transition: opacity 0.3s ease;
-  }
-
-  #rp-waitlist-modal-overlay.hidden {
-    opacity: 0;
-  }
-
-  #rp-waitlist-product-title {
-    text-transform: uppercase;
-    font-weight: bold;
-  }
-
-  #rp-waitlist-email {
-    border: 1px solid #ccc;
-  }
-
-  #rp-get-notified-btn {
-    white-space: nowrap;
-    text-transform: uppercase;
-  }
-
-  @media (max-width: 1440px) {
-    .product-slider {
-      width: 100%;
-      overflow-x: auto;
-      justify-content: flex-start;
-    }
-
-    .slider-container {
-      overflow-x: auto;
-    }
-  }
-
-  @media (max-width: 768px) {
-    .product-slider {
-      gap: 8px;
-      overflow-x: auto;
-      -webkit-overflow-scrolling: touch;
-    }
-
-    .slider-container {
-      overflow-x: hidden !important;
-    }
-
-    .related-products-main-heading {
-      padding-top: var(--space-2xl);
-    }
-
-    /* Mobile spacing between product grid and scrollbar */
-    .featured-collection-cursor-grab {
-      padding-bottom: var(--space-lg);
-    }
-  }
-
-  @keyframes letterAppear {
-    0% {
-      transform: translateX(10000%);
-      opacity: 0;
-    }
-    100% {
-      transform: translateX(0);
-      opacity: 1;
-    }
-  }
-
-  .letter-animation-container {
-    display: inline-block;
-    width: 100%;
-    overflow: visible;
-    position: relative;
-  }
-
-  .animated-letter {
-    display: inline-block;
-    opacity: 0;
-    transform: translateX(500%);
-    position: relative;
-  }
-
-  .hidden {
-    display: none !important;
-  }
-
-  /* Related Products Staggered Fade-Up Animations */
-  .related-product-item.scroll-fade-trigger {
-    opacity: 0;
-    transform: translateY(50px);
-    transition: opacity 0.6s ease, transform 0.6s ease;
-  }
-
-  .related-product-item.scroll-fade-trigger.animate {
-    opacity: 1;
-    transform: translateY(0);
-  }
-
-  /* Staggered delays for related product cards */
-  .related-products-grid .related-product-item:nth-child(1) {
-    transition-delay: 0s;
-  }
-  .related-products-grid .related-product-item:nth-child(2) {
-    transition-delay: 0.1s;
-  }
-  .related-products-grid .related-product-item:nth-child(3) {
-    transition-delay: 0.2s;
-  }
-  .related-products-grid .related-product-item:nth-child(4) {
-    transition-delay: 0.3s;
-  }
-  .related-products-grid .related-product-item:nth-child(5) {
-    transition-delay: 0.4s;
-  }
-  .related-products-grid .related-product-item:nth-child(6) {
-    transition-delay: 0.5s;
-  }
-  .related-products-grid .related-product-item:nth-child(7) {
-    transition-delay: 0.6s;
-  }
-  .related-products-grid .related-product-item:nth-child(8) {
-    transition-delay: 0.7s;
-  }
-  .related-products-grid .related-product-item:nth-child(9) {
-    transition-delay: 0.8s;
-  }
-  .related-products-grid .related-product-item:nth-child(10) {
-    transition-delay: 0.9s;
-  }
-  .related-products-grid .related-product-item:nth-child(11) {
-    transition-delay: 1s;
-  }
-  .related-products-grid .related-product-item:nth-child(12) {
-    transition-delay: 1.1s;
-  }
-
-  /* Accessibility - Respect reduced motion */
-  @media (prefers-reduced-motion: reduce) {
-    .related-product-item.scroll-fade-trigger {
-      opacity: 1 !important;
-      transform: none !important;
-      transition: none !important;
-    }
-  }
-
-  /* Completely remove hover functionality on mobile - make it touch-friendly */
-  @media (max-width: 768px) {
-    /* Hide all hover-triggered elements by default */
-    .new-image-nav-arrow {
-      display: none !important;
-    }
-
-    .new-product-cart-container {
-      display: none !important;
-    }
-
-    .new-add-to-cart-btn,
-    .new-sold-out-btn {
-      display: none !important;
-    }
-
-    .new-size-variants-container {
-      display: none !important;
-    }
-
-    /* Remove all hover states */
-    .new-product-image-wrapper:hover .new-image-nav-arrow,
-    .new-product-image-wrapper:hover .new-product-cart-container,
-    .new-product-image-wrapper:hover .new-add-to-cart-btn,
-    .new-product-image-wrapper:hover .new-sold-out-btn,
-    .new-product-image-wrapper:hover .new-size-variants-container {
-      display: none !important;
-      opacity: 0 !important;
-      visibility: hidden !important;
-    }
-
-    /* Make the product card a simple clickable link */
-    .new-product-card {
-      cursor: pointer;
-      transition: transform 0.2s ease;
-    }
-
-    .new-product-card:active {
-      transform: scale(0.98);
-    }
-
-    /* Ensure the product link works properly */
-    .new-product-card a {
-      display: block;
-      width: 100%;
-      height: 100%;
-      text-decoration: none;
-      color: inherit;
-    }
-
-    /* Hide any remaining interactive elements */
-    .new-product-image-wrapper:hover * {
-      display: none !important;
-    }
-  }
-</style>
-
-{% comment %} Scrollbar functionality provided by horizontal-scrollbar snippet {% endcomment %}
-
-<script>
-  // Custom Related Products Fade-Up Animation
-  document.addEventListener('DOMContentLoaded', function () {
-    const relatedProductsGrid = document.querySelector('.related-products-grid');
-    if (!relatedProductsGrid) return;
-
-    const productCards = relatedProductsGrid.querySelectorAll('.related-product-item');
-
-    // Set initial state for all cards
-    productCards.forEach((card, index) => {
-      card.style.opacity = '0';
-      card.style.transform = 'translateY(50px)';
-      card.style.transition = `opacity 0.6s ease ${index * 0.1}s, transform 0.6s ease ${index * 0.1}s`;
-    });
-
-    // Create intersection observer
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            // Trigger fade-up animation
-            entry.target.style.opacity = '1';
-            entry.target.style.transform = 'translateY(0)';
-
-            // Stop observing this element
-            observer.unobserve(entry.target);
-          }
-        });
-      },
-      {
-        rootMargin: '0px 0px -100px 0px',
-        threshold: 0.1,
-      }
-    );
-
-    // Observe all product cards
-    productCards.forEach((card) => {
-      observer.observe(card);
-    });
-  });
-</script>
-
+{%- comment -%} External scripts - loaded once and cached {%- endcomment -%}
+<script src="{{ 'related-products.js' | asset_url }}" defer></script>
 <script src="{{ 'featured-collection.js' | asset_url }}" defer></script>
 <script src="{{ 'new-product-card.js' | asset_url }}" defer></script>
 
@@ -499,10 +92,27 @@
   },
   "settings": [
     {
-      "type": "checkbox",
-      "id": "enabled",
-      "label": "Enable section",
-      "default": true
+      "type": "paragraph",
+      "content": "t:sections.related-products.settings.paragraph__1.content"
+    },
+    {
+      "type": "inline_richtext",
+      "id": "heading",
+      "default": "You may also like",
+      "label": "t:sections.related-products.settings.heading.label"
+    },
+    {
+      "type": "range",
+      "id": "products_to_show",
+      "min": 2,
+      "max": 10,
+      "step": 1,
+      "default": 4,
+      "label": "t:sections.related-products.settings.products_to_show.label"
+    },
+    {
+      "type": "header",
+      "content": "Design"
     },
     {
       "type": "color_scheme",
@@ -511,32 +121,35 @@
       "default": "scheme-1"
     },
     {
-      "type": "text",
-      "id": "heading",
-      "label": "Heading",
-      "default": "Related Products"
+      "type": "checkbox",
+      "id": "enable_animations",
+      "label": "Enable scroll animations",
+      "default": true,
+      "info": "Animate products as they scroll into view. Respects user's motion preferences."
+    },
+    {
+      "type": "header",
+      "content": "t:sections.all.padding.section_padding_heading"
     },
     {
       "type": "range",
-      "id": "products_to_show",
-      "label": "Number of products to show",
-      "min": 1,
-      "max": 15,
-      "step": 1,
-      "default": 12,
-      "info": "Select how many products to display in the related products section"
+      "id": "padding_top",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "t:sections.all.padding.padding_top",
+      "default": 36
     },
     {
-      "type": "checkbox",
-      "id": "show_vendor",
-      "label": "Show product vendor",
-      "default": false,
-      "info": "Display the vendor/brand name below the product title"
-    }
-  ],
-  "presets": [
-    {
-      "name": "Related Products"
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "t:sections.all.padding.padding_bottom",
+      "default": 36
     }
   ]
 }

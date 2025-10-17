@@ -1,7 +1,344 @@
-.related-products {
-  display: block;
+/* Related Products Section Styles - Using Product Recommendations API */
+
+/* Accessibility: Screen reader only content */
+.visually-hidden {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
 }
 
-.related-products__heading {
-  margin: 0 0 3rem;
+/* Accessibility: Skip link for keyboard navigation */
+.skip-to-content-link {
+  position: absolute;
+  left: -9999px;
+  z-index: 999;
+  padding: 12px 24px;
+  background-color: var(--color-background, #fff);
+  color: var(--color-foreground, #000);
+  font-size: 16px;
+  font-weight: 600;
+  text-decoration: none;
+  border: 2px solid var(--color-foreground, #000);
+  border-radius: 4px;
+  transition: left 0.2s ease;
+}
+
+.skip-to-content-link:focus {
+  left: 20px;
+  top: 20px;
+  outline: 3px solid var(--color-foreground, #000);
+  outline-offset: 2px;
+}
+
+/* Ensure skip link is visible when focused */
+.visually-hidden-focusable:focus {
+  position: absolute;
+  left: 20px;
+  top: 20px;
+  width: auto;
+  height: auto;
+  padding: 12px 24px;
+  margin: 0;
+  overflow: visible;
+  clip: auto;
+  white-space: normal;
+  background-color: var(--color-background, #fff);
+  color: var(--color-foreground, #000);
+  z-index: 9999;
+  border: 2px solid var(--color-foreground, #000);
+  border-radius: 4px;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.related-products-page-width {
+  margin: 0;
+  overflow-y: hidden;
+  width: 100vw;
+  position: relative;
+  left: 50%;
+  right: 50%;
+  margin-left: -50vw;
+  margin-right: -50vw;
+}
+
+.related-products-main-heading {
+  line-height: 40% !important;
+  font-size: 3.5rem;
+  left: -3px;
+  padding-top: var(--space-3xl, 48px);
+  font-weight: 500;
+  margin: 0px 20px 50px;
+}
+
+@media (min-width: 500px) {
+  .related-products-main-heading {
+    font-size: 5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .related-products-main-heading {
+    font-size: var(--tm-h-4-size, 24px) !important;
+    padding-top: var(--space-lg, 24px) !important;
+    padding-bottom: var(--space-lg, 24px) !important;
+  }
+
+  #related-products-heading {
+    margin: 0 7.5px 20px !important;
+  }
+}
+
+@media (min-width: 768px) {
+  .related-products-main-heading {
+    padding-top: var(--space-3xl, 48px);
+    font-size: 40px;
+    padding-bottom: var(--space-4xl, 64px);
+    padding-left: var(--space-xl, 32px);
+  }
+
+  .related-products-container {
+    padding-left: var(--space-lg, 24px);
+    padding-right: var(--space-lg, 24px);
+    overflow: hidden;
+  }
+
+  .related-products-section .slider-container {
+    margin-right: 0;
+    overflow-x: hidden;
+  }
+
+  .related-products-section .product-slider {
+    padding-right: var(--space-2xl, 40px);
+  }
+
+  #related-products-heading {
+    margin: 0 7.5px 20px !important;
+  }
+}
+
+.related-products-section .slider-container {
+  position: relative;
+  width: 100%;
+  overflow-x: hidden;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+  height: auto;
+  padding-bottom: var(--space-4xl, 64px);
+}
+
+.related-products-section .product-slider {
+  display: flex;
+  gap: 18px;
+  overflow-y: hidden;
+  width: 100%;
+  max-width: 100%;
+}
+
+.related-products-section .product-slider::-webkit-scrollbar:vertical {
+  display: none;
+}
+
+/* Add spacing between product grid and scrollbar */
+.related-products-section .featured-collection-cursor-grab {
+  padding-bottom: var(--space-2xl, 40px);
+}
+
+@media (max-width: 1440px) {
+  .related-products-section .product-slider {
+    width: 100%;
+    overflow-x: auto;
+    justify-content: flex-start;
+  }
+
+  .related-products-section .slider-container {
+    overflow-x: auto;
+  }
+}
+
+@media (max-width: 768px) {
+  .related-products-section .product-slider {
+    gap: 8px;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .related-products-section .slider-container {
+    overflow-x: hidden !important;
+  }
+
+  .related-products-main-heading {
+    padding-top: var(--space-2xl, 40px);
+  }
+
+  /* Mobile spacing between product grid and scrollbar */
+  .related-products-section .featured-collection-cursor-grab {
+    padding-bottom: var(--space-lg, 24px);
+  }
+}
+
+/* Related Products Staggered Fade-Up Animations */
+.related-products-item.scroll-fade-trigger {
+  opacity: 0;
+  transform: translateY(50px);
+  transition: opacity 0.6s ease, transform 0.6s ease;
+}
+
+.related-products-item.scroll-fade-trigger.animate {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Staggered delays for related products cards */
+.related-products-grid .related-products-item:nth-child(1) {
+  transition-delay: 0s;
+}
+.related-products-grid .related-products-item:nth-child(2) {
+  transition-delay: 0.1s;
+}
+.related-products-grid .related-products-item:nth-child(3) {
+  transition-delay: 0.2s;
+}
+.related-products-grid .related-products-item:nth-child(4) {
+  transition-delay: 0.3s;
+}
+.related-products-grid .related-products-item:nth-child(5) {
+  transition-delay: 0.4s;
+}
+.related-products-grid .related-products-item:nth-child(6) {
+  transition-delay: 0.5s;
+}
+.related-products-grid .related-products-item:nth-child(7) {
+  transition-delay: 0.6s;
+}
+.related-products-grid .related-products-item:nth-child(8) {
+  transition-delay: 0.7s;
+}
+.related-products-grid .related-products-item:nth-child(9) {
+  transition-delay: 0.8s;
+}
+.related-products-grid .related-products-item:nth-child(10) {
+  transition-delay: 0.9s;
+}
+
+/* Accessibility - Respect reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .related-products-item.scroll-fade-trigger {
+    opacity: 1 !important;
+    transform: none !important;
+    transition: none !important;
+  }
+}
+
+/* Completely remove hover functionality on mobile - make it touch-friendly */
+@media (max-width: 768px) {
+  /* Disable ALL hover effects on images */
+  .related-products-section .new-product-image,
+  .related-products-section .new-product-image-wrapper,
+  .related-products-section .new-product-images-container {
+    transition: none !important;
+  }
+
+  /* Prevent image scale/transform on hover */
+  .related-products-section .new-product-image-wrapper:hover .new-product-image,
+  .related-products-section .new-product-image-wrapper:hover img,
+  .related-products-section .new-product-card:hover .new-product-image,
+  .related-products-section .new-product-card:hover img {
+    transform: none !important;
+    transition: none !important;
+  }
+
+  /* Keep only first image visible, hide second image permanently on mobile */
+  .related-products-section .new-product-image:not(.active),
+  .related-products-section .new-product-image:not(:first-child) {
+    opacity: 0 !important;
+    display: none !important;
+  }
+
+  /* Ensure first/active image stays visible */
+  .related-products-section .new-product-image.active,
+  .related-products-section .new-product-image:first-child {
+    opacity: 1 !important;
+  }
+
+  /* Hide all hover-triggered elements by default */
+  .related-products-section .new-image-nav-arrow {
+    display: none !important;
+  }
+
+  .related-products-section .new-product-cart-container {
+    display: none !important;
+  }
+
+  .related-products-section .new-add-to-cart-btn,
+  .related-products-section .new-sold-out-btn {
+    display: none !important;
+  }
+
+  .related-products-section .new-size-variants-container {
+    display: none !important;
+  }
+
+  /* Remove all hover states */
+  .related-products-section .new-product-image-wrapper:hover .new-image-nav-arrow,
+  .related-products-section .new-product-image-wrapper:hover .new-product-cart-container,
+  .related-products-section .new-product-image-wrapper:hover .new-add-to-cart-btn,
+  .related-products-section .new-product-image-wrapper:hover .new-sold-out-btn,
+  .related-products-section .new-product-image-wrapper:hover .new-size-variants-container {
+    display: none !important;
+    opacity: 0 !important;
+    visibility: hidden !important;
+  }
+
+  /* Make the product card a simple clickable link */
+  .related-products-section .new-product-card {
+    cursor: pointer;
+  }
+
+  .related-products-section .new-product-card:active {
+    transform: none !important;
+  }
+
+  /* Ensure the product link works properly */
+  .related-products-section .new-product-card a {
+    display: block;
+    width: 100%;
+    height: 100%;
+    text-decoration: none;
+    color: inherit;
+  }
+
+  /* Disable any hover effects on product wrapper */
+  .related-products-section .new-product-image-wrapper:hover,
+  .related-products-section .new-product-card:hover {
+    transform: none !important;
+  }
+
+  /* Hide any remaining interactive elements */
+  .related-products-section .new-product-image-wrapper:hover * {
+    transform: none !important;
+  }
+}
+
+/* Loading state */
+product-recommendations:not(:defined) {
+  opacity: 0;
+}
+
+product-recommendations:defined {
+  opacity: 1;
+  transition: opacity 0.3s ease;
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  product-recommendations {
+    transition: none !important;
+  }
 }
