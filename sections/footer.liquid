@@ -191,32 +191,23 @@
             <div class="bb-footer-main-row footer-main-row footer-container-wrapper">
               <!-- Menu Section -->
               <nav
-                class="menu-section custom-nav-mr-25 footer-block"
+                class="menu-section footer-block"
                 aria-label="Footer Navigation"
               >
-                <div class="bb-inner-footer-main-row flex flex-wrap justify-start md:justify-end footer-main-row">
-                  <div
-                    class="flex flex-row flex-wrap justify-start md:justify-end custom-gap w-full mr-[20px] md:ml-0 menu-content-wrapper"
-                    {{ block.shopify_attributes }}
-                  >
-                    {% for menu_block in menu_blocks %}
-                      <div class="menu-block" {{ menu_block.shopify_attributes }}>
-                        <div class="flex flex-col w-auto">
-                          <div class="flex flex-col space-y-1">
-                            {% for link in linklists[menu_block.settings.menu_links].links %}
-                              <a
-                                href="{{ link.url }}"
-                                class="text-[16px] body-font"
-                                style="color: {{ section.settings.menu_item_color }}; line-height: 20px;"
-                              >
-                                {{- link.title -}}
-                              </a>
-                            {% endfor %}
-                          </div>
-                        </div>
-                      </div>
-                    {% endfor %}
-                  </div>
+                <div class="footer-menu-container">
+                  {% for menu_block in menu_blocks %}
+                    <div class="footer-menu-column" {{ menu_block.shopify_attributes }}>
+                      {% for link in linklists[menu_block.settings.menu_links].links %}
+                        <a
+                          href="{{ link.url }}"
+                          class="footer-menu-link body-font"
+                          style="color: {{ section.settings.menu_item_color }}; line-height: 20px;"
+                        >
+                          {{- link.title -}}
+                        </a>
+                      {% endfor %}
+                    </div>
+                  {% endfor %}
                 </div>
 
                 <div class="mobile-social-icons" aria-labelledby="mobile-social-heading">
@@ -412,18 +403,21 @@
 </style>
 
 <script>
-  document.addEventListener('DOMContentLoaded', function() {
+  document.addEventListener('DOMContentLoaded', function () {
     const footer = document.querySelector('.footer-container');
     if (!footer) return;
 
-    const observer = new IntersectionObserver((entries) => {
-      entries.forEach((entry) => {
-        if (entry.isIntersecting) {
-          entry.target.classList.add('animate');
-          observer.unobserve(entry.target);
-        }
-      });
-    }, { threshold: 0.1 });
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('animate');
+            observer.unobserve(entry.target);
+          }
+        });
+      },
+      { threshold: 0.1 }
+    );
 
     footer.querySelectorAll('.footer-section').forEach((section) => {
       observer.observe(section);
@@ -448,7 +442,7 @@
       function isValidEmail(email) {
         return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
       }
-      form.addEventListener('submit', function(e) {
+      form.addEventListener('submit', function (e) {
         e.preventDefault();
         const email = emailInput ? emailInput.value.trim() : '';
 
