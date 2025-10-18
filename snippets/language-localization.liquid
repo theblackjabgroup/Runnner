@@ -3,7 +3,15 @@
 
   Accepts:
     - localPosition: pass in the position in which the form is coming up to create specific IDs
+    - dropdown_icon: optional custom dropdown icon image
 {%- endcomment -%}
+
+{%- liquid
+  assign icon_to_use = dropdown_icon
+  if icon_to_use == blank and section.settings.dropdown_icon != blank
+    assign icon_to_use = section.settings.dropdown_icon
+  endif
+-%}
 
 <div class="disclosure group relative lg:!inline-block" style="background: var(--header_background);">
   <button
@@ -29,9 +37,9 @@
     <span class="bb-language-text">
       {{ localization.language.endonym_name | upcase }}
     </span>
-    {% if section.settings.dropdown_icon != blank %}
+    {% if icon_to_use != blank %}
       <img
-        src="{{ section.settings.dropdown_icon | image_url }}"
+        src="{{ icon_to_use | image_url }}"
         alt="Dropdown Icon"
         class="w-12 h-6 object-contain transition-transform duration-300 group-hover:-rotate-90"
         width="100%"
