@@ -14,7 +14,7 @@
 -%}
 
 <header
-  class="header-main relative color-{{ color_scheme }} header-z-index {% unless section.settings.enable_sticky %}sticky-disabled{% endunless %}"
+  class="header-main relative color-{{ color_scheme }} header-z-index {% unless section.settings.enable_sticky %}sticky-disabled{% endunless %}{% if section.settings.enable_transparent %} header-transparent{% endif %}"
   data-header-sticky
 >
   <div class=" w-full flex items-center justify-between ">
@@ -1049,6 +1049,22 @@
       });
     });
 
+    /* -- Transparent Header Background on Hover -- */
+    const headerElement = document.querySelector('[data-header-sticky]');
+    const isHeaderTransparent = headerElement?.classList.contains('header-transparent');
+
+    if (isHeaderTransparent) {
+      // Add background on menu hover
+      document.querySelectorAll('.dropdown-group').forEach(group => {
+        group.addEventListener('mouseenter', () => {
+          headerElement.classList.add('has-interaction');
+        });
+        group.addEventListener('mouseleave', () => {
+          headerElement.classList.remove('has-interaction');
+        });
+      });
+    }
+
     /* -- sub menu logic -- */
     document.querySelectorAll('.dropdown-group').forEach(group => {
       const trigger = group.querySelector('a');
@@ -1436,6 +1452,15 @@
         searchContainer.style.top = `${finalHeight}px`;
       } 
 
+        // Handle transparent header background
+        if (isHeaderTransparent) {
+          if (show) {
+            headerElement.classList.add('has-interaction');
+          } else {
+            headerElement.classList.remove('has-interaction');
+          }
+        }
+
         if (show) {
           searchContainer.classList.remove('hidden');
           searchOverlay.style.opacity = '0';
@@ -1708,6 +1733,13 @@
       "id": "enable_sticky",
       "label": "Enable sticky header",
       "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_transparent",
+      "label": "Enable transparent header",
+      "default": false,
+      "info": "Makes header background transparent. Works best with hero images."
     },
     {
       "type": "header",
