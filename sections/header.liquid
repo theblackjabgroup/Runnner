@@ -1051,7 +1051,9 @@
 
     /* -- Transparent Header Background on Hover -- */
     const headerElement = document.querySelector('[data-header-sticky]');
-    if (headerElement && headerElement.classList.contains('header-transparent')) {
+    const isHeaderTransparent = headerElement?.classList.contains('header-transparent');
+
+    if (isHeaderTransparent) {
       // Add background on menu hover
       document.querySelectorAll('.dropdown-group').forEach(group => {
         group.addEventListener('mouseenter', () => {
@@ -1061,18 +1063,6 @@
           headerElement.classList.remove('has-interaction');
         });
       });
-
-      // Add background when search opens
-      const searchToggle = document.getElementById('search-toggle');
-      const closeSearch = document.getElementById('close-search');
-      if (searchToggle && closeSearch) {
-        searchToggle.addEventListener('click', () => {
-          headerElement.classList.add('has-interaction');
-        });
-        closeSearch.addEventListener('click', () => {
-          headerElement.classList.remove('has-interaction');
-        });
-      }
     }
 
     /* -- sub menu logic -- */
@@ -1461,6 +1451,15 @@
         const finalHeight = height + h2;
         searchContainer.style.top = `${finalHeight}px`;
       } 
+
+        // Handle transparent header background
+        if (isHeaderTransparent) {
+          if (show) {
+            headerElement.classList.add('has-interaction');
+          } else {
+            headerElement.classList.remove('has-interaction');
+          }
+        }
 
         if (show) {
           searchContainer.classList.remove('hidden');
