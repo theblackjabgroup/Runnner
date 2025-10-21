@@ -602,6 +602,29 @@
     });
   });
 
+  /* -- Convert Country ISO Codes to Flag Emojis -- */
+  function convertISOToFlagEmoji(isoCode) {
+    if (!isoCode || isoCode.length !== 2) return isoCode;
+    const codePoints = isoCode
+      .toUpperCase()
+      .split('')
+      .map(char => 127397 + char.charCodeAt());
+    return String.fromCodePoint(...codePoints);
+  }
+
+  // Convert all country flag ISO codes to emojis on initial load
+  function convertAllFlags() {
+    document.querySelectorAll('.country-flag-emoji').forEach(flagElement => {
+      const isoCode = flagElement.textContent.trim();
+      if (isoCode.length === 2) {
+        flagElement.textContent = convertISOToFlagEmoji(isoCode);
+      }
+    });
+  }
+
+  // Run on page load
+  convertAllFlags();
+
   // Shopify theme events handling
   document.addEventListener('shopify:section:load', function (event) {
     // Reinitialize localization forms when section is loaded/reloaded
@@ -613,5 +636,8 @@
         form.connectedCallback();
       }
     });
+
+    // Convert flags after section reload
+    convertAllFlags();
   });
 </script>
