@@ -1,0 +1,57 @@
+{% comment %}
+  ================================================================================
+  LOW STOCK BADGE - GLOBAL SETTINGS GUIDE
+  ================================================================================
+
+  This badge shows low stock indicators like "1 LEFT", "2 LEFT", etc.
+  It uses the same styling system as the sold-out badge for consistency.
+
+  GLOBAL SETTINGS AVAILABLE:
+  --------------------------
+  The low stock badge uses the same settings as the sold-out badge:
+  Theme Settings > Sold Out Badge (shared with low stock and best seller badges)
+
+  CSS VARIABLES:
+  --------------
+  Uses the same CSS custom properties as sold-out badge:
+  - --sold-out-filled-bg: Background color for filled style
+  - --sold-out-filled-text: Text color for filled style
+  - --sold-out-transparent-border: Border color for transparent style
+  - --sold-out-transparent-text: Text color for transparent style
+  - --sold-out-badge-border-thickness: Border thickness for transparent style
+  - --sold-out-badge-radius: Border radius for all badges
+
+  HOW TO USE IN LIQUID:
+  --------------------
+  {% render 'low-stock-badge', quantity: 5 %}
+  {% render 'low-stock-badge', quantity: 1, class: 'your-additional-classes' %}
+
+  ================================================================================
+  Renders a low stock badge with quantity
+
+  Usage:
+  {% render 'low-stock-badge', quantity: 5 %}
+
+  Accepts:
+  - quantity: {Number} The remaining stock quantity
+  - class: {String} Additional CSS classes to add (optional)
+{% endcomment %}
+
+{%- liquid
+  assign badge_style = settings.sold_out_badge_style | default: 'filled'
+  assign quantity_text = quantity | append: ' LEFT'
+
+  if badge_style == 'filled'
+    assign badge_class = 'sold-out-badge-filled'
+  else
+    assign badge_class = 'sold-out-badge-transparent'
+  endif
+
+  if class != blank
+    assign badge_class = badge_class | append: ' ' | append: class
+  endif
+-%}
+
+<span class="{{ badge_class }}" role="status" aria-label="Only {{ quantity }} left in stock">
+  {{ quantity_text }}
+</span>

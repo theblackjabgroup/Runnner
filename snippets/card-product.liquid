@@ -168,9 +168,20 @@
         {%- endif -%}
 
         {% if card_product.available == false %}
-          <div class="">
-            {% render 'sold-out-badge', class: 'sold-out-tag text-[14px] font-medium' %}
+          <div class="absolute top-3 z-2" style="left: 10px;">
+            {% render 'sold-out-badge', class: 'sold-out-tag tracking-wide font-medium' %}
           </div>
+        {% elsif card_product.tags contains 'best-seller' or card_product.tags contains 'bestseller' or card_product.tags contains 'best seller' %}
+          <div class="absolute top-3 z-2" style="left: 10px;">
+            {% render 'best-seller-badge', class: 'best-seller-tag tracking-wide font-medium' %}
+          </div>
+        {% elsif card_product.available and card_product.variants.first.inventory_quantity <= 5 and card_product.variants.first.inventory_quantity > 0 %}
+          <div class="absolute top-3 z-2" style="left: 10px;">
+            {% render 'low-stock-badge', quantity: card_product.variants.first.inventory_quantity, class: 'low-stock-tag tracking-wide font-medium' %}
+          </div>
+        {% endif %}
+
+        {% if card_product.available == false %}
           <div class="rounded-[5px] absolute inset-x-0 bottom-0 p-4 opacity-0 translate-y-10 transition-all duration-300 group-hover:opacity-100 group-hover:-translate-y-0">
             <div class="w-[93%] rounded-[5px] mx-auto text-center" style="background-color: var(--background);">
               <button
@@ -350,28 +361,63 @@
 {%- endif -%}
 
 <style>
-  .sold-out-tag {
-    margin: 10px 0 0 5px !important;
-    position: absolute !important;
-    top: 0px !important;
-    left: 5px !important;
-    padding: 0 8px;
-    font-size: 16px;
+  /* Badge positioning and styling */
+  .sold-out-tag,
+  .best-seller-tag,
+  .low-stock-tag {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    z-index: 10;
+    padding: 0px 6px;
+    border-radius: var(--sold-out-badge-radius, 5px);
+    font-size: var(--t-b-3-size);
+    font-weight: var(--t-b-3-weight);
+    line-height: var(--t-b-3-line-height);
+    text-transform: uppercase;
+    white-space: nowrap;
+    letter-spacing: 0.5px;
+    text-align: center;
+    display: inline-block;
   }
 
-  /* Ensure sold-out badge uses global settings */
+  /* Sold Out Badge Styles */
   .sold-out-badge-filled.sold-out-tag {
-    background-color: var(--sold-out-filled-bg, #000000) !important;
-    color: var(--sold-out-filled-text, #FFFFFF) !important;
-    border-radius: var(--sold-out-badge-radius, 5px) !important;
-    border: none !important;
+    background-color: var(--sold-out-filled-bg, #000000);
+    color: var(--sold-out-filled-text, #FFFFFF);
+    border: none;
   }
 
   .sold-out-badge-transparent.sold-out-tag {
-    background-color: transparent !important;
-    color: var(--sold-out-transparent-text, #000000) !important;
-    border: var(--sold-out-badge-border-thickness, 1px) solid var(--sold-out-transparent-border, #000000) !important;
-    border-radius: var(--sold-out-badge-radius, 5px) !important;
+    background-color: transparent;
+    color: var(--sold-out-transparent-text, #000000);
+    border: var(--sold-out-badge-border-thickness, 1px) solid var(--sold-out-transparent-border, #000000);
+  }
+
+  /* Best Seller Badge Styles */
+  .sold-out-badge-filled.best-seller-tag {
+    background-color: var(--sold-out-filled-bg, #000000);
+    color: var(--sold-out-filled-text, #FFFFFF);
+    border: none;
+  }
+
+  .sold-out-badge-transparent.best-seller-tag {
+    background-color: transparent;
+    color: var(--sold-out-transparent-text, #000000);
+    border: var(--sold-out-badge-border-thickness, 1px) solid var(--sold-out-transparent-border, #000000);
+  }
+
+  /* Low Stock Badge Styles */
+  .sold-out-badge-filled.low-stock-tag {
+    background-color: var(--sold-out-filled-bg, #000000);
+    color: var(--sold-out-filled-text, #FFFFFF);
+    border: none;
+  }
+
+  .sold-out-badge-transparent.low-stock-tag {
+    background-color: transparent;
+    color: var(--sold-out-transparent-text, #000000);
+    border: var(--sold-out-badge-border-thickness, 1px) solid var(--sold-out-transparent-border, #000000);
   }
   .image-config {
     object-fit: cover;
@@ -405,8 +451,11 @@
     .image-config {
       object-fit: fill;
     }
-    .sold-out-tag {
-      font-size: 10px;
+    .sold-out-tag,
+    .best-seller-tag,
+    .low-stock-tag {
+      font-size: var(--tm-b-3-size) !important;
+      line-height: var(--tm-b-3-line-height) !important;
     }
     .card-product-typegraphy {
       font-size: 12px !important;

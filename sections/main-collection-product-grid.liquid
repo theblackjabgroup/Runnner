@@ -4,10 +4,6 @@
 {{ 'scroll-animations.css' | asset_url | stylesheet_tag }}
 {{ 'main-collection-product-grid.css' | asset_url | stylesheet_tag }}
 
-{% if section.settings.image_shape == 'blob' %}
-  {{ 'mask-blobs.css' | asset_url | stylesheet_tag }}
-{%- endif -%}
-
 <style>
   .products-container {
     padding-left: {{ settings.side_space }}px !important;
@@ -25,29 +21,13 @@
   }
 </style>
 
-{%- unless section.settings.quick_add == 'none' -%}
-  {{ 'quick-add.css' | asset_url | stylesheet_tag }}
-{%- endunless -%}
-
-{%- if section.settings.quick_add == 'standard' -%}
-  <script src="{{ 'quick-add.js' | asset_url }}" defer="defer"></script>
-  <script src="{{ 'product-form.js' | asset_url }}" defer="defer"></script>
-{%- endif -%}
-
-{%- if section.settings.quick_add == 'bulk' -%}
-  <script src="{{ 'quick-add-bulk.js' | asset_url }}" defer="defer"></script>
-  <script src="{{ 'quantity-popover.js' | asset_url }}" defer="defer"></script>
-  <script src="{{ 'price-per-item.js' | asset_url }}" defer="defer"></script>
-  <script src="{{ 'quick-order-list.js' | asset_url }}" defer="defer"></script>
-{%- endif -%}
-
 <script src="{{ 'scroll-animations.js' | asset_url }}" defer="defer"></script>
 <script src="{{ 'main-collection-product-grid.js' | asset_url }}" defer="defer"></script>
 
 <div class="collection-page-wrapper">
   {%- paginate collection.products by section.settings.products_per_page -%}
     <!-- Filters and Sorting -->
-    {%- if section.settings.enable_filtering or section.settings.enable_sorting -%}
+    {%- if section.settings.enable_filtering -%}
       <div class="filters-container" style="background-color: var(--body);">
         {{ 'component-facets.css' | asset_url | stylesheet_tag }}
         <script src="{{ 'facets.js' | asset_url }}" defer="defer"></script>
@@ -56,8 +36,8 @@
           {% render 'facets',
             results: collection,
             enable_filtering: section.settings.enable_filtering,
-            enable_sorting: section.settings.enable_sorting,
-            filter_type: section.settings.filter_type,
+            enable_sorting: true,
+            filter_type: 'horizontal',
             paginate: paginate
           %}
         </aside>
@@ -90,13 +70,8 @@
                 {%
                   render 'card-product',
                   card_product: product,
-                  media_aspect_ratio: section.settings.image_ratio,
-                  image_shape: section.settings.image_shape,
                   show_secondary_image: section.settings.show_secondary_image,
-                  show_vendor: section.settings.show_vendor,
-                  show_rating: section.settings.show_rating,
                   lazy_load: forloop.index > 2,
-                  quick_add: section.settings.quick_add,
                   section_id: section.id
                 %}
               </div>
@@ -133,82 +108,10 @@
       "content": "Product Display"
     },
     {
-      "type": "select",
-      "id": "image_ratio",
-      "options": [
-        {
-          "value": "adapt",
-          "label": "Adapt to image"
-        },
-        {
-          "value": "portrait",
-          "label": "Portrait"
-        },
-        {
-          "value": "square",
-          "label": "Square"
-        }
-      ],
-      "default": "adapt",
-      "label": "Image ratio"
-    },
-    {
-      "type": "select",
-      "id": "image_shape",
-      "options": [
-        {
-          "value": "default",
-          "label": "Default"
-        },
-        {
-          "value": "arch",
-          "label": "Arch"
-        },
-        {
-          "value": "blob",
-          "label": "Blob"
-        },
-        {
-          "value": "chevronleft",
-          "label": "Chevron Left"
-        },
-        {
-          "value": "chevronright",
-          "label": "Chevron Right"
-        },
-        {
-          "value": "diamond",
-          "label": "Diamond"
-        },
-        {
-          "value": "parallelogram",
-          "label": "Parallelogram"
-        },
-        {
-          "value": "round",
-          "label": "Round"
-        }
-      ],
-      "default": "default",
-      "label": "Image shape"
-    },
-    {
       "type": "checkbox",
       "id": "show_secondary_image",
       "default": false,
       "label": "Show secondary image on hover"
-    },
-    {
-      "type": "checkbox",
-      "id": "show_vendor",
-      "default": false,
-      "label": "Show vendor"
-    },
-    {
-      "type": "checkbox",
-      "id": "show_rating",
-      "default": false,
-      "label": "Show product rating"
     },
     {
       "type": "header",
@@ -231,26 +134,6 @@
       "label": "Mobile columns"
     },
     {
-      "type": "select",
-      "id": "quick_add",
-      "default": "none",
-      "label": "Quick add",
-      "options": [
-        {
-          "value": "none",
-          "label": "None"
-        },
-        {
-          "value": "standard",
-          "label": "Standard"
-        },
-        {
-          "value": "bulk",
-          "label": "Bulk"
-        }
-      ]
-    },
-    {
       "type": "header",
       "content": "Filtering and sorting"
     },
@@ -259,32 +142,6 @@
       "id": "enable_filtering",
       "default": true,
       "label": "Enable filtering"
-    },
-    {
-      "type": "select",
-      "id": "filter_type",
-      "options": [
-        {
-          "value": "horizontal",
-          "label": "Horizontal"
-        },
-        {
-          "value": "vertical",
-          "label": "Vertical"
-        },
-        {
-          "value": "drawer",
-          "label": "Drawer"
-        }
-      ],
-      "default": "horizontal",
-      "label": "Filter type"
-    },
-    {
-      "type": "checkbox",
-      "id": "enable_sorting",
-      "default": true,
-      "label": "Enable sorting"
     }
   ]
 }

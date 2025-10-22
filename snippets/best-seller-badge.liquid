@@ -1,0 +1,58 @@
+{% comment %}
+  ================================================================================
+  BEST SELLER BADGE - GLOBAL SETTINGS GUIDE
+  ================================================================================
+
+  This badge shows "BEST SELLER" indicator for popular products.
+  It uses the same styling system as the sold-out badge for consistency.
+
+  GLOBAL SETTINGS AVAILABLE:
+  --------------------------
+  The best seller badge uses the same settings as the sold-out badge:
+  Theme Settings > Sold Out Badge (shared with low stock and best seller badges)
+
+  CSS VARIABLES:
+  --------------
+  Uses the same CSS custom properties as sold-out badge:
+  - --sold-out-filled-bg: Background color for filled style
+  - --sold-out-filled-text: Text color for filled style
+  - --sold-out-transparent-border: Border color for transparent style
+  - --sold-out-transparent-text: Text color for transparent style
+  - --sold-out-badge-border-thickness: Border thickness for transparent style
+  - --sold-out-badge-radius: Border radius for all badges
+
+  HOW TO USE IN LIQUID:
+  --------------------
+  {% render 'best-seller-badge' %}
+  {% render 'best-seller-badge', class: 'your-additional-classes' %}
+  {% render 'best-seller-badge', text: 'HOT' %}
+
+  ================================================================================
+  Renders a best seller badge
+
+  Usage:
+  {% render 'best-seller-badge' %}
+
+  Accepts:
+  - class: {String} Additional CSS classes to add (optional)
+  - text: {String} Custom badge text (optional, defaults to "BEST SELLER")
+{% endcomment %}
+
+{%- liquid
+  assign badge_text = text | default: 'BEST SELLER'
+  assign badge_style = settings.sold_out_badge_style | default: 'filled'
+
+  if badge_style == 'filled'
+    assign badge_class = 'sold-out-badge-filled'
+  else
+    assign badge_class = 'sold-out-badge-transparent'
+  endif
+
+  if class != blank
+    assign badge_class = badge_class | append: ' ' | append: class
+  endif
+-%}
+
+<span class="{{ badge_class }}" role="status" aria-label="Best selling product">
+  {{ badge_text }}
+</span>
