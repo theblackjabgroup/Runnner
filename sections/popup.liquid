@@ -120,7 +120,7 @@
 
           <!-- Image Section -->
           <div class="imgdiv w-full md:w-1/2 aspect-[4/3] md:aspect-auto">
-            {% if section.settings.image != blank or section.settings.mobile_image != blank %}
+            {% if section.settings.image != blank %}
               <div class="h-full w-full">
                 <picture>
                   {% if section.settings.mobile_image != blank %}
@@ -136,24 +136,43 @@
                     >
                   {% endif %}
                   
-                  {% assign desktop_image = section.settings.image | default: section.settings.mobile_image %}
                   <img
                     srcset="
-                      {%- if desktop_image.width >= 375 -%}{{ desktop_image | image_url: width: 375 }} 375w,{%- endif -%}
-                      {%- if desktop_image.width >= 600 -%} {{ desktop_image | image_url: width: 600 }} 600w,{%- endif -%}
-                      {%- if desktop_image.width >= 900 -%} {{ desktop_image | image_url: width: 900 }} 900w,{%- endif -%}
-                      {%- if desktop_image.width >= 1200 -%} {{ desktop_image | image_url: width: 1200 }} 1200w,{%- endif -%} {{ desktop_image | image_url }} {{ desktop_image.width }}w
+                      {%- if section.settings.image.width >= 375 -%}{{ section.settings.image | image_url: width: 375 }} 375w,{%- endif -%}
+                      {%- if section.settings.image.width >= 600 -%} {{ section.settings.image | image_url: width: 600 }} 600w,{%- endif -%}
+                      {%- if section.settings.image.width >= 900 -%} {{ section.settings.image | image_url: width: 900 }} 900w,{%- endif -%}
+                      {%- if section.settings.image.width >= 1200 -%} {{ section.settings.image | image_url: width: 1200 }} 1200w,{%- endif -%} {{ section.settings.image | image_url }} {{ section.settings.image.width }}w
                     "
-                    sizes="(max-width: 768px) 100vw, 50vw"
-                    src="{{ desktop_image | image_url: width: 900 }}"
+                    sizes="(max-width: 640px) 100vw, (max-width: 768px) 100vw, 50vw"
+                    src="{{ section.settings.image | image_url: width: 900 }}"
                     alt="Offer Promo"
                     class="imgdiv-img w-full h-full object-cover"
-                    width="{{ desktop_image.width }}"
-                    height="{{ desktop_image.height }}"
+                    width="{{ section.settings.image.width }}"
+                    height="{{ section.settings.image.height }}"
                     loading="eager"
                     decoding="async"
                   >
                 </picture>
+              </div>
+            {% elsif section.settings.mobile_image != blank %}
+              {%- comment -%} Mobile-only: fallback to desktop image if mobile not available {%- endcomment -%}
+              <div class="h-full w-full">
+                <img
+                  srcset="
+                    {% if section.settings.mobile_image.width >= 375 %}{{ section.settings.mobile_image | image_url: width: 375 }} 375w,{% endif %}
+                    {% if section.settings.mobile_image.width >= 550 %}{{ section.settings.mobile_image | image_url: width: 550 }} 550w,{% endif %}
+                    {% if section.settings.mobile_image.width >= 640 %}{{ section.settings.mobile_image | image_url: width: 640 }} 640w,{% endif %}
+                    {{ section.settings.mobile_image | image_url }} {{ section.settings.mobile_image.width }}w
+                  "
+                  sizes="100vw"
+                  src="{{ section.settings.mobile_image | image_url: width: 640 }}"
+                  alt="Offer Promo"
+                  class="imgdiv-img w-full h-full object-cover"
+                  width="{{ section.settings.mobile_image.width }}"
+                  height="{{ section.settings.mobile_image.height }}"
+                  loading="eager"
+                  decoding="async"
+                >
               </div>
             {% else %}
               <div class="w-full h-6/5 md:h-9/5 bg-black-200 flex items-center justify-center">
