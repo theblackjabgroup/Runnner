@@ -1,0 +1,109 @@
+INLINE EVENT HANDLERS FIX - SHOPIFY THEME SUBMISSION BLOCKER
+================================================================
+
+PROBLEM:
+Inline event handlers like onmouseover and onmouseout are NOT ALLOWED in Shopify themes
+because they violate Content Security Policy (CSP) and security best practices.
+
+CURRENT ISSUE IN card-product.liquid:
+-------------------------------------
+Lines 159-160 and 191-192 contain:
+```html
+onmouseout="this.style.backgroundColor='var(--button)'; this.style.color='var(--button_label)';"
+onmouseover="this.style.backgroundColor='var(--hovered_button_label)'; this.style.color='var(--hovered_button_text_color)';"
+```
+
+WHY THIS IS A BLOCKER:
+----------------------
+1. Security Risk: Inline handlers can execute malicious code
+2. CSP Violation: Content Security Policy blocks inline scripts
+3. Theme Store Policy: Shopify explicitly prohibits inline event handlers
+4. Maintenance Issues: Hard to maintain and debug
+
+SOLUTION - REPLACE WITH CSS HOVER EFFECTS:
+------------------------------------------
+
+STEP 1: Remove inline handlers from HTML
+Replace this:
+```html
+<button
+  class="notify-when-available-btn w-full py-4 font-medium cursor-pointer transition-colors duration-200 uppercase tracking-wider"
+  onmouseout="this.style.backgroundColor='var(--button)'; this.style.color='var(--button_label)';"
+  onmouseover="this.style.backgroundColor='var(--hovered_button_label)'; this.style.color='var(--hovered_button_text_color)';"
+>
+```
+
+With this:
+```html
+<button
+  class="notify-when-available-btn w-full py-4 font-medium cursor-pointer transition-colors duration-200 uppercase tracking-wider"
+>
+```
+
+STEP 2: Add CSS hover effects
+Add this CSS to the <style> section in card-product.liquid:
+
+```css
+.notify-when-available-btn {
+  background-color: var(--button);
+  color: var(--button_label);
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.notify-when-available-btn:hover {
+  background-color: var(--hovered_button_label);
+  color: var(--hovered_button_text_color);
+}
+
+.add-to-cart-btn {
+  background-color: var(--button);
+  color: var(--button_label);
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.add-to-cart-btn:hover {
+  background-color: var(--hovered_button_label);
+  color: var(--hovered_button_text_color);
+}
+```
+
+STEP 3: Apply same fix to add-to-cart button
+Replace this:
+```html
+<button
+  class="add-to-cart-btn new-add-to-cart-btn w-full py-4 z-[100] !text-[1.6rem] font-medium transition-colors duration-200 uppercase tracking-wider quick-add-button"
+  onmouseout="this.style.backgroundColor='var(--button)'; this.style.color='var(--button_label)';"
+  onmouseover="this.style.backgroundColor='var(--hovered_button_label)'; this.style.color='var(--hovered_button_text_color)';"
+>
+```
+
+With this:
+```html
+<button
+  class="add-to-cart-btn new-add-to-cart-btn w-full py-4 z-[100] !text-[1.6rem] font-medium transition-colors duration-200 uppercase tracking-wider quick-add-button"
+>
+```
+
+BENEFITS OF CSS SOLUTION:
+------------------------
+1. ✅ CSP Compliant: No inline scripts
+2. ✅ Better Performance: CSS transitions are hardware accelerated
+3. ✅ Maintainable: All styles in one place
+4. ✅ Accessible: Works with keyboard navigation
+5. ✅ Theme Store Approved: Follows Shopify best practices
+
+IMPLEMENTATION CHECKLIST:
+------------------------
+□ Remove onmouseover from notify-when-available-btn
+□ Remove onmouseout from notify-when-available-btn  
+□ Remove onmouseover from add-to-cart-btn
+□ Remove onmouseout from add-to-cart-btn
+□ Add CSS hover rules for both buttons
+□ Test hover effects work correctly
+□ Verify no console errors
+
+FILES TO MODIFY:
+----------------
+- snippets/card-product.liquid (lines 159-160, 191-192)
+
+This fix will resolve the inline event handlers blocker for Shopify theme submission.
