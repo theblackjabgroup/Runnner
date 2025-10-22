@@ -395,7 +395,6 @@ function initializeCartDrawer() {
       }
     }
   });
-
 }
 
 // Initialize when DOM is loaded

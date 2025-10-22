@@ -13,6 +13,31 @@
     --footer-hover-color: {{ section.settings.hover_color | default: '#808080' }};
     --footer-email-signup-hover-text-color: {{ section.settings.email_signup_hover_text_color | default: '#FFFFFF' }};
   }
+
+  /* Control existing underline animation direction */
+  {% if settings.hover_Animation %}
+    .animated-underline::after {
+      {% if settings.underline_animation_direction == 'right-to-left' %}
+        transform-origin: right;
+      {% else %}
+        transform-origin: left;
+      {% endif %}
+    }
+
+    .animated-underline:hover::after {
+      {% if settings.underline_animation_direction == 'left-to-right' %}
+        transform: scaleX(0);
+        transform-origin: right;
+      {% elsif settings.underline_animation_direction == 'right-to-left' %}
+        transform: scaleX(0);
+        transform-origin: left;
+      {% endif %}
+    }
+  {% else %}
+    .animated-underline::after {
+      display: none !important;
+    }
+  {% endif %}
 {% endstyle %}
 
 <footer
@@ -412,18 +437,21 @@
 </style>
 
 <script>
-  document.addEventListener('DOMContentLoaded', function() {
+  document.addEventListener('DOMContentLoaded', function () {
     const footer = document.querySelector('.footer-container');
     if (!footer) return;
 
-    const observer = new IntersectionObserver((entries) => {
-      entries.forEach((entry) => {
-        if (entry.isIntersecting) {
-          entry.target.classList.add('animate');
-          observer.unobserve(entry.target);
-        }
-      });
-    }, { threshold: 0.1 });
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('animate');
+            observer.unobserve(entry.target);
+          }
+        });
+      },
+      { threshold: 0.1 }
+    );
 
     footer.querySelectorAll('.footer-section').forEach((section) => {
       observer.observe(section);
@@ -448,7 +476,7 @@
       function isValidEmail(email) {
         return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
       }
-      form.addEventListener('submit', function(e) {
+      form.addEventListener('submit', function (e) {
         e.preventDefault();
         const email = emailInput ? emailInput.value.trim() : '';
 
