@@ -127,7 +127,7 @@
                   <div class="product-showcase-images-container relative">
                     {% if block.settings.image != blank %}
                       <img
-                        src="{{ block.settings.image | img_url: '600x672', crop: 'center' }}"
+                        src="{{ block.settings.image | image_url: width: 600, height: 672, crop: 'center' }}"
                         alt="{{ block.settings.image.alt | default: block.settings.title | default: 'Product image' }}"
                         class="showcase-product-image w-[600px] h-[672px] object-cover"
                         loading="lazy"
@@ -142,6 +142,67 @@
                         class="w-full h-full flex items-center justify-center bg-gray-200"
                       >
                         {{ 'image' | placeholder_svg_tag }}
+                      </div>
+                    {% endif %}
+
+                    {%- comment -%} Product badges {%- endcomment -%}
+                    {% if block.settings.show_sold_out_badge or block.settings.show_bestseller_badge %}
+                      <div class="product-detail-badges" role="group" aria-label="Product badges">
+                        {% if block.settings.show_sold_out_badge %}
+                          {%- liquid
+                            assign sold_out_text = block.settings.sold_out_text | default: 'SOLD OUT'
+                            assign sold_out_style = block.settings.sold_out_style | default: 'filled'
+                            assign sold_out_link = block.settings.sold_out_link
+                            if sold_out_style == 'filled'
+                              assign sold_out_class = 'product-detail-badge-filled'
+                            else
+                              assign sold_out_class = 'product-detail-badge-outline'
+                            endif
+                          -%}
+                          {% if sold_out_link != blank %}
+                            <a
+                              href="{{ sold_out_link }}"
+                              class="product-detail-badge-link"
+                              aria-label="View {{ sold_out_text }} collection"
+                            >
+                              <span class="{{ sold_out_class }}">
+                                {{ sold_out_text }}
+                              </span>
+                            </a>
+                          {% else %}
+                            <span class="{{ sold_out_class }}" role="status" aria-label="{{ sold_out_text }} badge">
+                              {{ sold_out_text }}
+                            </span>
+                          {% endif %}
+                        {% endif %}
+
+                        {% if block.settings.show_bestseller_badge %}
+                          {%- liquid
+                            assign bestseller_text = block.settings.bestseller_text | default: 'BESTSELLER'
+                            assign bestseller_style = block.settings.bestseller_style | default: 'filled'
+                            assign bestseller_link = block.settings.bestseller_link
+                            if bestseller_style == 'filled'
+                              assign bestseller_class = 'product-detail-badge-filled'
+                            else
+                              assign bestseller_class = 'product-detail-badge-outline'
+                            endif
+                          -%}
+                          {% if bestseller_link != blank %}
+                            <a
+                              href="{{ bestseller_link }}"
+                              class="product-detail-badge-link"
+                              aria-label="View {{ bestseller_text }} collection"
+                            >
+                              <span class="{{ bestseller_class }}">
+                                {{ bestseller_text }}
+                              </span>
+                            </a>
+                          {% else %}
+                            <span class="{{ bestseller_class }}" role="status" aria-label="{{ bestseller_text }} badge">
+                              {{ bestseller_text }}
+                            </span>
+                          {% endif %}
+                        {% endif %}
                       </div>
                     {% endif %}
                   </div>
@@ -609,6 +670,101 @@
   .hidden {
     display: none !important;
   }
+
+  .product-detail-badges {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    display: flex;
+    gap: 5px;
+    z-index: 10;
+    flex-wrap: wrap;
+  }
+
+  .product-detail-badge-link {
+    text-decoration: none;
+    display: inline-block;
+    transition: opacity 0.2s ease, transform 0.2s ease;
+  }
+
+  .product-detail-badge-link:hover {
+    opacity: 0.85;
+    transform: translateY(-1px);
+  }
+
+  .product-detail-badge-link:active {
+    transform: translateY(0);
+  }
+
+  .product-detail-badge-link:focus {
+    outline: 2px solid #2563eb;
+    outline-offset: 2px;
+    border-radius: var(--sold-out-badge-radius, 4px);
+  }
+
+  .product-detail-badge-filled,
+  .product-detail-badge-outline {
+    display: inline-block;
+    padding: 0 6px !important;
+    font-size: var(--t-b-3-size);
+    font-weight: var(--t-b-3-weight);
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    border-radius: var(--sold-out-badge-radius, 4px);
+    line-height: var(--t-b-3-line-height);
+    white-space: nowrap;
+    cursor: default;
+  }
+
+  .product-detail-badge-link .product-detail-badge-filled,
+  .product-detail-badge-link .product-detail-badge-outline {
+    cursor: pointer;
+  }
+
+  .product-detail-badge-filled {
+    background-color: var(--sold-out-filled-bg, #000000);
+    color: var(--sold-out-filled-text, #FFFFFF);
+    border: none;
+  }
+
+  .product-detail-badge-outline {
+    background-color: transparent;
+    color: var(--sold-out-transparent-text, #000000);
+    border: var(--sold-out-badge-border-thickness, 1px) solid var(--sold-out-transparent-border, #000000);
+  }
+
+  /* Mobile adjustments */
+  @media (max-width: 480px) {
+    .product-detail-badges {
+      top: 8px;
+      left: 8px;
+      gap: 5px;
+    }
+
+    /* Reduce hover effects on mobile for better touch experience */
+    .product-detail-badge-link:hover {
+      transform: none;
+    }
+  }
+
+  /* High contrast mode support for badge links */
+  @media (prefers-contrast: high) {
+    .product-detail-badge-link:focus {
+      outline: 3px solid;
+      outline-offset: 3px;
+    }
+  }
+
+  /* Reduce motion support */
+  @media (prefers-reduced-motion: reduce) {
+    .product-detail-badge-link {
+      transition: none;
+    }
+
+    .product-detail-badge-link:hover {
+      transform: none;
+    }
+  }
 </style>
 
 {% comment %} Scrollbar functionality provided by horizontal-scrollbar snippet {% endcomment %}
@@ -674,6 +830,86 @@
           "id": "link_url",
           "label": "Product Link",
           "info": "Link to product page or external URL"
+        },
+        {
+          "type": "header",
+          "content": "Sold Out Badge"
+        },
+        {
+          "type": "checkbox",
+          "id": "show_sold_out_badge",
+          "label": "Show Sold Out Badge",
+          "default": false
+        },
+        {
+          "type": "text",
+          "id": "sold_out_text",
+          "label": "Sold Out Badge Text",
+          "default": "SOLD OUT",
+          "info": "Customize the text displayed on the sold out badge"
+        },
+        {
+          "type": "select",
+          "id": "sold_out_style",
+          "label": "Sold Out Badge Style",
+          "options": [
+            {
+              "value": "filled",
+              "label": "Solid (Filled Background)"
+            },
+            {
+              "value": "outline",
+              "label": "Outline (Transparent Background)"
+            }
+          ],
+          "default": "filled",
+          "info": "Choose between solid or outline style. Colors are controlled by theme settings."
+        },
+        {
+          "type": "url",
+          "id": "sold_out_link",
+          "label": "Sold Out Badge Link",
+          "info": "Optional: Link to a collection or page when badge is clicked (e.g., /collections/sold-out)"
+        },
+        {
+          "type": "header",
+          "content": "Bestseller Badge"
+        },
+        {
+          "type": "checkbox",
+          "id": "show_bestseller_badge",
+          "label": "Show Bestseller Badge",
+          "default": false
+        },
+        {
+          "type": "text",
+          "id": "bestseller_text",
+          "label": "Bestseller Badge Text",
+          "default": "BESTSELLER",
+          "info": "Customize the text displayed on the bestseller badge"
+        },
+        {
+          "type": "select",
+          "id": "bestseller_style",
+          "label": "Bestseller Badge Style",
+          "options": [
+            {
+              "value": "filled",
+              "label": "Solid (Filled Background)"
+            },
+            {
+              "value": "outline",
+              "label": "Outline (Transparent Background)"
+            }
+          ],
+          "default": "filled",
+          "info": "Choose between solid or outline style. Colors are controlled by theme settings."
+        },
+        {
+          "type": "url",
+          "id": "bestseller_link",
+          "label": "Bestseller Badge Link",
+          "info": "Optional: Link to a collection or page when badge is clicked (e.g., /collections/bestsellers)"
         }
       ]
     }
