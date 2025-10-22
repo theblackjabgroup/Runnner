@@ -30,6 +30,23 @@
       <div class="absolute top-3 z-2" style="left: 10px;">
         {% render 'sold-out-badge', class: 'tracking-wide font-medium sold-out' %}
       </div>
+    {% elsif product.tags contains 'best-seller'
+      or product.tags contains 'bestseller'
+      or product.tags contains 'best seller'
+    %}
+      <div class="absolute top-3 z-2" style="left: 10px;">
+        {% render 'best-seller-badge', class: 'tracking-wide font-medium best-seller' %}
+      </div>
+    {% elsif product_available
+      and product.variants.first.inventory_quantity <= 5
+      and product.variants.first.inventory_quantity > 0
+    %}
+      <div class="absolute top-3 z-2" style="left: 10px;">
+        {% render 'low-stock-badge',
+          quantity: product.variants.first.inventory_quantity,
+          class: 'tracking-wide font-medium low-stock'
+        %}
+      </div>
     {% endunless %}
 
     <a
@@ -213,6 +230,23 @@
     position: relative;
   }
 
+  /* Badge positioning and styling */
+  .sold-out,
+  .best-seller,
+  .low-stock {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    z-index: 10;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    white-space: nowrap;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
   .new-product-details .new-product-title {
     font-size: var(--t-b-3-size);
     font-weight: var(--t-b-3-weight);
@@ -236,8 +270,9 @@
     top: 50%;
     transform: translateY(-50%);
     z-index: var(--z-content-elevated);
-    width: 44px;
-    height: 44px;
+    width: 40px;
+    height: 40px;
+    padding: 6px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -249,7 +284,7 @@
   }
 
   .new-product-image-wrapper:hover .new-image-nav-arrow {
-    opacity: 0.6;
+    opacity: 1;
   }
 
   .new-image-nav-arrow:hover {
@@ -258,13 +293,13 @@
 
   .new-product-image-wrapper:hover .new-image-nav-arrow svg {
     transition: opacity 0.5s ease;
-    opacity: 0.6;
+    opacity: 1;
   }
 
   .new-image-nav-arrow svg {
-    opacity: 0;
     width: 20px;
     height: 20px;
+    color: var(--text);
   }
 
   .new-image-nav-prev {
@@ -512,7 +547,9 @@
     animation-delay: 0.4s;
   }
 
-  .sold-out {
+  .sold-out,
+  .best-seller,
+  .low-stock {
     font-weight: var(--t-b-3-weight);
     line-height: var(--t-b-3-line-height);
     display: inline-block;
@@ -527,6 +564,7 @@
     border-radius: var(--sold-out-badge-radius, 5px);
     padding: 0px 6px;
     border: none;
+    white-space: nowrap;
   }
 
   .sold-out-badge-transparent.sold-out {
@@ -535,6 +573,45 @@
     border: var(--sold-out-badge-border-thickness, 1px) solid var(--sold-out-transparent-border, #000000);
     border-radius: var(--sold-out-badge-radius, 5px);
     padding: 0px 6px;
+    white-space: nowrap;
+  }
+
+  /* Best Seller Badge Styles */
+  .sold-out-badge-filled.best-seller {
+    background-color: var(--sold-out-filled-bg, #000000);
+    color: var(--sold-out-filled-text, #FFFFFF);
+    border-radius: var(--sold-out-badge-radius, 5px);
+    padding: 0px 6px;
+    border: none;
+    white-space: nowrap;
+  }
+
+  .sold-out-badge-transparent.best-seller {
+    background-color: transparent;
+    color: var(--sold-out-transparent-text, #000000);
+    border: var(--sold-out-badge-border-thickness, 1px) solid var(--sold-out-transparent-border, #000000);
+    border-radius: var(--sold-out-badge-radius, 5px);
+    padding: 0px 6px;
+    white-space: nowrap;
+  }
+
+  /* Low Stock Badge Styles */
+  .sold-out-badge-filled.low-stock {
+    background-color: var(--sold-out-filled-bg, #000000);
+    color: var(--sold-out-filled-text, #FFFFFF);
+    border-radius: var(--sold-out-badge-radius, 5px);
+    padding: 0px 6px;
+    border: none;
+    white-space: nowrap;
+  }
+
+  .sold-out-badge-transparent.low-stock {
+    background-color: transparent;
+    color: var(--sold-out-transparent-text, #000000);
+    border: var(--sold-out-badge-border-thickness, 1px) solid var(--sold-out-transparent-border, #000000);
+    border-radius: var(--sold-out-badge-radius, 5px);
+    padding: 0px 6px;
+    white-space: nowrap;
   }
 
   .new-product-cart-container.show-button .new-sold-out-btn[data-has-variants='true'] {
@@ -561,7 +638,9 @@
       image-rendering: crisp-edges;
       image-rendering: optimize-quality;
     }
-    .sold-out {
+    .sold-out,
+    .best-seller,
+    .low-stock {
       font-size: var(--tm-b-3-size) !important;
       line-height: var(--tm-b-3-line-height) !important;
     }

@@ -13,6 +13,31 @@
     --footer-hover-color: {{ section.settings.hover_color | default: '#808080' }};
     --footer-email-signup-hover-text-color: {{ section.settings.email_signup_hover_text_color | default: '#FFFFFF' }};
   }
+
+  /* Control existing underline animation direction */
+  {% if settings.hover_Animation %}
+    .animated-underline::after {
+      {% if settings.underline_animation_direction == 'right-to-left' %}
+        transform-origin: right;
+      {% else %}
+        transform-origin: left;
+      {% endif %}
+    }
+
+    .animated-underline:hover::after {
+      {% if settings.underline_animation_direction == 'left-to-right' %}
+        transform: scaleX(0);
+        transform-origin: right;
+      {% elsif settings.underline_animation_direction == 'right-to-left' %}
+        transform: scaleX(0);
+        transform-origin: left;
+      {% endif %}
+    }
+  {% else %}
+    .animated-underline::after {
+      display: none !important;
+    }
+  {% endif %}
 {% endstyle %}
 
 <footer
@@ -191,23 +216,32 @@
             <div class="bb-footer-main-row footer-main-row footer-container-wrapper">
               <!-- Menu Section -->
               <nav
-                class="menu-section footer-block"
+                class="menu-section custom-nav-mr-25 footer-block"
                 aria-label="Footer Navigation"
               >
-                <div class="footer-menu-container">
-                  {% for menu_block in menu_blocks %}
-                    <div class="footer-menu-column" {{ menu_block.shopify_attributes }}>
-                      {% for link in linklists[menu_block.settings.menu_links].links %}
-                        <a
-                          href="{{ link.url }}"
-                          class="footer-menu-link body-font"
-                          style="color: {{ section.settings.menu_item_color }}; line-height: 20px;"
-                        >
-                          {{- link.title -}}
-                        </a>
-                      {% endfor %}
-                    </div>
-                  {% endfor %}
+                <div class="bb-inner-footer-main-row flex flex-wrap justify-start md:justify-end footer-main-row">
+                  <div
+                    class="flex flex-row flex-wrap justify-start md:justify-end custom-gap w-full mr-[20px] md:ml-0 menu-content-wrapper"
+                    {{ block.shopify_attributes }}
+                  >
+                    {% for menu_block in menu_blocks %}
+                      <div class="menu-block" {{ menu_block.shopify_attributes }}>
+                        <div class="flex flex-col w-auto">
+                          <div class="flex flex-col space-y-1">
+                            {% for link in linklists[menu_block.settings.menu_links].links %}
+                              <a
+                                href="{{ link.url }}"
+                                class="text-[16px] body-font"
+                                style="color: {{ section.settings.menu_item_color }}; line-height: 20px;"
+                              >
+                                {{- link.title -}}
+                              </a>
+                            {% endfor %}
+                          </div>
+                        </div>
+                      </div>
+                    {% endfor %}
+                  </div>
                 </div>
 
                 <div class="mobile-social-icons" aria-labelledby="mobile-social-heading">
@@ -518,8 +552,8 @@
       "type": "range",
       "id": "padding_bottom",
       "min": 0,
-      "max": 500,
-      "step": 5,
+      "max": 100,
+      "step": 4,
       "unit": "px",
       "label": "Bottom Padding",
       "default": 40
