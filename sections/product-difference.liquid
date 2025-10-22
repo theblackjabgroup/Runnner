@@ -9,6 +9,7 @@
       min-height: 60vh;
       max-height: none;
       position: relative;
+      z-index: var(--z-base);
       padding: {{ section.settings.padding_top }}px {{ section.settings.padding_right }}px {{ section.settings.padding_bottom }}px {{ section.settings.padding_left }}px;
     }
 
@@ -88,7 +89,7 @@
       margin: 0;
       opacity: 0;
       cursor: grab;
-      z-index: var(--z-fixed);
+      z-index: var(--z-content-elevated);
     }
     .prod-diff-slider-range:active { cursor: grabbing; }
 
@@ -101,7 +102,7 @@
       background-color: {{ section.settings.divider_color | default: 'var(--text)' }};
       transform: translateX(-50%);
       pointer-events: none;
-      z-index: var(--z-dropdown);
+      z-index: var(--z-content);
     }
 
     /* --- COMMENT: The original handle style, now with a transition for the grab animation --- */
@@ -110,7 +111,7 @@
       top: 50%; left: 50%;
       transform: translate(-50%, -50%);
       pointer-events: none;
-      z-index: var(--z-sticky);
+      z-index: var(--z-content);
       transition: transform 0.2s ease;
     }
 
@@ -119,7 +120,19 @@
       transform: translate(-50%, -50%) scale(0.9);
     }
 
-    .prod-diff-slider-handle-chevron svg { transition: all 0.2s ease; }
+    .prod-diff-slider-handle-chevron svg {
+      transition: all 0.2s ease;
+      width: {{ section.settings.handle_width_desktop | default: 137 }}px;
+      height: {{ section.settings.handle_height_desktop | default: 51 }}px;
+    }
+
+    /* Responsive handle sizing for mobile */
+    @media (max-width: 768px) {
+      .prod-diff-slider-handle-chevron svg {
+        width: {{ section.settings.handle_width_mobile | default: 100 }}px;
+        height: {{ section.settings.handle_height_mobile | default: 40 }}px;
+      }
+    }
 
     /* --- COMMENT: Styles for the product info text boxes (background removed) --- */
     .prod-diff-product-info {
@@ -133,13 +146,13 @@
     .prod-diff-product-info.left {
       left: var(--space-3xl);
       text-align: left;
-      z-index: 2;
+      z-index: var(--z-content-elevated);
       clip-path: inset(0 30% 0 0);
     }
     .prod-diff-product-info.right {
       right: var(--space-3xl);
       text-align: right;
-      z-index: 1;
+      z-index: var(--z-content);
     }
 
     /* --- COMMENT: Mobile responsive styles for product info --- */
@@ -661,6 +674,50 @@
       "label": "Slider Handle Color",
       "default": "#000000",
       "info": "Color of the slider handle (chevron/arrows)"
+    },
+    {
+      "type": "range",
+      "id": "handle_width_desktop",
+      "min": 80,
+      "max": 200,
+      "step": 5,
+      "unit": "px",
+      "label": "Handle Width (Desktop)",
+      "default": 135,
+      "info": "Width of the slider handle on desktop screens"
+    },
+    {
+      "type": "range",
+      "id": "handle_height_desktop",
+      "min": 30,
+      "max": 100,
+      "step": 5,
+      "unit": "px",
+      "label": "Handle Height (Desktop)",
+      "default": 50,
+      "info": "Height of the slider handle on desktop screens"
+    },
+    {
+      "type": "range",
+      "id": "handle_width_mobile",
+      "min": 60,
+      "max": 150,
+      "step": 5,
+      "unit": "px",
+      "label": "Handle Width (Mobile)",
+      "default": 100,
+      "info": "Width of the slider handle on mobile screens"
+    },
+    {
+      "type": "range",
+      "id": "handle_height_mobile",
+      "min": 25,
+      "max": 80,
+      "step": 5,
+      "unit": "px",
+      "label": "Handle Height (Mobile)",
+      "default": 40,
+      "info": "Height of the slider handle on mobile screens"
     },
     {
       "type": "header",
