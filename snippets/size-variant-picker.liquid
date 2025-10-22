@@ -2,7 +2,7 @@
   Unified Variant Picker Snippet
   Handles any non-color variant option (Size, Denomination, Material, Type, etc.)
   Works for both mobile and desktop with responsive styling
-  Usage: {% render 'size-variant-picker', product: product, mobile: true/false, show_label: true/false, size_only: true/false %}
+  Usage: {% render 'size-variant-picker', product: product, mobile: true/false, show_label: true/false, size_only: true/false, buttons_only: true/false %}
 {% endcomment %}
 
 {%- liquid
@@ -34,7 +34,52 @@
 -%}
 
 {% if variant_option %}
-  {% if mobile %}
+  {% if buttons_only %}
+    <!-- Buttons Only (for product cards) -->
+    {% for value in variant_option.values %}
+      {% assign variant_available = false %}
+      {% assign variant_id = null %}
+      {% assign value_normalized = value | strip %}
+      {% for variant in product.variants %}
+        {% assign option_key = 'option' | append: variant_option_index %}
+        {% assign variant_option_value = variant[option_key] | strip %}
+        {% if variant_option_value == value_normalized %}
+          {% if variant.available %}
+            {% assign variant_available = true %}
+            {% assign variant_id = variant.id %}
+            {% break %}
+          {% endif %}
+        {% endif %}
+      {% endfor %}
+      <button
+        type="button"
+        class="
+          size-btn relative px-3 h-10 min-w-[2.5rem] flex items-center justify-center border-transparent border
+          {% if forloop.first and variant_available %}bg-black text-white active{% endif %}
+          {% unless variant_available %}cursor-not-allowed unavailable-size{% endunless %}
+        "
+        data-desktop="true"
+        data-option-index="{{ variant_option_index }}"
+        data-option-key="{{ option_key }}"
+        data-value="{{ value | escape }}"
+        data-variant-available="{{ variant_available }}"
+        data-total-variants="{{ product.variants.size }}"
+        style="--animation-order: {{ forloop.index0 }};"
+        {% if variant_available %}
+          data-variant-id="{{ variant_id }}"
+          {% if forloop.first %}data-default-selected="true"{% endif %}
+        {% else %}
+          disabled aria-disabled="true"
+        {% endif %}
+        aria-label="{{ variant_option.name }} {{ value }}{% unless variant_available %} - Sold out{% endunless %}"
+      >
+        <span class="label">{{ value }}</span>
+        {% unless variant_available %}
+          <span class="slash-unavailable"></span>
+        {% endunless %}
+      </button>
+    {% endfor %}
+  {% elsif mobile %}
     <!-- Mobile Version -->
     <fieldset class="flex justify-between items-center gap-2" style="padding: 10px 0 0 0;" role="group">
       <legend style="font-size: var(--tm-b-4-size); line-height: var(--tm-b-4-line-height);">

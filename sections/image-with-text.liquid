@@ -1,5 +1,4 @@
 {%- style -%}
-
     /* Heading size based on selection */
     {% if section.settings.heading_size == 'small' %}
       @media screen and (max-width: 750px){
@@ -113,11 +112,11 @@
     {% if section.settings.enable_heading_background %}
       /* Base styles for heading container: Set the look */
       .image-with-text-heading {
-        font-weight: bold; 
-        text-transform: uppercase; 
+        font-weight: bold;
+        text-transform: uppercase;
         line-height: 1.2;
       }
-      
+
       /* Class to apply the inline background/padding wrap */
       .heading-background-block-style {
         display: inline; /* CRITICAL: Allows background to wrap lines */
@@ -126,13 +125,13 @@
         background-size: 100% 100%;
         background-origin: border-box;
         -webkit-box-decoration-break: clone;
-        box-decoration-break: clone; 
+        box-decoration-break: clone;
         color: inherit !important; /* Inherit color from parent h2 */
       }
 
       /* Ensure the inner animation container respects the inline display */
       .image-with-text-heading > .image-with-text-letter-animation-container.animation-ready {
-          display: inline; 
+          display: inline;
       }
 
     {% endif %}
@@ -193,13 +192,13 @@
       overflow-wrap: break-word;
       line-height: 1.2; /* Allow wrapping between words */
     }
-    
+
     /* Make heading flush with edges when positioned at left or right */
     {% if section.settings.horizontal_position == 'flex-start' or section.settings.horizontal_position == 'flex-end' %}
       .image-with-text-heading {
         margin-left: -{{ section.settings.content_padding }}px;
       }
-      
+
       @media screen and (max-width: 749px) {
         .image-with-text-heading {
           margin-left: -{{ section.settings.content_padding_mobile | plus: 10 }}px;
@@ -399,7 +398,7 @@
         {% when 'space-between' %}align-items: space-between;
         {% else %}align-items: center;
       {% endcase %}
-      z-index: 3;
+      z-index: 10;
     }
 
     @media (max-width: 749px) {
@@ -561,7 +560,7 @@
       height: 100%;
       width: 100%;
       opacity: {% if section.settings.enable_overlay_animation %}1{% else %}0{% endif %};
-      z-index: 2;
+      z-index: 5;
       /* pointer-events: none; */
       transition: opacity {{ section.settings.overlay_duration | default: 1 }}s ease-out;
       display: {% if section.settings.enable_overlay_animation %}block{% else %}none{% endif %} !important;
@@ -579,7 +578,7 @@
     min-height: 100%;
     display: block;
     position: relative;
-    z-index: 1;
+    z-index: 0;
     overflow: hidden;
     background: #000;
   }
@@ -605,206 +604,195 @@
   .remove_button_svg .primary-slide-button-arrow{
     display: none !important;
   }
-
 {%- endstyle -%}
 
 {% assign section_classes = '' %}
-  {% if section.settings.color_scheme %}
-    {% assign section_classes = section_classes | append: ' color-' | append: section.settings.color_scheme %}
-    {% unless section.settings.color_scheme == '1' %}
-      {% assign section_classes = section_classes | append: ' invert-arrow' %}
-    {% endunless %}
-  {% endif %}
-  <section
-    id="ImageWithText-{{ section.id }}"
-    class="image-with-text-media-section-{{ section.id }} relative w-full overflow-hidden image-with-text-section-{{ section.id }}-padding{{ section_classes }}"
-    role="region"
-    aria-label="Image with text section"
-  >
-    <div class="image-with-text-media-container-{{ section.id }}">
-      {% if section.settings.image != blank or section.settings.image_mobile != blank %}
-        <div
-          class="image-with-text-iframe"
-          role="img"
-          aria-label="{{ section.settings.image.alt | default: section.settings.image_mobile.alt | escape | default: 'Background image' }}"
-        >
-          <picture>
-            {% if section.settings.image_mobile != blank %}
-              <source
-                media="(max-width: 750px)"
-                srcset="
-                  {% if section.settings.image_mobile.width >= 375 %}{{ section.settings.image_mobile | image_url: width: 375 }} 375w,{% endif %}
-                  {% if section.settings.image_mobile.width >= 550 %}{{ section.settings.image_mobile | image_url: width: 550 }} 550w,{% endif %}
-                  {% if section.settings.image_mobile.width >= 750 %}{{ section.settings.image_mobile | image_url: width: 750 }} 750w,{% endif %}
-                  {{ section.settings.image_mobile | image_url }} {{ section.settings.image_mobile.width }}w
-                "
-                sizes="100vw"
-              >
-            {% endif %}
-            
-            {% assign desktop_image = section.settings.image | default: section.settings.image_mobile %}
-            <img
-              srcset="
-                {% if desktop_image.width >= 750 %}{{ desktop_image | image_url: width: 750 }} 750w,{% endif %}
-                {% if desktop_image.width >= 1100 %}{{ desktop_image | image_url: width: 1100 }} 1100w,{% endif %}
-                {% if desktop_image.width >= 1500 %}{{ desktop_image | image_url: width: 1500 }} 1500w,{% endif %}
-                {% if desktop_image.width >= 2200 %}{{ desktop_image | image_url: width: 2200 }} 2200w,{% endif %}
-                {{ desktop_image | image_url }} {{ desktop_image.width }}w
-              "
-              sizes="100vw"
-              height="auto"
-              width="auto"
-              src="{{ desktop_image | image_url: width: 1500 }}"
-              alt="{{ desktop_image.alt | escape | default: 'Background image' }}"
-              class="w-full h-full object-cover"
-              loading="lazy"
-              style="width: 100%; height: 100%; min-height: 100%; display: block; position: relative; z-index: 1;"
-            >
-          </picture>
-        </div>
-      {% else %}
-        <div
-          class="flex bg-gray-400 items-center justify-center w-full h-full"
-          role="img"
-          aria-label="Placeholder image"
-        >
-          {{ 'lifestyle-2' | placeholder_svg_tag: 'w-auto h-auto opacity-30' }}
-        </div>
-      {% endif %}
-      {% if section.settings.enable_overlay_animation %}
-        <div class="image-with-text-media-overlay-{{ section.id }}"></div>
-      {% endif %}
-    </div>
-    <div class="absolute inset-0 image-with-text-text-content-wrapper-{{ section.id }}" style="z-index:3;">
+{% if section.settings.color_scheme %}
+  {% assign section_classes = section_classes | append: ' color-' | append: section.settings.color_scheme %}
+  {% unless section.settings.color_scheme == '1' %}
+    {% assign section_classes = section_classes | append: ' invert-arrow' %}
+  {% endunless %}
+{% endif %}
+<section
+  id="ImageWithText-{{ section.id }}"
+  class="image-with-text-media-section-{{ section.id }} relative w-full overflow-hidden image-with-text-section-{{ section.id }}-padding{{ section_classes }}"
+  role="region"
+  aria-label="Image with text section"
+  style="z-index: 0;"
+>
+  <div class="image-with-text-media-container-{{ section.id }}">
+    {% if section.settings.image != blank %}
       <div
-        class="
-          image-with-text-text-content-container-{{ section.id }}
-          {% if section.settings.text_alignment == 'center' %}text-center{% elsif section.settings.text_alignment == 'right' %}text-right{% else %}text-left{% endif %}
-        "
+        class="image-with-text-iframe"
+        role="img"
+        aria-label="{{ section.settings.image.alt | escape | default: 'Background image' }}"
       >
-        <div class="content-wrapper-flex content-flex-{{ section.settings.vertical_content_position }}">
-          {% for block in section.blocks %}
-            {% case block.type %}
-              {% when 'heading' %}
-                {% assign heading_classes = 'image-with-text-heading mb-4' %}
+        <img
+          srcset="
+            {% if section.settings.image.width >= 375 %}{{ section.settings.image | image_url: width: 375 }} 375w,{% endif %}
+            {% if section.settings.image.width >= 550 %}{{ section.settings.image | image_url: width: 550 }} 550w,{% endif %}
+            {% if section.settings.image.width >= 750 %}{{ section.settings.image | image_url: width: 750 }} 750w,{% endif %}
+            {% if section.settings.image.width >= 1100 %}{{ section.settings.image | image_url: width: 1100 }} 1100w,{% endif %}
+            {% if section.settings.image.width >= 1500 %}{{ section.settings.image | image_url: width: 1500 }} 1500w,{% endif %}
+            {% if section.settings.image.width >= 2200 %}{{ section.settings.image | image_url: width: 2200 }} 2200w,{% endif %}
+            {{ section.settings.image | image_url }} {{ section.settings.image.width }}w
+          "
+          sizes="100vw"
+          height="auto"
+          width="auto"
+          src="{{ section.settings.image | image_url: width: 1500 }}"
+          alt="{{ section.settings.image.alt | escape | default: 'Background image' }}"
+          class="w-full h-full object-cover"
+          loading="lazy"
+          style="width: 100%; height: 100%; min-height: 100%; display: block; position: relative; z-index: 0;"
+        >
+      </div>
+    {% else %}
+      <div
+        class="flex bg-gray-400 items-center justify-center w-full h-full"
+        role="img"
+        aria-label="Placeholder image"
+      >
+        {{ 'lifestyle-2' | placeholder_svg_tag: 'w-auto h-auto opacity-30' }}
+      </div>
+    {% endif %}
+    {% if section.settings.enable_overlay_animation %}
+      <div class="image-with-text-media-overlay-{{ section.id }}"></div>
+    {% endif %}
+  </div>
+  <div class="absolute inset-0 image-with-text-text-content-wrapper-{{ section.id }}" style="z-index:10;">
+    <div
+      class="
+        image-with-text-text-content-container-{{ section.id }}
+        {% if section.settings.text_alignment == 'center' %}text-center{% elsif section.settings.text_alignment == 'right' %}text-right{% else %}text-left{% endif %}
+      "
+    >
+      <div class="content-wrapper-flex content-flex-{{ section.settings.vertical_content_position }}">
+        {% for block in section.blocks %}
+          {% case block.type %}
+            {% when 'heading' %}
+              {% assign heading_classes = 'image-with-text-heading mb-4' %}
+              {% if section.settings.enable_text_animation %}
+                {% assign heading_classes = heading_classes | append: ' image-with-text-letter-animation' %}
+              {% endif %}
+
+              {% assign inline_styles = 'font-weight: var(--t-h-2-weight); margin-bottom: 20px; font-style: var(--font-heading-style); font-family: var(--font-heading-family); font-size: var(--t-h-2-size); line-height: var(--t-h-2-line-height); color: '
+                | append: block.settings.text_color
+                | append: ';'
+              %}
+
+              <h2
+                id="Heading-{{ section.id }}-{{ forloop.index }}"
+                class="{{ heading_classes }}"
+                style="{{ inline_styles }}"
+              >
+                {% if section.settings.enable_heading_background %}
+                  <span class="heading-background-block-style">
+                    {{ block.settings.heading | replace: '||', '<br>' }}
+                  </span>
+                {% else %}
+                  {{ block.settings.heading | replace: '||', '<br>' }}
+                {% endif %}
+              </h2>
+            {% when 'date' %}
+              <div
+                id="TextContent-{{ section.id }}-{{ forloop.index }}"
+                class="image-with-text-date mb-3 {% if section.settings.enable_text_animation %}date-animation{% endif %}"
+                style="color: {{ block.settings.text_color }}; font-weight: {{ block.settings.font_weight }}; font-style: var(--font-subheading-style); font-family: var(--font-subheading-family);"
+              >
+                {{ block.settings.date }}
+              </div>
+            {% when 'text' %}
+              <div
+                id="TextContent-{{ section.id }}-{{ forloop.index }}"
+                class="image-with-text-text-content mb-6 {% if section.settings.enable_text_animation %}text-animation{% endif %}"
+                style="color: {{ block.settings.text_color }}; font-weight: {{ block.settings.font_weight }}; font-style: var(--font-body-style); font-family: var(--font-body-family);"
+              >
                 {% if section.settings.enable_text_animation %}
-                  {% assign heading_classes = heading_classes | append: ' image-with-text-letter-animation' %}
+                  {{ block.settings.text | replace: '<p>', '<p class="image-with-text-letter-animation">' }}
+                {% else %}
+                  {{ block.settings.text }}
+                {% endif %}
+              </div>
+            {% when 'dual_headings' %}
+              <div class="dual-heading-container">
+                {% if block.settings.top_heading != blank %}
+                  {% assign top_heading_class = '' %}
+                  {% if block.settings.top_heading_size == 'small' %}
+                    {% assign top_heading_class = 'image-with-text-heading-size-small' %}
+                  {% elsif block.settings.top_heading_size == 'medium' %}
+                    {% assign top_heading_class = 'image-with-text-heading-size-medium' %}
+                  {% elsif block.settings.top_heading_size == 'large' %}
+                    {% assign top_heading_class = 'image-with-text-heading-size-large' %}
+                  {% endif %}
+
+                  <div class="dual-heading-top {% if block.settings.top_alignment == 'center' %}text-center{% elsif block.settings.top_alignment == 'right' %}text-right{% else %}text-left{% endif %}">
+                    <h2
+                      id="TopHeading-{{ section.id }}-{{ forloop.index }}"
+                      class="image-with-text-heading {{ top_heading_class }} {% if section.settings.enable_text_animation %}image-with-text-letter-animation{% endif %}"
+                      style="color:{{ block.settings.top_text_color }}; font-weight: {{ block.settings.top_font_weight }}; font-style: var(--font-subheading-style); font-family: var(--font-subheading-family);"
+                    >
+                      {{ block.settings.top_heading }}
+                    </h2>
+                  </div>
                 {% endif %}
 
-                {% assign inline_styles = 'font-weight: var(--t-h-2-weight); margin-bottom: 20px; font-style: var(--font-heading-style); font-family: var(--font-heading-family); font-size: var(--t-h-2-size); line-height: var(--t-h-2-line-height); color: ' | append: block.settings.text_color | append: ';' %}
-
-                <h2
-                  id="Heading-{{ section.id }}-{{ forloop.index }}"
-                  class="{{ heading_classes }}"
-                  style="{{ inline_styles }}"
-                >
-                  {% if section.settings.enable_heading_background %}
-                    <span class="heading-background-block-style">
-                      {{ block.settings.heading | replace: '||', '<br>' }}
-                    </span>
-                  {% else %}
-                    {{ block.settings.heading | replace: '||', '<br>' }}
-                  {% endif %}
-                </h2>
-              {% when 'date' %}
-                <div
-                  id="TextContent-{{ section.id }}-{{ forloop.index }}"
-                  class="image-with-text-date mb-3 {% if section.settings.enable_text_animation %}date-animation{% endif %}"
-                  style="color: {{ block.settings.text_color }}; font-weight: {{ block.settings.font_weight }}; font-style: var(--font-subheading-style); font-family: var(--font-subheading-family);"
-                >
-                  {{ block.settings.date }}
-                </div>
-              {% when 'text' %}
-                <div
-                  id="TextContent-{{ section.id }}-{{ forloop.index }}"
-                  class="image-with-text-text-content mb-6 {% if section.settings.enable_text_animation %}text-animation{% endif %}"
-                  style="color: {{ block.settings.text_color }}; font-weight: {{ block.settings.font_weight }}; font-style: var(--font-body-style); font-family: var(--font-body-family);"
-                >
-                  {% if section.settings.enable_text_animation %}
-                    {{ block.settings.text | replace: '<p>', '<p class="image-with-text-letter-animation">' }}
-                  {% else %}
-                    {{ block.settings.text }}
-                  {% endif %}
-                </div>
-              {% when 'dual_headings' %}
-                <div class="dual-heading-container">
-                  {% if block.settings.top_heading != blank %}
-                    {% assign top_heading_class = '' %}
-                    {% if block.settings.top_heading_size == 'small' %}
-                      {% assign top_heading_class = 'image-with-text-heading-size-small' %}
-                    {% elsif block.settings.top_heading_size == 'medium' %}
-                      {% assign top_heading_class = 'image-with-text-heading-size-medium' %}
-                    {% elsif block.settings.top_heading_size == 'large' %}
-                      {% assign top_heading_class = 'image-with-text-heading-size-large' %}
-                    {% endif %}
-
-                    <div class="dual-heading-top {% if block.settings.top_alignment == 'center' %}text-center{% elsif block.settings.top_alignment == 'right' %}text-right{% else %}text-left{% endif %}">
-                      <h2
-                        id="TopHeading-{{ section.id }}-{{ forloop.index }}"
-                        class="image-with-text-heading {{ top_heading_class }} {% if section.settings.enable_text_animation %}image-with-text-letter-animation{% endif %}"
-                        style="color:{{ block.settings.top_text_color }}; font-weight: {{ block.settings.top_font_weight }}; font-style: var(--font-subheading-style); font-family: var(--font-subheading-family);"
-                      >
-                        {{ block.settings.top_heading }}
-                      </h2>
-                    </div>
+                {% if block.settings.bottom_heading != blank %}
+                  {% assign bottom_heading_class = '' %}
+                  {% if block.settings.bottom_heading_size == 'small' %}
+                    {% assign bottom_heading_class = 'image-with-text-heading-size-small' %}
+                  {% elsif block.settings.bottom_heading_size == 'medium' %}
+                    {% assign bottom_heading_class = 'image-with-text-heading-size-medium' %}
+                  {% elsif block.settings.bottom_heading_size == 'large' %}
+                    {% assign bottom_heading_class = 'image-with-text-heading-size-large' %}
                   {% endif %}
 
-                  {% if block.settings.bottom_heading != blank %}
-                    {% assign bottom_heading_class = '' %}
-                    {% if block.settings.bottom_heading_size == 'small' %}
-                      {% assign bottom_heading_class = 'image-with-text-heading-size-small' %}
-                    {% elsif block.settings.bottom_heading_size == 'medium' %}
-                      {% assign bottom_heading_class = 'image-with-text-heading-size-medium' %}
-                    {% elsif block.settings.bottom_heading_size == 'large' %}
-                      {% assign bottom_heading_class = 'image-with-text-heading-size-large' %}
-                    {% endif %}
-
-                    <div class="dual-heading-bottom {% if block.settings.bottom_alignment == 'center' %}text-center{% elsif block.settings.bottom_alignment == 'right' %}text-right{% else %}text-left{% endif %}">
-                      <h2
-                        id="BottomHeading-{{ section.id }}-{{ forloop.index }}"
-                        class="image-with-text-heading {{ bottom_heading_class }} {% if section.settings.enable_text_animation %}image-with-text-letter-animation{% endif %}"
-                        style="color:{{ block.settings.bottom_text_color }}; font-weight: {{ block.settings.bottom_font_weight }}; font-style: var(--font-subheading-style); font-family: var(--font-subheading-family);"
-                      >
-                        {{ block.settings.bottom_heading }}
-                      </h2>
-                    </div>
-                  {% endif %}
-                </div>
-              {% when 'button' %}
-                <div class="image-with-text-button-container color-{{ section.settings.color_scheme }} {% if section.settings.text_alignment == 'center' %}text-center{% elsif section.settings.text_alignment == 'right' %}text-right{% else %}text-left{% endif %} {% if section.settings.enable_button_animation %}button-animation{% endif %}">
-                  {% if block.settings.show_button_arrow == false %}
-                    {% render 'primary-button',
-                      button_text: block.settings.button_label,
-                      button_url: block.settings.button_link,
-                      button_font_size: 'var(--t-b-1-size)',
-                      font_weight: 'var(--t-b-1-weight)',
-                      button_line_height: 'var(--t-b-1-line-height)',
-                      mobile_font_size: 'var(--tm-b-2-size)',
-                      mobile_font_weight: 'var(--t-b-2-weight)',
-                      mobile_line_height: 'var(--tm-b-2-line-height)',
-                      primary_class: 'remove_button_svg',
-                      enable_border: block.settings.enable_button_border
-                    %}
-                  {% else %}
-                    {% render 'primary-button',
-                      button_text: block.settings.button_label,
-                      button_url: block.settings.button_link,
-                      button_font_size: 'var(--t-b-1-size)',
-                      font_weight: 'var(--t-b-1-weight)',
-                      button_line_height: 'var(--t-b-1-line-height)',
-                      mobile_font_size: 'var(--tm-b-2-size)',
-                      mobile_font_weight: 'var(--t-b-2-weight)',
-                      mobile_line_height: 'var(--tm-b-2-line-height)',
-                      enable_border: block.settings.enable_button_border
-                    %}
-                  {% endif %}
-                </div>
-            {% endcase %}
-          {% endfor %}
-        </div>
+                  <div class="dual-heading-bottom {% if block.settings.bottom_alignment == 'center' %}text-center{% elsif block.settings.bottom_alignment == 'right' %}text-right{% else %}text-left{% endif %}">
+                    <h2
+                      id="BottomHeading-{{ section.id }}-{{ forloop.index }}"
+                      class="image-with-text-heading {{ bottom_heading_class }} {% if section.settings.enable_text_animation %}image-with-text-letter-animation{% endif %}"
+                      style="color:{{ block.settings.bottom_text_color }}; font-weight: {{ block.settings.bottom_font_weight }}; font-style: var(--font-subheading-style); font-family: var(--font-subheading-family);"
+                    >
+                      {{ block.settings.bottom_heading }}
+                    </h2>
+                  </div>
+                {% endif %}
+              </div>
+            {% when 'button' %}
+              <div class="image-with-text-button-container color-{{ section.settings.color_scheme }} {% if section.settings.text_alignment == 'center' %}text-center{% elsif section.settings.text_alignment == 'right' %}text-right{% else %}text-left{% endif %} {% if section.settings.enable_button_animation %}button-animation{% endif %}">
+                {% if block.settings.show_button_arrow == false %}
+                  {% render 'primary-button',
+                    button_text: block.settings.button_label,
+                    button_url: block.settings.button_link,
+                    button_font_size: 'var(--t-b-1-size)',
+                    font_weight: 'var(--t-b-1-weight)',
+                    button_line_height: 'var(--t-b-1-line-height)',
+                    mobile_font_size: 'var(--tm-b-2-size)',
+                    mobile_font_weight: 'var(--t-b-2-weight)',
+                    mobile_line_height: 'var(--tm-b-2-line-height)',
+                    primary_class: 'remove_button_svg',
+                    enable_border: block.settings.enable_button_border
+                  %}
+                {% else %}
+                  {% render 'primary-button',
+                    button_text: block.settings.button_label,
+                    button_url: block.settings.button_link,
+                    button_font_size: 'var(--t-b-1-size)',
+                    font_weight: 'var(--t-b-1-weight)',
+                    button_line_height: 'var(--t-b-1-line-height)',
+                    mobile_font_size: 'var(--tm-b-2-size)',
+                    mobile_font_weight: 'var(--t-b-2-weight)',
+                    mobile_line_height: 'var(--tm-b-2-line-height)',
+                    enable_border: block.settings.enable_button_border
+                  %}
+                {% endif %}
+              </div>
+          {% endcase %}
+        {% endfor %}
       </div>
     </div>
-  </section>
+  </div>
+</section>
 
 <script>
 
@@ -1130,7 +1118,6 @@ button.addEventListener('keydown', function(event) {
 });
 });
 });
-
 </script>
 
 {% schema %}
@@ -1153,14 +1140,7 @@ button.addEventListener('keydown', function(event) {
     {
       "type": "image_picker",
       "id": "image",
-      "label": "Desktop Image",
-      "info": "Image shown on desktop and tablet screens (751px and wider)"
-    },
-    {
-      "type": "image_picker",
-      "id": "image_mobile",
-      "label": "Mobile Image",
-      "info": "Image shown on mobile screens (750px and below). Falls back to desktop image if not set."
+      "label": "Image"
     },
     {
       "type": "header",

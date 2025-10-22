@@ -3,58 +3,93 @@
 
   Accepts:
     - localPosition: pass in the position in which the form is coming up to create specific IDs
+    - dropdown_icon: optional custom dropdown icon image
 {%- endcomment -%}
 
-<div class="disclosure">
+{%- liquid
+  assign icon_to_use = dropdown_icon
+  if icon_to_use == blank and section.settings.dropdown_icon != blank
+    assign icon_to_use = section.settings.dropdown_icon
+  endif
+-%}
+
+<div class="disclosure group relative lg:!inline-block" style="background: var(--header_background);">
   <button
     type="button"
-    class="disclosure__button bb-localization-form__select localization-form__select localization-selector link link--text caption-large"
+    class="disclosure__button bb-localization-form__select localization-form__select"
     aria-expanded="false"
     aria-controls="{{ localPosition }}List"
     aria-describedby="{{ localPosition }}Label"
   >
-    <span>{{ localization.language.endonym_name | upcase }}</span>
-    <svg
-    width="41"
-    height="20"
-    viewBox="0 0 41 20"
-    fill="none"
-    xmlns="http://www.w3.org/2000/svg"
-    class="w-5 h-5 object-contain transition-transform duration-300 group-hover:rotate-180 mx-1"
-    style="color: var(--header_text);"
-    stroke="currentColor"
-  >
-    <path d="M20.3119 19.7659C20.7254 19.7298 21.1168 19.5625 21.4298 19.2881L39.5626 3.50455C39.7667 3.3376 39.9354 3.131 40.0586 2.89707C40.1818 2.66313 40.2569 2.40663 40.2795 2.14286C40.3022 1.87909 40.2718 1.61342 40.1903 1.3617C40.1088 1.10998 39.9778 0.877357 39.805 0.677661C39.6323 0.477966 39.4215 0.315286 39.185 0.199328C38.9485 0.0833695 38.6912 0.0164912 38.4285 0.0026841C38.1658 -0.011123 37.9031 0.0284416 37.6559 0.118979C37.4087 0.209515 37.1821 0.349193 36.9897 0.529697L20.1434 15.1881L3.29712 0.529697C3.10468 0.349193 2.87811 0.209515 2.63091 0.118979C2.38372 0.0284416 2.12095 -0.011123 1.85825 0.0026841C1.59555 0.0164912 1.3383 0.0833695 1.10182 0.199328C0.865337 0.315286 0.654461 0.477966 0.481748 0.677661C0.309036 0.877357 0.17802 1.10998 0.0965041 1.3617C0.0149883 1.61342 -0.0153602 1.87909 0.00726535 2.14286C0.0298909 2.40663 0.105028 2.66313 0.228202 2.89707C0.351376 3.131 0.520068 3.3376 0.72423 3.50455L18.8569 19.2881C19.0552 19.4619 19.2862 19.5937 19.5362 19.6758C19.7861 19.7579 20.0499 19.7885 20.3119 19.7659Z" fill="currentColor"/>
-  </svg>
+  <div class="inline-flex items-center cursor-pointer gap-0.5" style="gap: 5px;">
+    <span class="language-icon">
+      <svg
+        width="20"
+        height="20"
+        viewBox="0 0 24 24"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+        style="color: var(--header_text);"
+      >
+        <path d="M12.87 15.07l-2.54-2.51.03-.03c1.74-1.94 2.98-4.17 3.71-6.53H17V4h-7V2H8v2H1v1.99h11.17C11.5 7.92 10.44 9.75 9 11.35 8.07 10.32 7.3 9.19 6.69 8h-2c.73 1.63 1.73 3.17 2.98 4.56l-5.09 5.02L4 19l5-5 3.11 3.11.76-2.04zM18.5 10h-2L12 22h2l1.12-3h4.75L21 22h2l-4.5-12zm-2.62 7l1.62-4.33L19.12 17h-3.24z" fill="currentColor"/>
+      </svg>
+    </span>
+    <span class="bb-language-text">
+      {{ localization.language.endonym_name | upcase }}
+    </span>
+    {% if icon_to_use != blank %}
+      <img
+        src="{{ icon_to_use | image_url }}"
+        alt="Dropdown Icon"
+        class="w-12 h-6 object-contain transition-transform duration-300 group-hover:-rotate-90"
+        width="100%"
+        height="auto"
+        aria-hidden="true"
+      >
+    {% else %}
+      <svg
+        width="41"
+        height="20"
+        viewBox="0 0 41 20"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+        class="dropdown-arrow w-5 h-5 object-contain transition-transform duration-300 mx-1"
+        style="color: var(--header_text);"
+        stroke="currentColor"
+      >
+        <path d="M20.3119 19.7659C20.7254 19.7298 21.1168 19.5625 21.4298 19.2881L39.5626 3.50455C39.7667 3.3376 39.9354 3.131 40.0586 2.89707C40.1818 2.66313 40.2569 2.40663 40.2795 2.14286C40.3022 1.87909 40.2718 1.61342 40.1903 1.3617C40.1088 1.10998 39.9778 0.877357 39.805 0.677661C39.6323 0.477966 39.4215 0.315286 39.185 0.199328C38.9485 0.0833695 38.6912 0.0164912 38.4285 0.0026841C38.1658 -0.011123 37.9031 0.0284416 37.6559 0.118979C37.4087 0.209515 37.1821 0.349193 36.9897 0.529697L20.1434 15.1881L3.29712 0.529697C3.10468 0.349193 2.87811 0.209515 2.63091 0.118979C2.38372 0.0284416 2.12095 -0.011123 1.85825 0.0026841C1.59555 0.0164912 1.3383 0.0833695 1.10182 0.199328C0.865337 0.315286 0.654461 0.477966 0.481748 0.677661C0.309036 0.877357 0.17802 1.10998 0.0965041 1.3617C0.0149883 1.61342 -0.0153602 1.87909 0.00726535 2.14286C0.0298909 2.40663 0.105028 2.66313 0.228202 2.89707C0.351376 3.131 0.520068 3.3376 0.72423 3.50455L18.8569 19.2881C19.0552 19.4619 19.2862 19.5937 19.5362 19.6758C19.7861 19.7579 20.0499 19.7885 20.3119 19.7659Z" fill="currentColor"/>
+      </svg>
+    {% endif %}
+  </div>
   </button>
   <div class="disclosure__list-wrapper language-selector" hidden>
-    <ul id="{{ localPosition }}List" role="list" class="disclosure__list list-unstyled">
-      {%- for language in localization.available_languages -%}
-        <li class="disclosure__item" tabindex="-1">
-          <a
-            class="link link--text disclosure__link caption-large focus-inset"
-            href="#"
-            hreflang="{{ language.iso_code }}"
-            lang="{{ language.iso_code }}"
-            {% if language.iso_code == localization.language.iso_code %}
-              aria-current="true"
-            {% endif %}
-            data-value="{{ language.iso_code }}"
-          >
-            <span
-              {% if language.iso_code != localization.language.iso_code %}
-                class="visibility-hidden"
+    <div
+      class="bb-disclosure__list disclosure__list language-selector__list"
+      id="{{ localPosition }}List"
+    >
+      <ul role="list" class="overflow-y-auto divide-y divide-gray-100" style="max-height: 500px; max-width: 400px;">
+        {%- for language in localization.available_languages -%}
+          <li>
+            <a
+              class="w-full flex items-center justify-between px-4 py-2 text-3xl hover:bg-gray-300"
+              href="#"
+              hreflang="{{ language.iso_code }}"
+              lang="{{ language.iso_code }}"
+              {% if language.iso_code == localization.language.iso_code %}
+                aria-current="true"
               {% endif %}
+              data-value="{{ language.iso_code }}"
             >
-              {{- 'icon-checkmark.svg' | inline_asset_content -}}
-            </span>
-            <span>
-              {{ language.endonym_name | capitalize }}
-            </span>
-          </a>
-        </li>
-      {%- endfor -%}
-    </ul>
+              <span class="mx-2">{{ language.endonym_name | capitalize }}</span>
+              <span class="font-medium">
+                {{ language.iso_code | upcase }}
+              </span>
+            </a>
+          </li>
+        {%- endfor -%}
+      </ul>
+    </div>
   </div>
+  <div class="language-selector__overlay"></div>
 </div>
 <input type="hidden" name="locale_code" value="{{ localization.language.iso_code }}">
