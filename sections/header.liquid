@@ -1,5 +1,9 @@
 {{ 'header-currency.css' | asset_url | stylesheet_tag }}
 {{ 'header.css' | asset_url | stylesheet_tag }}
+{{ 'component-localization-form.css' | asset_url | stylesheet_tag }}
+
+<script src="{{ 'localization-form.js' | asset_url }}" defer="defer"></script>
+<script src="{{ 'flag-emoji-converter.js' | asset_url }}" defer="defer"></script>
 
 {%- liquid
   assign color_scheme = section.settings.color_scheme
@@ -688,47 +692,74 @@
 
     <div class="flex flex-col w-full">
       <div class="flex flex-col gap-1 mb-4 font-semibold ">
-        <div class="country-selector relative inline-block">
-          <!-- Trigger: Current country -->
-          <button
-            type="button"
-            class="country-selector-button inline-flex items-center cursor-pointer px-1 gap-2 hover:bg-gray-100"
-            aria-expanded="false"
-          >
-            {% assign current_country = localization.country %}
-            <span class="header-text-color">
-              {{ current_country.name | upcase }}
-            </span>
-            {% render 'icon-playback',
-              class: 'bi bi-caret-right-fill scrolling-separator',
-              width: '16px',
-              height: '16px',
-              fill: 'currentColor'
-            %}
-          </button>
+        <!-- Wrap in localization-form custom element -->
+        <localization-form class="header-country-selector">
+          {%- form 'localization', id: 'HeaderCountryForm', class: 'localization-form' -%}
+            <div class="country-selector relative inline-block">
+              <!-- Trigger: Current country -->
+              <button
+                type="button"
+                class="country-selector-button localization-form__select inline-flex items-center cursor-pointer px-1 gap-2 hover:bg-gray-100"
+                aria-expanded="false"
+                aria-controls="header-country-results"
+                aria-describedby="HeaderCountryLabel"
+              >
+                <!-- Add flag icon -->
+                <span class="country-flag country-flag-emoji">
+                  {{ localization.country.iso_code }}
+                </span>
+                <span class="header-text-color">
+                  {{ localization.country.name | upcase }}
+                </span>
+                {% render 'icon-playback',
+                  class: 'bi bi-caret-right-fill scrolling-separator',
+                  width: '16px',
+                  height: '16px',
+                  fill: 'currentColor'
+                %}
+              </button>
 
-          <!-- Dropdown -->
-          <div
-            class="country-selector-dropdown absolute bottom-16 w-100 border border-gray-200 rounded-md shadow-lg opacity-0 invisible transition-all duration-300 z-[9999] color-{{ color_scheme }} country-selector-dropdown-bg"
-          >
-            <ul class="max-h-100 overflow-y-auto divide-y divide-gray-100 text-xl">
-              {% for country in localization.available_countries %}
-                <li>
-                  <a
-                    href="{{ country.url }}"
-                    class="w-full flex items-center justify-between px-4 py-2 text-2xl hover:bg-gray-100 header-text-color"
-                  >
-                    <span class="mx-2">{{ country.name }}</span>
-                    <span class=" font-medium">
-                      {{ country.currency.iso_code }}
-                      {{ country.currency.symbol }}
-                    </span>
-                  </a>
-                </li> 
-              {% endfor %}
-            </ul>
-          </div>
-        </div>
+              <!-- Dropdown with proper structure -->
+              <div
+                class="country-selector-dropdown disclosure__list-wrapper absolute bottom-16 w-100 border border-gray-200 rounded-md shadow-lg transition-all duration-300 z-[9999] color-{{ color_scheme }} country-selector-dropdown-bg"
+                hidden
+              >
+                <ul 
+                  id="header-country-results" 
+                  role="list"
+                  class="max-h-100 overflow-y-auto divide-y divide-gray-100 text-xl"
+                >
+                  {% for country in localization.available_countries %}
+                    <li class="disclosure__item">
+                      <a
+                        href="#"
+                        class="w-full flex items-center justify-between px-4 py-2 text-2xl hover:bg-gray-100 header-text-color link link--text disclosure__link"
+                        {% if country.iso_code == localization.country.iso_code %}
+                          aria-current="true"
+                        {% endif %}
+                        data-value="{{ country.iso_code }}"
+                        id="{{ country.name }}"
+                      >
+                        <!-- Add flag icon -->
+                        <span class="country-flag country-flag-emoji">
+                          {{ country.iso_code }}
+                        </span>
+                        <span class="mx-2">{{ country.name }}</span>
+                        <span class="font-medium">
+                          {{ country.currency.iso_code }}
+                          {{ country.currency.symbol }}
+                        </span>
+                      </a>
+                    </li> 
+                  {% endfor %}
+                </ul>
+              </div>
+            </div>
+            
+            <!-- REQUIRED: Hidden input for form submission -->
+            <input type="hidden" name="country_code" value="{{ localization.country.iso_code }}">
+          {%- endform -%}
+        </localization-form>
         <!--
           <a
             href="{{ routes.account_login_url }}"
@@ -1392,34 +1423,29 @@
       window.addEventListener('scroll', () => requestAnimationFrame(handleScroll), { passive: true });
     }
 
-    /* -- Country Selector for Mobile -- */
+    /* -- Country Selector for Mobile - Icon Rotation -- */
+    // Note: Dropdown toggle is handled by localization-form.js
+    // This script only handles icon rotation animation
     const countrySelector = document.querySelector('.country-selector');
     const countrySelectorBtn = document.querySelector('.country-selector-button');
-    const countrySelectorDropdown = document.querySelector('.country-selector-dropdown');
 
-    if (countrySelector && countrySelectorBtn && countrySelectorDropdown) {
-      countrySelectorBtn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        const isExpanded = countrySelectorBtn.getAttribute('aria-expanded') === 'true';
-
-        countrySelectorBtn.setAttribute('aria-expanded', !isExpanded);
-        const icon = countrySelectorBtn.querySelector('img, svg');
-        if (icon) {
-          icon.style.transform = isExpanded ? 'rotate(0)' : 'rotate(-90deg)';
-        }
-        countrySelectorDropdown.classList.toggle('opacity-0');
-        countrySelectorDropdown.classList.toggle('invisible');
+    if (countrySelector && countrySelectorBtn) {
+      // Observe aria-expanded changes to rotate icon
+      const observer = new MutationObserver((mutations) => {
+        mutations.forEach((mutation) => {
+          if (mutation.type === 'attributes' && mutation.attributeName === 'aria-expanded') {
+            const isExpanded = countrySelectorBtn.getAttribute('aria-expanded') === 'true';
+            const icon = countrySelectorBtn.querySelector('img, svg');
+            if (icon) {
+              icon.style.transform = isExpanded ? 'rotate(-90deg)' : 'rotate(0)';
+            }
+          }
+        });
       });
 
-      document.addEventListener('click', (e) => {
-        if (!countrySelector.contains(e.target)) {
-          countrySelectorBtn.setAttribute('aria-expanded', 'false');
-          const icon2 = countrySelectorBtn.querySelector('img, svg');
-          if (icon2) {
-            icon2.style.transform = 'rotate(0)';
-          }
-          countrySelectorDropdown.classList.add('opacity-0', 'invisible');
-        }
+      observer.observe(countrySelectorBtn, {
+        attributes: true,
+        attributeFilter: ['aria-expanded']
       });
     }
 
