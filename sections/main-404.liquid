@@ -1,11 +1,26 @@
 <link rel="stylesheet" href="{{ 'main-404.css' | asset_url }}">
 
+<style>
+  /* Mobile background image */
+  @media (max-width: 640px) {
+    .aurelia-404-section {
+      {% if section.settings.mobile_background_image != blank %}
+        background-image: url('{{ section.settings.mobile_background_image | image_url: width: 800 }}');
+        background-size: {{ section.settings.background_size }};
+      {% elsif section.settings.background_image != blank %}
+        background-image: url('{{ section.settings.background_image | image_url }}');
+        background-size: {{ section.settings.background_size }};
+      {% endif %}
+    }
+  }
+</style>
+
 <main role="main">
   <h1 class="sr-only">{{ section.settings.third_text }}</h1>
 
   <div
     class="aurelia-404-section color-{{ section.settings.color_scheme }}"
-    style="{% if section.settings.background_image %}background-image: url({{ section.settings.background_image | image_url }}); background-size: {{ section.settings.background_size }};{% endif %}--mobile-top-padding: {{ settings.sections_spacing }}px;"
+    style="{% if section.settings.background_image %}background-image: url({{ section.settings.background_image | image_url }}); background-size: {{ section.settings.background_size }};{% endif %}"
   >
     {% if section.settings.animation_mode == 'slide' %}
       <div class="slide-animation" aria-hidden="true">
@@ -151,7 +166,14 @@
     {
       "type": "image_picker",
       "id": "background_image",
-      "label": "t:sections.404.background_image.label"
+      "label": "Desktop Background Image",
+      "info": "Background image for desktop and tablet views"
+    },
+    {
+      "type": "image_picker",
+      "id": "mobile_background_image",
+      "label": "Mobile Background Image",
+      "info": "Image shown on mobile phones only (640px and below). Falls back to desktop image if not set."
     },
     {
       "type": "select",
