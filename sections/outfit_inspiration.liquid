@@ -1,5 +1,6 @@
 <div
   class="outfit-inspiration-section color-{{ section.settings.color_scheme }} p-8  px-0 flex justify-center items-center md:py-16"
+  style="background-color: var(--background);"
 >
   <div class="outfit-navigation-arrows desktop-arrows ">
     <button
@@ -130,7 +131,11 @@
                             <div class="flex items-center justify-between gap-2 mt-auto">
                               <div>
                                 {% if paired_product.available == false %}
-                                  {% render 'sold-out-badge', class: 'outfit-sold-out' %}
+                                  <span
+                                    class="outfit-sold-out"
+                                  >
+                                    SOLD OUT
+                                  </span>
                                 {% endif %}
                               </div>
                               <button
@@ -141,8 +146,8 @@
                               >
                                 {% render 'icon-playback',
                                   class: 'bi bi-caret-right-fill outfit-expand-product-btn-svg',
-                                  width: '24',
-                                  height: '24',
+                                  width: '16',
+                                  height: '16',
                                   fill: 'currentColor'
                                 %}
                               </button>
@@ -196,8 +201,8 @@
                                   >
                                     {% render 'icon-playback',
                                       class: 'bi bi-caret-right-fill',
-                                      width: '24',
-                                      height: '24',
+                                      width: '16',
+                                      height: '16',
                                       fill: 'currentColor',
                                       style: 'transform: rotate(90deg);'
                                     %}
@@ -428,55 +433,6 @@
   </div>
 </div>
 <style>
-    .outfit-inspiration-section {
-      position: relative;
-      background-color: var(--background);
-    }
-
-    @media (min-width: 768px) {
-      .outfit-inspiration-section {
-        min-height: 100vh;
-      }
-    }
-
-    .outfit-inspiration-section::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      z-index: 1;
-      pointer-events: none;
-      {% if section.settings.background_image_desktop != blank %}
-        background-image: url('{{ section.settings.background_image_desktop | image_url: width: 1920 }}');
-      {% elsif section.settings.background_image_mobile != blank %}
-        background-image: url('{{ section.settings.background_image_mobile | image_url: width: 768 }}');
-      {% endif %}
-      background-size: cover;
-      background-position: center;
-      background-repeat: no-repeat;
-      opacity: {{ section.settings.background_opacity | divided_by: 100.0 }};
-    }
-
-    @media (max-width: 767px) {
-      .outfit-inspiration-section::before {
-        height: auto;
-        min-height: 100%;
-        max-height: 100%;
-        {% if section.settings.background_image_mobile != blank %}
-          background-image: url('{{ section.settings.background_image_mobile | image_url: width: 768 }}');
-        {% endif %}
-      }
-    }
-
-    .outfit-navigation-arrows,
-    .outfit-inspiration-section > div {
-      position: relative;
-      z-index: 1;
-    }
-
-
     .expanded-content{
     padding: 14px 14px 9px 14px;
   }
@@ -497,9 +453,9 @@
      border: 1px solid;
     }
     .paired-product-card{
-    height: 179px;
+    height: 180px;
     color: var(--text);
-    padding: 12px;
+    padding: 14px;
     border: 1px solid;
   }
   .outfit-expanded-title{
@@ -517,7 +473,7 @@
      font-size: 14px;
     }
     .outfit-size{
-      padding-bottom: 30px;
+      padding-bottom: 36px;
     }
     .main-product-title{
       font-size: var(--t-b-3-size);
@@ -535,12 +491,6 @@
     .outfit-paired-title .new-product-price .price-item {
       font-size: 14px !important;
     }
-    /* Desktop gap for outfit wrapper */
-    @media (min-width: 768px) {
-      .outfit-wrapper {
-        gap: 20px;
-      }
-    }
 
     /* Hide price in mobile view for paired products */
     @media (max-width: 767px) {
@@ -556,7 +506,7 @@
       }
     }
     .outfit-wrapper{
-      gap: 12px;
+      gap: 20px;
     }
     .outfit-section-title {
       font-size: var(--t-h-2-size);
@@ -564,7 +514,15 @@
       color: var(--header_text, var(--color-foreground));
       margin-bottom: 45px;
     }
-
+    .outfit-sold-out {
+      font-size: 13px;
+      font-weight: 500;
+      padding: 2px 4px;
+      border-radius: 4px;
+      color: var(--text);
+      background-color: var(--background);
+      border: 1px solid var(--border);
+    }
 
   .outfit-add-to-cart-btn-{{ section.id }} {
     display: flex !important;
@@ -633,18 +591,10 @@
 
 
   .outfit-expand-product-btn-{{ section.id }} {
-    height: 24px;
-    width: 24px;
+    height: 15px;
+    width: 15px;
     cursor: pointer;
-  }
-
-  @media (min-width: 768px) {
-    .outfit-expand-product-btn-{{ section.id }},
-    .outfit-arrow {
-      height: 24px !important;
-      width: 24px !important;
     }
-  }
     .exapnded-product-img {
       height: 316px !important;
       width: 360px !important;
@@ -657,8 +607,8 @@
       display: flex;
     }
     .outfit-arrow {
-      height: 24px;
-      width: 24px;
+      height: 15px;
+      width: 15px;
       cursor: pointer;
       position: absolute;
       top: 63%;
@@ -673,7 +623,7 @@
       height: 40px;
       min-width: 48px;
       padding: 0 7px;
-      border-radius: var(--sold-out-badge-radius);
+      border-radius: 4px;
       font-size: 16px;
       font-weight: 500;
       background-color: var(--button);
@@ -713,7 +663,7 @@
       transform: scale(1.1);
     }
     .main-product-card, .paired-product-card {
-      border-radius: var(--sold-out-badge-radius) !important;
+      border-radius: {{ section.settings.buttons_radius | default: 4 }}px ;
     }
 
     .paired-product-img {
@@ -728,7 +678,7 @@
     }
 
     .expanded-product-card {
-      border-radius: var(--sold-out-badge-radius) !important;
+      border-radius: {{ section.settings.buttons_radius | default: 8 }}px;
       border: 1px solid;
       position: absolute;
       left: 0;
@@ -743,7 +693,7 @@
       transition: transform 0.75s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.65s cubic-bezier(0.4, 0, 0.2, 1);
       width: 100%;
       max-width: 440px;
-      height: 557px !important;
+      height: 560px !important;
       z-index: 2;
       color: var(--text);
     }
@@ -794,11 +744,6 @@
       height: auto;
       position: static !important;
       margin: 18px;
-      display: flex;
-      align-items: center;
-      align-self: center;
-      margin-top: calc(45px + 290px);
-      margin-bottom: 232px;
     }
 
     .outfit-inspiration-details {
@@ -838,11 +783,14 @@
       width: 170px;
       padding: 1px 0;
     }
+       .outfit-wrapper{
+      gap: 20px;
+    }
       .outfit-section-title {
         font-size: 36px !important;
       }
       .outfit-sold-out {
-        display: none;
+      display: none;
       }
       .desktop-arrows {
         display: none !important;
@@ -1613,28 +1561,13 @@
       "default": "#000000"
     },
     {
-      "type": "header",
-      "content": "Background Image Settings"
-    },
-    {
-      "type": "image_picker",
-      "id": "background_image_desktop",
-      "label": "Desktop Background Image"
-    },
-    {
-      "type": "image_picker",
-      "id": "background_image_mobile",
-      "label": "Mobile Background Image"
-    },
-    {
       "type": "range",
-      "id": "background_opacity",
-      "label": "Background Image Opacity",
+      "id": "buttons_radius",
+      "label": "Border Radius (px)",
       "min": 0,
-      "max": 100,
-      "step": 5,
-      "unit": "%",
-      "default": 100
+      "max": 25,
+      "step": 1,
+      "default": 4
     }
   ],
   "blocks": [

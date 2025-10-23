@@ -2,10 +2,6 @@
 {
   "name": "Localization Selector",
   "class": "shopify-section-localization",
-  "disabled_on": {
-    "groups": ["header"],
-    "templates": ["index", "product", "collection", "page", "blog", "article", "cart", "search", "404"]
-  },
   "settings": [
     {
       "type": "header",
@@ -51,16 +47,6 @@
       "max": 80,
       "step": 5,
       "default": 40
-    },
-    {
-      "type": "header",
-      "content": "Dropdown Icon"
-    },
-    {
-      "type": "image_picker",
-      "id": "dropdown_icon",
-      "label": "Custom Dropdown Icon",
-      "info": "Optional. If not set, default arrow icon will be used"
     }
   ],
   "presets": [
@@ -71,10 +57,8 @@
   ]
 }
 {% endschema %}
-{{ 'component-localization-form.css' | asset_url | stylesheet_tag }}
+
 {{ 'localiztion-selector.css' | asset_url | stylesheet_tag }}
-<script src="{{ 'localization-form.js' | asset_url }}" defer="defer"></script>
-<script src="{{ 'flag-emoji-converter.js' | asset_url }}" defer="defer"></script>
 
 <section class="color-{{ section.settings.color_scheme }} ">
   <!-- Footer Layout - Single Row -->
@@ -87,20 +71,14 @@
       <div class="footer-left">
         <div class="footer__localization isolate">
           {%- if section.settings.enable_country_selector and localization.available_countries.size > 1 -%}
-            <localization-form class="footer__country-selector">
-              {%- form 'localization', id: 'FooterCountryForm', class: 'localization-form' -%}
-                <div class="localization-selector">
-                  {%- render 'currency-dropdown', localPosition: 'FooterCountry' -%}
-                </div>
-              {%- endform -%}
-            </localization-form>
+            {% render 'currency-dropdown', position: 'footer' %}
           {%- endif -%}
 
           {%- if section.settings.enable_language_selector and localization.available_languages.size > 1 -%}
             <localization-form class="footer__language-selector">
               {%- form 'localization', id: 'FooterLanguageForm', class: 'localization-form' -%}
                 <div class="localization-selector">
-                  {%- render 'language-localization', localPosition: 'FooterLanguage', dropdown_icon: section.settings.dropdown_icon -%}
+                  {%- render 'language-localization', localPosition: 'FooterLanguage' -%}
                 </div>
               {%- endform -%}
             </localization-form>
@@ -167,6 +145,7 @@
     display: grid;
     grid-template-columns: auto 1fr auto;
     align-items: center;
+    max-width: 1200px;
     padding: var(--space-md) var(--space-3xl) !important;
     margin: 0 auto !important;
     gap: 1rem;
@@ -207,49 +186,6 @@
     flex-wrap: nowrap;
     overflow: visible !important;
     min-height: 28px;
-  }
-
-  /* Ensure all child elements align on the same baseline */
-  .footer__localization > * {
-    display: flex;
-    align-items: center;
-  }
-
-  .footer__country-selector,
-  .footer__language-selector {
-    display: flex;
-    align-items: center;
-  }
-
-  .footer__country-selector .localization-form,
-  .footer__language-selector .localization-form {
-    display: flex;
-    align-items: center;
-    margin: 0;
-  }
-
-  .footer__country-selector .localization-selector,
-  .footer__language-selector .localization-selector {
-    display: flex;
-    align-items: center;
-  }
-
-  /* Ensure disclosure divs align properly */
-  .footer__localization .disclosure,
-  .footer__localization .group {
-    display: flex;
-    align-items: center;
-  }
-
-  /* Align buttons properly */
-  .footer__localization .disclosure__button,
-  .footer__localization .localization-form__select {
-    display: flex;
-    align-items: center;
-    padding: 0;
-    margin: 0;
-    min-height: auto;
-    height: auto;
   }
 
   /* Localization Form Styling */
@@ -342,13 +278,10 @@
       min-height: calc(var(--section-height, 40px) + 20px);
     }
 
-    .policies-inline {
-      display: none;
-    }
     .footer-left {
       justify-content: center;
       width: 100%;
-      order: 1;
+      order: 2;
       overflow: visible !important;
     }
 
@@ -452,64 +385,6 @@
   body.localization-form-open {
     overflow-x: hidden;
   }
-
-  /* Fix z-index to appear above product-difference slider and other sections */
-  .footer__localization,
-  .footer__country-selector,
-  .footer__language-selector {
-    position: relative;
-    z-index: 1000;
-  }
-
-  /* Ensure dropdowns have even higher z-index */
-  .disclosure__list-wrapper,
-  .bb-disclosure__list-wrapper {
-    position: absolute;
-    z-index: 10001 !important;
-  }
-
-  .bb-ls-disclosure__list-wrapper {
-    bottom: 120%;
-    display: block;
-    overflow: visible !important;
-    background: var(--header_background);
-    max-height: none !important;
-  }
-  /* Make sure parent containers don't clip dropdowns */
-  .shopify-section-localization,
-  .footer-bottom-section,
-  .footer-single-row,
-  .footer-left,
-  .footer__localization {
-    overflow: visible !important;
-  }
-
-  /* Override any parent overflow issues */
-  .bb-footer-container,
-  .footer-container {
-    overflow: visible !important;
-  }
-
-  /* Language selector overlay (matching currency selector) */
-  .language-selector__overlay {
-    display: none;
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.3);
-    z-index: 9998;
-  }
-
-  /* Language selector dropdown styling to match currency selector */
-  .language-selector__list {
-    background: var(--header_background);
-  }
-
-  .language-selector .disclosure__list {
-    background: var(--header_background);
-  }
 </style>
 
 <script>
@@ -594,13 +469,6 @@
         document.body.classList.remove('localization-form-open');
       }
     });
-
-    const button = document.querySelector('.bb-disclosure__button');
-    const arrow = button.querySelector('.dropdown-arrow');
-
-    button.addEventListener('click', () => {
-      arrow.classList.toggle('rotate-180');
-    });
   });
 
   // Shopify theme events handling
@@ -614,7 +482,5 @@
         form.connectedCallback();
       }
     });
-
-    // Note: Flag conversion is now handled by flag-emoji-converter.js
   });
 </script>

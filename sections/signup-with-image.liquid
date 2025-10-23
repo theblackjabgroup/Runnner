@@ -9,40 +9,23 @@
   <div id="signup-with-image-slider" class="signup-with-image-slider">
     <!-- Image Column -->
     <div class="signup-with-image-image scroll-slide-trigger scroll-slide-from-behind-right">
-      {% if section.settings.main_image or section.settings.mobile_image %}
-        <picture>
-          {% if section.settings.mobile_image != blank %}
-            <source
-              media="(max-width: 768px)"
-              srcset="
-                {% if section.settings.mobile_image.width >= 375 %}{{ section.settings.mobile_image | image_url: width: 375 }} 375w,{% endif %}
-                {% if section.settings.mobile_image.width >= 550 %}{{ section.settings.mobile_image | image_url: width: 550 }} 550w,{% endif %}
-                {% if section.settings.mobile_image.width >= 768 %}{{ section.settings.mobile_image | image_url: width: 768 }} 768w,{% endif %}
-                {{ section.settings.mobile_image | image_url }} {{ section.settings.mobile_image.width }}w
-              "
-              sizes="100vw"
-            >
-          {% endif %}
-          
-          {% assign desktop_image = section.settings.main_image | default: section.settings.mobile_image %}
-          <img
-            srcset="
-              {% if desktop_image.width >= 375 %}{{ desktop_image | image_url: width: 375 }} 375w,{% endif %}
-              {% if desktop_image.width >= 768 %}{{ desktop_image | image_url: width: 768 }} 768w,{% endif %}
-              {% if desktop_image.width >= 1000 %}{{ desktop_image | image_url: width: 1000 }} 1000w,{% endif %}
-              {% if desktop_image.width >= 1500 %}{{ desktop_image | image_url: width: 1500 }} 1500w,{% endif %}
-              {{ desktop_image | image_url }} {{ desktop_image.width }}w
-            "
-            sizes="(max-width: 768px) 100vw, 50vw"
-            src="{{ desktop_image | image_url: width: 1000 }}"
-            alt="{{ desktop_image.alt | escape | default: 'Signup with image' }}"
-            width="{{ desktop_image.width }}"
-            height="{{ desktop_image.height }}"
-            loading="lazy"
-            decoding="async"
-            style="width: 100%; height: 100%; object-fit: cover; border-radius: 0; display: block; margin: 0 auto;"
-          >
-        </picture>
+      {% if section.settings.main_image %}
+        <img
+          srcset="
+            {%- if section.settings.main_image.width >= 375 -%}{{ section.settings.main_image | image_url: width: 375 }} 375w,{%- endif -%}
+            {%- if section.settings.main_image.width >= 750 -%} {{ section.settings.main_image | image_url: width: 750 }} 750w,{%- endif -%}
+            {%- if section.settings.main_image.width >= 1000 -%} {{ section.settings.main_image | image_url: width: 1000 }} 1000w,{%- endif -%}
+            {%- if section.settings.main_image.width >= 1500 -%} {{ section.settings.main_image | image_url: width: 1500 }} 1500w,{%- endif -%} {{ section.settings.main_image | image_url }} {{ section.settings.main_image.width }}w
+          "
+          sizes="(max-width: 768px) 100vw, 50vw"
+          src="{{ section.settings.main_image | image_url: width: 1000 }}"
+          alt="signup-with-image Image"
+          width="{{ section.settings.main_image.width }}"
+          height="{{ section.settings.main_image.height }}"
+          loading="lazy"
+          decoding="async"
+          style="width: 100%; height: 100%; object-fit: cover; border-radius: 0; display: block; margin: 0 auto;"
+        >
       {% else %}
         <div style="display: flex; align-items: center; justify-content: center; width: 100%; height: 100%;">
           {{ 'collection-1' | placeholder_svg_tag: 'w-full h-[60vh] object-contain mx-auto' }}
@@ -51,12 +34,6 @@
     </div>
     <!-- Form Column -->
     <div class="signup-with-image-form-container">
-      {% if section.settings.form_bg_overlay and section.settings.form_bg_image %}
-        <div
-          class="signup-with-image-overlay"
-          style="opacity: {{ section.settings.form_bg_overlay_opacity | divided_by: 100.0 }};"
-        ></div>
-      {% endif %}
       <div
         class="signup-with-image-form-box"
         style="max-width: 45rem; padding: var(--space-5xl) var(--space-3xl); display: flex; flex-direction: column; align-items: center; text-align: center;"
@@ -94,7 +71,7 @@
               id="email-input-password"
               name="contact[email]"
               class="signup-with-image-input"
-              style="width: 324px; height: 48px; border: var(--inputs-border-width) solid var(--border); border-radius: 5px; opacity: var(--inputs-border-opacity); color:var(--button_label); padding: 0px var(--space-xl); font-size: var(--t-b-2-size); outline: none; box-sizing: border-box;"
+              style="width: 324px; height: 48px; border: var(--inputs-border-width) solid var(--border); border-radius: 3px; opacity: var(--inputs-border-opacity); color:var(--button_label); padding: 0px var(--space-xl); font-size: var(--t-b-2-size); outline: none; box-sizing: border-box;"
               required
               pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$"
             >
@@ -120,7 +97,7 @@
       justify-content: space-between;
     }
     .signup-with-image-form-container{
-        z-index:1;
+        z-index:10;
     }
       .signup-with-image-section ::selection {
         color: var(--accent) !important;
@@ -175,20 +152,8 @@
         z-index: 1;
       }
 
-      .signup-with-image-image picture {
-        width: 100%;
-        height: 100%;
-        display: block;
-      }
-
       .signup-with-image-form-container {
         background-color: {{ section.settings.form_bg_color }};
-        {% if section.settings.form_bg_image %}
-          background-image: url('{{ section.settings.form_bg_image | image_url: width: 1920 }}');
-          background-position: {{ section.settings.form_bg_position }};
-          background-size: {{ section.settings.form_bg_size }};
-          background-repeat: {{ section.settings.form_bg_repeat }};
-        {% endif %}
         margin-left: 9px;
         display: flex;
         flex-direction: column;
@@ -196,23 +161,11 @@
         justify-content: center;
         height: 100vh;
         position: relative;
+        z-index: 2;
       }
 
       .signup-with-image-form-box {
         width: 100%;
-        position: relative;
-        z-index: 3;
-      }
-
-      .signup-with-image-overlay {
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background-color: rgba(0, 0, 0, 0.5);
-        z-index: 2;
-        pointer-events: none;
       }
 
       .signup-with-image-slider {
@@ -291,7 +244,7 @@
         }
 
         .signup-with-image-form-container {
-          /* z-index inherited from main definition (1) */
+          z-index: 2;
         }
 
         .signup-with-image-subheading {
@@ -344,24 +297,7 @@
         .signup-with-image-heading{
           width: 95% !important;
         }
-      }
-
-      /* Responsive background image */
-      @media (max-width: 768px) {
-        .signup-with-image-form-container {
-          {% if section.settings.form_bg_image %}
-            background-image: url('{{ section.settings.form_bg_image | image_url: width: 768 }}');
-          {% endif %}
-        }
-      }
-
-      @media (max-width: 480px) {
-        .signup-with-image-form-container {
-          {% if section.settings.form_bg_image %}
-            background-image: url('{{ section.settings.form_bg_image | image_url: width: 480 }}');
-          {% endif %}
-        }
-      }
+    }
   </style>
 </section>
 
@@ -369,9 +305,6 @@
 {
   "name": "Signup With Image",
   "tag": "section",
-  "disabled_on": {
-    "groups": ["header", "footer"]
-  },
   "settings": [
     {
       "type": "color_scheme",
@@ -383,12 +316,6 @@
       "type": "image_picker",
       "id": "main_image",
       "label": "t:sections.signup-with-image.settings.main_image.label"
-    },
-    {
-      "type": "image_picker",
-      "id": "mobile_image",
-      "label": "Mobile Image",
-      "info": "Image shown on mobile screens (768px and below). Falls back to desktop image if not set."
     },
     {
       "type": "text",
@@ -425,115 +352,6 @@
       "id": "form_bg_color",
       "label": "t:sections.signup-with-image.settings.form_bg_color.label",
       "default": "#f2f2f2"
-    },
-    {
-      "type": "image_picker",
-      "id": "form_bg_image",
-      "label": "Form Background Image"
-    },
-    {
-      "type": "select",
-      "id": "form_bg_position",
-      "label": "Background Position",
-      "options": [
-        {
-          "value": "center",
-          "label": "Center"
-        },
-        {
-          "value": "top",
-          "label": "Top"
-        },
-        {
-          "value": "bottom",
-          "label": "Bottom"
-        },
-        {
-          "value": "left",
-          "label": "Left"
-        },
-        {
-          "value": "right",
-          "label": "Right"
-        },
-        {
-          "value": "top left",
-          "label": "Top Left"
-        },
-        {
-          "value": "top right",
-          "label": "Top Right"
-        },
-        {
-          "value": "bottom left",
-          "label": "Bottom Left"
-        },
-        {
-          "value": "bottom right",
-          "label": "Bottom Right"
-        }
-      ],
-      "default": "center"
-    },
-    {
-      "type": "select",
-      "id": "form_bg_size",
-      "label": "Background Size",
-      "options": [
-        {
-          "value": "cover",
-          "label": "Cover"
-        },
-        {
-          "value": "contain",
-          "label": "Contain"
-        },
-        {
-          "value": "auto",
-          "label": "Auto"
-        }
-      ],
-      "default": "cover"
-    },
-    {
-      "type": "select",
-      "id": "form_bg_repeat",
-      "label": "Background Repeat",
-      "options": [
-        {
-          "value": "no-repeat",
-          "label": "No Repeat"
-        },
-        {
-          "value": "repeat",
-          "label": "Repeat"
-        },
-        {
-          "value": "repeat-x",
-          "label": "Repeat Horizontally"
-        },
-        {
-          "value": "repeat-y",
-          "label": "Repeat Vertically"
-        }
-      ],
-      "default": "no-repeat"
-    },
-    {
-      "type": "checkbox",
-      "id": "form_bg_overlay",
-      "label": "Add Dark Overlay for Better Text Readability",
-      "default": false
-    },
-    {
-      "type": "range",
-      "id": "form_bg_overlay_opacity",
-      "label": "Overlay Opacity",
-      "min": 0,
-      "max": 100,
-      "step": 5,
-      "unit": "%",
-      "default": 50
     }
   ],
   "presets": [

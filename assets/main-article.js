@@ -1,43 +1,4 @@
-// Get canonical URL (works in all environments including customize view)
-function getCanonicalUrl() {
-  var canonical = document.querySelector('link[rel="canonical"]');
-  return canonical ? canonical.href : window.location.href;
-}
-
 document.addEventListener('DOMContentLoaded', function () {
-  // Main Article Fade-Up Animation
-  const animatedElements = document.querySelectorAll('.article-content-animated, .related-articles-animated');
-
-  // Set initial state for all elements
-  animatedElements.forEach((element, index) => {
-    element.style.transitionDelay = `${index * 0.2}s`;
-  });
-
-  // Create intersection observer
-  const observer = new IntersectionObserver(
-    (entries) => {
-      entries.forEach((entry) => {
-        if (entry.isIntersecting) {
-          // Trigger fade-up animation by adding animate class
-          entry.target.classList.add('animate');
-
-          // Stop observing this element
-          observer.unobserve(entry.target);
-        }
-      });
-    },
-    {
-      rootMargin: '0px 0px -100px 0px',
-      threshold: 0.1,
-    }
-  );
-
-  // Observe all animated elements
-  animatedElements.forEach((element) => {
-    observer.observe(element);
-  });
-
-  // Mobile subheader padding
   if (window.innerWidth <= 768) {
   const subheaders = document.querySelectorAll('.subclass-subheader');
   if (subheaders.length > 0) {

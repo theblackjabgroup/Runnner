@@ -235,137 +235,15 @@ class FacetFiltersForm extends HTMLElement {
   }
 
   static renderActiveFacets(html) {
-    const activeFacetElementSelectors = [
-      '.active-facets-mobile',
-      '.active-facets-desktop',
-      '.active-filters-tags-container',
-      '.active-filters-tags-container-mobile',
-    ];
+    const activeFacetElementSelectors = ['.active-facets-mobile', '.active-facets-desktop'];
 
     activeFacetElementSelectors.forEach((selector) => {
       const activeFacetsElement = html.querySelector(selector);
       if (!activeFacetsElement) return;
-      const targetElement = document.querySelector(selector);
-      if (targetElement) {
-        targetElement.innerHTML = activeFacetsElement.innerHTML;
-      }
+      document.querySelector(selector).innerHTML = activeFacetsElement.innerHTML;
     });
 
     FacetFiltersForm.toggleActiveFacets(false);
-
-    // Show desktop tags container if it has content
-    const tagsContainer = document.querySelector('.active-filters-tags-container');
-    if (tagsContainer) {
-      const hasTags = tagsContainer.querySelector('.active-filter-tag');
-      if (hasTags) {
-        tagsContainer.style.display = 'block';
-      } else {
-        tagsContainer.style.display = 'none';
-      }
-    }
-
-    // Show mobile tags container if it has content
-    const mobileTagsContainer = document.querySelector('.active-filters-tags-container-mobile');
-    if (mobileTagsContainer) {
-      const hasMobileTags = mobileTagsContainer.querySelector('.active-filter-tag');
-      if (hasMobileTags) {
-        mobileTagsContainer.style.display = 'block';
-      } else {
-        mobileTagsContainer.style.display = 'none';
-      }
-    }
-
-    // Re-attach event listeners for new tag removal buttons
-    FacetFiltersForm.attachTagEventListeners();
-    FacetFiltersForm.attachMobileTagEventListeners();
-  }
-
-  static attachTagEventListeners() {
-    // Handle active filter tag removal
-    document.querySelectorAll('.active-filter-tag-remove:not(.mobile-tag-remove)').forEach((button) => {
-      button.addEventListener('click', function (e) {
-        e.preventDefault();
-        const filterParam = this.getAttribute('data-filter-param');
-        const filterValue = this.getAttribute('data-filter-value');
-        const isSortRemove = this.getAttribute('data-sort-remove') === 'true';
-
-        if (isSortRemove) {
-          // Remove sort by filter
-          const sortInputs = document.querySelectorAll('input[name="sort_by"]');
-          sortInputs.forEach((input) => {
-            input.checked = false;
-          });
-        } else if (filterParam && filterValue) {
-          // Remove specific filter value
-          const filterInput = document.querySelector(`input[name="${filterParam}"][value="${filterValue}"]`);
-          if (filterInput) {
-            filterInput.checked = false;
-          }
-        } else if (filterParam) {
-          // Remove price range filter
-          const priceInputs = document.querySelectorAll(`input[name="${filterParam}"]`);
-          priceInputs.forEach((input) => {
-            input.value = '';
-          });
-        }
-
-        // Apply the filter changes
-        if (typeof window.applyFiltersAjax === 'function') {
-          window.applyFiltersAjax();
-        } else {
-          // Fallback to form submission
-          const form = document.querySelector('#FacetFiltersForm');
-          if (form) {
-            form.submit();
-          }
-        }
-      });
-    });
-  }
-
-  static attachMobileTagEventListeners() {
-    // Handle mobile active filter tag removal
-    document.querySelectorAll('.mobile-tag-remove').forEach((button) => {
-      button.addEventListener('click', function (e) {
-        e.preventDefault();
-        const filterParam = this.getAttribute('data-filter-param');
-        const filterValue = this.getAttribute('data-filter-value');
-        const isSortRemove = this.getAttribute('data-sort-remove') === 'true';
-
-        if (isSortRemove) {
-          // Remove sort by filter
-          const sortInputs = document.querySelectorAll('input[name="sort_by"]');
-          sortInputs.forEach((input) => {
-            input.checked = false;
-          });
-        } else if (filterParam && filterValue) {
-          // Remove specific filter value from mobile form
-          const filterInput = document.querySelector(
-            `#FacetFiltersFormMobile input[name="${filterParam}"][value="${filterValue}"]`
-          );
-          if (filterInput) {
-            filterInput.checked = false;
-          }
-        } else if (filterParam) {
-          // Remove price range filter from mobile form
-          const priceInputs = document.querySelectorAll(`#FacetFiltersFormMobile input[name="${filterParam}"]`);
-          priceInputs.forEach((input) => {
-            input.value = '';
-          });
-        }
-
-        // Apply the filter changes
-        if (typeof window.applyFiltersAjax === 'function') {
-          window.applyFiltersAjax();
-        } else {
-          // Fallback to form submission
-          const form = document.querySelector('#FacetFiltersFormMobile');
-          if (form) {
-            form.submit();
-          }
-        }
-      });
-    });
   }
 
   static renderAdditionalElements(html) {

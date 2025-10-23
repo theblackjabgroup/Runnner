@@ -3,30 +3,47 @@ document.addEventListener('DOMContentLoaded', function () {
   const collectionButtons = document.querySelectorAll('.collection-btn');
   const collectionContainers = document.querySelectorAll('.collection-products-container');
 
-  // Slider initialization handled by horizontal-scrollbar snippet
-  // This is a wrapper to maintain compatibility with collection switching
+  // Initialize slider functionality for collection containers
   function initializeCollectionSlider(container) {
-    // The horizontal-scrollbar snippet handles initialization automatically
-    // This function remains for compatibility but delegates to the snippet
-    if (window.initializeHorizontalScrollbar && container) {
-      // Re-run initialization for this specific container
-      // The snippet's function will check if already initialized
-
-      // Build a valid selector for the specific container
-      let containerSelector;
-      if (container.dataset.collectionId) {
-        // Use data attribute if available for specific targeting
-        containerSelector = `[data-collection-id="${container.dataset.collectionId}"]`;
-      } else {
-        // Fall back to using the container's primary class
-        const parentClass = container.classList.contains('collection-products-container')
-          ? '.collection-products-container'
-          : `.${container.className.split(' ')[0]}`;
-        containerSelector = parentClass;
-      }
-
-      window.initializeHorizontalScrollbar(containerSelector, '.featured-collection-product-slider');
+    // Check if already initialized to prevent duplicates
+    if (container.hasAttribute('data-slider-initialized')) {
+      return;
     }
+    container.setAttribute('data-slider-initialized', 'true');
+
+    // Slider drag functionality
+    const slider = container.querySelector('.featured-collection-product-slider');
+    if (!slider) return;
+
+    let isDown = false;
+    let startX;
+    let scrollLeft;
+
+    slider.addEventListener('mousedown', (e) => {
+      if (e.target.closest('.image-nav-arrow') || e.target.closest('.size-option-btn')) return;
+      isDown = true;
+      slider.classList.add('featured-collection-cursor-grabbing');
+      startX = e.pageX - slider.offsetLeft;
+      scrollLeft = slider.scrollLeft;
+    });
+
+    slider.addEventListener('mouseleave', () => {
+      isDown = false;
+      slider.classList.remove('featured-collection-cursor-grabbing');
+    });
+
+    slider.addEventListener('mouseup', () => {
+      isDown = false;
+      slider.classList.remove('featured-collection-cursor-grabbing');
+    });
+
+    slider.addEventListener('mousemove', (e) => {
+      if (!isDown) return;
+      e.preventDefault();
+      const x = e.pageX - slider.offsetLeft;
+      const walk = (x - startX) * 2;
+      slider.scrollLeft = scrollLeft - walk;
+    });
   }
 
   // Initialize all collections on page load

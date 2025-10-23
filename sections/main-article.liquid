@@ -177,52 +177,55 @@
   >
     <span class="sharebtn text-xl md:text-2xl items-center;" style="margin-right:20px; margin-top:0.7vw">SHARE</span>
 
+    {% if settings.social_facebook_link != blank %}
+      <a
+        href="https://www.facebook.com/sharer/sharer.php?u={{ shop.url }}{{ article.url | url_encode }}"
+        target="_blank"
+        rel="noopener"
+        aria-label="Share on Facebook"
+        class="fb text-xl md:text-2xl"
+        style="margin-right:40px;"
+      >
+        FACEBOOK
+      </a>
+    {% endif %}
 
-    <a
-      href="#"
-      target="_blank"
-      rel="noopener noreferrer"
-      aria-label="Share on Facebook"
-      class="fb text-xl md:text-2xl"
-      style="margin-right:40px;"
-      onclick="var url = getCanonicalUrl(); window.open('https://www.facebook.com/sharer.php?u=' + encodeURIComponent(url), 'facebook-share', 'width=580,height=400'); return false;"
-    >
-      FACEBOOK
-    </a>
+    {% if settings.social_twitter_link != blank %}
+      <a
+        href="https://twitter.com/intent/tweet?url={{ shop.url }}{{ article.url | url_encode }}&text={{ article.title | url_encode }}"
+        target="_blank"
+        rel="noopener"
+        aria-label="Share on Twitter"
+        class="tw text-xl md:text-2xl"
+        style="margin-right:40px;"
+      >
+        TWITTER
+      </a>
+    {% endif %}
 
-    <a
-      href="#"
-      target="_blank"
-      rel="noopener noreferrer"
-      aria-label="Share on Twitter"
-      class="tw text-xl md:text-2xl"
-      style="margin-right:40px;"
-      onclick="var url = getCanonicalUrl(); window.open('https://twitter.com/intent/tweet?url=' + encodeURIComponent(url) + '&text=' + encodeURIComponent(document.title || '{{ article.title | escape }}'), 'twitter-share', 'width=580,height=400'); return false;"
-    >
-      TWITTER
-    </a>
+    {% if settings.social_email_link != blank %}
+      <a
+        href="mailto:?subject={{ article.title | url_encode }}&body=Check out this article: {{ shop.url }}{{ article.url | url_encode }}"
+        class="em text-xl md:text-2xl"
+        aria-label="Share via Email"
+        style="margin-right:40px;"
+      >
+        EMAIL
+      </a>
+    {% endif %}
 
-    <a
-      href="mailto:?subject={{ article.title | default: 'Check out this article' | url_encode }}&body=Check out this article: {{ canonical_url | url_encode }}"
-      class="em text-xl md:text-2xl"
-      aria-label="Share via Email"
-      style="margin-right:40px;"
-      onclick="var url = getCanonicalUrl(); this.href = 'mailto:?subject=' + encodeURIComponent(document.title || '{{ article.title | escape }}') + '&body=Check out this article: ' + encodeURIComponent(url); return true;"
-    >
-      EMAIL
-    </a>
-
-    <a
-      href="#"
-      target="_blank"
-      rel="noopener noreferrer"
-      aria-label="Share on LinkedIn"
-      class="linked text-xl md:text-2xl"
-      style="margin-right:40px;"
-      onclick="var url = getCanonicalUrl(); window.open('https://www.linkedin.com/sharing/share-offsite/?url=' + encodeURIComponent(url), 'linkedin-share', 'width=580,height=400'); return false;"
-    >
-      LINKEDIN
-    </a>
+    {% if settings.social_linkedin_link != blank %}
+      <a
+        href="https://www.linkedin.com/sharing/share-offsite/?url={{ shop.url }}{{ article.url | url_encode }}"
+        target="_blank"
+        rel="noopener"
+        aria-label="Share on LinkedIn"
+        class="linked text-xl md:text-2xl"
+        style="margin-right:40px;"
+      >
+        LINKEDIN
+      </a>
+    {% endif %}
   </div>
 </div>
 <hr
@@ -317,6 +320,41 @@
     </div>
   </div>
 </div>
+<script>
+  // Main Article Fade-Up Animation
+  document.addEventListener('DOMContentLoaded', function () {
+    const animatedElements = document.querySelectorAll('.article-content-animated, .related-articles-animated');
+
+    // Set initial state for all elements
+    animatedElements.forEach((element, index) => {
+      element.style.transitionDelay = `${index * 0.2}s`;
+    });
+
+    // Create intersection observer
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            // Trigger fade-up animation by adding animate class
+            entry.target.classList.add('animate');
+
+            // Stop observing this element
+            observer.unobserve(entry.target);
+          }
+        });
+      },
+      {
+        rootMargin: '0px 0px -100px 0px',
+        threshold: 0.1,
+      }
+    );
+
+    // Observe all animated elements
+    animatedElements.forEach((element) => {
+      observer.observe(element);
+    });
+  });
+</script>
 
 <script type="application/ld+json">
   {{ article | structured_data }}
