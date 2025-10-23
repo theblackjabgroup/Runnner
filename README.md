@@ -1,10 +1,10 @@
-# Delhi - Shopify Theme
+# Noor - Shopify Theme
 
 A modern, high-performance Shopify theme built for e-commerce success.
 
-## About Delhi
+## About Noor
 
-Delhi is a professionally crafted Shopify theme designed to deliver exceptional shopping experiences across all devices. Built with performance, accessibility, and customization in mind.
+Noor is a professionally crafted Shopify theme designed to deliver exceptional shopping experiences across all devices. Built with performance, accessibility, and customization in mind.
 
 ## Key Features
 
@@ -30,7 +30,7 @@ Delhi is a professionally crafted Shopify theme designed to deliver exceptional 
 
 ## Customization
 
-Delhi offers extensive customization options through the Shopify Theme Editor:
+Noor offers extensive customization options through the Shopify Theme Editor:
 
 - Color schemes
 - Typography settings
