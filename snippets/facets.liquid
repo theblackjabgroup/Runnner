@@ -29,7 +29,7 @@
 -%}
 
 <div
-  class="facets-container-bg facets-container  md:border-b h-[40px] mb-10  {% if filter_type == 'drawer' %} facets-container-drawer{% endif %}{% if settings.animations_reveal_on_scroll %} scroll-trigger animate--fade-in{% endif %} facets-container-height"
+  class="facets-container-bg facets-container  md:border-b h-[40px]   {% if filter_type == 'drawer' %} facets-container-drawer{% endif %}{% if settings.animations_reveal_on_scroll %} scroll-trigger animate--fade-in{% endif %} facets-container-height"
 >
   {% if filter_type == 'horizontal' %}
     <div class="w-full md:!flex items-center hidden">
@@ -499,6 +499,85 @@
             {%- endif -%}
           </div>
 
+          <!-- Active Filters Tags Section (Mobile) - Above Footer -->
+          <div class="active-filters-tags-container-mobile">
+            <div class="active-filters-tags-wrapper">
+              <div class="active-filters-tags">
+                {%- for filter in results.filters -%}
+                  {%- for value in filter.active_values -%}
+                    <div class="active-filter-tag">
+                      <span class="active-filter-tag-text">{{ value.label | escape }}</span>
+                      <button
+                        class="active-filter-tag-remove mobile-tag-remove"
+                        data-filter-param="{{ filter.param_name }}"
+                        data-filter-value="{{ value.value }}"
+                      >
+                        <span class="svg-wrapper">
+                          {{- 'icon-close-small.svg' | inline_asset_content -}}
+                        </span>
+                      </button>
+                    </div>
+                  {%- endfor -%}
+                  {% if filter.type == 'price_range' %}
+                    {% assign min = filter.min_value.value %}
+                    {% assign max = filter.max_value.value %}
+                    {%- if min != null or max != null -%}
+                      <div class="active-filter-tag">
+                        <span class="active-filter-tag-text">
+                          {{- min | default: 0 | money }} - {{ max | default: filter.range_max | money -}}
+                        </span>
+                        <button
+                          class="active-filter-tag-remove mobile-tag-remove"
+                          data-filter-param="{{ filter.param_name }}"
+                        >
+                          <span class="svg-wrapper">
+                            {{- 'icon-close-small.svg' | inline_asset_content -}}
+                          </span>
+                        </button>
+                      </div>
+                    {%- endif -%}
+                  {% endif %}
+                {%- endfor -%}
+
+                <!-- Sort by tag -->
+                {%- if results.sort_by -%}
+                  {%- for option in results.sort_options -%}
+                    {%- if option.value == results.sort_by -%}
+                      <div class="active-filter-tag">
+                        <span class="active-filter-tag-text">{{ option.name | escape }}</span>
+                        <button class="active-filter-tag-remove mobile-tag-remove" data-sort-remove="true">
+                          <span class="svg-wrapper">
+                            {{- 'icon-close-small.svg' | inline_asset_content -}}
+                          </span>
+                        </button>
+                      </div>
+                    {%- endif -%}
+                  {%- endfor -%}
+                {%- endif -%}
+              </div>
+
+              {%- assign has_active_filters = false -%}
+              {%- for filter in results.filters -%}
+                {%- if filter.active_values.size > 0 -%}
+                  {%- assign has_active_filters = true -%}
+                  {%- break -%}
+                {%- endif -%}
+                {%- if filter.type == 'price_range' -%}
+                  {%- assign min = filter.min_value.value -%}
+                  {%- assign max = filter.max_value.value -%}
+                  {%- if min != null or max != null -%}
+                    {%- assign has_active_filters = true -%}
+                    {%- break -%}
+                  {%- endif -%}
+                {%- endif -%}
+              {%- endfor -%}
+
+              {%- if has_active_filters or results.sort_by -%}
+                <button class="clear-all-filters-btn mobile-clear-all" data-action="clear-all-mobile">CLEAR ALL</button>
+              {%- endif -%}
+            </div>
+          </div>
+
           <div class="mobile-filter-footer">
             <button type="button" class="mobile-apply-btn">CLOSE</button>
           </div>
@@ -540,6 +619,82 @@
         {%- endif -%}
       {%- endif -%}
     {%- endfor -%}
+  </div>
+</div>
+
+<!-- Active Filters Tags Section -->
+<div class="active-filters-tags-container">
+  <div class="active-filters-tags-wrapper">
+    <div class="active-filters-tags">
+      {%- for filter in results.filters -%}
+        {%- for value in filter.active_values -%}
+          <div class="active-filter-tag">
+            <span class="active-filter-tag-text">{{ value.label | escape }}</span>
+            <button
+              class="active-filter-tag-remove"
+              data-filter-param="{{ filter.param_name }}"
+              data-filter-value="{{ value.value }}"
+            >
+              <span class="svg-wrapper">
+                {{- 'icon-close-small.svg' | inline_asset_content -}}
+              </span>
+            </button>
+          </div>
+        {%- endfor -%}
+        {% if filter.type == 'price_range' %}
+          {% assign min = filter.min_value.value %}
+          {% assign max = filter.max_value.value %}
+          {%- if min != null or max != null -%}
+            <div class="active-filter-tag">
+              <span class="active-filter-tag-text">
+                {{- min | default: 0 | money }} - {{ max | default: filter.range_max | money -}}
+              </span>
+              <button class="active-filter-tag-remove" data-filter-param="{{ filter.param_name }}">
+                <span class="svg-wrapper">
+                  {{- 'icon-close-small.svg' | inline_asset_content -}}
+                </span>
+              </button>
+            </div>
+          {%- endif -%}
+        {% endif %}
+      {%- endfor -%}
+
+      <!-- Sort by tag -->
+      {%- if results.sort_by -%}
+        {%- for option in results.sort_options -%}
+          {%- if option.value == results.sort_by -%}
+            <div class="active-filter-tag">
+              <span class="active-filter-tag-text">{{ option.name | escape }}</span>
+              <button class="active-filter-tag-remove" data-sort-remove="true">
+                <span class="svg-wrapper">
+                  {{- 'icon-close-small.svg' | inline_asset_content -}}
+                </span>
+              </button>
+            </div>
+          {%- endif -%}
+        {%- endfor -%}
+      {%- endif -%}
+    </div>
+
+    {%- assign has_active_filters = false -%}
+    {%- for filter in results.filters -%}
+      {%- if filter.active_values.size > 0 -%}
+        {%- assign has_active_filters = true -%}
+        {%- break -%}
+      {%- endif -%}
+      {%- if filter.type == 'price_range' -%}
+        {%- assign min = filter.min_value.value -%}
+        {%- assign max = filter.max_value.value -%}
+        {%- if min != null or max != null -%}
+          {%- assign has_active_filters = true -%}
+          {%- break -%}
+        {%- endif -%}
+      {%- endif -%}
+    {%- endfor -%}
+
+    {%- if has_active_filters or results.sort_by -%}
+      <button class="clear-all-filters-btn" data-action="clear-all">CLEAR ALL</button>
+    {%- endif -%}
   </div>
 </div>
 
@@ -686,7 +841,7 @@
       });
     });
 
-    console.log('✅ Facets event listeners initialized (CSP-compliant)');
+    // Facets event listeners initialized (CSP-compliant)
 
     // Close dropdowns when clicking outside
     document.addEventListener('click', function (e) {
@@ -777,6 +932,9 @@
 </script>
 
 <style>
+  .facets-container-height {
+    z-index: 0 !important;
+  }
   .field__label {
     top: 6px;
   }
@@ -902,6 +1060,7 @@
     top: -15px !important;
     position: absolute;
     left: 10px;
+    stroke-width: 2px !important;
   }
 
   .facet-checkbox > input[type='radio'] {
@@ -1004,7 +1163,12 @@
     padding: 0.5rem;
   }
   .filters-translate {
-    transform: translateY(-55px) !important;
+    transform: translateY(-5px) !important;
+    position: absolute;
+    width: 94vw;
+    top: 10px;
+    left: 10px;
+    padding: 0 var(--space-md);
   }
 
   /* Only animate arrow rotation on click (rotated class), not on hover */
@@ -1027,16 +1191,14 @@
     left: 0;
     right: 0;
     bottom: 0;
-    background: rgba(0, 0, 0, 0.7);
-    z-index: 9999 !important;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 999999 !important; /* Much higher than header */
     opacity: 0;
     visibility: hidden;
     transition: all 0.3s ease;
-    /* Add blur effect */
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
     display: flex;
-    justify-content: flex-end; /* Ensure drawer is right-aligned */
+    justify-content: flex-end;
+    align-items: stretch;
   }
 
   .mobile-filter-overlay.active {
@@ -1045,9 +1207,7 @@
   }
 
   .mobile-filter-drawer {
-    position: absolute;
-    top: 0;
-    right: 0;
+    position: relative;
     height: 100vh;
     width: 90%;
     max-width: 400px;
@@ -1057,25 +1217,24 @@
     display: flex;
     flex-direction: column;
     overflow: hidden;
-    position: relative;
-    border-radius: 12px 0 0 12px;
-    z-index: 10000 !important;
+    z-index: 1000000 !important; /* Highest z-index */
+    box-shadow: -4px 0 20px rgba(0, 0, 0, 0.15);
   }
 
   .mobile-filter-overlay.active .mobile-filter-drawer {
-    transform: translateX(0);
+    transform: translateX(0%);
   }
 
   .mobile-filter-header {
     display: flex;
     justify-content: space-between;
-    align-items: flex-end;
-    padding: 24px 20px 20px 20px;
+    align-items: center;
+    padding: 20px 20px 40px 20px;
     background: white;
     position: sticky;
     top: 0;
-    z-index: 10001 !important;
-    border-radius: 12px 0 0 0;
+    z-index: 100001 !important; /* Highest z-index for header */
+    flex-shrink: 0;
   }
 
   .mobile-filter-header h2 {
@@ -1102,12 +1261,26 @@
   .mobile-filter-content {
     flex: 1;
     overflow-y: auto;
-    padding: 0 20px 20px 20px;
+    padding: 0;
+    background: var(--background);
+    scrollbar-width: thin;
+    scrollbar-color: rgba(0, 0, 0, 0.2) transparent;
+  }
+
+  .mobile-filter-content::-webkit-scrollbar {
+    width: 4px;
+  }
+
+  .mobile-filter-content::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .mobile-filter-content::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 2px;
   }
 
   .mobile-filter-section {
-    border-top: 1px solid var(--border);
-    margin: 0 -20px;
     padding: 0 20px;
   }
 
@@ -1115,7 +1288,7 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 16px 0;
+    padding: 10px 0;
     font-family: var(--font-body-family);
     font-style: var(--font-body-style);
     font-weight: var(--font-body-weight);
@@ -1124,6 +1297,7 @@
     cursor: pointer;
     list-style: none;
     background: white;
+    border-top: 1px solid var(--border);
   }
 
   .mobile-filter-summary::-webkit-details-marker {
@@ -1141,13 +1315,18 @@
   .mobile-filter-options {
     padding: 0 0 20px 0;
     background: var(--background);
+    margin: 0;
   }
 
   .mobile-filter-option {
     display: flex;
     align-items: center;
-    padding: 12px 0;
+    padding: 8px 0;
     cursor: pointer;
+  }
+
+  .mobile-filter-option:last-child {
+    border-bottom: none;
   }
 
   .mobile-filter-option input[type='checkbox'] {
@@ -1158,7 +1337,7 @@
     width: 16px;
     height: 16px;
     border: 1px solid var(--border);
-    margin-right: 0.75rem;
+    margin-right: 0.5rem;
     position: relative;
     flex-shrink: 0;
     border-radius: 2px;
@@ -1184,8 +1363,8 @@
     font-family: var(--font-body-family);
     font-style: var(--font-body-style);
     font-weight: var(--font-body-weight);
-    font-size: var(--tm-b-3-size);
-    line-height: var(--tm-b-3-line-height);
+    font-size: var(--tm-b-4-size);
+    line-height: var(--tm-b-4-line-height);
     text-transform: uppercase;
     color: var(--text);
   }
@@ -1196,208 +1375,159 @@
   }
 
   .mobile-filter-footer {
-    padding: 0px;
     border-top: 1px solid var(--border) !important;
     background: var(--background);
     display: flex;
     gap: 1rem;
-    position: absolute !important;
-    left: 0;
-    right: 0;
+    position: fixed !important;
     bottom: 0 !important;
     width: 100%;
-    border-radius: 0 0 12px 0;
-    z-index: 10001 !important;
+    z-index: 1000001 !important;
+    flex-shrink: 0;
+    margin-top: auto;
+    padding: 20px;
+    box-sizing: border-box;
   }
 
   .mobile-apply-btn {
     flex: 1;
-    padding: 16px !important;
+    padding: 12px 24px !important;
     background: var(--button);
     color: var(--button_label);
-    border-radius: 8px !important;
-    text-transform: uppercase;
-    font-family: var(--font-heading-family);
-    font-style: var(--font-heading-style);
-    font-weight: var(--font-heading-weight);
-    font-size: var(--tm-h-4-size);
-    line-height: var(--tm-h-4-line-height);
-    cursor: pointer;
-    width: 100% !important;
     border: none;
-  }
-
-  .mobile-price-range {
-    padding: 20px 0;
-  }
-
-  /* Mobile Price Facet Styling - Match Desktop */
-  .mobile-price-range .price-facet-container {
-    background-color: transparent;
-    border-radius: 6px;
-    padding: 12px;
-    width: 100%;
-    position: relative;
-  }
-
-  .mobile-price-range .price-facet-header {
-    display: flex;
-    justify-content: flex-end;
-    margin-bottom: 10px;
-  }
-
-  .mobile-price-range .price-reset {
-    font-family: var(--font-body-family);
-    font-style: var(--font-body-style);
-    font-weight: var(--font-body-weight);
-    font-size: var(--tm-b-3-size);
-    line-height: var(--tm-b-3-line-height);
-    color: var(--text);
-    padding: 0 0 var(--space-md) 0;
-    cursor: pointer;
+    border-radius: 5px !important;
     text-transform: uppercase;
-  }
-
-  .mobile-price-range .price-facet-inputs {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-    margin-bottom: 8px;
-  }
-
-  .mobile-price-range .price-facet-row {
-    display: flex;
-    width: 100%;
-  }
-
-  .mobile-price-range .field {
-    width: 100%;
-    position: relative;
-    margin-bottom: 10px;
-  }
-
-  .mobile-price-range .price-input-wrapper {
-    position: relative;
-    display: flex;
-    align-items: center;
-    width: 100%;
-  }
-
-  .mobile-price-range .currency-symbol {
-    position: absolute;
-    left: 10px;
-    z-index: 5;
-    font-family: var(--font-body-family);
-    font-style: var(--font-body-style);
-    font-weight: var(--font-body-weight);
-    font-size: var(--tm-b-3-size);
-    line-height: var(--tm-b-3-line-height);
-    color: #999;
-    pointer-events: none;
-  }
-
-  .mobile-price-range .price-input {
-    width: 100%;
-    height: 32px;
-    padding: 8px 10px 8px 25px;
-    border: none;
-    border-radius: 3px;
-    font-family: var(--font-body-family);
-    font-style: var(--font-body-style);
-    font-weight: var(--font-body-weight);
-    font-size: var(--tm-b-3-size);
-    line-height: var(--tm-b-3-line-height);
-    background-color: white;
-    box-sizing: border-box;
-    outline: none;
-    transition: border-color 0.2s ease;
-  }
-
-  .mobile-price-range .price-input:focus {
-    outline: none;
-    box-shadow: none;
-    margin-bottom: 10px;
-  }
-
-  .mobile-price-range .price-input:active {
-    outline: none;
-    box-shadow: none;
-  }
-
-  .mobile-price-range .field__label {
-    position: absolute;
-    left: 20px;
-    top: 0;
-    transform: translateY(-70%);
-    font-family: var(--font-body-family);
-    font-style: var(--font-body-style);
-    font-weight: var(--font-body-weight);
-    font-size: var(--tm-b-3-size);
-    line-height: var(--tm-b-3-line-height);
-    color: #999;
-    pointer-events: none;
-    transition: all 0.3s ease;
-    background-color: white;
-    padding: 0 4px;
-    z-index: 10;
-  }
-
-  .mobile-price-range .price-input:focus + .field__label,
-  .mobile-price-range .price-input:not(:placeholder-shown) + .field__label,
-  .mobile-price-range .price-input[value]:not([value='']) + .field__label {
-    top: 0;
-    font-size: var(--tm-b-2-size);
-    color: #333;
-    transform: translateY(-50%);
-    background-color: white;
-    padding: 0 4px;
-  }
-
-  .mobile-price-range .price-facet-info {
     font-family: var(--font-body-family);
     font-style: var(--font-body-style);
     font-weight: var(--font-body-weight);
     font-size: var(--tm-b-2-size);
     line-height: var(--tm-b-2-line-height);
-    color: var(--text);
-    margin-top: 4px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    letter-spacing: 0.5px;
+    max-width: 100%;
   }
 
-  .mobile-price-range .highest-price-text {
-    font-family: var(--font-body-family);
-    font-style: var(--font-body-style);
-    font-weight: var(--font-body-weight);
-    font-size: var(--tm-b-3-size);
-    line-height: var(--tm-b-3-line-height);
-    color: var(--text);
-  }
-  .facets {
-    padding-top: 5px;
+  .mobile-apply-btn:hover {
+    background: var(--hovered_button);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   }
 
-  /* Price Range Wrapper Styling */
-  .price-range-wrapper {
-    background-color: transparent;
-    padding: 0;
-    width: 180px !important;
-    max-width: 180px !important;
-    position: relative;
-  }
-
-  .price-range-wrapper .price-facet-container {
-    background-color: transparent;
-    border-radius: 6px;
-    padding: 12px;
+  .mobile-price-range {
+    padding: 20px 0;
+    background: var(--background);
     width: 100%;
+  }
+
+  .mobile-price-range .price-facet-container {
+    background: transparent;
+    border: none;
+    border-radius: 0;
+    padding: 20px 0;
+    margin: 0;
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .mobile-price-range .price-facet-header {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 12px;
+  }
+
+  .mobile-price-range .price-reset {
+    font-size: 12px;
+    color: #000;
+    text-decoration: underline;
+    cursor: pointer;
+    text-transform: uppercase;
+    font-weight: normal;
+    padding: 0;
+    margin: 0;
+    background: none;
+    border: none;
+  }
+
+  .mobile-price-range .price-slider-container {
+    margin-bottom: 16px;
+    position: relative;
+    height: 20px;
+  }
+
+  .mobile-price-range .price-input-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 16px;
+    width: 100%;
+  }
+
+  .mobile-price-range .price-field {
+    flex: 1;
+    position: relative;
+    width: 100%;
+  }
+
+  .mobile-price-range .price-input {
+    width: 100%;
+    height: 32px;
+    padding: 8px 10px;
+    border: 1px solid #000;
+    border-radius: 4px;
+    font-size: 12px;
+    background-color: white;
+    color: #000;
+    box-sizing: border-box;
+    outline: none;
+  }
+
+  .mobile-price-range .price-input::placeholder {
+    color: #999;
+    opacity: 1;
+    font-size: 12px;
+  }
+
+  .mobile-price-range .price-separator {
+    font-size: 14px;
+    color: #000;
+    font-weight: normal;
+    flex-shrink: 0;
+  }
+
+  /* Ensure mobile drawer appears above everything */
+  .mobile-filter-overlay,
+  .mobile-filter-drawer,
+  .mobile-filter-header,
+  .mobile-filter-footer {
+    z-index: 999999 !important;
   }
 </style>
 
 <script>
+  // Utility function to manage header z-index
+  function setHeaderZIndex(zIndex) {
+    const headerElements = document.querySelectorAll('.header-main, .header-z-index, [class*="header"]');
+    headerElements.forEach((element) => {
+      element.style.zIndex = zIndex;
+    });
+  }
+
   function openMobileFilters() {
     const overlay = document.getElementById('mobile-filter-overlay');
     if (overlay) {
       overlay.classList.add('active');
       document.body.style.overflow = 'hidden';
+
+      // Change header z-index to 1 when mobile filters are open
+      setHeaderZIndex('1');
+
+      // Calculate and set mobile footer height for proper tags positioning
+      const footer = document.querySelector('.mobile-filter-footer');
+      if (footer) {
+        const footerHeight = footer.offsetHeight;
+        document.documentElement.style.setProperty('--mobile-footer-height', `${footerHeight}px`);
+      }
     }
   }
 
@@ -1406,8 +1536,22 @@
     if (overlay) {
       overlay.classList.remove('active');
       document.body.style.overflow = '';
+
+      // Reset header z-index back to 2 when mobile filters are closed
+      setHeaderZIndex('2');
     }
   }
+
+  // Initialize header z-index on page load
+  document.addEventListener('DOMContentLoaded', function () {
+    // Ensure header starts with correct z-index
+    setHeaderZIndex('2');
+
+    // Add cleanup on page unload to reset z-index
+    window.addEventListener('beforeunload', function () {
+      setHeaderZIndex('2');
+    });
+  });
 
   // Close on overlay click
   document.addEventListener('DOMContentLoaded', function () {
@@ -1487,6 +1631,9 @@
         }
       });
 
+      // Update tags section
+      updateTagsSection();
+
       // Use AJAX instead of form submission
       if (typeof window.applyFiltersAjax === 'function') {
         window.applyFiltersAjax();
@@ -1499,6 +1646,31 @@
     }
   }
 
+  // Function to update tags section dynamically
+  function updateTagsSection() {
+    // This will be called after AJAX updates to refresh the tags
+    // The tags are already rendered server-side, so this ensures they stay in sync
+    const tagsContainer = document.querySelector('.active-filters-tags-container');
+    if (tagsContainer) {
+      // Trigger a re-render of the tags section
+      const event = new CustomEvent('tagsUpdate');
+      document.dispatchEvent(event);
+    }
+  }
+
+  // Function to show/hide tags container based on content
+  function toggleTagsContainer() {
+    const tagsContainer = document.querySelector('.active-filters-tags-container');
+    if (tagsContainer) {
+      const hasTags = tagsContainer.querySelector('.active-filter-tag');
+      if (hasTags) {
+        tagsContainer.style.display = 'block';
+      } else {
+        tagsContainer.style.display = 'none';
+      }
+    }
+  }
+
   // Prevent all filter form submissions - force AJAX only
   document.addEventListener('DOMContentLoaded', function () {
     const filterForms = document.querySelectorAll('#FacetFiltersForm, #FacetFiltersFormMobile');
@@ -1507,20 +1679,20 @@
       const submitHandler = function (event) {
         event.preventDefault();
         event.stopPropagation();
-        console.log('Filter form submission prevented, using AJAX instead');
+        // Filter form submission prevented, using AJAX instead
 
         // Try to use AJAX function, fallback to form submission if not available
         if (typeof window.applyFiltersAjax === 'function') {
           try {
             window.applyFiltersAjax();
           } catch (error) {
-            console.error('AJAX filter failed, allowing form submission:', error);
+            // AJAX filter failed, allowing form submission
             // Remove this event listener and resubmit
             form.removeEventListener('submit', submitHandler);
             form.submit();
           }
         } else {
-          console.warn('applyFiltersAjax not found, allowing form submission');
+          // applyFiltersAjax not found, allowing form submission
           // Remove this event listener and resubmit
           form.removeEventListener('submit', submitHandler);
           form.submit();
@@ -1530,6 +1702,195 @@
       };
 
       form.addEventListener('submit', submitHandler);
+    });
+
+    // Initialize tag event listeners
+    if (typeof FacetFiltersForm !== 'undefined' && FacetFiltersForm.attachTagEventListeners) {
+      FacetFiltersForm.attachTagEventListeners();
+    }
+
+    // Check and toggle tags container visibility on page load
+    toggleTagsContainer();
+
+    // Ensure tags are visible on page load if sort by is already selected
+    const sortInputs = document.querySelectorAll('input[name="sort_by"]:checked');
+    // Sort inputs found
+    if (sortInputs.length > 0) {
+      // Sort by is selected, checking tags container
+      // Trigger a tags update to ensure sort by tags are visible
+      const tagsContainer = document.querySelector('.active-filters-tags-container');
+      if (tagsContainer) {
+        // Tags container found, triggering update
+        // Force a re-render of the tags section
+        const event = new CustomEvent('tagsUpdate');
+        document.dispatchEvent(event);
+      } else {
+        // Tags container not found
+      }
+    }
+  });
+
+  // Clear all filters function
+  window.clearAllFilters = function () {
+    // Uncheck all filter checkboxes
+    document.querySelectorAll('input[type="checkbox"][name^="filter."]').forEach((input) => {
+      input.checked = false;
+    });
+
+    // Clear all price range inputs
+    document.querySelectorAll('input[type="number"]').forEach((input) => {
+      input.value = '';
+    });
+
+    // Reset sort to default
+    const sortInputs = document.querySelectorAll('input[name="sort_by"]');
+    sortInputs.forEach((input) => {
+      input.checked = false;
+    });
+
+    // Hide the tags container immediately
+    const tagsContainer = document.querySelector('.active-filters-tags-container');
+    if (tagsContainer) {
+      tagsContainer.style.display = 'none';
+    }
+
+    // Apply the filter changes
+    if (typeof window.applyFiltersAjax === 'function') {
+      window.applyFiltersAjax();
+    } else {
+      // Fallback to form submission
+      const form = document.querySelector('#FacetFiltersForm');
+      if (form) {
+        form.submit();
+      }
+    }
+  };
+
+  // Clear all filters function for mobile
+  window.clearAllFiltersMobile = function () {
+    // Uncheck all filter checkboxes in mobile form
+    document.querySelectorAll('#FacetFiltersFormMobile input[type="checkbox"][name^="filter."]').forEach((input) => {
+      input.checked = false;
+    });
+
+    // Clear all price range inputs in mobile form
+    document.querySelectorAll('#FacetFiltersFormMobile input[type="number"]').forEach((input) => {
+      input.value = '';
+    });
+
+    // Reset sort to default
+    const sortInputs = document.querySelectorAll('input[name="sort_by"]');
+    sortInputs.forEach((input) => {
+      input.checked = false;
+    });
+
+    // Hide the mobile tags container immediately
+    const tagsContainer = document.querySelector('.active-filters-tags-container-mobile');
+    if (tagsContainer) {
+      tagsContainer.style.display = 'none';
+    }
+
+    // Apply the filter changes
+    if (typeof window.applyFiltersAjax === 'function') {
+      window.applyFiltersAjax();
+    } else {
+      // Fallback to form submission
+      const form = document.querySelector('#FacetFiltersFormMobile');
+      if (form) {
+        form.submit();
+      }
+    }
+  };
+
+  // Mobile tag removal event listeners
+  document.addEventListener('DOMContentLoaded', function () {
+    function attachMobileTagListeners() {
+      document.querySelectorAll('.mobile-tag-remove').forEach((button) => {
+        button.addEventListener('click', function (e) {
+          e.preventDefault();
+          const filterParam = this.getAttribute('data-filter-param');
+          const filterValue = this.getAttribute('data-filter-value');
+          const isSortRemove = this.getAttribute('data-sort-remove') === 'true';
+
+          if (isSortRemove) {
+            const sortInputs = document.querySelectorAll('input[name="sort_by"]');
+            sortInputs.forEach((input) => {
+              input.checked = false;
+            });
+          } else if (filterParam && filterValue) {
+            // Uncheck in mobile form
+            const filterInput = document.querySelector(
+              `#FacetFiltersFormMobile input[name="${filterParam}"][value="${filterValue}"]`
+            );
+            if (filterInput) {
+              filterInput.checked = false;
+            }
+          } else if (filterParam) {
+            // Clear price range in mobile form
+            const priceInputs = document.querySelectorAll(`#FacetFiltersFormMobile input[name="${filterParam}"]`);
+            priceInputs.forEach((input) => {
+              input.value = '';
+            });
+          }
+
+          if (typeof window.applyFiltersAjax === 'function') {
+            window.applyFiltersAjax();
+          } else {
+            const form = document.querySelector('#FacetFiltersFormMobile');
+            if (form) {
+              form.submit();
+            }
+          }
+        });
+      });
+    }
+
+    // Attach listeners on page load
+    attachMobileTagListeners();
+
+    // Re-attach listeners after mobile drawer opens
+    const mobileFilterOverlay = document.getElementById('mobile-filter-overlay');
+    if (mobileFilterOverlay) {
+      const observer = new MutationObserver(function (mutations) {
+        mutations.forEach(function (mutation) {
+          if (mutation.attributeName === 'class') {
+            if (mobileFilterOverlay.classList.contains('active')) {
+              setTimeout(attachMobileTagListeners, 100);
+            }
+          }
+        });
+      });
+      observer.observe(mobileFilterOverlay, { attributes: true });
+    }
+
+    // Toggle mobile tags container visibility on page load
+    const mobileTagsContainer = document.querySelector('.active-filters-tags-container-mobile');
+    if (mobileTagsContainer) {
+      const hasTags = mobileTagsContainer.querySelector('.active-filter-tag');
+      if (hasTags) {
+        mobileTagsContainer.style.display = 'block';
+      } else {
+        mobileTagsContainer.style.display = 'none';
+      }
+    }
+
+    // Add event listeners for clear all buttons (CSP compliant)
+    document.querySelectorAll('[data-action="clear-all"]').forEach((button) => {
+      button.addEventListener('click', function (event) {
+        event.preventDefault();
+        if (typeof window.clearAllFilters === 'function') {
+          window.clearAllFilters();
+        }
+      });
+    });
+
+    document.querySelectorAll('[data-action="clear-all-mobile"]').forEach((button) => {
+      button.addEventListener('click', function (event) {
+        event.preventDefault();
+        if (typeof window.clearAllFiltersMobile === 'function') {
+          window.clearAllFiltersMobile();
+        }
+      });
     });
   });
 </script>

@@ -50,11 +50,33 @@
   .slider-arrow svg {
     display: block;
     margin: auto;
+    color: var(--text);
+    stroke-width: 1px;
   }
   .slider-arrow {
     width: 40px;
     height: 40px;
-    padding: 0;
+  }
+
+
+  /* Product Card Border Radius */
+  .card-wrapper {
+    border-radius: {{ settings.product_card_border_radius }}px;
+    overflow: hidden;
+  }
+
+  .card-wrapper .card__inner {
+    border-radius: {{ settings.product_card_border_radius }}px;
+    overflow: hidden;
+  }
+
+  .card-wrapper .card__media {
+    border-radius: {{ settings.product_card_border_radius }}px;
+    overflow: hidden;
+  }
+
+  .card-wrapper .card__media img {
+    border-radius: {{ settings.product_card_border_radius }}px;
   }
 </style>
 {%- unless skip_styles -%}
@@ -79,7 +101,7 @@
   <div class="card-wrapper product-card-wrapper group">
     <div class="block card-inner-wrapper w-full">
       <div
-        class="relative w-full product-card-height overflow-hidden"
+        class="relative w-full product-card-height transition-all duration-300 overflow-hidden"
         style="background-color: var(--background);"
       >
         {%- if card_product.featured_media -%}
@@ -119,13 +141,13 @@
               class="slider-arrow prev absolute left-0 top-1/2  -translate-y-1/2  cursor-pointer flex items-center justify-center z-[50] opacity-0 group-hover:opacity-100 transition-opacity duration-200"
             >
               <svg
-                width="40"
-                height="40"
-                viewBox="0 0 24 24"
                 fill="none"
-                stroke="#ccc"
+                width="30"
+                height="30"
+                viewBox="5 8 14 8"
+                style="transform: rotate(90deg);"
               >
-                <path d="M15 18l-6-6 6-6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M6 9L12 15L18 9" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/>
               </svg>
             </button>
             <button
@@ -133,33 +155,41 @@
               class="slider-arrow next absolute right-0 top-1/2  -translate-y-1/2  cursor-pointer flex items-center justify-center z-[50] opacity-0 group-hover:opacity-100 transition-opacity duration-200"
             >
               <svg
-                width="40"
-                height="40"
-                viewBox="0 0 24 24"
                 fill="none"
-                stroke="#ccc"
+                width="30"
+                height="30"
+                viewBox="5 8 14 8"
+                style="transform: rotate(-90deg);"
               >
-                <path d="M9 18l6-6-6-6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M6 9L12 15L18 9" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/>
               </svg>
             </button>
           </div>
         {%- endif -%}
 
         {% if card_product.available == false %}
-          <div class="">
-            <span
-              class="sold-out-tag text-[14px] font-medium rounded px-1"
-              style="background-color: transparent; color: var(--text); border: 1px solid var(--text);"
-            >
-              SOLD OUT
-            </span>
+          <div class="absolute top-3 z-2" style="left: 10px;">
+            {% render 'sold-out-badge', class: 'sold-out-tag tracking-wide font-medium' %}
           </div>
-          <div class="absolute inset-x-0 bottom-0 p-4 opacity-0 translate-y-10 transition-all duration-300 group-hover:opacity-100 group-hover:-translate-y-0">
-            <div class="w-[93%] mx-auto text-center" style="background-color: var(--background);">
+        {% elsif card_product.tags contains 'best-seller' or card_product.tags contains 'bestseller' or card_product.tags contains 'best seller' %}
+          <div class="absolute top-3 z-2" style="left: 10px;">
+            {% render 'best-seller-badge', class: 'best-seller-tag tracking-wide font-medium' %}
+          </div>
+        {% elsif card_product.available and card_product.variants.first.inventory_quantity <= 5 and card_product.variants.first.inventory_quantity > 0 %}
+          <div class="absolute top-3 z-2" style="left: 10px;">
+            {% render 'low-stock-badge', quantity: card_product.variants.first.inventory_quantity, class: 'low-stock-tag tracking-wide font-medium' %}
+          </div>
+        {% endif %}
+
+        {% if card_product.available == false %}
+          <div class="rounded-[5px] absolute inset-x-0 bottom-0 p-4 opacity-0 translate-y-10 transition-all duration-300 group-hover:opacity-100 group-hover:-translate-y-0">
+            <div class="w-[93%] rounded-[5px] mx-auto text-center" style="background-color: var(--background);">
               <button
                 type="button"
                 class="notify-when-available-btn w-full py-4  font-medium cursor-pointer transition-colors duration-200 uppercase tracking-wider"
                 style="color:var(--button_label); background-color: var(--button);"
+                onmouseout="this.style.backgroundColor='var(--button)'; this.style.color='var(--button_label)';"
+                onmouseover="this.style.backgroundColor='var(--hovered_button_label)'; this.style.color='var(--hovered_button_text_color)';"
                 data-product-id="{{ card_product.id }}"
                 data-product-title="{{ card_product.title | escape }}"
               >
@@ -170,9 +200,9 @@
             </div>
           </div>
         {% else %}
-          <div class="absolute inset-x-0 bottom-0 p-4 opacity-0 translate-y-10 transition-all duration-300 group-hover:opacity-100 group-hover:-translate-y-0">
+          <div class="rounded-[5px] absolute inset-x-0 bottom-0 p-4 opacity-0 translate-y-10 transition-all duration-300 group-hover:opacity-100 group-hover:-translate-y-0">
             <div
-              class="w-[93%] mx-auto text-center product-sizes-container"
+              class="w-[93%] rounded-[5px] mx-auto text-center product-sizes-container"
               style="background-color: var(--background);"
             >
               {%- liquid
@@ -189,6 +219,9 @@
                 type="button"
                 class="add-to-cart-btn new-add-to-cart-btn {% if has_size_variant %}no-hover-css-product-card{% endif %} w-full py-4 z-[100] !text-[1.6rem] font-medium transition-colors duration-200 uppercase tracking-wider quick-add-button"
                 style="color:var(--button_label); background-color: var(--button);"
+
+                onmouseout="this.style.backgroundColor='var(--button)'; this.style.color='var(--button_label)';"
+                onmouseover="this.style.backgroundColor='var(--hovered_button_label)'; this.style.color='var(--hovered_button_text_color)';"
                 {% if has_size_variant %}
                   data-has-sizes="true"
                 {% else %}
@@ -209,7 +242,8 @@
                         product: card_product,
                         mobile: false,
                         show_label: false,
-                        size_only: true
+                        size_only: true,
+                        buttons_only: true
                       %}
                     </div>
                   </div>
@@ -327,13 +361,63 @@
 {%- endif -%}
 
 <style>
-  .sold-out-tag {
-    margin: 10px 0 0 5px !important;
-    position: absolute !important;
-    top: 0px !important;
-    left: 5px !important;
-    padding: 0 8px;
-    font-size: 16px;
+  /* Badge positioning and styling */
+  .sold-out-tag,
+  .best-seller-tag,
+  .low-stock-tag {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    z-index: 10;
+    padding: 0px 6px;
+    border-radius: var(--sold-out-badge-radius, 5px);
+    font-size: var(--t-b-3-size);
+    font-weight: var(--t-b-3-weight);
+    line-height: var(--t-b-3-line-height);
+    text-transform: uppercase;
+    white-space: nowrap;
+    letter-spacing: 0.5px;
+    text-align: center;
+    display: inline-block;
+  }
+
+  /* Sold Out Badge Styles */
+  .sold-out-badge-filled.sold-out-tag {
+    background-color: var(--sold-out-filled-bg, #000000);
+    color: var(--sold-out-filled-text, #FFFFFF);
+    border: none;
+  }
+
+  .sold-out-badge-transparent.sold-out-tag {
+    background-color: transparent;
+    color: var(--sold-out-transparent-text, #000000);
+    border: var(--sold-out-badge-border-thickness, 1px) solid var(--sold-out-transparent-border, #000000);
+  }
+
+  /* Best Seller Badge Styles */
+  .sold-out-badge-filled.best-seller-tag {
+    background-color: var(--sold-out-filled-bg, #000000);
+    color: var(--sold-out-filled-text, #FFFFFF);
+    border: none;
+  }
+
+  .sold-out-badge-transparent.best-seller-tag {
+    background-color: transparent;
+    color: var(--sold-out-transparent-text, #000000);
+    border: var(--sold-out-badge-border-thickness, 1px) solid var(--sold-out-transparent-border, #000000);
+  }
+
+  /* Low Stock Badge Styles */
+  .sold-out-badge-filled.low-stock-tag {
+    background-color: var(--sold-out-filled-bg, #000000);
+    color: var(--sold-out-filled-text, #FFFFFF);
+    border: none;
+  }
+
+  .sold-out-badge-transparent.low-stock-tag {
+    background-color: transparent;
+    color: var(--sold-out-transparent-text, #000000);
+    border: var(--sold-out-badge-border-thickness, 1px) solid var(--sold-out-transparent-border, #000000);
   }
   .image-config {
     object-fit: cover;
@@ -344,45 +428,48 @@
   /* Responsive fixed height for image container */
   .product-card-height {
     height: 500px;
-    transition: height 0.3s ease;
     width: 100%;
     max-width: 100%;
     background: var(--background);
     position: relative;
     overflow: hidden;
   }
-  /* On hover, decrease height (shrink from bottom only) */
-  .card-wrapper:hover .product-card-height {
-    height: 450px;
-  }
   @media screen and (min-width: 1500px) {
     .product-card-height {
       height: 380px !important;
-    }
-    .card-wrapper:hover .product-card-height {
-      height: 350px !important;
     }
   }
   @media only screen and (max-width: 600px) {
     .image-config {
       object-fit: fill;
     }
-    .sold-out-tag {
-      font-size: 10px;
+    .sold-out-tag,
+    .best-seller-tag,
+    .low-stock-tag {
+      font-size: var(--tm-b-3-size) !important;
+      line-height: var(--tm-b-3-line-height) !important;
     }
     .card-product-typegraphy {
       font-size: 12px !important;
-    }
-    /* Disable hover effect on mobile - keep original height */
-    .card-wrapper:hover .product-card-height {
-      height: 270px;
     }
     .product-card-text {
       font-size: 12px;
     }
 
-    /* Disable all hover effects on mobile */
-    .group:hover .opacity-0 {
+    /* Disable all hover effects on mobile except images */
+
+    /* Keep images always visible on mobile */
+    .group:hover .image-config {
+      opacity: 1 !important;
+    }
+
+    /* Keep first image visible */
+    .image-config[style*="opacity: 1"] {
+      opacity: 1 !important;
+    }
+
+    /* Hide slider arrows on mobile hover */
+    .group:hover .slider-arrow {
       opacity: 0 !important;
     }
 
@@ -391,7 +478,7 @@
     }
 
     /* Keep add to cart button hidden on mobile hover */
-    .group:hover .group-hover\:opacity-100 {
+    .group:hover .group-hover\:opacity-100:not(.image-config) {
       opacity: 0 !important;
     }
 
@@ -405,20 +492,16 @@
     box-shadow: none !important;
   }
 
-  /* Disable all hover animations on mobile devices */
-  .card-wrapper:hover .product-card-height {
-    height: 270px !important;
-  }
-
-  .group:hover .opacity-0 {
-    opacity: 0 !important;
+  /* Ensure images stay visible */
+  .group:hover .image-config {
+    opacity: 1 !important;
   }
 
   .group:hover .translate-y-10 {
     transform: translateY(2.5rem) !important;
   }
 
-  .group:hover .group-hover\:opacity-100 {
+  .group:hover .group-hover\:opacity-100:not(.image-config) {
     opacity: 0 !important;
   }
 
@@ -451,6 +534,62 @@
     opacity: 0 !important;
     visibility: hidden !important;
   }
+  }
+
+  /* Additional mobile-only hover disabling using touch detection */
+  @media (hover: none) and (pointer: coarse) {
+
+    /* CRITICAL: Keep ONLY first image visible, hide all others */
+    .image-config {
+      opacity: 0 !important;
+    }
+
+    /* Show only the first image */
+    .image-config[style*="opacity: 1"],
+    .image-config:first-of-type {
+      opacity: 1 !important;
+    }
+
+    /* Prevent hover from changing any image opacity */
+    .group:hover .image-config,
+    .card-wrapper:hover .image-config {
+      opacity: 0 !important;
+    }
+
+    /* But keep first image visible even on hover */
+    .group:hover .image-config[style*="opacity: 1"],
+    .group:hover .image-config:first-of-type,
+    .card-wrapper:hover .image-config[style*="opacity: 1"],
+    .card-wrapper:hover .image-config:first-of-type {
+      opacity: 1 !important;
+    }
+
+    /* Disable all image transforms */
+    .group:hover .image-config,
+    .card-wrapper:hover .image-config {
+      transform: none !important;
+      scale: 1 !important;
+    }
+
+    /* Hide all interactive elements on mobile */
+    .slider-arrow,
+    .group:hover .slider-arrow,
+    .card-wrapper:hover .slider-arrow {
+      display: none !important;
+      opacity: 0 !important;
+    }
+
+    /* Disable all transform effects */
+    .group:hover *:not(.image-config),
+    .card-wrapper:hover *:not(.image-config) {
+      transform: none !important;
+    }
+
+    /* Keep buttons hidden */
+    .group:hover .group-hover\:opacity-100:not(.image-config),
+    .card-wrapper:hover .opacity-0:not(.image-config) {
+      opacity: 0 !important;
+    }
   }
 
   /* Make images fill the card completely */
@@ -657,20 +796,8 @@
     pointer-events: none;
   }
   .notify-when-available-btn {
-    border-radius: 5px;
+    border-radius: 5px !important;
     font-size: 20px;
-  }
-
-  /* Hover styles for notify button (replaces inline handlers) */
-  .notify-when-available-btn:hover {
-    background-color: var(--hovered_button_label) !important;
-    color: var(--hovered_button_text_color) !important;
-  }
-
-  /* Hover styles for add to cart button (replaces inline handlers) */
-  .add-to-cart-btn:not(.no-hover-css-product-card):hover {
-    background-color: var(--hovered_button_label) !important;
-    color: var(--hovered_button_text_color) !important;
   }
 
   .add-to-cart-text,
@@ -687,9 +814,9 @@
   document.addEventListener('DOMContentLoaded', function () {
     const containers = document.querySelectorAll('.product-sizes-container');
 
-    // Check if device is mobile
+    // Check if device is mobile or touch device
     function isMobile() {
-      return window.innerWidth <= 600;
+      return window.innerWidth <= 600 || window.matchMedia('(hover: none)').matches || 'ontouchstart' in window;
     }
 
     function updateButtonState(button, state) {

@@ -43,7 +43,7 @@ if (typeof window.ProductRecommendations === 'undefined') {
       const productId = this.dataset.productId;
 
       if (!url || !productId) {
-        console.error('Product recommendations: Missing required data attributes');
+        // Product recommendations: Missing required data attributes
         return;
       }
 

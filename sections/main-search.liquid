@@ -57,7 +57,7 @@
 
   .submit-wrapper {
     color: var(--button_label);
-    padding: 2px 10px;
+    padding: 0px 10px;
     background-color: var(--button);
     border-radius: {{ settings.buttons_radius }}px;
   }
@@ -78,10 +78,18 @@
     padding-right: 10rem; /* Make more space for both buttons */
   }
 
+  /* Adjust input text position closer to the bottom line */
+  .bb-field__input.search__input.field__input {
+    padding-bottom: 0.5rem;
+    line-height: 1.2;
+    vertical-align: bottom;
+    height: 3.5rem;
+  }
+
   .reset__button,
   .search__button {
     position: absolute;
-    top: 50%;
+    top: 65%;
     transform: translateY(-50%);
     display: flex;
     align-items: center;
@@ -92,14 +100,81 @@
 
   .reset__button {
     right: -0.5rem; /* Position reset button to the right of submit button */
-    z-index: 2;
     padding: 0.5rem;
+  }
+
+  /* Always show reset button */
+  .reset__button.hidden {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
   }
 
   .search__button {
     right: 2.75rem; /* Position submit button with space from right edge */
-    z-index: 1;
+    z-index: 0;
   }
+
+  /* Fix for card-product images in search results */
+  #product-grid .card-wrapper .image-config {
+    object-fit: cover !important;
+  }
+
+  #product-grid .card-wrapper .product-card-height {
+    position: relative;
+    overflow: hidden;
+  }
+
+  #product-grid .card-wrapper img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  /* Disable height changes on mobile hover in search results */
+  @media only screen and (max-width: 600px) {
+    #product-grid .card-wrapper:hover .product-card-height {
+      height: 270px !important;
+      transition: none !important;
+    }
+
+    #product-grid .card-wrapper .product-card-height {
+      height: 270px !important;
+    }
+  }
+
+  /* Additional touch device detection */
+  @media (hover: none) and (pointer: coarse) {
+    #product-grid .card-wrapper:hover .product-card-height,
+    #product-grid .group:hover .product-card-height,
+    #product-grid .card-wrapper .product-card-height {
+      height: 270px !important;
+      transition: none !important;
+    }
+
+    /* Prevent any height changes on touch */
+    #product-grid .card-wrapper:active .product-card-height,
+    #product-grid .card-wrapper:focus .product-card-height {
+      height: 270px !important;
+    }
+  }
+
+  /* Fix mobile sort dropdown visibility */
+  .mobile-sort-options,
+  .facets-mobile-sort {
+    z-index: var(--z-sort-search) !important;
+    position: absolute !important;
+  }
+
+  /* Ensure parent containers don't hide the dropdown */
+  .facets-wrapper,
+  .mobile-facets__wrapper,
+  #main-search-filters {
+    overflow: visible !important;
+    position: relative !important;
+   /* z-index: 100 !important; */
+  }
+
 </style>
 
 {%- liquid
@@ -123,7 +198,7 @@
 {%- endstyle -%}
 
 {% paginate search.results by 24 %}
-  <div class="template-search{% unless search.performed and search.results_count > 0 %} template-search--empty{% endunless %} section-{{ section.id }}-padding">
+  <div class="template-search{% unless search.performed and search.results_count > 0 %} template-search--empty{% endunless %} section-{{ section.id }}-padding color-{{ section.settings.color_scheme }}">
     <div class="template-search__header page-width{% if settings.animations_reveal_on_scroll %} scroll-trigger animate--fade-in{% endif %}">
       <h1 class="h2 center">
         {%- if search.performed -%}
@@ -178,7 +253,7 @@
 
               <button
                 type="reset"
-                class="reset__button field__button{% if search.terms == blank %} hidden{% endif %}"
+                class="reset__button field__button"
                 aria-label="{{ 'general.search.reset' | t }}"
               >
                 <span class="svg-wrapper">
@@ -370,6 +445,12 @@
   "tag": "section",
   "class": "section",
   "settings": [
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "t:sections.all.colors.label",
+      "default": "scheme-1"
+    },
     {
       "type": "range",
       "id": "columns_desktop",
