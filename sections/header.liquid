@@ -18,7 +18,7 @@
 -%}
 
 <header
-  class="header-main relative color-{{ color_scheme }} header-z-index {% unless section.settings.enable_sticky %}sticky-disabled{% endunless %}{% if section.settings.enable_transparent %} header-transparent{% endif %}"
+  class="header-main relative color-{{ color_scheme }} header-z-index {% unless section.settings.enable_sticky %}sticky-disabled{% endunless %}{% if section.settings.enable_transparent and template.name == 'index' %} header-transparent{% endif %}"
   data-header-sticky
 >
   <div class=" w-full flex items-center justify-between ">
@@ -1084,8 +1084,9 @@
     /* -- Transparent Header Background on Hover -- */
     const headerElement = document.querySelector('[data-header-sticky]');
     const isHeaderTransparent = headerElement?.classList.contains('header-transparent');
+    const isHomePage = window.location.pathname === '/' || window.location.pathname === '/index';
 
-    if (isHeaderTransparent) {
+    if (isHeaderTransparent && isHomePage) {
       // Add background on menu hover
       document.querySelectorAll('.dropdown-group').forEach(group => {
         group.addEventListener('mouseenter', () => {
@@ -1480,7 +1481,7 @@
       } 
 
         // Handle transparent header background
-        if (isHeaderTransparent) {
+        if (isHeaderTransparent && isHomePage) {
           if (show) {
             headerElement.classList.add('has-interaction');
           } else {
