@@ -27,8 +27,35 @@
   }
 
   .signup-with-email {
-    background: var(--background-box-color);
+    position: relative;
+    {% if section.settings.background_image != blank %}
+      background-image: url('{{ section.settings.background_image | image_url: width: 1920 }}') !important;
+      background-size: cover !important;
+      background-position: center !important;
+      background-repeat: no-repeat !important;
+      background-color: transparent !important;
+    {% else %}
+      background: var(--background-box-color) !important;
+    {% endif %}
   }
+
+  /* Mobile-specific background image */
+  @media (max-width: 640px) {
+    .signup-with-email {
+      {% if section.settings.mobile_background_image != blank %}
+        background-image: url('{{ section.settings.mobile_background_image | image_url: width: 800 }}') !important;
+        background-size: cover !important;
+        background-position: bottom center !important;
+        background-repeat: no-repeat !important;
+      {% elsif section.settings.background_image != blank %}
+        background-image: url('{{ section.settings.background_image | image_url: width: 1920 }}') !important;
+        background-size: cover !important;
+        background-position: bottom center !important;
+        background-repeat: no-repeat !important;
+      {% endif %}
+    }
+  }
+
 </style>
 
 <div
@@ -272,6 +299,18 @@
     {
       "type": "header",
       "content": "Background Customization"
+    },
+    {
+      "type": "image_picker",
+      "id": "background_image",
+      "label": "Desktop Background Image",
+      "info": "Choose a background image for desktop and tablet views. If no image is selected, the background color will be used."
+    },
+    {
+      "type": "image_picker",
+      "id": "mobile_background_image",
+      "label": "Mobile Background Image",
+      "info": "Image shown on mobile phones only (640px and below). Falls back to desktop image if not set."
     },
     {
       "type": "color",
