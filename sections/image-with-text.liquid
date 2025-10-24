@@ -384,8 +384,13 @@
       position: absolute;
       left: 0;
       width: 100%;
-      height: calc(100% - calc({{ settings.sections_spacing }}px * 2));
-      margin-top: {{ settings.sections_spacing }}px;
+      {% if section.settings.enable_fullscreen %}
+        height: 100%;
+        margin-top: 0;
+      {% else %}
+        height: calc(100% - calc({{ settings.sections_spacing }}px * 2));
+        margin-top: {{ settings.sections_spacing }}px;
+      {% endif %}
       min-height: 0;
       display: flex;
       pointer-events: none;
@@ -403,10 +408,17 @@
 
     @media (max-width: 749px) {
       .image-with-text-text-content-wrapper-{{ section.id }} {
-        left: {{ settings.side_space }}px;
-        width: calc(100% - {{ settings.side_space | times: 2 }}px);
-        height: calc({{ section.settings.img_height_mobile }}px - calc({{ settings.sections_spacing }}px * 2));
-        margin-top: {{ settings.sections_spacing }}px;
+        {% if section.settings.enable_fullscreen %}
+          left: 0;
+          width: 100%;
+          height: {{ section.settings.img_height_mobile }}px;
+          margin-top: 0;
+        {% else %}
+          left: {{ settings.side_space }}px;
+          width: calc(100% - {{ settings.side_space | times: 2 }}px);
+          height: calc({{ section.settings.img_height_mobile }}px - calc({{ settings.sections_spacing }}px * 2));
+          margin-top: {{ settings.sections_spacing }}px;
+        {% endif %}
       }
     }
 
@@ -598,7 +610,11 @@
 
 
   .image-with-text-media-section-{{ section.id }}{
-    padding: {{ settings.sections_spacing }}px {{ settings.side_space}}px;
+    {% if section.settings.enable_fullscreen %}
+      padding: 0;
+    {% else %}
+      padding: {{ settings.sections_spacing }}px {{ settings.side_space}}px;
+    {% endif %}
   }
 
   .remove_button_svg .primary-slide-button-arrow{
@@ -1301,6 +1317,13 @@ button.addEventListener('keydown', function(event) {
     {
       "type": "header",
       "content": "Section Size"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_fullscreen",
+      "label": "Enable fullscreen mode",
+      "default": false,
+      "info": "Overrides global margins and paddings for a full-width, edge-to-edge display"
     },
     {
       "type": "range",
