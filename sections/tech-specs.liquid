@@ -55,7 +55,7 @@
                           <div class="tech-specs-bars flex flex-col items-center justify-center pl-6">
                             <!-- Effort Bar -->
                             <div class="flex justify-between w-full max-w-full" id="effort-bar">
-                              {% for i in (1..54) %}
+                              {% for i in (1..90) %}
                                 <div class="box">|</div>
                               {% endfor %}
                             </div>
@@ -83,7 +83,7 @@
                         <div class="tech-specs-bars flex flex-col items-center justify-center pl-6">
                           <!-- Temperature Bar -->
                           <div class="flex justify-between w-full max-w-full" id="temperature-bar">
-                            {% for i in (1..54) %}
+                            {% for i in (1..90) %}
                               <div class="box">|</div>
                             {% endfor %}
                           </div>
@@ -420,6 +420,36 @@
       }
     }
 
+    @media (min-width: 991px) and (max-width: 1499px) {
+      .box:nth-child(n+55) {
+        display: none;
+      }
+    }
+
+    @media (min-width: 1500px) and (max-width: 1599px) {
+      .box:nth-child(n+55) {
+        display: none;
+      }
+    }
+
+    @media (min-width: 1600px) and (max-width: 1699px) {
+      .box:nth-child(n+61) {
+        display: none;
+      }
+    }
+
+    @media (min-width: 1700px) and (max-width: 1799px) {
+      .box:nth-child(n+71) {
+        display: none;
+      }
+    }
+
+    @media (min-width: 1800px) and (max-width: 1899px) {
+      .box:nth-child(n+81) {
+        display: none;
+      }
+    }
+
     .tech-left-box {
       border-right: 1px solid var(--border);
       padding-right: var(--space-4xl);
@@ -514,9 +544,24 @@
     const tempMin = {{ product.metafields.tech_specs.temp_min.value | default: 0 }};
     const tempMax = {{ product.metafields.tech_specs.temp_max.value | default: 0 }};
 
-    const isMobile = window.innerWidth <= 480;
-    const isTablet = window.innerWidth > 480 && window.innerWidth <= 990;
-    const totalBars = isMobile ? 29 : (isTablet ? 40 : 54);
+    const width = window.innerWidth;
+    let totalBars;
+
+    if (width <= 480) {
+      totalBars = 29;
+    } else if (width <= 990) {
+      totalBars = 40;
+    } else if (width < 1600) {
+      totalBars = 54;
+    } else if (width < 1700) {
+      totalBars = 60;
+    } else if (width < 1800) {
+      totalBars = 70;
+    } else if (width < 1900) {
+      totalBars = 80;
+    } else {
+      totalBars = 90;
+    }
 
     // Effort bars
     const effortBar = document.getElementById('effort-bar');
@@ -550,16 +595,24 @@
 
   document.addEventListener('DOMContentLoaded', function() {
     updateTechSpecBars();
-    let lastIsMobile = window.innerWidth <= 480;
-    let lastIsTablet = window.innerWidth > 480 && window.innerWidth <= 990;
+    let lastWidth = window.innerWidth;
 
     window.addEventListener('resize', function() {
-      const isMobile = window.innerWidth <= 480;
-      const isTablet = window.innerWidth > 480 && window.innerWidth <= 990;
+      const width = window.innerWidth;
 
-      if (isMobile !== lastIsMobile || isTablet !== lastIsTablet) {
-        lastIsMobile = isMobile;
-        lastIsTablet = isTablet;
+      // Check if we crossed a breakpoint
+      const breakpoints = [481, 991, 1600, 1700, 1800, 1900];
+      let crossedBreakpoint = false;
+
+      for (let bp of breakpoints) {
+        if ((lastWidth < bp && width >= bp) || (lastWidth >= bp && width < bp)) {
+          crossedBreakpoint = true;
+          break;
+        }
+      }
+
+      if (crossedBreakpoint) {
+        lastWidth = width;
         updateTechSpecBars();
       }
     });
