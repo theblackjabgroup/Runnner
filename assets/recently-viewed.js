@@ -12,9 +12,14 @@
     return;
   }
 
-  var MAX_PRODUCTS = parseInt(sectionElement.getAttribute('data-max-products')) || 10;
+  var MAX_PRODUCTS = parseInt(sectionElement.getAttribute('data-max-products'), 10) || 10;
   var sectionId = sectionElement.getAttribute('data-section-id');
   var enableAnimations = sectionElement.getAttribute('data-enable-animations') === 'true';
+  
+  // Exit if sectionId is missing (critical for selectors)
+  if (!sectionId) {
+    return;
+  }
 
   // Get meta safely
   function getMetaSafe(name) {
@@ -65,9 +70,6 @@
     if (currentlyTracking) return;
     currentlyTracking = true;
 
-    // Reset retry counter at the start of each new tracking attempt
-    trackProductRetries = 0;
-
     // Check multiple ways to detect product page
     var bodyClasses = document.body.className;
     var isProductPage =
@@ -77,6 +79,7 @@
 
     if (!isProductPage) {
       currentlyTracking = false;
+      trackProductRetries = 0;
       return;
     }
 
@@ -90,6 +93,7 @@
         return;
       } else {
         currentlyTracking = false;
+        trackProductRetries = 0;
         return;
       }
     }
@@ -99,6 +103,7 @@
 
     if (!productId || !productHandle) {
       currentlyTracking = false;
+      trackProductRetries = 0;
       return;
     }
 
@@ -324,15 +329,27 @@
   function saveProduct(product) {
     try {
       // Validate product has required data
-      if (!product.id || !product.handle || !product.title || !product.image) {
-        return;
+      if (!product || 
+          !product.id || 
+          !product.handle || 
+          !product.title || 
+          !product.image ||
+          typeof product.handle !== 'string' ||
+          typeof product.title !== 'string' ||
+          typeof product.image !== 'string') {
+        return false;
       }
 
       var products = getRecentlyViewed();
 
-      // Remove if already exists
+      // Ensure products is an array
+      if (!Array.isArray(products)) {
+        products = [];
+      }
+
+      // Remove if already exists (avoid duplicates)
       products = products.filter(function (p) {
-        return p.id !== product.id;
+        return p && p.id !== product.id;
       });
 
       // Add to beginning
@@ -342,8 +359,9 @@
       products = products.slice(0, MAX_PRODUCTS);
 
       storage.setItem(STORAGE_KEY, JSON.stringify(products));
+      return true;
     } catch (error) {
-      // Silent fail
+      return false;
     }
   }
 
@@ -351,7 +369,12 @@
   function getRecentlyViewed() {
     try {
       var data = storage.getItem(STORAGE_KEY);
-      return data ? JSON.parse(data) : [];
+      if (data) {
+        var parsed = JSON.parse(data);
+        // Ensure it's an array
+        return Array.isArray(parsed) ? parsed : [];
+      }
+      return [];
     } catch (error) {
       return [];
     }
@@ -363,50 +386,63 @@
     if (isRendering) return;
     isRendering = true;
 
-    var wrapper = document.querySelector('[data-section-id="' + sectionId + '"] .recently-viewed-wrapper');
-    var grid = document.getElementById('recently-viewed-grid-' + sectionId);
+    try {
+      var wrapper = document.querySelector('[data-section-id="' + sectionId + '"] .recently-viewed-wrapper');
+      var grid = document.getElementById('recently-viewed-grid-' + sectionId);
 
-    if (!wrapper || !grid) {
-      isRendering = false;
-      return;
-    }
+      if (!wrapper || !grid) {
+        isRendering = false;
+        return;
+      }
 
-    var products = getRecentlyViewed();
+      var products = getRecentlyViewed();
 
-    // Exclude current product
-    if (currentProductId) {
+      // Exclude current product
+      if (currentProductId) {
+        products = products.filter(function (p) {
+          return p.id !== currentProductId;
+        });
+      }
+
+      // Hide section if no products
+      if (products.length === 0) {
+        wrapper.style.display = 'none';
+        isRendering = false;
+        return;
+      }
+
+      // Clear grid
+      grid.innerHTML = '';
+
+      // Filter out products with missing data
       products = products.filter(function (p) {
-        return p.id !== currentProductId;
+        return p.title && p.image && p.url;
       });
-    }
 
-    // Hide section if no products
-    if (products.length === 0) {
-      wrapper.style.display = 'none';
-      isRendering = false;
-      return;
-    }
-
-    // Clear grid
-    grid.innerHTML = '';
-
-    // Filter out products with missing data
-    products = products.filter(function (p) {
-      return p.title && p.image && p.url;
-    });
-
-    // Re-check if we have products after filtering
-    if (products.length === 0) {
-      wrapper.style.display = 'none';
-      isRendering = false;
-      return;
-    }
+      // Re-check if we have products after filtering
+      if (products.length === 0) {
+        wrapper.style.display = 'none';
+        isRendering = false;
+        return;
+      }
 
     var productsProcessed = 0;
     var productsSuccessful = 0;
     var totalProducts = products.length;
 
     products.forEach(function (product, index) {
+      // Validate product has handle
+      if (!product || !product.handle) {
+        productsProcessed++;
+        if (productsProcessed === totalProducts) {
+          if (productsSuccessful === 0 && wrapper && wrapper.style) {
+            wrapper.style.display = 'none';
+          }
+          isRendering = false;
+        }
+        return;
+      }
+      
       fetchRenderedProductCard(product.handle, function (err, cardHTML) {
         productsProcessed++;
 
@@ -414,7 +450,7 @@
           // Check if all products have been processed
           if (productsProcessed === totalProducts) {
             // If no products were successfully added, hide the section
-            if (productsSuccessful === 0) {
+            if (productsSuccessful === 0 && wrapper && wrapper.style) {
               wrapper.style.display = 'none';
             }
             isRendering = false;
@@ -427,7 +463,7 @@
         tempDiv.innerHTML = cardHTML.trim();
         var cardElement = tempDiv.firstElementChild;
 
-        if (cardElement) {
+        if (cardElement && grid && grid.appendChild) {
           // Add animation attributes if enabled
           if (enableAnimations) {
             if (!cardElement.classList.contains('scroll-fade-trigger')) {
@@ -436,30 +472,45 @@
             cardElement.setAttribute('data-animation-index', index);
           }
 
-          grid.appendChild(cardElement);
-          productsSuccessful++;
+          try {
+            grid.appendChild(cardElement);
+            productsSuccessful++;
+          } catch (e) {
+            // DOM element may have been removed
+          }
         }
 
         // Once all products are processed
         if (productsProcessed === totalProducts) {
           // Only show wrapper if at least one product was successfully rendered
-          if (productsSuccessful > 0) {
+          if (productsSuccessful > 0 && wrapper && wrapper.style) {
             wrapper.style.display = 'block';
 
             // Initialize product card functionality
             setTimeout(function () {
+              // Verify grid still exists
+              if (!grid || !grid.querySelectorAll) return;
+              
               if (typeof window.ProductCard === 'function') {
                 var cards = grid.querySelectorAll('.new-product-card:not([data-card-initialized])');
 
                 cards.forEach(function (card) {
                   card.setAttribute('data-card-initialized', 'true');
-                  new window.ProductCard(card);
+                  try {
+                    new window.ProductCard(card);
+                  } catch (e) {
+                    // Silent fail if ProductCard initialization fails
+                  }
                 });
               } else if (typeof window.initializeProductCards === 'function') {
-                window.initializeProductCards();
+                try {
+                  window.initializeProductCards();
+                } catch (e) {
+                  // Silent fail if initialization fails
+                }
               }
             }, 100);
-          } else {
+          } else if (wrapper && wrapper.style) {
             // All fetches failed, hide the section
             wrapper.style.display = 'none';
           }
@@ -468,11 +519,27 @@
         }
       });
     });
+    } catch (error) {
+      // Ensure isRendering is reset even on error
+      isRendering = false;
+    }
   }
 
   // Fetch rendered product card from helper section
   function fetchRenderedProductCard(handle, callback) {
-    var url = '/products/' + handle + '?section_id=recently-viewed-card-renderer';
+    // Validate handle
+    if (!handle || typeof handle !== 'string') {
+      callback(new Error('Invalid product handle'), null);
+      return;
+    }
+
+    var url = '/products/' + encodeURIComponent(handle) + '?section_id=recently-viewed-card-renderer';
+
+    // Check if fetch is supported
+    if (typeof fetch !== 'function') {
+      callback(new Error('Fetch API not supported'), null);
+      return;
+    }
 
     fetch(url)
       .then(function (response) {
@@ -480,7 +547,17 @@
         return response.text();
       })
       .then(function (html) {
+        if (!html || typeof html !== 'string') {
+          callback(new Error('Invalid response'), null);
+          return;
+        }
+
         // Parse and extract the rendered card
+        if (typeof DOMParser !== 'function') {
+          callback(new Error('DOMParser not supported'), null);
+          return;
+        }
+
         var parser = new DOMParser();
         var doc = parser.parseFromString(html, 'text/html');
 
@@ -499,7 +576,12 @@
   }
 
   // Initialize
+  var isInitialized = false;
   function init() {
+    // Prevent multiple initializations
+    if (isInitialized) return;
+    isInitialized = true;
+
     try {
       // Track current product
       trackProduct();
@@ -507,27 +589,28 @@
       // Render recently viewed products
       renderProducts();
     } catch (error) {
-      // Silent fail
+      // Silent fail - but allow re-initialization on error
+      isInitialized = false;
     }
   }
 
-  // Run on page load
-  setTimeout(function () {
-    init();
-  }, 100);
-
+  // Run on page load - use single initialization point
   if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', function () {
-      init();
-    });
+    document.addEventListener('DOMContentLoaded', init);
   } else {
-    init();
+    // DOM already loaded
+    setTimeout(init, 100);
   }
 
   // Handle Shopify section editor events
   if (typeof Shopify !== 'undefined' && Shopify.designMode) {
     document.addEventListener('shopify:section:load', function (event) {
       if (event.detail.sectionId === sectionId) {
+        // Allow re-initialization in design mode
+        isInitialized = false;
+        isRendering = false;
+        currentlyTracking = false;
+        trackProductRetries = 0;
         init();
       }
     });
@@ -535,29 +618,40 @@
 
   // Clear storage helper
   window.clearRecentlyViewed = function () {
-    storage.setItem(STORAGE_KEY, '[]');
+    try {
+      storage.setItem(STORAGE_KEY, '[]');
+      return true;
+    } catch (error) {
+      return false;
+    }
   };
 
   // Debug helper - expose to global
   window.debugRecentlyViewed = function () {
-    var data = storage.getItem(STORAGE_KEY);
-    if (data) {
-      var products = JSON.parse(data);
-      return {
-        products: products,
-        totalProducts: products.length,
-        images: products.map(function (p) {
-          return p.image;
-        }),
-        uniqueImages: products
-          .map(function (p) {
-            return p.image;
-          })
-          .filter(function (value, index, self) {
-            return self.indexOf(value) === index;
-          }).length,
-      };
+    try {
+      var data = storage.getItem(STORAGE_KEY);
+      if (data) {
+        var products = JSON.parse(data);
+        if (Array.isArray(products)) {
+          return {
+            products: products,
+            totalProducts: products.length,
+            images: products.map(function (p) {
+              return p.image;
+            }),
+            uniqueImages: products
+              .map(function (p) {
+                return p.image;
+              })
+              .filter(function (value, index, self) {
+                return self.indexOf(value) === index;
+              }).length,
+          };
+        }
+      }
+      return { products: [], totalProducts: 0 };
+    } catch (error) {
+      return { products: [], totalProducts: 0, error: error.message };
     }
-    return { products: [], totalProducts: 0 };
   };
 })();
