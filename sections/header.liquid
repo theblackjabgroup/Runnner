@@ -18,7 +18,7 @@
 -%}
 
 <header
-  class="header-main relative color-{{ color_scheme }} header-z-index {% unless section.settings.enable_sticky %}sticky-disabled{% endunless %}{% if section.settings.enable_transparent %} header-transparent{% endif %}"
+  class="header-main relative color-{{ color_scheme }} header-z-index {% unless section.settings.enable_sticky %}sticky-disabled{% endunless %}{% if section.settings.enable_transparent and template.name == 'index' %} header-transparent{% endif %}"
   data-header-sticky
 >
   <div class=" w-full flex items-center justify-between ">
@@ -358,33 +358,33 @@
                 </div>
 
                 {% if settings.recent_search_enabled %}
-                <!-- Quick Links -->
-                <div
-                  class="flex flex-col lg:flex-row items-center search-top-searches"
-                >
-                  <span
-                    class="inline-block lg:!block text-[14px] lg:text-[16px] uppercase m-4 search-top-searches-label"
-                    >Recent Searches</span
+                  <!-- Quick Links -->
+                  <div
+                    class="flex flex-col lg:flex-row items-center search-top-searches"
                   >
-                  <div class="flex flex-wrap gap-6" id="recent-searches-container">
-                    <!-- Default searches (fallback) -->
-                    <a
-                      href="{{ routes.search_url }}?q=new"
-                      class="px-1 hover:bg-black hover:text-white transition-colors duration-200 rounded-md text-[16px] lg:text-[20px] font-medium search-chip no-inline-hover default-search-chip"
-                      >New Arrivals</a
+                    <span
+                      class="inline-block lg:!block text-[14px] lg:text-[16px] uppercase m-4 search-top-searches-label"
+                      >Recent Searches</span
                     >
-                    <a
-                      href="{{ routes.search_url }}?q=sale"
-                      class="px-1 hover:bg-black hover:text-white transition-colors duration-200 rounded-md text-[16px] lg:text-[20px] font-medium search-chip no-inline-hover default-search-chip"
-                      >Sale</a
-                    >
-                    <a
-                      href="{{ routes.search_url }}?q=bestsellers"
-                      class="px-1 hover:bg-black hover:text-white transition-colors duration-200 rounded-md text-[16px] lg:text-[20px] font-medium search-chip no-inline-hover default-search-chip"
-                      >Bestsellers</a
-                    >
+                    <div class="flex flex-wrap gap-6" id="recent-searches-container">
+                      <!-- Default searches (fallback) -->
+                      <a
+                        href="{{ routes.search_url }}?q=new"
+                        class="px-1 hover:bg-black hover:text-white transition-colors duration-200 rounded-md text-[16px] lg:text-[20px] font-medium search-chip no-inline-hover default-search-chip"
+                        >New Arrivals</a
+                      >
+                      <a
+                        href="{{ routes.search_url }}?q=sale"
+                        class="px-1 hover:bg-black hover:text-white transition-colors duration-200 rounded-md text-[16px] lg:text-[20px] font-medium search-chip no-inline-hover default-search-chip"
+                        >Sale</a
+                      >
+                      <a
+                        href="{{ routes.search_url }}?q=bestsellers"
+                        class="px-1 hover:bg-black hover:text-white transition-colors duration-200 rounded-md text-[16px] lg:text-[20px] font-medium search-chip no-inline-hover default-search-chip"
+                        >Bestsellers</a
+                      >
+                    </div>
                   </div>
-                </div>
                 {% endif %}
               </div>
             </div>
@@ -725,8 +725,8 @@
                 class="country-selector-dropdown disclosure__list-wrapper absolute bottom-16 w-100 border border-gray-200 rounded-md shadow-lg transition-all duration-300 z-[9999] color-{{ color_scheme }} country-selector-dropdown-bg"
                 hidden
               >
-                <ul 
-                  id="header-country-results" 
+                <ul
+                  id="header-country-results"
                   role="list"
                   class="max-h-100 overflow-y-auto divide-y divide-gray-100 text-xl"
                 >
@@ -751,12 +751,12 @@
                           {{ country.currency.symbol }}
                         </span>
                       </a>
-                    </li> 
+                    </li>
                   {% endfor %}
                 </ul>
               </div>
             </div>
-            
+
             <!-- REQUIRED: Hidden input for form submission -->
             <input type="hidden" name="country_code" value="{{ localization.country.iso_code }}">
           {%- endform -%}
@@ -1084,8 +1084,9 @@
     /* -- Transparent Header Background on Hover -- */
     const headerElement = document.querySelector('[data-header-sticky]');
     const isHeaderTransparent = headerElement?.classList.contains('header-transparent');
+    const isHomePage = window.location.pathname === '/' || window.location.pathname === '/index';
 
-    if (isHeaderTransparent) {
+    if (isHeaderTransparent && isHomePage) {
       // Add background on menu hover
       document.querySelectorAll('.dropdown-group').forEach(group => {
         group.addEventListener('mouseenter', () => {
@@ -1480,7 +1481,7 @@
       } 
 
         // Handle transparent header background
-        if (isHeaderTransparent) {
+        if (isHeaderTransparent && isHomePage) {
           if (show) {
             headerElement.classList.add('has-interaction');
           } else {
@@ -1639,7 +1640,7 @@
 
     // Debug method to check current searches
     debugSearches() {
-      console.log('Current recent searches:', this.getRecentSearches());
+      // Current recent searches
     }
   }
 
@@ -1706,7 +1707,7 @@
             try {
               handler();
             } catch (error) {
-              console.warn('Resize handler error:', error);
+              // Resize handler error
             }
           });
         }
