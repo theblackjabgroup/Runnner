@@ -378,13 +378,23 @@
       return;
     }
 
-    var productsRendered = 0;
+    var productsProcessed = 0;
+    var productsSuccessful = 0;
     var totalProducts = products.length;
 
     products.forEach(function (product, index) {
       fetchRenderedProductCard(product.handle, function (err, cardHTML) {
+        productsProcessed++;
+
         if (err) {
-          productsRendered++;
+          // Check if all products have been processed
+          if (productsProcessed === totalProducts) {
+            // If no products were successfully added, hide the section
+            if (productsSuccessful === 0) {
+              wrapper.style.display = 'none';
+            }
+            isRendering = false;
+          }
           return;
         }
 
@@ -403,27 +413,34 @@
           }
 
           grid.appendChild(cardElement);
+          productsSuccessful++;
         }
 
-        productsRendered++;
+        // Once all products are processed
+        if (productsProcessed === totalProducts) {
+          // Only show wrapper if at least one product was successfully rendered
+          if (productsSuccessful > 0) {
+            wrapper.style.display = 'block';
 
-        // Once all products are rendered
-        if (productsRendered === totalProducts) {
-          wrapper.style.display = 'block';
+            // Initialize product card functionality
+            setTimeout(function () {
+              if (typeof window.ProductCard === 'function') {
+                var cards = grid.querySelectorAll('.new-product-card:not([data-card-initialized])');
 
-          // Initialize product card functionality
-          setTimeout(function () {
-            if (typeof window.ProductCard === 'function') {
-              var cards = grid.querySelectorAll('.new-product-card:not([data-card-initialized])');
+                cards.forEach(function (card) {
+                  card.setAttribute('data-card-initialized', 'true');
+                  new window.ProductCard(card);
+                });
+              } else if (typeof window.initializeProductCards === 'function') {
+                window.initializeProductCards();
+              }
+            }, 100);
+          } else {
+            // All fetches failed, hide the section
+            wrapper.style.display = 'none';
+          }
 
-              cards.forEach(function (card) {
-                card.setAttribute('data-card-initialized', 'true');
-                new window.ProductCard(card);
-              });
-            } else if (typeof window.initializeProductCards === 'function') {
-              window.initializeProductCards();
-            }
-          }, 100);
+          isRendering = false;
         }
       });
     });
