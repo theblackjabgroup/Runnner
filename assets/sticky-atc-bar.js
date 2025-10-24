@@ -19,21 +19,23 @@ class StickyATCBar {
       ...document.querySelectorAll('.product-form__submit'),
       ...document.querySelectorAll('.add-to-cart-tertiary-btn'),
       ...document.querySelectorAll('.mobile-add-to-cart-tertiary-btn'),
-      ...document.querySelectorAll('button[name="add"]')
+      ...document.querySelectorAll('button[name="add"]'),
     ];
 
     // Filter to find the first visible button that actually has dimensions
-    this.mainATCButton = allButtons.find(button => {
-      const style = window.getComputedStyle(button);
-      const rect = button.getBoundingClientRect();
-      const isVisible = style.display !== 'none' &&
-                       style.visibility !== 'hidden' &&
-                       style.opacity !== '0' &&
-                       rect.height > 0 &&
-                       rect.width > 0;
+    this.mainATCButton =
+      allButtons.find((button) => {
+        const style = window.getComputedStyle(button);
+        const rect = button.getBoundingClientRect();
+        const isVisible =
+          style.display !== 'none' &&
+          style.visibility !== 'hidden' &&
+          style.opacity !== '0' &&
+          rect.height > 0 &&
+          rect.width > 0;
 
-      return isVisible;
-    }) || allButtons[0]; // Fallback to first button if none are visible
+        return isVisible;
+      }) || allButtons[0]; // Fallback to first button if none are visible
 
     if (!this.mainForm || !this.mainATCButton) {
       return;
@@ -360,10 +362,21 @@ class StickyATCBar {
     if (mainButton && this.stickyButton) {
       this.stickyButton.disabled = mainButton.disabled;
 
-      if (mainButton.disabled) {
-        this.stickyButton.textContent = 'Sold Out';
+      // Update only the text span, not the entire button (to preserve icon)
+      const buttonTextSpan = this.stickyButton.querySelector('span');
+      if (buttonTextSpan) {
+        if (mainButton.disabled) {
+          buttonTextSpan.textContent = 'Sold Out';
+        } else {
+          buttonTextSpan.textContent = 'Add to Cart';
+        }
       } else {
-        this.stickyButton.textContent = 'Add to Cart';
+        // Fallback if no span found (shouldn't happen with secondary-button component)
+        if (mainButton.disabled) {
+          this.stickyButton.textContent = 'Sold Out';
+        } else {
+          this.stickyButton.textContent = 'Add to Cart';
+        }
       }
     }
   }
