@@ -113,6 +113,18 @@
 <!-- Mobile Product Section -->
 {% render 'product-section-mobile', product: product, section: section %}
 
+{%- comment -%} Sticky Add-to-Cart Bar Block {%- endcomment -%}
+{%- for block in section.blocks -%}
+  {%- case block.type -%}
+    {%- when 'sticky_atc_bar' -%}
+      {% render 'sticky-atc-bar',
+        product: product,
+        selected_variant: product.selected_or_first_available_variant,
+        block: block
+      %}
+  {%- endcase -%}
+{%- endfor -%}
+
 {% schema %}
 {
   "name": "Product Details",
@@ -319,6 +331,23 @@
       "name": "Pickup Availability",
       "limit": 1,
       "settings": []
+    },
+    {
+      "type": "sticky_atc_bar",
+      "name": "Sticky Add to Cart Bar",
+      "limit": 1,
+      "settings": [
+        {
+          "type": "paragraph",
+          "content": "Display a sticky add-to-cart bar at the bottom of the screen when the main add-to-cart button scrolls out of view. Features premium orange/gold design with product image, title, price, variant selectors, and add-to-cart button."
+        },
+        {
+          "type": "checkbox",
+          "id": "enable_sticky_bar",
+          "label": "Enable Sticky Add to Cart Bar",
+          "default": true
+        }
+      ]
     }
   ]
 }
