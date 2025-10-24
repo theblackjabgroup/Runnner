@@ -89,6 +89,46 @@
   .card-wrapper .card__media img {
     border-radius: {{ settings.product_card_border_radius }}px;
   }
+
+  /* Sold out overlay animation */
+  .sold-out-overlay {
+    background: rgba(0, 0, 0, 0.3);
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 0%;
+    position: absolute;
+    transition: height 0.5s ease-out;
+    z-index: 5;
+    pointer-events: none;
+  }
+
+  .group:hover .sold-out-overlay {
+    height: 100%;
+  }
+
+  /* Ensure images are below the overlay */
+  .product-images-slider {
+    z-index: 0 !important;
+  }
+
+  .product-images-slider img {
+    z-index: 0 !important;
+  }
+
+  /* Disable sold-out overlay on mobile */
+  @media only screen and (max-width: 600px) {
+    .group:hover .sold-out-overlay {
+      height: 0% !important;
+    }
+  }
+
+  @media (hover: none) and (pointer: coarse) {
+    .group:hover .sold-out-overlay,
+    .card-wrapper:hover .sold-out-overlay {
+      height: 0% !important;
+    }
+  }
 </style>
 {%- unless skip_styles -%}
   {{ 'component-rating.css' | asset_url | stylesheet_tag }}
@@ -202,7 +242,10 @@
         {% endif %}
 
         {% if card_product.available == false %}
-          <div class="rounded-[5px] absolute inset-x-0 bottom-0 p-4 opacity-0 translate-y-10 transition-all duration-300 group-hover:opacity-100 group-hover:-translate-y-0">
+          <!-- Sold out overlay animation -->
+          <div class="sold-out-overlay"></div>
+
+          <div class="rounded-[5px] absolute inset-x-0 bottom-0 p-4 opacity-0 translate-y-10 transition-all duration-300 group-hover:opacity-100 group-hover:-translate-y-0 z-10">
             <div class="w-[93%] rounded-[5px] mx-auto text-center" style="background-color: var(--background);">
               <button
                 type="button"
