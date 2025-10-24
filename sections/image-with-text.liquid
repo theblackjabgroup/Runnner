@@ -627,25 +627,33 @@
         role="img"
         aria-label="{{ section.settings.image.alt | escape | default: 'Background image' }}"
       >
-        <img
-          srcset="
-            {% if section.settings.image.width >= 375 %}{{ section.settings.image | image_url: width: 375 }} 375w,{% endif %}
-            {% if section.settings.image.width >= 550 %}{{ section.settings.image | image_url: width: 550 }} 550w,{% endif %}
-            {% if section.settings.image.width >= 750 %}{{ section.settings.image | image_url: width: 750 }} 750w,{% endif %}
-            {% if section.settings.image.width >= 1100 %}{{ section.settings.image | image_url: width: 1100 }} 1100w,{% endif %}
-            {% if section.settings.image.width >= 1500 %}{{ section.settings.image | image_url: width: 1500 }} 1500w,{% endif %}
-            {% if section.settings.image.width >= 2200 %}{{ section.settings.image | image_url: width: 2200 }} 2200w,{% endif %}
-            {{ section.settings.image | image_url }} {{ section.settings.image.width }}w
-          "
-          sizes="100vw"
-          height="auto"
-          width="auto"
-          src="{{ section.settings.image | image_url: width: 1500 }}"
-          alt="{{ section.settings.image.alt | escape | default: 'Background image' }}"
-          class="w-full h-full object-cover"
-          loading="lazy"
-          style="width: 100%; height: 100%; min-height: 100%; display: block; position: relative; z-index: 0;"
-        >
+        <picture>
+          {% if section.settings.mobile_image != blank %}
+            <source
+              media="(max-width: 640px)"
+              srcset="{{ section.settings.mobile_image | image_url: width: 640 }}"
+            >
+          {% endif %}
+          <img
+            srcset="
+              {% if section.settings.image.width >= 375 %}{{ section.settings.image | image_url: width: 375 }} 375w,{% endif %}
+              {% if section.settings.image.width >= 550 %}{{ section.settings.image | image_url: width: 550 }} 550w,{% endif %}
+              {% if section.settings.image.width >= 750 %}{{ section.settings.image | image_url: width: 750 }} 750w,{% endif %}
+              {% if section.settings.image.width >= 1100 %}{{ section.settings.image | image_url: width: 1100 }} 1100w,{% endif %}
+              {% if section.settings.image.width >= 1500 %}{{ section.settings.image | image_url: width: 1500 }} 1500w,{% endif %}
+              {% if section.settings.image.width >= 2200 %}{{ section.settings.image | image_url: width: 2200 }} 2200w,{% endif %}
+              {{ section.settings.image | image_url }} {{ section.settings.image.width }}w
+            "
+            sizes="100vw"
+            height="auto"
+            width="auto"
+            src="{{ section.settings.image | image_url: width: 1500 }}"
+            alt="{{ section.settings.image.alt | escape | default: 'Background image' }}"
+            class="w-full h-full object-cover"
+            loading="lazy"
+            style="width: 100%; height: 100%; min-height: 100%; display: block; position: relative; z-index: 0;"
+          >
+        </picture>
       </div>
     {% else %}
       <div
@@ -1140,7 +1148,14 @@ button.addEventListener('keydown', function(event) {
     {
       "type": "image_picker",
       "id": "image",
-      "label": "Image"
+      "label": "Desktop Image",
+      "info": "Image for desktop and tablet views"
+    },
+    {
+      "type": "image_picker",
+      "id": "mobile_image",
+      "label": "Mobile Image",
+      "info": "Image shown on mobile phones only (640px and below). Falls back to desktop image if not set."
     },
     {
       "type": "header",
