@@ -50,6 +50,7 @@ class StickyATCBar {
 
     // Setup observers
     this.setupIntersectionObserver();
+    this.setupFooterObserver();
 
     // Setup event listeners
     this.setupEventListeners();
@@ -70,6 +71,10 @@ class StickyATCBar {
   }
 
   setupIntersectionObserver() {
+    // Track states
+    this.isMainButtonVisible = true;
+    this.isFooterVisible = false;
+
     // Watch when main ATC button goes out of view
     const options = {
       root: null,
@@ -83,10 +88,12 @@ class StickyATCBar {
         // If button is NOT intersecting (scrolled out of view), show sticky bar
         if (entry.isIntersecting) {
           // Main button is visible - hide sticky bar
+          this.isMainButtonVisible = true;
           this.hideBar();
         } else {
-          // Main button is not visible - show sticky bar
-          this.showBar();
+          // Main button is not visible - show sticky bar (unless footer is visible)
+          this.isMainButtonVisible = false;
+          this.updateBarVisibility();
         }
       });
     }, options);
@@ -98,6 +105,45 @@ class StickyATCBar {
       window.addEventListener('load', () => {
         setTimeout(() => this.startObserving(), 100);
       });
+    }
+  }
+
+  setupFooterObserver() {
+    // Find the footer
+    const footer = document.querySelector('footer') || document.querySelector('.footer-container') || document.querySelector('[role="contentinfo"]');
+    
+    if (!footer) return;
+
+    // Watch when footer comes into view
+    const footerOptions = {
+      root: null,
+      threshold: 0, // Trigger as soon as any part of footer is visible
+      rootMargin: '0px',
+    };
+
+    this.footerObserver = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        this.isFooterVisible = entry.isIntersecting;
+        this.updateBarVisibility();
+      });
+    }, footerOptions);
+
+    // Wait for the page to fully load before observing
+    if (document.readyState === 'complete') {
+      this.footerObserver.observe(footer);
+    } else {
+      window.addEventListener('load', () => {
+        setTimeout(() => this.footerObserver.observe(footer), 100);
+      });
+    }
+  }
+
+  updateBarVisibility() {
+    // Show bar only if main button is not visible AND footer is not visible
+    if (!this.isMainButtonVisible && !this.isFooterVisible) {
+      this.showBar();
+    } else {
+      this.hideBar();
     }
   }
 
@@ -424,6 +470,9 @@ class StickyATCBar {
   destroy() {
     if (this.observer) {
       this.observer.disconnect();
+    }
+    if (this.footerObserver) {
+      this.footerObserver.disconnect();
     }
   }
 }

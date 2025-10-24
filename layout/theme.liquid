@@ -418,6 +418,64 @@
 
     {% sections 'footer-group' %}
 
+    <!-- Floating Scroll to Top Button -->
+    {% if settings.scroll_to_top_enabled %}
+      {%- liquid
+        assign scroll_color_scheme = settings.scroll_to_top_color_scheme
+        if scroll_color_scheme == blank
+          assign scroll_color_scheme = 'scheme-1'
+        endif
+      -%}
+      <button
+        type="button"
+        id="floating-scroll-to-top"
+        class="floating-scroll-to-top color-{{ scroll_color_scheme }}"
+        aria-label="Scroll to top"
+        title="Scroll to top"
+        style="
+          --scroll-btn-border-width: {{ settings.scroll_to_top_border_width | default: 0 }}px;
+          --scroll-btn-border-radius: {{ settings.scroll_to_top_border_radius | default: 50 }}px;
+          --scroll-btn-bottom: {{ settings.scroll_to_top_bottom_offset | default: 30 }}px;
+          --scroll-btn-side: {{ settings.scroll_to_top_side_offset | default: 30 }}px;
+          --scroll-btn-icon-size: {{ settings.scroll_to_top_icon_size | default: 20 }}px;
+          --scroll-btn-shadow-opacity: {{ settings.scroll_to_top_shadow_opacity | default: 20 | divided_by: 100.0 }};
+          --scroll-btn-shadow-blur: {{ settings.scroll_to_top_shadow_blur | default: 20 }}px;
+        "
+        data-position="{{ settings.scroll_to_top_position | default: 'bottom-left' }}"
+        data-show-after="{{ settings.scroll_to_top_show_after | default: 300 }}"
+      >
+        {% if settings.scroll_to_top_text != blank %}
+          <span class="scroll-to-top-text">{{ settings.scroll_to_top_text }}</span>
+        {% endif %}
+
+        {% if settings.scroll_to_top_icon != blank %}
+          <img
+            src="{{ settings.scroll_to_top_icon | image_url: width: 200 }}"
+            alt=""
+            class="scroll-to-top-icon"
+            loading="lazy"
+            width="{{ settings.scroll_to_top_icon_size | default: 20 }}"
+            height="{{ settings.scroll_to_top_icon_size | default: 20 }}"
+          >
+        {% else %}
+          <!-- Default SVG icon if merchant hasn't uploaded one -->
+          <svg
+            class="scroll-to-top-icon-default"
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <line x1="12" y1="19" x2="12" y2="5"></line>
+            <polyline points="5 12 12 5 19 12"></polyline>
+          </svg>
+        {% endif %}
+      </button>
+    {% endif %}
+
     <ul hidden>
       <li id="a11y-refresh-page-message">{{ 'accessibility.refresh_page' | t }}</li>
       <li id="a11y-new-window-message">{{ 'accessibility.link_messages.new_window' | t }}</li>
@@ -475,5 +533,83 @@
     {%- if settings.cart_type == 'drawer' -%}
       <script src="{{ 'cart-drawer.js' | asset_url }}" defer="defer"></script>
     {%- endif -%}
+
+    {% if settings.scroll_to_top_enabled %}
+      <script>
+        // Floating Scroll to Top Button Functionality
+        document.addEventListener('DOMContentLoaded', function () {
+          const scrollToTopButton = document.getElementById('floating-scroll-to-top');
+
+          if (!scrollToTopButton) return;
+
+          const showAfter = parseInt(scrollToTopButton.getAttribute('data-show-after')) || 300;
+          let isVisible = false;
+
+          // Show/hide button based on scroll position
+          function toggleButtonVisibility() {
+            const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+
+            if (scrollTop > showAfter && !isVisible) {
+              scrollToTopButton.classList.add('visible');
+              isVisible = true;
+            } else if (scrollTop <= showAfter && isVisible) {
+              scrollToTopButton.classList.remove('visible');
+              isVisible = false;
+            }
+          }
+
+          // Smooth scroll to top
+          function scrollToTop() {
+            window.scrollTo({
+              top: 0,
+              behavior: 'smooth',
+            });
+
+            // Accessibility: Move focus to main content after scroll
+            setTimeout(function () {
+              const mainContent =
+                document.querySelector('main') ||
+                document.querySelector('#MainContent') ||
+                document.querySelector('body');
+              if (mainContent) {
+                mainContent.setAttribute('tabindex', '-1');
+                mainContent.focus();
+                // Remove tabindex after focus to avoid affecting tab order
+                setTimeout(function () {
+                  mainContent.removeAttribute('tabindex');
+                }, 100);
+              }
+            }, 500);
+          }
+
+          // Event listeners
+          scrollToTopButton.addEventListener('click', scrollToTop);
+
+          // Keyboard support (Enter and Space)
+          scrollToTopButton.addEventListener('keydown', function (e) {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault();
+              scrollToTop();
+            }
+          });
+
+          // Throttled scroll event
+          let scrollTimeout;
+          window.addEventListener(
+            'scroll',
+            function () {
+              if (scrollTimeout) {
+                clearTimeout(scrollTimeout);
+              }
+              scrollTimeout = setTimeout(toggleButtonVisibility, 10);
+            },
+            { passive: true }
+          );
+
+          // Initial check
+          toggleButtonVisibility();
+        });
+      </script>
+    {% endif %}
   </body>
 </html>

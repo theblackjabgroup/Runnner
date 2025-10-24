@@ -523,7 +523,7 @@ footer .email-input12::placeholder {
 }
 
 /* ==========================================================================
-   BACK TO TOP BUTTON - Bordered Button Style
+   BACK TO TOP BUTTON - OLD FOOTER VERSION (DEPRECATED)
    ========================================================================== */
 
 .email-signup-section .back-to-top-container {
@@ -612,5 +612,177 @@ footer .email-input12::placeholder {
   
   .back-to-top-button {
     transform: translateX(-18px);
+  }
+}
+
+/* ==========================================================================
+   FLOATING SCROLL TO TOP BUTTON - NEW GLOBAL VERSION
+   ========================================================================== */
+
+.floating-scroll-to-top {
+  position: fixed;
+  z-index: var(--z-fixed, 1000);
+  display: inline-flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 12px 20px;
+  background: var(--button);
+  color: var(--button_label);
+  border: var(--scroll-btn-border-width, 0px) solid var(--border);
+  border-radius: var(--scroll-btn-border-radius, 50px);
+  bottom: var(--scroll-btn-bottom, 30px);
+  cursor: pointer;
+  font-family: var(--font-body-family);
+  font-size: 14px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  transition: all 0.3s ease;
+  outline: none;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(20px);
+  box-shadow: 0 calc(var(--scroll-btn-shadow-blur, 20px) / 2) var(--scroll-btn-shadow-blur, 20px) rgba(0, 0, 0, var(--scroll-btn-shadow-opacity, 0.2));
+}
+
+/* Circular button when no text */
+.floating-scroll-to-top:not(:has(.scroll-to-top-text)) {
+  padding: 15px;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+}
+
+/* Position based on data attribute */
+.floating-scroll-to-top[data-position="bottom-left"] {
+  left: var(--scroll-btn-side, 30px);
+}
+
+.floating-scroll-to-top[data-position="bottom-center"] {
+  left: 50%;
+  transform: translateX(-50%) translateY(20px);
+}
+
+.floating-scroll-to-top[data-position="bottom-center"].visible {
+  transform: translateX(-50%) translateY(0);
+}
+
+.floating-scroll-to-top[data-position="bottom-right"] {
+  right: var(--scroll-btn-side, 30px);
+}
+
+/* Visible state */
+.floating-scroll-to-top.visible {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+/* Hover state - use hover button colors */
+.floating-scroll-to-top:hover {
+  transform: translateY(-3px);
+  background: var(--hovered_button_label);
+  color: var(--hovered_button_text_color);
+  box-shadow: 0 calc(var(--scroll-btn-shadow-blur, 20px) * 0.75) calc(var(--scroll-btn-shadow-blur, 20px) * 1.5) rgba(0, 0, 0, calc(var(--scroll-btn-shadow-opacity, 0.2) + 0.1));
+}
+
+/* Hover state for bottom-center */
+.floating-scroll-to-top[data-position="bottom-center"]:hover {
+  transform: translateX(-50%) translateY(-3px);
+}
+
+/* Focus state for accessibility */
+.floating-scroll-to-top:focus {
+  outline: 2px solid var(--border);
+  outline-offset: 2px;
+}
+
+/* Text styling */
+.floating-scroll-to-top .scroll-to-top-text {
+  font-size: inherit;
+  font-weight: inherit;
+  text-transform: inherit;
+  letter-spacing: inherit;
+  font-family: inherit;
+  color: inherit;
+  line-height: 1;
+}
+
+/* Custom uploaded icon */
+.floating-scroll-to-top .scroll-to-top-icon {
+  display: block;
+  width: var(--scroll-btn-icon-size, 20px);
+  height: var(--scroll-btn-icon-size, 20px);
+  object-fit: contain;
+  transition: transform 0.3s ease;
+  flex-shrink: 0;
+}
+
+/* Default SVG icon (if no custom icon uploaded) */
+.floating-scroll-to-top .scroll-to-top-icon-default {
+  display: block;
+  width: var(--scroll-btn-icon-size, 20px);
+  height: var(--scroll-btn-icon-size, 20px);
+  transition: transform 0.3s ease;
+  flex-shrink: 0;
+  stroke: currentColor;
+}
+
+/* Icon animation on hover */
+.floating-scroll-to-top:hover .scroll-to-top-icon,
+.floating-scroll-to-top:hover .scroll-to-top-icon-default {
+  transform: translateY(-2px);
+}
+
+/* Mobile: Smaller button */
+@media (max-width: 768px) {
+  .floating-scroll-to-top {
+    font-size: 12px;
+    padding: 10px 16px;
+    gap: 8px;
+    letter-spacing: 0.5px;
+  }
+  
+  .floating-scroll-to-top .scroll-to-top-text {
+    display: none; /* Hide text on mobile to save space */
+  }
+  
+  /* Force circular on mobile since text is hidden */
+  .floating-scroll-to-top {
+    padding: 12px;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+  }
+}
+
+/* Tablet adjustments */
+@media (min-width: 769px) and (max-width: 1023px) {
+  .floating-scroll-to-top {
+    font-size: 13px;
+    padding: 11px 18px;
+  }
+}
+
+/* Accessibility - Respect reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .floating-scroll-to-top {
+    transition: opacity 0.1s ease, visibility 0.1s ease;
+    transform: none !important;
+  }
+  
+  .floating-scroll-to-top.visible {
+    transform: none !important;
+  }
+  
+  .floating-scroll-to-top:hover {
+    transform: none !important;
+  }
+  
+  /* Exception for bottom-center which needs X translation */
+  .floating-scroll-to-top[data-position="bottom-center"] {
+    transform: translateX(-50%) !important;
   }
 }

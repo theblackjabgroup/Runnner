@@ -16,6 +16,11 @@
   if block and block.settings.enable_sticky_bar != null
     assign enable_sticky_bar = block.settings.enable_sticky_bar
   endif
+
+  assign sticky_color_scheme = 'scheme-1'
+  if block and block.settings.sticky_bar_color_scheme != blank
+    assign sticky_color_scheme = block.settings.sticky_bar_color_scheme
+  endif
 -%}
 
 {%- if enable_sticky_bar -%}
@@ -27,7 +32,12 @@
     assign product_form_id = 'sticky-product-form-' | append: section.id
   -%}
 
-  <div class="sticky-atc-bar" role="complementary" aria-label="Sticky add to cart" {{ block.shopify_attributes }}>
+  <div
+    class="sticky-atc-bar color-{{ sticky_color_scheme }}"
+    role="complementary"
+    aria-label="Sticky add to cart"
+    {{ block.shopify_attributes }}
+  >
     <div class="sticky-atc-bar__container">
       {%- comment -%} First Row: Image + Product Info {%- endcomment -%}
       <div class="sticky-atc-bar__top-row">
@@ -127,7 +137,7 @@
         {%- comment -%} Add to Cart Form with Tertiary Button {%- endcomment -%}
         <form
           method="post"
-          action="/cart/add"
+          action="{{ routes.cart_add_url }}"
           id="{{ product_form_id }}"
           class="sticky-atc-bar__form"
           enctype="multipart/form-data"
