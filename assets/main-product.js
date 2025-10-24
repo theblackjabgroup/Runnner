@@ -1136,10 +1136,10 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         button.classList.add('active-tab');
-        button.style.color = 'var(--text)';
+        button.style.color = 'var(--hovered_button_label)';
 
         if (borderDiv) {
-          borderDiv.style.backgroundColor = 'var(--text)';
+          borderDiv.style.backgroundColor = 'var(--hovered_button_label)';
         }
         tabPanes.forEach((pane) => {
           if (pane.getAttribute('data-content') === targetTab) {
@@ -1156,9 +1156,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
       button.addEventListener('mouseenter', () => {
         if (!button.classList.contains('active-tab')) {
-          button.style.color = 'var(--text)';
+          button.style.color = 'var(--hovered_button_label)';
           if (borderDiv) {
-            borderDiv.style.backgroundColor = 'var(--text)';
+            borderDiv.style.backgroundColor = 'var(--hovered_button_label)';
           }
         }
       });
