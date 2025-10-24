@@ -438,10 +438,8 @@ function initStickyBar() {
 
 if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', initStickyBar);
-} else if (document.readyState === 'interactive') {
-  document.addEventListener('DOMContentLoaded', initStickyBar);
 } else {
-  // Document already loaded
+  // DOM is already interactive or complete - DOMContentLoaded has already fired
   initStickyBar();
 }
 
