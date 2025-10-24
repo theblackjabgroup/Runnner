@@ -1171,11 +1171,13 @@ document.addEventListener('DOMContentLoaded', () => {
             pane.classList.add('block');
             // Update ARIA attributes for active panel
             pane.setAttribute('aria-hidden', 'false');
+            pane.setAttribute('tabindex', '0');
           } else {
             pane.classList.add('hidden');
             pane.classList.remove('block');
             // Update ARIA attributes for inactive panel
             pane.setAttribute('aria-hidden', 'true');
+            pane.removeAttribute('tabindex');
           }
         });
       });
