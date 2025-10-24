@@ -57,8 +57,13 @@
   // Track product if on product page
   var trackProductRetries = 0;
   var maxRetries = 10;
+  var currentlyTracking = false;
+  var isRendering = false;
 
   function trackProduct() {
+    // Prevent duplicate tracking calls
+    if (currentlyTracking) return;
+    currentlyTracking = true;
     // Check multiple ways to detect product page
     var bodyClasses = document.body.className;
     var isProductPage =
@@ -67,6 +72,7 @@
       window.location.pathname.indexOf('/products/') !== -1;
 
     if (!isProductPage) {
+      currentlyTracking = false;
       return;
     }
 
@@ -75,9 +81,11 @@
     if (!productSection) {
       if (trackProductRetries < maxRetries) {
         trackProductRetries++;
+        currentlyTracking = false;
         setTimeout(trackProduct, 200);
         return;
       } else {
+        currentlyTracking = false;
         return;
       }
     }
@@ -86,6 +94,7 @@
     var productHandle = getMetaSafe('product-handle');
 
     if (!productId || !productHandle) {
+      currentlyTracking = false;
       return;
     }
 
@@ -301,6 +310,7 @@
     };
 
     saveProduct(product);
+    currentlyTracking = false;
   }
 
   // Save product to storage
@@ -342,10 +352,15 @@
 
   // Render products
   function renderProducts() {
+    // Prevent duplicate render calls
+    if (isRendering) return;
+    isRendering = true;
+
     var wrapper = document.querySelector('[data-section-id="' + sectionId + '"] .recently-viewed-wrapper');
     var grid = document.getElementById('recently-viewed-grid-' + sectionId);
 
     if (!wrapper || !grid) {
+      isRendering = false;
       return;
     }
 
@@ -361,6 +376,7 @@
     // Hide section if no products
     if (products.length === 0) {
       wrapper.style.display = 'none';
+      isRendering = false;
       return;
     }
 
@@ -375,6 +391,7 @@
     // Re-check if we have products after filtering
     if (products.length === 0) {
       wrapper.style.display = 'none';
+      isRendering = false;
       return;
     }
 
