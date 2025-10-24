@@ -55,7 +55,7 @@
                           <div class="tech-specs-bars flex flex-col items-center justify-center pl-6">
                             <!-- Effort Bar -->
                             <div class="flex justify-between w-full max-w-full" id="effort-bar">
-                              {% for i in (1..80) %}
+                              {% for i in (1..90) %}
                                 <div class="box">|</div>
                               {% endfor %}
                             </div>
@@ -83,7 +83,7 @@
                         <div class="tech-specs-bars flex flex-col items-center justify-center pl-6">
                           <!-- Temperature Bar -->
                           <div class="flex justify-between w-full max-w-full" id="temperature-bar">
-                            {% for i in (1..80) %}
+                            {% for i in (1..90) %}
                               <div class="box">|</div>
                             {% endfor %}
                           </div>
@@ -444,6 +444,12 @@
       }
     }
 
+    @media (min-width: 1800px) and (max-width: 1899px) {
+      .box:nth-child(n+81) {
+        display: none;
+      }
+    }
+
     .tech-left-box {
       border-right: 1px solid var(--border);
       padding-right: var(--space-4xl);
@@ -539,18 +545,22 @@
     const tempMax = {{ product.metafields.tech_specs.temp_max.value | default: 0 }};
 
     const width = window.innerWidth;
-    let totalBars = 54; // default
+    let totalBars;
 
     if (width <= 480) {
       totalBars = 29;
     } else if (width <= 990) {
       totalBars = 40;
-    } else if (width >= 1800) {
-      totalBars = 80;
-    } else if (width >= 1700) {
-      totalBars = 70;
-    } else if (width >= 1600) {
+    } else if (width < 1600) {
+      totalBars = 54;
+    } else if (width < 1700) {
       totalBars = 60;
+    } else if (width < 1800) {
+      totalBars = 70;
+    } else if (width < 1900) {
+      totalBars = 80;
+    } else {
+      totalBars = 90;
     }
 
     // Effort bars
@@ -591,7 +601,7 @@
       const width = window.innerWidth;
 
       // Check if we crossed a breakpoint
-      const breakpoints = [480, 990, 1500, 1600, 1700, 1800];
+      const breakpoints = [480, 990, 1500, 1600, 1700, 1800, 1900];
       let crossedBreakpoint = false;
 
       for (let bp of breakpoints) {
