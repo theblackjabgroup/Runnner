@@ -1,0 +1,154 @@
+{{ 'section-related-products.css' | asset_url | stylesheet_tag }}
+
+{%- if section.settings.enable_animations -%}
+  {{ 'scroll-animations.css' | asset_url | stylesheet_tag }}
+  <script src="{{ 'scroll-animations.js' | asset_url }}" defer></script>
+{%- endif -%}
+
+{% comment %}
+  Recently Viewed Products Section
+  Tracks and displays recently viewed products using localStorage
+{% endcomment %}
+
+<recently-viewed-products
+  class="recently-viewed-products"
+  data-section-id="{{ section.id }}"
+  data-section-type="recently-viewed"
+  data-max-products="{{ section.settings.max_products | default: 10 }}"
+  data-enable-animations="{% if section.settings.enable_animations %}true{% else %}false{% endif %}"
+>
+  {% assign top_padding = section.settings.padding_top %}
+  {% assign side_padding = settings.side_space %}
+
+  {% if top_padding == blank or top_padding == 0 %}
+    {% assign top_padding = 36 %}
+  {% endif %}
+
+  {% if side_padding == blank or side_padding == 0 %}
+    {% assign side_padding = 20 %}
+  {% endif %}
+
+  <div
+    class="related-products-page-width related-products-section overflow-hidden color-{{ section.settings.color_scheme }} gradient recently-viewed-wrapper"
+    role="region"
+    aria-labelledby="recently-viewed-heading"
+    style="padding: {{ top_padding }}px {{ side_padding }}px {{ section.settings.padding_bottom }}px; display: none;"
+  >
+    {%- if section.settings.heading != blank -%}
+      <h2
+        id="recently-viewed-heading"
+        class="related-products-main-heading mb-[-10px]"
+      >
+        {{ section.settings.heading }}
+      </h2>
+    {%- endif -%}
+
+    {%- comment -%} Accessibility: Live region for screen readers {%- endcomment -%}
+    <div class="visually-hidden" role="status" aria-live="polite" aria-atomic="true"></div>
+
+    <main
+      class="related-products-container w-full mt-10 color-{{ section.settings.color_scheme }}"
+      style="margin-top:18px;"
+    >
+      <div class="slider-container relative">
+        <div
+          id="recently-viewed-grid-{{ section.id }}"
+          class="product-slider related-products-grid {% if section.settings.enable_animations %}scroll-fade-stagger{% endif %} flex gap-2 md:gap-4 custom-scrollbar featured-collection-cursor-grab overflow-x-auto"
+          role="list"
+          aria-labelledby="recently-viewed-heading"
+        >
+          {%- comment -%}
+            Products will be loaded here via JavaScript
+            Using same product card structure as related products
+          {%- endcomment -%}
+        </div>
+
+        <!-- Horizontal scrollbar using snippet -->
+        {% render 'horizontal-scrollbar',
+          container_selector: '.slider-container',
+          slider_selector: '#recently-viewed-grid-{{ section.id }}'
+        %}
+      </div>
+    </main>
+  </div>
+</recently-viewed-products>
+
+{%- comment -%} External scripts - loaded once and cached {%- endcomment -%}
+<script src="{{ 'featured-collection.js' | asset_url }}" defer></script>
+<script src="{{ 'new-product-card.js' | asset_url }}" defer></script>
+<script src="{{ 'recently-viewed.js' | asset_url }}" defer></script>
+
+{% schema %}
+{
+  "name": "Recently Viewed Products",
+  "tag": "section",
+  "class": "section recently-viewed-section",
+  "settings": [
+    {
+      "type": "paragraph",
+      "content": "Shows products that the customer has recently viewed. Products are tracked automatically using browser storage."
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Recently Viewed"
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "Color scheme",
+      "default": "scheme-1"
+    },
+    {
+      "type": "range",
+      "id": "max_products",
+      "min": 4,
+      "max": 20,
+      "step": 1,
+      "label": "Maximum products to show",
+      "default": 10
+    },
+    {
+      "type": "header",
+      "content": "Animation"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_animations",
+      "label": "Enable scroll animations",
+      "default": true,
+      "info": "Animate products as they scroll into view. Respects user's motion preferences."
+    },
+    {
+      "type": "header",
+      "content": "Spacing"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "Padding top",
+      "default": 36
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "Padding bottom",
+      "default": 36
+    }
+  ],
+  "presets": [
+    {
+      "name": "Recently Viewed Products"
+    }
+  ]
+}
+{% endschema %}
