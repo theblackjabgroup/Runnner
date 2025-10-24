@@ -39,6 +39,17 @@
     cursor: pointer;
     font-size: 20px;
   }
+
+  /* CSS hover effects to replace inline event handlers */
+  .notify-when-available-btn:hover {
+    background-color: var(--hovered_button_label) !important;
+    color: var(--hovered_button_text_color) !important;
+  }
+
+  .add-to-cart-btn:not(.no-hover-css-product-card):hover {
+    background-color: var(--hovered_button_label) !important;
+    color: var(--hovered_button_text_color) !important;
+  }
   .slider-arrow {
     background: transparent;
     transition: background 0.2s;
@@ -168,16 +179,25 @@
         {%- endif -%}
 
         {% if card_product.available == false %}
-          <div class="absolute top-3 z-2" style="left: 10px;">
+          <div class="absolute top-0 z-2">
             {% render 'sold-out-badge', class: 'sold-out-tag tracking-wide font-medium' %}
           </div>
-        {% elsif card_product.tags contains 'best-seller' or card_product.tags contains 'bestseller' or card_product.tags contains 'best seller' %}
-          <div class="absolute top-3 z-2" style="left: 10px;">
+        {% elsif card_product.tags contains 'best-seller'
+          or card_product.tags contains 'bestseller'
+          or card_product.tags contains 'best seller'
+        %}
+          <div class="absolute top-0 z-2">
             {% render 'best-seller-badge', class: 'best-seller-tag tracking-wide font-medium' %}
           </div>
-        {% elsif card_product.available and card_product.variants.first.inventory_quantity <= 5 and card_product.variants.first.inventory_quantity > 0 %}
-          <div class="absolute top-3 z-2" style="left: 10px;">
-            {% render 'low-stock-badge', quantity: card_product.variants.first.inventory_quantity, class: 'low-stock-tag tracking-wide font-medium' %}
+        {% elsif card_product.available
+          and card_product.variants.first.inventory_quantity <= 5
+          and card_product.variants.first.inventory_quantity > 0
+        %}
+          <div class="absolute top-0 z-2">
+            {% render 'low-stock-badge',
+              quantity: card_product.variants.first.inventory_quantity,
+              class: 'low-stock-tag tracking-wide font-medium'
+            %}
           </div>
         {% endif %}
 
@@ -188,8 +208,6 @@
                 type="button"
                 class="notify-when-available-btn w-full py-4  font-medium cursor-pointer transition-colors duration-200 uppercase tracking-wider"
                 style="color:var(--button_label); background-color: var(--button);"
-                onmouseout="this.style.backgroundColor='var(--button)'; this.style.color='var(--button_label)';"
-                onmouseover="this.style.backgroundColor='var(--hovered_button_label)'; this.style.color='var(--hovered_button_text_color)';"
                 data-product-id="{{ card_product.id }}"
                 data-product-title="{{ card_product.title | escape }}"
               >
@@ -197,6 +215,48 @@
                 <span class="notifying-text hidden">Submitting...</span>
                 <span class="notified-text hidden">We'll Notify You!</span>
               </button>
+            </div>
+          </div>
+
+          <!-- Notify Me Modal -->
+          <div id="notify-modal-{{ card_product.id }}" class="notify-modal" style="display: none;">
+            <div class="notify-modal-overlay"></div>
+            <div class="notify-modal-content">
+              <button class="notify-modal-close" aria-label="Close">&times;</button>
+              <h3 class="notify-modal-title">Notify Me When Available</h3>
+              <p class="notify-modal-description">
+                Enter your email and we'll let you know when <strong>{{ card_product.title }}</strong> is back in stock.
+              </p>
+
+              <form
+                class="notify-form"
+                data-product-id="{{ card_product.id }}"
+                data-product-title="{{ card_product.title | escape }}"
+              >
+                <div class="notify-form-group">
+                  <label for="notify-email-{{ card_product.id }}" class="sr-only">Email Address</label>
+                  <input
+                    type="email"
+                    id="notify-email-{{ card_product.id }}"
+                    name="email"
+                    placeholder="Your email address"
+                    required
+                    class="notify-email-input"
+                    aria-required="true"
+                  >
+                </div>
+
+                <!-- Error message container -->
+                <div class="notify-error-message" role="alert" aria-live="assertive" style="display: none;"></div>
+
+                <!-- Success message container -->
+                <div class="notify-success-message" role="status" aria-live="polite" style="display: none;"></div>
+
+                <button type="submit" class="notify-submit-btn">
+                  <span class="notify-submit-text">Notify Me</span>
+                  <span class="notify-submit-loading" style="display: none;">Sending...</span>
+                </button>
+              </form>
             </div>
           </div>
         {% else %}
@@ -219,9 +279,6 @@
                 type="button"
                 class="add-to-cart-btn new-add-to-cart-btn {% if has_size_variant %}no-hover-css-product-card{% endif %} w-full py-4 z-[100] !text-[1.6rem] font-medium transition-colors duration-200 uppercase tracking-wider quick-add-button"
                 style="color:var(--button_label); background-color: var(--button);"
-
-                onmouseout="this.style.backgroundColor='var(--button)'; this.style.color='var(--button_label)';"
-                onmouseover="this.style.backgroundColor='var(--hovered_button_label)'; this.style.color='var(--hovered_button_text_color)';"
                 {% if has_size_variant %}
                   data-has-sizes="true"
                 {% else %}
@@ -640,9 +697,11 @@
 
   .new-size-label-wrapper {
     display: flex;
+    flex-wrap: wrap;
     width: 100%;
     align-items: center;
     justify-content: space-between;
+    gap: 5px;
     border-radius: {{ settings.buttons_radius }}px;
   }
 
@@ -656,6 +715,7 @@
   .new-size-options-wrapper {
     display: flex !important;
     flex-direction: row !important;
+    flex-wrap: wrap !important;
     gap: 5px !important;
     align-items: center;
     justify-content: flex-end;
@@ -807,6 +867,230 @@
   }
   .select-size-option {
     font-size: 14px !important;
+  }
+
+  /* Screen reader only class */
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border-width: 0;
+  }
+
+  /* Notify Me Modal Styles */
+  .notify-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: fadeIn 0.3s ease;
+  }
+
+  .notify-modal-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(4px);
+  }
+
+  .notify-modal-content {
+    position: relative;
+    background: white;
+    border-radius: 12px;
+    padding: 32px;
+    max-width: 500px;
+    width: 90%;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    animation: slideUp 0.3s ease;
+    z-index: 10000;
+  }
+
+  .notify-modal-close {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    background: transparent;
+    border: none;
+    font-size: 28px;
+    line-height: 1;
+    cursor: pointer;
+    color: #999;
+    padding: 0;
+    width: 32px;
+    height: 32px;
+    transition: color 0.2s;
+  }
+
+  .notify-modal-close:hover {
+    color: #333;
+  }
+
+  .notify-modal-title {
+    font-size: 24px;
+    font-weight: 600;
+    margin: 0 0 12px 0;
+    color: #333;
+  }
+
+  .notify-modal-description {
+    font-size: 15px;
+    color: #666;
+    margin: 0 0 24px 0;
+    line-height: 1.5;
+  }
+
+  .notify-form-group {
+    margin-bottom: 16px;
+  }
+
+  .notify-email-input {
+    width: 100%;
+    padding: 14px 16px;
+    font-size: 15px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    transition: border-color 0.2s;
+    font-family: inherit;
+  }
+
+  .notify-email-input:focus {
+    outline: none;
+    border-color: #333;
+    box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.05);
+  }
+
+  .notify-email-input.error {
+    border-color: #d32f2f;
+  }
+
+  .notify-error-message {
+    padding: 12px 16px;
+    background: #ffebee;
+    color: #d32f2f;
+    border: 1px solid #ef5350;
+    border-radius: 6px;
+    font-size: 14px;
+    margin-bottom: 16px;
+    display: none;
+  }
+
+  .notify-error-message.show {
+    display: block;
+    animation: shake 0.4s;
+  }
+
+  .notify-success-message {
+    padding: 12px 16px;
+    background: #e8f5e9;
+    color: #2e7d32;
+    border: 1px solid #4caf50;
+    border-radius: 6px;
+    font-size: 14px;
+    margin-bottom: 16px;
+    display: none;
+  }
+
+  .notify-success-message.show {
+    display: block;
+  }
+
+  .notify-submit-btn {
+    width: 100%;
+    padding: 14px 24px;
+    background: #333;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .notify-submit-btn:hover:not(:disabled) {
+    background: #000;
+  }
+
+  .notify-submit-btn:disabled {
+    background: #999;
+    cursor: not-allowed;
+  }
+
+  .notify-submit-loading {
+    display: none;
+  }
+
+  .notify-submit-btn.loading .notify-submit-text {
+    display: none;
+  }
+
+  .notify-submit-btn.loading .notify-submit-loading {
+    display: inline;
+  }
+
+  /* Modal Animations */
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  @keyframes slideUp {
+    from {
+      transform: translateY(30px);
+      opacity: 0;
+    }
+    to {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  }
+
+  @keyframes shake {
+    0%,
+    100% {
+      transform: translateX(0);
+    }
+    25% {
+      transform: translateX(-10px);
+    }
+    75% {
+      transform: translateX(10px);
+    }
+  }
+
+  /* Modal Mobile Responsive */
+  @media (max-width: 600px) {
+    .notify-modal-content {
+      padding: 24px;
+      max-width: 95%;
+    }
+
+    .notify-modal-title {
+      font-size: 20px;
+    }
+
+    .notify-modal-description {
+      font-size: 14px;
+    }
   }
 </style>
 
@@ -962,33 +1246,143 @@
       });
     }
 
+    // Open modal when clicking notify button
     notifyButtons.forEach((button) => {
-      button.addEventListener('click', async () => {
+      button.addEventListener('click', () => {
         const productId = button.dataset.productId;
-        const productTitle = button.dataset.productTitle;
+        const modal = document.getElementById(`notify-modal-${productId}`);
 
-        // For now, we'll use a simple prompt for email
-        // In a real implementation, you'd want a proper modal or form
-        const email = prompt('Enter your email to be notified when this product is back in stock:');
-
-        if (!email) return;
-
-        if (!email.includes('@')) {
-          alert('Please enter a valid email address');
-          return;
-        }
-
-        updateNotifyButtonState(button, 'submitting');
-
-        try {
-          await submitNotifyRequest(productId, productTitle, email);
-          updateNotifyButtonState(button, 'submitted');
-        } catch (error) {
-          updateNotifyButtonState(button, 'default');
-          alert('Sorry, there was an error. Please try again later.');
+        if (modal) {
+          modal.style.display = 'flex';
+          const emailInput = modal.querySelector('.notify-email-input');
+          if (emailInput) {
+            emailInput.focus();
+          }
         }
       });
     });
+
+    // Handle modal close buttons
+    document.querySelectorAll('.notify-modal-close').forEach((closeBtn) => {
+      closeBtn.addEventListener('click', () => {
+        const modal = closeBtn.closest('.notify-modal');
+        if (modal) {
+          modal.style.display = 'none';
+          resetModalForm(modal);
+        }
+      });
+    });
+
+    // Close modal when clicking overlay
+    document.querySelectorAll('.notify-modal-overlay').forEach((overlay) => {
+      overlay.addEventListener('click', () => {
+        const modal = overlay.closest('.notify-modal');
+        if (modal) {
+          modal.style.display = 'none';
+          resetModalForm(modal);
+        }
+      });
+    });
+
+    // Close modal with Escape key
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        const openModal = document.querySelector('.notify-modal[style*="display: flex"]');
+        if (openModal) {
+          openModal.style.display = 'none';
+          resetModalForm(openModal);
+        }
+      }
+    });
+
+    // Handle form submissions
+    document.querySelectorAll('.notify-form').forEach((form) => {
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const emailInput = form.querySelector('.notify-email-input');
+        const email = emailInput.value.trim();
+        const submitBtn = form.querySelector('.notify-submit-btn');
+        const errorMsg = form.querySelector('.notify-error-message');
+        const successMsg = form.querySelector('.notify-success-message');
+
+        // Hide previous messages
+        errorMsg.classList.remove('show');
+        successMsg.classList.remove('show');
+        emailInput.classList.remove('error');
+
+        // Validate email
+        if (!email || !email.includes('@') || !email.includes('.')) {
+          showError(form, 'Please enter a valid email address');
+          emailInput.classList.add('error');
+          emailInput.focus();
+          return;
+        }
+
+        // Show loading state
+        submitBtn.disabled = true;
+        submitBtn.classList.add('loading');
+
+        try {
+          const productId = form.dataset.productId;
+          const productTitle = form.dataset.productTitle;
+
+          await submitNotifyRequest(productId, productTitle, email);
+
+          // Show success message
+          showSuccess(form, "Thanks! We'll notify you when this product is back in stock.");
+
+          // Close modal after 2 seconds
+          setTimeout(() => {
+            const modal = form.closest('.notify-modal');
+            if (modal) {
+              modal.style.display = 'none';
+              resetModalForm(modal);
+            }
+          }, 2000);
+        } catch (error) {
+          // Show error message
+          showError(form, 'Sorry, there was an error. Please try again later.');
+        } finally {
+          // Reset button state
+          submitBtn.disabled = false;
+          submitBtn.classList.remove('loading');
+        }
+      });
+    });
+
+    // Helper function to show error message
+    function showError(form, message) {
+      const errorMsg = form.querySelector('.notify-error-message');
+      if (errorMsg) {
+        errorMsg.textContent = message;
+        errorMsg.classList.add('show');
+      }
+    }
+
+    // Helper function to show success message
+    function showSuccess(form, message) {
+      const successMsg = form.querySelector('.notify-success-message');
+      if (successMsg) {
+        successMsg.textContent = message;
+        successMsg.classList.add('show');
+      }
+    }
+
+    // Helper function to reset modal form
+    function resetModalForm(modal) {
+      const form = modal.querySelector('.notify-form');
+      if (form) {
+        form.reset();
+        const errorMsg = form.querySelector('.notify-error-message');
+        const successMsg = form.querySelector('.notify-success-message');
+        const emailInput = form.querySelector('.notify-email-input');
+
+        if (errorMsg) errorMsg.classList.remove('show');
+        if (successMsg) successMsg.classList.remove('show');
+        if (emailInput) emailInput.classList.remove('error');
+      }
+    }
 
     const sliders = document.querySelectorAll('.product-images-slider');
 

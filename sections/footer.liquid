@@ -132,6 +132,48 @@
                   </button>
                 </div>
               {% endform %}
+
+              <!-- Back to Top Button -->
+              {% if section.settings.show_back_to_top %}
+                <div class="back-to-top-container">
+                  <button
+                    type="button"
+                    class="back-to-top-button"
+                    aria-label="Scroll to top"
+                    title="Scroll to top"
+                  >
+                    <span class="back-to-top-text">Scroll to Top</span>
+
+                    {% if section.settings.back_to_top_icon != blank %}
+                      <img
+                        src="{{ section.settings.back_to_top_icon | image_url: width: 200 }}"
+                        alt=""
+                        class="back-to-top-icon"
+                        style="width: {{ section.settings.back_to_top_icon_size }}px; height: {{ section.settings.back_to_top_icon_size }}px;"
+                        loading="lazy"
+                        width="{{ section.settings.back_to_top_icon_size }}"
+                        height="{{ section.settings.back_to_top_icon_size }}"
+                      >
+                    {% else %}
+                      <!-- Default SVG icon if merchant hasn't uploaded one -->
+                      <svg
+                        class="back-to-top-icon-default"
+                        style="width: {{ section.settings.back_to_top_icon_size }}px; height: {{ section.settings.back_to_top_icon_size }}px;"
+                        xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                      >
+                        <line x1="12" y1="19" x2="12" y2="5"></line>
+                        <polyline points="5 12 12 5 19 12"></polyline>
+                      </svg>
+                    {% endif %}
+                  </button>
+                </div>
+              {% endif %}
             </div>
 
           {% when 'support' %}
@@ -518,6 +560,47 @@
           });
       });
     }
+
+    // Back to Top Button - Simple & Accessible
+    const backToTopButton = document.querySelector('.back-to-top-button');
+
+    if (backToTopButton) {
+      // Smooth scroll to top
+      function scrollToTop() {
+        window.scrollTo({
+          top: 0,
+          behavior: 'smooth',
+        });
+
+        // Accessibility: Move focus to main content after scroll
+        setTimeout(function () {
+          const mainContent =
+            document.querySelector('main') || document.querySelector('#MainContent') || document.querySelector('body');
+          if (mainContent) {
+            mainContent.setAttribute('tabindex', '-1');
+            mainContent.focus();
+            // Remove tabindex after focus to avoid affecting tab order
+            setTimeout(function () {
+              mainContent.removeAttribute('tabindex');
+            }, 100);
+          }
+        }, 500);
+      }
+
+      // Click event
+      backToTopButton.addEventListener('click', function (e) {
+        e.preventDefault();
+        scrollToTop();
+      });
+
+      // Keyboard support (Enter and Space)
+      backToTopButton.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          scrollToTop();
+        }
+      });
+    }
   });
 </script>
 
@@ -576,6 +659,34 @@
       "unit": "px",
       "label": "Bottom Padding",
       "default": 40
+    },
+    {
+      "type": "header",
+      "content": "Back to Top Button"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_back_to_top",
+      "label": "Show Back to Top Button",
+      "default": true,
+      "info": "Display a button above the logo to scroll to page top"
+    },
+    {
+      "type": "image_picker",
+      "id": "back_to_top_icon",
+      "label": "Back to Top Icon",
+      "info": "Upload an icon image (SVG or PNG recommended, 40x40px to 60x60px)"
+    },
+    {
+      "type": "range",
+      "id": "back_to_top_icon_size",
+      "min": 16,
+      "max": 32,
+      "step": 2,
+      "unit": "px",
+      "label": "Icon Size",
+      "default": 20,
+      "info": "Adjust the size of the icon (appears inline with text)"
     },
     {
       "type": "color",
