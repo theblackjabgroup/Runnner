@@ -32,42 +32,12 @@ class StickyATCBar {
                        rect.height > 0 &&
                        rect.width > 0;
 
-      console.log('Checking button:', {
-        button,
-        className: button.className,
-        display: style.display,
-        visibility: style.visibility,
-        opacity: style.opacity,
-        height: rect.height,
-        width: rect.width,
-        isVisible
-      });
-
       return isVisible;
     }) || allButtons[0]; // Fallback to first button if none are visible
 
     if (!this.mainForm || !this.mainATCButton) {
-      console.log('Sticky ATC: Could not find main form or button', {
-        mainForm: this.mainForm,
-        mainATCButton: this.mainATCButton,
-        allButtonsFound: allButtons.length
-      });
       return;
     }
-
-    // Log final selected button details
-    const finalRect = this.mainATCButton.getBoundingClientRect();
-    console.log('Sticky ATC: Initialized successfully', {
-      mainForm: this.mainForm,
-      mainATCButton: this.mainATCButton,
-      buttonClass: this.mainATCButton.className,
-      buttonDimensions: {
-        height: finalRect.height,
-        width: finalRect.width,
-        top: finalRect.top,
-        bottom: finalRect.bottom
-      }
-    });
 
     this.init();
   }
@@ -107,22 +77,13 @@ class StickyATCBar {
 
     this.observer = new IntersectionObserver((entries) => {
       entries.forEach((entry) => {
-        console.log('Sticky ATC: Intersection change', {
-          isIntersecting: entry.isIntersecting,
-          intersectionRatio: entry.intersectionRatio,
-          target: entry.target,
-          boundingClientRect: entry.boundingClientRect.top
-        });
-
         // If button is intersecting (visible in viewport), hide sticky bar
         // If button is NOT intersecting (scrolled out of view), show sticky bar
         if (entry.isIntersecting) {
           // Main button is visible - hide sticky bar
-          console.log('Sticky ATC: Hiding bar - main button is visible');
           this.hideBar();
         } else {
           // Main button is not visible - show sticky bar
-          console.log('Sticky ATC: Showing bar - main button is NOT visible');
           this.showBar();
         }
       });
@@ -140,23 +101,14 @@ class StickyATCBar {
 
   startObserving() {
     if (!this.mainATCButton) {
-      console.log('Sticky ATC: No button to observe');
       return;
     }
 
-    console.log('Sticky ATC: Starting to observe button', this.mainATCButton);
     this.observer.observe(this.mainATCButton);
 
     // Do an immediate check
     const rect = this.mainATCButton.getBoundingClientRect();
     const isVisible = rect.top >= 0 && rect.bottom <= window.innerHeight;
-
-    console.log('Sticky ATC: Initial button position', {
-      top: rect.top,
-      bottom: rect.bottom,
-      windowHeight: window.innerHeight,
-      isVisible: isVisible
-    });
 
     if (isVisible) {
       this.hideBar();
