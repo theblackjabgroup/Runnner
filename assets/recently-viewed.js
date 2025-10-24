@@ -4,17 +4,17 @@
 (function () {
   'use strict';
 
-  const STORAGE_KEY = 'shopify_recently_viewed';
+  var STORAGE_KEY = 'shopify_recently_viewed';
 
   // Get settings from data attributes
-  const sectionElement = document.querySelector('[data-section-type="recently-viewed"]');
+  var sectionElement = document.querySelector('[data-section-type="recently-viewed"]');
   if (!sectionElement) {
     return;
   }
 
-  const MAX_PRODUCTS = parseInt(sectionElement.getAttribute('data-max-products')) || 10;
-  const sectionId = sectionElement.getAttribute('data-section-id');
-  const enableAnimations = sectionElement.getAttribute('data-enable-animations') === 'true';
+  var MAX_PRODUCTS = parseInt(sectionElement.getAttribute('data-max-products')) || 10;
+  var sectionId = sectionElement.getAttribute('data-section-id');
+  var enableAnimations = sectionElement.getAttribute('data-enable-animations') === 'true';
 
   // Get meta safely
   function getMetaSafe(name) {
@@ -22,11 +22,11 @@
     return meta ? meta.getAttribute('content') : null;
   }
 
-  const currentProductId = getMetaSafe('product-id');
+  var currentProductId = getMetaSafe('product-id');
 
   // Storage abstraction - handles localStorage, sessionStorage, or in-memory fallback
   var memoryStorage = {};
-  const storage = {
+  var storage = {
     getItem: function (key) {
       try {
         return localStorage.getItem(key);
@@ -343,7 +343,7 @@
   // Get recently viewed products from storage
   function getRecentlyViewed() {
     try {
-      const data = storage.getItem(STORAGE_KEY);
+      var data = storage.getItem(STORAGE_KEY);
       return data ? JSON.parse(data) : [];
     } catch (error) {
       return [];
