@@ -64,6 +64,10 @@
     // Prevent duplicate tracking calls
     if (currentlyTracking) return;
     currentlyTracking = true;
+
+    // Reset retry counter at the start of each new tracking attempt
+    trackProductRetries = 0;
+
     // Check multiple ways to detect product page
     var bodyClasses = document.body.className;
     var isProductPage =
@@ -310,7 +314,10 @@
     };
 
     saveProduct(product);
+
+    // Reset state after successful tracking
     currentlyTracking = false;
+    trackProductRetries = 0;
   }
 
   // Save product to storage
