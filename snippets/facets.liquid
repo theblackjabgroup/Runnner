@@ -164,7 +164,30 @@
                             {{ 'products.facets.filter_and_operator_subtitle' | t | default: 'All selected' }}
                           </span>
                         {%- endif -%}
-                        <span class="pmorph__icon" aria-hidden="true"></span>
+                        {% if facet_custom_icon_collapsed != blank %}
+                          <span class="custom-facet-icon" aria-hidden="true" data-icon-type="custom">
+                            <img
+                              src="{{ facet_custom_icon_collapsed | image_url: width: 48 }}"
+                              alt=""
+                              width="48"
+                              height="48"
+                              class="custom-icon-collapsed"
+                              style="width: var(--size); height: var(--size); display: block;"
+                            >
+                            {% if facet_custom_icon_expanded != blank %}
+                              <img
+                                src="{{ facet_custom_icon_expanded | image_url: width: 48 }}"
+                                alt=""
+                                width="48"
+                                height="48"
+                                class="custom-icon-expanded"
+                                style="width: var(--size); height: var(--size); display: none;"
+                              >
+                            {% endif %}
+                          </span>
+                        {% else %}
+                          <span class="pmorph__icon" aria-hidden="true"></span>
+                        {% endif %}
                       </div>
                     </summary>
                     <div
@@ -307,7 +330,30 @@
                         >
                           {{- filter.label | escape -}}
                         </h1>
-                        <span class="pmorph__icon" aria-hidden="true"></span>
+                        {% if facet_custom_icon_collapsed != blank %}
+                          <span class="custom-facet-icon" aria-hidden="true" data-icon-type="custom">
+                            <img
+                              src="{{ facet_custom_icon_collapsed | image_url: width: 48 }}"
+                              alt=""
+                              width="48"
+                              height="48"
+                              class="custom-icon-collapsed"
+                              style="width: var(--size); height: var(--size); display: block;"
+                            >
+                            {% if facet_custom_icon_expanded != blank %}
+                              <img
+                                src="{{ facet_custom_icon_expanded | image_url: width: 48 }}"
+                                alt=""
+                                width="48"
+                                height="48"
+                                class="custom-icon-expanded"
+                                style="width: var(--size); height: var(--size); display: none;"
+                              >
+                            {% endif %}
+                          </span>
+                        {% else %}
+                          <span class="pmorph__icon" aria-hidden="true"></span>
+                        {% endif %}
                       </div>
                     </summary>
                     <div
@@ -342,7 +388,30 @@
                 >
                   <div class="flex items-center">
                     <h1 class="uppercase !text-[16px] w-[75px] !font-[500] facets-text-color">Sort By</h1>
-                    <span class="pmorph__icon" aria-hidden="true"></span>
+                    {% if facet_custom_icon_collapsed != blank %}
+                      <span class="custom-facet-icon" aria-hidden="true" data-icon-type="custom">
+                        <img
+                          src="{{ facet_custom_icon_collapsed | image_url: width: 48 }}"
+                          alt=""
+                          width="48"
+                          height="48"
+                          class="custom-icon-collapsed"
+                          style="width: var(--size); height: var(--size); display: block;"
+                        >
+                        {% if facet_custom_icon_expanded != blank %}
+                          <img
+                            src="{{ facet_custom_icon_expanded | image_url: width: 48 }}"
+                            alt=""
+                            width="48"
+                            height="48"
+                            class="custom-icon-expanded"
+                            style="width: var(--size); height: var(--size); display: none;"
+                          >
+                        {% endif %}
+                      </span>
+                    {% else %}
+                      <span class="pmorph__icon" aria-hidden="true"></span>
+                    {% endif %}
                   </div>
                 </summary>
                 <div
@@ -948,8 +1017,8 @@
     --ease-open: ease;
     --ease-close: ease;
     --fg: var(--text);
-    --size: 12px;
-    --thickness: 2px;
+    --size: {{ facet_icon_size | default: 12 }}px;
+    --thickness: {{ facet_icon_thickness | default: 2 }}px;
   }
 
   .pmorph__icon {
@@ -1016,6 +1085,39 @@
     font-style: var(--font-body-style);
     font-weight: var(--font-body-weight);
     font-size: var(--tm-b-3-size);
+  }
+
+  /* Custom Icon Styles */
+  .custom-facet-icon {
+    position: relative;
+    width: var(--size);
+    height: var(--size);
+    flex-shrink: 0;
+    margin-left: 6px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .custom-facet-icon img {
+    transition: opacity var(--dur) var(--ease-open);
+  }
+
+  /* Toggle custom icons on expand */
+  details[open] .custom-facet-icon .custom-icon-collapsed {
+    display: none !important;
+  }
+
+  details[open] .custom-facet-icon .custom-icon-expanded {
+    display: block !important;
+  }
+
+  details:not([open]) .custom-facet-icon .custom-icon-collapsed {
+    display: block !important;
+  }
+
+  details:not([open]) .custom-facet-icon .custom-icon-expanded {
+    display: none !important;
   }
 
   .facets__summary-label {
