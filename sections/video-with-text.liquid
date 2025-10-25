@@ -1023,11 +1023,12 @@ window.addEventListener('load', function() {
     {% if section.settings.enable_overlay_animation %}
     const overlay = document.querySelector('.video-with-text-media-overlay-{{ section.id }}');
     if (!overlay) return;
+    {% if section.settings.overlay_final_opacity == 0 %}
+    // Add event listener BEFORE changing opacity to ensure it catches the transitionend event
+    overlay.addEventListener('transitionend', () => overlay.remove(), { once: true });
+    {% endif %}
     setTimeout(() => {
       overlay.style.opacity = '{{ section.settings.overlay_final_opacity | divided_by: 100.0 | default: 0 }}';
-      {% if section.settings.overlay_final_opacity == 0 %}
-      overlay.addEventListener('transitionend', () => overlay.remove());
-      {% endif %}
     }, {{ section.settings.overlay_duration | times: 1000 | default: 1000 }});
     {% endif %}
   });
