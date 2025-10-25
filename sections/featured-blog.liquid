@@ -362,6 +362,19 @@
        margin-bottom: 40px;
        display: flex;
        justify-content: end;
+       cursor: pointer;
+     }
+
+     /* Featured blog load more button styles */
+     .featured-blog-load-more-btn {
+       min-width: 159px;
+       width: auto !important;
+     }
+
+     .featured-blog-load-more-btn,
+     .featured-blog-load-more-btn * {
+       cursor: pointer !important;
+       pointer-events: auto !important;
      }
 
      .featured-blog-grid.list-view .featured-blog-card-title{
@@ -557,6 +570,11 @@
        .load-more-btn-fb-text-hover {
          font-size: var(--t-b-1-size);
        }
+
+       /* Featured blog load more button desktop styles */
+       .featured-blog-load-more-btn {
+         min-width: 200px;
+       }
      }
 
      /* Ensure the container doesn’t clip anything */
@@ -623,20 +641,21 @@
       id="archiveContainer"
       aria-live="polite"
       aria-label="Blog articles"
-      data-post-limit="{{ section.settings.post_limit }}"
+      data-post-limit="3"
       data-total-posts="{% assign blog_handle = section.settings.blog %}{% if blog_handle != blank %}{{ blogs[blog_handle].articles.size }}{% else %}0{% endif %}"
     >
       <!-- Separator before container (only visible in list view) -->
       <div class="list-separator"></div>
 
       {% assign blog_handle = section.settings.blog %}
-      {% assign post_limit = section.settings.post_limit | default: 3 %}
+      {% assign initial_display = 3 %}
+      {% assign load_more_increment = section.settings.post_limit | default: 6 %}
       {% if blog_handle != blank and blogs[blog_handle].articles.size > 0 %}
         {% for article in blogs[blog_handle].articles %}
           <article
             aria-labelledby="article-title-{{ forloop.index0 }}"
             class="blog-article-fb"
-            {% if forloop.index > post_limit %}
+            {% if forloop.index > initial_display %}
               style="display: none;"
             {% endif %}
           >
@@ -721,7 +740,7 @@
         {% endfor %}
       {% else %}
         {% comment %} Show placeholder blog articles when no blog is selected {% endcomment %}
-        {% for i in (1..post_limit) %}
+        {% for i in (1..3) %}
           {%- assign placeholder_image = 'collection-1' -%}
           <article
             aria-labelledby="placeholder-article-title-{{ forloop.index0 }}"
@@ -783,13 +802,15 @@
         {% endfor %}
       {% endif %}
     </div>
-    {% if blog_handle != blank and blogs[blog_handle].articles.size > section.settings.post_limit %}
+    {% if blog_handle != blank and blogs[blog_handle].articles.size > 3 %}
       <div class="load-more-btn-fb-container">
         {% render 'primary-button',
           button_text: 'LOAD MORE',
           button_url: '',
-          primary_class: 'load-more-btn-fb',
-          data_attributes: 'data-increment="6"',
+          button_type: 'button',
+          button_id: 'featured-blog-load-more',
+          primary_class: 'featured-blog-load-more-btn',
+          data_attributes: 'data-articles-per-load="{{ section.settings.post_limit | default: 6 }}"',
           button_font_size: 'var(--t-b-1-size)',
           font_weight: 'var(--t-b-1-weight)',
           button_line_height: 'var(--t-b-1-line-height)',
@@ -848,7 +869,7 @@
     const slider = document.querySelector('.toggle-slider');
     const container = document.getElementById('archiveContainer');
     const buttons = [gridBtn, listBtn];
-    const loadMoreBtn = document.querySelector('.load-more-btn-fb');
+    const loadMoreBtn = document.getElementById('featured-blog-load-more');
 
     // Featured Blog Fade-Up Animation
     const blogArticles = document.querySelectorAll('.blog-article-fb');
@@ -885,16 +906,32 @@
       observer.observe(article);
     });
 
-    // Load more functionality
-    if (loadMoreBtn) {
-      const increment = parseInt(loadMoreBtn.dataset.increment || '6', 10);
-      const postLimit = parseInt(container.dataset.postLimit || '5', 10);
+    // Load more functionality - use specific selector for featured blog section
+    const loadMoreContainer = document.querySelector('.featured-blog-section .load-more-btn-fb-container');
+    if (loadMoreContainer) {
+      const loadMoreBtnInside =
+        loadMoreContainer.querySelector('#featured-blog-load-more') ||
+        loadMoreContainer.querySelector('button') ||
+        loadMoreContainer.querySelector('a');
+
+      const incrementValue = (loadMoreBtnInside && loadMoreBtnInside.dataset.articlesPerLoad) || '6';
+      let increment = parseInt(incrementValue, 10);
+      // Fallback if increment is NaN
+      if (isNaN(increment)) {
+        increment = 6;
+      }
+      const postLimit = parseInt(container.dataset.postLimit || '3', 10);
       let currentlyVisible = postLimit;
 
-      loadMoreBtn.addEventListener('click', function (e) {
-        e.preventDefault(); // Prevent any default button behavior
+      // Add click handler to the parent container to catch all clicks
+      loadMoreContainer.addEventListener('click', function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+
         const blogArticles = document.querySelectorAll('#archiveContainer .blog-article-fb');
-        const endIndex = Math.min(currentlyVisible + increment, blogArticles.length);
+        const safeIncrement = isNaN(increment) ? 6 : increment;
+        const endIndex = Math.min(currentlyVisible + safeIncrement, blogArticles.length);
+
         for (let i = currentlyVisible; i < endIndex; i++) {
           if (blogArticles[i]) {
             blogArticles[i].style.display = '';
@@ -913,8 +950,9 @@
           }
         }
         currentlyVisible = endIndex;
+
         if (currentlyVisible >= blogArticles.length) {
-          loadMoreBtn.parentElement.style.display = 'none';
+          loadMoreContainer.style.display = 'none';
         }
       });
 
@@ -925,8 +963,8 @@
         });
       };
 
-      gridBtn.addEventListener('click', updateVisibilityAfterViewChange);
-      listBtn.addEventListener('click', updateVisibilityAfterViewChange);
+      if (gridBtn) gridBtn.addEventListener('click', updateVisibilityAfterViewChange);
+      if (listBtn) listBtn.addEventListener('click', updateVisibilityAfterViewChange);
     }
 
     function updateSliderPos(isList) {
@@ -1005,9 +1043,10 @@
     {
       "type": "range",
       "id": "post_limit",
-      "label": "Number of Posts to Display",
+      "label": "Posts to Load Per Click",
+      "info": "Number of additional posts to show when 'Load More' is clicked. Initial display is always 3 posts.",
       "default": 6,
-      "min": 3,
+      "min": 1,
       "max": 20,
       "step": 1
     },
@@ -1024,7 +1063,7 @@
       "settings": {
         "enabled": true,
         "heading": "Featured Blogs",
-        "post_limit": 3
+        "post_limit": 6
       }
     }
   ]
