@@ -1,6 +1,6 @@
 {% if template == 'product' %}
   <section
-    class="tech-specs-container color-{{ section.settings.color_scheme }} bg-color:var(--background) box-border overflow-x-hidden"
+    class="tech-specs-container color-{{ section.settings.color_scheme }} box-border overflow-x-hidden"
     style="padding: var(--space-7xl) var(--gutter-sm);"
   >
     <div class="tech-specs-outer">
@@ -381,7 +381,37 @@
 {% endif %}
 
 <style>
-     .tech-specs-data-border{
+    /* Background image styling */
+    .tech-specs-container {
+      position: relative;
+      {% if section.settings.desktop_background_image != blank %}
+        background-image: url('{{ section.settings.desktop_background_image | image_url: width: 1920 }}') !important;
+        background-size: cover !important;
+        background-position: center !important;
+        background-repeat: no-repeat !important;
+      {% else %}
+        background-color: var(--background) !important;
+      {% endif %}
+    }
+
+    /* Mobile background image with fallback */
+    @media (max-width: 768px) {
+      .tech-specs-container {
+        {% if section.settings.mobile_background_image != blank %}
+          background-image: url('{{ section.settings.mobile_background_image | image_url: width: 800 }}') !important;
+          background-size: cover !important;
+          background-position: center !important;
+          background-repeat: no-repeat !important;
+        {% elsif section.settings.desktop_background_image != blank %}
+          background-image: url('{{ section.settings.desktop_background_image | image_url: width: 1920 }}') !important;
+          background-size: cover !important;
+          background-position: center !important;
+          background-repeat: no-repeat !important;
+        {% endif %}
+      }
+    }
+
+    .tech-specs-data-border{
       border-color: var(--border);
       border-opacity: 0.1;
       gap: var(--space-5xl);
@@ -588,6 +618,18 @@
       "id": "bar_color",
       "label": "Bar Fill Color",
       "default": "#ff0000"
+    },
+    {
+      "type": "image_picker",
+      "id": "desktop_background_image",
+      "label": "Desktop Background Image",
+      "info": "Recommended size: 1920x1080px. This image will be shown on desktop and tablet devices."
+    },
+    {
+      "type": "image_picker",
+      "id": "mobile_background_image",
+      "label": "Mobile Background Image",
+      "info": "Recommended size: 800x1200px. This image will be shown on mobile devices (768px and below). Falls back to desktop image if not set."
     }
   ],
   "blocks": [
