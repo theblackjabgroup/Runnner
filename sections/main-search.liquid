@@ -5,11 +5,6 @@
 {{ 'scroll-animations.css' | asset_url | stylesheet_tag }}
 {{ 'main-collection-product-grid.css' | asset_url | stylesheet_tag }}
 
-{%- if section.settings.enable_filtering or section.settings.enable_sorting -%}
-  {{ 'component-facets.css' | asset_url | stylesheet_tag }}
-  <script src="{{ 'facets.js' | asset_url }}" defer="defer"></script>
-{%- endif -%}
-
 <script src="{{ 'scroll-animations.js' | asset_url }}" defer="defer"></script>
 <script src="{{ 'main-search.js' | asset_url }}" defer="defer"></script>
 
@@ -72,12 +67,14 @@
     .template-search__head1 {
       margin-bottom: 5rem;
     }
+
   }
 
   .search__button .icon {
     height: 1.8rem;
   }
-
+  .filters-container{
+  padding-inline:var(--sections-side-space) !important;}
   .submit-wrapper {
     color: var(--button_label);
     padding: 0px 10px;
@@ -160,21 +157,23 @@
   /* Desktop columns - use section setting */
   @media screen and (min-width: 990px) {
     .template-search .product-grid {
-      grid-template-columns: repeat({{ section.settings.columns_desktop | default: 4 }}, 1fr) !important;
+      grid-template-columns: repeat({{ section.settings.columns_desktop | default: 3 }}, 1fr) !important;
     }
   }
 
 
 
-  .template-search .facets-wrapper {
-    padding-left: {{ settings.side_space }}px !important;
-    padding-right: {{ settings.side_space }}px !important;
-  }
+  .template-search .filters-container {
+    position: sticky;
+    top: 75px;
+    background-color: var(--body);
+    z-index: var(--z-content);
 
-  .template-search #main-search-filters {
-    padding-left: {{ settings.side_space }}px !important;
-    padding-right: {{ settings.side_space }}px !important;
   }
+  .filters-translate{
+  left: 0px !important;}
+
+
 
   .template-search .facets-vertical-sort {
     padding-left: {{ settings.side_space }}px !important;
@@ -193,6 +192,24 @@
   #main-search-filters {
     overflow: visible !important;
     position: relative !important;
+  }
+
+  /* No search message styling */
+  .no-search-text {
+    font-family: var(--font-heading-family);
+    font-style: var(--font-heading-style);
+    font-weight: var(--font-heading-weight);
+    font-size: calc(var(--font-heading-scale) * 2rem);
+    color: var(--text);
+    text-transform: uppercase;
+    letter-spacing: calc(var(--font-heading-scale) * 0.06rem);
+  }
+
+  /* Desktop */
+  @media screen and (min-width: 750px) {
+    .no-search-text {
+      font-size: calc(var(--font-heading-scale) * 3.5rem);
+    }
   }
 </style>
 
@@ -217,7 +234,11 @@
 {%- endstyle -%}
 
 {% paginate search.results by section.settings.products_per_page %}
-  <div class="template-search{% unless search.performed and search.results_count > 0 %} template-search--empty{% endunless %} section-{{ section.id }}-padding color-{{ section.settings.color_scheme }}">
+  <div
+    class="template-search{% unless search.performed and search.results_count > 0 %} template-search--empty{% endunless %} section-{{ section.id }}-padding color-{{ section.settings.color_scheme }}"
+    data-section-type="main-search"
+    data-filters-drawer-speed="{{ section.settings.filters_drawer_animation_speed | default: settings.filters_drawer_animation_speed | default: 0.6 }}"
+  >
     <div class="template-search__head1 {% if settings.animations_reveal_on_scroll %} scroll-trigger animate--fade-in{% endif %}">
       <h1 class="h2 center">
         {%- if search.performed -%}
@@ -292,10 +313,8 @@
 
       {%- unless search.performed -%}
         <div class="no-search-message" style="text-align: center; padding: 0px 20px; margin-top: 40px;">
-          <h2
-            style="font-family: var(--font-heading-family); font-style: var(--font-heading-style); font-weight: var(--font-heading-weight); font-size: calc(var(--font-heading-scale) * 3.5rem); color: var(--text); text-transform: uppercase; letter-spacing: calc(var(--font-heading-scale) * 0.06rem);"
-          >
-            You searched for no products...
+          <h2 class="no-search-text">
+            {{ section.settings.no_search_message | default: 'You searched for no products...' }}
           </h2>
         </div>
       {%- endunless -%}
@@ -314,12 +333,15 @@
       {%- endif -%}
     </div>
     {%- if search.performed -%}
-      <div>
-        {%- if search.filters != empty -%}
-          {%- if section.settings.enable_filtering or section.settings.enable_sorting -%}
+      {%- if search.filters != empty -%}
+        {%- if section.settings.enable_filtering or section.settings.enable_sorting -%}
+          <div class="filters-container" style="background-color: var(--body);">
+            {{ 'component-facets.css' | asset_url | stylesheet_tag }}
+            <script src="{{ 'facets.js' | asset_url }}" defer="defer"></script>
+
             <aside
               aria-labelledby="verticalTitle"
-              class="facets-wrapper{% unless section.settings.enable_filtering %} facets-wrapper--no-filters{% endunless %}"
+              class="filters-sidebar"
               id="main-search-filters"
               data-id="{{ section.id }}"
             >
@@ -335,66 +357,83 @@
                 facet_custom_icon_expanded: section.settings.facet_custom_icon_expanded
               %}
             </aside>
-          {%- endif -%}
+          </div>
         {%- endif -%}
-        <div class="product-grid-container" id="ProductGridContainer">
-          {%- if search.results.size == 0 and search.filters != empty -%}
+      {%- endif -%}
+
+      <div class="product-grid-main" id="ProductGridContainer">
+        {%- if search.results.size == 0 and search.filters != empty -%}
+          <div
+            class="template-search__results collection collection--empty"
+            id="product-grid"
+            data-id="{{ section.id }}"
+          >
+            <div class="loading-overlay gradient"></div>
+            <div class="title-wrapper center">
+              <h2 class="title title--primary">
+                {{ 'sections.collection_template.empty' | t -}}
+                <br>
+                {{
+                  'sections.collection_template.use_fewer_filters_html'
+                  | t: link: search_url, class: 'underlined-link link'
+                }}
+              </h2>
+            </div>
+          </div>
+        {%- else -%}
+          <div class="products-container">
             <div
-              class="template-search__results collection collection--empty"
+              class="product-grid product-grid-animated scroll-fade-stagger mobile-columns-{{ section.settings.columns_mobile }}"
               id="product-grid"
               data-id="{{ section.id }}"
             >
               <div class="loading-overlay gradient"></div>
-              <div class="title-wrapper center">
-                <h2 class="title title--primary">
-                  {{ 'sections.collection_template.empty' | t -}}
-                  <br>
-                  {{
-                    'sections.collection_template.use_fewer_filters_html'
-                    | t: link: search_url, class: 'underlined-link link'
-                  }}
-                </h2>
-              </div>
+              {%- for item in search.results -%}
+                {%- case item.object_type -%}
+                  {%- when 'product' -%}
+                    <div
+                      class="product-card-item scroll-fade-trigger scroll-fade-up"
+                      data-animation-index="{{ forloop.index0 }}"
+                    >
+                      {%
+                        render 'card-product',
+                        card_product: item,
+                        show_secondary_image: section.settings.show_secondary_image,
+                        lazy_load: forloop.index > 2,
+                        section_id: section.id
+                      %}
+                    </div>
+                {%- endcase -%}
+              {%- endfor -%}
             </div>
-          {%- else -%}
-            <div class="products-container">
-              <div
-                class="product-grid product-grid-animated scroll-fade-stagger mobile-columns-{{ section.settings.columns_mobile }}"
-                id="product-grid"
-                data-id="{{ section.id }}"
-              >
-                <div class="loading-overlay gradient"></div>
-                {%- for item in search.results -%}
-                  {%- case item.object_type -%}
-                    {%- when 'product' -%}
-                      <div
-                        class="product-card-item scroll-fade-trigger scroll-fade-up"
-                        data-animation-index="{{ forloop.index0 }}"
-                      >
-                        {%
-                          render 'card-product',
-                          card_product: item,
-                          show_secondary_image: section.settings.show_secondary_image,
-                          lazy_load: forloop.index > 2,
-                          section_id: section.id
-                        %}
-                      </div>
-                  {%- endcase -%}
-                {%- endfor -%}
-              </div>
 
-              {%- if paginate.pages > 1 -%}
-                <div class="pagination-wrapper">
-                  {% render 'pagination', paginate: paginate, anchor: '' %}
-                </div>
-              {%- endif -%}
-            </div>
-          {%- endif -%}
-        </div>
+            {%- if paginate.pages > 1 -%}
+              <div class="pagination-wrapper">
+                {% render 'pagination', paginate: paginate, anchor: '' %}
+              </div>
+            {%- endif -%}
+          </div>
+        {%- endif -%}
       </div>
     {%- endif -%}
   </div>
 {% endpaginate %}
+
+<script>
+  // Handle search reset button click
+  document.addEventListener('DOMContentLoaded', function () {
+    const resetButton = document.querySelector('.reset__button');
+
+    if (resetButton) {
+      resetButton.addEventListener('click', function (e) {
+        e.preventDefault();
+
+        // Reload the page without any search query
+        window.location.href = window.location.pathname;
+      });
+    }
+  });
+</script>
 
 {% schema %}
 {
@@ -416,6 +455,13 @@
       "id": "color_scheme",
       "label": "t:sections.all.colors.label",
       "default": "scheme-1"
+    },
+    {
+      "type": "text",
+      "id": "no_search_message",
+      "label": "No Search Message",
+      "default": "You searched for no products...",
+      "info": "Message displayed when no search has been performed"
     },
     {
       "type": "header",
