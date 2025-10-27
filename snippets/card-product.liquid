@@ -89,43 +89,6 @@
   .card-wrapper .card__media img {
     border-radius: {{ settings.product_card_border_radius }}px;
   }
-
-  /* Sold out overlay animation - rises from bottom to top on hover */
-  .sold-out-overlay {
-    content: '';
-    background: rgba(0, 0, 0, {{ settings.product_card_overlay_opacity | divided_by: 100.0 }});
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    top: auto;
-    width: 100%;
-    height: 0%;
-    transition: height 0.5s ease-out;
-    z-index: 6 !important;
-    pointer-events: none;
-    border-radius: {{ settings.product_card_border_radius }}px;
-    will-change: height;
-    display: block !important;
-  }
-
-  /* Desktop hover effect - overlay rises to full height */
-  @media (hover: hover) and (pointer: fine) {
-    .card-wrapper.group:hover .sold-out-overlay {
-      height: 100% !important;
-    }
-  }
-
-  /* Ensure images are below the overlay */
-  .product-images-slider {
-    z-index: 1 !important;
-  }
-
-  .product-images-slider img {
-    z-index: 1 !important;
-  }
-
-  /* Sold-out overlay is automatically disabled on mobile/touch devices via the @media (hover: hover) query above */
 </style>
 {%- unless skip_styles -%}
   {{ 'component-rating.css' | asset_url | stylesheet_tag }}
@@ -215,22 +178,30 @@
           </div>
         {%- endif -%}
 
-        {% if card_product.available == false %}
-          <div class="absolute top-0 z-2">
-            {% render 'sold-out-badge', class: 'sold-out-tag tracking-wide font-medium' %}
-          </div>
-        {% elsif card_product.tags contains 'best-seller'
-          or card_product.tags contains 'bestseller'
-          or card_product.tags contains 'best seller'
-        %}
-          <div class="absolute top-0 z-2">
+        {%- liquid
+          assign is_best_seller = false
+          if card_product.tags contains 'best-seller' or card_product.tags contains 'bestseller' or card_product.tags contains 'best seller'
+            assign is_best_seller = true
+          endif
+        -%}
+
+        <!-- Best Seller Badge - Always shows first if product is a best seller -->
+        {% if is_best_seller %}
+          <div class="absolute top-0 z-2 badge-best-seller">
             {% render 'best-seller-badge', class: 'best-seller-tag tracking-wide font-medium' %}
+          </div>
+        {% endif %}
+
+        <!-- Status Badges - Sold Out or Low Stock -->
+        {% if card_product.available == false %}
+          <div class="absolute z-2 badge-status" style="top: {% if is_best_seller %}30px{% else %}0{% endif %};">
+            {% render 'sold-out-badge', class: 'sold-out-tag tracking-wide font-medium' %}
           </div>
         {% elsif card_product.available
           and card_product.variants.first.inventory_quantity <= 5
           and card_product.variants.first.inventory_quantity > 0
         %}
-          <div class="absolute top-0 z-2">
+          <div class="absolute z-2 badge-status" style="top: {% if is_best_seller %}30px{% else %}0{% endif %};">
             {% render 'low-stock-badge',
               quantity: card_product.variants.first.inventory_quantity,
               class: 'low-stock-tag tracking-wide font-medium'
@@ -239,12 +210,7 @@
         {% endif %}
 
         {% if card_product.available == false %}
-          <!-- Sold out overlay animation -->
-          <div
-            class="sold-out-overlay"
-          ></div>
-
-          <div class="rounded-[5px] absolute inset-x-0 bottom-0 p-4 opacity-0 translate-y-10 transition-all duration-300 group-hover:opacity-100 group-hover:-translate-y-0 z-10">
+          <div class="rounded-[5px] absolute inset-x-0 bottom-0 p-4 opacity-0 translate-y-10 transition-all duration-300 group-hover:opacity-100 group-hover:-translate-y-0">
             <div class="w-[93%] rounded-[5px] mx-auto text-center" style="background-color: var(--background);">
               <button
                 type="button"
@@ -377,28 +343,18 @@
           >
             {{ card_product.title | escape }}
           </h3>
-          <div class=" gap-2 items-baseline leading-tight">
-            {%- if card_product.compare_at_price > card_product.price -%}
-              <span
-                class="card-product-typegraphy product-card-text uppercase font-medium"
-                style="color: var(--sale_badge);"
-              >
-                {{ card_product.price | money }} |
-              </span>
-              <span
-                class="card-product-typegraphy product-card-text uppercase line-through mr-2"
-                style="color: var(--text);"
-              >
-                {{ card_product.compare_at_price | money }}
-              </span>
-            {%- else -%}
-              <span
-                class="card-product-typegraphy product-card-text uppercase font-medium"
-                style="color: var(--sale_badge);"
-              >
-                {{ card_product.price | money }}
-              </span>
-            {%- endif -%}
+          <div class="card-product-price-wrapper">
+            {% render 'price',
+              product: card_product,
+              price_class: 'card-product-price',
+              show_compare_at_price: true,
+              font_size_desktop: 'var(--t-b-3-size)',
+              font_size_mobile: 'var(--tm-b-3-size)',
+              font_weight_desktop: 'var(--t-b-3-weight)',
+              font_weight_mobile: 'var(--tm-b-3-weight)',
+              line_height_desktop: 'var(--t-b-3-line-height)',
+              line_height_mobile: 'var(--tm-b-3-line-height)'
+            %}
           </div>
         </a>
       </div>
@@ -538,6 +494,47 @@
       height: 380px !important;
     }
   }
+  /* Badge stacking - when best seller badge is present */
+  .badge-best-seller {
+    left: 10px;
+  }
+
+  .badge-status {
+    left: 10px;
+  }
+
+  @media only screen and (max-width: 768px) {
+    /* Smaller badges for 2-column mobile layout */
+    .mobile-columns-2 .sold-out-tag,
+    .mobile-columns-2 .best-seller-tag,
+    .mobile-columns-2 .low-stock-tag {
+      font-size: 10px !important;
+      line-height: 12px !important;
+      padding: 0px 4px !important;
+      border-radius: 3px !important;
+    }
+
+    /* Adjust stacking distance for 2-column layout */
+    .mobile-columns-2 .badge-status[style*="30px"] {
+      top: 22px !important;
+    }
+
+    /* Reduce spacing between image and title for 2-column layout */
+    .mobile-columns-2 .mt-3 {
+      margin-top: 0.5rem !important;
+    }
+
+    /* Reduce spacing between title and price for 2-column layout */
+    .mobile-columns-2 .space-y-1 > * + * {
+      margin-top: 0.125rem !important;
+    }
+
+    /* Reduce line-height on price div for 2-column layout */
+    .mobile-columns-2 .leading-tight {
+      line-height: 1 !important;
+    }
+  }
+
   @media only screen and (max-width: 600px) {
 
     .sold-out-tag,
@@ -546,6 +543,37 @@
       font-size: var(--tm-b-3-size) !important;
       line-height: var(--tm-b-3-line-height) !important;
     }
+
+    /* Even smaller for 2-column mobile layout */
+    .mobile-columns-2 .sold-out-tag,
+    .mobile-columns-2 .best-seller-tag,
+    .mobile-columns-2 .low-stock-tag {
+      font-size: 9px !important;
+      line-height: 11px !important;
+      padding: 0px 3px !important;
+      border-radius: 2px !important;
+    }
+
+    /* Tighter stacking on mobile 2-column */
+    .mobile-columns-2 .badge-status[style*="30px"] {
+      top: 18px !important;
+    }
+
+    /* Further reduce spacing for very small screens in 2-column */
+    .mobile-columns-2 .mt-3 {
+      margin-top: 0.375rem !important;
+    }
+
+    /* Even tighter spacing between title and price on small screens */
+    .mobile-columns-2 .space-y-1 > * + * {
+      margin-top: 0.0625rem !important;
+    }
+
+    /* Keep tight line-height on price for very small screens */
+    .mobile-columns-2 .leading-tight {
+      line-height: 0.5 !important;
+    }
+
     .card-product-typegraphy {
       font-size: 12px !important;
     }
@@ -898,9 +926,6 @@
   .notify-when-available-btn {
     border-radius: 5px !important;
     font-size: 20px;
-    font-family: var(--font-body-family);
-    font-style: var(--font-body-style);
-    font-weight: var(--font-body-weight);
   }
 
   .add-to-cart-text,
@@ -959,9 +984,6 @@
     box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
     animation: slideUp 0.3s ease;
     z-index: 10000;
-    font-family: var(--font-body-family);
-    font-style: var(--font-body-style);
-    font-weight: var(--font-body-weight);
   }
 
   .notify-modal-close {
@@ -1009,9 +1031,7 @@
     border: 1px solid #ddd;
     border-radius: 6px;
     transition: border-color 0.2s;
-    font-family: var(--font-body-family);
-    font-style: var(--font-body-style);
-    font-weight: var(--font-body-weight);
+    font-family: inherit;
   }
 
   .notify-email-input:focus {
@@ -1063,13 +1083,11 @@
     border: none;
     border-radius: 6px;
     font-size: 16px;
+    font-weight: 600;
     cursor: pointer;
     transition: background 0.2s;
     text-transform: uppercase;
     letter-spacing: 0.5px;
-    font-family: var(--font-body-family);
-    font-style: var(--font-body-style);
-    font-weight: var(--font-body-weight);
   }
 
   .notify-submit-btn:hover:not(:disabled) {
@@ -1140,6 +1158,108 @@
 
     .notify-modal-description {
       font-size: 14px;
+    }
+  }
+
+  /* Card Product Price Styles */
+  .card-product-price {
+    color: var(--text);
+    padding-top: 0;
+    text-transform: uppercase;
+  }
+
+  .card-product-price .price__container {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .card-product-price .price__regular,
+  .card-product-price .price__sale {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .card-product-price .price-item {
+    font-size: var(--t-b-3-size);
+    font-weight: var(--t-b-3-weight);
+    line-height: var(--t-b-3-line-height);
+    color: var(--sale_badge);
+    text-transform: uppercase;
+  }
+
+  .card-product-price .price-item--regular {
+    color: var(--text);
+  }
+
+  /* Sale price styling - swap order: sale price first, then strikethrough original */
+  .card-product-price .price__sale {
+    flex-direction: row-reverse;
+  }
+
+  .card-product-price .price__sale .price-item--sale {
+    color: var(--sale_badge);
+    order: 2;
+  }
+
+  .card-product-price .price__sale .price-item--regular {
+    text-decoration: line-through;
+    color: var(--text);
+    order: 1;
+  }
+
+  .card-product-price .price-separator {
+    color: var(--text);
+    order: 1.5;
+  }
+
+  /* Hide regular price section when on sale */
+  .card-product-price.price--on-sale .price__regular {
+    display: none !important;
+  }
+
+  /* Show sale price section when on sale */
+  .card-product-price.price--on-sale .price__sale {
+    display: flex !important;
+  }
+
+  /* Hide sale price section when not on sale */
+  .card-product-price:not(.price--on-sale) .price__sale {
+    display: none !important;
+  }
+
+  /* Show regular price section when not on sale */
+  .card-product-price:not(.price--on-sale) .price__regular {
+    display: flex !important;
+  }
+
+  .card-product-price .visually-hidden {
+    position: absolute !important;
+    width: 1px !important;
+    height: 1px !important;
+    padding: 0 !important;
+    margin: -1px !important;
+    overflow: hidden !important;
+    clip: rect(0, 0, 0, 0) !important;
+    white-space: nowrap !important;
+    border: 0 !important;
+  }
+
+  .card-product-price .unit-price {
+    display: none;
+  }
+
+  .card-product-price .badge {
+    display: none;
+  }
+
+  /* Mobile Responsive Styles for card-product-price */
+  @media screen and (max-width: 749px) {
+    .card-product-price .price-item {
+      font-size: var(--tm-b-3-size);
+      font-weight: var(--tm-b-3-weight);
+      line-height: var(--tm-b-3-line-height);
     }
   }
 </style>
