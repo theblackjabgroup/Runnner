@@ -615,8 +615,8 @@
                   {% endif %}
                 {%- endfor -%}
 
-                <!-- Sort by tag -->
-                {%- if results.sort_by -%}
+                <!-- Sort by tag - Hide default sort (relevance for search) -->
+                {%- if results.sort_by and results.sort_by != results.default_sort_by -%}
                   {%- for option in results.sort_options -%}
                     {%- if option.value == results.sort_by -%}
                       <div class="active-filter-tag">
@@ -735,8 +735,8 @@
         {% endif %}
       {%- endfor -%}
 
-      <!-- Sort by tag -->
-      {%- if results.sort_by -%}
+      <!-- Sort by tag - Hide default sort (relevance for search) -->
+      {%- if results.sort_by and results.sort_by != results.default_sort_by -%}
         {%- for option in results.sort_options -%}
           {%- if option.value == results.sort_by -%}
             <div class="active-filter-tag">
@@ -1860,8 +1860,17 @@
   // Clear all filters function
   window.clearAllFilters = function () {
     // For search pages, preserve the search query
+    let searchQuery = '';
+    
+    // Try to get search query from input
     const searchInput = document.querySelector('input[name="q"]');
-    const searchQuery = searchInput ? searchInput.value : '';
+    if (searchInput && searchInput.value) {
+      searchQuery = searchInput.value;
+    } else {
+      // Fallback: get from URL if input is empty
+      const urlParams = new URLSearchParams(window.location.search);
+      searchQuery = urlParams.get('q') || '';
+    }
     
     // Navigate to base URL with search query but no filters
     if (searchQuery) {
@@ -1876,8 +1885,17 @@
   // Clear all filters function for mobile
   window.clearAllFiltersMobile = function () {
     // For search pages, preserve the search query
+    let searchQuery = '';
+    
+    // Try to get search query from input
     const searchInput = document.querySelector('input[name="q"]');
-    const searchQuery = searchInput ? searchInput.value : '';
+    if (searchInput && searchInput.value) {
+      searchQuery = searchInput.value;
+    } else {
+      // Fallback: get from URL if input is empty
+      const urlParams = new URLSearchParams(window.location.search);
+      searchQuery = urlParams.get('q') || '';
+    }
     
     // Navigate to base URL with search query but no filters
     if (searchQuery) {
