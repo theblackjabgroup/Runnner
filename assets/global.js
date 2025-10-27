@@ -462,7 +462,7 @@ class MenuDrawer extends HTMLElement {
   }
 
   openMenuDrawer(summaryElement) {
-    setTimeout(() => {
+    requestAnimationFrame(() => {
       this.mainDetailsToggle.classList.add('menu-opening');
     });
     summaryElement.setAttribute('aria-expanded', true);
@@ -512,6 +512,35 @@ class MenuDrawer extends HTMLElement {
   closeAnimation(detailsElement) {
     let animationStart;
 
+    // Get animation speed from CSS variable or section setting
+    let animationDuration = 600; // default 0.6s
+
+    // Try to get from CSS variable first
+    const filtersDrawerSpeed = getComputedStyle(document.documentElement)
+      .getPropertyValue('--filters-drawer-speed')
+      .trim();
+
+    if (filtersDrawerSpeed && filtersDrawerSpeed !== '') {
+      animationDuration = parseFloat(filtersDrawerSpeed) * 1000;
+    } else {
+      // Fallback: try to find the section and get the setting
+      const collectionSection = document.querySelector('[data-section-type="main-collection-product-grid"]');
+      if (collectionSection) {
+        const speedSetting = collectionSection.dataset.filtersDrawerSpeed;
+        if (speedSetting) {
+          animationDuration = parseFloat(speedSetting) * 1000;
+        }
+      }
+
+      // Additional fallback: check if we can get it from Shopify theme settings
+      if (animationDuration === 600 && typeof Shopify !== 'undefined' && Shopify.theme && Shopify.theme.settings) {
+        const globalSpeed = Shopify.theme.settings.filters_drawer_animation_speed;
+        if (globalSpeed) {
+          animationDuration = parseFloat(globalSpeed) * 1000;
+        }
+      }
+    }
+
     const handleAnimation = (time) => {
       if (animationStart === undefined) {
         animationStart = time;
@@ -519,7 +548,7 @@ class MenuDrawer extends HTMLElement {
 
       const elapsedTime = time - animationStart;
 
-      if (elapsedTime < 400) {
+      if (elapsedTime < animationDuration) {
         window.requestAnimationFrame(handleAnimation);
       } else {
         detailsElement.removeAttribute('open');

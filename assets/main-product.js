@@ -763,6 +763,9 @@ document.addEventListener('DOMContentLoaded', () => {
         btn.addEventListener('click', () => {
           drawer.classList.remove('hidden');
           backdrop.classList.remove('hidden');
+          // Update ARIA attributes for accessibility
+          btn.setAttribute('aria-expanded', 'true');
+          drawer.setAttribute('aria-hidden', 'false');
           setTimeout(() => {
             drawer.classList.add('open');
           }, 20);
@@ -783,6 +786,12 @@ document.addEventListener('DOMContentLoaded', () => {
         const closeMobileDrawer = () => {
           drawer.classList.remove('open');
           backdrop.classList.add('hidden');
+          // Update ARIA attributes for accessibility
+          const openBtn = document.querySelector(`[data-mobile-drawer-id="${drawerId}"]`);
+          if (openBtn) {
+            openBtn.setAttribute('aria-expanded', 'false');
+          }
+          drawer.setAttribute('aria-hidden', 'true');
           unlockBodyScroll();
           setTimeout(() => {
             drawer.classList.add('hidden');
@@ -812,6 +821,9 @@ document.addEventListener('DOMContentLoaded', () => {
         btn.addEventListener('click', () => {
           drawer.classList.remove('hidden');
           backdrop.classList.remove('hidden');
+          // Update ARIA attributes for accessibility
+          btn.setAttribute('aria-expanded', 'true');
+          drawer.setAttribute('aria-hidden', 'false');
           setTimeout(() => {
             drawer.classList.add('open');
           }, 20);
@@ -832,6 +844,12 @@ document.addEventListener('DOMContentLoaded', () => {
         const closeDrawer = () => {
           drawer.classList.remove('open');
           backdrop.classList.add('hidden');
+          // Update ARIA attributes for accessibility
+          const openBtn = document.querySelector(`[data-drawer-id="${drawerId}"]`);
+          if (openBtn) {
+            openBtn.setAttribute('aria-expanded', 'false');
+          }
+          drawer.setAttribute('aria-hidden', 'true');
           unlockBodyScroll();
           setTimeout(() => {
             drawer.classList.add('hidden');
@@ -1129,6 +1147,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
           btn.classList.remove('active-tab');
           btn.style.color = 'var(--secondary_text)';
+          // Update ARIA attributes for accessibility
+          btn.setAttribute('aria-selected', 'false');
+          btn.setAttribute('tabindex', '-1');
 
           if (btnBorderDiv) {
             btnBorderDiv.style.backgroundColor = 'var(--secondary_text)';
@@ -1136,18 +1157,27 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         button.classList.add('active-tab');
-        button.style.color = 'var(--text)';
+        button.style.color = 'var(--hovered_button_label)';
+        // Update ARIA attributes for active tab
+        button.setAttribute('aria-selected', 'true');
+        button.setAttribute('tabindex', '0');
 
         if (borderDiv) {
-          borderDiv.style.backgroundColor = 'var(--text)';
+          borderDiv.style.backgroundColor = 'var(--hovered_button_label)';
         }
         tabPanes.forEach((pane) => {
           if (pane.getAttribute('data-content') === targetTab) {
             pane.classList.remove('hidden');
             pane.classList.add('block');
+            // Update ARIA attributes for active panel
+            pane.setAttribute('aria-hidden', 'false');
+            pane.setAttribute('tabindex', '0');
           } else {
             pane.classList.add('hidden');
             pane.classList.remove('block');
+            // Update ARIA attributes for inactive panel
+            pane.setAttribute('aria-hidden', 'true');
+            pane.removeAttribute('tabindex');
           }
         });
       });
@@ -1156,9 +1186,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
       button.addEventListener('mouseenter', () => {
         if (!button.classList.contains('active-tab')) {
-          button.style.color = 'var(--text)';
+          button.style.color = 'var(--hovered_button_label)';
           if (borderDiv) {
-            borderDiv.style.backgroundColor = 'var(--text)';
+            borderDiv.style.backgroundColor = 'var(--hovered_button_label)';
           }
         }
       });

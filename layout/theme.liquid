@@ -28,6 +28,11 @@
 
     {% render 'meta-tags' %}
 
+    {%- if template.name == 'product' -%}
+      <meta name="product-id" content="{{ product.id }}">
+      <meta name="product-handle" content="{{ product.handle }}">
+    {%- endif -%}
+
     <script src="{{ 'constants.js' | asset_url }}" defer="defer"></script>
     <script src="{{ 'pubsub.js' | asset_url }}" defer="defer"></script>
     <script src="{{ 'global.js' | asset_url }}" defer="defer"></script>
@@ -55,6 +60,7 @@
       {{ body_font_bold_italic | font_face: font_display: 'swap' }}
       {{ settings.type_header_font | font_face: font_display: 'swap' }}
 
+      {% assign scheme_classes = '' %}
       {% for scheme in settings.color_schemes -%}
         {% assign scheme_classes = scheme_classes | append: ', .color-' | append: scheme.id %}
         {% if forloop.index == 1 -%}
@@ -68,17 +74,6 @@
           --gradient-background: {{ scheme.settings.background }};
         {% endif %}
 
-        {% liquid
-          assign background_color = scheme.settings.background
-          assign background_color_brightness = background_color | color_brightness
-          if background_color_brightness <= 26
-            assign background_color_contrast = background_color | color_lighten: 50
-          elsif background_color_brightness <= 65
-            assign background_color_contrast = background_color | color_lighten: 5
-          else
-            assign background_color_contrast = background_color | color_darken: 25
-          endif
-        %}
 
       --header_background: {{ scheme.settings.header_background }};
         --background: {{ scheme.settings.background }};
@@ -207,6 +202,9 @@
         --spacing-sections-desktop: {{ settings.spacing_sections }}px;
         --spacing-sections-mobile: {% if settings.spacing_sections < 24 %}{{ settings.spacing_sections }}{% else %}{{ settings.spacing_sections | times: 0.7 | round | at_least: 20 }}{% endif %}px;
 
+        /* Drawer Animation Speeds */
+        --filters-drawer-speed: {{ settings.filters_drawer_animation_speed | default: 0.6 }}s;
+
         /* Design System Spacing Tokens - Logical Hierarchy */
         --space-micro: 0.05rem;    /* 0.5px - for micro spacing */
         --space-tiny: 0.1rem;      /* 1px - for 1px values */
@@ -318,8 +316,20 @@
         --variant-pills-shadow-vertical-offset: {{ settings.variant_pills_shadow_vertical_offset }}px;
         --variant-pills-shadow-blur-radius: {{ settings.variant_pills_shadow_blur }}px;
 
-        --sections-spacing: {{ settings.sections_spacing }}px;
+        --sections-spacing-top: {{ settings.sections_spacing_top_mobile | default: 10 }}px;
+        --sections-spacing-bottom: {{ settings.sections_spacing_bottom_mobile | default: 10 }}px;
         --sections-side-space : {{ settings.side_space}}px;
+        --grid-horizontal-gap: {{ settings.horizontal_space_mobile | default: 8 }}px;
+        --grid-vertical-gap: {{ settings.vertical_space_mobile | default: 45 }}px;
+      }
+
+      @media screen and (min-width: 750px) {
+        :root {
+          --sections-spacing-top: {{ settings.sections_spacing_top_desktop | default: 10 }}px;
+          --sections-spacing-bottom: {{ settings.sections_spacing_bottom_desktop | default: 10 }}px;
+          --grid-horizontal-gap: {{ settings.horizontal_space_desktop | default: 8 }}px;
+          --grid-vertical-gap: {{ settings.vertical_space_desktop | default: 45 }}px;
+        }
 
       }
 
@@ -419,62 +429,7 @@
     {% sections 'footer-group' %}
 
     <!-- Floating Scroll to Top Button -->
-    {% if settings.scroll_to_top_enabled %}
-      {%- liquid
-        assign scroll_color_scheme = settings.scroll_to_top_color_scheme
-        if scroll_color_scheme == blank
-          assign scroll_color_scheme = 'scheme-1'
-        endif
-      -%}
-      <button
-        type="button"
-        id="floating-scroll-to-top"
-        class="floating-scroll-to-top color-{{ scroll_color_scheme }}"
-        aria-label="Scroll to top"
-        title="Scroll to top"
-        style="
-          --scroll-btn-border-width: {{ settings.scroll_to_top_border_width | default: 0 }}px;
-          --scroll-btn-border-radius: {{ settings.scroll_to_top_border_radius | default: 50 }}px;
-          --scroll-btn-bottom: {{ settings.scroll_to_top_bottom_offset | default: 30 }}px;
-          --scroll-btn-side: {{ settings.scroll_to_top_side_offset | default: 30 }}px;
-          --scroll-btn-icon-size: {{ settings.scroll_to_top_icon_size | default: 20 }}px;
-          --scroll-btn-shadow-opacity: {{ settings.scroll_to_top_shadow_opacity | default: 20 | divided_by: 100.0 }};
-          --scroll-btn-shadow-blur: {{ settings.scroll_to_top_shadow_blur | default: 20 }}px;
-        "
-        data-position="{{ settings.scroll_to_top_position | default: 'bottom-left' }}"
-        data-show-after="{{ settings.scroll_to_top_show_after | default: 300 }}"
-      >
-        {% if settings.scroll_to_top_text != blank %}
-          <span class="scroll-to-top-text">{{ settings.scroll_to_top_text }}</span>
-        {% endif %}
-
-        {% if settings.scroll_to_top_icon != blank %}
-          <img
-            src="{{ settings.scroll_to_top_icon | image_url: width: 200 }}"
-            alt=""
-            class="scroll-to-top-icon"
-            loading="lazy"
-            width="{{ settings.scroll_to_top_icon_size | default: 20 }}"
-            height="{{ settings.scroll_to_top_icon_size | default: 20 }}"
-          >
-        {% else %}
-          <!-- Default SVG icon if merchant hasn't uploaded one -->
-          <svg
-            class="scroll-to-top-icon-default"
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          >
-            <line x1="12" y1="19" x2="12" y2="5"></line>
-            <polyline points="5 12 12 5 19 12"></polyline>
-          </svg>
-        {% endif %}
-      </button>
-    {% endif %}
+    {% render 'scroll-to-top' %}
 
     <ul hidden>
       <li id="a11y-refresh-page-message">{{ 'accessibility.refresh_page' | t }}</li>
@@ -533,83 +488,5 @@
     {%- if settings.cart_type == 'drawer' -%}
       <script src="{{ 'cart-drawer.js' | asset_url }}" defer="defer"></script>
     {%- endif -%}
-
-    {% if settings.scroll_to_top_enabled %}
-      <script>
-        // Floating Scroll to Top Button Functionality
-        document.addEventListener('DOMContentLoaded', function () {
-          const scrollToTopButton = document.getElementById('floating-scroll-to-top');
-
-          if (!scrollToTopButton) return;
-
-          const showAfter = parseInt(scrollToTopButton.getAttribute('data-show-after')) || 300;
-          let isVisible = false;
-
-          // Show/hide button based on scroll position
-          function toggleButtonVisibility() {
-            const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-
-            if (scrollTop > showAfter && !isVisible) {
-              scrollToTopButton.classList.add('visible');
-              isVisible = true;
-            } else if (scrollTop <= showAfter && isVisible) {
-              scrollToTopButton.classList.remove('visible');
-              isVisible = false;
-            }
-          }
-
-          // Smooth scroll to top
-          function scrollToTop() {
-            window.scrollTo({
-              top: 0,
-              behavior: 'smooth',
-            });
-
-            // Accessibility: Move focus to main content after scroll
-            setTimeout(function () {
-              const mainContent =
-                document.querySelector('main') ||
-                document.querySelector('#MainContent') ||
-                document.querySelector('body');
-              if (mainContent) {
-                mainContent.setAttribute('tabindex', '-1');
-                mainContent.focus();
-                // Remove tabindex after focus to avoid affecting tab order
-                setTimeout(function () {
-                  mainContent.removeAttribute('tabindex');
-                }, 100);
-              }
-            }, 500);
-          }
-
-          // Event listeners
-          scrollToTopButton.addEventListener('click', scrollToTop);
-
-          // Keyboard support (Enter and Space)
-          scrollToTopButton.addEventListener('keydown', function (e) {
-            if (e.key === 'Enter' || e.key === ' ') {
-              e.preventDefault();
-              scrollToTop();
-            }
-          });
-
-          // Throttled scroll event
-          let scrollTimeout;
-          window.addEventListener(
-            'scroll',
-            function () {
-              if (scrollTimeout) {
-                clearTimeout(scrollTimeout);
-              }
-              scrollTimeout = setTimeout(toggleButtonVisibility, 10);
-            },
-            { passive: true }
-          );
-
-          // Initial check
-          toggleButtonVisibility();
-        });
-      </script>
-    {% endif %}
   </body>
 </html>

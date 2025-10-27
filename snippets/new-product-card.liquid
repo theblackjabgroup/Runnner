@@ -1,6 +1,11 @@
 {% comment %}
   Product Card Snippet
-  Usage: {% render 'new-product-card', product: product, collection: collection %}
+  Usage: {% render 'new-product-card', product: product, collection: collection, card_color_scheme: 'scheme-1' %}
+
+  Parameters:
+  - product: Product object (required)
+  - collection: Collection object (optional)
+  - card_color_scheme: Color scheme for the card (optional, defaults to none)
 {% endcomment %}
 
 {% assign product_id = product.id %}
@@ -9,20 +14,25 @@
 {% assign product_available = product.available %}
 {% assign product_images = product.images %}
 
-{% comment %} Check for size variants {% endcomment %}
+{% comment %} Check for size and color variants {% endcomment %}
 {% assign has_size_variants = false %}
+{% assign has_color_variants = false %}
+{% assign color_option = null %}
 {% unless product.has_only_default_variant %}
   {% for option in product.options_with_values %}
     {% assign option_name_lower = option.name | downcase %}
     {% if option_name_lower == 'size' or option_name_lower contains 'size' %}
       {% assign has_size_variants = true %}
-      {% break %}
+    {% endif %}
+    {% if option_name_lower == 'color' or option_name_lower == 'colour' %}
+      {% assign has_color_variants = true %}
+      {% assign color_option = option %}
     {% endif %}
   {% endfor %}
 {% endunless %}
 
 <div
-  class="new-product-card scroll-fade-trigger scroll-fade-up"
+  class="new-product-card scroll-fade-trigger scroll-fade-up{% if card_color_scheme %} color-{{ card_color_scheme }} gradient{% endif %}"
   data-product-id="{{ product_id }}"
 >
   <div class="new-product-image-wrapper" aria-label="Product images for {{ product_title }}">

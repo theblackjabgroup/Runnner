@@ -1,0 +1,73 @@
+{% comment %}
+  Floating Scroll to Top Button
+
+  This snippet renders a floating button that appears when the user scrolls down
+  and allows them to quickly scroll back to the top of the page.
+
+  Settings controlled via Theme Settings > Scroll to Top Button
+
+  Assets:
+  - CSS: assets/scroll-to-top.css
+  - JS: assets/scroll-to-top.js
+{% endcomment %}
+
+{% if settings.scroll_to_top_enabled %}
+  {{ 'scroll-to-top.css' | asset_url | stylesheet_tag }}
+  <script src="{{ 'scroll-to-top.js' | asset_url }}" defer="defer"></script>
+
+  {%- liquid
+    assign scroll_color_scheme = settings.scroll_to_top_color_scheme
+    if scroll_color_scheme == blank
+      assign scroll_color_scheme = 'scheme-1'
+    endif
+  -%}
+
+  <button
+    type="button"
+    id="floating-scroll-to-top"
+    class="floating-scroll-to-top color-{{ scroll_color_scheme }}{% if settings.scroll_to_top_transparent_bg %} transparent-bg{% endif %}"
+    aria-label="Scroll to top"
+    title="Scroll to top"
+    style="
+      --scroll-btn-border-width: {{ settings.scroll_to_top_border_width | default: 0 }}px;
+      --scroll-btn-border-radius: {{ settings.scroll_to_top_border_radius | default: 50 }}px;
+      --scroll-btn-bottom: {{ settings.scroll_to_top_bottom_offset | default: 30 }}px;
+      --scroll-btn-side: {{ settings.scroll_to_top_side_offset | default: 30 }}px;
+      --scroll-btn-icon-size: {{ settings.scroll_to_top_icon_size | default: 20 }}px;
+      --scroll-btn-shadow-opacity: {{ settings.scroll_to_top_shadow_opacity | default: 20 | divided_by: 100.0 }};
+      --scroll-btn-shadow-blur: {{ settings.scroll_to_top_shadow_blur | default: 20 }}px;
+    "
+    data-position="{{ settings.scroll_to_top_position | default: 'bottom-left' }}"
+    data-show-after="{{ settings.scroll_to_top_show_after | default: 300 }}"
+  >
+    {% if settings.scroll_to_top_text != blank %}
+      <span class="scroll-to-top-text">{{ settings.scroll_to_top_text }}</span>
+    {% endif %}
+
+    {% if settings.scroll_to_top_icon != blank %}
+      <img
+        src="{{ settings.scroll_to_top_icon | image_url: width: 200 }}"
+        alt=""
+        class="scroll-to-top-icon"
+        loading="lazy"
+        width="{{ settings.scroll_to_top_icon_size | default: 20 }}"
+        height="{{ settings.scroll_to_top_icon_size | default: 20 }}"
+      >
+    {% else %}
+      <!-- Default SVG icon if merchant hasn't uploaded one -->
+      <svg
+        class="scroll-to-top-icon-default"
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      >
+        <line x1="12" y1="19" x2="12" y2="5"></line>
+        <polyline points="5 12 12 5 19 12"></polyline>
+      </svg>
+    {% endif %}
+  </button>
+{% endif %}

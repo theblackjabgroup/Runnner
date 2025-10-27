@@ -16,12 +16,7 @@
   data-product-id="{{ product.id }}"
 >
   {% if recommendations.performed and recommendations.products_count > 0 %}
-    {% assign top_padding = section.settings.padding_top %}
     {% assign side_padding = settings.side_space %}
-
-    {% if top_padding == blank or top_padding == 0 %}
-      {% assign top_padding = 36 %}
-    {% endif %}
 
     {% if side_padding == blank or side_padding == 0 %}
       {% assign side_padding = 20 %}
@@ -31,7 +26,7 @@
       class="related-products-page-width related-products-section overflow-hidden color-{{ section.settings.color_scheme }} gradient"
       role="region"
       aria-labelledby="related-products-heading"
-      style="padding: {{ top_padding }}px {{ side_padding }}px {{ section.settings.padding_bottom }}px;"
+      style="padding: var(--sections-spacing-top) {{ side_padding }}px var(--sections-spacing-bottom);"
     >
       {%- if section.settings.heading != blank -%}
         <h2
@@ -46,8 +41,7 @@
       <div class="visually-hidden" role="status" aria-live="polite" aria-atomic="true"></div>
 
       <main
-        class="related-products-container w-full mt-10 color-{{ section.settings.color_scheme }}"
-        style="margin-top:18px;"
+        class="related-products-container w-full color-{{ section.settings.color_scheme }}"
       >
         <div class="slider-container relative">
           <div
@@ -63,7 +57,10 @@
                   data-animation-index="{{ forloop.index0 }}"
                 {% endif %}
               >
-                {% render 'new-product-card', product: recommendation %}
+                {% render 'new-product-card',
+                  product: recommendation,
+                  card_color_scheme: section.settings.color_scheme
+                %}
               </div>
             {% endfor %}
           </div>
@@ -128,30 +125,6 @@
       "label": "Enable scroll animations",
       "default": true,
       "info": "Animate products as they scroll into view. Respects user's motion preferences."
-    },
-    {
-      "type": "header",
-      "content": "t:sections.all.padding.section_padding_heading"
-    },
-    {
-      "type": "range",
-      "id": "padding_top",
-      "min": 0,
-      "max": 100,
-      "step": 4,
-      "unit": "px",
-      "label": "t:sections.all.padding.padding_top",
-      "default": 36
-    },
-    {
-      "type": "range",
-      "id": "padding_bottom",
-      "min": 0,
-      "max": 100,
-      "step": 4,
-      "unit": "px",
-      "label": "t:sections.all.padding.padding_bottom",
-      "default": 36
     }
   ]
 }

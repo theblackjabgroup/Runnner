@@ -17,6 +17,7 @@
 <style>
   :root {
     --scroll-speed: {{ settings.scroll_speed | default: 10 }}s;
+    --cart-drawer-speed: {{ settings.cart_drawer_animation_speed | default: 0.6 }}s !important;
   }
 
   .vertical-text-cart-drawer .separator-image {
@@ -796,32 +797,48 @@
             <span class="!font-medium cart-drawer-text-color">{{ cart.total_price | money -}}</span>
           </div>
 
-          <details class="border-t border-b cart-drawer-border">
-            <summary class="!font-medium cursor-pointer py-3 cart-drawer-text-color !flex !items-center !justify-between">
-              <div>ORDER NOTE</div>
-              <svg
-                class="cart-drawer-order-note-arrow"
-                width="20"
-                height="20"
-                viewBox="4.5 1.5 8.5 13"
-                fill="currentColor"
-                xmlns="http://www.w3.org/2000/svg"
-                stroke="currentColor "
-              >
-                <path d="m12.14 8.753-5.482 4.796c-.646.566-1.658.106-1.658-.753V3.204a1 1 0 0 1 1.659-.753l5.48 4.796a1 1 0 0 1 0 1.506z"/>
-              </svg>
-            </summary>
-            <div class="cart-note-wrapper py-3">
-              <label for="CartDrawer-Note" class="visually-hidden">{{ 'sections.cart.note' | t }}</label>
-              <textarea
-                id="CartDrawer-Note"
-                class="cart-note__input w-full   cart-drawer-text-color"
-                name="note"
-                placeholder="{{ 'sections.cart.note' | t }}"
-                rows="4"
-              >{{ cart.note }}</textarea>
-            </div>
-          </details>
+          {% if settings.show_cart_note %}
+            <details class="border-t border-b cart-drawer-border">
+              <summary class="!font-medium cursor-pointer py-3 cart-drawer-text-color !flex !items-center !justify-between">
+                <div>ORDER NOTE</div>
+                {% assign icon_size = settings.cart_drawer_order_note_icon_size | default: 20 %}
+                {% if settings.cart_drawer_order_note_icon %}
+                  <img
+                    src="{{ settings.cart_drawer_order_note_icon | image_url: width: 80 }}"
+                    alt="Order note icon"
+                    class="cart-drawer-order-note-arrow"
+                    width="{{ icon_size }}"
+                    height="{{ icon_size }}"
+                    loading="lazy"
+                    style="width: {{ icon_size }}px; height: {{ icon_size }}px;"
+                  >
+                {% else %}
+                  <svg
+                    class="cart-drawer-order-note-arrow"
+                    width="{{ icon_size }}"
+                    height="{{ icon_size }}"
+                    viewBox="4.5 1.5 8.5 13"
+                    fill="currentColor"
+                    xmlns="http://www.w3.org/2000/svg"
+                    stroke="currentColor "
+                    style="width: {{ icon_size }}px; height: {{ icon_size }}px;"
+                  >
+                    <path d="m12.14 8.753-5.482 4.796c-.646.566-1.658.106-1.658-.753V3.204a1 1 0 0 1 1.659-.753l5.48 4.796a1 1 0 0 1 0 1.506z"/>
+                  </svg>
+                {% endif %}
+              </summary>
+              <div class="cart-note-wrapper py-3">
+                <label for="CartDrawer-Note" class="visually-hidden">{{ 'sections.cart.note' | t }}</label>
+                <textarea
+                  id="CartDrawer-Note"
+                  class="cart-note__input w-full   cart-drawer-text-color"
+                  name="note"
+                  placeholder="{{ 'sections.cart.note' | t }}"
+                  rows="4"
+                >{{ cart.note }}</textarea>
+              </div>
+            </details>
+          {% endif %}
         </div>
 
         <div class="cart__ctas !ml-auto mt-5" {{ block.shopify_attributes }}>

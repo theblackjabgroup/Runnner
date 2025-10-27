@@ -1,7 +1,7 @@
 {% if template == 'product' %}
   <section
     class="tech-specs-container color-{{ section.settings.color_scheme }} box-border overflow-x-hidden"
-    style="padding: var(--space-7xl) var(--gutter-sm);"
+    style="padding: var(--sections-spacing-top) var(--gutter-sm) var(--sections-spacing-bottom);"
   >
     <div class="tech-specs-outer">
       <div class="tech-specs-main flex flex-col lg:flex-row relative items-start">
@@ -9,7 +9,10 @@
         <div
           class="tech-left-box relative z-20 flex flex-col min-h-full w-full lg:w-[80%]"
         >
-          <h2 class="tech-left-box-heading !text-[32px] !font-medium tracking-wide uppercase text-left">
+          <h2
+            class="tech-left-box-heading !text-[32px] !font-medium tracking-wide uppercase text-left"
+            style="margin-bottom: 24px;"
+          >
             {{ section.settings.tech_specs_heading }}
           </h2>
           <div>
@@ -55,7 +58,7 @@
                           <div class="tech-specs-bars flex flex-col items-center justify-center pl-6">
                             <!-- Effort Bar -->
                             <div class="flex justify-between w-full max-w-full" id="effort-bar">
-                              {% for i in (1..54) %}
+                              {% for i in (1..90) %}
                                 <div class="box">|</div>
                               {% endfor %}
                             </div>
@@ -83,7 +86,7 @@
                         <div class="tech-specs-bars flex flex-col items-center justify-center pl-6">
                           <!-- Temperature Bar -->
                           <div class="flex justify-between w-full max-w-full" id="temperature-bar">
-                            {% for i in (1..54) %}
+                            {% for i in (1..90) %}
                               <div class="box">|</div>
                             {% endfor %}
                           </div>
@@ -103,7 +106,7 @@
               {% endcase %}
             {% endfor %}
 
-            <div class="flex flex-col lg:flex-row" style="margin-top: var(--space-lg);">
+            <div class="flex flex-col lg:flex-row" style="margin-top: 24px;">
               {% for block in section.blocks %}
                 {% if block.type == 'materials' or block.type == 'care' or block.type == 'additional_info' %}
                   {% case block.type %}
@@ -153,7 +156,10 @@
               {{ block.shopify_attributes }}
               class="functionality-right-box relative flex flex-col lg:w-[20%]"
             >
-              <h2 class=" functionality-right-box-heading !text-[32px] !font-medium tracking-wide uppercase">
+              <h2
+                class=" functionality-right-box-heading !text-[32px] !font-medium tracking-wide uppercase"
+                style="margin-bottom: 24px;"
+              >
                 {{ block.settings.features_heading }}
               </h2>
               <div class="flex flex-col" style="gap: var(--gutter-md);">
@@ -421,7 +427,7 @@
     }
 
     .functionality-right-box-heading, .tech-left-box-heading{
-      margin-bottom: var(--space-3xl);
+      /* Margin set inline for consistency */
     }
     .tech-specs-main{
       gap: var(--space-3xl);
@@ -446,6 +452,36 @@
 
     @media (min-width: 481px) and (max-width: 990px) {
       .box:nth-child(n+41) {
+        display: none;
+      }
+    }
+
+    @media (min-width: 991px) and (max-width: 1499px) {
+      .box:nth-child(n+55) {
+        display: none;
+      }
+    }
+
+    @media (min-width: 1500px) and (max-width: 1599px) {
+      .box:nth-child(n+55) {
+        display: none;
+      }
+    }
+
+    @media (min-width: 1600px) and (max-width: 1699px) {
+      .box:nth-child(n+61) {
+        display: none;
+      }
+    }
+
+    @media (min-width: 1700px) and (max-width: 1799px) {
+      .box:nth-child(n+71) {
+        display: none;
+      }
+    }
+
+    @media (min-width: 1800px) and (max-width: 1899px) {
+      .box:nth-child(n+81) {
         display: none;
       }
     }
@@ -488,7 +524,7 @@
 
     @media screen and (max-width: 1445px) {
       .tech-specs-container {
-        padding: var(--space-6xl) var(--gutter-lg) !important;
+        padding: var(--sections-spacing-top) var(--gutter-lg) var(--sections-spacing-bottom) !important;
       }
       .tech-specs-data-border{
         gap: var(--space-xl);
@@ -506,7 +542,7 @@
 
     @media (max-width: 700px) {
       .tech-specs-container{
-        padding: var(--gutter-md) var(--gutter-sm-safe-right) var(--gutter-md) var(--gutter-sm-safe-left) !important;
+        padding: var(--sections-spacing-top) var(--gutter-sm-safe-right) var(--sections-spacing-bottom) var(--gutter-sm-safe-left) !important;
       }
 
       .tech-specs-bars {
@@ -544,9 +580,24 @@
     const tempMin = {{ product.metafields.tech_specs.temp_min.value | default: 0 }};
     const tempMax = {{ product.metafields.tech_specs.temp_max.value | default: 0 }};
 
-    const isMobile = window.innerWidth <= 480;
-    const isTablet = window.innerWidth > 480 && window.innerWidth <= 990;
-    const totalBars = isMobile ? 29 : (isTablet ? 40 : 54);
+    const width = window.innerWidth;
+    let totalBars;
+
+    if (width <= 480) {
+      totalBars = 29;
+    } else if (width <= 990) {
+      totalBars = 40;
+    } else if (width < 1600) {
+      totalBars = 54;
+    } else if (width < 1700) {
+      totalBars = 60;
+    } else if (width < 1800) {
+      totalBars = 70;
+    } else if (width < 1900) {
+      totalBars = 80;
+    } else {
+      totalBars = 90;
+    }
 
     // Effort bars
     const effortBar = document.getElementById('effort-bar');
@@ -580,16 +631,24 @@
 
   document.addEventListener('DOMContentLoaded', function() {
     updateTechSpecBars();
-    let lastIsMobile = window.innerWidth <= 480;
-    let lastIsTablet = window.innerWidth > 480 && window.innerWidth <= 990;
+    let lastWidth = window.innerWidth;
 
     window.addEventListener('resize', function() {
-      const isMobile = window.innerWidth <= 480;
-      const isTablet = window.innerWidth > 480 && window.innerWidth <= 990;
+      const width = window.innerWidth;
 
-      if (isMobile !== lastIsMobile || isTablet !== lastIsTablet) {
-        lastIsMobile = isMobile;
-        lastIsTablet = isTablet;
+      // Check if we crossed a breakpoint
+      const breakpoints = [481, 991, 1600, 1700, 1800, 1900];
+      let crossedBreakpoint = false;
+
+      for (let bp of breakpoints) {
+        if ((lastWidth < bp && width >= bp) || (lastWidth >= bp && width < bp)) {
+          crossedBreakpoint = true;
+          break;
+        }
+      }
+
+      if (crossedBreakpoint) {
+        lastWidth = width;
         updateTechSpecBars();
       }
     });
