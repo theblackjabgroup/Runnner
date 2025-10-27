@@ -37,8 +37,15 @@
       <span class="mx-2 facets-text-color">/</span>
       <h1 class="!text-[1.6rem] !font-light uppercase facets-text-color">
         <span class="visually-hidden">{{ 'sections.collection_template.title' | t }}: </span>
-        {{- collection.title | escape -}}
+        {%- if results.terms -%}
+          Search Results
+        {%- else -%}
+          {{- collection.title | escape -}}
+        {%- endif -%}
       </h1>
+      {%- if results.terms and results.results_count -%}
+        <span class="mx-2 facets-text-color !text-[1.6rem] !font-light">[{{ results.results_count }}]</span>
+      {%- endif -%}
     </div>
   {% endif %}
   {%- if filter_type == 'vertical' or filter_type == 'horizontal' -%}
@@ -1852,73 +1859,33 @@
 
   // Clear all filters function
   window.clearAllFilters = function () {
-    // Uncheck all filter checkboxes
-    document.querySelectorAll('input[type="checkbox"][name^="filter."]').forEach((input) => {
-      input.checked = false;
-    });
-
-    // Clear all price range inputs
-    document.querySelectorAll('input[type="number"]').forEach((input) => {
-      input.value = '';
-    });
-
-    // Reset sort to default
-    const sortInputs = document.querySelectorAll('input[name="sort_by"]');
-    sortInputs.forEach((input) => {
-      input.checked = false;
-    });
-
-    // Hide the tags container immediately
-    const tagsContainer = document.querySelector('.active-filters-tags-container');
-    if (tagsContainer) {
-      tagsContainer.style.display = 'none';
-    }
-
-    // Apply the filter changes
-    if (typeof window.applyFiltersAjax === 'function') {
-      window.applyFiltersAjax();
+    // For search pages, preserve the search query
+    const searchInput = document.querySelector('input[name="q"]');
+    const searchQuery = searchInput ? searchInput.value : '';
+    
+    // Navigate to base URL with search query but no filters
+    if (searchQuery) {
+      // Search page - keep the search term but clear filters
+      window.location.href = '{{ routes.search_url }}?q=' + encodeURIComponent(searchQuery) + '&options%5Bprefix%5D=last';
     } else {
-      // Fallback to form submission
-      const form = document.querySelector('#FacetFiltersForm');
-      if (form) {
-        form.submit();
-      }
+      // Collection page - go to base collection URL
+      window.location.href = '{{ results_url | split: '?' | first }}';
     }
   };
 
   // Clear all filters function for mobile
   window.clearAllFiltersMobile = function () {
-    // Uncheck all filter checkboxes in mobile form
-    document.querySelectorAll('#FacetFiltersFormMobile input[type="checkbox"][name^="filter."]').forEach((input) => {
-      input.checked = false;
-    });
-
-    // Clear all price range inputs in mobile form
-    document.querySelectorAll('#FacetFiltersFormMobile input[type="number"]').forEach((input) => {
-      input.value = '';
-    });
-
-    // Reset sort to default
-    const sortInputs = document.querySelectorAll('input[name="sort_by"]');
-    sortInputs.forEach((input) => {
-      input.checked = false;
-    });
-
-    // Hide the mobile tags container immediately
-    const tagsContainer = document.querySelector('.active-filters-tags-container-mobile');
-    if (tagsContainer) {
-      tagsContainer.style.display = 'none';
-    }
-
-    // Apply the filter changes
-    if (typeof window.applyFiltersAjax === 'function') {
-      window.applyFiltersAjax();
+    // For search pages, preserve the search query
+    const searchInput = document.querySelector('input[name="q"]');
+    const searchQuery = searchInput ? searchInput.value : '';
+    
+    // Navigate to base URL with search query but no filters
+    if (searchQuery) {
+      // Search page - keep the search term but clear filters
+      window.location.href = '{{ routes.search_url }}?q=' + encodeURIComponent(searchQuery) + '&options%5Bprefix%5D=last';
     } else {
-      // Fallback to form submission
-      const form = document.querySelector('#FacetFiltersFormMobile');
-      if (form) {
-        form.submit();
-      }
+      // Collection page - go to base collection URL
+      window.location.href = '{{ results_url | split: '?' | first }}';
     }
   };
 
