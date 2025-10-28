@@ -693,8 +693,10 @@
 
     if (techSpecsSection) {
       const hasScrollAnimation = techSpecsSection.classList.contains('scroll-fade-trigger');
+      // Check if animations are globally disabled via theme settings
+      const globalAnimationsEnabled = document.body.dataset.scrollAnimations !== 'false';
 
-      if (hasScrollAnimation) {
+      if (hasScrollAnimation && globalAnimationsEnabled) {
         // Wait for scroll animation to complete, then trigger bar animation
         const checkForAnimate = setInterval(() => {
           if (techSpecsSection.classList.contains('animate') && !hasAnimated) {
@@ -716,7 +718,7 @@
           }
         }, 5000);
       } else {
-        // No scroll animation, use original intersection observer
+        // No scroll animation or animations disabled globally, use original intersection observer
         const observer = new IntersectionObserver((entries) => {
           entries.forEach(entry => {
             // Trigger animation when section is at least 50% visible

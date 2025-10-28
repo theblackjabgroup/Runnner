@@ -225,7 +225,7 @@
       font-size: 32px;
       line-height: 1.1;
       margin: 0 0 1rem;
-      font-weight: 500;
+      font-weight: var(--weight-medium);
       color: var(--text);
       letter-spacing: -1px;
       line-height: 85%;
@@ -449,6 +449,13 @@
     .blog-article-fb.animate {
       opacity: 1;
       transform: translateY(0);
+    }
+
+    /* Disable animations when global toggle is off */
+    body[data-scroll-animations="false"] .blog-article-fb {
+      opacity: 1 !important;
+      transform: none !important;
+      transition: none !important;
     }
 
      @media (max-width: 1025px) {
@@ -879,39 +886,52 @@
     const isDefaultList = defaultView === 'list';
 
     // Featured Blog Fade-Up Animation
-    const blogArticles = document.querySelectorAll('.blog-article-fb');
+    // Check if animations are globally disabled via theme settings
+    const globalAnimationsEnabled = document.body.dataset.scrollAnimations !== 'false';
 
-    // Set initial state for all articles
-    blogArticles.forEach((article, index) => {
-      article.style.opacity = '0';
-      article.style.transform = 'translateY(50px)';
-      article.style.transition = `opacity 0.8s ease ${index * 0.1}s, transform 0.8s ease ${index * 0.1}s`;
-    });
+    if (globalAnimationsEnabled) {
+      const blogArticles = document.querySelectorAll('.blog-article-fb');
 
-    // Create intersection observer
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            // Trigger fade-up animation
-            entry.target.style.opacity = '1';
-            entry.target.style.transform = 'translateY(0)';
+      // Set initial state for all articles
+      blogArticles.forEach((article, index) => {
+        article.style.opacity = '0';
+        article.style.transform = 'translateY(50px)';
+        article.style.transition = `opacity 0.8s ease ${index * 0.1}s, transform 0.8s ease ${index * 0.1}s`;
+      });
 
-            // Stop observing this element
-            observer.unobserve(entry.target);
-          }
-        });
-      },
-      {
-        rootMargin: '0px 0px -100px 0px',
-        threshold: 0.1,
-      }
-    );
+      // Create intersection observer
+      const observer = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              // Trigger fade-up animation
+              entry.target.style.opacity = '1';
+              entry.target.style.transform = 'translateY(0)';
 
-    // Observe all blog articles
-    blogArticles.forEach((article) => {
-      observer.observe(article);
-    });
+              // Stop observing this element
+              observer.unobserve(entry.target);
+            }
+          });
+        },
+        {
+          rootMargin: '0px 0px -100px 0px',
+          threshold: 0.1,
+        }
+      );
+
+      // Observe all blog articles
+      blogArticles.forEach((article) => {
+        observer.observe(article);
+      });
+    } else {
+      // If animations disabled, make all articles immediately visible
+      const blogArticles = document.querySelectorAll('.blog-article-fb');
+      blogArticles.forEach((article) => {
+        article.style.opacity = '1';
+        article.style.transform = 'none';
+        article.style.transition = 'none';
+      });
+    }
 
     // Load more functionality - use specific selector for featured blog section
     const loadMoreContainer = document.querySelector('.featured-blog-section .load-more-btn-fb-container');
@@ -942,18 +962,27 @@
         for (let i = currentlyVisible; i < endIndex; i++) {
           if (blogArticles[i]) {
             blogArticles[i].style.display = '';
-            // Add fade-up animation for newly shown articles
-            blogArticles[i].style.opacity = '0';
-            blogArticles[i].style.transform = 'translateY(50px)';
-            blogArticles[i].style.transition = `opacity 0.8s ease ${
-              (i - currentlyVisible) * 0.1
-            }s, transform 0.8s ease ${(i - currentlyVisible) * 0.1}s`;
 
-            // Trigger animation after a short delay
-            setTimeout(() => {
+            // Only animate if global animations are enabled
+            if (globalAnimationsEnabled) {
+              // Add fade-up animation for newly shown articles
+              blogArticles[i].style.opacity = '0';
+              blogArticles[i].style.transform = 'translateY(50px)';
+              blogArticles[i].style.transition = `opacity 0.8s ease ${
+                (i - currentlyVisible) * 0.1
+              }s, transform 0.8s ease ${(i - currentlyVisible) * 0.1}s`;
+
+              // Trigger animation after a short delay
+              setTimeout(() => {
+                blogArticles[i].style.opacity = '1';
+                blogArticles[i].style.transform = 'translateY(0)';
+              }, 50);
+            } else {
+              // If animations disabled, show immediately
               blogArticles[i].style.opacity = '1';
-              blogArticles[i].style.transform = 'translateY(0)';
-            }, 50);
+              blogArticles[i].style.transform = 'none';
+              blogArticles[i].style.transition = 'none';
+            }
           }
         }
         currentlyVisible = endIndex;

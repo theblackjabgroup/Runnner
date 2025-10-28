@@ -1,9 +1,6 @@
 {{ 'section-footer.css' | asset_url | stylesheet_tag }}
 {{ 'component-newsletters.css' | asset_url | stylesheet_tag }}
 {{ 'footer.css' | asset_url | stylesheet_tag }}
-{{ 'scroll-animations.css' | asset_url | stylesheet_tag }}
-
-<script src="{{ 'scroll-animations.js' | asset_url }}" defer="defer"></script>
 
 {% style %}
   :root {
@@ -377,7 +374,7 @@
       border-width: 1px !important;
       border-radius: 4px !important;
       text-transform: uppercase !important;
-      font-weight: 500 !important;
+      font-weight: var(--weight-medium) !important;
       letter-spacing: 0.5px !important;
     }
 
@@ -454,21 +451,31 @@
     const footer = document.querySelector('.footer-container');
     if (!footer) return;
 
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            entry.target.classList.add('animate');
-            observer.unobserve(entry.target);
-          }
-        });
-      },
-      { threshold: 0.1 }
-    );
+    // Check if animations are globally disabled via theme settings
+    const globalAnimationsEnabled = document.body.dataset.scrollAnimations !== 'false';
 
-    footer.querySelectorAll('.footer-section').forEach((section) => {
-      observer.observe(section);
-    });
+    if (globalAnimationsEnabled) {
+      const observer = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              entry.target.classList.add('animate');
+              observer.unobserve(entry.target);
+            }
+          });
+        },
+        { threshold: 0.1 }
+      );
+
+      footer.querySelectorAll('.footer-section').forEach((section) => {
+        observer.observe(section);
+      });
+    } else {
+      // If animations disabled, make all footer sections immediately visible
+      footer.querySelectorAll('.footer-section').forEach((section) => {
+        section.classList.add('animate');
+      });
+    }
 
     const form = footer.querySelector('#email-signup-form');
     if (form) {
