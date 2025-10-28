@@ -48,24 +48,26 @@
               class="main-product-card"
             >
               <div
-                class="flex items-center justify-center w-full overflow-hidden"
+                class="main-img-wrapper-outer flex items-center justify-center overflow-hidden"
               >
-                <img
-                  srcset="
-                    {%- if product.featured_image.width >= 205 -%}{{ product.featured_image | image_url: width: 205 }} 205w,{%- endif -%}
-                    {%- if product.featured_image.width >= 409 -%}{{ product.featured_image | image_url: width: 409 }} 409w,{%- endif -%}
-                    {%- if product.featured_image.width >= 818 -%}{{ product.featured_image | image_url: width: 818 }} 818w,{%- endif -%}
-                    {{ product.featured_image | image_url }} {{ product.featured_image.width }}w
-                  "
-                  sizes="(max-width: 767px) 184px, 409px"
-                  src="{{ product.featured_image | image_url: width: 409 }}"
-                  alt="{{ product.title }}"
-                  class="outfit-main-img"
-                  loading="eager"
-                  decoding="async"
-                  height="512"
-                  width="409"
-                >
+                <div class="main-img-wrapper-inner w-full h-full flex items-center justify-center overflow-hidden">
+                  <img
+                    srcset="
+                      {%- if product.featured_image.width >= 205 -%}{{ product.featured_image | image_url: width: 205 }} 205w,{%- endif -%}
+                      {%- if product.featured_image.width >= 409 -%}{{ product.featured_image | image_url: width: 409 }} 409w,{%- endif -%}
+                      {%- if product.featured_image.width >= 818 -%}{{ product.featured_image | image_url: width: 818 }} 818w,{%- endif -%}
+                      {{ product.featured_image | image_url }} {{ product.featured_image.width }}w
+                    "
+                    sizes="(max-width: 767px) 184px, 409px"
+                    src="{{ product.featured_image | image_url: width: 409 }}"
+                    alt="{{ product.title }}"
+                    class="outfit-main-img"
+                    loading="eager"
+                    decoding="async"
+                    height="512"
+                    width="409"
+                  >
+                </div>
               </div>
               <div class="main-product-details">
                 <h4 class="main-product-title">
@@ -111,7 +113,7 @@
                           data-product-url="{{ paired_product.url }}"
                           data-section-id="{{ section.id }}"
                         >
-                          <div class=" paired-product-img w-[140px] h-[150px] flex items-center justify-center overflow-hidden flex-shrink-0">
+                          <div class="paired-product-img-wrapper w-[140px] h-[150px] flex items-center justify-center overflow-hidden flex-shrink-0">
                             {% if paired_product.featured_image %}
                               <img
                                 srcset="
@@ -450,6 +452,9 @@
       .outfit-inspiration-section {
         min-height: 100vh;
       }
+      .main-product-card {
+        height: 560px;
+      }
     }
 
     .outfit-inspiration-section::before {
@@ -509,6 +514,8 @@
     .main-product-card{
      border: 1px solid;
      overflow: hidden;
+     width: 420px;
+
     }
     .paired-product-card{
     height: 179px;
@@ -530,6 +537,7 @@
     .paired-product-title{
      color: var(--text);
      font-size: 14px;
+     margin: 5px 0;
     }
     .outfit-size{
       padding-bottom: 30px;
@@ -753,8 +761,8 @@
     }
 
     .paired-product-img {
-      width: 140px !important;
-      height: 150px !important;
+      width: 100% !important;
+      height: 100% !important;
       aspect-ratio: 1/1;
       object-fit: cover;
       transition: transform 0.3s ease;
@@ -799,18 +807,28 @@
       left: 0;
       right: 0;
     }
+    .main-img-wrapper-outer {
+      padding: 14px 14px 9px 14px !important;
+      width: 100% !important;
+    }
+
+    .main-img-wrapper-inner {
+      width: 100% !important;
+      height: 482px !important;
+    }
+
     .outfit-main-img {
-      height: 505px;
-      width: 420px;
-      padding: 14px 14px 9px 14px;
+      width: 100% !important;
+      height: 100% !important;
       aspect-ratio: 1/1;
       object-fit: cover;
       transition: transform 0.3s ease;
+      display: block;
     }
 
     /* Hover zoom animation like blog-grid */
     .main-product-card:hover .outfit-main-img {
-      transform: scale(1.05);
+      transform: scale(1.1);
     }
 
     .paired-product-slide {
@@ -952,10 +970,16 @@
         width: 184px !important;
         min-width: 0 !important;
       }
-      .outfit-main-img {
-        height: 212px !important;
-        width: 180px !important;
+      .main-img-wrapper-outer {
         padding: 8px !important;
+      }
+      .main-img-wrapper-inner {
+        width: 100% !important;
+        height: 196px !important;
+      }
+      .outfit-main-img {
+        width: 100% !important;
+        height: 100% !important;
       }
       .max-w-\[409px\] {
         max-width: 172px !important;
@@ -973,8 +997,8 @@
         gap: 4px !important;
       }
       .paired-product-img {
-        width: 60px !important;
-        height: 60px !important;
+        width: 100% !important;
+        height: 100% !important;
       }
       .expanded-product-card {
         max-width: 172px !important;
@@ -991,9 +1015,10 @@
         transition: transform 0.75s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.65s cubic-bezier(0.4, 0, 0.2, 1);
       }
 
-      .w-\[140px\],
-      .h-\[150px\] {
+      .paired-product-img-wrapper.w-\[140px\] {
         width: 60px !important;
+      }
+      .paired-product-img-wrapper.h-\[150px\] {
         height: 60px !important;
       }
       .w-\[200px\] {
