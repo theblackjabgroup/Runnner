@@ -31,10 +31,10 @@
                     </div>
                     <!-- Pocketing -->
                     <div class="tech-specs-data-border flex flex-row items-center border-b">
-                      <span class="tech-specs-data text-[12px] font-normal">
+                      <span class="tech-specs-data text-[13px] font-normal">
                         {{ block.settings.pocketing_label }}
                       </span>
-                      <span class="text-[12px] font-medium pl-6">
+                      <span class="text-[13px] font-medium pl-6">
                         {{- product.metafields.tech_specs.pocketing.value | default: block.settings.pocketing_value -}}
                       </span>
                     </div>
@@ -63,7 +63,7 @@
                               {% endfor %}
                             </div>
                             <!-- Scale Labels -->
-                            <div class="flex justify-between text-[12px] w-full mt-1">
+                            <div class="flex justify-between text-[13px] w-full mt-1">
                               <span>{{ block.settings.effort_scale_0 }}</span>
                               <span>{{ block.settings.effort_scale_25 }}</span>
                               <span>{{ block.settings.effort_scale_50 }}</span>
@@ -115,7 +115,7 @@
                         <div class="font-medium text-[16px] mb-3 text-left">
                           {{ block.settings.materials_label }}
                         </div>
-                        <div class="text-[12px] font-normal leading-relaxed text-left">
+                        <div class="text-[13px] font-normal leading-relaxed text-left">
                           {{ product.metafields.tech_specs.materials.value | default: block.settings.materials_value }}
                         </div>
                       </div>
@@ -124,7 +124,7 @@
                         <div class="font-medium text-[16px] mb-3 text-left">
                           {{ block.settings.care_label }}
                         </div>
-                        <div class="text-[12px] font-normal leading-relaxed text-left">
+                        <div class="text-[13px] font-normal leading-relaxed text-left">
                           {% assign care_lines = product.metafields.tech_specs.care.value
                             | default: block.settings.care_value
                             | split: '\n'
@@ -138,7 +138,7 @@
                       </div>
                     {% when 'additional_info' %}
                       <div {{ block.shopify_attributes }} class="w-full lg:w-1/3">
-                        <div class="text-[12px] font-normal leading-relaxed text-left">
+                        <div class="text-[13px] font-normal leading-relaxed text-left">
                           {{ block.settings.additional_info }}
                         </div>
                       </div>
@@ -437,7 +437,23 @@
     }
 
     .box {
-      transition: all 0.3s ease;
+      transition: color 0.3s ease;
+      opacity: 0.3;
+    }
+
+    .box.filled {
+      animation: fillBar 0.6s ease-in-out forwards;
+    }
+
+    @keyframes fillBar {
+      0% {
+        color: var(--text);
+        opacity: 0.3;
+      }
+      100% {
+        color: {{ section.settings.bar_color | default: 'red' }};
+        opacity: 1;
+      }
     }
 
     /* Hide excess bars on smaller screens */
@@ -495,9 +511,6 @@
       width: 230px;
     }
 
-    .box.filled {
-      color: {{ section.settings.bar_color | default: 'red' }};
-    }
      .functionality-feature-content {
        display: flex;
        flex-direction: column;
@@ -575,7 +588,7 @@
 </style>
 
 <script>
-  function updateTechSpecBars() {
+  function updateTechSpecBars(animate = true) {
     const effortValue = {{ product.metafields.tech_specs.effort.value | default: 0 }};
     const tempMin = {{ product.metafields.tech_specs.temp_min.value | default: 0 }};
     const tempMax = {{ product.metafields.tech_specs.temp_max.value | default: 0 }};
@@ -599,29 +612,47 @@
       totalBars = 90;
     }
 
-    // Effort bars
+    // Effort bars with loading animation
     const effortBar = document.getElementById('effort-bar');
     if (effortBar && effortValue > 0) {
       const effortBars = effortBar.querySelectorAll('.box');
       const effortFilled = Math.floor((effortValue * totalBars) / 100);
+
       effortBars.forEach((bar, i) => {
         if (i < effortFilled) {
-          bar.classList.add('filled');
+          if (animate && !bar.classList.contains('filled')) {
+            // Add staggered delay for loading animation effect
+            setTimeout(() => {
+              bar.classList.add('filled');
+            }, i * 25); // 15ms delay between each bar
+          } else if (!animate) {
+            bar.classList.add('filled');
+          }
         } else {
           bar.classList.remove('filled');
         }
       });
     }
 
-    // Temperature bars
+    // Temperature bars with loading animation
     const temperatureBar = document.getElementById('temperature-bar');
     if (temperatureBar && tempMin >= 0 && tempMax > 0 && tempMax > tempMin) {
       const tempBars = temperatureBar.querySelectorAll('.box');
       const tempStartPos = Math.round((tempMin / 95) * (totalBars - 1));
       const tempEndPos = Math.round((tempMax / 95) * (totalBars - 1));
+      let animationIndex = 0;
+
       tempBars.forEach((bar, i) => {
         if (i >= tempStartPos && i <= tempEndPos) {
-          bar.classList.add('filled');
+          if (animate && !bar.classList.contains('filled')) {
+            // Add staggered delay for loading animation effect
+            setTimeout(() => {
+              bar.classList.add('filled');
+            }, animationIndex * 25); // 15ms delay between each bar
+            animationIndex++;
+          } else if (!animate) {
+            bar.classList.add('filled');
+          }
         } else {
           bar.classList.remove('filled');
         }
@@ -630,8 +661,27 @@
   }
 
   document.addEventListener('DOMContentLoaded', function() {
-    updateTechSpecBars();
+    const techSpecsSection = document.querySelector('.tech-specs-container');
+    let hasAnimated = false;
     let lastWidth = window.innerWidth;
+
+    if (techSpecsSection) {
+      // Create an Intersection Observer to detect when section is visible
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          // Trigger animation when section is at least 20% visible
+          if (entry.isIntersecting && entry.intersectionRatio >= 0.5 && !hasAnimated) {
+            hasAnimated = true;
+            updateTechSpecBars(true);
+          }
+        });
+      }, {
+        threshold: [0.5] // Trigger when 20% of section is visible
+      });
+
+      // Start observing the tech specs section
+      observer.observe(techSpecsSection);
+    }
 
     window.addEventListener('resize', function() {
       const width = window.innerWidth;
@@ -647,9 +697,9 @@
         }
       }
 
-      if (crossedBreakpoint) {
+      if (crossedBreakpoint && hasAnimated) {
         lastWidth = width;
-        updateTechSpecBars();
+        updateTechSpecBars(false);
       }
     });
   });
