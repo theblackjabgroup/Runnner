@@ -41,6 +41,17 @@
       cursor: col-resize;
       margin: {{ section.settings.margin_top }}px auto {{ section.settings.margin_bottom }}px auto;
       max-height: 90vh;
+      /* Initial state for entrance animation - same speed as product grid but longer duration for bigger section */
+      opacity: 0;
+      transform: translateY(100px);
+      animation: fadeInUp 1.2s ease forwards;
+    }
+
+    @keyframes fadeInUp {
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
     }
 
     /* --- COMMENT: Base style for BOTH layered images. Now uses height: 100% to fill its parent --- */
@@ -53,6 +64,23 @@
       pointer-events: none;
       background-color: rgb(var(--color-background)); /* Ensures placeholders are visible */
       z-index: 0;
+    }
+
+    /* Right side image with tint - starts transparent, animates in, then stays static */
+    .prod-diff-img-right {
+      opacity: 0;
+    }
+
+    /* Tint enabled - animates to 0.7 opacity using CSS transition */
+    .prod-diff-img-right.animate-tint:not(.no-tint) {
+      transition: opacity 1.2s ease;
+      opacity: 0.7;
+    }
+
+    /* Tint disabled - animates to full opacity using CSS transition */
+    .prod-diff-img-right.animate-tint.no-tint {
+      transition: opacity 1.2s ease;
+      opacity: 1;
     }
 
     .prod-diff-img picture {
@@ -330,23 +358,16 @@
           "
           sizes="(min-width: 1200px) 1200px, (min-width: 768px) calc(100vw - 10rem), 100vw"
           src="{{ desktop_image_after | image_url: width: 1800 }}"
-          class="prod-diff-img"
+          class="prod-diff-img prod-diff-img-right{% if section.settings.enable_right_tint == false %} no-tint{% endif %}"
           alt="{{ desktop_image_after.alt | escape }}"
           width="{{ desktop_image_after.width }}"
           height="{{ desktop_image_after.width | divided_by: desktop_image_after.aspect_ratio | round }}"
           loading="eager"
           fetchpriority="high"
-          {% unless section.settings.enable_right_tint == false %}
-            style="opacity: 0.7;"
-          {% endunless %}
         >
       </picture>
     {% else %}
-      <div
-        {% unless section.settings.enable_right_tint == false %}
-          style="opacity: 0.7;"
-        {% endunless %}
-      >
+      <div class="prod-diff-img prod-diff-img-right{% if section.settings.enable_right_tint == false %} no-tint{% endif %}">
         {{ 'lifestyle-2' | placeholder_svg_tag: 'prod-diff-img' }}
       </div>
     {% endif %}
@@ -573,9 +594,116 @@
       const beforeImage = sliderContainer.querySelector('#BeforeImage-{{ section.id }}');
       const divider = sliderContainer.querySelector('#Divider-{{ section.id }}');
       const handle = sliderContainer.querySelector('#Handle-{{ section.id }}');
-      const leftText = sliderContainer.querySelector('.prod-diff-product-info.left');
+      const leftTextElements = sliderContainer.querySelectorAll('.prod-diff-product-info.left');
+      const rightTextElements = sliderContainer.querySelectorAll('.prod-diff-product-info.right');
 
       if (slider && beforeImage && divider && handle) {
+        // Get the right image element (with tint)
+        const rightImage = sliderContainer.querySelector('.prod-diff-img-right');
+        const tintOpacity = rightImage && !rightImage.classList.contains('no-tint') ? 0.7 : 1;
+
+        // Set initial state - everything starts at 0%
+        slider.value = 0;
+        beforeImage.style.clipPath = 'inset(0 100% 0 0)';
+        divider.style.left = '0%';
+        leftTextElements.forEach((leftText) => {
+          leftText.style.clipPath = 'inset(0 100% 0 0)';
+        });
+        rightTextElements.forEach((rightText) => {
+          rightText.style.clipPath = 'inset(0 0 0 0)';
+        });
+        // Animation function - called when section is visible
+        let hasAnimated = false;
+        const triggerAnimation = () => {
+          if (hasAnimated) return;
+          hasAnimated = true;
+
+          // Trigger tint animation when scroll animation starts
+          if (rightImage) {
+            rightImage.classList.add('animate-tint');
+          }
+
+          // Animate slider, divider, clip-path, and tint together from 0% to 50%
+          // Same speed as product grid (50px in 0.6s = ~83px/s) but proportionally longer for bigger section
+          const startTime = Date.now();
+          const duration = 1200; // 1.2s - same speed ratio as product grid but longer distance
+          const delay = 300; // 0.3 second delay (user said delay is acceptable)
+          const startValue = 0;
+          const endValue = 50;
+
+          setTimeout(() => {
+            const animate = () => {
+              const elapsed = Date.now() - startTime - delay;
+              if (elapsed < 0) {
+                requestAnimationFrame(animate);
+                return;
+              }
+
+              if (elapsed >= duration) {
+                // Animation complete - set final values
+                slider.value = endValue;
+                beforeImage.style.clipPath = `inset(0 calc(100% - ${endValue}%) 0 0)`;
+                divider.style.left = `${endValue}%`;
+                leftTextElements.forEach((leftText) => {
+                  leftText.style.clipPath = `inset(0 calc(100% - ${endValue}%) 0 0)`;
+                });
+                rightTextElements.forEach((rightText) => {
+                  // Right text: visible from 0-50%, then clips from left as slider goes past 50%
+                  const rightClip = endValue <= 50 ? 0 : (endValue - 50) * 2;
+                  rightText.style.clipPath = `inset(0 0 0 ${rightClip}%)`;
+                });
+                // Tint stays at its final static value (set by CSS transition)
+                return;
+              }
+
+              // Ease-out function for smooth animation
+              const progress = elapsed / duration;
+              const eased = 1 - Math.pow(1 - progress, 3); // Cubic ease-out
+
+              const currentValue = startValue + (endValue - startValue) * eased;
+
+              // Update slider, clip-path, and divider (tint opacity handled by CSS)
+              slider.value = currentValue;
+              beforeImage.style.clipPath = `inset(0 calc(100% - ${currentValue}%) 0 0)`;
+              divider.style.left = `${currentValue}%`;
+              leftTextElements.forEach((leftText) => {
+                leftText.style.clipPath = `inset(0 calc(100% - ${currentValue}%) 0 0)`;
+              });
+              rightTextElements.forEach((rightText) => {
+                // Right text: visible from 0-50%, then clips from left as slider goes past 50%
+                const rightClip = currentValue <= 50 ? 0 : (currentValue - 50) * 2;
+                rightText.style.clipPath = `inset(0 0 0 ${rightClip}%)`;
+              });
+
+              requestAnimationFrame(animate);
+            };
+            animate();
+          }, delay);
+        };
+
+        // Use Intersection Observer to trigger animation when section is visible
+        if ('IntersectionObserver' in window) {
+          const observer = new IntersectionObserver(
+            (entries) => {
+              entries.forEach((entry) => {
+                if (entry.isIntersecting && entry.intersectionRatio > 0.1) {
+                  triggerAnimation();
+                  observer.disconnect(); // Only animate once
+                }
+              });
+            },
+            {
+              threshold: 0.1, // Trigger when 10% of section is visible
+              rootMargin: '0px 0px -50px 0px', // Start animation slightly before fully in view
+            }
+          );
+
+          observer.observe(sliderContainer);
+        } else {
+          // Fallback for browsers without Intersection Observer
+          triggerAnimation();
+        }
+
         // JavaScript for the grab animation is added here
         slider.addEventListener('mousedown', () => handle.classList.add('dragging'));
         slider.addEventListener('touchstart', () => handle.classList.add('dragging'));
@@ -587,10 +715,15 @@
           const value = e.target.value;
           beforeImage.style.clipPath = `inset(0 calc(100% - ${value}%) 0 0)`;
           divider.style.left = `${value}%`;
-          // Sync left text clip-path with the before image
-          if (leftText) {
+          // Sync left text clip-path with the before image (all left text elements: mobile and desktop)
+          leftTextElements.forEach((leftText) => {
             leftText.style.clipPath = `inset(0 calc(100% - ${value}%) 0 0)`;
-          }
+          });
+          // Sync right text clip-path: visible from 0-50%, clips from left when slider > 50%
+          rightTextElements.forEach((rightText) => {
+            const rightClip = value <= 50 ? 0 : (value - 50) * 2;
+            rightText.style.clipPath = `inset(0 0 0 ${rightClip}%)`;
+          });
         });
 
         // Remove hyphens from price text
