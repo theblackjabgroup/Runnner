@@ -36,6 +36,13 @@ if (typeof ScrollAnimations === 'undefined') {
     init() {
       if (this.isInitialized) return;
 
+      // Check if animations are globally disabled via theme settings
+      const globalAnimationsEnabled = document.body.dataset.scrollAnimations !== 'false';
+      if (!globalAnimationsEnabled) {
+        this.disableAnimations();
+        return;
+      }
+
       // Check for reduced motion preference
       if (this.options.respectReducedMotion && this.prefersReducedMotion()) {
         this.disableAnimations();

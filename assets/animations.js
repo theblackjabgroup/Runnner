@@ -40,6 +40,10 @@ function initializeScrollAnimationTrigger(rootEl = document, isDesignModeEvent =
 
 // Zoom in animation logic
 function initializeScrollZoomAnimationTrigger() {
+  // Check global animation setting
+  const globalAnimationsEnabled = document.body.dataset.scrollAnimations !== 'false';
+  if (!globalAnimationsEnabled) return;
+
   if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
 
   const animationTriggerElements = Array.from(document.getElementsByClassName(SCROLL_ZOOM_IN_TRIGGER_CLASSNAME));
@@ -92,6 +96,12 @@ function percentageSeen(element) {
 }
 
 window.addEventListener('DOMContentLoaded', () => {
+  // Check if animations are globally disabled via theme settings
+  const globalAnimationsEnabled = document.body.dataset.scrollAnimations !== 'false';
+  if (!globalAnimationsEnabled) {
+    return; // Don't initialize animations if globally disabled
+  }
+
   initializeScrollAnimationTrigger();
   initializeScrollZoomAnimationTrigger();
 });

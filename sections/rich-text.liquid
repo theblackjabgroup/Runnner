@@ -1,10 +1,5 @@
 {{ 'section-rich-text.css' | asset_url | stylesheet_tag }}
 
-{%- if section.settings.enable_animations -%}
-  {{ 'scroll-animations.css' | asset_url | stylesheet_tag }}
-  <script src="{{ 'scroll-animations.js' | asset_url }}" defer></script>
-{%- endif -%}
-
 {%- style -%}
   #shopify-section-{{ section.id }} .rich-text {
     position: relative;
@@ -172,13 +167,13 @@
 >
   <div class="rich-text content-container color-{{ section.settings.color_scheme }} gradient{% if section.settings.full_width %} rich-text--full-width content-container--full-width{% endif %} section-{{ section.id }}-padding">
     <div class="rich-text__wrapper rich-text__wrapper--{{ section.settings.desktop_content_position }}{% if section.settings.full_width %} page-width{% endif %}">
-      <div class="rich-text__blocks {{ section.settings.content_alignment }}">
+      <div class="rich-text__blocks{% if section.settings.enable_animations %} scroll-fade-stagger{% endif %} {{ section.settings.content_alignment }}">
         {%- for block in section.blocks -%}
           {%- case block.type -%}
             {%- when 'heading' -%}
               <h2
                 id="Heading-{{ block.id }}"
-                class="rich-text__heading rte {{ block.settings.heading_size }}{% if block.settings.text_align == 'left' %} text-left{% elsif block.settings.text_align == 'center' %} text-center{% else %} text-right{% endif %}"
+                class="rich-text__heading rte {{ block.settings.heading_size }}{% if block.settings.text_align == 'left' %} text-left{% elsif block.settings.text_align == 'center' %} text-center{% else %} text-right{% endif %}{% if section.settings.enable_animations %} scroll-fade-trigger scroll-fade-up{% endif %}"
                 {{ block.shopify_attributes }}
               >
                 {{ block.settings.heading | replace: 'p>', 'span>' }}
@@ -187,7 +182,7 @@
             {%- when 'subheading' -%}
               <h3
                 id="Subheading-{{ block.id }}"
-                class="rich-text__subheading rte {{ block.settings.text_style }} {{ block.settings.text_style }}--{{ block.settings.text_size }}"
+                class="rich-text__subheading rte {{ block.settings.text_style }} {{ block.settings.text_style }}--{{ block.settings.text_size }}{% if section.settings.enable_animations %} scroll-fade-trigger scroll-fade-up{% endif %}"
                 {{ block.shopify_attributes }}
               >
                 {{ block.settings.subheading | replace: 'p>', 'span>' }}
@@ -196,7 +191,7 @@
             {%- when 'text' -%}
               <div
                 id="Text-{{ block.id }}"
-                class="rich-text__text rte"
+                class="rich-text__text rte{% if section.settings.enable_animations %} scroll-fade-trigger scroll-fade-up{% endif %}"
                 {{ block.shopify_attributes }}
               >
                 {{ block.settings.text }}
