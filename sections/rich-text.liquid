@@ -1,5 +1,10 @@
 {{ 'section-rich-text.css' | asset_url | stylesheet_tag }}
 
+{%- if section.settings.enable_animations -%}
+  {{ 'scroll-animations.css' | asset_url | stylesheet_tag }}
+  <script src="{{ 'scroll-animations.js' | asset_url }}" defer></script>
+{%- endif -%}
+
 {%- style -%}
   #shopify-section-{{ section.id }} .rich-text {
     position: relative;
@@ -161,7 +166,10 @@
   }
 {%- endstyle -%}
 
-<div class="color-{{ section.settings.color_scheme }} gradient">
+<div
+  class="color-{{ section.settings.color_scheme }} gradient {% if section.settings.enable_animations %}scroll-fade-trigger scroll-fade-up{% endif %}"
+  data-section-id="{{ section.id }}"
+>
   <div class="rich-text content-container color-{{ section.settings.color_scheme }} gradient{% if section.settings.full_width %} rich-text--full-width content-container--full-width{% endif %} section-{{ section.id }}-padding">
     <div class="rich-text__wrapper rich-text__wrapper--{{ section.settings.desktop_content_position }}{% if section.settings.full_width %} page-width{% endif %}">
       <div class="rich-text__blocks {{ section.settings.content_alignment }}">
@@ -260,6 +268,13 @@
       "id": "full_width",
       "default": true,
       "label": "t:sections.video.settings.full_width.label"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_animations",
+      "label": "Enable scroll animations",
+      "default": true,
+      "info": "Animate section as it scrolls into view. Respects user's motion preferences."
     }
   ],
   "blocks": [

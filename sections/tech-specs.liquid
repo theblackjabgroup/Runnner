@@ -1,7 +1,19 @@
 {% if template == 'product' %}
+  {%- if section.settings.enable_animations -%}
+    {{ 'scroll-animations.css' | asset_url | stylesheet_tag }}
+    <script src="{{ 'scroll-animations.js' | asset_url }}" defer></script>
+  {%- endif -%}
+
+  {% assign side_padding = settings.side_space %}
+
+  {% if side_padding == blank or side_padding == 0 %}
+    {% assign side_padding = 20 %}
+  {% endif %}
+
   <section
-    class="tech-specs-container color-{{ section.settings.color_scheme }} box-border overflow-x-hidden"
-    style="padding: var(--sections-spacing-top) var(--gutter-sm) var(--sections-spacing-bottom);"
+    class="tech-specs-container color-{{ section.settings.color_scheme }} box-border overflow-x-hidden {% if section.settings.enable_animations %}scroll-fade-trigger scroll-fade-up{% endif %}"
+    style="padding: var(--sections-spacing-top) {{ side_padding }}px var(--sections-spacing-bottom);"
+    data-section-id="{{ section.id }}"
   >
     <div class="tech-specs-outer">
       <div class="tech-specs-main flex flex-col lg:flex-row relative items-start">
@@ -517,6 +529,25 @@
        justify-content: center;
        min-height: 83px;
      }
+
+     /* Icon hover effects */
+     .functionality-icons-background {
+       transition: all 0.3s ease;
+       cursor: pointer;
+     }
+
+     .functionality-icons-background:hover {
+       transform: scale(1.05);
+       box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15) !important;
+     }
+
+     .functionality-icons-background:hover .feature-icon {
+       filter: brightness(0) saturate(100%) invert(27%) sepia(51%) saturate(2878%) hue-rotate(346deg) brightness(104%) contrast(97%);
+     }
+
+     .functionality-icons-background:hover svg {
+       color: {{ section.settings.icon_hover_color | default: '#ff6b35' }};
+     }
      @media (max-width: 1024px){
       .tech-left-box {
         border-right: none;
@@ -536,9 +567,6 @@
 
 
     @media screen and (max-width: 1445px) {
-      .tech-specs-container {
-        padding: var(--sections-spacing-top) var(--gutter-lg) var(--sections-spacing-bottom) !important;
-      }
       .tech-specs-data-border{
         gap: var(--space-xl);
       }
@@ -554,10 +582,6 @@
 
 
     @media (max-width: 700px) {
-      .tech-specs-container{
-        padding: var(--sections-spacing-top) var(--gutter-sm-safe-right) var(--sections-spacing-bottom) var(--gutter-sm-safe-left) !important;
-      }
-
       .tech-specs-bars {
         padding-left: 0;
         width: 100%;
@@ -666,21 +690,46 @@
     let lastWidth = window.innerWidth;
 
     if (techSpecsSection) {
-      // Create an Intersection Observer to detect when section is visible
-      const observer = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-          // Trigger animation when section is at least 20% visible
-          if (entry.isIntersecting && entry.intersectionRatio >= 0.5 && !hasAnimated) {
+      const hasScrollAnimation = techSpecsSection.classList.contains('scroll-fade-trigger');
+
+      if (hasScrollAnimation) {
+        // Wait for scroll animation to complete, then trigger bar animation
+        const checkForAnimate = setInterval(() => {
+          if (techSpecsSection.classList.contains('animate') && !hasAnimated) {
+            hasAnimated = true;
+            clearInterval(checkForAnimate);
+            // Delay to let scroll animation complete (0.8s + buffer)
+            setTimeout(() => {
+              updateTechSpecBars(true);
+            }, 900);
+          }
+        }, 100);
+
+        // Fallback: if animate class doesn't appear within 5 seconds, trigger anyway
+        setTimeout(() => {
+          if (!hasAnimated) {
+            clearInterval(checkForAnimate);
             hasAnimated = true;
             updateTechSpecBars(true);
           }
+        }, 5000);
+      } else {
+        // No scroll animation, use original intersection observer
+        const observer = new IntersectionObserver((entries) => {
+          entries.forEach(entry => {
+            // Trigger animation when section is at least 50% visible
+            if (entry.isIntersecting && entry.intersectionRatio >= 0.5 && !hasAnimated) {
+              hasAnimated = true;
+              updateTechSpecBars(true);
+            }
+          });
+        }, {
+          threshold: [0.5] // Trigger when 50% of section is visible
         });
-      }, {
-        threshold: [0.5] // Trigger when 20% of section is visible
-      });
 
-      // Start observing the tech specs section
-      observer.observe(techSpecsSection);
+        // Start observing the tech specs section
+        observer.observe(techSpecsSection);
+      }
     }
 
     window.addEventListener('resize', function() {
@@ -727,6 +776,19 @@
       "id": "bar_color",
       "label": "Bar Fill Color",
       "default": "#ff0000"
+    },
+    {
+      "type": "color",
+      "id": "icon_hover_color",
+      "label": "Icon Hover Color",
+      "default": "#ff6b35"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_animations",
+      "label": "Enable scroll animations",
+      "default": true,
+      "info": "Animate section as it scrolls into view. Bar animations will trigger after scroll animation completes. Respects user's motion preferences."
     },
     {
       "type": "image_picker",
