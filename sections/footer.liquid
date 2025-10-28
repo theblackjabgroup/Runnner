@@ -451,21 +451,31 @@
     const footer = document.querySelector('.footer-container');
     if (!footer) return;
 
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            entry.target.classList.add('animate');
-            observer.unobserve(entry.target);
-          }
-        });
-      },
-      { threshold: 0.1 }
-    );
+    // Check if animations are globally disabled via theme settings
+    const globalAnimationsEnabled = document.body.dataset.scrollAnimations !== 'false';
 
-    footer.querySelectorAll('.footer-section').forEach((section) => {
-      observer.observe(section);
-    });
+    if (globalAnimationsEnabled) {
+      const observer = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              entry.target.classList.add('animate');
+              observer.unobserve(entry.target);
+            }
+          });
+        },
+        { threshold: 0.1 }
+      );
+
+      footer.querySelectorAll('.footer-section').forEach((section) => {
+        observer.observe(section);
+      });
+    } else {
+      // If animations disabled, make all footer sections immediately visible
+      footer.querySelectorAll('.footer-section').forEach((section) => {
+        section.classList.add('animate');
+      });
+    }
 
     const form = footer.querySelector('#email-signup-form');
     if (form) {

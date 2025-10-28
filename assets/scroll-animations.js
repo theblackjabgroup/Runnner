@@ -368,6 +368,13 @@ if (typeof ScrollAnimations === 'undefined') {
    * Initialize animations when DOM is ready
    */
   function initScrollAnimations() {
+    // Check if animations are globally disabled via theme settings
+    const globalAnimationsEnabled = document.body.dataset.scrollAnimations !== 'false';
+    if (!globalAnimationsEnabled) {
+      // Don't initialize any animations if globally disabled
+      return;
+    }
+
     // Initialize general scroll animations
     window.scrollAnimations = new ScrollAnimations({
       debugMode: window.location.search.includes('debug=animations'),

@@ -1080,6 +1080,15 @@ if (prefersReducedMotion) {
     element.style.opacity = '1';
   });
 } else {
+  // Check if animations are globally disabled via theme settings
+  const globalAnimationsEnabled = document.body.dataset.scrollAnimations !== 'false';
+  
+  if (!globalAnimationsEnabled) {
+    // If global animations disabled, make everything visible immediately
+    document.querySelectorAll('.button-animation').forEach(element => {
+      element.style.opacity = '1';
+    });
+  } else {
   const observer = new IntersectionObserver((entries, observer) => {
     entries.forEach(entry => {
       if (entry.isIntersecting) {
@@ -1110,6 +1119,7 @@ if (prefersReducedMotion) {
   document.querySelectorAll('.video-with-text-media-section-{{ section.id }}').forEach(section => {
     observer.observe(section);
   });
+  } // Close the else block for globalAnimationsEnabled
 }
 
 const buttons = document.querySelectorAll('.video-with-text-custom-button-css');
