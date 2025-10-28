@@ -1,6 +1,18 @@
+{%- if section.settings.enable_animations -%}
+  {{ 'scroll-animations.css' | asset_url | stylesheet_tag }}
+  <script src="{{ 'scroll-animations.js' | asset_url }}" defer></script>
+{%- endif -%}
+
+{% assign side_padding = settings.side_space %}
+
+{% if side_padding == blank or side_padding == 0 %}
+  {% assign side_padding = 20 %}
+{% endif %}
+
 <div
-  class="outfit-inspiration-section color-{{ section.settings.color_scheme }} px-0 flex justify-center items-center"
-  style="padding-top: var(--sections-spacing-top); padding-bottom: var(--sections-spacing-bottom);"
+  class="outfit-inspiration-section color-{{ section.settings.color_scheme }} flex justify-center items-center {% if section.settings.enable_animations %}scroll-fade-trigger scroll-fade-up{% endif %}"
+  style="padding-top: var(--sections-spacing-top); padding-bottom: var(--sections-spacing-bottom); padding-left: {{ side_padding }}px; padding-right: {{ side_padding }}px;"
+  data-section-id="{{ section.id }}"
 >
   <div class="outfit-navigation-arrows desktop-arrows ">
     <button
@@ -36,7 +48,7 @@
               class="main-product-card"
             >
               <div
-                class="flex items-center justify-center w-full"
+                class="flex items-center justify-center w-full overflow-hidden"
               >
                 <img
                   srcset="
@@ -798,7 +810,7 @@
 
     /* Hover zoom animation like blog-grid */
     .main-product-card:hover .outfit-main-img {
-      transform: scale(1.1);
+      transform: scale(1.05);
     }
 
     .paired-product-slide {
@@ -1664,6 +1676,13 @@
       "id": "border_color",
       "label": "Border Color",
       "default": "#000000"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_animations",
+      "label": "Enable scroll animations",
+      "default": true,
+      "info": "Animate section as it scrolls into view. Respects user's motion preferences."
     },
     {
       "type": "header",

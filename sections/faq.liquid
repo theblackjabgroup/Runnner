@@ -1,5 +1,11 @@
 <script src="{{ 'custom-faq.js' | asset_url }}" defer></script>
 <link rel="stylesheet" href="{{ 'custom-faq.css' | asset_url }}">
+
+{%- if section.settings.enable_animations -%}
+  {{ 'scroll-animations.css' | asset_url | stylesheet_tag }}
+  <script src="{{ 'scroll-animations.js' | asset_url }}" defer></script>
+{%- endif -%}
+
 {% assign side_padding = settings.side_space %}
 
 {% if side_padding == blank or side_padding == 0 %}
@@ -25,9 +31,10 @@
 </style>
 
 <div
-  class="[your-brand]-faq color-{{ section.settings.color_scheme }}"
+  class="[your-brand]-faq color-{{ section.settings.color_scheme }} {% if section.settings.enable_animations %}scroll-fade-trigger scroll-fade-up{% endif %}"
   role="region"
   aria-labelledby="faq-heading"
+  data-section-id="{{ section.id }}"
   style="padding: var(--sections-spacing-top) {{ side_padding }}px var(--sections-spacing-bottom); font-family: var(--font-heading-family);"
 >
   <div class="faq-header" style="height:auto; margin-top:40px; margin-bottom:40px;">
@@ -122,6 +129,13 @@
       "id": "faq-title",
       "label": "FAQ Title",
       "default": "FAQ"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_animations",
+      "label": "Enable scroll animations",
+      "default": true,
+      "info": "Animate section as it scrolls into view. Respects user's motion preferences."
     }
   ],
   "blocks": [

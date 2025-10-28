@@ -1,3 +1,14 @@
+{%- if section.settings.enable_animations -%}
+  {{ 'scroll-animations.css' | asset_url | stylesheet_tag }}
+  <script src="{{ 'scroll-animations.js' | asset_url }}" defer></script>
+{%- endif -%}
+
+{% assign side_padding = settings.side_space %}
+
+{% if side_padding == blank or side_padding == 0 %}
+  {% assign side_padding = 20 %}
+{% endif %}
+
 <style>
     /* --- COMMENT: The main 'section' element now handles padding --- */
     .prod-diff-section {
@@ -10,7 +21,7 @@
       max-height: none;
       position: relative;
       z-index: var(--z-base);
-      padding: var(--sections-spacing-top) {{ section.settings.padding_right }}px var(--sections-spacing-bottom) {{ section.settings.padding_left }}px;
+      padding: var(--sections-spacing-top) {{ side_padding }}px var(--sections-spacing-bottom) {{ side_padding }}px;
     }
 
 
@@ -231,7 +242,10 @@
   {%- assign mobile_aspect_ratio = image_for_sizing_mobile.aspect_ratio -%}
 {%- endif -%}
 
-<section class="prod-diff-section">
+<section
+  class="prod-diff-section {% if section.settings.enable_animations %}scroll-fade-trigger scroll-fade-up{% endif %}"
+  data-section-id="{{ section.id }}"
+>
   {%- comment -%}
     The container no longer needs a separate style tag for its height.
     It now uses the same variable as the main section.
@@ -634,6 +648,13 @@
       "info": "Applies a subtle opacity effect to the right side image for better visual distinction"
     },
     {
+      "type": "checkbox",
+      "id": "enable_animations",
+      "label": "Enable scroll animations",
+      "default": true,
+      "info": "Animate section as it scrolls into view. Respects user's motion preferences."
+    },
+    {
       "type": "header",
       "content": "Slider Customization"
     },
@@ -694,26 +715,6 @@
       "label": "Handle Height (Mobile)",
       "default": 40,
       "info": "Height of the slider handle on mobile screens"
-    },
-    {
-      "type": "range",
-      "id": "padding_left",
-      "min": 0,
-      "max": 100,
-      "step": 1,
-      "unit": "px",
-      "label": "Left Padding",
-      "default": 0
-    },
-    {
-      "type": "range",
-      "id": "padding_right",
-      "min": 0,
-      "max": 100,
-      "step": 1,
-      "unit": "px",
-      "label": "Right Padding",
-      "default": 0
     },
     {
       "type": "range",
