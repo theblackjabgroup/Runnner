@@ -594,7 +594,7 @@
 
 {% if section.settings.enabled %}
   <section
-    class="featured-blog-section color-{{ section.settings.color_scheme }}"
+    class="featured-blog-section color-{{ section.settings.color_scheme }}{% if section.settings.default_view == 'list' %} list-view{% endif %}"
     aria-labelledby="featured-blog-section-title"
   >
     <header class="featured-blog-section-header">
@@ -603,9 +603,9 @@
         <div class="toggle-slider"></div>
         <button
           id="gridViewBtn"
-          class="active"
+          class="{% if section.settings.default_view == 'grid' %}active{% endif %}"
           role="radio"
-          aria-checked="true"
+          aria-checked="{% if section.settings.default_view == 'grid' %}true{% else %}false{% endif %}"
           type="button"
           style="border-radius: 0px {{ settings.buttons_radius }}px {{ settings.buttons_radius }}px 0px;"
         >
@@ -613,8 +613,9 @@
         </button>
         <button
           id="listViewBtn"
+          class="{% if section.settings.default_view == 'list' %}active{% endif %}"
           role="radio"
-          aria-checked="false"
+          aria-checked="{% if section.settings.default_view == 'list' %}true{% else %}false{% endif %}"
           type="button"
           style=" border-radius: {{ settings.buttons_radius }}px 0px 0px {{ settings.buttons_radius }}px !important; padding-left: var(--space-lg)"
         >
@@ -630,12 +631,13 @@
     {% endif %}
 
     <div
-      class="featured-blog-grid grid-view"
+      class="featured-blog-grid {% if section.settings.default_view == 'list' %}list-view{% else %}grid-view{% endif %}"
       id="archiveContainer"
       aria-live="polite"
       aria-label="Blog articles"
       data-post-limit="3"
       data-total-posts="{% assign blog_handle = section.settings.blog %}{% if blog_handle != blank %}{{ blogs[blog_handle].articles.size }}{% else %}0{% endif %}"
+      data-default-view="{{ section.settings.default_view | default: 'grid' }}"
     >
       <!-- Separator before container (only visible in list view) -->
       <div class="list-separator"></div>
@@ -854,14 +856,27 @@
 {% endif %}
 
 <script>
-  document.addEventListener('DOMContentLoaded', () => {
+  // Initialize the featured blog functionality
+  function initFeaturedBlog() {
     const gridBtn = document.getElementById('gridViewBtn');
     const listBtn = document.getElementById('listViewBtn');
     const sectionEl = document.querySelector('.featured-blog-section');
     const slider = document.querySelector('.toggle-slider');
     const container = document.getElementById('archiveContainer');
+
+    // Return early if elements don't exist
+    if (!gridBtn || !listBtn || !sectionEl || !slider || !container) return;
+
+    // Prevent re-initialization if already initialized
+    if (container.dataset.initialized === 'true') return;
+    container.dataset.initialized = 'true';
+
     const buttons = [gridBtn, listBtn];
     const loadMoreBtn = document.getElementById('featured-blog-load-more');
+
+    // Get the default view from the data attribute
+    const defaultView = container.dataset.defaultView || 'grid';
+    const isDefaultList = defaultView === 'list';
 
     // Featured Blog Fade-Up Animation
     const blogArticles = document.querySelectorAll('.blog-article-fb');
@@ -975,15 +990,25 @@
       });
       container.style.opacity = 0;
       setTimeout(() => {
-        container.classList.toggle('list-view', toList);
-        container.classList.toggle('grid-view', !toList);
-        sectionEl.classList.toggle('list-view', toList);
+        // Explicitly remove and add classes to ensure proper switching
+        if (toList) {
+          container.classList.remove('grid-view');
+          container.classList.add('list-view');
+          sectionEl.classList.add('list-view');
+        } else {
+          container.classList.remove('list-view');
+          container.classList.add('grid-view');
+          sectionEl.classList.remove('list-view');
+        }
         updateSliderPos(toList);
         container.style.opacity = 1;
       }, 300);
     }
 
-    updateSliderPos(false);
+    // Initialize with the default view
+    updateSliderPos(isDefaultList);
+
+    // Add event listeners
     gridBtn.addEventListener('click', () => switchView(false));
     listBtn.addEventListener('click', () => switchView(true));
 
@@ -1003,6 +1028,34 @@
     });
 
     window.addEventListener('resize', () => updateSliderPos(sectionEl.classList.contains('list-view')));
+  }
+
+  // Run on initial page load
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initFeaturedBlog);
+  } else {
+    // DOM is already ready, run immediately
+    initFeaturedBlog();
+  }
+
+  // Run when section is rendered/reloaded in theme editor
+  document.addEventListener('shopify:section:load', function (event) {
+    // Reset initialization flag to allow re-init
+    const container = document.getElementById('archiveContainer');
+    if (container) {
+      container.dataset.initialized = 'false';
+    }
+    // Small delay to ensure DOM is fully updated
+    setTimeout(initFeaturedBlog, 100);
+  });
+
+  document.addEventListener('shopify:section:reorder', function (event) {
+    // Reset initialization flag to allow re-init
+    const container = document.getElementById('archiveContainer');
+    if (container) {
+      container.dataset.initialized = 'false';
+    }
+    setTimeout(initFeaturedBlog, 100);
   });
 </script>
 
@@ -1047,6 +1100,23 @@
       "id": "color_scheme",
       "label": "t:sections.all.colors.label",
       "default": "scheme-1"
+    },
+    {
+      "type": "select",
+      "id": "default_view",
+      "label": "Default View",
+      "info": "Choose the default view that users will see when the page loads",
+      "options": [
+        {
+          "value": "grid",
+          "label": "Grid View"
+        },
+        {
+          "value": "list",
+          "label": "List View"
+        }
+      ],
+      "default": "grid"
     }
   ],
   "presets": [
