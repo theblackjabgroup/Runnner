@@ -1734,15 +1734,10 @@
         if (checkbox && e.target !== checkbox) {
           checkbox.checked = !checkbox.checked;
           
-          // Trigger the form input event for facet-filters-form
-          const form = checkbox.closest('form');
-          if (form) {
-            const inputEvent = new Event('input', { bubbles: true });
-            form.dispatchEvent(inputEvent);
-          }
+          // Manually dispatch change event (which will trigger the change listener below)
+          // The change listener handles both visual state update and form submission
+          checkbox.dispatchEvent(new Event('change', { bubbles: true }));
         }
-
-        this.classList.toggle('active', checkbox.checked);
       });
     });
 
@@ -1754,11 +1749,17 @@
       }
     });
 
-    // Handle mobile filter checkboxes change events
+    // Handle mobile filter checkboxes change events (triggered by user or programmatic change)
     const mobileCheckboxes = document.querySelectorAll('.mobile-filter-option input[type="checkbox"]');
     mobileCheckboxes.forEach((checkbox) => {
       checkbox.addEventListener('change', function () {
-        // Trigger the form input event
+        // Update visual state
+        const option = this.closest('.mobile-filter-option');
+        if (option) {
+          option.classList.toggle('active', this.checked);
+        }
+        
+        // Trigger the form input event (single source of truth for filter updates)
         const form = this.closest('form');
         if (form) {
           const inputEvent = new Event('input', { bubbles: true });
