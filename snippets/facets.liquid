@@ -29,7 +29,6 @@
 -%}
 
 <div
-
   class="facets-container-bg facets-container  md:border-b h-[40px]   {% if filter_type == 'drawer' %} facets-container-drawer{% endif %}{% if settings.animations_reveal_on_scroll %} scroll-trigger animate--fade-in{% endif %} facets-container-height"
 >
   {% if filter_type == 'horizontal' %}
@@ -1760,12 +1759,19 @@
           option.classList.toggle('active', this.checked);
         }
         
-        // Trigger the form input event (single source of truth for filter updates)
-        const form = this.closest('form');
-        if (form) {
-          const inputEvent = new Event('input', { bubbles: true });
-          form.dispatchEvent(inputEvent);
-        }
+        // Apply filters with delay to allow for multiple selections
+        clearTimeout(window.mobileFilterTimeout);
+        window.mobileFilterTimeout = setTimeout(() => {
+          if (typeof window.applyFiltersAjax === 'function') {
+            window.applyFiltersAjax();
+          } else {
+            // Fallback to form submission
+            const form = this.closest('form');
+            if (form) {
+              form.submit();
+            }
+          }
+        }, 300);
       });
     });
   }
