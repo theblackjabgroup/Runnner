@@ -5,7 +5,50 @@
 <style>
   :root {
     --menu-drawer-speed: {{ section.settings.menu_drawer_animation_speed | default: 0.6 }}s !important;
+    {% if section.settings.enable_menu_hover_color %}
+      --menu-hover-color: {{ section.settings.menu_hover_color | default: '#000000' }};
+    {% endif %}
   }
+
+  {% if section.settings.enable_menu_hover_color %}
+    /* Menu item hover color effect */
+    .menu-items .dropdown-group a.dropdown-link,
+    .menu-items .dropdown-group > a {
+      transition: color 0.3s ease;
+    }
+
+    /* Arrows/icons transition - only for dropdown arrows */
+    .menu-items .dropdown-group > a svg,
+    .menu-items .dropdown-group > a svg path,
+    .menu-items .dropdown-group > a img {
+      transition: color 0.3s ease, stroke 0.3s ease, fill 0.3s ease, filter 0.3s ease;
+    }
+
+    /* Hover state for menu items with dropdowns */
+    .menu-items .dropdown-group:hover a.dropdown-link,
+    .menu-items .dropdown-group a.dropdown-link:hover {
+      color: var(--menu-hover-color) !important;
+    }
+
+    /* Hover state for regular menu items (without dropdowns) */
+    .menu-items .dropdown-group > a:hover {
+      color: var(--menu-hover-color) !important;
+    }
+
+    /* Apply hover color to dropdown icons/arrows - only direct children of menu links */
+    .menu-items .dropdown-group:hover > a svg,
+    .menu-items .dropdown-group:hover > a svg path,
+    .menu-items .dropdown-group:hover > a .header-text-color {
+      color: var(--menu-hover-color) !important;
+      stroke: var(--menu-hover-color) !important;
+      fill: var(--menu-hover-color) !important;
+    }
+
+    /* For image-based arrows using filter - only direct children of menu links */
+    .menu-items .dropdown-group:hover > a img {
+      filter: brightness(0) saturate(100%) invert(0);
+    }
+  {% endif %}
 </style>
 
 <script src="{{ 'localization-form.js' | asset_url }}" defer="defer"></script>
@@ -1112,6 +1155,28 @@
       });
     }
 
+    /* -- Global function to check header height and toggle bottom bar -- */
+    window.checkHeaderHeight = function() {
+      const headerEl = document.querySelector('[data-header-sticky]');
+      const bottomBarIndicator = document.getElementById('bottom-bar-indicator');
+      
+      if (headerEl && bottomBarIndicator) {
+        const headerHeight = headerEl.offsetHeight;
+        
+        if (headerHeight > 56) {
+          // Hide bottom bar animation
+          window.bottomBarEnabled = false;
+          bottomBarIndicator.style.opacity = '0';
+          bottomBarIndicator.style.pointerEvents = 'none';
+        } else {
+          // Show bottom bar animation
+          window.bottomBarEnabled = true;
+          bottomBarIndicator.style.opacity = '1';
+          bottomBarIndicator.style.pointerEvents = 'auto';
+        }
+      }
+    };
+
     /* -- sub menu logic -- */
     document.querySelectorAll('.dropdown-group').forEach(group => {
       const trigger = group.querySelector('a');
@@ -1188,17 +1253,27 @@
     const bottomBarIndicator = document.getElementById('bottom-bar-indicator');
     const menuItems = document.querySelectorAll('.menu-items ul > li.dropdown-group');
     let indicatorTimeout = null;
+    window.bottomBarEnabled = true;
 
     if (bottomBarIndicator) {
       bottomBarIndicator.style.width = '100%';
       bottomBarIndicator.style.transform = 'translateX(0)';
       bottomBarIndicator.style.opacity = '1';
+      bottomBarIndicator.style.transition = 'opacity 0.3s ease, transform var(--duration-moderate) var(--ease-standard), width var(--duration-moderate) var(--ease-standard)';
+      
+      // Initial check
+      window.checkHeaderHeight();
+      
+      // Monitor header height changes
+      window.addEventListener('resize', window.checkHeaderHeight);
+      window.addEventListener('scroll', window.checkHeaderHeight);
     }
 
     menuItems.forEach((item) => {
       const link = item.querySelector('a');
 
       item.addEventListener('mouseenter', () => {
+        if (!window.bottomBarEnabled) return; // Don't animate if disabled
         if (indicatorTimeout) clearTimeout(indicatorTimeout);
         const rect = link.getBoundingClientRect();
         const containerRect = item.closest('.menu-items').getBoundingClientRect();
@@ -1215,6 +1290,7 @@
       });
 
       item.addEventListener('mouseleave', (e) => {
+        if (!window.bottomBarEnabled) return; // Don't animate if disabled
         const related = e.relatedTarget;
         if (!item.contains(related)) {
           indicatorTimeout = setTimeout(() => {
@@ -1410,6 +1486,11 @@
         const headerHeight = getComputedStyle(root).getPropertyValue('--header-height');
 
         initialHeaderTop = headerEl.offsetTop;
+        
+        // Check bottom bar visibility when header height changes
+        if (typeof window.checkHeaderHeight === 'function') {
+          window.checkHeaderHeight();
+        }
       }
       };
 
@@ -1769,6 +1850,24 @@
       "type": "image_picker",
       "id": "dropdown_icon",
       "label": "Dropdown Icon"
+    },
+    {
+      "type": "header",
+      "content": "Menu Hover Effects"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_menu_hover_color",
+      "label": "Enable menu item hover color change",
+      "default": false,
+      "info": "When enabled, menu items will change color on hover"
+    },
+    {
+      "type": "color",
+      "id": "menu_hover_color",
+      "label": "Menu hover color",
+      "default": "#000000",
+      "info": "Color of menu items when hovered"
     },
     {
       "type": "checkbox",
