@@ -70,6 +70,12 @@
 }
 {% endschema %}
 
+{% assign side_padding = settings.side_space %}
+
+{% if side_padding == blank or side_padding == 0 %}
+  {% assign side_padding = 20 %}
+{% endif %}
+
 {{ 'sub-footer.css' | asset_url | stylesheet_tag }}
 <style>
   .site-credit-link:hover {
@@ -151,12 +157,14 @@
   .custom-footer-style {
     padding-top: var(--sections-spacing-top);
     padding-bottom: var(--sections-spacing-bottom);
+    padding-left: {{ side_padding }}px;
+    padding-right: {{ side_padding }}px;
     line-height: normal;
   }
 </style>
 
-<div class="w-full p-4 flex justify-between items-center bg-black footer-container color-{{ section.settings.color_scheme }} custom-footer-style">
-  <div class="flex gap-8 footer-links" style="margin-left: var(--space-lg);">
+<div class="w-full flex justify-between items-center footer-container color-{{ section.settings.color_scheme }} custom-footer-style">
+  <div class="flex gap-8 footer-links">
     {% if section.settings.link1_text != blank %}
       <a
         href="{{ section.settings.link1_url | default: '#' }}"
