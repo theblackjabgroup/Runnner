@@ -55,7 +55,7 @@
     transition: background 0.2s;
   }
   .slider-arrow:hover {
-    background: #e5e5e5;
+    background: {{ settings.product_card_arrow_hover_bg | default: 'rgba(68, 68, 68, 0.15)' }};
     box-shadow: 0 2px 8px rgba(68, 68, 68, 0.1);
   }
   .slider-arrow svg {
@@ -422,7 +422,7 @@
   .low-stock-tag {
     position: absolute;
     top: 10px;
-    left: 10px;
+    left: 0px;
     z-index: 10;
     padding: 0px 6px;
     border-radius: var(--sold-out-badge-radius, 5px);
@@ -1170,15 +1170,15 @@
 
   .card-product-price .price__container {
     display: flex;
-    align-items: center;
-    gap: 8px;
+    align-items: baseline;
+    gap: 0;
   }
 
   .card-product-price .price__regular,
   .card-product-price .price__sale {
     display: flex;
-    align-items: center;
-    gap: 8px;
+    align-items: baseline;
+    gap: 0;
   }
 
   .card-product-price .price-item {
@@ -1193,14 +1193,9 @@
     color: var(--text);
   }
 
-  /* Sale price styling - swap order: sale price first, then strikethrough original */
+  /* Sale price styling - strikethrough original, then separator, then sale price */
   .card-product-price .price__sale {
-    flex-direction: row-reverse;
-  }
-
-  .card-product-price .price__sale .price-item--sale {
-    color: var(--sale_badge);
-    order: 2;
+    flex-direction: row;
   }
 
   .card-product-price .price__sale .price-item--regular {
@@ -1211,7 +1206,15 @@
 
   .card-product-price .price-separator {
     color: var(--text);
-    order: 1.5;
+    order: 2;
+    margin: 0 8px;
+    font-size: var(--t-b-3-size);
+    display: inline-block !important;
+  }
+
+  .card-product-price .price__sale .price-item--sale {
+    color: var(--sale_badge);
+    order: 3;
   }
 
   /* Hide regular price section when on sale */
@@ -1256,10 +1259,37 @@
 
   /* Mobile Responsive Styles for card-product-price */
   @media screen and (max-width: 749px) {
+    .card-product-price {
+      font-size: 14px !important;
+    }
+
     .card-product-price .price-item {
-      font-size: var(--tm-b-3-size);
-      font-weight: var(--tm-b-3-weight);
-      line-height: var(--tm-b-3-line-height);
+      font-size: 14px !important;
+      font-weight: var(--tm-b-3-weight) !important;
+      line-height: 1.2 !important;
+    }
+
+    .card-product-price .price-separator {
+      font-size: 14px !important;
+      margin: 0 4px !important;
+    }
+  }
+
+  /* Extra small mobile screens - even smaller for 2-column grid */
+  @media screen and (max-width: 500px) {
+    .card-product-price {
+      font-size: 12px !important;
+    }
+
+    .card-product-price .price-item {
+      font-size: 12px !important;
+      font-weight: 500 !important;
+      line-height: 1.1 !important;
+    }
+
+    .card-product-price .price-separator {
+      font-size: 12px !important;
+      margin: 0 3px !important;
     }
   }
 </style>
