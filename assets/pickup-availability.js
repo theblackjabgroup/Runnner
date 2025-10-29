@@ -107,7 +107,6 @@ if (!customElements.get('pickup-availability')) {
             }
           })
           .catch((error) => {
-            console.error('Error fetching pickup availability:', error);
             // Revert variant ID on error
             this.dataset.variantId = previousVariantId;
             // Keep existing content on error - don't clear

@@ -74,9 +74,23 @@ class CustomerAddresses {
     this._toggleExpanded(currentTarget.closest(selectors.addressContainer).querySelector(`[${attributes.expanded}]`));
   };
 
-  _handleDeleteButtonClick = ({ currentTarget }) => {
-    // eslint-disable-next-line no-alert
-    if (confirm(currentTarget.getAttribute(attributes.confirmMessage))) {
+  _handleDeleteButtonClick = async ({ currentTarget }) => {
+    const confirmMessage =
+      currentTarget.getAttribute(attributes.confirmMessage) || 'Are you sure you want to delete this address?';
+
+    // Use custom confirm dialog if available, fallback to native confirm
+    let confirmed = false;
+    if (typeof window.showConfirm === 'function') {
+      confirmed = await window.showConfirm(confirmMessage, {
+        confirmText: 'Delete',
+        cancelText: 'Cancel',
+      });
+    } else {
+      // Fallback to native confirm (should not happen in production)
+      confirmed = confirm(confirmMessage);
+    }
+
+    if (confirmed) {
       Shopify.postLink(currentTarget.dataset.target, {
         parameters: { _method: 'delete' },
       });

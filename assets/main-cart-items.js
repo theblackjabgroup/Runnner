@@ -465,7 +465,9 @@ function changeItemColor(colorPicker) {
       window.location.reload();
     })
     .catch((error) => {
-      alert('Unable to change color. Please try again.');
+      if (typeof window.showNotification === 'function') {
+        window.showNotification('Unable to change color. Please try again.', 'error', 4000);
+      }
     });
 }
 
@@ -764,5 +766,4 @@ document.addEventListener('DOMContentLoaded', function () {
       }
     });
   });
-
 });
