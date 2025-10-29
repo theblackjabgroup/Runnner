@@ -1156,23 +1156,31 @@
     }
 
     /* -- Global function to check header height and toggle bottom bar -- */
+    let lastBottomBarState = null; // Track state to avoid unnecessary DOM updates
+    
     window.checkHeaderHeight = function() {
       const headerEl = document.querySelector('[data-header-sticky]');
       const bottomBarIndicator = document.getElementById('bottom-bar-indicator');
       
       if (headerEl && bottomBarIndicator) {
         const headerHeight = headerEl.offsetHeight;
+        const shouldHide = headerHeight > 56;
         
-        if (headerHeight > 56) {
-          // Hide bottom bar animation
-          window.bottomBarEnabled = false;
-          bottomBarIndicator.style.opacity = '0';
-          bottomBarIndicator.style.pointerEvents = 'none';
-        } else {
-          // Show bottom bar animation
-          window.bottomBarEnabled = true;
-          bottomBarIndicator.style.opacity = '1';
-          bottomBarIndicator.style.pointerEvents = 'auto';
+        // Only update if state changed to minimize DOM manipulation
+        if (lastBottomBarState !== shouldHide) {
+          lastBottomBarState = shouldHide;
+          
+          if (shouldHide) {
+            // Hide bottom bar animation
+            window.bottomBarEnabled = false;
+            bottomBarIndicator.style.opacity = '0';
+            bottomBarIndicator.style.pointerEvents = 'none';
+          } else {
+            // Show bottom bar animation
+            window.bottomBarEnabled = true;
+            bottomBarIndicator.style.opacity = '1';
+            bottomBarIndicator.style.pointerEvents = 'auto';
+          }
         }
       }
     };
@@ -1263,10 +1271,6 @@
       
       // Initial check
       window.checkHeaderHeight();
-      
-      // Monitor header height changes
-      window.addEventListener('resize', window.checkHeaderHeight);
-      window.addEventListener('scroll', window.checkHeaderHeight);
     }
 
     menuItems.forEach((item) => {
@@ -1513,6 +1517,11 @@
         }
 
         lastScroll = currentScroll;
+        
+        // Check bottom bar visibility on scroll
+        if (typeof window.checkHeaderHeight === 'function') {
+          window.checkHeaderHeight();
+        }
       };
 
       setHeaderHeight();
@@ -1783,6 +1792,13 @@
       headerSticky: () => {
         if (typeof setHeaderHeight !== 'undefined') {
           setHeaderHeight();
+        }
+      },
+      
+      // Bottom bar visibility handler
+      bottomBar: () => {
+        if (typeof window.checkHeaderHeight === 'function') {
+          window.checkHeaderHeight();
         }
       }
     };
