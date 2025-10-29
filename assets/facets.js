@@ -446,15 +446,10 @@ class FacetFiltersForm extends HTMLElement {
   }
 
   onSubmitHandler(event) {
-    // Preserve current filter state before submitting
-    this.preserveFilterState();
-
-    // Let the form submit naturally to trigger a page reload
-    // This will fix the animation issues
-    const form = event.target.closest('form');
-    if (form) {
-      form.submit();
-    }
+    event.preventDefault();
+    const formData = new FormData(event.target.closest('form'));
+    const searchParams = new URLSearchParams(formData).toString();
+    this.onSubmitForm(searchParams, event);
   }
 
   preserveFilterState() {

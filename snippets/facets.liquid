@@ -29,7 +29,7 @@
 -%}
 
 <div
-  class="facets-container-bg facets-container  md:border-b h-[40px]   {% if filter_type == 'drawer' %} facets-container-drawer{% endif %}{% if settings.animations_reveal_on_scroll %} scroll-fade-trigger scroll-fade-up{% endif %} facets-container-height"
+  class="facets-container-bg facets-container  md:border-b h-[40px]   {% if filter_type == 'drawer' %} facets-container-drawer{% endif %}{% if settings.animations_reveal_on_scroll %} scroll-trigger animate--fade-in{% endif %} facets-container-height"
 >
   {% if filter_type == 'horizontal' %}
     <div class="w-full md:!flex items-center hidden">
@@ -1005,6 +1005,31 @@
       form.submit();
     }
   }
+
+  // Global AJAX filter application function
+  window.applyFiltersAjax = function () {
+    // Get the active form (desktop or mobile)
+    const desktopForm = document.getElementById('FacetFiltersForm');
+    const mobileForm = document.getElementById('FacetFiltersFormMobile');
+    const activeForm = mobileForm && mobileForm.closest('.mobile-filter-overlay.active') ? mobileForm : desktopForm;
+
+    if (!activeForm) {
+      console.error('No filter form found');
+      return;
+    }
+
+    // Create search params from form data
+    const formData = new FormData(activeForm);
+    const searchParams = new URLSearchParams(formData).toString();
+
+    // Use FacetFiltersForm to render the page with new filters
+    if (typeof FacetFiltersForm !== 'undefined' && typeof FacetFiltersForm.renderPage === 'function') {
+      FacetFiltersForm.renderPage(searchParams, null);
+    } else {
+      // Fallback to form submission
+      activeForm.submit();
+    }
+  };
 </script>
 
 <style>
@@ -1646,6 +1671,13 @@
         const footerHeight = footer.offsetHeight;
         document.documentElement.style.setProperty('--mobile-footer-height', `${footerHeight}px`);
       }
+
+      // Re-attach mobile filter listeners when drawer opens
+      setTimeout(() => {
+        if (typeof attachMobileFilterListeners === 'function') {
+          attachMobileFilterListeners();
+        }
+      }, 100);
     }
   }
 
@@ -1680,6 +1712,62 @@
     });
   });
 
+  // Function to attach mobile filter listeners (can be called multiple times)
+  function attachMobileFilterListeners() {
+    // Handle checkbox changes for mobile filters
+    const filterOptions = document.querySelectorAll('.mobile-filter-option');
+    filterOptions.forEach((option) => {
+      // Remove existing listener to avoid duplicates
+      const clonedOption = option.cloneNode(true);
+      option.parentNode.replaceChild(clonedOption, option);
+    });
+
+    // Reselect after cloning
+    document.querySelectorAll('.mobile-filter-option').forEach((option) => {
+      option.addEventListener('click', function (e) {
+        if (this.classList.contains('disabled')) {
+          e.preventDefault();
+          return;
+        }
+
+        const checkbox = this.querySelector('input[type="checkbox"]');
+        if (checkbox && e.target !== checkbox) {
+          checkbox.checked = !checkbox.checked;
+          
+          // Trigger the form input event for facet-filters-form
+          const form = checkbox.closest('form');
+          if (form) {
+            const inputEvent = new Event('input', { bubbles: true });
+            form.dispatchEvent(inputEvent);
+          }
+        }
+
+        this.classList.toggle('active', checkbox.checked);
+      });
+    });
+
+    // Update active state based on initial checked state
+    document.querySelectorAll('.mobile-filter-option').forEach((option) => {
+      const checkbox = option.querySelector('input[type="checkbox"]');
+      if (checkbox && checkbox.checked) {
+        option.classList.add('active');
+      }
+    });
+
+    // Handle mobile filter checkboxes change events
+    const mobileCheckboxes = document.querySelectorAll('.mobile-filter-option input[type="checkbox"]');
+    mobileCheckboxes.forEach((checkbox) => {
+      checkbox.addEventListener('change', function () {
+        // Trigger the form input event
+        const form = this.closest('form');
+        if (form) {
+          const inputEvent = new Event('input', { bubbles: true });
+          form.dispatchEvent(inputEvent);
+        }
+      });
+    });
+  }
+
   // Close on overlay click
   document.addEventListener('DOMContentLoaded', function () {
     const overlay = document.getElementById('mobile-filter-overlay');
@@ -1691,32 +1779,8 @@
       });
     }
 
-    // Handle checkbox changes for mobile filters
-    const filterOptions = document.querySelectorAll('.mobile-filter-option');
-    filterOptions.forEach((option) => {
-      option.addEventListener('click', function (e) {
-        if (this.classList.contains('disabled')) {
-          e.preventDefault();
-          return;
-        }
-
-        const checkbox = this.querySelector('input[type="checkbox"]');
-        if (checkbox && e.target !== checkbox) {
-          checkbox.checked = !checkbox.checked;
-          checkbox.dispatchEvent(new Event('change', { bubbles: true }));
-        }
-
-        this.classList.toggle('active', checkbox.checked);
-      });
-    });
-
-    // Update active state based on initial checked state
-    filterOptions.forEach((option) => {
-      const checkbox = option.querySelector('input[type="checkbox"]');
-      if (checkbox && checkbox.checked) {
-        option.classList.add('active');
-      }
-    });
+    // Initialize mobile filter listeners
+    attachMobileFilterListeners();
 
     // Handle regular filter checkboxes (desktop) with AJAX
     const regularCheckboxes = document.querySelectorAll('.facet-checkbox input[type="checkbox"]');
@@ -1725,20 +1789,6 @@
         // Add a small delay to allow for multiple checkbox changes
         clearTimeout(window.filterTimeout);
         window.filterTimeout = setTimeout(() => {
-          if (typeof window.applyFiltersAjax === 'function') {
-            window.applyFiltersAjax();
-          }
-        }, 300);
-      });
-    });
-
-    // Handle mobile filter checkboxes with AJAX
-    const mobileCheckboxes = document.querySelectorAll('.mobile-filter-option input[type="checkbox"]');
-    mobileCheckboxes.forEach((checkbox) => {
-      checkbox.addEventListener('change', function () {
-        // Add a small delay to allow for multiple checkbox changes
-        clearTimeout(window.mobileFilterTimeout);
-        window.mobileFilterTimeout = setTimeout(() => {
           if (typeof window.applyFiltersAjax === 'function') {
             window.applyFiltersAjax();
           }
