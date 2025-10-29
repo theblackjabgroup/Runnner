@@ -1584,25 +1584,26 @@
       initSearchPosition();
 
       function toggleSearch(show) {
+        // Always update positioning first (before early return) to handle dynamic header height changes
+        const headerEl2 = document.querySelector('[data-header-sticky]');
+        const announcementBar = document.getElementsByClassName("announcement-bar")[0];
+        if (headerEl2 && announcementBar) {
+          const headerHeight = headerEl2.offsetHeight;
+          const announcementHeight = announcementBar.offsetHeight;
+          const totalHeight = headerHeight + announcementHeight;
+          
+          // Position search container and overlay directly below header
+          const searchTop = `${totalHeight}px`;
+          searchContainer.style.top = searchTop;
+          searchOverlay.style.top = searchTop;
+          searchOverlay.style.height = `calc(100vh - ${totalHeight}px)`;
+        }
+
+        // Early return if state hasn't changed
         if (show === isSearchOpen) return;
 
         isSearchOpen = show;
-        searchToggle.setAttribute('aria-expanded', show);
-
-        // Dynamically calculate and set search container position
-        const headerEl2 = document.querySelector('[data-header-sticky]');
-        const announcementBar = document.getElementsByClassName("announcement-bar")[0];
-      if (headerEl2 && announcementBar) {
-        const headerHeight = headerEl2.offsetHeight;
-        const announcementHeight = announcementBar.offsetHeight;
-        const totalHeight = headerHeight + announcementHeight;
-        
-        // Position search container and overlay directly below header
-        const searchTop = `${totalHeight}px`;
-        searchContainer.style.top = searchTop;
-        searchOverlay.style.top = searchTop;
-        searchOverlay.style.height = `calc(100vh - ${totalHeight}px)`;
-      } 
+        searchToggle.setAttribute('aria-expanded', show); 
 
         // Handle transparent header background
         if (isHeaderTransparent && isHomePage) {
