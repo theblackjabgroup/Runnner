@@ -1569,20 +1569,41 @@
       searchContainer.style.transform = 'translate3d(0, calc(var(--header-height) - 1px), 0)';
       searchOverlay.classList.add('pointer-events-none');
 
+      // Set initial overlay position
+      const initSearchPosition = () => {
+        const headerEl = document.querySelector('[data-header-sticky]');
+        const announcementBar = document.getElementsByClassName("announcement-bar")[0];
+        if (headerEl && announcementBar) {
+          const headerHeight = headerEl.offsetHeight;
+          const announcementHeight = announcementBar.offsetHeight;
+          const totalHeight = headerHeight + announcementHeight;
+          searchOverlay.style.top = `${totalHeight}px`;
+          searchOverlay.style.height = `calc(100vh - ${totalHeight}px)`;
+        }
+      };
+      initSearchPosition();
+
       function toggleSearch(show) {
+        // Always update positioning first (before early return) to handle dynamic header height changes
+        const headerEl2 = document.querySelector('[data-header-sticky]');
+        const announcementBar = document.getElementsByClassName("announcement-bar")[0];
+        if (headerEl2 && announcementBar) {
+          const headerHeight = headerEl2.offsetHeight;
+          const announcementHeight = announcementBar.offsetHeight;
+          const totalHeight = headerHeight + announcementHeight;
+          
+          // Position search container and overlay directly below header
+          const searchTop = `${totalHeight}px`;
+          searchContainer.style.top = searchTop;
+          searchOverlay.style.top = searchTop;
+          searchOverlay.style.height = `calc(100vh - ${totalHeight}px)`;
+        }
+
+        // Early return if state hasn't changed
         if (show === isSearchOpen) return;
 
         isSearchOpen = show;
-        searchToggle.setAttribute('aria-expanded', show);
-
-        const headerEl2 = document.querySelector('[data-header-sticky]');
-        const announcementBar = document.getElementsByClassName("announcement-bar")[0];
-      if (headerEl2 && announcementBar) {
-        const height = headerEl2.offsetHeight;
-        const h2 = announcementBar.offsetHeight;
-        const finalHeight = height + h2;
-        searchContainer.style.top = `${finalHeight}px`;
-      } 
+        searchToggle.setAttribute('aria-expanded', show); 
 
         // Handle transparent header background
         if (isHeaderTransparent && isHomePage) {
@@ -1594,6 +1615,9 @@
         }
 
         if (show) {
+          // Prevent body scroll when search is open
+          document.body.style.overflow = 'hidden';
+          
           searchContainer.classList.remove('hidden');
           searchOverlay.style.opacity = '0';
           searchOverlay.classList.remove('pointer-events-none');
@@ -1605,8 +1629,11 @@
             setTimeout(() => searchInput.focus(), 400);
           });
         } else {
+          // Re-enable body scroll when search is closed
+          document.body.style.overflow = '';
+          
           searchContainer.style.opacity = '0';
-          searchContainer.style.transform = 'translateY(-20px)';
+          searchContainer.style.transform = 'translate3d(0, 0, 0)';
 
           searchOverlay.style.opacity = '0';
           searchOverlay.classList.add('pointer-events-none');
