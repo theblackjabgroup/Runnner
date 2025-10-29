@@ -47,12 +47,6 @@ if (typeof window.ProductRecommendations === 'undefined') {
         return;
       }
 
-      // Debug logging (can be removed in production)
-      if (window.Shopify && window.Shopify.designMode) {
-        console.log('Fetching recommendations for product:', productId);
-        console.log('API URL:', url);
-      }
-
       fetch(url)
         .then((response) => {
           if (!response.ok) {
@@ -64,7 +58,6 @@ if (typeof window.ProductRecommendations === 'undefined') {
           this.handleResponse(text);
         })
         .catch((error) => {
-          console.error('Error loading product recommendations:', error);
           this.handleError(error);
         });
     }

@@ -110,8 +110,11 @@ class StickyATCBar {
 
   setupFooterObserver() {
     // Find the footer
-    const footer = document.querySelector('footer') || document.querySelector('.footer-container') || document.querySelector('[role="contentinfo"]');
-    
+    const footer =
+      document.querySelector('footer') ||
+      document.querySelector('.footer-container') ||
+      document.querySelector('[role="contentinfo"]');
+
     if (!footer) return;
 
     // Watch when footer comes into view
@@ -254,7 +257,6 @@ class StickyATCBar {
         this.handleAddToCartSuccess(data);
       })
       .catch((error) => {
-        console.error('Error adding to cart:', error);
         this.handleAddToCartError(error);
       })
       .finally(() => {

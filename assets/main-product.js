@@ -423,7 +423,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function addToCart(variantId, quantity) {
     if (!variantId) {
-      alert('Please select a valid product variant');
+      if (typeof window.showNotification === 'function') {
+        window.showNotification('Please select a valid product variant', 'warning', 4000);
+      }
       return;
     }
 

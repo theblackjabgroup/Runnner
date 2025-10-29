@@ -501,7 +501,7 @@ class FacetFiltersForm extends HTMLElement {
       // Clear the preserved state after restoring
       sessionStorage.removeItem('preservedFilters');
     } catch (error) {
-      console.warn('Failed to restore filter state:', error);
+      // Silent fail - filter state restoration is not critical
     }
   }
 
