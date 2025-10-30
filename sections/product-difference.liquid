@@ -722,15 +722,16 @@
         window.addEventListener('touchend', () => handle.classList.remove('dragging'));
 
         // Add hover animation for chevrons when slider handle area is hovered
-        // Listen on slider but only trigger when near center (handle position)
+        // Listen on slider and detect when near handle's actual position
         slider.addEventListener('mousemove', (e) => {
           const rect = slider.getBoundingClientRect();
-          const x = e.clientX - rect.left;
-          const centerX = rect.width / 2;
-          const distanceFromCenter = Math.abs(x - centerX);
+          const mouseX = e.clientX - rect.left;
+          const sliderValue = parseFloat(slider.value);
+          const handleX = (rect.width * sliderValue) / 100; // Handle's actual position based on slider value
+          const distanceFromHandle = Math.abs(mouseX - handleX);
           
-          // If within 100px of center (handle area), show hover effect
-          if (distanceFromCenter < 100 && handle) {
+          // If within 100px of handle's current position, show hover effect
+          if (distanceFromHandle < 100 && handle) {
             handle.classList.add('handle-hovered');
           } else if (handle) {
             handle.classList.remove('handle-hovered');
