@@ -353,26 +353,30 @@ function initializeCartDrawer() {
   // CART DRAWER CLOSE BUTTONS (CSP-compliant event listeners)
   // ===================================================================
 
-  // Add event listeners for close buttons
-  const closeButtons = document.querySelectorAll('.drawer__close, .drawer__close2');
-  closeButtons.forEach(function (button) {
-    button.addEventListener('click', function () {
-      const cartDrawer = this.closest('cart-drawer');
+  // Use event delegation to handle close buttons
+  // This ensures the listeners work even when cart content is dynamically updated
+  document.addEventListener('click', function (e) {
+    const closeButton = e.target.closest('.drawer__close, .drawer__close2');
+    if (closeButton) {
+      const cartDrawer = closeButton.closest('cart-drawer');
       if (cartDrawer && typeof cartDrawer.close === 'function') {
         cartDrawer.close();
       }
-    });
+    }
+  });
 
-    // Add keyboard accessibility
-    button.addEventListener('keydown', function (e) {
-      if (e.key === 'Enter' || e.key === ' ') {
+  // Add keyboard accessibility for close buttons using event delegation
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Enter' || e.key === ' ') {
+      const closeButton = e.target.closest('.drawer__close, .drawer__close2');
+      if (closeButton) {
         e.preventDefault();
-        const cartDrawer = this.closest('cart-drawer');
+        const cartDrawer = closeButton.closest('cart-drawer');
         if (cartDrawer && typeof cartDrawer.close === 'function') {
           cartDrawer.close();
         }
       }
-    });
+    }
   });
 
   // Add event listeners for size and color changes
