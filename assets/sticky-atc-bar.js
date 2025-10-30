@@ -62,7 +62,10 @@ class StickyATCBar {
   setupElements() {
     // Get sticky bar elements
     this.stickyForm = this.bar.querySelector('.sticky-atc-bar__form');
-    this.stickyButton = this.bar.querySelector('.sticky-atc-bar__button');
+    // Button might be rendered by secondary-button snippet, so use multiple selectors
+    this.stickyButton = this.bar.querySelector('.sticky-atc-bar__button') || 
+                        this.bar.querySelector('.sticky-atc-bar__form button[type="submit"]') ||
+                        this.bar.querySelector('.sticky-atc-bar__form button');
     this.stickyVariantSelect = this.bar.querySelector('.sticky-atc-bar__variant-select');
     this.stickyQuantityInput = this.bar.querySelector('.sticky-atc-bar__quantity-input');
     this.stickyQuantityButtons = this.bar.querySelectorAll('.sticky-atc-bar__quantity-button');
@@ -180,7 +183,16 @@ class StickyATCBar {
     // Variant selection
     if (this.stickyVariantSelect) {
       this.stickyVariantSelect.addEventListener('change', (e) => {
-        this.syncVariantToMain(e.target.value);
+        const variantId = e.target.value;
+        
+        // Update the hidden input in the form
+        const hiddenVariantInput = this.stickyForm.querySelector('input[name="id"]');
+        if (hiddenVariantInput) {
+          hiddenVariantInput.value = variantId;
+        }
+        
+        // Sync with main form
+        this.syncVariantToMain(variantId);
       });
     }
 
@@ -243,8 +255,10 @@ class StickyATCBar {
     const formData = new FormData(this.stickyForm);
 
     // Show loading state
-    this.stickyButton.classList.add('sticky-atc-bar__button--loading');
-    this.stickyButton.disabled = true;
+    if (this.stickyButton) {
+      this.stickyButton.classList.add('sticky-atc-bar__button--loading');
+      this.stickyButton.disabled = true;
+    }
 
     // Add to cart via Shopify API
     fetch('/cart/add.js', {
@@ -261,8 +275,10 @@ class StickyATCBar {
       })
       .finally(() => {
         // Remove loading state
-        this.stickyButton.classList.remove('sticky-atc-bar__button--loading');
-        this.stickyButton.disabled = false;
+        if (this.stickyButton) {
+          this.stickyButton.classList.remove('sticky-atc-bar__button--loading');
+          this.stickyButton.disabled = false;
+        }
       });
   }
 
@@ -273,14 +289,16 @@ class StickyATCBar {
     // Update cart count
     this.updateCartCount();
 
-    // Show notification (optional)
-    this.showNotification('Added to cart!');
-
-    // Open cart drawer if available
-    const cartDrawer = document.querySelector('cart-drawer');
-    if (cartDrawer && typeof cartDrawer.open === 'function') {
-      cartDrawer.open();
-    }
+    // Refresh cart drawer content then open it
+    this.refreshCartDrawer()
+      .then(() => {
+        this.openCartDrawer();
+      })
+      .catch((error) => {
+        // Fallback: just update count and open
+        this.updateCartCount();
+        this.openCartDrawer();
+      });
   }
 
   handleAddToCartError(error) {
@@ -299,6 +317,65 @@ class StickyATCBar {
           count.textContent = cart.item_count;
         });
       });
+  }
+
+  refreshCartDrawer() {
+    // Fetch updated cart drawer content
+    return fetch(`${window.location.pathname}?section_id=cart-drawer`)
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return response.text();
+      })
+      .then((responseText) => {
+        const html = new DOMParser().parseFromString(responseText, 'text/html');
+
+        // Update cart drawer content
+        const cartDrawerElement = document.querySelector('cart-drawer');
+        const newCartDrawerContent = html.querySelector('cart-drawer');
+
+        if (cartDrawerElement && newCartDrawerContent) {
+          // Store the current state
+          const isActive = cartDrawerElement.classList.contains('active');
+          const isAnimating = cartDrawerElement.classList.contains('animate');
+
+          // Replace the content
+          cartDrawerElement.innerHTML = newCartDrawerContent.innerHTML;
+
+          // Restore necessary classes
+          if (isActive) cartDrawerElement.classList.add('active');
+          if (isAnimating) cartDrawerElement.classList.add('animate');
+
+          // Remove empty state if it has items
+          if (!newCartDrawerContent.classList.contains('is-empty')) {
+            cartDrawerElement.classList.remove('is-empty');
+          } else {
+            cartDrawerElement.classList.add('is-empty');
+          }
+        }
+
+        // Also update cart icon bubble
+        const cartIconBubble = document.querySelector('#cart-icon-bubble');
+        const newCartIconBubble = html.querySelector('#cart-icon-bubble');
+
+        if (cartIconBubble && newCartIconBubble) {
+          cartIconBubble.innerHTML = newCartIconBubble.innerHTML;
+        }
+
+        // Re-initialize cart drawer quantity inputs (cart-drawer-custom.js handles close buttons via event delegation)
+        if (typeof initializeCartDrawerQuantities === 'function') {
+          setTimeout(() => initializeCartDrawerQuantities(), 50);
+        }
+      });
+  }
+
+  openCartDrawer() {
+    // Open cart drawer if available
+    const cartDrawer = document.querySelector('cart-drawer');
+    if (cartDrawer && typeof cartDrawer.open === 'function') {
+      cartDrawer.open();
+    }
   }
 
   showNotification(message, type = 'success') {
@@ -351,14 +428,35 @@ class StickyATCBar {
       this.mainForm.querySelector('.mobile-variant-id') ||
       this.mainForm.querySelector('input[name="id"]:checked') ||
       this.mainForm.querySelector('select[name="id"]');
-    if (mainVariantInput && this.stickyVariantSelect) {
-      this.stickyVariantSelect.value = mainVariantInput.value;
+    
+    if (mainVariantInput) {
+      const variantId = mainVariantInput.value;
+      
+      // Update sticky bar's visible select
+      if (this.stickyVariantSelect) {
+        this.stickyVariantSelect.value = variantId;
+      }
+      
+      // Update sticky bar's hidden form input
+      const hiddenVariantInput = this.stickyForm?.querySelector('input[name="id"]');
+      if (hiddenVariantInput) {
+        hiddenVariantInput.value = variantId;
+      }
     }
 
     // Sync quantity
     const mainQuantityInput = this.mainForm.querySelector('[name="quantity"]');
-    if (mainQuantityInput && this.stickyQuantityInput) {
-      this.stickyQuantityInput.value = mainQuantityInput.value;
+    if (mainQuantityInput) {
+      // Update visible quantity input
+      if (this.stickyQuantityInput) {
+        this.stickyQuantityInput.value = mainQuantityInput.value;
+      }
+      
+      // Update hidden quantity input in form
+      const hiddenQuantityInput = this.stickyForm?.querySelector('input[name="quantity"]');
+      if (hiddenQuantityInput) {
+        hiddenQuantityInput.value = mainQuantityInput.value;
+      }
     }
 
     // Update price
@@ -407,25 +505,21 @@ class StickyATCBar {
   updateButtonState() {
     // Check if variant is available
     const mainButton = this.mainATCButton;
-    if (mainButton && this.stickyButton) {
-      this.stickyButton.disabled = mainButton.disabled;
+    if (!mainButton || !this.stickyButton) return;
+    
+    this.stickyButton.disabled = mainButton.disabled;
 
-      // Update only the text span, not the entire button (to preserve icon)
-      const buttonTextSpan = this.stickyButton.querySelector('span');
-      if (buttonTextSpan) {
-        if (mainButton.disabled) {
-          buttonTextSpan.textContent = 'Sold Out';
-        } else {
-          buttonTextSpan.textContent = 'Add to Cart';
-        }
-      } else {
-        // Fallback if no span found (shouldn't happen with secondary-button component)
-        if (mainButton.disabled) {
-          this.stickyButton.textContent = 'Sold Out';
-        } else {
-          this.stickyButton.textContent = 'Add to Cart';
-        }
-      }
+    // Find the text element in secondary-button (it's a direct child span)
+    // Could also be in other button types, so try multiple selectors
+    const buttonTextSpan = 
+      this.stickyButton.querySelector('span:not(.rotate-arrow)') ||
+      this.stickyButton.querySelector('.button-text') ||
+      this.stickyButton.querySelector('.secondary-slide-button-text') ||
+      this.stickyButton;
+
+    if (buttonTextSpan) {
+      const newText = mainButton.disabled ? 'Sold Out' : 'Add to Cart';
+      buttonTextSpan.textContent = newText;
     }
   }
 
@@ -446,10 +540,17 @@ class StickyATCBar {
       currentValue = Math.max(currentValue - 1, min);
     }
 
+    // Update visible quantity input
     input.value = currentValue;
 
+    // Update hidden quantity input in sticky form
+    const hiddenQuantityInput = this.stickyForm?.querySelector('input[name="quantity"]');
+    if (hiddenQuantityInput) {
+      hiddenQuantityInput.value = currentValue;
+    }
+
     // Update main form quantity
-    const mainQuantityInput = this.mainForm.querySelector('[name="quantity"]');
+    const mainQuantityInput = this.mainForm?.querySelector('[name="quantity"]');
     if (mainQuantityInput) {
       mainQuantityInput.value = currentValue;
     }
@@ -467,6 +568,12 @@ class StickyATCBar {
     }
 
     input.value = value;
+    
+    // Update hidden quantity input in sticky form
+    const hiddenQuantityInput = this.stickyForm?.querySelector('input[name="quantity"]');
+    if (hiddenQuantityInput) {
+      hiddenQuantityInput.value = value;
+    }
   }
 
   destroy() {

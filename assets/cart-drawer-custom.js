@@ -353,12 +353,11 @@ function initializeCartDrawer() {
   // CART DRAWER CLOSE BUTTONS (CSP-compliant event listeners)
   // ===================================================================
 
-  // Use event delegation for close buttons to handle dynamically refreshed content
+  // Use event delegation to handle close buttons
+  // This ensures the listeners work even when cart content is dynamically updated
   document.addEventListener('click', function (e) {
-    // Check if the clicked element or its parent is a close button
     const closeButton = e.target.closest('.drawer__close, .drawer__close2');
     if (closeButton) {
-      e.preventDefault();
       const cartDrawer = closeButton.closest('cart-drawer');
       if (cartDrawer && typeof cartDrawer.close === 'function') {
         cartDrawer.close();
@@ -366,7 +365,7 @@ function initializeCartDrawer() {
     }
   });
 
-  // Add keyboard accessibility using event delegation
+  // Add keyboard accessibility for close buttons using event delegation
   document.addEventListener('keydown', function (e) {
     if (e.key === 'Enter' || e.key === ' ') {
       const closeButton = e.target.closest('.drawer__close, .drawer__close2');
