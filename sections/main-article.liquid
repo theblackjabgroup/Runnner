@@ -52,15 +52,26 @@
 <section
   id="parallax-section"
   class="section1 color-{{ section.settings.color_scheme }} relative overflow-hidden items-start"
-  style="min-height: 100vh;padding-right:{{ settings.side_space }}px;"
+  {% if section.settings.enable_parallax %}
+    style="min-height: 100vh;padding-right:{{ settings.side_space }}px;"
+  {% else %}
+    style="padding-right:{{ settings.side_space }}px; padding-top: 50px;"
+  {% endif %}
+  data-parallax-enabled="{{ section.settings.enable_parallax }}"
 >
   <div
     class="parallax-container relative"
-    style="min-height: 191.5vh; padding-left:{{ settings.side_space }}px; padding-right:{{ settings.side_space }}px;"
+    {% if section.settings.enable_parallax %}
+      style="min-height: 191.5vh; padding-left:{{ settings.side_space }}px; padding-right:{{ settings.side_space }}px;"
+    {% else %}
+      style="padding-left:{{ settings.side_space }}px; padding-right:{{ settings.side_space }}px;"
+    {% endif %}
   >
-    <div class="overlay-placeholder" style="height: 188vh;"></div>
+    {% if section.settings.enable_parallax %}
+      <div class="overlay-placeholder" style="height: 188vh;"></div>
+    {% endif %}
 
-    <div class="overlay-content max-w-7xl relative flex flex-col" style="margin-top: 1.8vh;">
+    <div class="overlay-content max-w-7xl relative flex flex-col" {% if section.settings.enable_parallax %}style="margin-top: 1.8vh;"{% endif %}>
       {% if section.settings.show_date %}
         <div
           class="ml-4 show_date"
@@ -86,7 +97,11 @@
     {% if article.image %}
       <div
         class="parallax-image-overlay mb-10"
-        style="height: 101.4vh; width:49vw; padding-right:{{ settings.side_space }}px;"
+        {% if section.settings.enable_parallax %}
+          style="height: 101.4vh; width:49vw; padding-right:{{ settings.side_space }}px;"
+        {% else %}
+          style="width:100%; max-width: 1200px; margin: 40px auto; padding-right:{{ settings.side_space }}px;"
+        {% endif %}
       >
         <img
           srcset="
@@ -342,6 +357,13 @@
       "id": "color_scheme",
       "label": "Color Scheme",
       "default": "scheme-1"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_parallax",
+      "label": "Enable Parallax Effect",
+      "default": true,
+      "info": "Turn on/off the parallax scrolling effect for the article hero image"
     },
     {
       "type": "checkbox",

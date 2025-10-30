@@ -802,8 +802,16 @@
 
   /* Style size buttons to match new-product-card */
   .new-size-variants-container .size-btn {
-
+    width: 30px !important;
+    height: 30px !important;
+    min-width: 30px !important;
+    padding: 0 !important;
+    border-radius: var(--sold-out-badge-radius) !important;
+    font-size: var(--t-b-2-size);
+    font-weight: var(--t-b-2-weight);
+    line-height: var(--t-b-2-line-height);
     transform: translateY(10px);
+    cursor: pointer;
   }
 
   .new-size-variants-container .size-btn:hover {
@@ -1330,16 +1338,131 @@
       }
     }
 
+    // Track if we're currently adding to cart to prevent duplicates
+    let isAddingToCart = false;
+
     async function addToCart(formData) {
+      // Prevent duplicate submissions
+      if (isAddingToCart) {
+        console.log('Already adding to cart, skipping duplicate request');
+        return;
+      }
+
+      isAddingToCart = true;
+
       try {
         const response = await fetch(window.routes.cart_add_url, {
           method: 'POST',
           body: formData,
         });
+
         if (!response.ok) throw new Error('Network response was not ok');
-        return await response.json();
+
+        // Check if response is actually JSON
+        const contentType = response.headers.get('content-type');
+        let data;
+
+        if (contentType && contentType.includes('application/json')) {
+          data = await response.json();
+        } else {
+          // If it's not JSON but status is OK, treat as success
+          console.log('Response was not JSON, but treating as success');
+          data = { success: true };
+        }
+
+        // Wait a moment for the cart to update on the server
+        await new Promise((resolve) => setTimeout(resolve, 200));
+
+        // Refresh cart drawer and open it
+        try {
+          await refreshCartDrawer();
+        } catch (refreshError) {
+          console.error('Error refreshing cart drawer:', refreshError);
+          // Even if refresh fails, still try to open the drawer
+        }
+
+        // Open cart drawer after refresh completes
+        await new Promise((resolve) => setTimeout(resolve, 100));
+        openCartDrawer();
+
+        return data;
       } catch (error) {
+        console.error('Error adding to cart:', error);
         throw error;
+      } finally {
+        // Reset the flag after 1 second to allow new additions
+        setTimeout(() => {
+          isAddingToCart = false;
+        }, 1000);
+      }
+    }
+
+    function refreshCartDrawer() {
+      console.log('Refreshing cart drawer...');
+      return fetch(`${window.location.pathname}?section_id=cart-drawer`)
+        .then((response) => {
+          if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+          }
+          return response.text();
+        })
+        .then((responseText) => {
+          console.log('Cart drawer content fetched successfully');
+          const html = new DOMParser().parseFromString(responseText, 'text/html');
+
+          const cartDrawerElement = document.querySelector('cart-drawer');
+          const newCartDrawerContent = html.querySelector('cart-drawer');
+
+          if (cartDrawerElement && newCartDrawerContent) {
+            const isActive = cartDrawerElement.classList.contains('active');
+            const isAnimating = cartDrawerElement.classList.contains('animate');
+
+            cartDrawerElement.innerHTML = newCartDrawerContent.innerHTML;
+
+            if (isActive) cartDrawerElement.classList.add('active');
+            if (isAnimating) cartDrawerElement.classList.add('animate');
+
+            if (!newCartDrawerContent.classList.contains('is-empty')) {
+              cartDrawerElement.classList.remove('is-empty');
+            } else {
+              cartDrawerElement.classList.add('is-empty');
+            }
+            console.log('Cart drawer updated successfully');
+          } else {
+            console.error('Cart drawer elements not found');
+          }
+
+          const cartIconBubble = document.querySelector('#cart-icon-bubble');
+          const newCartIconBubble = html.querySelector('#cart-icon-bubble');
+
+          if (cartIconBubble && newCartIconBubble) {
+            cartIconBubble.innerHTML = newCartIconBubble.innerHTML;
+          }
+
+          if (typeof initializeCartDrawerQuantities === 'function') {
+            setTimeout(() => initializeCartDrawerQuantities(), 50);
+          }
+        })
+        .catch((error) => {
+          console.error('Error in refreshCartDrawer:', error);
+          throw error;
+        });
+    }
+
+    function openCartDrawer() {
+      const cartDrawer = document.querySelector('cart-drawer');
+      if (cartDrawer) {
+        if (typeof cartDrawer.open === 'function') {
+          cartDrawer.open();
+        } else {
+          // Manually open the cart drawer
+          setTimeout(() => {
+            cartDrawer.classList.add('animate', 'active');
+            document.body.classList.add('overflow-hidden');
+          }, 100);
+        }
+      } else {
+        console.error('Cart drawer element not found');
       }
     }
 
@@ -1370,6 +1493,10 @@
 
         // Handle size button clicks
         sizeVariantsContainer.querySelectorAll('.size-btn').forEach((sizeBtn) => {
+          // Check if listener already attached
+          if (sizeBtn.dataset.listenerAttached) return;
+          sizeBtn.dataset.listenerAttached = 'true';
+
           sizeBtn.addEventListener('click', async () => {
             if (sizeBtn.disabled) return;
 
@@ -1390,19 +1517,24 @@
         });
       } else if (singleVariantId) {
         // For products without size variants
-        addToCartBtn.addEventListener('click', async () => {
-          updateButtonState(addToCartBtn, 'adding');
-          const formData = new FormData();
-          formData.append('id', singleVariantId);
-          formData.append('quantity', '1');
+        // Check if listener already attached
+        if (!addToCartBtn.dataset.listenerAttached) {
+          addToCartBtn.dataset.listenerAttached = 'true';
 
-          try {
-            await addToCart(formData);
-            updateButtonState(addToCartBtn, 'added');
-          } catch (error) {
-            updateButtonState(addToCartBtn, 'default');
-          }
-        });
+          addToCartBtn.addEventListener('click', async () => {
+            updateButtonState(addToCartBtn, 'adding');
+            const formData = new FormData();
+            formData.append('id', singleVariantId);
+            formData.append('quantity', '1');
+
+            try {
+              await addToCart(formData);
+              updateButtonState(addToCartBtn, 'added');
+            } catch (error) {
+              updateButtonState(addToCartBtn, 'default');
+            }
+          });
+        }
       }
     });
 

@@ -44,6 +44,10 @@ document.addEventListener('DOMContentLoaded', function () {
     subheaders[subheaders.length - 1].classList.add('no-padding-bottom');
   }
 }
+// Check if parallax is enabled
+const parallaxSection = document.querySelector('#parallax-section');
+const isParallaxEnabled = parallaxSection?.dataset.parallaxEnabled === 'true';
+
 const headingEl = document.querySelector('.animated-text');
 const overlay = document.querySelector('.overlay-content');
 const parallaxImage = document.querySelector('.parallax-image-overlay img');
@@ -67,7 +71,8 @@ if (headingEl) {
   if (dateEl) dateEl.style.animationDelay = `${delayTotal + 0.2}s`;
   if (arrowEl) arrowEl.style.animationDelay = `${delayTotal + 0.4}s`;
 
-  if (parallaxImage) {
+  // Only apply parallax image effects if parallax is enabled
+  if (parallaxImage && isParallaxEnabled) {
     parallaxImage.style.position = 'absolute';
     parallaxImage.style.top = '0';
     parallaxImage.style.left = '0';
@@ -81,12 +86,20 @@ if (headingEl) {
       parallaxImage.style.opacity = '1';
       parallaxImage.style.transform = 'translateY(0)';
     }, delayTotal * 1000);
+  } else if (parallaxImage && !isParallaxEnabled) {
+    // Static image - just fade in
+    parallaxImage.style.opacity = '0';
+    parallaxImage.style.transition = 'opacity 1.2s ease-out';
+    
+    setTimeout(() => {
+      parallaxImage.style.opacity = '1';
+    }, delayTotal * 1000);
   }
 }
 
-// ✅ Parallax movement
+// ✅ Parallax movement - only if enabled
 function parallaxScrollEffect() {
-  if (!parallaxImage || !container) return;
+  if (!parallaxImage || !container || !isParallaxEnabled) return;
 
   const rect = container.getBoundingClientRect();
   const scrollY = window.scrollY || window.pageYOffset;
@@ -103,42 +116,45 @@ function onScroll() {
   ticking = false;
   if (!overlay || !container) return;
 
-  const containerRect = container.getBoundingClientRect();
-  const overlayHeight = overlay.offsetHeight;
-  const startParallax = containerRect.top <= OFFSET_TOP;
-  const stopPoint = containerRect.bottom - overlayHeight - OFFSET_TOP;
-  const shouldStopParallax = stopPoint <= OFFSET_TOP;
+  // Only apply parallax scroll effects if enabled
+  if (isParallaxEnabled) {
+    const containerRect = container.getBoundingClientRect();
+    const overlayHeight = overlay.offsetHeight;
+    const startParallax = containerRect.top <= OFFSET_TOP;
+    const stopPoint = containerRect.bottom - overlayHeight - OFFSET_TOP;
+    const shouldStopParallax = stopPoint <= OFFSET_TOP;
 
-  overlay.classList.remove('mobile-fixed', 'mobile-absolute');
+    overlay.classList.remove('mobile-fixed', 'mobile-absolute');
 
-  if (startParallax && !shouldStopParallax) {
-    overlay.style.position = 'fixed';
-    overlay.style.top = `${OFFSET_TOP}px`;
-    overlay.style.zIndex = '2';
-    overlay.style.transform = 'translateZ(0)';
-    overlay.style.width = '100vw';
-    overlay.style.maxWidth = '100vw';
+    if (startParallax && !shouldStopParallax) {
+      overlay.style.position = 'fixed';
+      overlay.style.top = `${OFFSET_TOP}px`;
+      overlay.style.zIndex = '2';
+      overlay.style.transform = 'translateZ(0)';
+      overlay.style.width = '100vw';
+      overlay.style.maxWidth = '100vw';
 
-  } else if (shouldStopParallax) {
-    overlay.style.position = 'absolute';
-    overlay.style.top = `${Math.max(0, container.offsetHeight - overlayHeight - OFFSET_TOP)}px`;
-    overlay.style.zIndex = '';
-    overlay.style.transition = 'none';
-    overlay.style.transform = 'translateY(-20px)';
-    overlay.style.opacity = '1';
-    overlay.style.width = '100vw';
-  } else {
-    overlay.style.position = 'relative';
-    overlay.style.top = '';
-    overlay.style.left = '';
-    overlay.style.width = '';
-    overlay.style.zIndex = '';
-    overlay.style.transform = '';
-    overlay.style.padding = '';
-    overlay.style.maxWidth = '';
+    } else if (shouldStopParallax) {
+      overlay.style.position = 'absolute';
+      overlay.style.top = `${Math.max(0, container.offsetHeight - overlayHeight - OFFSET_TOP)}px`;
+      overlay.style.zIndex = '';
+      overlay.style.transition = 'none';
+      overlay.style.transform = 'translateY(-20px)';
+      overlay.style.opacity = '1';
+      overlay.style.width = '100vw';
+    } else {
+      overlay.style.position = 'relative';
+      overlay.style.top = '';
+      overlay.style.left = '';
+      overlay.style.width = '';
+      overlay.style.zIndex = '';
+      overlay.style.transform = '';
+      overlay.style.padding = '';
+      overlay.style.maxWidth = '';
+    }
+
+    parallaxScrollEffect(); 
   }
-
-  parallaxScrollEffect(); 
 }
 
 function requestTick() {
@@ -158,11 +174,14 @@ function handleOrientationChange() {
   orientationTimeout = setTimeout(requestTick, 100);
 }
 
-window.addEventListener('scroll', requestTick, { passive: true });
-window.addEventListener('resize', handleResize, { passive: true });
-window.addEventListener('orientationchange', handleOrientationChange, { passive: true });
-
-requestTick();
+// Only add parallax scroll listeners if parallax is enabled
+if (isParallaxEnabled) {
+  window.addEventListener('scroll', requestTick, { passive: true });
+  window.addEventListener('resize', handleResize, { passive: true });
+  window.addEventListener('orientationchange', handleOrientationChange, { passive: true });
+  
+  requestTick();
+}
 
 if (parallaxImage && parallaxImage.src) {
   const img = new Image();
