@@ -149,9 +149,10 @@
       position: absolute;
       top: 50%; left: 50%;
       transform: translate(-50%, -50%);
-      pointer-events: none;
+      pointer-events: auto; /* Enable to receive hover events */
       z-index: var(--z-content);
       transition: transform 0.2s ease;
+      padding: 10px; /* Increase hover area */
     }
 
     /* --- COMMENT: A new class added by JavaScript to create the grab animation --- */
@@ -160,9 +161,19 @@
     }
 
     .prod-diff-slider-handle-chevron svg {
-      transition: all 0.2s ease;
       width: {{ section.settings.handle_width_desktop | default: 135 }}px;
       height: {{ section.settings.handle_height_desktop | default: 50 }}px;
+    }
+
+    /* Chevron arrow hover animation - matches quantity selector behavior */
+    #Handle-{{ section.id }} svg path {
+      transition: transform 0.2s ease;
+      transform-box: fill-box; /* Scale relative to path's own bounding box */
+      transform-origin: 50% 50%; /* Center of each individual path */
+    }
+
+    #Handle-{{ section.id }}.handle-hovered svg path {
+      transform: scale(1.2);
     }
 
     /* Responsive handle sizing for mobile */
@@ -709,6 +720,27 @@
         slider.addEventListener('touchstart', () => handle.classList.add('dragging'));
         window.addEventListener('mouseup', () => handle.classList.remove('dragging'));
         window.addEventListener('touchend', () => handle.classList.remove('dragging'));
+
+        // Add hover animation for chevrons when slider handle area is hovered
+        // Listen on slider and detect when near handle's actual position
+        slider.addEventListener('mousemove', (e) => {
+          const rect = slider.getBoundingClientRect();
+          const mouseX = e.clientX - rect.left;
+          const sliderValue = parseFloat(slider.value);
+          const handleX = (rect.width * sliderValue) / 100; // Handle's actual position based on slider value
+          const distanceFromHandle = Math.abs(mouseX - handleX);
+          
+          // If within 100px of handle's current position, show hover effect
+          if (distanceFromHandle < 100 && handle) {
+            handle.classList.add('handle-hovered');
+          } else if (handle) {
+            handle.classList.remove('handle-hovered');
+          }
+        });
+        
+        slider.addEventListener('mouseleave', () => {
+          if (handle) handle.classList.remove('handle-hovered');
+        });
 
         // This is the new, simple logic that updates the slider visuals
         slider.addEventListener('input', (e) => {
