@@ -613,8 +613,16 @@
     {% if section.settings.enable_fullscreen %}
       padding: 0;
     {% else %}
-      padding: var(--sections-spacing-top) var(--sections-side-space) var(--sections-spacing-bottom);
+      padding: {{ section.settings.section_top_padding | default: 0 }}px var(--sections-side-space) var(--sections-spacing-bottom);
     {% endif %}
+  }
+
+  @media (max-width: 749px) {
+    .image-with-text-media-section-{{ section.id }}{
+      {% unless section.settings.enable_fullscreen %}
+        padding-top: {{ section.settings.section_top_padding_mobile | default: 0 }}px !important;
+      {% endunless %}
+    }
   }
 
   .remove_button_svg .primary-slide-button-arrow{
@@ -1379,6 +1387,28 @@ button.addEventListener('keydown', function(event) {
       "unit": "px",
       "label": "Section height (mobile)",
       "default": 500
+    },
+    {
+      "type": "range",
+      "id": "section_top_padding",
+      "min": 0,
+      "max": 200,
+      "step": 5,
+      "unit": "px",
+      "label": "Section top padding (desktop)",
+      "default": 10,
+      "info": "Overrides global top spacing when fullscreen is disabled"
+    },
+    {
+      "type": "range",
+      "id": "section_top_padding_mobile",
+      "min": 0,
+      "max": 200,
+      "step": 5,
+      "unit": "px",
+      "label": "Section top padding (mobile)",
+      "default": 10,
+      "info": "Overrides global top spacing when fullscreen is disabled on mobile"
     },
     {
       "type": "header",
