@@ -2,7 +2,10 @@
 
 <style>
   :root {
-    --popup-close-button-bg: {{ section.settings.close_button_bg_color | default: '#ffffff' }};
+    {% assign opacity_value = section.settings.close_button_bg_opacity | default: 100 | divided_by: 100.0 %}
+    {% assign bg_color = section.settings.close_button_bg_color | default: '#ffffff' %}
+    --popup-close-button-bg: {{ bg_color }};
+    --popup-close-button-bg-rgba: {{ bg_color | color_to_rgb | replace: 'rgb(', 'rgba(' | replace: ')', ', ' }}{{ opacity_value }});
   }
 </style>
 
@@ -456,6 +459,17 @@
       "id": "close_button_bg_color",
       "default": "#ffffff",
       "label": "Close button background color"
+    },
+    {
+      "type": "range",
+      "id": "close_button_bg_opacity",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "unit": "%",
+      "default": 100,
+      "label": "Close button background opacity",
+      "info": "Control the transparency of the close button background circle (0% = fully transparent, 100% = fully opaque)"
     }
   ],
   "presets": [{ "name": "Pop Up" }]
