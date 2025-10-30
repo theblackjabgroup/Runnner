@@ -1,14 +1,25 @@
 {% comment %}theme-check-disable ImgLazyLoading{% endcomment %}
 {{ 'collection-banner.css' | asset_url | stylesheet_tag }}
 
+<style>
+  .section-{{ section.id }}-padding {
+    padding-top: {{ section.settings.section_top_padding | default: 0 }}px;
+  }
+
+  @media (max-width: 749px) {
+    .section-{{ section.id }}-padding {
+      padding-top: {{ section.settings.section_top_padding_mobile | default: 0 }}px !important;
+    }
+  }
+</style>
+
 {% if section.settings.enabled %}
   <section
-    class="collection-banner-simple"
+    class="collection-banner-simple section-{{ section.id }}-padding"
     style="
       --banner-height: {{ section.settings.banner_height }}px;
       --banner-height-mobile: {{ section.settings.banner_height_mobile }}px;
       --side-space: {{ settings.side_space }}px;
-      --padding-top: var(--sections-spacing-top);
       --padding-bottom: var(--sections-spacing-bottom);
       --object-fit: {{ section.settings.object_fit }};
       --object-position: {{ section.settings.object_position }};
@@ -93,6 +104,32 @@
       "unit": "px",
       "label": "Banner height (Mobile)",
       "default": 500
+    },
+    {
+      "type": "header",
+      "content": "Section Spacing"
+    },
+    {
+      "type": "range",
+      "id": "section_top_padding",
+      "min": 0,
+      "max": 200,
+      "step": 5,
+      "unit": "px",
+      "label": "Section top padding (desktop)",
+      "default": 10,
+      "info": "Custom top padding for desktop, overrides global spacing"
+    },
+    {
+      "type": "range",
+      "id": "section_top_padding_mobile",
+      "min": 0,
+      "max": 200,
+      "step": 5,
+      "unit": "px",
+      "label": "Section top padding (mobile)",
+      "default": 10,
+      "info": "Custom top padding for mobile, overrides global spacing"
     },
     {
       "type": "header",

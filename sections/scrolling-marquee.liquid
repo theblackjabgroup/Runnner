@@ -52,6 +52,32 @@
       "id": "pause_on_hover",
       "label": "Pause on hover",
       "default": false
+    },
+    {
+      "type": "header",
+      "content": "Section Spacing"
+    },
+    {
+      "type": "range",
+      "id": "section_top_padding",
+      "min": 0,
+      "max": 200,
+      "step": 5,
+      "unit": "px",
+      "label": "Section top padding (desktop)",
+      "default": 10,
+      "info": "Custom top padding for desktop, overrides global spacing"
+    },
+    {
+      "type": "range",
+      "id": "section_top_padding_mobile",
+      "min": 0,
+      "max": 200,
+      "step": 5,
+      "unit": "px",
+      "label": "Section top padding (mobile)",
+      "default": 10,
+      "info": "Custom top padding for mobile, overrides global spacing"
     }
   ],
   "presets": [
@@ -139,7 +165,7 @@
 </section>
 
 <style>
-  /* Global spacing applied as margins for marquee section */
+  /* Custom section spacing for marquee section */
   .marquee-wrapper {
     padding: 0;
     display: flex;
@@ -149,9 +175,15 @@
     position: relative;
     height: 30px;
     overflow: hidden;
-    margin-top: var(--sections-spacing-top) !important;
+    margin-top: {{ section.settings.section_top_padding | default: 0 }}px !important;
     margin-bottom: var(--sections-spacing-bottom) !important;
     box-sizing: border-box;
+  }
+
+  @media (max-width: 749px) {
+    .marquee-wrapper {
+      margin-top: {{ section.settings.section_top_padding_mobile | default: 0 }}px !important;
+    }
   }
 
   /* Ensure consistent spacing behavior */
