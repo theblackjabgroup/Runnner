@@ -32,17 +32,13 @@
   assign price_min = product.price_min
   assign price_max = product.price_max
   assign available = target.available | default: false
-  
+  assign money_price = price | money
+  assign money_price_min = price_min | money
+  assign money_price_max = price_max | money
   if settings.currency_code_enabled
     assign money_price = price | money_with_currency
     assign money_price_min = price_min | money_with_currency
     assign money_price_max = price_max | money_with_currency
-    assign money_compare_at_price = compare_at_price | money_with_currency
-  else
-    assign money_price = price | money
-    assign money_price_min = price_min | money
-    assign money_price_max = price_max | money
-    assign money_compare_at_price = compare_at_price | money
   endif
 
   if target == product and product.price_varies
@@ -87,7 +83,11 @@
               </span>
               <span>
                 <s class="price-item price-item--regular variant-item__old-price">
-                  {{ money_compare_at_price }}
+                  {% if settings.currency_code_enabled %}
+                    {{ compare_at_price | money_with_currency }}
+                  {% else %}
+                    {{ compare_at_price | money }}
+                  {% endif %}
                 </s>
               </span>
             {%- endunless -%}
@@ -111,7 +111,11 @@
           <span class="visually-hidden visually-hidden--inline">{{ 'products.product.price.regular_price' | t }}</span>
           <span>
             <s class="price-item price-item--regular">
-              {{ money_compare_at_price }}
+              {% if settings.currency_code_enabled %}
+                {{ compare_at_price | money_with_currency }}
+              {% else %}
+                {{ compare_at_price | money }}
+              {% endif %}
             </s>
           </span>
         {%- endunless -%}
@@ -164,14 +168,14 @@
 
   .new-product-price .price__container {
     display: flex;
-    align-items: baseline;
+    align-items: center;
   }
 
   .new-product-price .price__regular,
   .new-product-price .price__sale {
     display: flex;
-    align-items: baseline;
-    gap: 0;
+    align-items: center;
+    gap: 8px;
   }
 
   .new-product-price .price-item {
@@ -185,24 +189,10 @@
     color: var(--text);
   }
 
-  /* Sale price styling - order: strikethrough, separator, sale price */
+  /* Sale price styling - strikethrough for compare-at-price */
   .new-product-price .price__sale .price-item--regular {
     text-decoration: line-through;
     color: var(--disabled_text);
-    order: 1;
-  }
-
-  /* Price separator styling */
-  .new-product-price .price-separator {
-    color: var(--text);
-    margin: 0 8px;
-    font-size: var(--t-b-3-size);
-    display: inline-block !important;
-    order: 2;
-  }
-
-  .new-product-price .price__sale .price-item--sale {
-    order: 3;
   }
 
   /* Hide regular price section when on sale */
@@ -248,40 +238,15 @@
   /* Mobile Responsive Styles */
   @media screen and (max-width: 749px) {
     .new-product-price {
-      font-size: 14px !important;
-      font-weight: var(--tm-b-3-weight) !important;
-      line-height: 1.2 !important;
+      font-size: var(--tm-b-3-size);
+      font-weight: var(--tm-b-3-weight);
+      line-height: var(--tm-b-3-line-height);
     }
 
     .new-product-price .price-item {
-      font-size: 14px !important;
-      font-weight: var(--tm-b-3-weight) !important;
-      line-height: 1.2 !important;
-    }
-
-    .new-product-price .price-separator {
-      font-size: 14px !important;
-      margin: 0 4px !important;
-    }
-  }
-
-  /* Extra small mobile screens - even smaller */
-  @media screen and (max-width: 500px) {
-    .new-product-price {
-      font-size: 12px !important;
-      font-weight: 500 !important;
-      line-height: 1.1 !important;
-    }
-
-    .new-product-price .price-item {
-      font-size: 12px !important;
-      font-weight: 500 !important;
-      line-height: 1.1 !important;
-    }
-
-    .new-product-price .price-separator {
-      font-size: 12px !important;
-      margin: 0 3px !important;
+      font-size: var(--tm-b-3-size);
+      font-weight: var(--tm-b-3-weight);
+      line-height: var(--tm-b-3-line-height);
     }
   }
 
