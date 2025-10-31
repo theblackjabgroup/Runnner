@@ -16,24 +16,7 @@
 
 <style>
   :root {
-    --scroll-speed: {{ settings.scroll_speed | default: 10 }}s;
     --cart-drawer-speed: {{ settings.cart_drawer_animation_speed | default: 0.6 }}s !important;
-  }
-
-  .vertical-text-cart-drawer .separator-image {
-    transform: rotate({{ settings.vertical_scroll_image_rotation | default: 0 | plus: 90 }}deg);
-    -webkit-transform: rotate({{ settings.vertical_scroll_image_rotation | default: 0 | plus: 90 }}deg);
-    -moz-transform: rotate({{ settings.vertical_scroll_image_rotation | default: 0 | plus: 90 }}deg);
-    -ms-transform: rotate({{ settings.vertical_scroll_image_rotation | default: 0 | plus: 90 }}deg);
-  }
-
-  @media only screen and (max-width: 600px) {
-    .vertical-text-cart-drawer .separator-image {
-      transform: rotate({{ settings.vertical_scroll_image_rotation | default: 0 | plus: 90 }}deg);
-      -webkit-transform: rotate({{ settings.vertical_scroll_image_rotation | default: 0 | plus: 90 }}deg);
-      -moz-transform: rotate({{ settings.vertical_scroll_image_rotation | default: 0 | plus: 90 }}deg);
-      -ms-transform: rotate({{ settings.vertical_scroll_image_rotation | default: 0 | plus: 90 }}deg);
-    }
   }
 </style>
 
@@ -52,77 +35,7 @@
       aria-label="{{ 'sections.cart.title' | t }}"
       tabindex="-1"
     >
-      <div class="vertical-text-cart-drawer-container">
-        <div class="vertical-text-cart-drawer">
-          {% if settings.vertical_scroll_image %}
-            {% assign text_parts = settings.vertical_scroll_text | split: '→' %}
-            {% for i in (1..10) %}
-              {% for part in text_parts %}
-                {{ part | strip }}
-                {% unless forloop.last %}
-                  <img
-                    src="{{ settings.vertical_scroll_image | image_url: width: 40 }}"
-                    alt="Separator"
-                    class="separator-image"
-                    width="100"
-                    height="100"
-                  >
-                {% endunless %}
-              {% endfor %}
-            {% endfor %}
-          {% else %}
-            {% assign text_parts = settings.vertical_scroll_text | split: '→' %}
-            {% for i in (1..10) %}
-              {% for part in text_parts %}
-                {{ part | strip }}
-                {% unless forloop.last %}
-                  {% render 'icon-playback',
-                    class: 'bi bi-caret-right-fill scrolling-separator-cart-drawer',
-                    width: '25px',
-                    height: '25px',
-                    fill: 'currentColor'
-                  %}
-                {% endunless %}
-              {% endfor %}
-            {% endfor %}
-          {% endif %}
-        </div>
-        <div class="vertical-text-cart-drawer">
-          {% if settings.vertical_scroll_image %}
-            {% assign text_parts = settings.vertical_scroll_text | split: '→' %}
-            {% for i in (1..10) %}
-              {% for part in text_parts %}
-                {{ part | strip }}
-                {% unless forloop.last %}
-                  <img
-                    src="{{ settings.vertical_scroll_image | image_url: width: 40 }}"
-                    alt="Separator"
-                    class="separator-image"
-                    width="100"
-                    height="100"
-                    style="transform: rotate({{ settings.vertical_scroll_image_rotation | default: 0 | plus: 90 }}deg);"
-                  >
-                {% endunless %}
-              {% endfor %}
-            {% endfor %}
-          {% else %}
-            {% assign text_parts = settings.vertical_scroll_text | split: '→' %}
-            {% for i in (1..10) %}
-              {% for part in text_parts %}
-                {{ part | strip }}
-                {% unless forloop.last %}
-                  {% render 'icon-playback',
-                    class: 'bi bi-caret-right-fill scrolling-separator',
-                    width: '25px',
-                    height: '25px',
-                    fill: 'currentColor'
-                  %}
-                {% endunless %}
-              {% endfor %}
-            {% endfor %}
-          {% endif %}
-        </div>
-      </div>
+      {% render 'vertical-scrolling-text', context: 'cart-drawer' %}
 
       {%- if cart == empty -%}
         <div class="drawer__inner-empty">
