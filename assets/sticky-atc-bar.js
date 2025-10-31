@@ -474,15 +474,30 @@ class StickyATCBar {
   }
 
   updatePrice() {
-    // Get current price from main form - try multiple selectors for this theme
-    const mainPrice =
-      document.querySelector('.main-product-price .price-item--last') ||
-      document.querySelector('.mobile-main-product-price .price-item--last') ||
-      document.querySelector('.price__regular .price-item--regular') ||
-      document.querySelector('.price-item--sale');
+    // Get current price container from main form - try multiple selectors
+    const mainPriceContainer =
+      document.querySelector('.main-product-price') ||
+      document.querySelector('.mobile-main-product-price');
 
-    if (mainPrice && this.stickyPrice) {
-      this.stickyPrice.innerHTML = mainPrice.textContent;
+    if (mainPriceContainer && this.stickyPrice) {
+      // Clone the price container classes to sync sale state
+      const isOnSale = mainPriceContainer.classList.contains('price--on-sale');
+      
+      if (isOnSale) {
+        this.stickyPrice.classList.add('price--on-sale');
+      } else {
+        this.stickyPrice.classList.remove('price--on-sale');
+      }
+
+      // Update all price items
+      const mainPriceItems = mainPriceContainer.querySelectorAll('.price-item');
+      const stickyPriceItems = this.stickyPrice.querySelectorAll('.price-item');
+      
+      mainPriceItems.forEach((mainItem, index) => {
+        if (stickyPriceItems[index]) {
+          stickyPriceItems[index].textContent = mainItem.textContent;
+        }
+      });
     }
   }
 
