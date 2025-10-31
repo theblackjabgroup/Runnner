@@ -21,13 +21,13 @@
             {{ section.settings.image | image_url }} {{ section.settings.image.width }}w
           "
           src="{{ section.settings.image | image_url: width: 750 }}"
-          alt="Image"
-          width="auto"
-          height="100%"
+          alt="{{ section.settings.image.alt | escape | default: 'Content image' }}"
+          width="{{ section.settings.image.width }}"
+          height="{{ section.settings.image.height }}"
           loading="lazy"
         >
       {% else %}
-        <div style="width: 500px; height: 100%;">
+        <div style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center;">
           {{ 'collection-1' | placeholder_svg_tag }}
         </div>
       {% endif %}
@@ -134,7 +134,7 @@
     background-color: rgb(var(--color-background));
     overflow: visible;
     align-items: stretch;
-    height: 100%;
+    height: {{ section.settings.section_height }}px;
     padding: var(--sections-spacing-top) var(--sections-side-space) var(--sections-spacing-bottom);
   }
 
@@ -166,18 +166,18 @@
     max-width: 50vw; /* Subtract top and bottom padding */
     width: 50%;
     display: flex;
-    align-items: start;
+    align-items: center;
     justify-content: center;
     /* pointer-events: none; */
     box-sizing: border-box;
-    /* height: 50vw; */
+    height: 100%;
   }
 
   section.cb-container-image-and-text .cb-left img {
-    max-width: 100%;
-    max-height: 100%;
-    object-fit: contain;
-    width: auto;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
     /* pointer-events:  none; */
   }
 
@@ -185,6 +185,8 @@
     /* pointer-events: none; */
     position: sticky;
     top: 55px;
+    width: 100%;
+    height: 100%;
   }
 
 
@@ -402,6 +404,7 @@
     section.cb-container-image-and-text {
       flex-direction: column;
       min-height: auto;
+      height: {{ section.settings.section_height_mobile }}px;
     }
 
     section.cb-container-image-and-text .cb-left {
@@ -524,6 +527,30 @@
       "id": "main_heading",
       "label": "Main Heading",
       "default": "WELCOME TO OUR STORE"
+    },
+    {
+      "type": "header",
+      "content": "Section Size"
+    },
+    {
+      "type": "range",
+      "id": "section_height",
+      "min": 300,
+      "max": 1100,
+      "step": 10,
+      "unit": "px",
+      "label": "Section height (desktop)",
+      "default": 700
+    },
+    {
+      "type": "range",
+      "id": "section_height_mobile",
+      "min": 300,
+      "max": 800,
+      "step": 10,
+      "unit": "px",
+      "label": "Section height (mobile)",
+      "default": 680
     }
   ],
   "blocks": [
