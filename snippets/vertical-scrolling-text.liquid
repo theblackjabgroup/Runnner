@@ -1,0 +1,323 @@
+{% comment %}
+  Renders vertical scrolling text with customizable separator
+
+  Accepts:
+  - context: 'mobile-menu' or 'cart-drawer' - determines which settings to use and CSS classes
+  - text_1: First text to display (optional, falls back to settings)
+  - text_2: Second text to display (optional, falls back to settings)
+  - text_3: Third text to display (optional, falls back to settings)
+  - separator_image: Custom separator image (optional)
+  - separator_rotation: Rotation angle for separator (optional)
+  - scroll_speed: Animation speed in seconds (optional)
+  - scroll_direction: 'bottom-to-top' or 'top-to-bottom' (optional)
+  - color: Text color (optional)
+
+  Usage:
+  {% render 'vertical-scrolling-text', context: 'mobile-menu' %}
+  {% render 'vertical-scrolling-text', context: 'cart-drawer' %}
+{% endcomment %}
+
+{%- liquid
+  # Determine which settings to use based on context
+  if context == 'mobile-menu'
+    # Try to get from passed parameters first, then fall back to settings
+    if text_1 == blank
+      assign text_1 = settings.mobile_menu_scroll_text_1
+    endif
+    if text_2 == blank
+      assign text_2 = settings.mobile_menu_scroll_text_2
+    endif
+    if text_3 == blank
+      assign text_3 = settings.mobile_menu_scroll_text_3
+    endif
+    if separator_image == blank
+      assign separator_image = settings.mobile_menu_scroll_image
+    endif
+    if separator_rotation == blank
+      assign separator_rotation = settings.mobile_menu_scroll_image_rotation
+    endif
+    if scroll_speed == blank
+      assign scroll_speed = settings.mobile_menu_scroll_speed
+    endif
+    if scroll_direction == blank
+      assign scroll_direction = settings.mobile_menu_scroll_direction
+    endif
+    assign container_class = 'vertical-text-mobile-menu-container'
+    assign text_class = 'vertical-text-mobile-menu'
+    assign separator_class = 'scrolling-separator-mobile-menu'
+  elsif context == 'cart-drawer'
+    # Try to get from passed parameters first, then fall back to settings
+    if text_1 == blank
+      assign text_1 = settings.cart_drawer_scroll_text_1
+    endif
+    if text_2 == blank
+      assign text_2 = settings.cart_drawer_scroll_text_2
+    endif
+    if text_3 == blank
+      assign text_3 = settings.cart_drawer_scroll_text_3
+    endif
+    if separator_image == blank
+      assign separator_image = settings.cart_drawer_scroll_image
+    endif
+    if separator_rotation == blank
+      assign separator_rotation = settings.cart_drawer_scroll_image_rotation
+    endif
+    if scroll_speed == blank
+      assign scroll_speed = settings.cart_drawer_scroll_speed
+    endif
+    if scroll_direction == blank
+      assign scroll_direction = settings.cart_drawer_scroll_direction
+    endif
+    assign container_class = 'vertical-text-cart-drawer-container'
+    assign text_class = 'vertical-text-cart-drawer'
+    assign separator_class = 'scrolling-separator-cart-drawer'
+  endif
+
+  # Default values if not set
+  if text_1 == blank
+    assign text_1 = 'STAY TRUE'
+  endif
+  if text_2 == blank
+    assign text_2 = 'KEEP GOING'
+  endif
+  if text_3 == blank
+    assign text_3 = 'FIND THE BALANCE'
+  endif
+  if scroll_speed == blank
+    assign scroll_speed = 10
+  endif
+  if scroll_direction == blank
+    assign scroll_direction = 'bottom-to-top'
+  endif
+  if separator_rotation == blank
+    assign separator_rotation = 0
+  endif
+-%}
+
+<style>
+  .{{ container_class }} {
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    line-height: 1.2;
+    width: 30px;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-right: 1px solid var(--header_text);
+    border-left: 1px solid var(--header_text);
+    z-index: 9999;
+  }
+
+  .{{ text_class }} {
+    position: absolute;
+    width: 100vh;
+    height: 24px;
+    transform: rotate(-90deg);
+    -webkit-transform: rotate(-90deg);
+    -moz-transform: rotate(-90deg);
+    -ms-transform: rotate(-90deg);
+    transform-origin: center center;
+    -webkit-transform-origin: center center;
+    -moz-transform-origin: center center;
+    -ms-transform-origin: center center;
+    animation: scrollTextHorizontal{{ context }} {{ scroll_speed }}s linear infinite !important;
+    -webkit-animation: scrollTextHorizontal{{ context }} {{ scroll_speed }}s linear infinite !important;
+    -moz-animation: scrollTextHorizontal{{ context }} {{ scroll_speed }}s linear infinite !important;
+    color: var(--header_text) !important;
+    font-size: 16px;
+    white-space: nowrap;
+    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    left: 50%;
+    top: 50%;
+    margin-left: -50vh;
+    margin-top: -12px;
+  }
+
+  .{{ text_class }} .separator-image {
+    width: 20px;
+    height: 20px;
+    max-width: 20px;
+    max-height: 20px;
+    object-fit: contain;
+    margin: 0 8px;
+    display: inline-block;
+    transform: rotate({{ separator_rotation | plus: 90 }}deg);
+    -webkit-transform: rotate({{ separator_rotation | plus: 90 }}deg);
+    -moz-transform: rotate({{ separator_rotation | plus: 90 }}deg);
+    -ms-transform: rotate({{ separator_rotation | plus: 90 }}deg);
+  }
+
+  .{{ separator_class }},
+  .{{ text_class }} .scrolling-separator {
+    margin: 0 12px;
+    display: inline-block;
+    vertical-align: middle;
+  }
+
+  .{{ text_class }} .text-part {
+    display: inline-block;
+  }
+
+  .{{ text_class }} .arrow-separator {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 4px;
+  }
+
+  .{{ text_class }} .arrow-separator svg {
+    display: block;
+    color: var(--header_text);
+    fill: var(--header_text);
+  }
+
+  /* Bottom to Top (default) - text moves upward */
+  @keyframes scrollTextHorizontal{{ context }} {
+    0% {
+      transform: rotate(-90deg) translateX(-100%);
+      -webkit-transform: rotate(-90deg) translateX(-100%);
+      -moz-transform: rotate(-90deg) translateX(-100%);
+      -ms-transform: rotate(-90deg) translateX(-100%);
+    }
+    100% {
+      transform: rotate(-90deg) translateX(0);
+      -webkit-transform: rotate(-90deg) translateX(0);
+      -moz-transform: rotate(-90deg) translateX(0);
+      -ms-transform: rotate(-90deg) translateX(0);
+    }
+  }
+
+  @-webkit-keyframes scrollTextHorizontal{{ context }} {
+    0% { -webkit-transform: rotate(-90deg) translateX(-100%); }
+    100% { -webkit-transform: rotate(-90deg) translateX(0); }
+  }
+
+  /* Top to Bottom - text moves downward */
+  @keyframes scrollTextHorizontal{{ context }}Reverse {
+    0% {
+      transform: rotate(-90deg) translateX(0);
+      -webkit-transform: rotate(-90deg) translateX(0);
+      -moz-transform: rotate(-90deg) translateX(0);
+      -ms-transform: rotate(-90deg) translateX(0);
+    }
+    100% {
+      transform: rotate(-90deg) translateX(-100%);
+      -webkit-transform: rotate(-90deg) translateX(-100%);
+      -moz-transform: rotate(-90deg) translateX(-100%);
+      -ms-transform: rotate(-90deg) translateX(-100%);
+    }
+  }
+
+  @-webkit-keyframes scrollTextHorizontal{{ context }}Reverse {
+    0% { -webkit-transform: rotate(-90deg) translateX(0); }
+    100% { -webkit-transform: rotate(-90deg) translateX(-100%); }
+  }
+
+  {% if scroll_direction == 'top-to-bottom' %}
+    .{{ text_class }} {
+      animation: scrollTextHorizontal{{ context }}Reverse {{ scroll_speed }}s linear infinite !important;
+      -webkit-animation: scrollTextHorizontal{{ context }}Reverse {{ scroll_speed }}s linear infinite !important;
+      -moz-animation: scrollTextHorizontal{{ context }}Reverse {{ scroll_speed }}s linear infinite !important;
+    }
+  {% endif %}
+
+  @media only screen and (max-width: 600px) {
+    .{{ container_class }} {
+      width: 25px !important;
+    }
+
+    .{{ text_class }} {
+      font-size: 14px !important;
+      padding: 0 !important;
+      height: 15px;
+      margin-top: -7.5px;
+    }
+  }
+</style>
+
+<div class="{{ container_class }}">
+  <div class="{{ text_class }}">
+    {% if separator_image %}
+      {%- comment -%} Render with custom separator image {%- endcomment -%}
+      {% for i in (1..10) %}
+        {% if text_1 != blank %}
+          <span class="text-part">{{ text_1 | strip }}</span>
+          <img
+            src="{{ separator_image | image_url: width: 40 }}"
+            alt="Separator"
+            class="separator-image"
+            width="40"
+            height="40"
+            loading="lazy"
+          >
+        {% endif %}
+        {% if text_2 != blank %}
+          <span class="text-part">{{ text_2 | strip }}</span>
+          <img
+            src="{{ separator_image | image_url: width: 40 }}"
+            alt="Separator"
+            class="separator-image"
+            width="40"
+            height="40"
+            loading="lazy"
+          >
+        {% endif %}
+        {% if text_3 != blank %}
+          <span class="text-part">{{ text_3 | strip }}</span>
+          <img
+            src="{{ separator_image | image_url: width: 40 }}"
+            alt="Separator"
+            class="separator-image"
+            width="40"
+            height="40"
+            loading="lazy"
+          >
+        {% endif %}
+      {% endfor %}
+    {% else %}
+      {%- comment -%} Render with icon separator {%- endcomment -%}
+      {% for i in (1..10) %}
+        {% if text_1 != blank %}
+          <span class="text-part">{{ text_1 | strip }}</span>
+          <span class="arrow-separator">
+            {% render 'icon-playback',
+              class: 'bi bi-caret-right-fill ' | append: separator_class,
+              width: '20px',
+              height: '20px',
+              fill: 'currentColor'
+            %}
+          </span>
+        {% endif %}
+        {% if text_2 != blank %}
+          <span class="text-part">{{ text_2 | strip }}</span>
+          <span class="arrow-separator">
+            {% render 'icon-playback',
+              class: 'bi bi-caret-right-fill ' | append: separator_class,
+              width: '20px',
+              height: '20px',
+              fill: 'currentColor'
+            %}
+          </span>
+        {% endif %}
+        {% if text_3 != blank %}
+          <span class="text-part">{{ text_3 | strip }}</span>
+          <span class="arrow-separator">
+            {% render 'icon-playback',
+              class: 'bi bi-caret-right-fill ' | append: separator_class,
+              width: '20px',
+              height: '20px',
+              fill: 'currentColor'
+            %}
+          </span>
+        {% endif %}
+      {% endfor %}
+    {% endif %}
+  </div>
+</div>
+
