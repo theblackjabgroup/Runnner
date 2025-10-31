@@ -37,8 +37,15 @@
       <span class="mx-2 facets-text-color">/</span>
       <h1 class="!text-[1.6rem] !font-light uppercase facets-text-color">
         <span class="visually-hidden">{{ 'sections.collection_template.title' | t }}: </span>
-        {{- collection.title | escape -}}
+        {%- if results.terms -%}
+          Search Results
+        {%- else -%}
+          {{- collection.title | escape -}}
+        {%- endif -%}
       </h1>
+      {%- if results.terms and results.results_count -%}
+        <span class="mx-2 facets-text-color !text-[1.6rem] !font-light">[{{ results.results_count }}]</span>
+      {%- endif -%}
     </div>
   {% endif %}
   {%- if filter_type == 'vertical' or filter_type == 'horizontal' -%}
@@ -164,7 +171,30 @@
                             {{ 'products.facets.filter_and_operator_subtitle' | t | default: 'All selected' }}
                           </span>
                         {%- endif -%}
-                        <span class="pmorph__icon" aria-hidden="true"></span>
+                        {% if facet_custom_icon_collapsed %}
+                          <span class="custom-facet-icon" aria-hidden="true" data-icon-type="custom">
+                            <img
+                              src="{{ facet_custom_icon_collapsed | image_url: width: 48 }}"
+                              alt=""
+                              width="48"
+                              height="48"
+                              class="custom-icon-collapsed"
+                              style="width: var(--size); height: var(--size); display: block;"
+                            >
+                            {% if facet_custom_icon_expanded %}
+                              <img
+                                src="{{ facet_custom_icon_expanded | image_url: width: 48 }}"
+                                alt=""
+                                width="48"
+                                height="48"
+                                class="custom-icon-expanded"
+                                style="width: var(--size); height: var(--size); display: none;"
+                              >
+                            {% endif %}
+                          </span>
+                        {% else %}
+                          <span class="pmorph__icon" aria-hidden="true"></span>
+                        {% endif %}
                       </div>
                     </summary>
                     <div
@@ -307,7 +337,30 @@
                         >
                           {{- filter.label | escape -}}
                         </h1>
-                        <span class="pmorph__icon" aria-hidden="true"></span>
+                        {% if facet_custom_icon_collapsed %}
+                          <span class="custom-facet-icon" aria-hidden="true" data-icon-type="custom">
+                            <img
+                              src="{{ facet_custom_icon_collapsed | image_url: width: 48 }}"
+                              alt=""
+                              width="48"
+                              height="48"
+                              class="custom-icon-collapsed"
+                              style="width: var(--size); height: var(--size); display: block;"
+                            >
+                            {% if facet_custom_icon_expanded %}
+                              <img
+                                src="{{ facet_custom_icon_expanded | image_url: width: 48 }}"
+                                alt=""
+                                width="48"
+                                height="48"
+                                class="custom-icon-expanded"
+                                style="width: var(--size); height: var(--size); display: none;"
+                              >
+                            {% endif %}
+                          </span>
+                        {% else %}
+                          <span class="pmorph__icon" aria-hidden="true"></span>
+                        {% endif %}
                       </div>
                     </summary>
                     <div
@@ -341,8 +394,31 @@
                   data-facet-summary="sort"
                 >
                   <div class="flex items-center">
-                    <h1 class="uppercase !text-[16px] w-[75px] !font-[500] facets-text-color">Sort By</h1>
-                    <span class="pmorph__icon" aria-hidden="true"></span>
+                    <h1 class="uppercase !text-[16px]  !font-[500] facets-text-color">Sort By</h1>
+                    {% if facet_custom_icon_collapsed %}
+                      <span class="custom-facet-icon" aria-hidden="true" data-icon-type="custom">
+                        <img
+                          src="{{ facet_custom_icon_collapsed | image_url: width: 48 }}"
+                          alt=""
+                          width="48"
+                          height="48"
+                          class="custom-icon-collapsed"
+                          style="width: var(--size); height: var(--size); display: block;"
+                        >
+                        {% if facet_custom_icon_expanded %}
+                          <img
+                            src="{{ facet_custom_icon_expanded | image_url: width: 48 }}"
+                            alt=""
+                            width="48"
+                            height="48"
+                            class="custom-icon-expanded"
+                            style="width: var(--size); height: var(--size); display: none;"
+                          >
+                        {% endif %}
+                      </span>
+                    {% else %}
+                      <span class="pmorph__icon" aria-hidden="true"></span>
+                    {% endif %}
                   </div>
                 </summary>
                 <div
@@ -539,8 +615,8 @@
                   {% endif %}
                 {%- endfor -%}
 
-                <!-- Sort by tag -->
-                {%- if results.sort_by -%}
+                <!-- Sort by tag - Hide default sort (relevance for search) -->
+                {%- if results.sort_by and results.sort_by != results.default_sort_by -%}
                   {%- for option in results.sort_options -%}
                     {%- if option.value == results.sort_by -%}
                       <div class="active-filter-tag">
@@ -659,8 +735,8 @@
         {% endif %}
       {%- endfor -%}
 
-      <!-- Sort by tag -->
-      {%- if results.sort_by -%}
+      <!-- Sort by tag - Hide default sort (relevance for search) -->
+      {%- if results.sort_by and results.sort_by != results.default_sort_by -%}
         {%- for option in results.sort_options -%}
           {%- if option.value == results.sort_by -%}
             <div class="active-filter-tag">
@@ -929,6 +1005,31 @@
       form.submit();
     }
   }
+
+  // Global AJAX filter application function
+  window.applyFiltersAjax = function () {
+    // Get the active form (desktop or mobile)
+    const desktopForm = document.getElementById('FacetFiltersForm');
+    const mobileForm = document.getElementById('FacetFiltersFormMobile');
+    const activeForm = mobileForm && mobileForm.closest('.mobile-filter-overlay.active') ? mobileForm : desktopForm;
+
+    if (!activeForm) {
+      console.error('No filter form found');
+      return;
+    }
+
+    // Create search params from form data
+    const formData = new FormData(activeForm);
+    const searchParams = new URLSearchParams(formData).toString();
+
+    // Use FacetFiltersForm to render the page with new filters
+    if (typeof FacetFiltersForm !== 'undefined' && typeof FacetFiltersForm.renderPage === 'function') {
+      FacetFiltersForm.renderPage(searchParams, null);
+    } else {
+      // Fallback to form submission
+      activeForm.submit();
+    }
+  };
 </script>
 
 <style>
@@ -948,8 +1049,8 @@
     --ease-open: ease;
     --ease-close: ease;
     --fg: var(--text);
-    --size: 12px;
-    --thickness: 2px;
+    --size: {{ facet_icon_size | default: 12 }}px;
+    --thickness: {{ facet_icon_thickness | default: 2 }}px;
   }
 
   .pmorph__icon {
@@ -1018,6 +1119,39 @@
     font-size: var(--tm-b-3-size);
   }
 
+  /* Custom Icon Styles */
+  .custom-facet-icon {
+    position: relative;
+    width: var(--size);
+    height: var(--size);
+    flex-shrink: 0;
+    margin-left: 6px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .custom-facet-icon img {
+    transition: opacity var(--dur) var(--ease-open);
+  }
+
+  /* Toggle custom icons on expand */
+  details[open] .custom-facet-icon .custom-icon-collapsed {
+    display: none !important;
+  }
+
+  details[open] .custom-facet-icon .custom-icon-expanded {
+    display: block !important;
+  }
+
+  details:not([open]) .custom-facet-icon .custom-icon-collapsed {
+    display: block !important;
+  }
+
+  details:not([open]) .custom-facet-icon .custom-icon-expanded {
+    display: none !important;
+  }
+
   .facets__summary-label {
     margin-right: 6px !important;
     font-family: var(--font-heading-family) !important;
@@ -1072,7 +1206,7 @@
   }
 
   .facet-checkbox > input[type='radio']:checked + span + .svg-wrapper + span {
-    font-weight: bold;
+    font-weight: var(--weight-bold);
   }
 
   .facet-checkbox > input[type='radio'] ~ svg,
@@ -1191,18 +1325,19 @@
     left: 0;
     right: 0;
     bottom: 0;
-    background: rgba(0, 0, 0, 0.5);
+    background: rgba(0, 0, 0, 0);
     z-index: 999999 !important; /* Much higher than header */
-    opacity: 0;
+    opacity: 1;
     visibility: hidden;
-    transition: all 0.3s ease;
+    transition: background-color var(--filters-drawer-speed, 0.6s) ease,
+                visibility var(--filters-drawer-speed, 0.6s) ease;
     display: flex;
     justify-content: flex-end;
     align-items: stretch;
   }
 
   .mobile-filter-overlay.active {
-    opacity: 1;
+    background: rgba(0, 0, 0, 0.5);
     visibility: visible;
   }
 
@@ -1212,8 +1347,8 @@
     width: 90%;
     max-width: 400px;
     background: white;
-    transform: translateX(100%);
-    transition: transform 0.3s ease;
+    transform: translateX(110%);
+    transition: transform var(--filters-drawer-speed, 0.6s) ease;
     display: flex;
     flex-direction: column;
     overflow: hidden;
@@ -1222,7 +1357,7 @@
   }
 
   .mobile-filter-overlay.active .mobile-filter-drawer {
-    transform: translateX(0%);
+    transform: translateX(11%);
   }
 
   .mobile-filter-header {
@@ -1356,7 +1491,7 @@
     left: 50%;
     transform: translate(-50%, -50%);
     font-size: 10px;
-    font-weight: bold;
+    font-weight: var(--weight-bold);
   }
 
   .mobile-filter-label {
@@ -1516,7 +1651,15 @@
   function openMobileFilters() {
     const overlay = document.getElementById('mobile-filter-overlay');
     if (overlay) {
-      overlay.classList.add('active');
+      // Reset overlay state for animation
+      overlay.style.display = 'block';
+      overlay.classList.remove('active'); // Ensure clean state
+
+      // Use requestAnimationFrame to ensure proper animation triggering
+      requestAnimationFrame(() => {
+        overlay.classList.add('active');
+      });
+
       document.body.style.overflow = 'hidden';
 
       // Change header z-index to 1 when mobile filters are open
@@ -1528,6 +1671,13 @@
         const footerHeight = footer.offsetHeight;
         document.documentElement.style.setProperty('--mobile-footer-height', `${footerHeight}px`);
       }
+
+      // Re-attach mobile filter listeners when drawer opens
+      setTimeout(() => {
+        if (typeof attachMobileFilterListeners === 'function') {
+          attachMobileFilterListeners();
+        }
+      }, 100);
     }
   }
 
@@ -1537,8 +1687,17 @@
       overlay.classList.remove('active');
       document.body.style.overflow = '';
 
-      // Reset header z-index back to 2 when mobile filters are closed
-      setHeaderZIndex('2');
+      // Wait for animation to complete before changing z-index and hiding overlay
+      const filtersDrawerSpeed = getComputedStyle(document.documentElement)
+        .getPropertyValue('--filters-drawer-speed')
+        .trim();
+      const animationDuration = parseFloat(filtersDrawerSpeed) * 1000 || 600;
+
+      setTimeout(() => {
+        // Reset header z-index back to 2 when mobile filters are closed
+        setHeaderZIndex('2');
+        overlay.style.display = 'none';
+      }, animationDuration);
     }
   }
 
@@ -1553,6 +1712,70 @@
     });
   });
 
+  // Function to attach mobile filter listeners (can be called multiple times)
+  function attachMobileFilterListeners() {
+    // Handle checkbox changes for mobile filters
+    const filterOptions = document.querySelectorAll('.mobile-filter-option');
+    filterOptions.forEach((option) => {
+      // Remove existing listener to avoid duplicates
+      const clonedOption = option.cloneNode(true);
+      option.parentNode.replaceChild(clonedOption, option);
+    });
+
+    // Reselect after cloning
+    document.querySelectorAll('.mobile-filter-option').forEach((option) => {
+      option.addEventListener('click', function (e) {
+        if (this.classList.contains('disabled')) {
+          e.preventDefault();
+          return;
+        }
+
+        const checkbox = this.querySelector('input[type="checkbox"]');
+        if (checkbox && e.target !== checkbox) {
+          checkbox.checked = !checkbox.checked;
+          
+          // Manually dispatch change event (which will trigger the change listener below)
+          // The change listener handles both visual state update and form submission
+          checkbox.dispatchEvent(new Event('change', { bubbles: true }));
+        }
+      });
+    });
+
+    // Update active state based on initial checked state
+    document.querySelectorAll('.mobile-filter-option').forEach((option) => {
+      const checkbox = option.querySelector('input[type="checkbox"]');
+      if (checkbox && checkbox.checked) {
+        option.classList.add('active');
+      }
+    });
+
+    // Handle mobile filter checkboxes change events (triggered by user or programmatic change)
+    const mobileCheckboxes = document.querySelectorAll('.mobile-filter-option input[type="checkbox"]');
+    mobileCheckboxes.forEach((checkbox) => {
+      checkbox.addEventListener('change', function () {
+        // Update visual state
+        const option = this.closest('.mobile-filter-option');
+        if (option) {
+          option.classList.toggle('active', this.checked);
+        }
+        
+        // Apply filters with delay to allow for multiple selections
+        clearTimeout(window.mobileFilterTimeout);
+        window.mobileFilterTimeout = setTimeout(() => {
+          if (typeof window.applyFiltersAjax === 'function') {
+            window.applyFiltersAjax();
+          } else {
+            // Fallback to form submission
+            const form = this.closest('form');
+            if (form) {
+              form.submit();
+            }
+          }
+        }, 300);
+      });
+    });
+  }
+
   // Close on overlay click
   document.addEventListener('DOMContentLoaded', function () {
     const overlay = document.getElementById('mobile-filter-overlay');
@@ -1564,32 +1787,8 @@
       });
     }
 
-    // Handle checkbox changes for mobile filters
-    const filterOptions = document.querySelectorAll('.mobile-filter-option');
-    filterOptions.forEach((option) => {
-      option.addEventListener('click', function (e) {
-        if (this.classList.contains('disabled')) {
-          e.preventDefault();
-          return;
-        }
-
-        const checkbox = this.querySelector('input[type="checkbox"]');
-        if (checkbox && e.target !== checkbox) {
-          checkbox.checked = !checkbox.checked;
-          checkbox.dispatchEvent(new Event('change', { bubbles: true }));
-        }
-
-        this.classList.toggle('active', checkbox.checked);
-      });
-    });
-
-    // Update active state based on initial checked state
-    filterOptions.forEach((option) => {
-      const checkbox = option.querySelector('input[type="checkbox"]');
-      if (checkbox && checkbox.checked) {
-        option.classList.add('active');
-      }
-    });
+    // Initialize mobile filter listeners
+    attachMobileFilterListeners();
 
     // Handle regular filter checkboxes (desktop) with AJAX
     const regularCheckboxes = document.querySelectorAll('.facet-checkbox input[type="checkbox"]');
@@ -1598,20 +1797,6 @@
         // Add a small delay to allow for multiple checkbox changes
         clearTimeout(window.filterTimeout);
         window.filterTimeout = setTimeout(() => {
-          if (typeof window.applyFiltersAjax === 'function') {
-            window.applyFiltersAjax();
-          }
-        }, 300);
-      });
-    });
-
-    // Handle mobile filter checkboxes with AJAX
-    const mobileCheckboxes = document.querySelectorAll('.mobile-filter-option input[type="checkbox"]');
-    mobileCheckboxes.forEach((checkbox) => {
-      checkbox.addEventListener('change', function () {
-        // Add a small delay to allow for multiple checkbox changes
-        clearTimeout(window.mobileFilterTimeout);
-        window.mobileFilterTimeout = setTimeout(() => {
           if (typeof window.applyFiltersAjax === 'function') {
             window.applyFiltersAjax();
           }
@@ -1732,73 +1917,51 @@
 
   // Clear all filters function
   window.clearAllFilters = function () {
-    // Uncheck all filter checkboxes
-    document.querySelectorAll('input[type="checkbox"][name^="filter."]').forEach((input) => {
-      input.checked = false;
-    });
-
-    // Clear all price range inputs
-    document.querySelectorAll('input[type="number"]').forEach((input) => {
-      input.value = '';
-    });
-
-    // Reset sort to default
-    const sortInputs = document.querySelectorAll('input[name="sort_by"]');
-    sortInputs.forEach((input) => {
-      input.checked = false;
-    });
-
-    // Hide the tags container immediately
-    const tagsContainer = document.querySelector('.active-filters-tags-container');
-    if (tagsContainer) {
-      tagsContainer.style.display = 'none';
-    }
-
-    // Apply the filter changes
-    if (typeof window.applyFiltersAjax === 'function') {
-      window.applyFiltersAjax();
+    // For search pages, preserve the search query
+    let searchQuery = '';
+    
+    // Try to get search query from input
+    const searchInput = document.querySelector('input[name="q"]');
+    if (searchInput && searchInput.value) {
+      searchQuery = searchInput.value;
     } else {
-      // Fallback to form submission
-      const form = document.querySelector('#FacetFiltersForm');
-      if (form) {
-        form.submit();
-      }
+      // Fallback: get from URL if input is empty
+      const urlParams = new URLSearchParams(window.location.search);
+      searchQuery = urlParams.get('q') || '';
+    }
+    
+    // Navigate to base URL with search query but no filters
+    if (searchQuery) {
+      // Search page - keep the search term but clear filters
+      window.location.href = '{{ routes.search_url }}?q=' + encodeURIComponent(searchQuery) + '&options%5Bprefix%5D=last';
+    } else {
+      // Collection page - go to base collection URL
+      window.location.href = '{{ results_url | split: '?' | first }}';
     }
   };
 
   // Clear all filters function for mobile
   window.clearAllFiltersMobile = function () {
-    // Uncheck all filter checkboxes in mobile form
-    document.querySelectorAll('#FacetFiltersFormMobile input[type="checkbox"][name^="filter."]').forEach((input) => {
-      input.checked = false;
-    });
-
-    // Clear all price range inputs in mobile form
-    document.querySelectorAll('#FacetFiltersFormMobile input[type="number"]').forEach((input) => {
-      input.value = '';
-    });
-
-    // Reset sort to default
-    const sortInputs = document.querySelectorAll('input[name="sort_by"]');
-    sortInputs.forEach((input) => {
-      input.checked = false;
-    });
-
-    // Hide the mobile tags container immediately
-    const tagsContainer = document.querySelector('.active-filters-tags-container-mobile');
-    if (tagsContainer) {
-      tagsContainer.style.display = 'none';
-    }
-
-    // Apply the filter changes
-    if (typeof window.applyFiltersAjax === 'function') {
-      window.applyFiltersAjax();
+    // For search pages, preserve the search query
+    let searchQuery = '';
+    
+    // Try to get search query from input
+    const searchInput = document.querySelector('input[name="q"]');
+    if (searchInput && searchInput.value) {
+      searchQuery = searchInput.value;
     } else {
-      // Fallback to form submission
-      const form = document.querySelector('#FacetFiltersFormMobile');
-      if (form) {
-        form.submit();
-      }
+      // Fallback: get from URL if input is empty
+      const urlParams = new URLSearchParams(window.location.search);
+      searchQuery = urlParams.get('q') || '';
+    }
+    
+    // Navigate to base URL with search query but no filters
+    if (searchQuery) {
+      // Search page - keep the search term but clear filters
+      window.location.href = '{{ routes.search_url }}?q=' + encodeURIComponent(searchQuery) + '&options%5Bprefix%5D=last';
+    } else {
+      // Collection page - go to base collection URL
+      window.location.href = '{{ results_url | split: '?' | first }}';
     }
   };
 

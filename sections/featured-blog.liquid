@@ -1,3 +1,9 @@
+{% assign side_padding = settings.side_space %}
+
+{% if side_padding == blank or side_padding == 0 %}
+  {% assign side_padding = 20 %}
+{% endif %}
+
 <style>
     #gridViewBtn {
     display: flex;
@@ -11,27 +17,15 @@
     align-items: center;
   }
      .featured-blog-section {
-       margin: {{ settings.sections_spacing }}px {{ settings.side_space}}px;
-       /* margin: 0; */
        background-color: rgb(var(--color-background)) !important;
        color: var(--text) !important;
        border-top: 1px solid var(--text);
-       padding: var(--space-3xl) 0px;
-       /* margin-right: 0; */
+       padding: var(--sections-spacing-top) {{ side_padding }}px var(--sections-spacing-bottom);
      }
 
-     @media (max-width: 749px) {
-       .featured-blog-section {
-         padding-top: var(--space-3xl);
-       }
-     }
-
-     .featured-blog-section ::selection {
-       /* background: none; */
-       color: var(--accent) !important;
-     }
+     /* Text selection styling removed - using default browser behavior */
      .featured-blog-section-title {
-       font-size: var(--t-h-3-size);
+       font-size: var(--t-h-4-size);
        font-weight: var(--t-h-4-weight);
        line-height: var(--t-h-4-line-height);
        font-family: var(--font-heading-family);
@@ -94,16 +88,16 @@
      }
 
      .featured-blog-grid.grid-view {
+       margin-top: 35px;
+     }
+
+     .featured-blog-grid.list-view {
        margin-top: 50px;
      }
 
      .featured-blog-grid.list-view {
-       margin-top: 20px;
-     }
-
-     .featured-blog-grid.list-view {
        /* border-bottom: 1px solid var(--text); */
-       width: 80%;
+       width: 85%;
        display: block;
      }
 
@@ -231,7 +225,7 @@
       font-size: 32px;
       line-height: 1.1;
       margin: 0 0 1rem;
-      font-weight: 500;
+      font-weight: var(--weight-medium);
       color: var(--text);
       letter-spacing: -1px;
       line-height: 85%;
@@ -362,6 +356,21 @@
        margin-bottom: 40px;
        display: flex;
        justify-content: end;
+       cursor: pointer;
+     }
+
+     /* Featured blog load more button styles */
+     .featured-blog-load-more-btn {
+       min-width: auto !important;
+       width: auto !important;
+       max-width: fit-content !important;
+
+     }
+
+     .featured-blog-load-more-btn,
+     .featured-blog-load-more-btn * {
+       cursor: pointer !important;
+       pointer-events: auto !important;
      }
 
      .featured-blog-grid.list-view .featured-blog-card-title{
@@ -440,6 +449,13 @@
     .blog-article-fb.animate {
       opacity: 1;
       transform: translateY(0);
+    }
+
+    /* Disable animations when global toggle is off */
+    body[data-scroll-animations="false"] .blog-article-fb {
+      opacity: 1 !important;
+      transform: none !important;
+      transition: none !important;
     }
 
      @media (max-width: 1025px) {
@@ -557,6 +573,8 @@
        .load-more-btn-fb-text-hover {
          font-size: var(--t-b-1-size);
        }
+
+
      }
 
      /* Ensure the container doesn’t clip anything */
@@ -583,7 +601,7 @@
 
 {% if section.settings.enabled %}
   <section
-    class="featured-blog-section color-{{ section.settings.color_scheme }}"
+    class="featured-blog-section color-{{ section.settings.color_scheme }}{% if section.settings.default_view == 'list' %} list-view{% endif %}"
     aria-labelledby="featured-blog-section-title"
   >
     <header class="featured-blog-section-header">
@@ -592,9 +610,9 @@
         <div class="toggle-slider"></div>
         <button
           id="gridViewBtn"
-          class="active"
+          class="{% if section.settings.default_view == 'grid' %}active{% endif %}"
           role="radio"
-          aria-checked="true"
+          aria-checked="{% if section.settings.default_view == 'grid' %}true{% else %}false{% endif %}"
           type="button"
           style="border-radius: 0px {{ settings.buttons_radius }}px {{ settings.buttons_radius }}px 0px;"
         >
@@ -602,8 +620,9 @@
         </button>
         <button
           id="listViewBtn"
+          class="{% if section.settings.default_view == 'list' %}active{% endif %}"
           role="radio"
-          aria-checked="false"
+          aria-checked="{% if section.settings.default_view == 'list' %}true{% else %}false{% endif %}"
           type="button"
           style=" border-radius: {{ settings.buttons_radius }}px 0px 0px {{ settings.buttons_radius }}px !important; padding-left: var(--space-lg)"
         >
@@ -619,24 +638,25 @@
     {% endif %}
 
     <div
-      class="featured-blog-grid grid-view"
+      class="featured-blog-grid {% if section.settings.default_view == 'list' %}list-view{% else %}grid-view{% endif %}"
       id="archiveContainer"
       aria-live="polite"
       aria-label="Blog articles"
-      data-post-limit="{{ section.settings.post_limit }}"
+      data-post-limit="3"
       data-total-posts="{% assign blog_handle = section.settings.blog %}{% if blog_handle != blank %}{{ blogs[blog_handle].articles.size }}{% else %}0{% endif %}"
+      data-default-view="{{ section.settings.default_view | default: 'grid' }}"
     >
       <!-- Separator before container (only visible in list view) -->
       <div class="list-separator"></div>
 
       {% assign blog_handle = section.settings.blog %}
-      {% assign post_limit = section.settings.post_limit | default: 3 %}
+      {% assign initial_display = 3 %}
       {% if blog_handle != blank and blogs[blog_handle].articles.size > 0 %}
         {% for article in blogs[blog_handle].articles %}
           <article
             aria-labelledby="article-title-{{ forloop.index0 }}"
             class="blog-article-fb"
-            {% if forloop.index > post_limit %}
+            {% if forloop.index > initial_display %}
               style="display: none;"
             {% endif %}
           >
@@ -721,7 +741,7 @@
         {% endfor %}
       {% else %}
         {% comment %} Show placeholder blog articles when no blog is selected {% endcomment %}
-        {% for i in (1..post_limit) %}
+        {% for i in (1..3) %}
           {%- assign placeholder_image = 'collection-1' -%}
           <article
             aria-labelledby="placeholder-article-title-{{ forloop.index0 }}"
@@ -783,13 +803,15 @@
         {% endfor %}
       {% endif %}
     </div>
-    {% if blog_handle != blank and blogs[blog_handle].articles.size > section.settings.post_limit %}
+    {% if blog_handle != blank and blogs[blog_handle].articles.size > 3 %}
       <div class="load-more-btn-fb-container">
         {% render 'primary-button',
           button_text: 'LOAD MORE',
           button_url: '',
-          primary_class: 'load-more-btn-fb',
-          data_attributes: 'data-increment="6"',
+          button_type: 'button',
+          button_id: 'featured-blog-load-more',
+          primary_class: 'featured-blog-load-more-btn',
+          data_attributes: 'data-articles-per-load="{{ section.settings.post_limit | default: 6 }}"',
           button_font_size: 'var(--t-b-1-size)',
           font_weight: 'var(--t-b-1-weight)',
           button_line_height: 'var(--t-b-1-line-height)',
@@ -841,80 +863,132 @@
 {% endif %}
 
 <script>
-  document.addEventListener('DOMContentLoaded', () => {
+  // Initialize the featured blog functionality
+  function initFeaturedBlog() {
     const gridBtn = document.getElementById('gridViewBtn');
     const listBtn = document.getElementById('listViewBtn');
     const sectionEl = document.querySelector('.featured-blog-section');
     const slider = document.querySelector('.toggle-slider');
     const container = document.getElementById('archiveContainer');
+
+    // Return early if elements don't exist
+    if (!gridBtn || !listBtn || !sectionEl || !slider || !container) return;
+
+    // Prevent re-initialization if already initialized
+    if (container.dataset.initialized === 'true') return;
+    container.dataset.initialized = 'true';
+
     const buttons = [gridBtn, listBtn];
-    const loadMoreBtn = document.querySelector('.load-more-btn-fb');
+    const loadMoreBtn = document.getElementById('featured-blog-load-more');
+
+    // Get the default view from the data attribute
+    const defaultView = container.dataset.defaultView || 'grid';
+    const isDefaultList = defaultView === 'list';
 
     // Featured Blog Fade-Up Animation
-    const blogArticles = document.querySelectorAll('.blog-article-fb');
+    // Check if animations are globally disabled via theme settings
+    const globalAnimationsEnabled = document.body.dataset.scrollAnimations !== 'false';
 
-    // Set initial state for all articles
-    blogArticles.forEach((article, index) => {
-      article.style.opacity = '0';
-      article.style.transform = 'translateY(50px)';
-      article.style.transition = `opacity 0.8s ease ${index * 0.1}s, transform 0.8s ease ${index * 0.1}s`;
-    });
+    if (globalAnimationsEnabled) {
+      const blogArticles = document.querySelectorAll('.blog-article-fb');
 
-    // Create intersection observer
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            // Trigger fade-up animation
-            entry.target.style.opacity = '1';
-            entry.target.style.transform = 'translateY(0)';
+      // Set initial state for all articles
+      blogArticles.forEach((article, index) => {
+        article.style.opacity = '0';
+        article.style.transform = 'translateY(50px)';
+        article.style.transition = `opacity 0.8s ease ${index * 0.1}s, transform 0.8s ease ${index * 0.1}s`;
+      });
 
-            // Stop observing this element
-            observer.unobserve(entry.target);
-          }
-        });
-      },
-      {
-        rootMargin: '0px 0px -100px 0px',
-        threshold: 0.1,
+      // Create intersection observer
+      const observer = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              // Trigger fade-up animation
+              entry.target.style.opacity = '1';
+              entry.target.style.transform = 'translateY(0)';
+
+              // Stop observing this element
+              observer.unobserve(entry.target);
+            }
+          });
+        },
+        {
+          rootMargin: '0px 0px -100px 0px',
+          threshold: 0.1,
+        }
+      );
+
+      // Observe all blog articles
+      blogArticles.forEach((article) => {
+        observer.observe(article);
+      });
+    } else {
+      // If animations disabled, make all articles immediately visible
+      const blogArticles = document.querySelectorAll('.blog-article-fb');
+      blogArticles.forEach((article) => {
+        article.style.opacity = '1';
+        article.style.transform = 'none';
+        article.style.transition = 'none';
+      });
+    }
+
+    // Load more functionality - use specific selector for featured blog section
+    const loadMoreContainer = document.querySelector('.featured-blog-section .load-more-btn-fb-container');
+    if (loadMoreContainer) {
+      const loadMoreBtnInside =
+        loadMoreContainer.querySelector('#featured-blog-load-more') ||
+        loadMoreContainer.querySelector('button') ||
+        loadMoreContainer.querySelector('a');
+
+      const incrementValue = (loadMoreBtnInside && loadMoreBtnInside.dataset.articlesPerLoad) || '6';
+      let increment = parseInt(incrementValue, 10);
+      // Fallback if increment is NaN
+      if (isNaN(increment)) {
+        increment = 6;
       }
-    );
-
-    // Observe all blog articles
-    blogArticles.forEach((article) => {
-      observer.observe(article);
-    });
-
-    // Load more functionality
-    if (loadMoreBtn) {
-      const increment = parseInt(loadMoreBtn.dataset.increment || '6', 10);
-      const postLimit = parseInt(container.dataset.postLimit || '5', 10);
+      const postLimit = parseInt(container.dataset.postLimit || '3', 10);
       let currentlyVisible = postLimit;
 
-      loadMoreBtn.addEventListener('click', function (e) {
-        e.preventDefault(); // Prevent any default button behavior
+      // Add click handler to the parent container to catch all clicks
+      loadMoreContainer.addEventListener('click', function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+
         const blogArticles = document.querySelectorAll('#archiveContainer .blog-article-fb');
-        const endIndex = Math.min(currentlyVisible + increment, blogArticles.length);
+        const safeIncrement = isNaN(increment) ? 6 : increment;
+        const endIndex = Math.min(currentlyVisible + safeIncrement, blogArticles.length);
+
         for (let i = currentlyVisible; i < endIndex; i++) {
           if (blogArticles[i]) {
             blogArticles[i].style.display = '';
-            // Add fade-up animation for newly shown articles
-            blogArticles[i].style.opacity = '0';
-            blogArticles[i].style.transform = 'translateY(50px)';
-            blogArticles[i].style.transition = `opacity 0.8s ease ${
-              (i - currentlyVisible) * 0.1
-            }s, transform 0.8s ease ${(i - currentlyVisible) * 0.1}s`;
 
-            // Trigger animation after a short delay
-            setTimeout(() => {
+            // Only animate if global animations are enabled
+            if (globalAnimationsEnabled) {
+              // Add fade-up animation for newly shown articles
+              blogArticles[i].style.opacity = '0';
+              blogArticles[i].style.transform = 'translateY(50px)';
+              blogArticles[i].style.transition = `opacity 0.8s ease ${
+                (i - currentlyVisible) * 0.1
+              }s, transform 0.8s ease ${(i - currentlyVisible) * 0.1}s`;
+
+              // Trigger animation after a short delay
+              setTimeout(() => {
+                blogArticles[i].style.opacity = '1';
+                blogArticles[i].style.transform = 'translateY(0)';
+              }, 50);
+            } else {
+              // If animations disabled, show immediately
               blogArticles[i].style.opacity = '1';
-              blogArticles[i].style.transform = 'translateY(0)';
-            }, 50);
+              blogArticles[i].style.transform = 'none';
+              blogArticles[i].style.transition = 'none';
+            }
           }
         }
         currentlyVisible = endIndex;
+
         if (currentlyVisible >= blogArticles.length) {
-          loadMoreBtn.parentElement.style.display = 'none';
+          loadMoreContainer.style.display = 'none';
         }
       });
 
@@ -925,8 +999,8 @@
         });
       };
 
-      gridBtn.addEventListener('click', updateVisibilityAfterViewChange);
-      listBtn.addEventListener('click', updateVisibilityAfterViewChange);
+      if (gridBtn) gridBtn.addEventListener('click', updateVisibilityAfterViewChange);
+      if (listBtn) listBtn.addEventListener('click', updateVisibilityAfterViewChange);
     }
 
     function updateSliderPos(isList) {
@@ -945,15 +1019,25 @@
       });
       container.style.opacity = 0;
       setTimeout(() => {
-        container.classList.toggle('list-view', toList);
-        container.classList.toggle('grid-view', !toList);
-        sectionEl.classList.toggle('list-view', toList);
+        // Explicitly remove and add classes to ensure proper switching
+        if (toList) {
+          container.classList.remove('grid-view');
+          container.classList.add('list-view');
+          sectionEl.classList.add('list-view');
+        } else {
+          container.classList.remove('list-view');
+          container.classList.add('grid-view');
+          sectionEl.classList.remove('list-view');
+        }
         updateSliderPos(toList);
         container.style.opacity = 1;
       }, 300);
     }
 
-    updateSliderPos(false);
+    // Initialize with the default view
+    updateSliderPos(isDefaultList);
+
+    // Add event listeners
     gridBtn.addEventListener('click', () => switchView(false));
     listBtn.addEventListener('click', () => switchView(true));
 
@@ -973,6 +1057,34 @@
     });
 
     window.addEventListener('resize', () => updateSliderPos(sectionEl.classList.contains('list-view')));
+  }
+
+  // Run on initial page load
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initFeaturedBlog);
+  } else {
+    // DOM is already ready, run immediately
+    initFeaturedBlog();
+  }
+
+  // Run when section is rendered/reloaded in theme editor
+  document.addEventListener('shopify:section:load', function (event) {
+    // Reset initialization flag to allow re-init
+    const container = document.getElementById('archiveContainer');
+    if (container) {
+      container.dataset.initialized = 'false';
+    }
+    // Small delay to ensure DOM is fully updated
+    setTimeout(initFeaturedBlog, 100);
+  });
+
+  document.addEventListener('shopify:section:reorder', function (event) {
+    // Reset initialization flag to allow re-init
+    const container = document.getElementById('archiveContainer');
+    if (container) {
+      container.dataset.initialized = 'false';
+    }
+    setTimeout(initFeaturedBlog, 100);
   });
 </script>
 
@@ -1005,9 +1117,10 @@
     {
       "type": "range",
       "id": "post_limit",
-      "label": "Number of Posts to Display",
+      "label": "Posts to Load Per Click",
+      "info": "Number of additional posts to show when 'Load More' is clicked. Initial display is always 3 posts.",
       "default": 6,
-      "min": 3,
+      "min": 1,
       "max": 20,
       "step": 1
     },
@@ -1016,6 +1129,23 @@
       "id": "color_scheme",
       "label": "t:sections.all.colors.label",
       "default": "scheme-1"
+    },
+    {
+      "type": "select",
+      "id": "default_view",
+      "label": "Default View",
+      "info": "Choose the default view that users will see when the page loads",
+      "options": [
+        {
+          "value": "grid",
+          "label": "Grid View"
+        },
+        {
+          "value": "list",
+          "label": "List View"
+        }
+      ],
+      "default": "grid"
     }
   ],
   "presets": [
@@ -1024,7 +1154,7 @@
       "settings": {
         "enabled": true,
         "heading": "Featured Blogs",
-        "post_limit": 3
+        "post_limit": 6
       }
     }
   ]

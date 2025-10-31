@@ -1,6 +1,11 @@
 {% comment %}
   Product Card Snippet
-  Usage: {% render 'new-product-card', product: product, collection: collection %}
+  Usage: {% render 'new-product-card', product: product, collection: collection, card_color_scheme: 'scheme-1' %}
+
+  Parameters:
+  - product: Product object (required)
+  - collection: Collection object (optional)
+  - card_color_scheme: Color scheme for the card (optional, defaults to none)
 {% endcomment %}
 
 {% assign product_id = product.id %}
@@ -9,20 +14,25 @@
 {% assign product_available = product.available %}
 {% assign product_images = product.images %}
 
-{% comment %} Check for size variants {% endcomment %}
+{% comment %} Check for size and color variants {% endcomment %}
 {% assign has_size_variants = false %}
+{% assign has_color_variants = false %}
+{% assign color_option = null %}
 {% unless product.has_only_default_variant %}
   {% for option in product.options_with_values %}
     {% assign option_name_lower = option.name | downcase %}
     {% if option_name_lower == 'size' or option_name_lower contains 'size' %}
       {% assign has_size_variants = true %}
-      {% break %}
+    {% endif %}
+    {% if option_name_lower == 'color' or option_name_lower == 'colour' %}
+      {% assign has_color_variants = true %}
+      {% assign color_option = option %}
     {% endif %}
   {% endfor %}
 {% endunless %}
 
 <div
-  class="new-product-card scroll-fade-trigger scroll-fade-up"
+  class="new-product-card scroll-fade-trigger scroll-fade-up{% if card_color_scheme %} color-{{ card_color_scheme }} gradient{% endif %}"
   data-product-id="{{ product_id }}"
 >
   <div class="new-product-image-wrapper" aria-label="Product images for {{ product_title }}">
@@ -235,14 +245,14 @@
   .best-seller,
   .low-stock {
     position: absolute;
-    top: 10px;
-    left: 10px;
+    top: 0px;
+    left: 0px;
     z-index: 10;
     padding: 4px 8px;
     border-radius: 4px;
     font-size: 12px;
     white-space: nowrap;
-    font-weight: 600;
+    font-weight: var(--weight-semibold);
     text-transform: uppercase;
     letter-spacing: 0.5px;
   }
@@ -270,7 +280,7 @@
     top: 50%;
     transform: translateY(-50%);
     z-index: var(--z-content-elevated);
-    width: 40px;
+    width: 30px;
     height: 40px;
     padding: 6px;
     display: flex;
@@ -288,7 +298,8 @@
   }
 
   .new-image-nav-arrow:hover {
-    background-color: rgba(68, 68, 68, 0.15);
+    background-color: var(--disabled_text);
+    opacity: 0.3;
   }
 
   .new-product-image-wrapper:hover .new-image-nav-arrow svg {
@@ -396,9 +407,10 @@
   .new-size-options-wrapper {
     display: flex !important;
     flex-direction: row !important;
+    flex-wrap: wrap !important;
     gap: 5px !important;
     align-items: center;
-    justify-content: flex-end;
+    justify-content: flex-start;
   }
 
   .new-product-image-wrapper:hover .new-add-to-cart-btn[data-has-variants='true'] {

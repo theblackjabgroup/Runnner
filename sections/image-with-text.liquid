@@ -384,8 +384,13 @@
       position: absolute;
       left: 0;
       width: 100%;
-      height: calc(100% - calc({{ settings.sections_spacing }}px * 2));
-      margin-top: {{ settings.sections_spacing }}px;
+      {% if section.settings.enable_fullscreen %}
+        height: 100%;
+        margin-top: 0;
+      {% else %}
+        height: calc(100% - (var(--sections-spacing-top) + var(--sections-spacing-bottom)));
+        margin-top: var(--sections-spacing-top);
+      {% endif %}
       min-height: 0;
       display: flex;
       pointer-events: none;
@@ -403,10 +408,17 @@
 
     @media (max-width: 749px) {
       .image-with-text-text-content-wrapper-{{ section.id }} {
-        left: {{ settings.side_space }}px;
-        width: calc(100% - {{ settings.side_space | times: 2 }}px);
-        height: calc({{ section.settings.img_height_mobile }}px - calc({{ settings.sections_spacing }}px * 2));
-        margin-top: {{ settings.sections_spacing }}px;
+        {% if section.settings.enable_fullscreen %}
+          left: 0;
+          width: 100%;
+          height: {{ section.settings.img_height_mobile }}px;
+          margin-top: 0;
+        {% else %}
+          left: {{ settings.side_space }}px;
+          width: calc(100% - {{ settings.side_space | times: 2 }}px);
+          height: calc({{ section.settings.img_height_mobile }}px - (var(--sections-spacing-top) + var(--sections-spacing-bottom)));
+          margin-top: var(--sections-spacing-top);
+        {% endif %}
       }
     }
 
@@ -598,7 +610,19 @@
 
 
   .image-with-text-media-section-{{ section.id }}{
-    padding: {{ settings.sections_spacing }}px {{ settings.side_space}}px;
+    {% if section.settings.enable_fullscreen %}
+      padding: 0;
+    {% else %}
+      padding: {{ section.settings.section_top_padding | default: 0 }}px var(--sections-side-space) var(--sections-spacing-bottom);
+    {% endif %}
+  }
+
+  @media (max-width: 749px) {
+    .image-with-text-media-section-{{ section.id }}{
+      {% unless section.settings.enable_fullscreen %}
+        padding-top: {{ section.settings.section_top_padding_mobile | default: 0 }}px !important;
+      {% endunless %}
+    }
   }
 
   .remove_button_svg .primary-slide-button-arrow{
@@ -627,25 +651,33 @@
         role="img"
         aria-label="{{ section.settings.image.alt | escape | default: 'Background image' }}"
       >
-        <img
-          srcset="
-            {% if section.settings.image.width >= 375 %}{{ section.settings.image | image_url: width: 375 }} 375w,{% endif %}
-            {% if section.settings.image.width >= 550 %}{{ section.settings.image | image_url: width: 550 }} 550w,{% endif %}
-            {% if section.settings.image.width >= 750 %}{{ section.settings.image | image_url: width: 750 }} 750w,{% endif %}
-            {% if section.settings.image.width >= 1100 %}{{ section.settings.image | image_url: width: 1100 }} 1100w,{% endif %}
-            {% if section.settings.image.width >= 1500 %}{{ section.settings.image | image_url: width: 1500 }} 1500w,{% endif %}
-            {% if section.settings.image.width >= 2200 %}{{ section.settings.image | image_url: width: 2200 }} 2200w,{% endif %}
-            {{ section.settings.image | image_url }} {{ section.settings.image.width }}w
-          "
-          sizes="100vw"
-          height="auto"
-          width="auto"
-          src="{{ section.settings.image | image_url: width: 1500 }}"
-          alt="{{ section.settings.image.alt | escape | default: 'Background image' }}"
-          class="w-full h-full object-cover"
-          loading="lazy"
-          style="width: 100%; height: 100%; min-height: 100%; display: block; position: relative; z-index: 0;"
-        >
+        <picture>
+          {% if section.settings.mobile_image != blank %}
+            <source
+              media="(max-width: 640px)"
+              srcset="{{ section.settings.mobile_image | image_url: width: 640 }}"
+            >
+          {% endif %}
+          <img
+            srcset="
+              {% if section.settings.image.width >= 375 %}{{ section.settings.image | image_url: width: 375 }} 375w,{% endif %}
+              {% if section.settings.image.width >= 550 %}{{ section.settings.image | image_url: width: 550 }} 550w,{% endif %}
+              {% if section.settings.image.width >= 750 %}{{ section.settings.image | image_url: width: 750 }} 750w,{% endif %}
+              {% if section.settings.image.width >= 1100 %}{{ section.settings.image | image_url: width: 1100 }} 1100w,{% endif %}
+              {% if section.settings.image.width >= 1500 %}{{ section.settings.image | image_url: width: 1500 }} 1500w,{% endif %}
+              {% if section.settings.image.width >= 2200 %}{{ section.settings.image | image_url: width: 2200 }} 2200w,{% endif %}
+              {{ section.settings.image | image_url }} {{ section.settings.image.width }}w
+            "
+            sizes="100vw"
+            height="auto"
+            width="auto"
+            src="{{ section.settings.image | image_url: width: 1500 }}"
+            alt="{{ section.settings.image.alt | escape | default: 'Background image' }}"
+            class="w-full h-full object-cover"
+            loading="lazy"
+            style="width: 100%; height: 100%; min-height: 100%; display: block; position: relative; z-index: 0;"
+          >
+        </picture>
       </div>
     {% else %}
       <div
@@ -801,8 +833,7 @@ window.addEventListener('load', function() {
     const overlay = document.querySelector('.image-with-text-media-overlay-{{ section.id }}');
     if (!overlay) return;
     setTimeout(() => {
-      overlay.style.opacity = '0';
-      overlay.addEventListener('transitionend', () => overlay.remove());
+      overlay.style.opacity = '{{ section.settings.overlay_final_opacity | divided_by: 100.0 | default: 0.3 }}';
     }, {{ section.settings.overlay_duration | times: 1000 | default: 1000 }});
     {% endif %}
   });
@@ -878,6 +909,15 @@ if (prefersReducedMotion) {
     element.style.opacity = '1';
   });
 } else {
+  // Check if animations are globally disabled via theme settings
+  const globalAnimationsEnabled = document.body.dataset.scrollAnimations !== 'false';
+  
+  if (!globalAnimationsEnabled) {
+    // If global animations disabled, make everything visible immediately
+    document.querySelectorAll('.image-with-text-letter-animation, .image-with-text-image-with-text-letter-animation, .date-animation, .text-animation, .button-animation').forEach(element => {
+      element.style.opacity = '1';
+    });
+  } else {
   const observer = new IntersectionObserver((entries, observer) => {
     entries.forEach(entry => {
       if (entry.isIntersecting) {
@@ -1106,6 +1146,7 @@ if (prefersReducedMotion) {
   document.querySelectorAll('.image-with-text-media-section-{{ section.id }}').forEach(section => {
     observer.observe(section);
   });
+  } // Close the else block for globalAnimationsEnabled
 }
 
 const buttons = document.querySelectorAll('.image-with-text-custom-button-css');
@@ -1140,7 +1181,14 @@ button.addEventListener('keydown', function(event) {
     {
       "type": "image_picker",
       "id": "image",
-      "label": "Image"
+      "label": "Desktop Image",
+      "info": "Image for desktop and tablet views"
+    },
+    {
+      "type": "image_picker",
+      "id": "mobile_image",
+      "label": "Mobile Image",
+      "info": "Image shown on mobile phones only (640px and below). Falls back to desktop image if not set."
     },
     {
       "type": "header",
@@ -1188,6 +1236,17 @@ button.addEventListener('keydown', function(event) {
       "label": "Overlay fade duration",
       "default": 2.5,
       "info": "How long the black overlay stays before fading out (in seconds)"
+    },
+    {
+      "type": "range",
+      "id": "overlay_final_opacity",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "unit": "%",
+      "label": "Overlay final opacity",
+      "default": 30,
+      "info": "Final opacity of the overlay after the fade animation completes (0% = fully transparent, 100% = fully opaque)"
     },
     {
       "type": "header",
@@ -1303,6 +1362,13 @@ button.addEventListener('keydown', function(event) {
       "content": "Section Size"
     },
     {
+      "type": "checkbox",
+      "id": "enable_fullscreen",
+      "label": "Enable fullscreen mode",
+      "default": true,
+      "info": "Overrides global margins and paddings for a full-width, edge-to-edge display"
+    },
+    {
       "type": "range",
       "id": "img_height",
       "min": 300,
@@ -1321,6 +1387,28 @@ button.addEventListener('keydown', function(event) {
       "unit": "px",
       "label": "Section height (mobile)",
       "default": 500
+    },
+    {
+      "type": "range",
+      "id": "section_top_padding",
+      "min": 0,
+      "max": 200,
+      "step": 5,
+      "unit": "px",
+      "label": "Section top padding (desktop)",
+      "default": 10,
+      "info": "Overrides global top spacing when fullscreen is disabled"
+    },
+    {
+      "type": "range",
+      "id": "section_top_padding_mobile",
+      "min": 0,
+      "max": 200,
+      "step": 5,
+      "unit": "px",
+      "label": "Section top padding (mobile)",
+      "default": 10,
+      "info": "Overrides global top spacing when fullscreen is disabled on mobile"
     },
     {
       "type": "header",

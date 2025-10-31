@@ -1,6 +1,4 @@
 document.addEventListener('DOMContentLoaded', function () {
-  const loadMoreBtn = document.getElementById('load-more-btn-fb');
-
   function updateLastVisibleMargin() {
     // Remove margin override from all articles
     document.querySelectorAll('.blog-article').forEach((article) => {
@@ -18,22 +16,21 @@ document.addEventListener('DOMContentLoaded', function () {
 
   updateLastVisibleMargin(); // Call on initial load
 
-  if (loadMoreBtn) {
-    loadMoreBtn.addEventListener('mouseenter', function () {
-      loadMoreBtn.classList.remove('animate');
-      void loadMoreBtn.offsetWidth; // Trigger reflow
-      loadMoreBtn.classList.add('animate');
-    });
+  // Use parent container approach to handle clicks
+  const loadMoreContainer = document.querySelector('.blog-section-container .load-more-btn-fb-container');
+  if (loadMoreContainer) {
+    const loadMoreBtn =
+      loadMoreContainer.querySelector('#load-more-btn-fb') ||
+      loadMoreContainer.querySelector('button') ||
+      loadMoreContainer.querySelector('a');
 
-    loadMoreBtn.addEventListener('animationend', function (e) {
-      if (e.target.classList.contains('load-more-text-hover')) {
-        loadMoreBtn.classList.remove('animate');
-      }
-    });
+    // Add click handler to the container to catch all clicks
+    loadMoreContainer.addEventListener('click', function (e) {
+      e.preventDefault();
+      e.stopPropagation();
 
-    loadMoreBtn.addEventListener('click', function () {
       const hiddenArticles = document.querySelectorAll('.blog-article.hidden-articles');
-      const articlesPerLoad = parseInt(loadMoreBtn.getAttribute('data-articles-per-load')) || 3;
+      const articlesPerLoad = parseInt((loadMoreBtn && loadMoreBtn.dataset.articlesPerLoad) || '3') || 3;
 
       for (let i = 0; i < Math.min(articlesPerLoad, hiddenArticles.length); i++) {
         const article = hiddenArticles[i];
@@ -54,11 +51,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
       const remainingHidden = document.querySelectorAll('.blog-article.hidden-articles');
       if (remainingHidden.length === 0) {
-        loadMoreBtn.style.display = 'none';
+        loadMoreContainer.style.display = 'none';
       }
-
-      const remaining = remainingHidden.length;
-      loadMoreBtn.setAttribute('data-remaining', remaining);
 
       updateLastVisibleMargin(); // Update the last visible article
     });

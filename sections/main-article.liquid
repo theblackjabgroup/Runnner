@@ -47,20 +47,66 @@
     .overlay-content .flex {
       width: 95vw !important;
     }
+
+    /* Remove all spacing - override inline styles */
+    .social-section {
+      padding-top: 0 !important;
+      padding-bottom: 0 !important;
+      padding-left: {{ settings.side_space }}px !important;
+      padding-right: {{ settings.side_space }}px !important;
+    }
+
+    /* Two-line layout: SHARE on line 1, buttons on line 2 */
+    .social-media {
+      display: flex !important;
+      flex-wrap: wrap !important;
+      margin: 0 !important;
+      padding: 0 !important;
+    }
+
+    /* SHARE takes full width (line 1) with no space below */
+    .sharebtn {
+      flex-basis: 100% !important;
+      margin-right: 0 !important;
+      margin-bottom: 0 !important;
+      padding: 0 !important;
+    }
+
+    /* All buttons on line 2 in horizontal row */
+    .fb, .tw, .em, .linked {
+      flex-shrink: 0 !important;
+      white-space: nowrap !important;
+      margin-right: 15px !important;
+    }
+
+    .linked {
+      margin-right: 0 !important;
+    }
   }
 </style>
 <section
   id="parallax-section"
   class="section1 color-{{ section.settings.color_scheme }} relative overflow-hidden items-start"
-  style="min-height: 100vh;padding-right:{{ settings.side_space }}px;"
+  {% if section.settings.enable_parallax %}
+    style="min-height: 100vh;padding-right:{{ settings.side_space }}px;"
+  {% else %}
+    style="padding-right:{{ settings.side_space }}px; padding-top: 50px;"
+  {% endif %}
+  data-parallax-enabled="{{ section.settings.enable_parallax }}"
 >
   <div
     class="parallax-container relative"
-    style="min-height: 191.5vh; padding-left:{{ settings.side_space }}px; padding-right:{{ settings.side_space }}px;"
+    {% if section.settings.enable_parallax %}
+      style="min-height: 191.5vh; padding-left:{{ settings.side_space }}px; padding-right:{{ settings.side_space }}px;"
+    {% else %}
+      style="padding-left:{{ settings.side_space }}px; padding-right:{{ settings.side_space }}px;"
+    {% endif %}
   >
-    <div class="overlay-placeholder" style="height: 188vh;"></div>
+    {% if section.settings.enable_parallax %}
+      <div class="overlay-placeholder" style="height: 188vh;"></div>
+    {% endif %}
 
-    <div class="overlay-content max-w-7xl relative flex flex-col" style="margin-top: 1.8vh;">
+    <div class="overlay-content max-w-7xl relative flex flex-col" {% if section.settings.enable_parallax %}style="margin-top: 1.8vh;"{% endif %}>
       {% if section.settings.show_date %}
         <div
           class="ml-4 show_date"
@@ -86,7 +132,11 @@
     {% if article.image %}
       <div
         class="parallax-image-overlay mb-10"
-        style="height: 101.4vh; width:49vw; padding-right:{{ settings.side_space }}px;"
+        {% if section.settings.enable_parallax %}
+          style="height: 101.4vh; width:49vw; padding-right:{{ settings.side_space }}px;"
+        {% else %}
+          style="width:100%; max-width: 1200px; margin: 40px auto; padding-right:{{ settings.side_space }}px;"
+        {% endif %}
       >
         <img
           srcset="
@@ -169,14 +219,13 @@
 >
 <div
   class="social-section"
-  style="font-weight:500; height: 7.8vh; padding-left:{{ settings.side_space}}px; padding-right:{{ settings.side_space }}px;"
+  style="font-weight:var(--weight-medium); padding-top: var(--space-xl); padding-bottom: var(--space-xl); padding-left:{{ settings.side_space}}px; padding-right:{{ settings.side_space }}px;"
 >
   <div
     class="social-media items-center "
-    style="color: var(--text); padding-top:13px; padding-bottom:20px; font-size:var(--tm-b-2-size);height: 7.8vh;"
+    style="color: var(--text); font-size:var(--tm-b-2-size); display: flex; align-items: center;"
   >
-    <span class="sharebtn text-xl md:text-2xl items-center;" style="margin-right:20px; margin-top:0.7vw">SHARE</span>
-
+    <span class="sharebtn text-xl md:text-2xl items-center;" style="margin-right:20px;">SHARE:</span>
 
     <a
       href="#"
@@ -185,7 +234,7 @@
       aria-label="Share on Facebook"
       class="fb text-xl md:text-2xl"
       style="margin-right:40px;"
-      onclick="var url = getCanonicalUrl(); window.open('https://www.facebook.com/sharer.php?u=' + encodeURIComponent(url), 'facebook-share', 'width=580,height=400'); return false;"
+      onclick="var url = getCanonicalUrl(); window.open('https://www.facebook.com/sharer.php?u=' + encodeURIComponent(url), '_blank'); return false;"
     >
       FACEBOOK
     </a>
@@ -197,7 +246,7 @@
       aria-label="Share on Twitter"
       class="tw text-xl md:text-2xl"
       style="margin-right:40px;"
-      onclick="var url = getCanonicalUrl(); window.open('https://twitter.com/intent/tweet?url=' + encodeURIComponent(url) + '&text=' + encodeURIComponent(document.title || '{{ article.title | escape }}'), 'twitter-share', 'width=580,height=400'); return false;"
+      onclick="var url = getCanonicalUrl(); window.open('https://twitter.com/intent/tweet?url=' + encodeURIComponent(url) + '&text=' + encodeURIComponent(document.title || '{{ article.title | escape }}'), '_blank'); return false;"
     >
       TWITTER
     </a>
@@ -219,7 +268,7 @@
       aria-label="Share on LinkedIn"
       class="linked text-xl md:text-2xl"
       style="margin-right:40px;"
-      onclick="var url = getCanonicalUrl(); window.open('https://www.linkedin.com/sharing/share-offsite/?url=' + encodeURIComponent(url), 'linkedin-share', 'width=580,height=400'); return false;"
+      onclick="var url = getCanonicalUrl(); window.open('https://www.linkedin.com/sharing/share-offsite/?url=' + encodeURIComponent(url), '_blank'); return false;"
     >
       LINKEDIN
     </a>
@@ -343,6 +392,13 @@
       "id": "color_scheme",
       "label": "Color Scheme",
       "default": "scheme-1"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_parallax",
+      "label": "Enable Parallax Effect",
+      "default": true,
+      "info": "Turn on/off the parallax scrolling effect for the article hero image"
     },
     {
       "type": "checkbox",

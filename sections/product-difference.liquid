@@ -1,3 +1,14 @@
+{%- if section.settings.enable_animations -%}
+  {{ 'scroll-animations.css' | asset_url | stylesheet_tag }}
+  <script src="{{ 'scroll-animations.js' | asset_url }}" defer></script>
+{%- endif -%}
+
+{% assign side_padding = settings.side_space %}
+
+{% if side_padding == blank or side_padding == 0 %}
+  {% assign side_padding = 20 %}
+{% endif %}
+
 <style>
     /* --- COMMENT: The main 'section' element now handles padding --- */
     .prod-diff-section {
@@ -10,7 +21,7 @@
       max-height: none;
       position: relative;
       z-index: var(--z-base);
-      padding: {{ section.settings.padding_top }}px {{ section.settings.padding_right }}px {{ section.settings.padding_bottom }}px {{ section.settings.padding_left }}px;
+      padding: var(--sections-spacing-top) {{ side_padding }}px var(--sections-spacing-bottom) {{ side_padding }}px;
     }
 
 
@@ -30,6 +41,17 @@
       cursor: col-resize;
       margin: {{ section.settings.margin_top }}px auto {{ section.settings.margin_bottom }}px auto;
       max-height: 90vh;
+      /* Initial state for entrance animation - same speed as product grid but longer duration for bigger section */
+      opacity: 0;
+      transform: translateY(100px);
+      animation: fadeInUp 1.2s ease forwards;
+    }
+
+    @keyframes fadeInUp {
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
     }
 
     /* --- COMMENT: Base style for BOTH layered images. Now uses height: 100% to fill its parent --- */
@@ -42,6 +64,23 @@
       pointer-events: none;
       background-color: rgb(var(--color-background)); /* Ensures placeholders are visible */
       z-index: 0;
+    }
+
+    /* Right side image with tint - starts transparent, animates in, then stays static */
+    .prod-diff-img-right {
+      opacity: 0;
+    }
+
+    /* Tint enabled - animates to 0.7 opacity using CSS transition */
+    .prod-diff-img-right.animate-tint:not(.no-tint) {
+      transition: opacity 1.2s ease;
+      opacity: 0.7;
+    }
+
+    /* Tint disabled - animates to full opacity using CSS transition */
+    .prod-diff-img-right.animate-tint.no-tint {
+      transition: opacity 1.2s ease;
+      opacity: 1;
     }
 
     .prod-diff-img picture {
@@ -61,7 +100,7 @@
     .mobile-only {
       display: block;
     }
-    
+
     .desktop-only {
       display: none;
     }
@@ -70,7 +109,7 @@
       .mobile-only {
         display: none;
       }
-      
+
       .desktop-only {
         display: block;
       }
@@ -110,9 +149,10 @@
       position: absolute;
       top: 50%; left: 50%;
       transform: translate(-50%, -50%);
-      pointer-events: none;
+      pointer-events: auto; /* Enable to receive hover events */
       z-index: var(--z-content);
       transition: transform 0.2s ease;
+      padding: 10px; /* Increase hover area */
     }
 
     /* --- COMMENT: A new class added by JavaScript to create the grab animation --- */
@@ -121,9 +161,19 @@
     }
 
     .prod-diff-slider-handle-chevron svg {
-      transition: all 0.2s ease;
       width: {{ section.settings.handle_width_desktop | default: 135 }}px;
       height: {{ section.settings.handle_height_desktop | default: 50 }}px;
+    }
+
+    /* Chevron arrow hover animation - matches quantity selector behavior */
+    #Handle-{{ section.id }} svg path {
+      transition: transform 0.2s ease;
+      transform-box: fill-box; /* Scale relative to path's own bounding box */
+      transform-origin: 50% 50%; /* Center of each individual path */
+    }
+
+    #Handle-{{ section.id }}.handle-hovered svg path {
+      transform: scale(1.2);
     }
 
     /* Responsive handle sizing for mobile */
@@ -221,51 +271,122 @@
 {%- endif -%}
 
 {%- comment -%} Calculate mobile aspect ratio independently - same approach as desktop {%- endcomment -%}
-{%- assign image_for_sizing_mobile = image_before_mobile | default: image_after_mobile | default: image_before | default: image_after -%}
+{%- assign image_for_sizing_mobile = image_before_mobile
+  | default: image_after_mobile
+  | default: image_before
+  | default: image_after
+-%}
 {%- assign mobile_aspect_ratio = 0 -%}
 {%- if image_for_sizing_mobile != blank -%}
   {%- assign mobile_aspect_ratio = image_for_sizing_mobile.aspect_ratio -%}
 {%- endif -%}
 
-<section class="prod-diff-section">
-    {%- comment -%}
-      The container no longer needs a separate style tag for its height.
-      It now uses the same variable as the main section.
-    {%- endcomment -%}
-    <style>
-      /* Mobile height calculation - uses mobile product aspect ratio */
+<section
+  class="prod-diff-section color-{{ section.settings.color_scheme }} {% if section.settings.enable_animations %}scroll-fade-trigger scroll-fade-up{% endif %}"
+  data-section-id="{{ section.id }}"
+>
+  {%- comment -%}
+    The container no longer needs a separate style tag for its height.
+    It now uses the same variable as the main section.
+  {%- endcomment -%}
+  <style>
+    /* Mobile height calculation - uses mobile product aspect ratio */
+    .prod-diff-container-{{ section.id }} {
+      {%- if mobile_aspect_ratio > 0 -%}
+        height: min({{ 100 | divided_by: mobile_aspect_ratio }}vw, 90vh);
+      {%- else -%}
+        height: 70vh;
+      {%- endif -%}
+    }
+
+    /* Desktop height calculation - uses desktop product aspect ratio */
+    @media screen and (min-width: 769px) {
       .prod-diff-container-{{ section.id }} {
-        {%- if mobile_aspect_ratio > 0 -%}
-          height: min({{ 100 | divided_by: mobile_aspect_ratio }}vw, 90vh);
+        {%- if desktop_aspect_ratio > 0 -%}
+          height: min({{ 100 | divided_by: desktop_aspect_ratio }}vw, 90vh);
         {%- else -%}
           height: 70vh;
         {%- endif -%}
       }
+    }
+  </style>
 
-      /* Desktop height calculation - uses desktop product aspect ratio */
-      @media screen and (min-width: 769px) {
-        .prod-diff-container-{{ section.id }} {
-          {%- if desktop_aspect_ratio > 0 -%}
-            height: min({{ 100 | divided_by: desktop_aspect_ratio }}vw, 90vh);
-          {%- else -%}
-            height: 70vh;
-          {%- endif -%}
-        }
-      }
-    </style>
+  <div
+    class="prod-diff-container prod-diff-container-{{ section.id }}"
+    data-section-id="{{ section.id }}"
+  >
+    {%- comment -%}
+      The structure is now two layered images instead of two side-by-side wrappers.
+      Each layer checks for its own image and falls back to a placeholder if needed.
+    {%- endcomment -%}
 
-    <div
-      class="prod-diff-container prod-diff-container-{{ section.id }}"
-      data-section-id="{{ section.id }}"
-    >
-      {%- comment -%}
-        The structure is now two layered images instead of two side-by-side wrappers.
-        Each layer checks for its own image and falls back to a placeholder if needed.
-      {%- endcomment -%}
+    {% if image_after != blank or image_after_mobile != blank %}
+      <picture>
+        {% if image_after_mobile != blank %}
+          <source
+            media="(max-width: 768px)"
+            srcset="
+              {%- liquid
+                assign widths = '375,550,768' | split: ','
+                for width in widths
+                  assign width_num = width | plus: 0
+                  if image_after_mobile.width >= width_num
+                    echo image_after_mobile | image_url: width: width_num
+                    echo ' '
+                    echo width_num
+                    echo 'w, '
+                  endif
+                endfor
+                echo image_after_mobile | image_url
+                echo ' '
+                echo image_after_mobile.width
+                echo 'w'
+              -%}
+            "
+            sizes="100vw"
+          >
+        {% endif %}
 
-      {% if image_after != blank or image_after_mobile != blank %}
+        {% assign desktop_image_after = image_after | default: image_after_mobile %}
+        <img
+          srcset="
+            {%- liquid
+              assign widths = '375,550,768,1100,1500,1780,2000,3000,3840' | split: ','
+              for width in widths
+                assign width_num = width | plus: 0
+                if desktop_image_after.width >= width_num
+                  echo desktop_image_after | image_url: width: width_num
+                  echo ' '
+                  echo width_num
+                  echo 'w, '
+                endif
+              endfor
+              echo desktop_image_after | image_url
+              echo ' '
+              echo desktop_image_after.width
+              echo 'w'
+            -%}
+          "
+          sizes="(min-width: 1200px) 1200px, (min-width: 768px) calc(100vw - 10rem), 100vw"
+          src="{{ desktop_image_after | image_url: width: 1800 }}"
+          class="prod-diff-img prod-diff-img-right{% if section.settings.enable_right_tint == false %} no-tint{% endif %}"
+          alt="{{ desktop_image_after.alt | escape }}"
+          width="{{ desktop_image_after.width }}"
+          height="{{ desktop_image_after.width | divided_by: desktop_image_after.aspect_ratio | round }}"
+          loading="eager"
+          fetchpriority="high"
+        >
+      </picture>
+    {% else %}
+      <div class="prod-diff-img prod-diff-img-right{% if section.settings.enable_right_tint == false %} no-tint{% endif %}">
+        {{ 'lifestyle-2' | placeholder_svg_tag: 'prod-diff-img' }}
+      </div>
+    {% endif %}
+
+    <div id="BeforeImage-{{ section.id }}" class="prod-diff-img prod-diff-img--before">
+      {% if image_before != blank or image_before_mobile != blank %}
         <picture>
-          {% if image_after_mobile != blank %}
+          {% if image_before_mobile != blank %}
             <source
               media="(max-width: 768px)"
               srcset="
@@ -273,273 +394,202 @@
                   assign widths = '375,550,768' | split: ','
                   for width in widths
                     assign width_num = width | plus: 0
-                    if image_after_mobile.width >= width_num
-                      echo image_after_mobile | image_url: width: width_num
+                    if image_before_mobile.width >= width_num
+                      echo image_before_mobile | image_url: width: width_num
                       echo ' '
                       echo width_num
                       echo 'w, '
                     endif
                   endfor
-                  echo image_after_mobile | image_url
+                  echo image_before_mobile | image_url
                   echo ' '
-                  echo image_after_mobile.width
+                  echo image_before_mobile.width
                   echo 'w'
                 -%}
               "
               sizes="100vw"
             >
           {% endif %}
-          
-          {% assign desktop_image_after = image_after | default: image_after_mobile %}
+
+          {% assign desktop_image_before = image_before | default: image_before_mobile %}
           <img
             srcset="
               {%- liquid
                 assign widths = '375,550,768,1100,1500,1780,2000,3000,3840' | split: ','
                 for width in widths
                   assign width_num = width | plus: 0
-                  if desktop_image_after.width >= width_num
-                    echo desktop_image_after | image_url: width: width_num
+                  if desktop_image_before.width >= width_num
+                    echo desktop_image_before | image_url: width: width_num
                     echo ' '
                     echo width_num
                     echo 'w, '
                   endif
                 endfor
-                echo desktop_image_after | image_url
+                echo desktop_image_before | image_url
                 echo ' '
-                echo desktop_image_after.width
+                echo desktop_image_before.width
                 echo 'w'
               -%}
             "
             sizes="(min-width: 1200px) 1200px, (min-width: 768px) calc(100vw - 10rem), 100vw"
-            src="{{ desktop_image_after | image_url: width: 1800 }}"
+            src="{{ desktop_image_before | image_url: width: 1800 }}"
             class="prod-diff-img"
-            alt="{{ desktop_image_after.alt | escape }}"
-            width="{{ desktop_image_after.width }}"
-            height="{{ desktop_image_after.width | divided_by: desktop_image_after.aspect_ratio | round }}"
+            alt="{{ desktop_image_before.alt | escape }}"
+            width="{{ desktop_image_before.width }}"
+            height="{{ desktop_image_before.width | divided_by: desktop_image_before.aspect_ratio | round }}"
             loading="eager"
             fetchpriority="high"
-            {% unless section.settings.enable_right_tint == false %}
-              style="opacity: 0.7;"
-            {% endunless %}
           >
         </picture>
       {% else %}
         <div
-          {% unless section.settings.enable_right_tint == false %}
-            style="opacity: 0.7;"
-          {% endunless %}
+          class="flex items-center justify-center w-full h-full"
+          style="background-color: var(--accent);"
+          role="img"
+          aria-label="Placeholder image"
         >
-          {{ 'lifestyle-2' | placeholder_svg_tag: 'prod-diff-img' }}
+          {{ 'lifestyle-2' | placeholder_svg_tag: 'prod-diff-img opacity-30' }}
         </div>
-      {% endif %}
-
-      <div id="BeforeImage-{{ section.id }}" class="prod-diff-img prod-diff-img--before">
-        {% if image_before != blank or image_before_mobile != blank %}
-          <picture>
-            {% if image_before_mobile != blank %}
-              <source
-                media="(max-width: 768px)"
-                srcset="
-                  {%- liquid
-                    assign widths = '375,550,768' | split: ','
-                    for width in widths
-                      assign width_num = width | plus: 0
-                      if image_before_mobile.width >= width_num
-                        echo image_before_mobile | image_url: width: width_num
-                        echo ' '
-                        echo width_num
-                        echo 'w, '
-                      endif
-                    endfor
-                    echo image_before_mobile | image_url
-                    echo ' '
-                    echo image_before_mobile.width
-                    echo 'w'
-                  -%}
-                "
-                sizes="100vw"
-              >
-            {% endif %}
-            
-            {% assign desktop_image_before = image_before | default: image_before_mobile %}
-            <img
-              srcset="
-                {%- liquid
-                  assign widths = '375,550,768,1100,1500,1780,2000,3000,3840' | split: ','
-                  for width in widths
-                    assign width_num = width | plus: 0
-                    if desktop_image_before.width >= width_num
-                      echo desktop_image_before | image_url: width: width_num
-                      echo ' '
-                      echo width_num
-                      echo 'w, '
-                    endif
-                  endfor
-                  echo desktop_image_before | image_url
-                  echo ' '
-                  echo desktop_image_before.width
-                  echo 'w'
-                -%}
-              "
-              sizes="(min-width: 1200px) 1200px, (min-width: 768px) calc(100vw - 10rem), 100vw"
-              src="{{ desktop_image_before | image_url: width: 1800 }}"
-              class="prod-diff-img"
-              alt="{{ desktop_image_before.alt | escape }}"
-              width="{{ desktop_image_before.width }}"
-              height="{{ desktop_image_before.width | divided_by: desktop_image_before.aspect_ratio | round }}"
-              loading="eager"
-              fetchpriority="high"
-            >
-          </picture>
-        {% else %}
-          <div
-            class="flex items-center justify-center w-full h-full"
-            style="background-color: var(--accent);"
-            role="img"
-            aria-label="Placeholder image"
-          >
-            {{ 'lifestyle-2' | placeholder_svg_tag: 'prod-diff-img opacity-30' }}
-          </div>
-        {% endif %}
-      </div>
-
-      <div id="Divider-{{ section.id }}" class="prod-diff-slider-divider">
-        <div id="Handle-{{ section.id }}" class="prod-diff-slider-handle-chevron">
-          <svg width="137" height="51" viewBox="0 0 137 51" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <rect x="0.5" y="0.5" width="136" height="50" rx="4.5" stroke="{{ section.settings.handle_color | default: 'var(--text)' }}"/>
-             <path d="M112.451 26.5824L104.571 33.4767C103.642 34.2903 102.188 33.6291 102.188 32.3943V18.6058C102.187 18.3294 102.267 18.0588 102.416 17.8265C102.566 17.5941 102.779 17.4098 103.031 17.2955C103.283 17.1813 103.562 17.1421 103.835 17.1825C104.109 17.2229 104.364 17.3412 104.572 17.5233L112.45 24.4176C112.604 24.5525 112.728 24.7189 112.813 24.9056C112.898 25.0923 112.941 25.295 112.941 25.5C112.941 25.7051 112.898 25.9077 112.813 26.0944C112.728 26.2811 112.604 26.4475 112.450 26.5824H112.451Z" fill="{{ section.settings.handle_color | default: 'var(--text)' }}"/>
-             <path d="M24.5487 26.5824L32.4291 33.4767C33.3577 34.2903 34.8125 33.6291 34.8125 32.3943V18.6058C34.8127 18.3294 34.7333 18.0588 34.5837 17.8265C34.4342 17.5941 34.2208 17.4098 33.9691 17.2955C33.7175 17.1813 33.4383 17.1421 33.1649 17.1825C32.8915 17.2229 32.6355 17.3412 32.4277 17.5233L24.5502 24.4176C24.3958 24.5525 24.272 24.7189 24.1872 24.9056C24.1025 25.0923 24.0586 25.295 24.0586 25.5C24.0586 25.7051 24.1025 25.9077 24.1872 26.0944C24.272 26.2811 24.3958 26.4475 24.5502 26.5824H24.5487Z" fill="{{ section.settings.handle_color | default: 'var(--text)' }}"/>
-          </svg>
-        </div>
-      </div>
-
-      <input
-        type="range"
-        min="0"
-        max="100"
-        value="50"
-        id="Slider-{{ section.id }}"
-        class="prod-diff-slider-range"
-        aria-label="Image comparison slider"
-      >
-
-      {% if section.settings.product_name_enabled %}
-        {%- assign display_left_mobile = left_mobile_product | default: left_product -%}
-        {%- assign display_left_desktop = left_product | default: left_mobile_product -%}
-        
-        {% if display_left_mobile %}
-          <div class="prod-diff-product-info left mobile-only">
-            <h3 class="prod-diff-product-name">{{ display_left_mobile.title }}</h3>
-            <div class="prod-diff-product-price">
-              {%- render 'price',
-                product: display_left_mobile,
-                price_class: 'prod-diff-price',
-                font_size_desktop: 'var(--t-b-2-size)',
-                font_size_mobile: 'var(--tm-b-2-size)',
-                font_weight_desktop: 'var(--t-b-2-weight)',
-                font_weight_mobile: 'var(--t-b-2-weight)',
-                line_height_desktop: 'var(--t-b-2-line-height)',
-                line_height_mobile: 'var(--tm-b-2-line-height)'
-              -%}
-            </div>
-          </div>
-        {% elsif image_before_mobile != blank or image_before != blank %}
-          <div class="prod-diff-product-info left default-label mobile-only">
-            <h3 class="prod-diff-product-name">Left</h3>
-          </div>
-        {% endif %}
-        
-        {% if display_left_desktop %}
-          <div class="prod-diff-product-info left desktop-only">
-            <h3 class="prod-diff-product-name">{{ display_left_desktop.title }}</h3>
-            <div class="prod-diff-product-price">
-              {%- render 'price',
-                product: display_left_desktop,
-                price_class: 'prod-diff-price',
-                font_size_desktop: 'var(--t-b-2-size)',
-                font_size_mobile: 'var(--tm-b-2-size)',
-                font_weight_desktop: 'var(--t-b-2-weight)',
-                font_weight_mobile: 'var(--t-b-2-weight)',
-                line_height_desktop: 'var(--t-b-2-line-height)',
-                line_height_mobile: 'var(--tm-b-2-line-height)'
-              -%}
-            </div>
-          </div>
-        {% elsif image_before != blank or image_before_mobile != blank %}
-          <div class="prod-diff-product-info left default-label desktop-only">
-            <h3 class="prod-diff-product-name">Left</h3>
-          </div>
-        {% endif %}
-        {%- assign display_right_mobile = right_mobile_product | default: right_product -%}
-        {%- assign display_right_desktop = right_product | default: right_mobile_product -%}
-        
-        {% if display_right_mobile %}
-          <div class="prod-diff-product-info right mobile-only">
-            <h3 class="prod-diff-product-name">{{ display_right_mobile.title }}</h3>
-            <div class="prod-diff-product-price">
-              {%- render 'price',
-                product: display_right_mobile,
-                price_class: 'prod-diff-price',
-                font_size_desktop: 'var(--t-b-2-size)',
-                font_size_mobile: 'var(--tm-b-2-size)',
-                font_weight_desktop: 'var(--t-b-2-weight)',
-                font_weight_mobile: 'var(--t-b-2-weight)',
-                line_height_desktop: 'var(--t-b-2-line-height)',
-                line_height_mobile: 'var(--tm-b-2-line-height)'
-              -%}
-            </div>
-          </div>
-        {% elsif image_after_mobile != blank or image_after != blank %}
-          <div class="prod-diff-product-info right default-label mobile-only">
-            <h3 class="prod-diff-product-name">Right</h3>
-          </div>
-        {% endif %}
-        
-        {% if display_right_desktop %}
-          <div class="prod-diff-product-info right desktop-only">
-            <h3 class="prod-diff-product-name">{{ display_right_desktop.title }}</h3>
-            <div class="prod-diff-product-price">
-              {%- render 'price',
-                product: display_right_desktop,
-                price_class: 'prod-diff-price',
-                font_size_desktop: 'var(--t-b-2-size)',
-                font_size_mobile: 'var(--tm-b-2-size)',
-                font_weight_desktop: 'var(--t-b-2-weight)',
-                font_weight_mobile: 'var(--t-b-2-weight)',
-                line_height_desktop: 'var(--t-b-2-line-height)',
-                line_height_mobile: 'var(--tm-b-2-line-height)'
-              -%}
-            </div>
-          </div>
-        {% elsif image_after != blank or image_after_mobile != blank %}
-          <div class="prod-diff-product-info right default-label desktop-only">
-            <h3 class="prod-diff-product-name">Right</h3>
-          </div>
-        {% endif %}
-      {% else %}
-        {%- comment -%} Show Left/Right labels when product names are disabled and using default images {%- endcomment -%}
-        {% if image_before_mobile != blank or image_before != blank %}
-          <div class="prod-diff-product-info left default-label mobile-only">
-            <h3 class="prod-diff-product-name">Left</h3>
-          </div>
-        {% endif %}
-        {% if image_before != blank or image_before_mobile != blank %}
-          <div class="prod-diff-product-info left default-label desktop-only">
-            <h3 class="prod-diff-product-name">Left</h3>
-          </div>
-        {% endif %}
-        {% if image_after_mobile != blank or image_after != blank %}
-          <div class="prod-diff-product-info right default-label mobile-only">
-            <h3 class="prod-diff-product-name">Right</h3>
-          </div>
-        {% endif %}
-        {% if image_after != blank or image_after_mobile != blank %}
-          <div class="prod-diff-product-info right default-label desktop-only">
-            <h3 class="prod-diff-product-name">Right</h3>
-          </div>
-        {% endif %}
       {% endif %}
     </div>
+
+    <div id="Divider-{{ section.id }}" class="prod-diff-slider-divider">
+      <div id="Handle-{{ section.id }}" class="prod-diff-slider-handle-chevron">
+        <svg width="137" height="51" viewBox="0 0 137 51" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect x="0.5" y="0.5" width="136" height="50" rx="4.5" stroke="{{ section.settings.handle_color | default: 'var(--text)' }}"/>
+           <path d="M112.451 26.5824L104.571 33.4767C103.642 34.2903 102.188 33.6291 102.188 32.3943V18.6058C102.187 18.3294 102.267 18.0588 102.416 17.8265C102.566 17.5941 102.779 17.4098 103.031 17.2955C103.283 17.1813 103.562 17.1421 103.835 17.1825C104.109 17.2229 104.364 17.3412 104.572 17.5233L112.45 24.4176C112.604 24.5525 112.728 24.7189 112.813 24.9056C112.898 25.0923 112.941 25.295 112.941 25.5C112.941 25.7051 112.898 25.9077 112.813 26.0944C112.728 26.2811 112.604 26.4475 112.450 26.5824H112.451Z" fill="{{ section.settings.handle_color | default: 'var(--text)' }}"/>
+           <path d="M24.5487 26.5824L32.4291 33.4767C33.3577 34.2903 34.8125 33.6291 34.8125 32.3943V18.6058C34.8127 18.3294 34.7333 18.0588 34.5837 17.8265C34.4342 17.5941 34.2208 17.4098 33.9691 17.2955C33.7175 17.1813 33.4383 17.1421 33.1649 17.1825C32.8915 17.2229 32.6355 17.3412 32.4277 17.5233L24.5502 24.4176C24.3958 24.5525 24.272 24.7189 24.1872 24.9056C24.1025 25.0923 24.0586 25.295 24.0586 25.5C24.0586 25.7051 24.1025 25.9077 24.1872 26.0944C24.272 26.2811 24.3958 26.4475 24.5502 26.5824H24.5487Z" fill="{{ section.settings.handle_color | default: 'var(--text)' }}"/>
+        </svg>
+      </div>
+    </div>
+
+    <input
+      type="range"
+      min="0"
+      max="100"
+      value="50"
+      id="Slider-{{ section.id }}"
+      class="prod-diff-slider-range"
+      aria-label="Image comparison slider"
+    >
+
+    {% if section.settings.product_name_enabled %}
+      {%- assign display_left_mobile = left_mobile_product | default: left_product -%}
+      {%- assign display_left_desktop = left_product | default: left_mobile_product -%}
+
+      {% if display_left_mobile %}
+        <div class="prod-diff-product-info left mobile-only">
+          <h3 class="prod-diff-product-name">{{ display_left_mobile.title }}</h3>
+          <div class="prod-diff-product-price">
+            {%- render 'price',
+              product: display_left_mobile,
+              price_class: 'prod-diff-price',
+              font_size_desktop: 'var(--t-b-2-size)',
+              font_size_mobile: 'var(--tm-b-2-size)',
+              font_weight_desktop: 'var(--t-b-2-weight)',
+              font_weight_mobile: 'var(--t-b-2-weight)',
+              line_height_desktop: 'var(--t-b-2-line-height)',
+              line_height_mobile: 'var(--tm-b-2-line-height)'
+            -%}
+          </div>
+        </div>
+      {% elsif image_before_mobile != blank or image_before != blank %}
+        <div class="prod-diff-product-info left default-label mobile-only">
+          <h3 class="prod-diff-product-name">Left</h3>
+        </div>
+      {% endif %}
+
+      {% if display_left_desktop %}
+        <div class="prod-diff-product-info left desktop-only">
+          <h3 class="prod-diff-product-name">{{ display_left_desktop.title }}</h3>
+          <div class="prod-diff-product-price">
+            {%- render 'price',
+              product: display_left_desktop,
+              price_class: 'prod-diff-price',
+              font_size_desktop: 'var(--t-b-2-size)',
+              font_size_mobile: 'var(--tm-b-2-size)',
+              font_weight_desktop: 'var(--t-b-2-weight)',
+              font_weight_mobile: 'var(--t-b-2-weight)',
+              line_height_desktop: 'var(--t-b-2-line-height)',
+              line_height_mobile: 'var(--tm-b-2-line-height)'
+            -%}
+          </div>
+        </div>
+      {% elsif image_before != blank or image_before_mobile != blank %}
+        <div class="prod-diff-product-info left default-label desktop-only">
+          <h3 class="prod-diff-product-name">Left</h3>
+        </div>
+      {% endif %}
+      {%- assign display_right_mobile = right_mobile_product | default: right_product -%}
+      {%- assign display_right_desktop = right_product | default: right_mobile_product -%}
+
+      {% if display_right_mobile %}
+        <div class="prod-diff-product-info right mobile-only">
+          <h3 class="prod-diff-product-name">{{ display_right_mobile.title }}</h3>
+          <div class="prod-diff-product-price">
+            {%- render 'price',
+              product: display_right_mobile,
+              price_class: 'prod-diff-price',
+              font_size_desktop: 'var(--t-b-2-size)',
+              font_size_mobile: 'var(--tm-b-2-size)',
+              font_weight_desktop: 'var(--t-b-2-weight)',
+              font_weight_mobile: 'var(--t-b-2-weight)',
+              line_height_desktop: 'var(--t-b-2-line-height)',
+              line_height_mobile: 'var(--tm-b-2-line-height)'
+            -%}
+          </div>
+        </div>
+      {% elsif image_after_mobile != blank or image_after != blank %}
+        <div class="prod-diff-product-info right default-label mobile-only">
+          <h3 class="prod-diff-product-name">Right</h3>
+        </div>
+      {% endif %}
+
+      {% if display_right_desktop %}
+        <div class="prod-diff-product-info right desktop-only">
+          <h3 class="prod-diff-product-name">{{ display_right_desktop.title }}</h3>
+          <div class="prod-diff-product-price">
+            {%- render 'price',
+              product: display_right_desktop,
+              price_class: 'prod-diff-price',
+              font_size_desktop: 'var(--t-b-2-size)',
+              font_size_mobile: 'var(--tm-b-2-size)',
+              font_weight_desktop: 'var(--t-b-2-weight)',
+              font_weight_mobile: 'var(--t-b-2-weight)',
+              line_height_desktop: 'var(--t-b-2-line-height)',
+              line_height_mobile: 'var(--tm-b-2-line-height)'
+            -%}
+          </div>
+        </div>
+      {% elsif image_after != blank or image_after_mobile != blank %}
+        <div class="prod-diff-product-info right default-label desktop-only">
+          <h3 class="prod-diff-product-name">Right</h3>
+        </div>
+      {% endif %}
+    {% else %}
+      {%- comment -%} Show Left/Right labels when product names are disabled and using default images {%- endcomment -%}
+      {% if image_before_mobile != blank or image_before != blank %}
+        <div class="prod-diff-product-info left default-label mobile-only">
+          <h3 class="prod-diff-product-name">Left</h3>
+        </div>
+      {% endif %}
+      {% if image_before != blank or image_before_mobile != blank %}
+        <div class="prod-diff-product-info left default-label desktop-only">
+          <h3 class="prod-diff-product-name">Left</h3>
+        </div>
+      {% endif %}
+      {% if image_after_mobile != blank or image_after != blank %}
+        <div class="prod-diff-product-info right default-label mobile-only">
+          <h3 class="prod-diff-product-name">Right</h3>
+        </div>
+      {% endif %}
+      {% if image_after != blank or image_after_mobile != blank %}
+        <div class="prod-diff-product-info right default-label desktop-only">
+          <h3 class="prod-diff-product-name">Right</h3>
+        </div>
+      {% endif %}
+    {% endif %}
+  </div>
 </section>
 
 {%- comment -%}
@@ -555,24 +605,157 @@
       const beforeImage = sliderContainer.querySelector('#BeforeImage-{{ section.id }}');
       const divider = sliderContainer.querySelector('#Divider-{{ section.id }}');
       const handle = sliderContainer.querySelector('#Handle-{{ section.id }}');
-      const leftText = sliderContainer.querySelector('.prod-diff-product-info.left');
+      const leftTextElements = sliderContainer.querySelectorAll('.prod-diff-product-info.left');
+      const rightTextElements = sliderContainer.querySelectorAll('.prod-diff-product-info.right');
 
       if (slider && beforeImage && divider && handle) {
+        // Get the right image element (with tint)
+        const rightImage = sliderContainer.querySelector('.prod-diff-img-right');
+        const tintOpacity = rightImage && !rightImage.classList.contains('no-tint') ? 0.7 : 1;
+
+        // Set initial state - everything starts at 0%
+        slider.value = 0;
+        beforeImage.style.clipPath = 'inset(0 100% 0 0)';
+        divider.style.left = '0%';
+        leftTextElements.forEach((leftText) => {
+          leftText.style.clipPath = 'inset(0 100% 0 0)';
+        });
+        rightTextElements.forEach((rightText) => {
+          rightText.style.clipPath = 'inset(0 0 0 0)';
+        });
+        // Animation function - called when section is visible
+        let hasAnimated = false;
+        const triggerAnimation = () => {
+          if (hasAnimated) return;
+          hasAnimated = true;
+
+          // Trigger tint animation when scroll animation starts
+          if (rightImage) {
+            rightImage.classList.add('animate-tint');
+          }
+
+          // Animate slider, divider, clip-path, and tint together from 0% to 50%
+          // Same speed as product grid (50px in 0.6s = ~83px/s) but proportionally longer for bigger section
+          const startTime = Date.now();
+          const duration = 1200; // 1.2s - same speed ratio as product grid but longer distance
+          const delay = 300; // 0.3 second delay (user said delay is acceptable)
+          const startValue = 0;
+          const endValue = 50;
+
+          setTimeout(() => {
+            const animate = () => {
+              const elapsed = Date.now() - startTime - delay;
+              if (elapsed < 0) {
+                requestAnimationFrame(animate);
+                return;
+              }
+
+              if (elapsed >= duration) {
+                // Animation complete - set final values
+                slider.value = endValue;
+                beforeImage.style.clipPath = `inset(0 calc(100% - ${endValue}%) 0 0)`;
+                divider.style.left = `${endValue}%`;
+                leftTextElements.forEach((leftText) => {
+                  leftText.style.clipPath = `inset(0 calc(100% - ${endValue}%) 0 0)`;
+                });
+                rightTextElements.forEach((rightText) => {
+                  // Right text: visible from 0-50%, then clips from left as slider goes past 50%
+                  const rightClip = endValue <= 50 ? 0 : (endValue - 50) * 2;
+                  rightText.style.clipPath = `inset(0 0 0 ${rightClip}%)`;
+                });
+                // Tint stays at its final static value (set by CSS transition)
+                return;
+              }
+
+              // Ease-out function for smooth animation
+              const progress = elapsed / duration;
+              const eased = 1 - Math.pow(1 - progress, 3); // Cubic ease-out
+
+              const currentValue = startValue + (endValue - startValue) * eased;
+
+              // Update slider, clip-path, and divider (tint opacity handled by CSS)
+              slider.value = currentValue;
+              beforeImage.style.clipPath = `inset(0 calc(100% - ${currentValue}%) 0 0)`;
+              divider.style.left = `${currentValue}%`;
+              leftTextElements.forEach((leftText) => {
+                leftText.style.clipPath = `inset(0 calc(100% - ${currentValue}%) 0 0)`;
+              });
+              rightTextElements.forEach((rightText) => {
+                // Right text: visible from 0-50%, then clips from left as slider goes past 50%
+                const rightClip = currentValue <= 50 ? 0 : (currentValue - 50) * 2;
+                rightText.style.clipPath = `inset(0 0 0 ${rightClip}%)`;
+              });
+
+              requestAnimationFrame(animate);
+            };
+            animate();
+          }, delay);
+        };
+
+        // Use Intersection Observer to trigger animation when section is visible
+        if ('IntersectionObserver' in window) {
+          const observer = new IntersectionObserver(
+            (entries) => {
+              entries.forEach((entry) => {
+                if (entry.isIntersecting && entry.intersectionRatio > 0.1) {
+                  triggerAnimation();
+                  observer.disconnect(); // Only animate once
+                }
+              });
+            },
+            {
+              threshold: 0.1, // Trigger when 10% of section is visible
+              rootMargin: '0px 0px -50px 0px', // Start animation slightly before fully in view
+            }
+          );
+
+          observer.observe(sliderContainer);
+        } else {
+          // Fallback for browsers without Intersection Observer
+          triggerAnimation();
+        }
+
         // JavaScript for the grab animation is added here
         slider.addEventListener('mousedown', () => handle.classList.add('dragging'));
         slider.addEventListener('touchstart', () => handle.classList.add('dragging'));
         window.addEventListener('mouseup', () => handle.classList.remove('dragging'));
         window.addEventListener('touchend', () => handle.classList.remove('dragging'));
 
+        // Add hover animation for chevrons when slider handle area is hovered
+        // Listen on slider and detect when near handle's actual position
+        slider.addEventListener('mousemove', (e) => {
+          const rect = slider.getBoundingClientRect();
+          const mouseX = e.clientX - rect.left;
+          const sliderValue = parseFloat(slider.value);
+          const handleX = (rect.width * sliderValue) / 100; // Handle's actual position based on slider value
+          const distanceFromHandle = Math.abs(mouseX - handleX);
+          
+          // If within 100px of handle's current position, show hover effect
+          if (distanceFromHandle < 100 && handle) {
+            handle.classList.add('handle-hovered');
+          } else if (handle) {
+            handle.classList.remove('handle-hovered');
+          }
+        });
+        
+        slider.addEventListener('mouseleave', () => {
+          if (handle) handle.classList.remove('handle-hovered');
+        });
+
         // This is the new, simple logic that updates the slider visuals
         slider.addEventListener('input', (e) => {
           const value = e.target.value;
           beforeImage.style.clipPath = `inset(0 calc(100% - ${value}%) 0 0)`;
           divider.style.left = `${value}%`;
-          // Sync left text clip-path with the before image
-          if (leftText) {
+          // Sync left text clip-path with the before image (all left text elements: mobile and desktop)
+          leftTextElements.forEach((leftText) => {
             leftText.style.clipPath = `inset(0 calc(100% - ${value}%) 0 0)`;
-          }
+          });
+          // Sync right text clip-path: visible from 0-50%, clips from left when slider > 50%
+          rightTextElements.forEach((rightText) => {
+            const rightClip = value <= 50 ? 0 : (value - 50) * 2;
+            rightText.style.clipPath = `inset(0 0 0 ${rightClip}%)`;
+          });
         });
 
         // Remove hyphens from price text
@@ -594,6 +777,13 @@
     "groups": ["header", "footer"]
   },
   "settings": [
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "Color Scheme",
+      "default": "scheme-1",
+      "info": "Choose the color scheme for this section"
+    },
     {
       "type": "product",
       "id": "left_product",
@@ -628,6 +818,13 @@
       "label": "Enable right side tint overlay",
       "default": true,
       "info": "Applies a subtle opacity effect to the right side image for better visual distinction"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_animations",
+      "label": "Enable scroll animations",
+      "default": true,
+      "info": "Animate section as it scrolls into view. Respects user's motion preferences."
     },
     {
       "type": "header",
@@ -690,50 +887,6 @@
       "label": "Handle Height (Mobile)",
       "default": 40,
       "info": "Height of the slider handle on mobile screens"
-    },
-    {
-      "type": "header",
-      "content": "Spacing"
-    },
-    {
-      "type": "range",
-      "id": "padding_top",
-      "min": 0,
-      "max": 100,
-      "step": 1,
-      "unit": "px",
-      "label": "Top Padding",
-      "default": 0
-    },
-    {
-      "type": "range",
-      "id": "padding_bottom",
-      "min": 0,
-      "max": 100,
-      "step": 1,
-      "unit": "px",
-      "label": "Bottom Padding",
-      "default": 0
-    },
-    {
-      "type": "range",
-      "id": "padding_left",
-      "min": 0,
-      "max": 100,
-      "step": 1,
-      "unit": "px",
-      "label": "Left Padding",
-      "default": 0
-    },
-    {
-      "type": "range",
-      "id": "padding_right",
-      "min": 0,
-      "max": 100,
-      "step": 1,
-      "unit": "px",
-      "label": "Right Padding",
-      "default": 0
     },
     {
       "type": "range",

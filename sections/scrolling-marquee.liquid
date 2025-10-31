@@ -52,6 +52,32 @@
       "id": "pause_on_hover",
       "label": "Pause on hover",
       "default": false
+    },
+    {
+      "type": "header",
+      "content": "Section Spacing"
+    },
+    {
+      "type": "range",
+      "id": "section_top_padding",
+      "min": 0,
+      "max": 200,
+      "step": 5,
+      "unit": "px",
+      "label": "Section top padding (desktop)",
+      "default": 10,
+      "info": "Custom top padding for desktop, overrides global spacing"
+    },
+    {
+      "type": "range",
+      "id": "section_top_padding_mobile",
+      "min": 0,
+      "max": 200,
+      "step": 5,
+      "unit": "px",
+      "label": "Section top padding (mobile)",
+      "default": 10,
+      "info": "Custom top padding for mobile, overrides global spacing"
     }
   ],
   "presets": [
@@ -88,7 +114,7 @@
     />
   {% else %}
     {% render 'icon-playback',
-      class: 'bi bi-caret-right-fill scrolling-separator',
+      class: 'bi bi-caret-right-fill marquee-separator',
       width: '50px',
       height: '50px',
       fill: 'currentColor'
@@ -139,6 +165,7 @@
 </section>
 
 <style>
+  /* Custom section spacing for marquee section */
   .marquee-wrapper {
     padding: 0;
     display: flex;
@@ -148,6 +175,21 @@
     position: relative;
     height: 30px;
     overflow: hidden;
+    margin-top: {{ section.settings.section_top_padding | default: 0 }}px !important;
+    margin-bottom: var(--sections-spacing-bottom) !important;
+    box-sizing: border-box;
+  }
+
+  @media (max-width: 749px) {
+    .marquee-wrapper {
+      margin-top: {{ section.settings.section_top_padding_mobile | default: 0 }}px !important;
+    }
+  }
+
+  /* Ensure consistent spacing behavior */
+  .shopify-section-scrolling-marquee {
+    margin: 0 !important;
+    padding: 0 !important;
   }
 
   .marquee-container {
@@ -162,7 +204,7 @@
     color: var(--text);
     font-size: 24px;
     line-height: 1.2;
-    font-weight: 500;
+    font-weight: var(--weight-medium);
     flex-shrink: 0;
     display: flex;
     align-items: center;
@@ -180,6 +222,22 @@
     height: 25px;
     margin: 0 {{ icon_spacing }}px;
     flex-shrink: 0;
+  }
+
+  /* Marquee separator styling - keeps arrows horizontal on all devices */
+  .marquee-separator {
+    flex-shrink: 0;
+    margin: 0 {{ icon_spacing }}px;
+    opacity: 0.7;
+    color: var(--text);
+  }
+
+  .marquee-separator-image {
+    width: 25px;
+    height: 25px;
+    margin: 0 {{ icon_spacing }}px;
+    flex-shrink: 0;
+    object-fit: contain;
   }
 
   /* Pause animation on hover if enabled */
@@ -209,6 +267,20 @@
 
     .marquee-content img,
     .marquee-content svg {
+      width: 20px;
+      height: 20px;
+      margin: 0 {{ icon_spacing | divided_by: 2 }}px;
+    }
+
+    /* Keep arrows horizontal on mobile - no rotation */
+    .marquee-separator {
+      width: 20px;
+      height: 20px;
+      margin: 0 {{ icon_spacing | divided_by: 2 }}px;
+      transform: none !important;
+    }
+
+    .marquee-separator-image {
       width: 20px;
       height: 20px;
       margin: 0 {{ icon_spacing | divided_by: 2 }}px;

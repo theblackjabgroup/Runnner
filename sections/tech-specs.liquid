@@ -1,7 +1,19 @@
 {% if template == 'product' %}
+  {%- if section.settings.enable_animations -%}
+    {{ 'scroll-animations.css' | asset_url | stylesheet_tag }}
+    <script src="{{ 'scroll-animations.js' | asset_url }}" defer></script>
+  {%- endif -%}
+
+  {% assign side_padding = settings.side_space %}
+
+  {% if side_padding == blank or side_padding == 0 %}
+    {% assign side_padding = 20 %}
+  {% endif %}
+
   <section
-    class="tech-specs-container color-{{ section.settings.color_scheme }} bg-color:var(--background) box-border overflow-x-hidden"
-    style="padding: var(--space-7xl) var(--gutter-sm);"
+    class="tech-specs-container color-{{ section.settings.color_scheme }} box-border overflow-x-hidden {% if section.settings.enable_animations %}scroll-fade-trigger scroll-fade-up{% endif %}"
+    style="padding: var(--sections-spacing-top) {{ side_padding }}px var(--sections-spacing-bottom);"
+    data-section-id="{{ section.id }}"
   >
     <div class="tech-specs-outer">
       <div class="tech-specs-main flex flex-col lg:flex-row relative items-start">
@@ -9,7 +21,10 @@
         <div
           class="tech-left-box relative z-20 flex flex-col min-h-full w-full lg:w-[80%]"
         >
-          <h2 class="tech-left-box-heading !text-[32px] !font-medium tracking-wide uppercase text-left">
+          <h2
+            class="tech-left-box-heading !text-[32px] !font-medium tracking-wide uppercase text-left"
+            style="margin-bottom: 24px;"
+          >
             {{ section.settings.tech_specs_heading }}
           </h2>
           <div>
@@ -28,10 +43,10 @@
                     </div>
                     <!-- Pocketing -->
                     <div class="tech-specs-data-border flex flex-row items-center border-b">
-                      <span class="tech-specs-data text-[12px] font-normal">
+                      <span class="tech-specs-data text-[13px] font-normal">
                         {{ block.settings.pocketing_label }}
                       </span>
-                      <span class="text-[12px] font-medium pl-6">
+                      <span class="text-[13px] font-medium pl-6">
                         {{- product.metafields.tech_specs.pocketing.value | default: block.settings.pocketing_value -}}
                       </span>
                     </div>
@@ -55,12 +70,12 @@
                           <div class="tech-specs-bars flex flex-col items-center justify-center pl-6">
                             <!-- Effort Bar -->
                             <div class="flex justify-between w-full max-w-full" id="effort-bar">
-                              {% for i in (1..52) %}
+                              {% for i in (1..90) %}
                                 <div class="box">|</div>
                               {% endfor %}
                             </div>
                             <!-- Scale Labels -->
-                            <div class="flex justify-between text-[12px] w-full mt-1">
+                            <div class="flex justify-between text-[13px] w-full mt-1">
                               <span>{{ block.settings.effort_scale_0 }}</span>
                               <span>{{ block.settings.effort_scale_25 }}</span>
                               <span>{{ block.settings.effort_scale_50 }}</span>
@@ -83,7 +98,7 @@
                         <div class="tech-specs-bars flex flex-col items-center justify-center pl-6">
                           <!-- Temperature Bar -->
                           <div class="flex justify-between w-full max-w-full" id="temperature-bar">
-                            {% for i in (1..52) %}
+                            {% for i in (1..90) %}
                               <div class="box">|</div>
                             {% endfor %}
                           </div>
@@ -103,7 +118,7 @@
               {% endcase %}
             {% endfor %}
 
-            <div class="flex flex-col lg:flex-row" style="margin-top: var(--space-lg);">
+            <div class="flex flex-col lg:flex-row" style="margin-top: 24px;">
               {% for block in section.blocks %}
                 {% if block.type == 'materials' or block.type == 'care' or block.type == 'additional_info' %}
                   {% case block.type %}
@@ -112,7 +127,7 @@
                         <div class="font-medium text-[16px] mb-3 text-left">
                           {{ block.settings.materials_label }}
                         </div>
-                        <div class="text-[12px] font-normal leading-relaxed text-left">
+                        <div class="text-[13px] font-normal leading-relaxed text-left">
                           {{ product.metafields.tech_specs.materials.value | default: block.settings.materials_value }}
                         </div>
                       </div>
@@ -121,7 +136,7 @@
                         <div class="font-medium text-[16px] mb-3 text-left">
                           {{ block.settings.care_label }}
                         </div>
-                        <div class="text-[12px] font-normal leading-relaxed text-left">
+                        <div class="text-[13px] font-normal leading-relaxed text-left">
                           {% assign care_lines = product.metafields.tech_specs.care.value
                             | default: block.settings.care_value
                             | split: '\n'
@@ -135,7 +150,7 @@
                       </div>
                     {% when 'additional_info' %}
                       <div {{ block.shopify_attributes }} class="w-full lg:w-1/3">
-                        <div class="text-[12px] font-normal leading-relaxed text-left">
+                        <div class="text-[13px] font-normal leading-relaxed text-left">
                           {{ block.settings.additional_info }}
                         </div>
                       </div>
@@ -153,7 +168,10 @@
               {{ block.shopify_attributes }}
               class="functionality-right-box relative flex flex-col lg:w-[20%]"
             >
-              <h2 class=" functionality-right-box-heading !text-[32px] !font-medium tracking-wide uppercase">
+              <h2
+                class=" functionality-right-box-heading !text-[32px] !font-medium tracking-wide uppercase"
+                style="margin-bottom: 24px;"
+              >
                 {{ block.settings.features_heading }}
               </h2>
               <div class="flex flex-col" style="gap: var(--gutter-md);">
@@ -182,14 +200,18 @@
                         height="67"
                       >
                     {% else %}
+                      {%- comment -%} Feature Icon 1 {%- endcomment -%}
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
-                        width="50"
-                        height="50"
-                        fill="currentColor"
-                        viewBox="0 0 256 256"
+                        width="40"
+                        height="40"
+                        viewBox="0 0 16 16"
+                        fill="none"
+                        stroke="currentColor"
                       >
-                        <path d="M128,80a48,48,0,1,0,48,48A48.05,48.05,0,0,0,128,80Zm0,80a32,32,0,1,1,32-32A32,32,0,0,1,128,160Zm88-29.84q.06-2.16,0-4.32l14.92-18.64a8,8,0,0,0,1.48-7.06,107.21,107.21,0,0,0-10.88-26.25,8,8,0,0,0-6-3.93l-23.72-2.64q-1.48-1.56-3-3L186,40.54a8,8,0,0,0-3.94-6,107.71,107.71,0,0,0-26.25-10.87,8,8,0,0,0-7.06,1.49L130.16,40Q128,40,125.84,40L107.2,25.11a8,8,0,0,0-7.06-1.48A107.6,107.6,0,0,0,73.89,34.51a8,8,0,0,0-3.93,6L67.32,64.27q-1.56,1.49-3,3L40.54,70a8,8,0,0,0-6,3.94,107.71,107.71,0,0,0-10.87,26.25,8,8,0,0,0,1.49,7.06L40,125.84Q40,128,40,130.16L25.11,148.8a8,8,0,0,0-1.48,7.06,107.21,107.21,0,0,0,10.88,26.25,8,8,0,0,0,6,3.93l23.72,2.64q1.49,1.56,3,3L70,215.46a8,8,0,0,0,3.94,6,107.71,107.71,0,0,0,26.25,10.87,8,8,0,0,0,7.06-1.49L125.84,216q2.16.06,4.32,0l18.64,14.92a8,8,0,0,0,7.06,1.48,107.21,107.21,0,0,0,26.25-10.88,8,8,0,0,0,3.93-6l2.64-23.72q1.56-1.48,3-3L215.46,186a8,8,0,0,0,6-3.94,107.71,107.71,0,0,0,10.87-26.25,8,8,0,0,0-1.49-7.06Zm-16.1-6.5a73.93,73.93,0,0,1,0,8.68,8,8,0,0,0,1.74,5.48l14.19,17.73a91.57,91.57,0,0,1-6.23,15L187,173.11a8,8,0,0,0-5.1,2.64,74.11,74.11,0,0,1-6.14,6.14,8,8,0,0,0-2.64,5.1l-2.51,22.58a91.32,91.32,0,0,1-15,6.23l-17.74-14.19a8,8,0,0,0-5-1.75h-.48a73.93,73.93,0,0,1-8.68,0,8,8,0,0,0-5.48,1.74L100.45,215.8a91.57,91.57,0,0,1-15-6.23L82.89,187a8,8,0,0,0-2.64-5.1,74.11,74.11,0,0,1-6.14-6.14,8,8,0,0,0-5.1-2.64L46.43,170.6a91.32,91.32,0,0,1-6.23-15l14.19-17.74a8,8,0,0,0,1.74-5.48,73.93,73.93,0,0,1,0-8.68,8,8,0,0,0-1.74-5.48L40.2,100.45a91.57,91.57,0,0,1,6.23-15L69,82.89a8,8,0,0,0,5.1-2.64,74.11,74.11,0,0,1,6.14-6.14A8,8,0,0,0,82.89,69L85.4,46.43a91.32,91.32,0,0,1,15-6.23l17.74,14.19a8,8,0,0,0,5.48,1.74,73.93,73.93,0,0,1,8.68,0,8,8,0,0,0,5.48-1.74L155.55,40.2a91.57,91.57,0,0,1,15,6.23L173.11,69a8,8,0,0,0,2.64,5.1,74.11,74.11,0,0,1,6.14,6.14,8,8,0,0,0,5.1,2.64l22.58,2.51a91.32,91.32,0,0,1,6.23,15l-14.19,17.74A8,8,0,0,0,199.87,123.66Z"/>
+                        <path d="M5.00006 8C5.00006 8.79565 5.31613 9.55871 5.87874 10.1213C6.44135 10.6839 7.20441 11 8.00006 11C8.79571 11 9.55877 10.6839 10.1214 10.1213C10.684 9.55871 11.0001 8.79565 11.0001 8" stroke-linecap="round"/>
+                        <path d="M0.500061 4.7111C0.500061 4.10998 0.500061 3.80941 0.585877 3.52598C0.671693 3.24255 0.838415 2.99247 1.17186 2.4923L1.3126 2.2812C1.89388 1.40927 2.18453 0.973302 2.62671 0.736651C3.0689 0.5 3.59286 0.5 4.6408 0.5H11.3593C12.4073 0.5 12.9312 0.5 13.3734 0.736651C13.8156 0.973302 14.1062 1.40927 14.6875 2.2812L14.8283 2.4923C15.1617 2.99247 15.3284 3.24255 15.4142 3.52598C15.5001 3.80941 15.5001 4.10998 15.5001 4.7111V11.5C15.5001 13.3856 15.5001 14.3284 14.9143 14.9142C14.3285 15.5 13.3857 15.5 11.5001 15.5H4.50006C2.61444 15.5 1.67163 15.5 1.08585 14.9142C0.500061 14.3284 0.500061 13.3856 0.500061 11.5V4.7111Z"/>
+                        <path d="M0.500061 5.5H15.5001" stroke-linecap="round"/>
                       </svg>
                     {% endif %}
                   </span>
@@ -234,14 +256,18 @@
                         height="67"
                       >
                     {% else %}
+                      {%- comment -%} Feature Icon 2 {%- endcomment -%}
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
-                        width="50"
-                        height="50"
-                        fill="currentColor"
-                        viewBox="0 0 256 256"
+                        width="40"
+                        height="40"
+                        viewBox="0 0 18 20"
+                        fill="none"
+                        stroke="currentColor"
                       >
-                        <path d="M196,88a27.86,27.86,0,0,0-13.35,3.39A28,28,0,0,0,144,74.7V44a28,28,0,0,0-56,0v80l-3.82-6.13A28,28,0,0,0,35.73,146l4.67,8.23C74.81,214.89,89.05,240,136,240a88.1,88.1,0,0,0,88-88V116A28,28,0,0,0,196,88Zm12,64a72.08,72.08,0,0,1-72,72c-37.63,0-47.84-18-81.68-77.68l-4.69-8.27,0-.05A12,12,0,0,1,54,121.61a11.88,11.88,0,0,1,6-1.6,12,12,0,0,1,10.41,6,1.76,1.76,0,0,0,.14.23l18.67,30A8,8,0,0,0,104,152V44a12,12,0,0,1,24,0v68a8,8,0,0,0,16,0V100a12,12,0,0,1,24,0v20a8,8,0,0,0,16,0v-4a12,12,0,0,1,24,0Z"/>
+                        <path d="M16.3612 15C17.1072 15.4561 17.5 15.9734 17.5 16.5C17.5 17.0266 17.1072 17.5439 16.3612 18C15.6152 18.4561 14.5422 18.8348 13.25 19.0981C11.9578 19.3614 10.4921 19.5 9 19.5C7.50794 19.5 6.04216 19.3614 4.75 19.0981C3.45784 18.8348 2.38482 18.4561 1.63878 18C0.892754 17.5439 0.5 17.0266 0.5 16.5C0.5 15.9734 0.892753 15.4561 1.63878 15" stroke-linecap="round"/>
+                        <path d="M16.5 8C16.5 13.018 11.0117 16.4027 9.42489 17.2764C9.15683 17.424 8.84317 17.424 8.57511 17.2764C6.98831 16.4027 1.5 13.018 1.5 8C1.5 3.5 5.13401 0.5 9 0.5C13 0.5 16.5 3.5 16.5 8Z"/>
+                        <circle cx="9" cy="8" r="3.5"/>
                       </svg>
                     {% endif %}
                   </span>
@@ -286,14 +312,16 @@
                         height="67"
                       >
                     {% else %}
+                      {%- comment -%} Feature Icon 3 {%- endcomment -%}
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
-                        width="50"
-                        height="50"
-                        fill="currentColor"
-                        viewBox="0 0 256 256"
+                        width="40"
+                        height="40"
+                        viewBox="0 0 17 18"
+                        fill="none"
+                        stroke="currentColor"
                       >
-                        <path d="M152,224a8,8,0,0,1-8,8H112a8,8,0,0,1,0-16h32A8,8,0,0,1,152,224ZM128,112a12,12,0,1,0-12-12A12,12,0,0,0,128,112Zm95.62,43.83-12.36,55.63a16,16,0,0,1-25.51,9.11L158.51,200h-61L70.25,220.57a16,16,0,0,1-25.51-9.11L32.38,155.83a16.09,16.09,0,0,1,3.32-13.71l28.56-34.26a123.07,123.07,0,0,1,8.57-36.67c12.9-32.34,36-52.63,45.37-59.85a16,16,0,0,1,19.6,0c9.34,7.22,32.47,27.51,45.37,59.85a123.07,123.07,0,0,1,8.57,36.67l28.56,34.26A16.09,16.09,0,0,1,223.62,155.83ZM99.43,184h57.14c21.12-37.54,25.07-73.48,11.74-106.88C156.55,47.64,134.49,29,128,24c-6.51,5-28.57,23.64-40.33,53.12C74.36,110.52,78.31,146.46,99.43,184Zm-15,5.85Q68.28,160.5,64.83,132.16L48,152.36,60.36,208l.18-.13ZM208,152.36l-16.83-20.2q-3.42,28.28-19.56,57.69l23.85,18,.18.13Z"/>
+                        <path d="M8.37561 16.5L1.05531 7.34963C0.722793 6.93398 0.556534 6.72615 0.511865 6.4757C0.467196 6.22524 0.551358 5.97276 0.719683 5.46778L1.46391 3.23509C1.90393 1.91505 2.12393 1.25503 2.64771 0.877516C3.17148 0.5 3.8672 0.5 5.25865 0.5H11.4926C12.884 0.5 13.5797 0.5 14.1035 0.877516C14.6273 1.25503 14.8473 1.91505 15.2873 3.23509L16.0315 5.46778C16.1999 5.97276 16.284 6.22524 16.2394 6.4757C16.1947 6.72615 16.0284 6.93398 15.6959 7.34963L8.37561 16.5ZM8.37561 16.5L11.8756 5.5M8.37561 16.5L4.87561 5.5M15.8756 6.5L11.8756 5.5M11.8756 5.5L10.3756 1.5M11.8756 5.5H4.87561M6.37561 1.5L4.87561 5.5M4.87561 5.5L0.87561 6.5" stroke-linecap="round"/>
                       </svg>
                     {% endif %}
                   </span>
@@ -338,14 +366,21 @@
                         height="67"
                       >
                     {% else %}
+                      {%- comment -%} Feature Icon 4 {%- endcomment -%}
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
-                        width="50"
-                        height="50"
-                        fill="currentColor"
-                        viewBox="0 0 256 256"
+                        width="40"
+                        height="40"
+                        viewBox="0 0 19 19"
+                        fill="none"
+                        stroke="currentColor"
                       >
-                        <path d="M216,72H180.92c.39-.33.79-.65,1.17-1A29.53,29.53,0,0,0,192,49.57,32.62,32.62,0,0,0,158.44,16,29.53,29.53,0,0,0,137,25.91a54.94,54.94,0,0,0-9,14.48,54.94,54.94,0,0,0-9-14.48A29.53,29.53,0,0,0,97.56,16,32.62,32.62,0,0,0,64,49.57,29.53,29.53,0,0,0,73.91,71c.38.33.78.65,1.17,1H40A16,16,0,0,0,24,88v32a16,16,0,0,0,16,16v64a16,16,0,0,0,16,16H200a16,16,0,0,0,16-16V136a16,16,0,0,0,16-16V88A16,16,0,0,0,216,72ZM149,36.51a13.69,13.69,0,0,1,10-4.5h.49A16.62,16.62,0,0,1,176,49.08a13.69,13.69,0,0,1-4.5,10c-9.49,8.4-25.24,11.36-35,12.4C137.7,60.89,141,45.5,149,36.51Zm-64.09.36A16.63,16.63,0,0,1,96.59,32h.49a13.69,13.69,0,0,1,10,4.5c8.39,9.48,11.35,25.2,12.39,34.92-9.72-1-25.44-4-34.92-12.39a13.69,13.69,0,0,1-4.5-10A16.6,16.6,0,0,1,84.87,36.87ZM40,88h80v32H40Zm16,48h64v64H56Zm144,64H136V136h64Zm16-80H136V88h80v32Z"/>
+                        <path d="M18.1933 11.8294C18.5506 10.4959 18.5964 9.09815 18.3271 7.74419C18.0577 6.39022 17.4806 5.11636 16.6402 4.02115C15.7998 2.92593 14.7187 2.03872 13.4806 1.42815C12.2425 0.817571 10.8805 0.5 9.5 0.5C8.11951 0.5 6.75752 0.817571 5.5194 1.42815C4.28128 2.03872 3.20021 2.92593 2.35982 4.02115C1.51943 5.11636 0.942252 6.39022 0.672932 7.74419C0.403612 9.09815 0.449371 10.4959 0.806668 11.8294" stroke-linecap="round"/>
+                        <path d="M10.2657 10.0823C10.7532 10.7916 10.4104 11.8738 9.50001 12.4994C8.58967 13.125 7.45652 13.0571 6.96906 12.3477C6.44955 11.5917 4.65616 7.34088 3.56713 4.71143C3.36203 4.21621 3.9677 3.8 4.35648 4.169C6.42077 6.12825 9.7462 9.32631 10.2657 10.0823Z"/>
+                        <path d="M9.5 0.5V2.5" stroke-linecap="round"/>
+                        <path d="M15.864 3.13574L14.4498 4.54996" stroke-linecap="round"/>
+                        <path d="M18.1934 11.8291L16.2615 11.3115" stroke-linecap="round"/>
+                        <path d="M0.806641 11.8291L2.73849 11.3115" stroke-linecap="round"/>
                       </svg>
                     {% endif %}
                   </span>
@@ -374,7 +409,37 @@
 {% endif %}
 
 <style>
-     .tech-specs-data-border{
+    /* Background image styling */
+    .tech-specs-container {
+      position: relative;
+      {% if section.settings.desktop_background_image != blank %}
+        background-image: url('{{ section.settings.desktop_background_image | image_url: width: 1920 }}') !important;
+        background-size: cover !important;
+        background-position: center !important;
+        background-repeat: no-repeat !important;
+      {% else %}
+        background-color: var(--background) !important;
+      {% endif %}
+    }
+
+    /* Mobile background image with fallback */
+    @media (max-width: 768px) {
+      .tech-specs-container {
+        {% if section.settings.mobile_background_image != blank %}
+          background-image: url('{{ section.settings.mobile_background_image | image_url: width: 800 }}') !important;
+          background-size: cover !important;
+          background-position: center !important;
+          background-repeat: no-repeat !important;
+        {% elsif section.settings.desktop_background_image != blank %}
+          background-image: url('{{ section.settings.desktop_background_image | image_url: width: 1920 }}') !important;
+          background-size: cover !important;
+          background-position: center !important;
+          background-repeat: no-repeat !important;
+        {% endif %}
+      }
+    }
+
+    .tech-specs-data-border{
       border-color: var(--border);
       border-opacity: 0.1;
       gap: var(--space-5xl);
@@ -382,11 +447,9 @@
     .tech-left-box, .functionality-right-box{
       color: var(--text);
     }
-    .functionality-right-box{
-      padding-left: var(--space-3xl) !important;
-    }
+
     .functionality-right-box-heading, .tech-left-box-heading{
-      margin-bottom: var(--space-3xl);
+      /* Margin set inline for consistency */
     }
     .tech-specs-main{
       gap: var(--space-3xl);
@@ -396,13 +459,32 @@
     }
 
     .box {
-      transition: all 0.3s ease;
+      transition: color 0.3s ease;
+      opacity: 0.3;
+    }
+
+    .box.filled {
+      animation: fillBar 0.6s ease-in-out forwards;
+    }
+
+    @keyframes fillBar {
+      0% {
+        color: var(--text);
+        opacity: 0.3;
+      }
+      100% {
+        color: {{ section.settings.bar_color | default: 'red' }};
+        opacity: 1;
+      }
     }
 
     /* Hide excess bars on smaller screens */
     @media (max-width: 480px) {
       .box:nth-child(n+30) {
         display: none;
+      }
+      .tech-left-box{
+        padding-right: 0;
       }
     }
 
@@ -411,30 +493,80 @@
         display: none;
       }
     }
-    .functionality-right-box {
-      border-left: 1px solid var(--border);
-      border-opacity: 0.1;
+
+    @media (min-width: 991px) and (max-width: 1499px) {
+      .box:nth-child(n+55) {
+        display: none;
+      }
+    }
+
+    @media (min-width: 1500px) and (max-width: 1599px) {
+      .box:nth-child(n+55) {
+        display: none;
+      }
+    }
+
+    @media (min-width: 1600px) and (max-width: 1699px) {
+      .box:nth-child(n+61) {
+        display: none;
+      }
+    }
+
+    @media (min-width: 1700px) and (max-width: 1799px) {
+      .box:nth-child(n+71) {
+        display: none;
+      }
+    }
+
+    @media (min-width: 1800px) and (max-width: 1899px) {
+      .box:nth-child(n+81) {
+        display: none;
+      }
+    }
+
+    .tech-left-box {
+      border-right: 1px solid var(--border);
+      padding-right: var(--space-4xl);
     }
 
     .tech-specs-data {
       width: 230px;
     }
-    .box {
-    }
-    .box.filled {
-      color: {{ section.settings.bar_color | default: 'red' }};
-    }
+
      .functionality-feature-content {
        display: flex;
        flex-direction: column;
        justify-content: center;
        min-height: 83px;
      }
-     @media (max-width: 1024px){
-      .functionality-right-box {
-      border-left: none;
-      padding-left: 0 !important;
+
+     /* Icon hover effects - desktop only */
+     @media (min-width: 768px) {
+       .functionality-icons-background {
+         transition: all 0.3s ease;
+         cursor: pointer;
+       }
+
+       .functionality-icons-background:hover {
+         transform: scale(1.05);
+         box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15) !important;
+       }
+
+       .functionality-icons-background:hover .feature-icon {
+         filter: brightness(0) saturate(100%) invert(27%) sepia(51%) saturate(2878%) hue-rotate(346deg) brightness(104%) contrast(97%);
+       }
+
+       .functionality-icons-background:hover svg {
+         color: {{ section.settings.icon_hover_color | default: '#ff6b35' }};
+       }
      }
+     @media (max-width: 1024px){
+      .tech-left-box {
+        border-right: none;
+      }
+      .functionality-right-box {
+        padding-left: 0 !important;
+      }
   }
 
     @media screen and (min-width: 750px) {
@@ -447,9 +579,6 @@
 
 
     @media screen and (max-width: 1445px) {
-      .tech-specs-container {
-        padding: var(--space-6xl) var(--gutter-lg) !important;
-      }
       .tech-specs-data-border{
         gap: var(--space-xl);
       }
@@ -465,10 +594,6 @@
 
 
     @media (max-width: 700px) {
-      .tech-specs-container{
-        padding: var(--gutter-md) var(--gutter-sm-safe-right) var(--gutter-md) var(--gutter-sm-safe-left) !important;
-      }
-
       .tech-specs-bars {
         padding-left: 0;
         width: 100%;
@@ -491,45 +616,79 @@
       .tech-specs-bars .box:nth-child(n + 30) {
         display: none;
       }
-      .functionality-right-box {
-        border-left: none;
+      .tech-left-box {
+        border-right: none;
+        padding-right: 0;
       }
     }
 </style>
 
 <script>
-  function updateTechSpecBars() {
+  function updateTechSpecBars(animate = true) {
     const effortValue = {{ product.metafields.tech_specs.effort.value | default: 0 }};
     const tempMin = {{ product.metafields.tech_specs.temp_min.value | default: 0 }};
     const tempMax = {{ product.metafields.tech_specs.temp_max.value | default: 0 }};
 
-    const isMobile = window.innerWidth <= 480;
-    const isTablet = window.innerWidth > 480 && window.innerWidth <= 990;
-    const totalBars = isMobile ? 29 : (isTablet ? 40 : 52);
+    const width = window.innerWidth;
+    let totalBars;
 
-    // Effort bars
+    if (width <= 480) {
+      totalBars = 29;
+    } else if (width <= 990) {
+      totalBars = 40;
+    } else if (width < 1600) {
+      totalBars = 54;
+    } else if (width < 1700) {
+      totalBars = 60;
+    } else if (width < 1800) {
+      totalBars = 70;
+    } else if (width < 1900) {
+      totalBars = 80;
+    } else {
+      totalBars = 90;
+    }
+
+    // Effort bars with loading animation
     const effortBar = document.getElementById('effort-bar');
     if (effortBar && effortValue > 0) {
       const effortBars = effortBar.querySelectorAll('.box');
       const effortFilled = Math.floor((effortValue * totalBars) / 100);
+
       effortBars.forEach((bar, i) => {
         if (i < effortFilled) {
-          bar.classList.add('filled');
+          if (animate && !bar.classList.contains('filled')) {
+            // Add staggered delay for loading animation effect
+            setTimeout(() => {
+              bar.classList.add('filled');
+            }, i * 25); // 15ms delay between each bar
+          } else if (!animate) {
+            bar.classList.add('filled');
+          }
         } else {
           bar.classList.remove('filled');
         }
       });
     }
 
-    // Temperature bars
+    // Temperature bars with loading animation
     const temperatureBar = document.getElementById('temperature-bar');
     if (temperatureBar && tempMin >= 0 && tempMax > 0 && tempMax > tempMin) {
       const tempBars = temperatureBar.querySelectorAll('.box');
       const tempStartPos = Math.round((tempMin / 95) * (totalBars - 1));
       const tempEndPos = Math.round((tempMax / 95) * (totalBars - 1));
+      let animationIndex = 0;
+
       tempBars.forEach((bar, i) => {
         if (i >= tempStartPos && i <= tempEndPos) {
-          bar.classList.add('filled');
+          if (animate && !bar.classList.contains('filled')) {
+            // Add staggered delay for loading animation effect
+            setTimeout(() => {
+              bar.classList.add('filled');
+            }, animationIndex * 25); // 15ms delay between each bar
+            animationIndex++;
+          } else if (!animate) {
+            bar.classList.add('filled');
+          }
         } else {
           bar.classList.remove('filled');
         }
@@ -538,18 +697,72 @@
   }
 
   document.addEventListener('DOMContentLoaded', function() {
-    updateTechSpecBars();
-    let lastIsMobile = window.innerWidth <= 480;
-    let lastIsTablet = window.innerWidth > 480 && window.innerWidth <= 990;
+    const techSpecsSection = document.querySelector('.tech-specs-container');
+    let hasAnimated = false;
+    let lastWidth = window.innerWidth;
+
+    if (techSpecsSection) {
+      const hasScrollAnimation = techSpecsSection.classList.contains('scroll-fade-trigger');
+      // Check if animations are globally disabled via theme settings
+      const globalAnimationsEnabled = document.body.dataset.scrollAnimations !== 'false';
+
+      if (hasScrollAnimation && globalAnimationsEnabled) {
+        // Wait for scroll animation to complete, then trigger bar animation
+        const checkForAnimate = setInterval(() => {
+          if (techSpecsSection.classList.contains('animate') && !hasAnimated) {
+            hasAnimated = true;
+            clearInterval(checkForAnimate);
+            // Delay to let scroll animation complete (0.8s + buffer)
+            setTimeout(() => {
+              updateTechSpecBars(true);
+            }, 900);
+          }
+        }, 100);
+
+        // Fallback: if animate class doesn't appear within 5 seconds, trigger anyway
+        setTimeout(() => {
+          if (!hasAnimated) {
+            clearInterval(checkForAnimate);
+            hasAnimated = true;
+            updateTechSpecBars(true);
+          }
+        }, 5000);
+      } else {
+        // No scroll animation or animations disabled globally, use original intersection observer
+        const observer = new IntersectionObserver((entries) => {
+          entries.forEach(entry => {
+            // Trigger animation when section is at least 50% visible
+            if (entry.isIntersecting && entry.intersectionRatio >= 0.5 && !hasAnimated) {
+              hasAnimated = true;
+              updateTechSpecBars(true);
+            }
+          });
+        }, {
+          threshold: [0.5] // Trigger when 50% of section is visible
+        });
+
+        // Start observing the tech specs section
+        observer.observe(techSpecsSection);
+      }
+    }
 
     window.addEventListener('resize', function() {
-      const isMobile = window.innerWidth <= 480;
-      const isTablet = window.innerWidth > 480 && window.innerWidth <= 990;
+      const width = window.innerWidth;
 
-      if (isMobile !== lastIsMobile || isTablet !== lastIsTablet) {
-        lastIsMobile = isMobile;
-        lastIsTablet = isTablet;
-        updateTechSpecBars();
+      // Check if we crossed a breakpoint
+      const breakpoints = [481, 991, 1600, 1700, 1800, 1900];
+      let crossedBreakpoint = false;
+
+      for (let bp of breakpoints) {
+        if ((lastWidth < bp && width >= bp) || (lastWidth >= bp && width < bp)) {
+          crossedBreakpoint = true;
+          break;
+        }
+      }
+
+      if (crossedBreakpoint && hasAnimated) {
+        lastWidth = width;
+        updateTechSpecBars(false);
       }
     });
   });
@@ -563,8 +776,9 @@
     {
       "type": "text",
       "id": "tech_specs_heading",
-      "label": "Tech Specs Heading",
-      "default": "TECH SPECS"
+      "label": "Section Heading",
+      "default": "SPECIFICATIONS",
+      "info": "Main heading for this section"
     },
     {
       "type": "color_scheme",
@@ -577,48 +791,77 @@
       "id": "bar_color",
       "label": "Bar Fill Color",
       "default": "#ff0000"
+    },
+    {
+      "type": "color",
+      "id": "icon_hover_color",
+      "label": "Icon Hover Color",
+      "default": "#ff6b35"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_animations",
+      "label": "Enable scroll animations",
+      "default": true,
+      "info": "Animate section as it scrolls into view. Bar animations will trigger after scroll animation completes. Respects user's motion preferences."
+    },
+    {
+      "type": "image_picker",
+      "id": "desktop_background_image",
+      "label": "Desktop Background Image",
+      "info": "Recommended size: 1920x1080px. This image will be shown on desktop and tablet devices."
+    },
+    {
+      "type": "image_picker",
+      "id": "mobile_background_image",
+      "label": "Mobile Background Image",
+      "info": "Recommended size: 800x1200px. This image will be shown on mobile devices (768px and below). Falls back to desktop image if not set."
     }
   ],
   "blocks": [
     {
       "type": "fit_pocketing",
-      "name": "Fit & Pocketing",
+      "name": "Specification Pair",
       "settings": [
         {
           "type": "text",
           "id": "fit_label",
-          "label": "Fit Label",
-          "default": "Fit"
+          "label": "First Specification Label",
+          "default": "Specification",
+          "info": "Example: Material, Weight, Dimensions, Style, etc."
         },
         {
           "type": "text",
           "id": "fit_value",
-          "label": "Fit Value (default)",
-          "default": "Fitted"
+          "label": "First Specification Value",
+          "default": "Premium Quality",
+          "info": "The value for the first specification"
         },
         {
           "type": "text",
           "id": "pocketing_label",
-          "label": "Pocketing Label",
-          "default": "Pocketing"
+          "label": "Second Specification Label",
+          "default": "Specification",
+          "info": "Example: Size, Capacity, Finish, Features, etc."
         },
         {
           "type": "text",
           "id": "pocketing_value",
-          "label": "Pocketing Value (default)",
-          "default": "2 Gel, 1 Phone"
+          "label": "Second Specification Value",
+          "default": "Standard Size",
+          "info": "The value for the second specification"
         }
       ]
     },
     {
       "type": "functionality",
-      "name": "Functionality",
+      "name": "Features",
       "settings": [
         {
           "type": "text",
           "id": "features_heading",
           "label": "Features Heading",
-          "default": "FUNCTIONALITY"
+          "default": "FEATURES"
         },
         {
           "type": "text",
@@ -692,145 +935,165 @@
     },
     {
       "type": "effort_temperature",
-      "name": "Effort & Temperature",
+      "name": "Measurement Scales",
       "settings": [
         {
           "type": "text",
           "id": "effort_label",
-          "label": "Effort Label",
-          "default": "Effort"
+          "label": "First Scale Label",
+          "default": "Intensity",
+          "info": "Example: Intensity, Performance, Quality, Strength, etc."
         },
         {
           "type": "text",
           "id": "effort_desc",
-          "label": "Effort Description",
-          "default": "This product was designed for any and every run."
+          "label": "First Scale Description",
+          "default": "Designed for various use cases and intensity levels.",
+          "info": "Describe what this measurement represents"
         },
         {
           "type": "text",
           "id": "temperature_label",
-          "label": "Temperature Label",
-          "default": "Temperature"
+          "label": "Second Scale Label",
+          "default": "Range",
+          "info": "Example: Range, Durability, Versatility, Coverage, etc."
         },
         {
           "type": "text",
           "id": "temperature_desc",
-          "label": "Temperature Description",
-          "default": "Designed for cool to hot temperatures."
+          "label": "Second Scale Description",
+          "default": "Suitable for a wide range of conditions and applications.",
+          "info": "Describe what this measurement represents"
         },
         {
           "type": "text",
           "id": "effort_scale_0",
-          "label": "Effort Scale: 1",
-          "default": "0%"
+          "label": "First Scale: Point 1",
+          "default": "Low",
+          "info": "First point on the scale (0%)"
         },
         {
           "type": "text",
           "id": "effort_scale_25",
-          "label": "Effort Scale: 2",
-          "default": "25%"
+          "label": "First Scale: Point 2",
+          "default": "25%",
+          "info": "Second point (25%)"
         },
         {
           "type": "text",
           "id": "effort_scale_50",
-          "label": "Effort Scale: 3",
-          "default": "50%"
+          "label": "First Scale: Point 3",
+          "default": "50%",
+          "info": "Middle point (50%)"
         },
         {
           "type": "text",
           "id": "effort_scale_75",
-          "label": "Effort Scale: 4",
-          "default": "75%"
+          "label": "First Scale: Point 4",
+          "default": "75%",
+          "info": "Fourth point (75%)"
         },
         {
           "type": "text",
           "id": "effort_scale_100",
-          "label": "Effort Scale: 5",
-          "default": "100%"
+          "label": "First Scale: Point 5",
+          "default": "High",
+          "info": "Maximum point (100%)"
         },
         {
           "type": "text",
           "id": "temp_scale_0",
-          "label": "Temperature Scale: 1",
-          "default": "0°"
+          "label": "Second Scale: Point 1",
+          "default": "Min",
+          "info": "First point on the scale"
         },
         {
           "type": "text",
           "id": "temp_scale_32",
-          "label": "Temperature Scale: 2",
-          "default": "32°"
+          "label": "Second Scale: Point 2",
+          "default": "20",
+          "info": "Second point"
         },
         {
           "type": "text",
           "id": "temp_scale_50",
-          "label": "Temperature Scale: 3",
-          "default": "50°"
+          "label": "Second Scale: Point 3",
+          "default": "40",
+          "info": "Third point"
         },
         {
           "type": "text",
           "id": "temp_scale_70",
-          "label": "Temperature Scale: 4",
-          "default": "70°"
+          "label": "Second Scale: Point 4",
+          "default": "60",
+          "info": "Fourth point"
         },
         {
           "type": "text",
           "id": "temp_scale_85",
-          "label": "Temperature Scale: 5",
-          "default": "85°"
+          "label": "Second Scale: Point 5",
+          "default": "80",
+          "info": "Fifth point"
         },
         {
           "type": "text",
           "id": "temp_scale_95",
-          "label": "Temperature Scale: 6",
-          "default": "95°"
+          "label": "Second Scale: Point 6",
+          "default": "Max",
+          "info": "Maximum point"
         }
       ]
     },
     {
       "type": "materials",
-      "name": "Materials",
+      "name": "Text Column 1",
       "settings": [
         {
           "type": "text",
           "id": "materials_label",
-          "label": "Materials Label",
-          "default": "Materials"
+          "label": "Column Heading",
+          "default": "Details",
+          "info": "Example: Materials, Specifications, Components, etc."
         },
         {
           "type": "text",
           "id": "materials_value",
-          "label": "Materials Value (default)",
-          "default": "83% M.Poly FD, 17% Spandex"
+          "label": "Column Content",
+          "default": "Add your product details here",
+          "info": "Can reference product metafields if configured"
         }
       ]
     },
     {
       "type": "care",
-      "name": "Care Instructions",
+      "name": "Text Column 2",
       "settings": [
         {
           "type": "text",
           "id": "care_label",
-          "label": "Care Label",
-          "default": "Care"
+          "label": "Column Heading",
+          "default": "Information",
+          "info": "Example: Care, Instructions, Usage, Guidelines, etc."
         },
+
         {
           "type": "textarea",
           "id": "care_value",
-          "label": "Care Value (default, use \\n for new lines)",
-          "default": "Machine Wash Cold\\nWash with Like Colors\\nDo Not Bleach\\nLay Flat to Dry\\nDo Not Iron\\nDo Not Dry Clean"
+          "label": "Column Content (use \\n for new lines)",
+          "default": "Add your product information here.",
+          "info": "Can reference product metafields if configured"
         }
       ]
     },
     {
       "type": "additional_info",
-      "name": "Additional Info",
+      "name": "Text Column 3",
       "settings": [
         {
           "type": "textarea",
           "id": "additional_info",
-          "label": "Additional Info (HTML allowed)",
-          "default": "For best outcome, wash exclusively with active apparel.<br>Garment made in China"
+          "label": "Column Content (HTML supported)",
+          "default": "Add additional product information here."
         }
       ]
     }

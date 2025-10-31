@@ -1,6 +1,35 @@
 {{ 'main-product.css' | asset_url | stylesheet_tag }}
 <script src="{{ 'global.js' | asset_url }}" defer></script>
 
+{%- if section.settings.enable_animations -%}
+  {{ 'scroll-animations.css' | asset_url | stylesheet_tag }}
+  <script src="{{ 'scroll-animations.js' | asset_url }}" defer></script>
+{%- endif -%}
+
+{% assign side_padding = settings.side_space %}
+
+{% if side_padding == blank or side_padding == 0 %}
+  {% assign side_padding = 20 %}
+{% endif %}
+
+<style>
+  .section-{{ section.id }}-padding {
+    padding-top: {{ section.settings.section_top_padding | default: 0 }}px;
+    padding-bottom: var(--sections-spacing-bottom);
+  }
+
+  @media (max-width: 749px) {
+    .section-{{ section.id }}-padding {
+      padding-top: {{ section.settings.section_top_padding_mobile | default: 0 }}px !important;
+    }
+  }
+
+  .product-section-container {
+    padding-left: {{ side_padding }}px;
+    padding-right: {{ side_padding }}px;
+  }
+</style>
+
 <!-- JavaScript data for main-product.js -->
 <script>
   window.SHOP_CURRENCY = {{ shop.currency | json }};
@@ -46,8 +75,8 @@
       position: relative;
     }
     model-viewer {
-      --poster-color: #f5f5f5;
-      background-color: #f5f5f5;
+      --poster-color: var(--background);
+      background-color: var(--background);
       touch-action: manipulation;
       width: 100% !important;
       height: 100% !important;
@@ -77,8 +106,8 @@
   /* Ensure model viewer loads on mobile */
   model-viewer {
     --poster-color: transparent;
-    --progress-bar-color: #000;
-    --progress-mask: #fff;
+    --progress-bar-color: var(--text);
+    --progress-mask: var(--background);
   }
 
   /* Preserve 3D model state during scroll transitions */
@@ -112,6 +141,18 @@
 
 <!-- Mobile Product Section -->
 {% render 'product-section-mobile', product: product, section: section %}
+
+{%- comment -%} Sticky Add-to-Cart Bar Block {%- endcomment -%}
+{%- for block in section.blocks -%}
+  {%- case block.type -%}
+    {%- when 'sticky_atc_bar' -%}
+      {% render 'sticky-atc-bar',
+        product: product,
+        selected_variant: product.selected_or_first_available_variant,
+        block: block
+      %}
+  {%- endcase -%}
+{%- endfor -%}
 
 {% schema %}
 {
@@ -185,6 +226,39 @@
         }
       ],
       "default": "400"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_animations",
+      "label": "Enable scroll animations",
+      "default": true,
+      "info": "Animate product title as it scrolls into view. Respects user's motion preferences."
+    },
+    {
+      "type": "header",
+      "content": "Section Spacing"
+    },
+    {
+      "type": "range",
+      "id": "section_top_padding",
+      "min": 0,
+      "max": 200,
+      "step": 5,
+      "unit": "px",
+      "label": "Section top padding (desktop)",
+      "default": 10,
+      "info": "Custom top padding for desktop, overrides global spacing"
+    },
+    {
+      "type": "range",
+      "id": "section_top_padding_mobile",
+      "min": 0,
+      "max": 200,
+      "step": 5,
+      "unit": "px",
+      "label": "Section top padding (mobile)",
+      "default": 10,
+      "info": "Custom top padding for mobile, overrides global spacing"
     }
   ],
   "blocks": [
@@ -213,10 +287,10 @@
           "default": "DETAILS"
         },
         {
-          "type": "text",
+          "type": "richtext",
           "id": "metafield_namespace_key",
-          "label": "Product Details ",
-          "default": "CONNECT TO A DYNAMIC SOURCE FOR PRODUCT DETAILS"
+          "label": "Product Details",
+          "info": "Add rich text content or connect to a dynamic source for product details."
         }
       ]
     },
@@ -319,6 +393,30 @@
       "name": "Pickup Availability",
       "limit": 1,
       "settings": []
+    },
+    {
+      "type": "sticky_atc_bar",
+      "name": "Sticky Add to Cart Bar",
+      "limit": 1,
+      "settings": [
+        {
+          "type": "paragraph",
+          "content": "Display a sticky add-to-cart bar at the bottom of the screen when the main add-to-cart button scrolls out of view."
+        },
+        {
+          "type": "checkbox",
+          "id": "enable_sticky_bar",
+          "label": "Enable Sticky Add to Cart Bar",
+          "default": true
+        },
+        {
+          "type": "color_scheme",
+          "id": "sticky_bar_color_scheme",
+          "label": "Color Scheme",
+          "default": "scheme-1",
+          "info": "Choose color scheme for the sticky bar"
+        }
+      ]
     }
   ]
 }

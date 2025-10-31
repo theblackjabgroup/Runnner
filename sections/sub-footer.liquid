@@ -70,93 +70,107 @@
 }
 {% endschema %}
 
+{% assign side_padding = settings.side_space %}
+
+{% if side_padding == blank or side_padding == 0 %}
+  {% assign side_padding = 20 %}
+{% endif %}
+
 {{ 'sub-footer.css' | asset_url | stylesheet_tag }}
 <style>
-  .site-credit-link:hover {
-    opacity: 1;
-    color: var(--accent);
-  }
-
-  .site-credit-link .default-text {
-    display: inline;
-  }
-
-  .site-credit-link .hover-text {
-    display: none;
-  }
-
-  .site-credit-link:hover .default-text {
-    display: none;
-  }
-
-  .site-credit-link:hover .hover-text {
-    display: inline;
-  }
-
-  @media screen and (max-width: 480px) {
-    .footer-container {
-      flex-direction: column;
-      gap: 1px;
+    .footer-text,
+    .site-credit-link {
+      color: var(--text);
     }
 
-    .footer-links {
-      flex-direction: column;
-      gap: 5px;
-      width: 100%;
-      order: 2;
-    }
-
-    .site-credit {
-      order: 1;
-      margin-bottom: 1rem;
-    }
-
-    .footer-text {
-      font-size: var(--tm-b-4-size);
-      line-height: 11px;
+    .site-credit-link:hover {
+      opacity: 1;
+      color: var(--accent);
     }
 
     .site-credit-link .default-text {
-      font-size: var(--tm-b-4-size);
-      line-height: 11px;
-      margin-left: 20px;
+      display: inline;
     }
 
     .site-credit-link .hover-text {
-      margin-left: 8px;
-      font-size: var(--tm-b-4-size);
-      line-height: 11px;
+      display: none;
     }
-  }
 
-  @media screen and (max-width: 480px) {
-    .site-credit {
-      margin-left: 70%;
+    .site-credit-link:hover .default-text {
+      display: none;
     }
-    .footer-links {
-      margin-top: -25px;
-    }
-    .footer-container {
-      margin-top: -3px;
-    }
-  }
 
-  /* Add margin-left for large screens only */
-  @media screen and (min-width: 1024px) {
-    .footer-links {
-      margin-left: 20px;
+    .site-credit-link:hover .hover-text {
+      display: inline;
     }
-  }
+
+    @media screen and (max-width: 480px) {
+      .footer-container {
+        flex-direction: column;
+        gap: 1px;
+      }
+
+      .footer-links {
+        flex-direction: column;
+        gap: 5px;
+        width: 100%;
+        order: 2;
+      }
+
+      .site-credit {
+        order: 1;
+        margin-bottom: 1rem;
+      }
+
+      .footer-text {
+        font-size: var(--tm-b-4-size);
+        line-height: 11px;
+      }
+
+      .site-credit-link .default-text {
+        font-size: var(--tm-b-4-size);
+        line-height: 11px;
+        margin-left: 20px;
+      }
+
+      .site-credit-link .hover-text {
+        margin-left: 8px;
+        font-size: var(--tm-b-4-size);
+        line-height: 11px;
+      }
+    }
+
+    @media screen and (max-width: 480px) {
+      .site-credit {
+        margin-left: 70%;
+      }
+      .footer-links {
+        margin-top: -25px;
+      }
+      .footer-container {
+        margin-top: -3px;
+      }
+    }
+
+    /* Add margin-left for large screens only */
+    @media screen and (min-width: 1024px) {
+      .footer-links {
+        margin-left: 20px;
+      }
+    }
 
   .custom-footer-style {
     padding-top: var(--space-3xl);
     padding-bottom: var(--space-3xl);
+    padding-left: {{ side_padding }}px;
+    padding-right: {{ side_padding }}px;
     line-height: normal;
+    background-color: var(--background);
   }
 </style>
 
-<div class="w-full p-4 flex justify-between items-center bg-black footer-container color-{{ section.settings.color_scheme }} custom-footer-style">
-  <div class="flex gap-8 footer-links" style="margin-left: var(--space-lg);">
+<div class="w-full flex justify-between items-center color-{{ section.settings.color_scheme }} footer-container custom-footer-style">
+  <div class="flex gap-8 footer-links">
     {% if section.settings.link1_text != blank %}
       <a
         href="{{ section.settings.link1_url | default: '#' }}"

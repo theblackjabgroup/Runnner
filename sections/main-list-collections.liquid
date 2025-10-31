@@ -1,36 +1,71 @@
 {{ 'collections-bundle.css' | asset_url | stylesheet_tag }}
 
-<script src="{{ 'scroll-animations.js' | asset_url }}" defer="defer"></script>
 <script src="{{ 'main-list-collections.js' | asset_url }}" defer="defer"></script>
 
 <style>
-  .collection-list {
-    padding-left: {{ settings.side_space }}px !important;
-    padding-right: {{ settings.side_space }}px !important;
-    column-gap: {{ settings.horizontal_space }}px !important;
-    row-gap: {{ settings.vertical_space }}px !important;
-    display: grid;
+  .collection-page-wrapper {
+    padding-top: {{ section.settings.section_top_padding | default: 0 }}px !important;
+    padding-bottom: var(--sections-spacing-bottom) !important;
   }
 
-  /* Desktop columns */
-  @media screen and (min-width: 750px) {
-    .collection-list {
-      grid-template-columns: repeat({{ section.settings.columns_desktop }}, 1fr);
+  @media (max-width: 749px) {
+    .collection-page-wrapper {
+      padding-top: {{ section.settings.section_top_padding_mobile | default: 0 }}px !important;
     }
   }
 
-  /* Mobile columns */
+  .collection-list {
+    padding-left: {{ settings.side_space }}px !important;
+    padding-right: {{ settings.side_space }}px !important;
+    column-gap: var(--grid-horizontal-gap) !important;
+    row-gap: var(--grid-vertical-gap) !important;
+    display: grid !important;
+  }
+
+  /* Desktop columns - Override any CSS file rules */
+  @media screen and (min-width: 1500px) {
+    .collection-list {
+      grid-template-columns: repeat({{ section.settings.columns_desktop }}, 1fr) !important;
+    }
+  }
+
+  @media screen and (max-width: 1499px) and (min-width: 1300px) {
+    .collection-list {
+      grid-template-columns: repeat({{ section.settings.columns_desktop }}, 1fr) !important;
+    }
+  }
+
+  @media screen and (max-width: 1299px) and (min-width: 750px) {
+    .collection-list {
+      grid-template-columns: repeat({{ section.settings.columns_desktop }}, 1fr) !important;
+    }
+  }
+
+  /* Mobile columns - Override any CSS file rules */
   @media screen and (max-width: 749px) {
     .collection-list {
-      grid-template-columns: repeat({{ section.settings.columns_mobile }}, 1fr);
+      grid-template-columns: repeat({{ section.settings.columns_mobile }}, 1fr) !important;
     }
   }
 
   /* Handle span two columns on desktop */
   @media screen and (min-width: 750px) {
     .collection-list__item[data-span-two="true"] {
-      grid-column: span 2;
+      grid-column: span 2 !important;
     }
+  }
+
+  /* Handle span two columns on mobile based on column setting */
+  @media screen and (max-width: 749px) {
+    {% if section.settings.columns_mobile == '1' %}
+      .collection-list__item[data-span-two="true"] {
+        grid-column: span 1 !important;
+      }
+    {% else %}
+      .collection-list__item[data-span-two="true"] {
+        grid-column: span 2 !important;
+      }
+    {% endif %}
   }
 
   /* Card height - Desktop */
@@ -127,7 +162,7 @@
   }
 </style>
 
-<div class="!p-0 py-16 collection-page-wrapper">
+<div class="collection-page-wrapper color-{{ section.settings.color_scheme }}">
   <div class="breadcrumb-collections-list border-b mb-10 flex items-center">
     <h1 class="uppercase !font-light breadcrumb-text-size breadcrumb-text">Shop</h1>
     <span class="mx-2 breadcrumb-text">/</span>
@@ -136,18 +171,13 @@
     </h1>
   </div>
   {%- comment -%}
-    <h1
-      class="title title--primary inline-richtext mb-12 {% if settings.animations_reveal_on_scroll %} scroll-trigger animate--fade-in{% endif %}"
-      style="color: {{ section.settings.text_color }};"
-    >
-      &nbsp;{{ section.settings.title }}
-    </h1>
+    Legacy heading code - replaced with modern design
   {%- endcomment -%}
 
   <ul class="collection-list collection-grid-animated scroll-fade-stagger" role="list">
     {%- for block in section.blocks -%}
       <li
-        class="collection-list__item collection-card-item scroll-fade-trigger scroll-fade-up {% if block.type == 'media' and block.settings.span_two_columns %}md:col-span-2{% endif %}"
+        class="collection-list__item collection-card-item scroll-fade-trigger scroll-fade-up"
         data-animation-index="{{ forloop.index0 }}"
         {% if block.type == 'media' and block.settings.span_two_columns %}
           data-span-two="true"
@@ -314,6 +344,12 @@
   },
   "settings": [
     {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "Color scheme",
+      "default": "scheme-1"
+    },
+    {
       "type": "inline_richtext",
       "id": "title",
       "label": "t:sections.main-list-collections.settings.title.label",
@@ -344,6 +380,32 @@
       ],
       "default": "2",
       "label": "Columns on mobile"
+    },
+    {
+      "type": "header",
+      "content": "Section Spacing"
+    },
+    {
+      "type": "range",
+      "id": "section_top_padding",
+      "min": 0,
+      "max": 200,
+      "step": 5,
+      "unit": "px",
+      "label": "Section top padding (desktop)",
+      "default": 0,
+      "info": "Custom top padding for desktop, overrides global spacing"
+    },
+    {
+      "type": "range",
+      "id": "section_top_padding_mobile",
+      "min": 0,
+      "max": 200,
+      "step": 5,
+      "unit": "px",
+      "label": "Section top padding (mobile)",
+      "default": 10,
+      "info": "Custom top padding for mobile, overrides global spacing"
     }
   ],
   "blocks": [

@@ -1,18 +1,33 @@
 {{ 'template-collection.css' | asset_url | stylesheet_tag }}
 {{ 'component-card.css' | asset_url | stylesheet_tag }}
 {{ 'component-price.css' | asset_url | stylesheet_tag }}
-{{ 'scroll-animations.css' | asset_url | stylesheet_tag }}
 {{ 'main-collection-product-grid.css' | asset_url | stylesheet_tag }}
 
 <style>
+  :root {
+    --filters-drawer-speed: {{ section.settings.filters_drawer_animation_speed | default: settings.filters_drawer_animation_speed | default: 0.6 }}s !important;
+  }
+
+  .collection-page-wrapper {
+    padding-top: var(--sections-spacing-top) !important;
+    padding-bottom: var(--sections-spacing-bottom) !important;
+  }
+
   .products-container {
     padding-left: {{ settings.side_space }}px !important;
     padding-right: {{ settings.side_space }}px !important;
   }
 
   .product-grid {
-    column-gap: {{ settings.horizontal_space }}px !important;
-    row-gap: {{ settings.vertical_space }}px !important;
+    column-gap: var(--grid-horizontal-gap) !important;
+    row-gap: var(--grid-vertical-gap) !important;
+  }
+
+  /* Desktop columns - use section setting */
+  @media screen and (min-width: 990px) {
+    .collection-page-wrapper .product-grid {
+      grid-template-columns: repeat({{ section.settings.columns_desktop | default: 3 }}, 1fr) !important;
+    }
   }
 
   .filters-container {
@@ -21,10 +36,13 @@
   }
 </style>
 
-<script src="{{ 'scroll-animations.js' | asset_url }}" defer="defer"></script>
 <script src="{{ 'main-collection-product-grid.js' | asset_url }}" defer="defer"></script>
 
-<div class="collection-page-wrapper">
+<div
+  class="collection-page-wrapper color-{{ section.settings.color_scheme }}"
+  data-section-type="main-collection-product-grid"
+  data-filters-drawer-speed="{{ section.settings.filters_drawer_animation_speed | default: settings.filters_drawer_animation_speed | default: 0.6 }}"
+>
   {%- paginate collection.products by section.settings.products_per_page -%}
     <!-- Filters and Sorting -->
     {%- if section.settings.enable_filtering -%}
@@ -38,7 +56,11 @@
             enable_filtering: section.settings.enable_filtering,
             enable_sorting: true,
             filter_type: 'horizontal',
-            paginate: paginate
+            paginate: paginate,
+            facet_icon_size: section.settings.facet_icon_size,
+            facet_icon_thickness: section.settings.facet_icon_thickness,
+            facet_custom_icon_collapsed: section.settings.facet_custom_icon_collapsed,
+            facet_custom_icon_expanded: section.settings.facet_custom_icon_expanded
           %}
         </aside>
       </div>
@@ -95,6 +117,12 @@
   "class": "section",
   "settings": [
     {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "Color scheme",
+      "default": "scheme-1"
+    },
+    {
       "type": "range",
       "id": "products_per_page",
       "min": 8,
@@ -112,6 +140,19 @@
       "id": "show_secondary_image",
       "default": false,
       "label": "Show secondary image on hover"
+    },
+    {
+      "type": "header",
+      "content": "Desktop Layout"
+    },
+    {
+      "type": "range",
+      "id": "columns_desktop",
+      "min": 1,
+      "max": 6,
+      "step": 1,
+      "default": 3,
+      "label": "Desktop columns"
     },
     {
       "type": "header",
@@ -142,6 +183,55 @@
       "id": "enable_filtering",
       "default": true,
       "label": "Enable filtering"
+    },
+    {
+      "type": "range",
+      "id": "filters_drawer_animation_speed",
+      "min": 0.1,
+      "max": 2.0,
+      "step": 0.1,
+      "unit": "s",
+      "label": "Filters Drawer Animation Speed",
+      "default": 0.6,
+      "info": "Speed of the mobile filters drawer open/close animation (in seconds)."
+    },
+    {
+      "type": "header",
+      "content": "Filters Icon Customization"
+    },
+    {
+      "type": "image_picker",
+      "id": "facet_custom_icon_collapsed",
+      "label": "Custom Icon (Collapsed State)",
+      "info": "Upload a custom icon for collapsed filters (replaces + icon). Recommended size: 12x12px to 24x24px. Leave blank to use default plus/minus icon."
+    },
+    {
+      "type": "image_picker",
+      "id": "facet_custom_icon_expanded",
+      "label": "Custom Icon (Expanded State)",
+      "info": "Upload a custom icon for expanded filters (replaces - icon). Leave blank to use the collapsed icon or default."
+    },
+    {
+      "type": "range",
+      "id": "facet_icon_size",
+      "min": 8,
+      "max": 24,
+      "step": 1,
+      "unit": "px",
+      "label": "Icon Size",
+      "default": 12,
+      "info": "Size of the expand/collapse icon (applies to both default and custom icons)"
+    },
+    {
+      "type": "range",
+      "id": "facet_icon_thickness",
+      "min": 1,
+      "max": 4,
+      "step": 0.5,
+      "unit": "px",
+      "label": "Icon Thickness (Default Icon Only)",
+      "default": 2,
+      "info": "Thickness of the default plus/minus icon lines (only applies when no custom icon is uploaded)"
     }
   ]
 }

@@ -1,0 +1,167 @@
+{% comment %}
+  Sticky Add-to-Cart Bar
+  Shows when main ATC button scrolls out of view
+
+  Accepts:
+  - product: {Object} Product object (required)
+  - selected_variant: {Object} Currently selected variant
+  - block: {Object} Block object (optional, for settings)
+
+  Usage:
+  {% render 'sticky-atc-bar', product: product, selected_variant: product.selected_or_first_available_variant, block: block %}
+{% endcomment %}
+
+{%- liquid
+  assign enable_sticky_bar = true
+  if block and block.settings.enable_sticky_bar != null
+    assign enable_sticky_bar = block.settings.enable_sticky_bar
+  endif
+
+  assign sticky_color_scheme = 'scheme-1'
+  if block and block.settings.sticky_bar_color_scheme != blank
+    assign sticky_color_scheme = block.settings.sticky_bar_color_scheme
+  endif
+-%}
+
+{%- if enable_sticky_bar -%}
+  {{ 'sticky-atc-bar.css' | asset_url | stylesheet_tag }}
+
+  {%- liquid
+    assign current_variant = selected_variant | default: product.selected_or_first_available_variant
+    assign featured_image = current_variant.featured_image | default: product.featured_image
+    assign product_form_id = 'sticky-product-form-' | append: section.id
+  -%}
+
+  <div
+    class="sticky-atc-bar color-{{ sticky_color_scheme }}"
+    role="complementary"
+    aria-label="Sticky add to cart"
+    {{ block.shopify_attributes }}
+  >
+    <div class="sticky-atc-bar__container">
+      {%- comment -%} First Row: Image + Product Info {%- endcomment -%}
+      <div class="sticky-atc-bar__top-row">
+        {%- comment -%} Product Image {%- endcomment -%}
+        <div class="sticky-atc-bar__image">
+          {%- if featured_image -%}
+            <img
+              src="{{ featured_image | image_url: width: 120 }}"
+              alt="{{ featured_image.alt | escape }}"
+              width="60"
+              height="60"
+              loading="eager"
+            >
+          {%- else -%}
+            {{ 'product-1' | placeholder_svg_tag: 'placeholder-svg' }}
+          {%- endif -%}
+        </div>
+
+        {%- comment -%} Product Info {%- endcomment -%}
+        <div class="sticky-atc-bar__info">
+          <h2 class="sticky-atc-bar__title">
+            {{ product.title | escape }}
+          </h2>
+          <div class="sticky-atc-bar__price">
+            {%- if current_variant.compare_at_price > current_variant.price -%}
+              <span class="sticky-atc-bar__price--compare">
+                {{ current_variant.compare_at_price | money }}
+              </span>
+              <span class="sticky-atc-bar__price--sale">
+                {{ current_variant.price | money }}
+              </span>
+            {%- else -%}
+              <span>{{ current_variant.price | money }}</span>
+            {%- endif -%}
+          </div>
+        </div>
+      </div>
+
+      {%- comment -%} Second Row: Variant Selector + Add to Cart Button {%- endcomment -%}
+      <div class="sticky-atc-bar__bottom-row">
+        {%- comment -%} Variant Selector (if product has variants) {%- endcomment -%}
+        {%- unless product.has_only_default_variant -%}
+          <div class="sticky-atc-bar__variants">
+            <select
+              name="id"
+              class="sticky-atc-bar__variant-select"
+              aria-label="Select variant"
+            >
+              {%- for variant in product.variants -%}
+                <option
+                  value="{{ variant.id }}"
+                  {% if variant.id == current_variant.id %}
+                    selected="selected"
+                  {% endif %}
+                  {% unless variant.available %}
+                    disabled
+                  {% endunless %}
+                >
+                  {{ variant.title }}
+                  {%- unless variant.available %} - Sold Out{% endunless -%}
+                </option>
+              {%- endfor -%}
+            </select>
+          </div>
+        {%- endunless -%}
+
+        {%- comment -%} Quantity Selector (hidden on mobile) {%- endcomment -%}
+        <div class="sticky-atc-bar__quantity">
+          <button
+            type="button"
+            class="sticky-atc-bar__quantity-button"
+            data-action="decrease"
+            aria-label="Decrease quantity"
+          >
+            <span>−</span>
+          </button>
+          <input
+            type="number"
+            name="quantity"
+            class="sticky-atc-bar__quantity-input"
+            value="1"
+            min="1"
+            max="999"
+            aria-label="Product quantity"
+            readonly
+          >
+          <button
+            type="button"
+            class="sticky-atc-bar__quantity-button"
+            data-action="increase"
+            aria-label="Increase quantity"
+          >
+            <span>+</span>
+          </button>
+        </div>
+
+        {%- comment -%} Add to Cart Form with Tertiary Button {%- endcomment -%}
+        <form
+          method="post"
+          action="{{ routes.cart_add_url }}"
+          id="{{ product_form_id }}"
+          class="sticky-atc-bar__form"
+          enctype="multipart/form-data"
+        >
+          <input type="hidden" name="id" value="{{ current_variant.id }}">
+          <input type="hidden" name="quantity" value="1">
+
+          {%- liquid
+            if current_variant.available
+              assign button_text = 'Add to Cart'
+            else
+              assign button_text = 'Sold Out'
+            endif
+          -%}
+
+          {% render 'secondary-button',
+            button_text: button_text,
+            button_id: 'get-access',
+            button_classes: 'submit-btn'
+          %}
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <script src="{{ 'sticky-atc-bar.js' | asset_url }}" defer></script>
+{%- endif -%}

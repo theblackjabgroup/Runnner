@@ -2,7 +2,10 @@
 
 <style>
   :root {
-    --popup-close-button-bg: {{ section.settings.close_button_bg_color | default: '#ffffff' }};
+    {% assign opacity_value = section.settings.close_button_bg_opacity | default: 100 | divided_by: 100.0 %}
+    {% assign bg_color = section.settings.close_button_bg_color | default: '#ffffff' %}
+    --popup-close-button-bg: {{ bg_color }};
+    --popup-close-button-bg-rgba: {{ bg_color | color_to_rgb | replace: 'rgb(', 'rgba(' | replace: ')', ', ' }}{{ opacity_value }});
   }
 </style>
 
@@ -135,7 +138,7 @@
                       sizes="100vw"
                     >
                   {% endif %}
-                  
+
                   <img
                     srcset="
                       {%- if section.settings.image.width >= 375 -%}{{ section.settings.image | image_url: width: 375 }} 375w,{%- endif -%}
@@ -220,7 +223,9 @@
         
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         if (!email || !emailRegex.test(email)) {
-          alert('Please enter a valid email address.');
+          if (typeof window.showNotification === 'function') {
+            window.showNotification('Please enter a valid email address.', 'warning', 4000);
+          }
           return;
         }
         fetch(form.action, {
@@ -239,7 +244,9 @@
           updatePopupToThankYou();
         })
         .catch(error => {
-          alert('There was an error submitting your email. Please try again.');
+          if (typeof window.showNotification === 'function') {
+            window.showNotification('There was an error submitting your email. Please try again.', 'error', 4000);
+          }
         });
       });
     }
@@ -304,11 +311,15 @@
         const contactNumber = formData.get('customer[phone]');
         
         if (!contactNumber) {
-          alert('Please enter your contact number.');
+          if (typeof window.showNotification === 'function') {
+            window.showNotification('Please enter your contact number.', 'warning', 4000);
+          }
           return;
         }
         if (!/^[0-9+\-\s()]{10,15}$/.test(contactNumber)) {
-          alert('Please enter a valid contact number.');
+          if (typeof window.showNotification === 'function') {
+            window.showNotification('Please enter a valid contact number.', 'warning', 4000);
+          }
           return;
         }
 
@@ -326,7 +337,9 @@
           hidePromo();
         })
         .catch(error => {
-          alert('There was an error submitting your contact. Please try again.');
+          if (typeof window.showNotification === 'function') {
+            window.showNotification('There was an error submitting your contact. Please try again.', 'error', 4000);
+          }
         });
       });
     }
@@ -446,6 +459,17 @@
       "id": "close_button_bg_color",
       "default": "#ffffff",
       "label": "Close button background color"
+    },
+    {
+      "type": "range",
+      "id": "close_button_bg_opacity",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "unit": "%",
+      "default": 100,
+      "label": "Close button background opacity",
+      "info": "Control the transparency of the close button background circle (0% = fully transparent, 100% = fully opaque)"
     }
   ],
   "presets": [{ "name": "Pop Up" }]

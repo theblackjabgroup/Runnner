@@ -1,5 +1,18 @@
+{%- if section.settings.enable_animations -%}
+  {{ 'scroll-animations.css' | asset_url | stylesheet_tag }}
+  <script src="{{ 'scroll-animations.js' | asset_url }}" defer></script>
+{%- endif -%}
+
+{% assign side_padding = settings.side_space %}
+
+{% if side_padding == blank or side_padding == 0 %}
+  {% assign side_padding = 20 %}
+{% endif %}
+
 <div
-  class="outfit-inspiration-section color-{{ section.settings.color_scheme }} p-8  px-0 flex justify-center items-center md:py-16"
+  class="outfit-inspiration-section color-{{ section.settings.color_scheme }} flex justify-center items-center {% if section.settings.enable_animations %}scroll-fade-trigger scroll-fade-up{% endif %}"
+  style="padding-top: var(--sections-spacing-top); padding-bottom: var(--sections-spacing-bottom); padding-left: {{ side_padding }}px; padding-right: {{ side_padding }}px;"
+  data-section-id="{{ section.id }}"
 >
   <div class="outfit-navigation-arrows desktop-arrows ">
     <button
@@ -24,7 +37,7 @@
   <div class="relative" style="background-color: var(--background);">
     <div class="flex flex-col color-{{ section.settings.color_scheme }} lg:flex-row gap-4 justify-center ">
       <div class="outfit-contianer flex flex-col">
-        <h2 class="outfit-section-title">
+        <h2 class="outfit-section-title" style="margin-bottom: 24px;">
           {{ section.settings.title }}
         </h2>
 
@@ -35,24 +48,26 @@
               class="main-product-card"
             >
               <div
-                class="flex items-center justify-center w-full"
+                class="main-img-wrapper-outer flex items-center justify-center overflow-hidden"
               >
-                <img
-                  srcset="
-                    {%- if product.featured_image.width >= 205 -%}{{ product.featured_image | image_url: width: 205 }} 205w,{%- endif -%}
-                    {%- if product.featured_image.width >= 409 -%}{{ product.featured_image | image_url: width: 409 }} 409w,{%- endif -%}
-                    {%- if product.featured_image.width >= 818 -%}{{ product.featured_image | image_url: width: 818 }} 818w,{%- endif -%}
-                    {{ product.featured_image | image_url }} {{ product.featured_image.width }}w
-                  "
-                  sizes="(max-width: 767px) 184px, 409px"
-                  src="{{ product.featured_image | image_url: width: 409 }}"
-                  alt="{{ product.title }}"
-                  class="outfit-main-img"
-                  loading="eager"
-                  decoding="async"
-                  height="512"
-                  width="409"
-                >
+                <div class="main-img-wrapper-inner w-full h-full flex items-center justify-center overflow-hidden">
+                  <img
+                    srcset="
+                      {%- if product.featured_image.width >= 205 -%}{{ product.featured_image | image_url: width: 205 }} 205w,{%- endif -%}
+                      {%- if product.featured_image.width >= 409 -%}{{ product.featured_image | image_url: width: 409 }} 409w,{%- endif -%}
+                      {%- if product.featured_image.width >= 818 -%}{{ product.featured_image | image_url: width: 818 }} 818w,{%- endif -%}
+                      {{ product.featured_image | image_url }} {{ product.featured_image.width }}w
+                    "
+                    sizes="(max-width: 767px) 184px, 409px"
+                    src="{{ product.featured_image | image_url: width: 409 }}"
+                    alt="{{ product.title }}"
+                    class="outfit-main-img"
+                    loading="eager"
+                    decoding="async"
+                    height="512"
+                    width="409"
+                  >
+                </div>
               </div>
               <div class="main-product-details">
                 <h4 class="main-product-title">
@@ -98,7 +113,7 @@
                           data-product-url="{{ paired_product.url }}"
                           data-section-id="{{ section.id }}"
                         >
-                          <div class=" paired-product-img w-[140px] h-[150px] flex items-center justify-center overflow-hidden flex-shrink-0">
+                          <div class="paired-product-img-wrapper w-[140px] h-[150px] flex items-center justify-center overflow-hidden flex-shrink-0">
                             {% if paired_product.featured_image %}
                               <img
                                 srcset="
@@ -437,6 +452,9 @@
       .outfit-inspiration-section {
         min-height: 100vh;
       }
+      .main-product-card {
+        height: 560px;
+      }
     }
 
     .outfit-inspiration-section::before {
@@ -495,12 +513,16 @@
     }
     .main-product-card{
      border: 1px solid;
+     overflow: hidden;
+     width: 420px;
+
     }
     .paired-product-card{
     height: 179px;
     color: var(--text);
     padding: 12px;
     border: 1px solid;
+    overflow: hidden;
   }
   .outfit-expanded-title{
     color: var(--text);
@@ -515,6 +537,7 @@
     .paired-product-title{
      color: var(--text);
      font-size: 14px;
+     margin: 5px 0;
     }
     .outfit-size{
       padding-bottom: 30px;
@@ -562,7 +585,6 @@
       font-size: var(--t-h-2-size);
       text-align: {{ section.settings.title_align | default: 'center' }};
       color: var(--header_text, var(--color-foreground));
-      margin-bottom: 45px;
     }
 
 
@@ -648,6 +670,12 @@
     .exapnded-product-img {
       height: 316px !important;
       width: 360px !important;
+      transition: transform 0.3s ease;
+    }
+
+    /* Hover zoom animation for expanded products like blog-grid */
+    .expanded-product-card:hover .exapnded-product-img {
+      transform: scale(1.1);
     }
     .outfit-navigation {
       width: 78px !important;
@@ -655,6 +683,22 @@
       cursor: pointer;
       position: static !important;
       display: flex;
+      transition: transform 0.3s ease;
+    }
+
+    /* Hover animation for left arrow (prev) - shifts left */
+    #outfit-slider-prev-{{ section.id }}:hover {
+      transform: translateX(-5px);
+    }
+
+    /* Hover animation for right arrow (next) - shifts right */
+    #outfit-slider-next-{{ section.id }}:hover {
+      transform: translateX(5px);
+    }
+
+    /* Disable hover animation when arrows are disabled */
+    .outfit-navigation[style*="pointer-events: none"]:hover {
+      transform: none !important;
     }
     .outfit-arrow {
       height: 24px;
@@ -675,7 +719,7 @@
       padding: 0 7px;
       border-radius: var(--sold-out-badge-radius);
       font-size: 16px;
-      font-weight: 500;
+      font-weight: var(--weight-medium);
       background-color: var(--button);
       color: var(--button_label);
       border: 1px solid var(--border);
@@ -717,10 +761,16 @@
     }
 
     .paired-product-img {
-      width: 140px !important;
-      height: 150px !important;
+      width: 100% !important;
+      height: 100% !important;
       aspect-ratio: 1/1;
       object-fit: cover;
+      transition: transform 0.3s ease;
+    }
+
+    /* Hover zoom animation for paired products like blog-grid */
+    .paired-product-card:hover .paired-product-img {
+      transform: scale(1.1);
     }
 
     .paired-product-card.hidden-for-expand {
@@ -757,12 +807,28 @@
       left: 0;
       right: 0;
     }
+    .main-img-wrapper-outer {
+      padding: 14px 14px 9px 14px !important;
+      width: 100% !important;
+    }
+
+    .main-img-wrapper-inner {
+      width: 100% !important;
+      height: 482px !important;
+    }
+
     .outfit-main-img {
-      height: 505px;
-      width: 420px;
-      padding: 14px 14px 9px 14px;
+      width: 100% !important;
+      height: 100% !important;
       aspect-ratio: 1/1;
       object-fit: cover;
+      transition: transform 0.3s ease;
+      display: block;
+    }
+
+    /* Hover zoom animation like blog-grid */
+    .main-product-card:hover .outfit-main-img {
+      transform: scale(1.1);
     }
 
     .paired-product-slide {
@@ -787,6 +853,22 @@
       width: 50px !important;
       height: 50px !important;
       cursor: pointer;
+      transition: transform 0.3s ease;
+    }
+
+    /* Hover animation for mobile left arrow (prev) - shifts left */
+    #outfit-slider-prev-mobile-{{ section.id }}:hover {
+      transform: translateX(-5px);
+    }
+
+    /* Hover animation for mobile right arrow (next) - shifts right */
+    #outfit-slider-next-mobile-{{ section.id }}:hover {
+      transform: translateX(5px);
+    }
+
+    /* Disable hover animation when mobile arrows are disabled */
+    .outfit-navigation-mobile[style*="pointer-events: none"]:hover {
+      transform: none !important;
     }
 
     .desktop-arrows {
@@ -840,6 +922,7 @@
     }
       .outfit-section-title {
         font-size: 36px !important;
+        margin-bottom: 16px;
       }
       .outfit-sold-out {
         display: none;
@@ -872,7 +955,7 @@
           right: 6px;
     }
       .outfit-inspiration-section {
-        padding: 10px 0 !important;
+        padding: var(--sections-spacing-top) 0 var(--sections-spacing-bottom) !important;
       }
       .max-w-5xl {
         max-width: 100vw !important;
@@ -887,10 +970,16 @@
         width: 184px !important;
         min-width: 0 !important;
       }
-      .outfit-main-img {
-        height: 212px !important;
-        width: 180px !important;
+      .main-img-wrapper-outer {
         padding: 8px !important;
+      }
+      .main-img-wrapper-inner {
+        width: 100% !important;
+        height: 196px !important;
+      }
+      .outfit-main-img {
+        width: 100% !important;
+        height: 100% !important;
       }
       .max-w-\[409px\] {
         max-width: 172px !important;
@@ -908,8 +997,8 @@
         gap: 4px !important;
       }
       .paired-product-img {
-        width: 60px !important;
-        height: 60px !important;
+        width: 100% !important;
+        height: 100% !important;
       }
       .expanded-product-card {
         max-width: 172px !important;
@@ -926,9 +1015,10 @@
         transition: transform 0.75s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.65s cubic-bezier(0.4, 0, 0.2, 1);
       }
 
-      .w-\[140px\],
-      .h-\[150px\] {
+      .paired-product-img-wrapper.w-\[140px\] {
         width: 60px !important;
+      }
+      .paired-product-img-wrapper.h-\[150px\] {
         height: 60px !important;
       }
       .w-\[200px\] {
@@ -1611,6 +1701,13 @@
       "id": "border_color",
       "label": "Border Color",
       "default": "#000000"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_animations",
+      "label": "Enable scroll animations",
+      "default": true,
+      "info": "Animate section as it scrolls into view. Respects user's motion preferences."
     },
     {
       "type": "header",

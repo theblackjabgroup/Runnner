@@ -28,9 +28,15 @@
 
     {% render 'meta-tags' %}
 
+    {%- if template.name == 'product' -%}
+      <meta name="product-id" content="{{ product.id }}">
+      <meta name="product-handle" content="{{ product.handle }}">
+    {%- endif -%}
+
     <script src="{{ 'constants.js' | asset_url }}" defer="defer"></script>
     <script src="{{ 'pubsub.js' | asset_url }}" defer="defer"></script>
     <script src="{{ 'global.js' | asset_url }}" defer="defer"></script>
+    <script src="{{ 'notification-utils.js' | asset_url }}" defer="defer"></script>
     <script src="{{ 'details-disclosure.js' | asset_url }}" defer="defer"></script>
     <script src="{{ 'details-modal.js' | asset_url }}" defer="defer"></script>
     <script src="{{ 'search-form.js' | asset_url }}" defer="defer"></script>
@@ -38,6 +44,8 @@
 
     {%- if settings.animations_reveal_on_scroll -%}
       <script src="{{ 'animations.js' | asset_url }}" defer="defer"></script>
+      {{ 'scroll-animations.css' | asset_url | stylesheet_tag }}
+      <script src="{{ 'scroll-animations.js' | asset_url }}" defer="defer"></script>
     {%- endif -%}
 
     {{ content_for_header }}
@@ -55,6 +63,7 @@
       {{ body_font_bold_italic | font_face: font_display: 'swap' }}
       {{ settings.type_header_font | font_face: font_display: 'swap' }}
 
+      {% assign scheme_classes = '' %}
       {% for scheme in settings.color_schemes -%}
         {% assign scheme_classes = scheme_classes | append: ', .color-' | append: scheme.id %}
         {% if forloop.index == 1 -%}
@@ -68,17 +77,6 @@
           --gradient-background: {{ scheme.settings.background }};
         {% endif %}
 
-        {% liquid
-          assign background_color = scheme.settings.background
-          assign background_color_brightness = background_color | color_brightness
-          if background_color_brightness <= 26
-            assign background_color_contrast = background_color | color_lighten: 50
-          elsif background_color_brightness <= 65
-            assign background_color_contrast = background_color | color_lighten: 5
-          else
-            assign background_color_contrast = background_color | color_darken: 25
-          endif
-        %}
 
       --header_background: {{ scheme.settings.header_background }};
         --background: {{ scheme.settings.background }};
@@ -207,6 +205,9 @@
         --spacing-sections-desktop: {{ settings.spacing_sections }}px;
         --spacing-sections-mobile: {% if settings.spacing_sections < 24 %}{{ settings.spacing_sections }}{% else %}{{ settings.spacing_sections | times: 0.7 | round | at_least: 20 }}{% endif %}px;
 
+        /* Drawer Animation Speeds */
+        --filters-drawer-speed: {{ settings.filters_drawer_animation_speed | default: 0.6 }}s;
+
         /* Design System Spacing Tokens - Logical Hierarchy */
         --space-micro: 0.05rem;    /* 0.5px - for micro spacing */
         --space-tiny: 0.1rem;      /* 1px - for 1px values */
@@ -318,8 +319,20 @@
         --variant-pills-shadow-vertical-offset: {{ settings.variant_pills_shadow_vertical_offset }}px;
         --variant-pills-shadow-blur-radius: {{ settings.variant_pills_shadow_blur }}px;
 
-        --sections-spacing: {{ settings.sections_spacing }}px;
+        --sections-spacing-top: {{ settings.sections_spacing_top_mobile | default: 10 }}px;
+        --sections-spacing-bottom: {{ settings.sections_spacing_bottom_mobile | default: 10 }}px;
         --sections-side-space : {{ settings.side_space}}px;
+        --grid-horizontal-gap: {{ settings.horizontal_space_mobile | default: 8 }}px;
+        --grid-vertical-gap: {{ settings.vertical_space_mobile | default: 45 }}px;
+      }
+
+      @media screen and (min-width: 750px) {
+        :root {
+          --sections-spacing-top: {{ settings.sections_spacing_top_desktop | default: 10 }}px;
+          --sections-spacing-bottom: {{ settings.sections_spacing_bottom_desktop | default: 10 }}px;
+          --grid-horizontal-gap: {{ settings.horizontal_space_desktop | default: 8 }}px;
+          --grid-vertical-gap: {{ settings.vertical_space_desktop | default: 45 }}px;
+        }
 
       }
 
@@ -401,7 +414,10 @@
     {{ 'tailwind.output.css' | asset_url | stylesheet_tag }}
   </head>
 
-  <body class="gradient{% if settings.animations_hover_elements != 'none' %} animate--hover-{{ settings.animations_hover_elements }}{% endif %}">
+  <body
+    class="gradient{% if settings.animations_hover_elements != 'none' %} animate--hover-{{ settings.animations_hover_elements }}{% endif %}"
+    data-scroll-animations="{{ settings.animations_reveal_on_scroll }}"
+  >
     <a class="skip-to-content-link button visually-hidden" href="#MainContent">
       {{ 'accessibility.skip_to_text' | t }}
     </a>
@@ -417,6 +433,9 @@
     </main>
 
     {% sections 'footer-group' %}
+
+    <!-- Floating Scroll to Top Button -->
+    {% render 'scroll-to-top' %}
 
     <ul hidden>
       <li id="a11y-refresh-page-message">{{ 'accessibility.refresh_page' | t }}</li>

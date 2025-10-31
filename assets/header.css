@@ -286,7 +286,7 @@
 
 .mega-menu-dropdown {
     position: absolute;
-    top: 85%;
+    top: 100%;
     left: 0;
     right: 0;
     z-index: var(--z-mobile-menu);
@@ -354,7 +354,7 @@
 
 /* Add overlay transition */
 #menu-overlay {
-    transition: opacity 0.3s ease;
+    transition: opacity var(--menu-drawer-speed, var(--duration-slow)) var(--ease-decelerate);
     will-change: opacity;
 }
 
@@ -535,21 +535,39 @@
     width: 40%;
 }
 
+/* Ensure mega menu images don't overflow */
+.mega-menu-images > div {
+    max-height: 250px;
+    width: 100%;
+    max-width: 300px;
+}
+
+.mega-menu-images .aspect-\[4\/3\] {
+    max-height: 200px;
+    width: 100%;
+    height: auto;
+}
+
+.mega-menu-images img {
+    max-height: 200px;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
 /* Fixed height for mega menu when opened */
 .mega-menu-dropdown.open {
     min-height: 300px !important;
-    max-height: 300px !important;
-    height: 300px !important;
+    max-height: 450px !important;
+    height: auto !important;
 }
 
 /* Position scrolling text at bottom of mega menu */
 .mega-menu-dropdown .bb-mega-menu-first {
     position: relative;
-    height: 100%;
-}
-
-.mega-menu-dropdown .mega-menu-links {
-    /* Keep original positioning */
+    min-height: 300px;
+    max-height: 420px;
+    overflow: visible;
 }
 
 .mega-menu-dropdown .mega-menu-images {
@@ -578,9 +596,9 @@
 /* Search container */
 .search-container-fixed {
     background: var(--header_background);
-    top: var(--header-height);
-    padding: var(--space-xl) var(--space-6xl);
+    padding: var(--space-xl) var(--sections-side-space);
     z-index: 999;
+    /* top is set dynamically in JavaScript */
 }
 
 .search-button-padding {
@@ -602,6 +620,7 @@
 
 .search-bottom-bar {
     background: var(--header_text);
+    height: 1px;
 }
 
 .search-top-searches {
@@ -628,10 +647,9 @@
 
 /* Search overlay */
 .search-overlay-fixed {
-    height: 100vh;
     transition: opacity 0.2s ease-in-out;
-    top: 0;
     z-index: 998;
+    /* top and height are set dynamically in JavaScript */
 }
 
 /* Login/Cart margin */
@@ -642,7 +660,7 @@
 /* Mobile menu */
 .mobile-menu-transform {
     transform: translateX(100%);
-    transition: transform 0.3s ease-in-out;
+    transition: transform var(--menu-drawer-speed, var(--timing-drawer-open));
     background: var(--header_background);
     z-index: var(--z-header);
 }
@@ -693,6 +711,37 @@
     z-index: var(--z-header) !important;
 }
 
+/* Mobile Menu Login Button - Button Style */
+.mobile-menu-login-wrapper {
+    padding: 12px 0;
+}
+
+.mobile-menu-login-btn {
+    width: fit-content;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 5px;
+    background-color: var(--secondary_button_label);
+    color: var(--secondary_button_text_color);
+    border: none;
+    border-radius: var(--buttons-radius);
+    cursor: pointer;
+    transition: opacity 0.3s ease, background-color 0.3s ease;
+    font-family: inherit;
+}
+
+.mobile-menu-login-text {
+    font-size: 16px;
+    font-weight: 500;
+    text-transform: uppercase;
+    color: var(--secondary_button_text_color);    
+}
+
+.mobile-menu-login-btn .mobile-login-arrow {
+    color: var(--secondary_button_text_color);
+}
+
 /* Mobile menu social icons */
 .social-icon-height-30 {
     height: 30px;
@@ -711,7 +760,7 @@
 .bottom-bar {
     position: relative;
     overflow: visible;
-    z-index: 1000;
+    z-index: 1;
 }
 
 /* Bottom bar indicator - smooth animation controlled by JavaScript */
@@ -720,8 +769,9 @@
     background: var(--header_text, #000000) !important;
     width: 100%;
     transform: translateX(0) ;
-    transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1), transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-    z-index: 1000 !important;
+    transition: width var(--duration-moderate) var(--ease-standard), 
+                transform var(--duration-moderate) var(--ease-standard);
+    z-index: 1 !important;
     opacity: 1 !important;
     display: block !important;
     /* JavaScript will override width and transform on hover */
@@ -753,6 +803,7 @@
 .login-link,
 .cart-link {
     transition: color 0.2s ease;
+    text-transform: var(--header-text-transform);
 }
 
 .login-link:hover,
