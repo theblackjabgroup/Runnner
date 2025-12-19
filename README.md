@@ -1,4 +1,4 @@
-# Noor - Shopify Theme
+# Noor - Shopify Theme BB
 
 A modern, high-performance Shopify theme built for e-commerce success.
 
